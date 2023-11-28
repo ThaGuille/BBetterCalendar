@@ -12,14 +12,19 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.bbettercalendar.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_progress"
+        android:name="com.example.bbettercalendar.ui.progress.ProgressFragment"
+        android:label="@string/title_progress"
+        tools:layout="@layout/fragment_progress" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.bbettercalendar.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_calendar"
+        android:name="com.example.bbettercalendar.ui.calendar.CalendarFragment"
+        android:label="@string/title_calendar"
+        tools:layout="@layout/fragment_calendar" />
+    <fragment
+        android:id="@+id/navigation_projects"
+        android:name="com.example.bbettercalendar.ui.projects.ProjectsFragment"
+        android:label="@string/title_projects"
+        tools:layout="@layout/fragment_projects" />
 </navigation>

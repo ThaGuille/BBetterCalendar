@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,6 +23,37 @@
         android:textSize="15sp"
         android:textStyle="bold"
         android:visibility="visible" />
+
+    <!--<com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/calendarAddEvent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:backgroundTintMode="src_over"
+        android:background="@drawable/rounded_square"
+        android:layout_marginBottom="70dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:src="@drawable/ic_add_24"
+        android:visibility="visible" />-->
+
+    <!--<com.google.android.material.button.MaterialButton
+        android:id="@+id/calendarAddEvent2"
+        style="@style/fab_3_rounded"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="70dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="@color/white"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:cornerRadius="16dp"
+        app:icon="@drawable/ic_add_24"
+        />-->
 
 
     <!-- Horizontal lines -->
@@ -112,4 +144,17 @@
         android:layout_marginEnd="8dp"
         android:textAlignment="center"
         android:textSize="20sp" />
+    <ImageButton
+        android:id="@+id/calendarAddEvent3"
+        android:background="@drawable/rounded_square"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="65dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="@color/white"
+        android:src="@drawable/ic_add_24"
+        android:elevation="5dp"
+        />
 </RelativeLayout>

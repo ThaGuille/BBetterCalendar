@@ -1,36 +1,38 @@
 package com.example.bbettercalendar.ui.calendar;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.ReplacementSpan;
 import android.text.style.ScaleXSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.databinding.FragmentCalendarBinding;
+import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.ScreenHelper;
+import com.example.bbettercalendar.helpers.ToolbarHelper;
 
 import java.util.Calendar;
 import java.util.Locale;
 
 import javax.inject.Inject;
 
-public class CalendarFragment extends Fragment {
+public class CalendarFragment extends Fragment implements OnToolBarListener{
 
     @Inject
     Configuration config;
@@ -42,6 +44,13 @@ public class CalendarFragment extends Fragment {
     private Calendar calendar;
     private TextView calendarDayInitials;
     private final int daysMargin = 70;
+    private OnToolBarListener onToolBarListener;
+    private ToolbarHelper toolbarHelper;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -56,6 +65,9 @@ public class CalendarFragment extends Fragment {
         View[] calendarHorizontalLines = new View[6];
         View[] calendarVerticalLines = new View[6];
         calendar = Calendar.getInstance(Locale.getDefault());
+        toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.toolbar);
+        toolbarHelper.setOnToolbarListener(this);
+
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         positionWeedDaysText();
         /**obtiene las líneas del calendario**/
@@ -79,6 +91,8 @@ public class CalendarFragment extends Fragment {
         });
 
         positionMonthDays();
+        setTopMenu();
+
 
         calendarViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
@@ -90,6 +104,10 @@ public class CalendarFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void setTopMenu() {
+        getActivity().addMenuProvider(toolbarHelper, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
     }
 
     /**posiciona los días del mes**/
@@ -106,9 +124,6 @@ public class CalendarFragment extends Fragment {
 
     /**posiciona las líneas del calendario**/
     private void positionLines(View[] calendarHorizontalLines, View[] calendarVerticalLines) {
-
-
-
         float horizontalLineSeparation = screenHeight/6;
         float verticalLineSeparation = screenWidth/7;
 
@@ -158,5 +173,15 @@ public class CalendarFragment extends Fragment {
         }*/
 
         calendarDayInitials.setText(spannableBuilder);
+    }
+
+    @Override
+    public void onToolbarLoaded(int result) {
+        switch (result){
+            case ToolbarHelper.FINISH:
+                break;
+            default:
+                break;
+        }
     }
 }

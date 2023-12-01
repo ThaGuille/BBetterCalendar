@@ -1,5 +1,6 @@
 package com.example.bbettercalendar.ui.calendar;
 
+import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
@@ -23,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.databinding.FragmentCalendarBinding;
+import com.example.bbettercalendar.events.AddEventActivity;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.ScreenHelper;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
@@ -32,7 +34,7 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-public class CalendarFragment extends Fragment implements OnToolBarListener{
+public class CalendarFragment extends Fragment implements OnToolBarListener, View.OnClickListener {
 
     @Inject
     Configuration config;
@@ -184,4 +186,21 @@ public class CalendarFragment extends Fragment implements OnToolBarListener{
                 break;
         }
     }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.calendarAddEventButton:
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void addEvent(){
+        Intent intent = new Intent(this.binding.getRoot().getContext(), AddEventActivity.class);
+        startActivityForResult(intent, 1);
+    }
+        //añadir evento
 }

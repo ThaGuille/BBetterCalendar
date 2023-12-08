@@ -29,4 +29,7 @@ public interface EventDao {
 
     @Query("SELECT * FROM event WHERE limitDate = :date")
     List<Event> getEventsByDate(String date);
+
+    @Query("SELECT * FROM event WHERE title = :title")
+    List<Event> getEventsByTitle(String title);
 }

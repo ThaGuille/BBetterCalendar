@@ -13,4 +13,58 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="ThemeColorBlue" parent="Theme.BBetterCalendar">
+        <item name="colorPrimary">@color/azul</item>
+        <item name="colorSecondary">@color/gris</item>
+        <item name="colorAccent">@color/naranja</item>
+        <item name="colorOnPrimary">@color/blanco</item>
+    </style>
+
+    <style name="ThemeColorGreen" parent="Theme.BBetterCalendar">
+        <item name="colorPrimary">@color/verde</item>
+        <item name="colorSecondary">@color/amarillo</item>
+        <item name="colorAccent">@color/beige</item>
+        <item name="colorOnPrimary">@color/marron_claro</item>
+    </style>
+
+    <style name="ThemeColorNavyBlue" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/azul_marino</item>
+        <item name="colorSecondary">@color/teal</item>
+        <item name="colorAccent">@color/plata</item>
+        <item name="colorOnPrimary">@color/blanco</item>
+    </style>
+
+    <style name="ThemeColorPurple" parent="Theme.BBetterCalendar">
+        <item name="colorPrimary">@color/purpura</item>
+        <item name="colorSecondary">@color/gris_oscuro</item>
+        <item name="colorAccent">@color/magenta</item>
+        <item name="colorOnPrimary">@color/blanco</item>
+    </style>
+
+    <!--Theme.AppCompat.DayNight.NoActionBar-->
+    <style name="ThemeColorEvenTalk" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/eventalkAzul</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorSecondary">@color/eventalkAzulSecundario</item>
+        <item name="colorAccent">@color/eventalkNaranja</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+
+    <style name="FakeTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+
 </resources>

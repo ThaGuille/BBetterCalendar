@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Cuentan que esto es más eficiente. Si laguea o algo se mira
+    <ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_close_or_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>-->
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,83 +21,221 @@
     android:orientation="vertical"
     android:textSize="20sp"
     >
+    <include layout="@layout/toolbar_close_or_save"/>
 
-    <LinearLayout
-        android:id="@+id/event_title_layout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="4"
-        android:orientation="horizontal"
-        android:gravity="center|start"
-        android:clickable="true"
-        android:focusable="true">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="45dp"
+        <LinearLayout
+            android:id="@+id/create_event_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/event_title_layout"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_progress_24"
+                    app:tint="@color/black" />
+
+                <EditText
+                    android:id="@+id/event_title"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="4"
+                    android:gravity="center|start"
+                    android:hint="@string/title"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_arrow_forward_24"
+                    app:tint="@color/black" />
+            </LinearLayout>
+
+            <!-- START DATE LAYOUT -->
+            <LinearLayout
+                android:id="@+id/event_start_date_layout"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_progress_24"
+                    app:tint="@color/black" />
+
+                <TextView
+                    android:id="@+id/event_start_date"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="4"
+                    android:gravity="center|start"
+                    android:hint="Date"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+                <TextView
+                    android:id="@+id/event_start_hour"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center|start"
+                    android:hint="00:00"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <!-- END DATE LAYOUT -->
+            <LinearLayout
+            android:id="@+id/event_end_date_layout"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
             android:layout_marginTop="0dp"
             android:layout_weight="1"
-            app:tint="@color/black"
-            android:src="@drawable/ic_progress_24" />
-
-        <EditText
-            android:id="@+id/event_title"
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:layout_weight="4"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center|start"
-            android:hint="@string/title"
-            android:textColorHint="@color/black"
-            android:textSize="20sp" />
+            android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:layout_marginTop="0dp"
-            android:layout_weight="1"
-            app:tint="@color/black"
-            android:src="@drawable/ic_arrow_forward_24" />
-    </LinearLayout>
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_weight="1"
+                    />
 
-    <LinearLayout
-        android:id="@+id/event_date_layout"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="4"
-        android:orientation="horizontal"
-        android:gravity="center|start"
-        android:clickable="true"
-        android:focusable="true">
+            <TextView
+                android:id="@+id/event_end_date"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="4"
+                android:gravity="center|start"
+                android:hint="Date"
+                android:textColorHint="@color/black"
+                android:textSize="20sp" />
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:layout_weight="1"
-            app:tint="@color/black"
-            android:src="@drawable/ic_progress_24" />
+                <TextView
+                    android:id="@+id/event_end_hour"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center|start"
+                    android:hint="24:00"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
 
-        <EditText
-            android:id="@+id/event_date"
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:layout_weight="4"
-            android:gravity="center|start"
-            android:hint="Date"
-            android:textColorHint="@color/black"
-            android:textSize="20sp" />
+        </LinearLayout>
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:layout_marginTop="0dp"
-            android:layout_weight="1"
-            app:tint="@color/black"
-            android:src="@drawable/ic_arrow_forward_24" />
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/event_notifications_layout"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center|start"
+                android:orientation="horizontal">
 
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_progress_24"
+                    app:tint="@color/black" />
+
+                <TextView
+                    android:id="@+id/event_notification_1"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="4"
+                    android:gravity="center|start"
+                    android:hint="Add notification"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_arrow_forward_24"
+                    app:tint="@color/black" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/event_description_layout"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_progress_24"
+                    app:tint="@color/black" />
+
+                <EditText
+                    android:id="@+id/event_description"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="4"
+                    android:gravity="center|start"
+                    android:hint="Description"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_arrow_forward_24"
+                    app:tint="@color/black" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

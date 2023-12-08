@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/event_notifications_layout"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginTop="0dp"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center|start"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            />
+
+        <TextView
+            android:id="@+id/event_notification_text"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="0dp"
+            android:layout_weight="4"
+            android:gravity="center|start"
+            android:hint="Add notification"
+            android:textColorHint="@color/black"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/event_notification_close"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/ic_close_24"
+            />
+    </LinearLayout>

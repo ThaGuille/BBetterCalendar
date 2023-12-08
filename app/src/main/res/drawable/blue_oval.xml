@@ -1,0 +1,6 @@
+
+    <shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="rectangle">
+        <corners android:radius="50dp" /> <!-- Radio alto para efecto ovalado -->
+        <solid android:color="?attr/colorOnPrimary" /> <!-- Color azul para el fondo -->
+    </shape>

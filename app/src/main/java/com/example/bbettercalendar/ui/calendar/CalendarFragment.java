@@ -1,5 +1,7 @@
 package com.example.bbettercalendar.ui.calendar;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -8,29 +10,39 @@ import android.text.Spanned;
 import android.text.style.ScaleXSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.MenuProvider;
+
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
+import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.databinding.FragmentCalendarBinding;
 import com.example.bbettercalendar.events.AddEventActivity;
+import com.example.bbettercalendar.events.Event;
+import com.example.bbettercalendar.events.EventDao;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.ScreenHelper;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -38,6 +50,7 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
 
     @Inject
     Configuration config;
+    private String TAG = "CalendarFragmentTag";
 
     private FragmentCalendarBinding binding;
     // Guillem -> això s'haurà de canviar per el valor estàtic que es crearà en una classe a part
@@ -48,6 +61,17 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
     private final int daysMargin = 70;
     private OnToolBarListener onToolBarListener;
     private ToolbarHelper toolbarHelper;
+    AppDatabase db;
+    EventDao eventDao;
+
+    private ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    handleOnActivityResult(result);
+                }
+            });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,17 +82,22 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
                              ViewGroup container, Bundle savedInstanceState) {
         CalendarViewModel calendarViewModel =
                 new ViewModelProvider(this).get(CalendarViewModel.class);
+        getActivity().setTheme(R.style.ThemeColorGreen);
 
         binding = FragmentCalendarBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+        //db = Room.databaseBuilder(getActivity().getApplicationContext(), AppDatabase.class, "eventDB").build();
+        eventDao = AppDatabase.getDatabase(getContext().getApplicationContext()).eventDao();
 
         final TextView textView = binding.textNotifications;
         calendarDayInitials = binding.calendarDayInitials;
         View[] calendarHorizontalLines = new View[6];
         View[] calendarVerticalLines = new View[6];
         calendar = Calendar.getInstance(Locale.getDefault());
-        toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.toolbar);
+        toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.toolbar, true);
         toolbarHelper.setOnToolbarListener(this);
+        binding.calendarAddEventButton.setOnClickListener(this);
 
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         positionWeedDaysText();
@@ -177,6 +206,44 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
         calendarDayInitials.setText(spannableBuilder);
     }
 
+    private void handleOnActivityResult(ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            // Hay datos de retorno
+            Intent data = result.getData();
+            // Maneja el resultado utilizando los datos del Intent
+        }
+        if(result.getResultCode() == Activity.RESULT_CANCELED || result.getResultCode() == Activity.RESULT_OK){
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    List<Event> events;
+                    events = eventDao.getAllEvents();
+                    try {
+                        for(int i=0;i<events.size();i++){
+                            printEvents(events.get(i));
+                        }
+                    }catch (Exception e){
+                        Log.i(TAG, "no hay eventos");
+                    }
+
+                }
+            });
+        }
+    }
+    private void printEvents(Event event){
+        SimpleDateFormat dateFormat=new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Log.i(TAG, "event title: "+event.getTitle());
+        if(event.getStartDayAndHour()!=null)
+            Log.i(TAG,"dya y hora: "+ dateFormat.format(event.getStartDayAndHour().getTime()));
+        else
+            Log.i(TAG,"dya y hora: null");
+        if(event.getDescription()!=null && !event.getDescription().isEmpty()){
+            Log.i(TAG, "event description: "+event.getDescription());
+        }
+        Log.i(TAG, "-------------------------------------------");
+    }
+
     @Override
     public void onToolbarLoaded(int result) {
         switch (result){
@@ -191,7 +258,7 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.calendarAddEventButton:
-
+                addEvent();
                 break;
             default:
                 break;
@@ -199,8 +266,8 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
     }
 
     private void addEvent(){
-        Intent intent = new Intent(this.binding.getRoot().getContext(), AddEventActivity.class);
-        startActivityForResult(intent, 1);
+        Intent intent = new Intent(getActivity(), AddEventActivity.class);
+        someActivityResultLauncher.launch(intent);
     }
         //añadir evento
 }

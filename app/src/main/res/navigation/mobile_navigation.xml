@@ -18,13 +18,29 @@
         tools:layout="@layout/fragment_progress" />
 
     <fragment
-        android:id="@+id/navigation_calendar"
-        android:name="com.example.bbettercalendar.ui.calendar.CalendarFragment"
+        android:id="@+id/navigation_calendar_month"
+        android:name="com.example.bbettercalendar.ui.calendar.CalendarFragmentMonth"
         android:label="@string/title_calendar"
-        tools:layout="@layout/fragment_calendar" />
+        tools:layout="@layout/fragment_calendar_month" >
+        <action
+            android:id="@+id/action_navigation_calendar_month_to_navigation_calendar_week"
+            app:destination="@id/navigation_calendar_week" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_calendar_week"
+        android:name="com.example.bbettercalendar.ui.calendar.CalendarFragmentWeek"
+        android:label="@string/title_calendar"
+        tools:layout="@layout/fragment_calendar_week" >
+        <action
+            android:id="@+id/action_navigation_calendar_week_to_navigation_calendar_month"
+            app:destination="@id/navigation_calendar_month" />
+    </fragment>
+
     <fragment
         android:id="@+id/navigation_projects"
         android:name="com.example.bbettercalendar.ui.projects.ProjectsFragment"
         android:label="@string/title_projects"
         tools:layout="@layout/fragment_projects" />
+
 </navigation>

@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
-@Entity
+@Entity(tableName = "event")
 public class Event {
 
     /** Esto tendrá que ser serializable para guardarlo, y usar patrón builder para su creación**/

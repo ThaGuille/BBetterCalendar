@@ -28,6 +28,19 @@
         <item name="colorOnPrimary">@color/marron_claro</item>
     </style>
 
+    <style name="ThemeChatGPTBlue" parent="Theme.MaterialComponents.Light">
+        <item name="colorPrimary">@color/c_azul_claro</item>
+        <item name="colorSecondary">@color/c_verde_claro</item>
+        <item name="colorAccent">@color/c_azul_oscuro</item>
+        <item name="colorOnPrimary">@color/c_verde_oscuro</item>
+    </style>
+    <style name="ThemeChatGPTBlue.actionBar" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">@color/c_verde_claro</item>
+        <item name="colorSecondary">@color/c_azul_claro</item>
+        <item name="colorAccent">@color/c_azul_oscuro</item>
+        <item name="colorOnPrimary">@color/c_verde_oscuro</item>
+    </style>
+
     <style name="ThemeColorNavyBlue" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/azul_marino</item>
         <item name="colorSecondary">@color/teal</item>

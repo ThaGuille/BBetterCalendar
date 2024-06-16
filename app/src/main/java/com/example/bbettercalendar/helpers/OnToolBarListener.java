@@ -5,4 +5,5 @@ import android.view.Menu;
 public interface OnToolBarListener {
 
     void onToolbarLoaded(int result);
+
 }

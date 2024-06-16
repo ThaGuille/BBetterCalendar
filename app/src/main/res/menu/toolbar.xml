@@ -5,9 +5,11 @@
     android:layout_height="wrap_content"
     android:layout_gravity="start|left"
     android:gravity="start|left"
+    android:background="?attr/colorAccent"
     android:layoutDirection="rtl">
 
     <group
+
         android:layout_gravity="end"
         android:gravity="right|end">
         <item
@@ -18,7 +20,7 @@
             android:title="atrás"
             app:showAsAction="always" />
         <item
-            android:id="@+id/toolbarButtonFav"
+            android:id="@+id/toolbarButtonSwitchCalendar"
             android:layout_gravity="end"
             android:gravity="end"
             android:icon="@drawable/ic_calendar_24"

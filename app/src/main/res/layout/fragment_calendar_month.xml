@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.calendar.CalendarFragment">
+    tools:context=".ui.calendar.CalendarFragmentMonth">
 
     <!-- Reservar un pequeño espacio arriba, de 70 pixels, donde escribir las
      iniciales de los días de la semana. Cada letra está a la misma distancia
@@ -113,19 +113,21 @@
         android:layout_marginEnd="8dp"
         android:textAlignment="center"
         android:textSize="20sp" />
+
     <ImageButton
         android:id="@+id/calendarAddEventButton"
-        android:background="@drawable/rounded_square"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="65dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="65dp"
+        android:background="@drawable/rounded_square"
         android:backgroundTint="@color/white"
-        android:src="@drawable/ic_add_24"
+        android:clickable="true"
         android:elevation="5dp"
         android:focusable="true"
-        android:clickable="true"
-        />
+        android:src="@drawable/ic_add_24" />
+
+
 </RelativeLayout>

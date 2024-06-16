@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
     tools:context=".ui.home.HomeFragment">
 
     <TextView
@@ -14,9 +15,65 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/homeTimerText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="108dp"
+        android:layout_marginEnd="8dp"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="20sp" />
+<!--
+    <ImageView
+        android:id="@+id/homePlayButton"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:src="@drawable/ic_play_circle_filled_24"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="128dp"
+        android:elevation="5dp"
+        app:tint="?attr/colorAccent" />-->
+
+    <ImageButton
+        android:id="@+id/homePlayButton"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="128dp"
+        android:backgroundTint="@color/transparent"
+        android:elevation="5dp"
+        android:scaleType="fitCenter"
+        android:background="@drawable/round_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_play_circle_filled_24"
+        app:tint="?attr/colorAccent" />
+
+    <ImageView
+        android:id="@+id/homeStreakImage"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/a_streak_logo" />
+
+
+    <ImageButton
+        android:id="@+id/homeTimerButton"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="65dp"
+        android:background="@drawable/rounded_square"
+        android:backgroundTint="@color/white"
+        android:clickable="true"
+        android:elevation="5dp"
+        android:focusable="true"
+        android:src="@drawable/ic_timer_empty_24" />
+
+</RelativeLayout>

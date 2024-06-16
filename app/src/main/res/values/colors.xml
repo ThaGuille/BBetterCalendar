@@ -30,6 +30,11 @@
     <color name="eventalkNaranja">#FFFF4E03</color>
     <color name="eventalkAzul">#FF0336FF</color>
     <color name="eventalkAzulSecundario">#FF819BFF</color>
-    FF4E03
+
+    <color name="c_azul_claro">#AEDFF7</color>
+    <color name="c_verde_claro">#C1E1C1</color>
+    <color name="c_azul_oscuro">#4A90E2</color>
+    <color name="c_verde_oscuro">#77DD77</color>
+
 
 </resources>

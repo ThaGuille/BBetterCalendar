@@ -3,6 +3,7 @@ package com.example.bbettercalendar.helpers;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +22,7 @@ import java.util.List;
 public class ToolbarHelper implements MenuProvider, View.OnClickListener{
 
         OnToolBarListener listener;
+        OnToolbarCalendarListener calendarListener;
         Context context;
         Activity activity;
         MenuInflater menuInflater;
@@ -36,6 +38,12 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                 this.menuRes = menuRes;
                 this.isMenuResFile = isMenuResFile;
                 toolbar = activity.findViewById(menuRes);
+                if(toolbar!=null){
+                        TypedValue typedValue = new TypedValue();
+                        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSecondary, typedValue, true);
+                        int color = typedValue.data;
+                        toolbar.setBackgroundColor(color);
+                }
         }
 
         public void setToolbarElements(List<View> elements){
@@ -46,20 +54,23 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
 
         @Override
         public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
-                if(isMenuResFile)
+                if(isMenuResFile) {
                         menuInflater.inflate(menuRes, menu);
+                }
                 else {
                         //View customToolbarLayout = activity.getLayoutInflater().inflate(menuRes, toolbar, false);
                         //toolbar.addView(customToolbarLayout);
                 }
+                // Obtener el color del tema y establecerlo como fondo de la toolbar
+
                 //Editar los iconos de la toolbar con sintaxis tipo - MenuItem favItem = menu.findItem(R.id.toolbarButtonFav);
         }
 
         @Override
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                        case R.id.toolbarButtonFav:
-                                //acciones para toolbar
+                        case R.id.toolbarButtonSwitchCalendar:
+                                if (calendarListener!=null) calendarListener.switchFragment();
                                 break;
                         case R.id.go_back:
                                 Log.i("ToolbarHelper", "onMenuItemSelected: go_back");
@@ -86,5 +97,8 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
 
         public void setOnToolbarListener(OnToolBarListener onToolBarListener) {
                 this.listener = onToolBarListener;
+        }
+        public void setOnToolbarCalendarListener(OnToolbarCalendarListener onToolbarCalendarListener) {
+                this.calendarListener = onToolbarCalendarListener;
         }
 }

@@ -1,18 +1,23 @@
 package com.example.bbettercalendar.ui.calendar;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ScaleXSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -22,18 +27,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.room.Room;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.database.AppDatabase;
-import com.example.bbettercalendar.databinding.FragmentCalendarBinding;
+import com.example.bbettercalendar.databinding.FragmentCalendarMonthBinding;
 import com.example.bbettercalendar.events.AddEventActivity;
 import com.example.bbettercalendar.events.Event;
 import com.example.bbettercalendar.events.EventDao;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
+import com.example.bbettercalendar.helpers.OnToolbarCalendarListener;
 import com.example.bbettercalendar.helpers.ScreenHelper;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 
@@ -46,13 +55,13 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-public class CalendarFragment extends Fragment implements OnToolBarListener, View.OnClickListener {
+public class CalendarFragmentMonth extends Fragment implements OnToolBarListener, OnToolbarCalendarListener, View.OnClickListener {
 
     @Inject
     Configuration config;
     private String TAG = "CalendarFragmentTag";
 
-    private FragmentCalendarBinding binding;
+    private FragmentCalendarMonthBinding binding;
     // Guillem -> això s'haurà de canviar per el valor estàtic que es crearà en una classe a part
     private float screenWidth;
     private float screenHeight;
@@ -61,46 +70,50 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
     private final int daysMargin = 70;
     private OnToolBarListener onToolBarListener;
     private ToolbarHelper toolbarHelper;
-    AppDatabase db;
     EventDao eventDao;
+    ActionBar actionBar;
+    private CalendarController calendarController;
 
     private ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    handleOnActivityResult(result);
+                    calendarController.handleOnActivityResult(result);
                 }
             });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         CalendarViewModel calendarViewModel =
                 new ViewModelProvider(this).get(CalendarViewModel.class);
-        getActivity().setTheme(R.style.ThemeColorGreen);
+        getActivity().setTheme(R.style.ThemeChatGPTBlue);
 
-        binding = FragmentCalendarBinding.inflate(inflater, container, false);
+        binding = FragmentCalendarMonthBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         //db = Room.databaseBuilder(getActivity().getApplicationContext(), AppDatabase.class, "eventDB").build();
         eventDao = AppDatabase.getDatabase(getContext().getApplicationContext()).eventDao();
+        calendarController = new CalendarController(getActivity(), getContext());
 
-        final TextView textView = binding.textNotifications;
+        //final TextView textView = binding.text_notifications;
         calendarDayInitials = binding.calendarDayInitials;
         View[] calendarHorizontalLines = new View[6];
         View[] calendarVerticalLines = new View[6];
         calendar = Calendar.getInstance(Locale.getDefault());
         toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.toolbar, true);
         toolbarHelper.setOnToolbarListener(this);
+        toolbarHelper.setOnToolbarCalendarListener(this);
         binding.calendarAddEventButton.setOnClickListener(this);
 
         screenWidth = getResources().getDisplayMetrics().widthPixels;
-        positionWeedDaysText();
+        calendarController.positionWeekDaysText(calendarDayInitials, screenWidth, 0);
         /**obtiene las líneas del calendario**/
         for(int i=0;i<6;i++){
             String lineName = "calendarHorizontalLine" + i;
@@ -125,7 +138,7 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
         setTopMenu();
 
 
-        calendarViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        //calendarViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         //función similar para posicionar las líneas del calendario
         return root;
@@ -165,85 +178,6 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
         }
     }
 
-    //Función para posicionar los días de la semana de manera uniforme a lo largo de screenWidth
-    private void positionWeedDaysText(){
-        int firstDayOfWeek = calendar.getFirstDayOfWeek();
-        String dayInitials = "";
-        if(firstDayOfWeek == 1){
-            dayInitials = "SMTWTFS";
-        }else if(firstDayOfWeek == 2){
-            dayInitials ="MTWTFSU";
-        }else if(firstDayOfWeek == 3) {
-            dayInitials = "TWTFSUM";
-        }
-        SpannableStringBuilder spannableBuilder = new SpannableStringBuilder(dayInitials);
-
-        // Calcular el espacio disponible después de dibujar todas las letras
-        Paint paint = new Paint();
-        paint.setTextSize(calendarDayInitials.getTextSize());
-        float totalTextWidth = paint.measureText(dayInitials);
-
-        // Calcular el espacio disponible y el factor de escala requerido para los espacios
-        float spaceAvailable = screenWidth - totalTextWidth;
-        int numberOfSpaces = dayInitials.length();
-        float spaceWidth = paint.measureText(" ");
-        float totalSpaceWidthRequired = spaceAvailable + (numberOfSpaces * spaceWidth);
-        float scaleX = totalSpaceWidthRequired / (numberOfSpaces * spaceWidth);
-
-        // Insertar espacios y aplicar ScaleXSpan
-        for (int i = dayInitials.length() - 1; i > 0; i--) {
-            spannableBuilder.insert(i, " ");
-            spannableBuilder.setSpan(new ScaleXSpan(scaleX - 1), i, i + 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        }
-
-        /* Guillem:  cambiamos  int numberOfSpaces = dayInitials.length() - 1;
-
-        for (int i = dayInitials.length(); i > -1; i--) {
-            spannableBuilder.insert(i, " ");
-            spannableBuilder.setSpan(new ScaleXSpan(scaleX - 1), i, i + 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        }*/
-
-        calendarDayInitials.setText(spannableBuilder);
-    }
-
-    private void handleOnActivityResult(ActivityResult result) {
-        if (result.getResultCode() == Activity.RESULT_OK) {
-            // Hay datos de retorno
-            Intent data = result.getData();
-            // Maneja el resultado utilizando los datos del Intent
-        }
-        if(result.getResultCode() == Activity.RESULT_CANCELED || result.getResultCode() == Activity.RESULT_OK){
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    List<Event> events;
-                    events = eventDao.getAllEvents();
-                    try {
-                        for(int i=0;i<events.size();i++){
-                            printEvents(events.get(i));
-                        }
-                    }catch (Exception e){
-                        Log.i(TAG, "no hay eventos");
-                    }
-
-                }
-            });
-        }
-    }
-    private void printEvents(Event event){
-        SimpleDateFormat dateFormat=new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Log.i(TAG, "event title: "+event.getTitle());
-        if(event.getStartDayAndHour()!=null)
-            Log.i(TAG,"dya y hora: "+ dateFormat.format(event.getStartDayAndHour().getTime()));
-        else
-            Log.i(TAG,"dya y hora: null");
-        if(event.getDescription()!=null && !event.getDescription().isEmpty()){
-            Log.i(TAG, "event description: "+event.getDescription());
-        }
-        Log.i(TAG, "-------------------------------------------");
-    }
-
     @Override
     public void onToolbarLoaded(int result) {
         switch (result){
@@ -258,6 +192,7 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.calendarAddEventButton:
+                //replaceFragmentMonthForWeek();
                 addEvent();
                 break;
             default:
@@ -265,9 +200,18 @@ public class CalendarFragment extends Fragment implements OnToolBarListener, Vie
         }
     }
 
+    //todo reactivar función
     private void addEvent(){
         Intent intent = new Intent(getActivity(), AddEventActivity.class);
         someActivityResultLauncher.launch(intent);
     }
         //añadir evento
+
+    @Override
+    public void switchFragment(){
+        NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment_activity_main);
+        navController.navigate(R.id.action_navigation_calendar_month_to_navigation_calendar_week);
+    }
+
+
 }

@@ -3,6 +3,9 @@ package com.example.bbettercalendar.stats;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.time.LocalDate;
+import java.util.Calendar;
+
 @Entity(tableName = "stats")
 public class Stats {
     @PrimaryKey(autoGenerate = true)
@@ -10,19 +13,35 @@ public class Stats {
     public int totalTimeStudied;
     public int todayTimeStudied;
     public int totalTasksDone;
+    public int todayTasksDone;
     public int maxStreak;
     public int currentStreak;
+    private Calendar lastDayStreak;
     public int totalFails;
     public int todayFails;
 
-    public Stats(int totalTimeStudied, int todayTimeStudied, int totalTasksDone, int maxStreak, int currentStreak, int totalFails, int todayFails) {
+    public Stats(int totalTimeStudied, int todayTimeStudied, int totalTasksDone, int todayTasksDone, int maxStreak, int currentStreak, Calendar lastDayStreak, int totalFails, int todayFails) {
         this.totalTimeStudied = totalTimeStudied;
         this.todayTimeStudied = todayTimeStudied;
         this.totalTasksDone = totalTasksDone;
+        this.todayTasksDone = todayTasksDone;
         this.maxStreak = maxStreak;
         this.currentStreak = currentStreak;
+        this.lastDayStreak = lastDayStreak;
         this.totalFails = totalFails;
         this.todayFails = todayFails;
+    }
+
+    public Stats() {
+        this.totalTimeStudied = 0;
+        this.todayTimeStudied = 0;
+        this.totalTasksDone = 0;
+        this.todayTasksDone = 0;
+        this.maxStreak = 0;
+        this.currentStreak = 0;
+        this.lastDayStreak = null;
+        this.totalFails = 0;
+        this.todayFails = 0;
     }
 
     // Getters y Setters
@@ -58,6 +77,10 @@ public class Stats {
         this.totalTasksDone = totalTasksDone;
     }
 
+    public int getTodayTasksDone() {return todayTasksDone;}
+
+    public void setTodayTasksDone(int todayTasksDone) {this.todayTasksDone = todayTasksDone;}
+
     public int getMaxStreak() {
         return maxStreak;
     }
@@ -73,6 +96,10 @@ public class Stats {
     public void setCurrentStreak(int currentStreak) {
         this.currentStreak = currentStreak;
     }
+
+    public Calendar getLastDayStreak() {return lastDayStreak;}
+
+    public void setLastDayStreak(Calendar lastDayStreak) {this.lastDayStreak = lastDayStreak;}
 
     public int getTotalFails() {
         return totalFails;

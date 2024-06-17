@@ -1,13 +1,12 @@
 package com.example.bbettercalendar;
 
-import android.app.ActionBar;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.example.bbettercalendar.stats.StatsDAO;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,9 +17,14 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.bbettercalendar.databinding.ActivityMainBinding;
 
+import java.util.concurrent.ExecutorService;
+
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = "MainActivityTAG";
     private ActivityMainBinding binding;
+    private StatsDAO statsDao;
+    private ExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +33,11 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Iniciar la configuración si no se ha hecho antes
+        if (InitialConfiguration.getInstance().getInitializationStatus().getValue() == null) {
+            InitialConfiguration.getInstance().initialize(this);
+        }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -42,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel();
 
     }
+
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

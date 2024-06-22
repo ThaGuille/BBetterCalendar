@@ -2,6 +2,7 @@ package com.example.bbettercalendar.helpers;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -16,11 +17,13 @@ import androidx.lifecycle.Lifecycle;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.events.AddEventActivity;
+import com.google.android.material.color.MaterialColors;
 
 import java.util.List;
 
 public class ToolbarHelper implements MenuProvider, View.OnClickListener{
 
+        private final String TAG = "toolbarHelperTAG";
         OnToolBarListener listener;
         OnToolbarCalendarListener calendarListener;
         Context context;
@@ -40,7 +43,8 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                 toolbar = activity.findViewById(menuRes);
                 if(toolbar!=null){
                         TypedValue typedValue = new TypedValue();
-                        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorSecondary, typedValue, true);
+                        int colorSecondary = MaterialColors.getColor(toolbar, com.google.android.material.R.attr.colorSecondary);
+                        context.getTheme().resolveAttribute(colorSecondary, typedValue, true);
                         int color = typedValue.data;
                         toolbar.setBackgroundColor(color);
                 }
@@ -50,6 +54,10 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                 for(View element : elements){
                         element.setOnClickListener(this);
                 }
+        }
+
+        public void pruebaBiggerIcon(){
+
         }
 
         @Override
@@ -62,6 +70,7 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                         //toolbar.addView(customToolbarLayout);
                 }
                 // Obtener el color del tema y establecerlo como fondo de la toolbar
+                //MenuItem itemMaxStreak = menu.findItem(R.id.toolbarMaxStreak);
 
                 //Editar los iconos de la toolbar con sintaxis tipo - MenuItem favItem = menu.findItem(R.id.toolbarButtonFav);
         }
@@ -73,8 +82,10 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                                 if (calendarListener!=null) calendarListener.switchFragment();
                                 break;
                         case R.id.go_back:
-                                Log.i("ToolbarHelper", "onMenuItemSelected: go_back");
+                                Log.i(TAG, "onMenuItemSelected: go_back");
                                 activity.finish();
+                        case R.id.toolbarTimer:
+                                Log.i(TAG, "toolbar ohme timer");
                         default:
                                 break;
                 }

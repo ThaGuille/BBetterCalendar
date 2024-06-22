@@ -13,25 +13,26 @@
         android:layout_gravity="end"
         android:gravity="right|end">
         <item
-            android:id="@+id/go_back"
+            android:id="@+id/toolbarTimer"
             android:layout_gravity="end"
             android:gravity="end"
-            android:icon="@drawable/ic_arrow_back_24"
-            android:title="atrás"
+            android:icon="@drawable/ic_hourglass_bottom_24"
+            android:title="timer"
             app:showAsAction="always" />
         <item
-            android:id="@+id/toolbarButtonSwitchCalendar"
+            android:id="@+id/toolbarSettings"
             android:layout_gravity="end"
             android:gravity="end"
-            android:icon="@drawable/ic_calendar_24"
-            android:title="calendario"
+            android:icon="@drawable/ic_settings_24"
+            android:title="ajustes"
             app:showAsAction="always" />
         <item
-            android:id="@+id/toolbarButtonShare"
+            android:id="@+id/toolbarProgress"
             android:icon="@drawable/ic_progress_24"
             android:title="progress"
             app:showAsAction="always"
             />
+
         <!--<item
             android:id="@+id/salir"
             android:title="Salir" />-->

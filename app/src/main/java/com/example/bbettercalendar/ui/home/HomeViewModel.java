@@ -96,13 +96,16 @@ public class HomeViewModel extends AndroidViewModel {
             @Override
             public void run() {
                 Log.i(TAG, "View Model addTimeStudied( " + timerTime + " )");
-                timerText.postValue("20:00");
                 statsDao.addTimeStudied(timerTime);
                 statsDao.addTasksDone();
                 String formattedTime = formatTime(statsDao.getTodayTimeStudied());
                 todayTimeStudiedText.postValue("Today studied time: " + formattedTime);
             }
         });
+    }
+
+    public void resetTimer(){
+        timerText.postValue("20:00");
     }
 
     //Si esto se ha de usar más se puede hacer estático en una clase de utilidad o así

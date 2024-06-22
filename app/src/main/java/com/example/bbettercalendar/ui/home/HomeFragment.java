@@ -1,9 +1,13 @@
 package com.example.bbettercalendar.ui.home;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Debug;
@@ -13,21 +17,29 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
 import com.example.bbettercalendar.events.EventDao;
+import com.example.bbettercalendar.helpers.OnToolBarListener;
+import com.example.bbettercalendar.helpers.ToolbarHelper;
+import com.example.bbettercalendar.popups.AlertPopup;
+import com.example.bbettercalendar.popups.OnAlertPopupListener;
 import com.example.bbettercalendar.stats.StatsDAO;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.snackbar.Snackbar;
 
-public class HomeFragment extends Fragment implements View.OnClickListener{
+public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnAlertPopupListener {
 
     private final int TIMER_STOPPED = 0;
     private final int TIMER_RUNNING = 1;
@@ -36,6 +48,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
     private final String TAG = "HomeFragmentTag";
     private FragmentHomeBinding binding;
     HomeViewModel homeViewModel;
+    private AlertPopup alertPopup = new AlertPopup();
+    private ToolbarHelper toolbarHelper;
     private boolean timerActive = false;
     private ImageButton homeTimerButton;
     private ImageButton playButton;
@@ -51,7 +65,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
     //todo volver a poner esto a 20 min y el lastTimerTime
     private long timeLeftInMillis = 10000; // 20 minutos --> 60000 * 20
     private boolean isBackground = false;
-    private StatsDAO statsDao;
+    private boolean isTimerFailed = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -59,7 +73,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        statsDao = AppDatabase.getDatabase(getContext()).statsDao();
 
         final TextView textView = binding.textHome;
         homeTimerButton = binding.homeTimerButton;
@@ -71,13 +84,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
         todayFailsText = binding.homeToadyFailsText;
         todayTimeStudiedText = binding.homeTodayTimeText;
 
+        toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.home_toolbar, true);
+        toolbarHelper.setOnToolbarListener(this);
+        //todo crear listener personalizado
+        // toolbarHelper.setOnToolbarCalendarListener(this);
+
+        alertPopup.selectView(AlertPopup.ALERT_POPUP);
+        alertPopup.setOnAlertPopupListener(this);
+
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         homeViewModel.getTimerText().observe(getViewLifecycleOwner(), timerText::setText);
         homeViewModel.getCurrentStreakText().observe(getViewLifecycleOwner(), currentStreakText::setText);
         homeViewModel.getTodayFailsText().observe(getViewLifecycleOwner(), todayFailsText::setText);
-        homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), todayFailsText::setText);
+        homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), todayTimeStudiedText::setText);
+
+        setTopMenu();
         return root;
     }
+
 
     private void startTimer(){
         countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) { // 60000 milisegundos = 60 segundos, con intervalo de 1000 milisegundos = 1 segundo
@@ -97,13 +121,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
         timer_state = TIMER_RUNNING;
     }
 
+    //Cuando el timer logra llegar a 0
     private void completeTimer(){
         timer_state = TIMER_STOPPED;
         //reproducir sonido indicador
         homeViewModel.completeTimer(lastTimerTime);
-        timeLeftInMillis = 60000 * 20;
+        resetTimer();
     }
 
+    private void resetTimer(){
+        timeLeftInMillis = 60000 * 20;
+        homeViewModel.resetTimer();
+    }
+
+    //Se pulsa el timer para pausarlo
     private void pauseTimer(){
         countDownTimer.cancel();
         timer_state = TIMER_PAUSED;
@@ -136,6 +167,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
         binding = null;
     }
 
+    @Override
+    public void onToolbarLoaded(int result) {
+        switch (result){
+            case ToolbarHelper.FINISH:
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Sistema per detectar si l'aplicació està en primer pla o en segon pla */
 
     @Override
@@ -158,8 +199,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
                 numStarted++;
             }
 
+            //Detectamos cuando se vuelve a la app despu´se de joder el timer
             @Override
-            public void onActivityResumed(Activity activity) {}
+            public void onActivityResumed(Activity activity) {
+                if(isTimerFailed){
+                    isTimerFailed = false;
+                    //homeViewModel.completeTimer(lastTimerTime);
+                    alertPopup.selectView(AlertPopup.ALERT_POPUP);
+                    alertPopup.show(getParentFragmentManager(), "popup_tag");
+                    //despues de esto, se resetea el timer
+                }
+            }
 
             @Override
             public void onActivityPaused(Activity activity) {}
@@ -176,14 +226,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
                         // Crea una instancia de Handler
                         Handler handler = new Handler(Looper.getMainLooper());
 
-// Ejecuta un Runnable después de un retraso de X milisegundos
+                        // Ejecuta un Runnable después de un retraso de X milisegundos
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 // Código a ejecutar después del retraso
                                 failTimer();
                             }
-                        }, 5000); // Retraso en milisegundos, por ejemplo, 5000 para 5 segundos
+                        }, 4000); // Retraso en milisegundos, por ejemplo, 5000 para 5 segundos
                     }
                 }
             }
@@ -196,8 +246,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
                     timer_state = TIMER_STOPPED;
                     homeViewModel.addFails();
                     //statsDao.addFails();
-
-                    pauseTimer();
+                    //showCustomAlertDialog(binding.getRoot());
+                    isTimerFailed=true;
+                    isBackground=false;
+                    //todo cuando se cierre el mesaje de error, resetear el timer
                 }
             }
 
@@ -212,6 +264,47 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
         Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
+
+
+    private void showCustomAlertDialog(View view) {
+        // Crear el builder para el AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+
+        // Configurar el mensaje y el botón positivo, similar al Snackbar
+        builder.setMessage("Temporizador fallido")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Acción al presionar el botón "OK"
+                    }
+                });
+
+        // Crear el AlertDialog
+        AlertDialog dialog = builder.create();
+
+        // Personalizar los colores del AlertDialog
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button positiveButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setTextColor(Color.WHITE); // Color del texto del botón
+
+                // Establecer el color de fondo del AlertDialog
+                //int colorAccent = MaterialColors.getColor(view, com.google.android.material.R.attr.colorAccent);
+                int colorAccent = Color.RED;
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(colorAccent));
+
+                // Configurar el color del mensaje
+                TextView messageText = (TextView) dialog.findViewById(android.R.id.message);
+                messageText.setTextColor(Color.WHITE);
+            }
+        });
+
+        // Mostrar el AlertDialog
+        dialog.show();
+    }
+
+
     @Override
     public void onDetach() {
         super.onDetach();
@@ -238,6 +331,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
             Intent serviceIntent = new Intent(getActivity(), HomeForegroundService.class);
             getActivity().stopService(serviceIntent);
         }
+    }
+
+    @Override
+    public void OnClosePopup(int popupType) {
+        if (popupType==AlertPopup.ALERT_POPUP){
+            resetTimer();
+        }
+    }
+
+    private void setTopMenu() {
+        getActivity().addMenuProvider(toolbarHelper, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
     }
     /** --------------------------------------------------------------------------- */
 }

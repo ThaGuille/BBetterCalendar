@@ -43,4 +43,13 @@
        <item name="android:layout_height">70dp</item>
        <item name="android:layout_alignParentTop">true</item>
    </style>
+
+    <style name="RoundedDialog" parent="Theme.MaterialComponents.Dialog">
+        <!-- Personaliza el fondo del diálogo para tener bordes redondeados -->
+        <item name="android:windowBackground">@drawable/rounded_square</item>
+        <!-- Configuraciones opcionales para el padding del diálogo -->
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+    </style>
+
 </resources>

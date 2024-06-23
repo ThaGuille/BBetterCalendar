@@ -7,18 +7,21 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import com.example.bbettercalendar.configuration.Configuration;
+import com.example.bbettercalendar.configuration.ConfigurationDAO;
 import com.example.bbettercalendar.events.Event;
 import com.example.bbettercalendar.events.EventDao;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 
-@Database(entities = {Event.class, Stats.class}, version = 1)
+@Database(entities = {Event.class, Stats.class, Configuration.class}, version = 2)
 @TypeConverters({DBConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
     public abstract EventDao eventDao();
     public abstract StatsDAO statsDao();
+    public abstract ConfigurationDAO configurationDao();
 
     //Esto sirve para que solo haya una instancia de la base de datos -> la borra y la vuelve a crear
     public static AppDatabase getDatabase(final Context context) {

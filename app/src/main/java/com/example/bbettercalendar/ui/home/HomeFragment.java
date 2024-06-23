@@ -28,18 +28,26 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
 import com.example.bbettercalendar.events.EventDao;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
+import com.example.bbettercalendar.helpers.OnToolbarHomeListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.popups.AlertPopup;
 import com.example.bbettercalendar.popups.OnAlertPopupListener;
+import com.example.bbettercalendar.popups.TimerPopup;
 import com.example.bbettercalendar.stats.StatsDAO;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.snackbar.Snackbar;
 
-public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnAlertPopupListener {
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
+public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnToolbarHomeListener, OnAlertPopupListener {
 
     private final int TIMER_STOPPED = 0;
     private final int TIMER_RUNNING = 1;
@@ -49,6 +57,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private FragmentHomeBinding binding;
     HomeViewModel homeViewModel;
     private AlertPopup alertPopup = new AlertPopup();
+    private TimerPopup timerPopup = new TimerPopup();
     private ToolbarHelper toolbarHelper;
     private boolean timerActive = false;
     private ImageButton homeTimerButton;
@@ -66,6 +75,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private long timeLeftInMillis = 10000; // 20 minutos --> 60000 * 20
     private boolean isBackground = false;
     private boolean isTimerFailed = false;
+
+    @Inject
+    ConfigurationManager configurationManager;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -86,11 +98,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.home_toolbar, true);
         toolbarHelper.setOnToolbarListener(this);
+        toolbarHelper.setOnToolbarHomeListener(this);
         //todo crear listener personalizado
         // toolbarHelper.setOnToolbarCalendarListener(this);
 
         alertPopup.selectView(AlertPopup.ALERT_POPUP);
         alertPopup.setOnAlertPopupListener(this);
+
 
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         homeViewModel.getTimerText().observe(getViewLifecycleOwner(), timerText::setText);
@@ -339,6 +353,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             resetTimer();
         }
     }
+
+    @Override
+    public void onToolbarTimerClick(){
+        timerPopup.show(getParentFragmentManager(), "popup_tag");
+    }
+
 
     private void setTopMenu() {
         getActivity().addMenuProvider(toolbarHelper, getViewLifecycleOwner(), Lifecycle.State.RESUMED);

@@ -20,11 +20,11 @@
         android:id="@+id/alertMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/icon"
         android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/icon"
+        android:paddingLeft="8dp"
         android:text="Temporizador fallido"
         android:textColor="@color/black"
-        android:paddingLeft="8dp"
         android:textSize="18sp" />
 
     <Button

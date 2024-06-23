@@ -13,6 +13,7 @@
     <color name="naranja">#FFFF9F40</color>
     <color name="blanco">#FFFFFFFF</color>
     <color name="gris">#FF708090</color>
+    <color name="gris_claro">#F1F2F3</color>
     <color name="rojo">#FFFF0000</color>
 
     <color name="verde">#FF2ECC71</color>

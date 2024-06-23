@@ -6,8 +6,10 @@ import androidx.room.Room;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-public class DBMigration extends Application {
+import dagger.hilt.android.HiltAndroidApp;
 
+@HiltAndroidApp
+public class DBMigration extends Application {
 
     @Override
     public void onCreate() {

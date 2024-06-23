@@ -1,4 +1,4 @@
-package com.example.bbettercalendar;
+package com.example.bbettercalendar.configuration;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -22,8 +22,11 @@ public class InitialConfiguration extends AppCompatActivity {
     private static InitialConfiguration instance;
     private MutableLiveData<Boolean> isInitialized = new MutableLiveData<>();
 
+
+
     private final String TAG = "InitialConfigurationTag";
     private StatsDAO statsDao;
+    private ConfigurationDAO configurationDao;
     private ExecutorService executorService;
     //Esto sirve para que la app espere a que se terminen X tareas en background antes de continuar, en este caso una
     final CountDownLatch latch = new CountDownLatch(1);
@@ -41,6 +44,7 @@ public class InitialConfiguration extends AppCompatActivity {
 
     public void initialize(Context context) {
         statsDao = AppDatabase.getDatabase(this).statsDao();
+        configurationDao = AppDatabase.getDatabase(this).configurationDao();
         executorService = Executors.newFixedThreadPool(2);
 
         Calendar today = Calendar.getInstance();
@@ -83,6 +87,9 @@ public class InitialConfiguration extends AppCompatActivity {
     private void initializeStats() {
         if (statsDao.getStats() == null) {
             statsDao.insert(new Stats());
+        }
+        if(configurationDao.getConfiguration() == null){
+            configurationDao.insert(new Configuration());
         }
     }
 

@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.stats.StatsDAO;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -19,6 +20,9 @@ import com.example.bbettercalendar.databinding.ActivityMainBinding;
 
 import java.util.concurrent.ExecutorService;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivityTAG";

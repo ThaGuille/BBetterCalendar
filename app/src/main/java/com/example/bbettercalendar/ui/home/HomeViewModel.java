@@ -8,17 +8,17 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
 
-import com.example.bbettercalendar.InitialConfiguration;
+import com.example.bbettercalendar.configuration.ConfigurationManager;
+import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
 
 public class HomeViewModel extends AndroidViewModel {
 
@@ -31,6 +31,7 @@ public class HomeViewModel extends AndroidViewModel {
     private String currentStreakString;
     private ExecutorService executorService;
     private StatsDAO statsDao;
+
 
     public HomeViewModel(@NonNull Application application) {
         super(application);

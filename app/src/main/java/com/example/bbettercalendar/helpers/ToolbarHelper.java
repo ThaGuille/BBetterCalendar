@@ -16,16 +16,22 @@ import androidx.core.view.MenuProvider;
 import androidx.lifecycle.Lifecycle;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.events.AddEventActivity;
 import com.google.android.material.color.MaterialColors;
 
 import java.util.List;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 public class ToolbarHelper implements MenuProvider, View.OnClickListener{
 
         private final String TAG = "toolbarHelperTAG";
         OnToolBarListener listener;
         OnToolbarCalendarListener calendarListener;
+        OnToolbarHomeListener homeListener;
         Context context;
         Activity activity;
         MenuInflater menuInflater;
@@ -85,6 +91,7 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                                 Log.i(TAG, "onMenuItemSelected: go_back");
                                 activity.finish();
                         case R.id.toolbarTimer:
+                                if (homeListener!=null) homeListener.onToolbarTimerClick();
                                 Log.i(TAG, "toolbar ohme timer");
                         default:
                                 break;
@@ -111,5 +118,8 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
         }
         public void setOnToolbarCalendarListener(OnToolbarCalendarListener onToolbarCalendarListener) {
                 this.calendarListener = onToolbarCalendarListener;
+        }
+        public void setOnToolbarHomeListener(OnToolbarHomeListener onToolbarHomeListener) {
+                this.homeListener = onToolbarHomeListener;
         }
 }

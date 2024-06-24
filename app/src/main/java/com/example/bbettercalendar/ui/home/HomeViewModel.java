@@ -9,9 +9,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 
@@ -31,7 +33,7 @@ public class HomeViewModel extends AndroidViewModel {
     private String currentStreakString;
     private ExecutorService executorService;
     private StatsDAO statsDao;
-
+    public ConfigurationManager configManager;
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
@@ -65,7 +67,6 @@ public class HomeViewModel extends AndroidViewModel {
         };
         InitialConfiguration.getInstance().getInitializationStatus().observeForever(initializationObserver);
 
-
     }
 
     private void setInitialTexts(Stats initialStats){
@@ -77,6 +78,7 @@ public class HomeViewModel extends AndroidViewModel {
         todayFailsText.postValue("Today fails: "+initialStats.todayFails);
         String formattedTime = formatTime(initialStats.todayTimeStudied);
         todayTimeStudiedText.postValue("Today studied time: " + formattedTime);
+        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
     }
 
     //Cuando el usuario cierra la app a medio contador
@@ -106,7 +108,7 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public void resetTimer(){
-        timerText.postValue("20:00");
+        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
     }
 
     //Si esto se ha de usar más se puede hacer estático en una clase de utilidad o así
@@ -118,6 +120,25 @@ public class HomeViewModel extends AndroidViewModel {
 
         // Formatear el tiempo en el formato HH:mm
         return String.format("%02d:%02d", hours, minutes);
+    }
+
+    public void setConfigManager(ConfigurationManager configManager) {
+        this.configManager = configManager;
+    }
+
+    public void updateConfiguration(Configuration config){
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                configManager.updateConfiguration(config);
+                updateConfigurationUIValues();
+            }
+        });
+    }
+
+    private void updateConfigurationUIValues(){
+        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
+        //todo update other values
     }
 
     public LiveData<String> getText() {

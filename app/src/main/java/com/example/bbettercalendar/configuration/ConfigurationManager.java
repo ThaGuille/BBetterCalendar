@@ -1,7 +1,5 @@
 package com.example.bbettercalendar.configuration;
 
-import com.example.bbettercalendar.stats.Stats;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

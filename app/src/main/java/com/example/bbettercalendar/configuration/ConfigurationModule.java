@@ -1,17 +1,12 @@
 package com.example.bbettercalendar.configuration;
 
-import android.content.Context;
 
 import com.example.bbettercalendar.database.AppDatabase;
-
-import java.util.Locale;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
-import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 
 @Module

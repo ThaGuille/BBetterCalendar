@@ -13,6 +13,7 @@ public class Configuration {
     private int homeRestTime;
     private int homeNumberOfCycles;
     private boolean homeIsRestEnabled;
+    private boolean homeIsInfiniteCycleEnabled;
     private boolean homeIsAutoCycle;
     private boolean homeIsPauseEnabled;
     private boolean homeIsAlarmEnabled;
@@ -21,9 +22,11 @@ public class Configuration {
 
     private String country;
     /** Clase contenedor para las configuraciones de la aplicación **/
-    public Configuration(int homeTimerTime, int homeRestTime, int homeNumberOfCycles, boolean homeIsRestEnabled, boolean homeIsAutoCycle, boolean homeIsPauseEnabled, boolean homeIsAlarmEnabled, boolean homeIsVibrationEnabled) {
+    public Configuration(int homeTimerTime, int homeRestTime, int homeNumberOfCycles, boolean homeIsInfiniteCycleEnabled,
+                         boolean homeIsRestEnabled, boolean homeIsAutoCycle, boolean homeIsPauseEnabled, boolean homeIsAlarmEnabled, boolean homeIsVibrationEnabled) {
         this.homeTimerTime = homeTimerTime;
         this.homeRestTime = homeRestTime;
+        this.homeIsInfiniteCycleEnabled = homeIsInfiniteCycleEnabled;
         this.homeNumberOfCycles = homeNumberOfCycles;
         this.homeIsRestEnabled = homeIsRestEnabled;
         this.homeIsAutoCycle = homeIsAutoCycle;
@@ -33,9 +36,10 @@ public class Configuration {
     }
 
     public Configuration(){
-        this.homeTimerTime = 20;
-        this.homeRestTime = 5;
+        this.homeTimerTime = 20 * 60000;
+        this.homeRestTime = 5 * 60000;
         this.homeNumberOfCycles = 3;
+        this.homeIsInfiniteCycleEnabled = false;
         this.homeIsRestEnabled = true;
         this.homeIsAutoCycle = true;
         this.homeIsPauseEnabled = true;
@@ -66,15 +70,18 @@ public class Configuration {
     public int getHomeNumberOfCycles() {
         return homeNumberOfCycles;
     }
-    public void setHomeNumberOfCycles(int homeNumberOfCycles) {
-        this.homeNumberOfCycles = homeNumberOfCycles;
+    public void setHomeNumberOfCycles(int homeNumberOfCycles) {this.homeNumberOfCycles = homeNumberOfCycles;}
+
+    public boolean isHomeIsInfiniteCycleEnabled() {return homeIsInfiniteCycleEnabled;}
+    public void setHomeIsInfiniteCycleEnabled(boolean homeIsInfiniteCycleEnabled) {
+        this.homeIsInfiniteCycleEnabled = homeIsInfiniteCycleEnabled;
     }
-    public boolean isHomeIsRestEnabled() {
-        return homeIsRestEnabled;
-    }
+
+    public boolean isHomeIsRestEnabled() {return homeIsRestEnabled;}
     public void setHomeIsRestEnabled(boolean homeIsRestEnabled) {
         this.homeIsRestEnabled = homeIsRestEnabled;
     }
+
     public boolean isHomeIsAutoCycle() {
         return homeIsAutoCycle;
     }

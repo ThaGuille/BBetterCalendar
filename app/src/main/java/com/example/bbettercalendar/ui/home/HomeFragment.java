@@ -1,13 +1,9 @@
 package com.example.bbettercalendar.ui.home;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Debug;
@@ -17,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -28,26 +23,24 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
-import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
-import com.example.bbettercalendar.events.EventDao;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarHomeListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.popups.AlertPopup;
-import com.example.bbettercalendar.popups.OnAlertPopupListener;
+import com.example.bbettercalendar.popups.OnPopupListener;
+import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.TimerPopup;
-import com.example.bbettercalendar.stats.StatsDAO;
-import com.google.android.material.color.MaterialColors;
-import com.google.android.material.snackbar.Snackbar;
+
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnToolbarHomeListener, OnAlertPopupListener {
+public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnToolbarHomeListener, OnPopupListener<Object> {
 
     private final int TIMER_STOPPED = 0;
     private final int TIMER_RUNNING = 1;
@@ -70,7 +63,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private int timer_state = TIMER_STOPPED;
     private int lastTimerTime =10000;
 
-    private CountDownTimer countDownTimer;
+    private CountDownTimer countDownTimer = null;
     //todo volver a poner esto a 20 min y el lastTimerTime
     private long timeLeftInMillis = 10000; // 20 minutos --> 60000 * 20
     private boolean isBackground = false;
@@ -86,6 +79,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        homeViewModel.setConfigManager(configurationManager);
         final TextView textView = binding.textHome;
         homeTimerButton = binding.homeTimerButton;
         homeTimerButton.setOnClickListener(this);
@@ -95,6 +89,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         currentStreakText = binding.homeCurrentStreakText;
         todayFailsText = binding.homeToadyFailsText;
         todayTimeStudiedText = binding.homeTodayTimeText;
+        timeLeftInMillis = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
 
         toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.home_toolbar, true);
         toolbarHelper.setOnToolbarListener(this);
@@ -102,8 +97,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         //todo crear listener personalizado
         // toolbarHelper.setOnToolbarCalendarListener(this);
 
-        alertPopup.selectView(AlertPopup.ALERT_POPUP);
-        alertPopup.setOnAlertPopupListener(this);
+        alertPopup.setOnPopupListener(this);
+        timerPopup.setOnPopupListener(this);
 
 
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
@@ -116,9 +111,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         return root;
     }
 
+    private void startTimer(long time){
 
-    private void startTimer(){
-        countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) { // 60000 milisegundos = 60 segundos, con intervalo de 1000 milisegundos = 1 segundo
+        countDownTimer = new CountDownTimer(time, 1000) { // 60000 milisegundos = 60 segundos, con intervalo de 1000 milisegundos = 1 segundo
 
             public void onTick(long millisUntilFinished) {
                 timeLeftInMillis = millisUntilFinished;
@@ -144,7 +139,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     }
 
     private void resetTimer(){
-        timeLeftInMillis = 60000 * 20;
+        //timeLeftInMillis =  60000 * 20;
+        timeLeftInMillis =  configurationManager.getConfiguration().getHomeTimerTime();
         homeViewModel.resetTimer();
     }
 
@@ -163,8 +159,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                 break;
             case R.id.homePlayButton:
                 Log.i(TAG, "Timer started");
-                if(timer_state == TIMER_STOPPED || timer_state == TIMER_PAUSED){
-                    startTimer();
+                if(timer_state == TIMER_STOPPED){
+                    startTimer(homeViewModel.configManager.getConfiguration().getHomeTimerTime());
+                    lastTimerTime = (int) homeViewModel.configManager.getConfiguration().getHomeTimerTime();
+                } else if( timer_state == TIMER_PAUSED){
+                    startTimer(timeLeftInMillis);
                 }else if(timer_state == TIMER_RUNNING){
                     pauseTimer();
                 }
@@ -218,10 +217,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             public void onActivityResumed(Activity activity) {
                 if(isTimerFailed){
                     isTimerFailed = false;
-                    //homeViewModel.completeTimer(lastTimerTime);
-                    alertPopup.selectView(AlertPopup.ALERT_POPUP);
+                    alertPopup.selectView(PopupHelper.ALERT_POPUP);
                     alertPopup.show(getParentFragmentManager(), "popup_tag");
-                    //despues de esto, se resetea el timer
                 }
             }
 
@@ -259,11 +256,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                     countDownTimer.cancel();
                     timer_state = TIMER_STOPPED;
                     homeViewModel.addFails();
-                    //statsDao.addFails();
-                    //showCustomAlertDialog(binding.getRoot());
                     isTimerFailed=true;
                     isBackground=false;
-                    //todo cuando se cierre el mesaje de error, resetear el timer
                 }
             }
 
@@ -277,45 +271,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
-    }
-
-
-    private void showCustomAlertDialog(View view) {
-        // Crear el builder para el AlertDialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-
-        // Configurar el mensaje y el botón positivo, similar al Snackbar
-        builder.setMessage("Temporizador fallido")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Acción al presionar el botón "OK"
-                    }
-                });
-
-        // Crear el AlertDialog
-        AlertDialog dialog = builder.create();
-
-        // Personalizar los colores del AlertDialog
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
-                Button positiveButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                positiveButton.setTextColor(Color.WHITE); // Color del texto del botón
-
-                // Establecer el color de fondo del AlertDialog
-                //int colorAccent = MaterialColors.getColor(view, com.google.android.material.R.attr.colorAccent);
-                int colorAccent = Color.RED;
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(colorAccent));
-
-                // Configurar el color del mensaje
-                TextView messageText = (TextView) dialog.findViewById(android.R.id.message);
-                messageText.setTextColor(Color.WHITE);
-            }
-        });
-
-        // Mostrar el AlertDialog
-        dialog.show();
     }
 
 
@@ -349,13 +304,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
     @Override
     public void OnClosePopup(int popupType) {
-        if (popupType==AlertPopup.ALERT_POPUP){
+        if (popupType==PopupHelper.ALERT_POPUP){
             resetTimer();
         }
     }
 
     @Override
+    public void OnClosePopup(int popupType, Object result) {
+        try {
+            if (popupType == PopupHelper.ALERT_POPUP) {
+                resetTimer();
+            } else if (popupType == PopupHelper.TIMER_POPUP) {
+                Configuration config = (Configuration) result;
+                homeViewModel.updateConfiguration(config);
+                Log.i(TAG, "Configuration received: ");
+            }
+        } catch (ClassCastException e) {
+            Log.e(TAG, "Error on closing popup: " + e.getMessage());
+        }
+    }
+
+    @Override
     public void onToolbarTimerClick(){
+        timerPopup.setConfiguration(configurationManager.getConfiguration());
         timerPopup.show(getParentFragmentManager(), "popup_tag");
     }
 

@@ -2,8 +2,6 @@ package com.example.bbettercalendar.configuration;
 
 import android.content.Context;
 
-import androidx.room.Room;
-
 import com.example.bbettercalendar.database.AppDatabase;
 
 import javax.inject.Singleton;

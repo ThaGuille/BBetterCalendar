@@ -2,33 +2,30 @@ package com.example.bbettercalendar.popups;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.popups.OnNotificationsPopupListener;
 
 public class AlertPopup extends DialogFragment {
 
-    public static final int ALERT_POPUP = 1;
     public int popupType;
     public int popupView;
-    private OnAlertPopupListener listener;
+    private OnPopupListener listener;
 
-    public void setOnAlertPopupListener(OnAlertPopupListener listener) {
+    public void setOnPopupListener(OnPopupListener listener) {
         this.listener = listener;
     }
 
     public void selectView(int popupType) {
         this.popupType = popupType;
         switch (popupType) {
-            case ALERT_POPUP:
+            case PopupHelper.ALERT_POPUP:
                 this.popupView = R.layout.popup_error;
                 break;
             default:
@@ -55,12 +52,16 @@ public class AlertPopup extends DialogFragment {
         view.findViewById(R.id.okButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.OnClosePopup(popupType);
                 dismiss();
             }
         });
-
         return builder.create();
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        listener.OnClosePopup(popupType);
     }
 
 }

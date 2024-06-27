@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -16,11 +17,14 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
+import com.example.bbettercalendar.helpers.FormatHelper;
+import com.google.android.material.snackbar.Snackbar;
 
 public class TimerPopup extends DialogFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     //todo estos final ints deberían centralizarse en una sola clase popupHelper
 
+    private final String TAG = "TimerPopupTag";
     private Configuration configuration;
     private int timerTime;
     private int restTime;
@@ -150,15 +154,35 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
     }
 
     private void changeCycles(int cyclesChange){
+        if(cyclesNumber+cyclesChange <= 0 || cyclesNumber+cyclesChange > 15){
+            sendErrorMessage("You can't set the number of cycles lower than 1 or higher than 15.");
+            return;
+        }
         cyclesNumber+=cyclesChange;
         cyclesNumberTextView.setText(String.valueOf(cyclesNumber));
     }
 
+    private void sendErrorMessage(String message){
+        try {
+            Snackbar.make(this.getParentFragment().getView(), message, Snackbar.LENGTH_SHORT).show();
+        }catch (NullPointerException e){
+            Log.e(TAG, "the TimerPopup is not attached to any view.");
+        }
+    }
+
     private void changeTime(int timeChange, boolean isTimer ){
         if(isTimer){
+            if(timerTime+timeChange <= 0 || timerTime+timeChange > FormatHelper.minutesToMillis(90)){
+                sendErrorMessage("You can't set a timer with a value lower than 1 minute or higher than 90 minutes.");
+                return;
+            }
             timerTime+=timeChange;
             timerTimeTextView.setText(formatTime(timerTime));
         }else{
+            if(restTime+timeChange <= 0 || restTime+timeChange > timerTime){
+                sendErrorMessage("You can't set a rest time with a value lower than 1 minute or higher than the concentration time.");
+                return;
+            }
             restTime+=timeChange;
             restTimeTextView.setText(formatTime(restTime));
         }

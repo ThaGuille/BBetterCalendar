@@ -43,6 +43,21 @@
         android:src="@drawable/ic_play_circle_filled_24"
         app:tint="?attr/colorAccent" />
 
+    <TextView
+        android:id="@+id/homeTimerTypeText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/homePlayButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="8dp"
+        android:hint="-- Concentration --"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textColorHint="?attr/colorAccent"
+        android:textSize="20sp" />
+
     <ImageView
         android:id="@+id/homeStreakImage"
         android:layout_width="56dp"
@@ -89,10 +104,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="30dp"
-        android:textAlignment="center"
         android:hint="Today studied time: 00:00"
-        android:textColorHint="@color/black"
+        android:textAlignment="center"
         android:textColor="@color/black"
+        android:textColorHint="@color/black"
         android:textSize="20sp" />
 
     <ImageButton

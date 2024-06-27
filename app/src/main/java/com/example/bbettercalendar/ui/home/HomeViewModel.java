@@ -30,6 +30,7 @@ public class HomeViewModel extends AndroidViewModel {
     private final MutableLiveData<String> currentStreakText;
     private final MutableLiveData<String> todayFailsText;
     private final MutableLiveData<String> todayTimeStudiedText;
+    private final MutableLiveData<String> timerModeText;
     private String currentStreakString;
     private ExecutorService executorService;
     private StatsDAO statsDao;
@@ -42,6 +43,7 @@ public class HomeViewModel extends AndroidViewModel {
         currentStreakText = new MutableLiveData<>();
         todayFailsText = new MutableLiveData<>();
         todayTimeStudiedText = new MutableLiveData<>();
+        timerModeText = new MutableLiveData<>();
         mText.setValue("This is home fragment");
         timerText.setValue("20:00");
         AppDatabase db = AppDatabase.getDatabase(application);
@@ -76,8 +78,9 @@ public class HomeViewModel extends AndroidViewModel {
         currentStreakText.postValue("Current streak: "+initialStats.currentStreak);
         //todayFailsText.postValue("Today fails: "+statsDao.getTodayFails());
         todayFailsText.postValue("Today fails: "+initialStats.todayFails);
-        String formattedTime = formatTime(initialStats.todayTimeStudied);
+        String formattedTime = FormatHelper.formatTime(initialStats.todayTimeStudied, "HH:mm");
         todayTimeStudiedText.postValue("Today studied time: " + formattedTime);
+        timerModeText.postValue("-- Concentration --");
         timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
     }
 
@@ -101,25 +104,20 @@ public class HomeViewModel extends AndroidViewModel {
                 Log.i(TAG, "View Model addTimeStudied( " + timerTime + " )");
                 statsDao.addTimeStudied(timerTime);
                 statsDao.addTasksDone();
-                String formattedTime = formatTime(statsDao.getTodayTimeStudied());
+                String formattedTime = FormatHelper.formatTime(statsDao.getTodayTimeStudied(), "HH:mm");
                 todayTimeStudiedText.postValue("Today studied time: " + formattedTime);
             }
         });
     }
 
-    public void resetTimer(){
-        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
+    public void setRestTimer(){
+        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeRestTime(), "mm:ss"));
+        timerModeText.postValue("-- Rest --");
     }
 
-    //Si esto se ha de usar más se puede hacer estático en una clase de utilidad o así
-    private String formatTime(int milliseconds) {
-        int totalSeconds = milliseconds / 1000;
-        int totalMinutes = totalSeconds / 60;
-        int minutes = totalMinutes % 60;
-        int hours = totalMinutes / 60;
-
-        // Formatear el tiempo en el formato HH:mm
-        return String.format("%02d:%02d", hours, minutes);
+    public void resetTimer(){
+        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
+        timerModeText.postValue("-- Concentration --");
     }
 
     public void setConfigManager(ConfigurationManager configManager) {
@@ -150,5 +148,6 @@ public class HomeViewModel extends AndroidViewModel {
     public LiveData<String> getCurrentStreakText() {return currentStreakText;}
     public LiveData<String> getTodayFailsText() {return todayFailsText;}
     public LiveData<String> getTodayTimeStudiedText() {return todayTimeStudiedText;}
+    public LiveData<String> getTimerModeText() {return timerModeText;}
 
 }

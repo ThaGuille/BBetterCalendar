@@ -26,6 +26,7 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
+import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarHomeListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
@@ -44,7 +45,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
     private final int TIMER_STOPPED = 0;
     private final int TIMER_RUNNING = 1;
-    private final int TIMER_PAUSED = 2;
+    private final int TIMER_PAUSED = 3;
+    private final int TIMER_STOPPED_REST = 4;
+    private final int TIMER_RUNNING_REST = 5;
+    private final int TIMER_PAUSED_REST = 6;
+
 
     private final String TAG = "HomeFragmentTag";
     private FragmentHomeBinding binding;
@@ -59,6 +64,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private TextView currentStreakText;
     private TextView todayFailsText;
     private TextView todayTimeStudiedText;
+    private TextView timerModeText;
     private Application.ActivityLifecycleCallbacks activityLifecycleCallbacks;
     private int timer_state = TIMER_STOPPED;
     private int lastTimerTime =10000;
@@ -68,6 +74,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private long timeLeftInMillis = 10000; // 20 minutos --> 60000 * 20
     private boolean isBackground = false;
     private boolean isTimerFailed = false;
+
+    private int restsCompleted = 0;
 
     @Inject
     ConfigurationManager configurationManager;
@@ -89,6 +97,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         currentStreakText = binding.homeCurrentStreakText;
         todayFailsText = binding.homeToadyFailsText;
         todayTimeStudiedText = binding.homeTodayTimeText;
+        timerModeText = binding.homeTimerTypeText;
         timeLeftInMillis = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
 
         toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.home_toolbar, true);
@@ -106,6 +115,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         homeViewModel.getCurrentStreakText().observe(getViewLifecycleOwner(), currentStreakText::setText);
         homeViewModel.getTodayFailsText().observe(getViewLifecycleOwner(), todayFailsText::setText);
         homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), todayTimeStudiedText::setText);
+        homeViewModel.getTimerModeText().observe(getViewLifecycleOwner(), timerModeText::setText);
 
         setTopMenu();
         return root;
@@ -117,17 +127,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
             public void onTick(long millisUntilFinished) {
                 timeLeftInMillis = millisUntilFinished;
-                long seconds = millisUntilFinished / 1000;
-                timerText.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
+                timerText.setText(FormatHelper.formatTime((int)millisUntilFinished, "mm:ss"));
             }
 
             public void onFinish() {
                 //reproducir sonido, resetear timer y anotar resultado
-                completeTimer();
-
+                if(timer_state == TIMER_RUNNING)
+                    completeTimer();
+                else
+                    completeRest();
             }
         }.start();
-        timer_state = TIMER_RUNNING;
+        if(timer_state == TIMER_STOPPED || timer_state == TIMER_PAUSED)
+            timer_state = TIMER_RUNNING;
+        else if(timer_state == TIMER_STOPPED_REST || timer_state == TIMER_PAUSED_REST)
+            timer_state = TIMER_RUNNING_REST;
+        else
+            Log.e(TAG, "Error en el estado del timer");
     }
 
     //Cuando el timer logra llegar a 0
@@ -135,11 +151,35 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         timer_state = TIMER_STOPPED;
         //reproducir sonido indicador
         homeViewModel.completeTimer(lastTimerTime);
+        //Si el descanso está activado, y no se ha llegado al límite de descansos predefinidos, se activa el descanso
+        if(configurationManager.getConfiguration().isHomeIsRestEnabled() )
+        {
+            if(restsCompleted < configurationManager.getConfiguration().getHomeNumberOfCycles()
+                    || configurationManager.getConfiguration().isHomeIsInfiniteCycleEnabled())
+            {
+                setRestTimer();}
+            else if(restsCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
+            {
+                //todo mostrar popup de ciclo finalizado, y confeti
+                resetTimer();
+            }
+        }else{ resetTimer();}
+    }
+
+    private void completeRest(){
+        timer_state = TIMER_STOPPED;
+        restsCompleted++;
         resetTimer();
     }
 
+    private void setRestTimer(){
+        timer_state = TIMER_STOPPED_REST;
+        timeLeftInMillis = configurationManager.getConfiguration().getHomeRestTime();
+        homeViewModel.setRestTimer();
+    }
+
     private void resetTimer(){
-        //timeLeftInMillis =  60000 * 20;
+        restsCompleted = 0;
         timeLeftInMillis =  configurationManager.getConfiguration().getHomeTimerTime();
         homeViewModel.resetTimer();
     }
@@ -160,12 +200,18 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             case R.id.homePlayButton:
                 Log.i(TAG, "Timer started");
                 if(timer_state == TIMER_STOPPED){
-                    startTimer(homeViewModel.configManager.getConfiguration().getHomeTimerTime());
-                    lastTimerTime = (int) homeViewModel.configManager.getConfiguration().getHomeTimerTime();
-                } else if( timer_state == TIMER_PAUSED){
+                    int actualTime = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
+                    lastTimerTime = actualTime;
+                    timeLeftInMillis = actualTime;
+                    startTimer(actualTime);
+                } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_STOPPED_REST){
                     startTimer(timeLeftInMillis);
-                }else if(timer_state == TIMER_RUNNING){
+                }else if(timer_state == TIMER_RUNNING || timer_state == TIMER_RUNNING_REST){
                     pauseTimer();
+                }else if(timer_state == TIMER_STOPPED_REST){
+                    int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
+                    timeLeftInMillis = actualTime;
+                    startTimer(actualTime);
                 }
                 break;
             default:
@@ -309,6 +355,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         }
     }
 
+    private void checkConfigChanges(Configuration config){
+
+        if(!config.isHomeIsRestEnabled()) {
+            if (timer_state == TIMER_STOPPED_REST) {
+                resetTimer();
+            }
+            if (timer_state == TIMER_RUNNING_REST || timer_state == TIMER_PAUSED_REST) {
+                countDownTimer.cancel();
+                resetTimer();
+            }
+        }
+
+
+        //todo mirar otras cosas como el autoCycle y eso
+    }
+
+
+    //Método genérico llamado al cerrar los diferentes popups
     @Override
     public void OnClosePopup(int popupType, Object result) {
         try {
@@ -316,6 +380,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                 resetTimer();
             } else if (popupType == PopupHelper.TIMER_POPUP) {
                 Configuration config = (Configuration) result;
+                checkConfigChanges(config);
                 homeViewModel.updateConfiguration(config);
                 Log.i(TAG, "Configuration received: ");
             }

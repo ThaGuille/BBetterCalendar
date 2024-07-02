@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
@@ -17,6 +18,9 @@ public class AlertPopup extends DialogFragment {
     public int popupType;
     public int popupView;
     private OnPopupListener listener;
+    //private TextView popupText;
+
+    //todo depende como funcione, se puede crear una clase padre para los popups que estos exiendan, que use el listener
 
     public void setOnPopupListener(OnPopupListener listener) {
         this.listener = listener;
@@ -28,11 +32,20 @@ public class AlertPopup extends DialogFragment {
             case PopupHelper.ALERT_POPUP:
                 this.popupView = R.layout.popup_error;
                 break;
+            /*case PopupHelper.MESSAGE_POPUP:
+                this.popupView = R.layout.popup_message;
+                popupText = getView().findViewById(R.id.popupMessageText);
+                break;*/
             default:
                 this.popupView =0;
                 break;
         }
     }
+
+    //Previamente hay que haber llamado a selectView
+    /*public void setText(String text) {
+        if(popupText!=null) popupText.setText(text);
+    }*/
 
     @NonNull
     @Override

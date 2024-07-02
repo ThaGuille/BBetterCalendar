@@ -6,24 +6,15 @@
     android:padding="16dp"
     android:background="#FFFFFF"> <!-- Cambia el color de fondo según necesites -->
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_error_cross_24"
-        app:tint="#FF0000"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-         />
 
     <TextView
-        android:id="@+id/alertMessage"
+        android:id="@+id/popupMessageText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/icon"
-        android:paddingLeft="8dp"
-        android:text="Temporizador fallido"
+        android:layout_marginStart="24dp"
+
+        android:text="message"
         android:textColor="@color/black"
         android:textSize="18sp" />
 
@@ -31,7 +22,7 @@
         android:id="@+id/okButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/alertMessage"
+        android:layout_below="@id/popupMessageText"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:background="@drawable/rounded_square"

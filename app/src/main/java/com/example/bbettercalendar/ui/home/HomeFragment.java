@@ -31,6 +31,7 @@ import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarHomeListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.popups.AlertPopup;
+import com.example.bbettercalendar.popups.MessagePopup;
 import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.TimerPopup;
@@ -56,6 +57,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     HomeViewModel homeViewModel;
     private AlertPopup alertPopup = new AlertPopup();
     private TimerPopup timerPopup = new TimerPopup();
+    private MessagePopup messagePopup = new MessagePopup();
+
     private ToolbarHelper toolbarHelper;
     private boolean timerActive = false;
     private ImageButton homeTimerButton;
@@ -70,12 +73,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private int lastTimerTime =10000;
 
     private CountDownTimer countDownTimer = null;
-    //todo volver a poner esto a 20 min y el lastTimerTime
     private long timeLeftInMillis = 10000; // 20 minutos --> 60000 * 20
     private boolean isBackground = false;
     private boolean isTimerFailed = false;
 
-    private int restsCompleted = 0;
+    private int cyclesCompleted = 0;
 
     @Inject
     ConfigurationManager configurationManager;
@@ -108,6 +110,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         alertPopup.setOnPopupListener(this);
         timerPopup.setOnPopupListener(this);
+        messagePopup.setOnPopupListener(this);
 
 
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
@@ -154,32 +157,54 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         //Si el descanso está activado, y no se ha llegado al límite de descansos predefinidos, se activa el descanso
         if(configurationManager.getConfiguration().isHomeIsRestEnabled() )
         {
-            if(restsCompleted < configurationManager.getConfiguration().getHomeNumberOfCycles()
+            if(cyclesCompleted < configurationManager.getConfiguration().getHomeNumberOfCycles()
                     || configurationManager.getConfiguration().isHomeIsInfiniteCycleEnabled())
             {
-                setRestTimer();}
-            else if(restsCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
+                setRestTimer();
+            }
+            else if(cyclesCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
             {
-                //todo mostrar popup de ciclo finalizado, y confeti
-                resetTimer();
+                messagePopup.setText("Ciclo finalizado, Has completado el ciclo de estudio");
+                messagePopup.show(getParentFragmentManager(), "popup_tag");
+                resetTimerAndCycles();
             }
         }else{ resetTimer();}
     }
 
     private void completeRest(){
         timer_state = TIMER_STOPPED;
-        restsCompleted++;
+        cyclesCompleted++;
         resetTimer();
+        if(configurationManager.getConfiguration().isHomeIsAutoCycle()){
+            if(cyclesCompleted < configurationManager.getConfiguration().getHomeNumberOfCycles()
+                    || configurationManager.getConfiguration().isHomeIsInfiniteCycleEnabled())
+            {   //si aun quedan ciclos por realizar, se inicia el siguiente ciclo
+                startTimer(configurationManager.getConfiguration().getHomeTimerTime());
+            }
+            else if(cyclesCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
+            {   //si se han completado todos los ciclos, se muestra un mensaje y se resetea el contador
+                messagePopup.setText("Ciclo finalizado, Has completado el ciclo de estudio");
+                messagePopup.show(getParentFragmentManager(), "popup_tag");
+                cyclesCompleted = 0;
+            }
+        }
     }
 
     private void setRestTimer(){
         timer_state = TIMER_STOPPED_REST;
-        timeLeftInMillis = configurationManager.getConfiguration().getHomeRestTime();
+        int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
         homeViewModel.setRestTimer();
+        timeLeftInMillis = actualTime;
+        //todo se puede implementar una función para que solo se inicicie el descanso automático si el usuario lo desea
+        startTimer(actualTime);
+    }
+
+    private void resetTimerAndCycles(){
+        cyclesCompleted = 0;
+        resetTimer();
     }
 
     private void resetTimer(){
-        restsCompleted = 0;
         timeLeftInMillis =  configurationManager.getConfiguration().getHomeTimerTime();
         homeViewModel.resetTimer();
     }
@@ -204,7 +229,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                     lastTimerTime = actualTime;
                     timeLeftInMillis = actualTime;
                     startTimer(actualTime);
-                } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_STOPPED_REST){
+                } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_PAUSED_REST){
                     startTimer(timeLeftInMillis);
                 }else if(timer_state == TIMER_RUNNING || timer_state == TIMER_RUNNING_REST){
                     pauseTimer();
@@ -359,12 +384,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         if(!config.isHomeIsRestEnabled()) {
             if (timer_state == TIMER_STOPPED_REST) {
-                resetTimer();
+                timer_state = TIMER_STOPPED;
+                resetTimerAndCycles();
             }
             if (timer_state == TIMER_RUNNING_REST || timer_state == TIMER_PAUSED_REST) {
                 countDownTimer.cancel();
-                resetTimer();
+                resetTimerAndCycles();
             }
+        }
+        if(!config.isHomeIsAutoCycle()){
+            cyclesCompleted = 0;
         }
 
 

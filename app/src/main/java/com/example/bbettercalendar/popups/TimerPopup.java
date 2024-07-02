@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -71,6 +72,9 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
         view.findViewById(R.id.btn_add_cycles).setOnClickListener(this);
         view.findViewById(R.id.btn_subtract_cycles).setOnClickListener(this);
 
+        view.findViewById(R.id.btn_restore).setOnClickListener(this);
+        view.findViewById(R.id.btn_save).setOnClickListener(this);
+
         restEnabledToggleButton.setOnCheckedChangeListener(this);
         autoCycleEnabledToggleButton.setOnCheckedChangeListener(this);
         infiniteCyclesToggleButton.setOnCheckedChangeListener(this);
@@ -91,6 +95,14 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
         isRestEnabled = configuration.isHomeIsRestEnabled();
         isAutoCycleEnabled = configuration.isHomeIsAutoCycle();
         cyclesNumber = configuration.getHomeNumberOfCycles();
+    }
+
+    private void getRestoredValues(){
+        timerTime = 60000 * 20;
+        restTime = 60000 * 5;
+        isRestEnabled = true;
+        isAutoCycleEnabled = false;
+        cyclesNumber = 3;
     }
 
     private void setValues(){
@@ -123,14 +135,13 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
             case R.id.btn_subtract_cycles:
                 changeCycles(-1);
                 break;
-            case R.id.toggle_resting:
-                //todo listener.onRestEnabled();
+            case R.id.btn_restore:
+                getRestoredValues();
+                setValues();
                 break;
-            case R.id.toggle_auto_cycle:
-                //todo listener.onAutoCycleEnabled();
-                break;
-            case R.id.toggle_infinite_cycles:
-                //todo listener.onInfiniteCycles();
+            case R.id.btn_save:
+                saveValues();
+                dismiss();
                 break;
         }
     }
@@ -205,9 +216,7 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
         return String.format("%02d:%02d", minutes, seconds);
     }
 
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
+    private void saveValues(){
         if(configuration.getHomeTimerTime()!=timerTime || configuration.getHomeRestTime()!=restTime ||
                 configuration.isHomeIsRestEnabled()!=isRestEnabled || configuration.isHomeIsAutoCycle()!=isAutoCycleEnabled ||
                 configuration.getHomeNumberOfCycles()!=cyclesNumber || configuration.isHomeIsInfiniteCycleEnabled()!=isInfiniteCycles)
@@ -220,5 +229,10 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
             configuration.setHomeIsInfiniteCycleEnabled(isInfiniteCycles);
             listener.OnClosePopup(PopupHelper.TIMER_POPUP, configuration);
         }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
     }
 }

@@ -15,7 +15,8 @@
         android:theme="@style/ThemeChatGPTBlue"
         tools:targetApi="33">
         <activity
-            android:name=".MainActivity"
+            android:name=".configuration.SplashActivity"
+            android:theme="@style/SplashTheme"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -23,8 +24,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity"/>
         <activity
-            android:name=".events.AddEventActivity"
+            android:name=".calendarEntries.AddEventActivity"
             android:exported="true"
             android:theme="@style/AppTheme.NoActionBar"/>
 

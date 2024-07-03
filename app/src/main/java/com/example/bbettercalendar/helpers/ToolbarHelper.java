@@ -2,7 +2,6 @@ package com.example.bbettercalendar.helpers;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -13,18 +12,12 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.MenuProvider;
-import androidx.lifecycle.Lifecycle;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.configuration.ConfigurationManager;
-import com.example.bbettercalendar.events.AddEventActivity;
+import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.google.android.material.color.MaterialColors;
 
 import java.util.List;
-
-import javax.inject.Inject;
-
-import dagger.hilt.android.AndroidEntryPoint;
 
 public class ToolbarHelper implements MenuProvider, View.OnClickListener{
 

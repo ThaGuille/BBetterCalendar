@@ -51,7 +51,7 @@ public class HomeViewModel extends AndroidViewModel {
         executorService = Executors.newFixedThreadPool(2);
 
         // Observador que se activa cuando la base de datos se ha inicializado en la clase InitialConfiguration
-        Observer<Boolean> initializationObserver = new Observer<Boolean>() {
+        /*Observer<Boolean> initializationObserver = new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean initialized) {
                 if (initialized) {
@@ -67,7 +67,11 @@ public class HomeViewModel extends AndroidViewModel {
                 }
             }
         };
-        InitialConfiguration.getInstance().getInitializationStatus().observeForever(initializationObserver);
+        InitialConfiguration.getInstance().getInitializationStatus().observeForever(initializationObserver);*/
+        executorService.execute(() -> {
+            Stats initialStats = statsDao.getStats();
+            setInitialTexts(initialStats);
+        });
 
     }
 
@@ -81,7 +85,6 @@ public class HomeViewModel extends AndroidViewModel {
         String formattedTime = FormatHelper.formatTime(initialStats.todayTimeStudied, "HH:mm");
         todayTimeStudiedText.postValue("Today studied time: " + formattedTime);
         timerModeText.postValue("-- Concentration --");
-        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
     }
 
     //Cuando el usuario cierra la app a medio contador
@@ -122,6 +125,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     public void setConfigManager(ConfigurationManager configManager) {
         this.configManager = configManager;
+        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
     }
 
     public void updateConfiguration(Configuration config){

@@ -27,12 +27,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.databinding.FragmentCalendarWeekBinding;
-import com.example.bbettercalendar.events.AddEventActivity;
-import com.example.bbettercalendar.events.Event;
-import com.example.bbettercalendar.events.EventDao;
+import com.example.bbettercalendar.calendarEntries.AddEventActivity;
+import com.example.bbettercalendar.calendarEntries.CalendarEntry;
+import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarCalendarListener;
 import com.example.bbettercalendar.helpers.ScreenHelper;
@@ -57,12 +56,12 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
     private final int daysMargin = 70;
     private OnToolBarListener onToolBarListener;
     private ToolbarHelper toolbarHelper;
-    private EventDao eventDao;
+    private CalendarEntryDAO calendarEntryDAO;
     private CalendarController calendarController;
 
     private RecyclerView recyclerView;
     private static CalendarWeekAdapter adapter;
-    private static List<Event> mEventList = new ArrayList<>();
+    private static List<CalendarEntry> mCalendarEntryList = new ArrayList<>();
 
     View[] calendarVerticalLines = new View[6];
     List<View> calendarHorizontalLines = new ArrayList<>();
@@ -92,10 +91,10 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
         View root = binding.getRoot();
 
         //db = Room.databaseBuilder(getActivity().getApplicationContext(), AppDatabase.class, "eventDB").build();
-        eventDao = AppDatabase.getDatabase(getContext().getApplicationContext()).eventDao();
+        calendarEntryDAO = AppDatabase.getDatabase(getContext().getApplicationContext()).eventDao();
         calendarController = new CalendarController(getActivity(), getContext());
         recyclerView = binding.weekCalendarTopRecyclerView;
-        adapter = new CalendarWeekAdapter(getContext(), mEventList);
+        adapter = new CalendarWeekAdapter(getContext(), mCalendarEntryList);
         recyclerView.setAdapter(adapter);
         //todo ver si uso linear layout, grid o relative
         // sistema del calendari: o scrollviews separades vinculades per codi (hores/linies horizontals/events)

@@ -9,17 +9,17 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.events.Event;
+import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 
 import java.util.List;
 
 public class CalendarWeekAdapter extends RecyclerView.Adapter<CalendarWeekAdapter.ViewHolder>{
 
-    private List<Event> events;
+    private List<CalendarEntry> calendarEntries;
     private Context context;
 
-    public CalendarWeekAdapter(Context context, List<Event> events) {
-        this.events = events;
+    public CalendarWeekAdapter(Context context, List<CalendarEntry> calendarEntries) {
+        this.calendarEntries = calendarEntries;
     }
 
     @Override
@@ -33,13 +33,13 @@ public class CalendarWeekAdapter extends RecyclerView.Adapter<CalendarWeekAdapte
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         // Configura los elementos de la vista
-        Event item = events.get(position);
+        CalendarEntry item = calendarEntries.get(position);
         // holder.miTextView.setText(item.getTexto()); // Ejemplo
     }
 
     @Override
     public int getItemCount() {
-        return events.size();
+        return calendarEntries.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

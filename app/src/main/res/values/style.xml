@@ -11,6 +11,10 @@
         <!-- Personaliza tu tema aquí -->
     </style>
 
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/blue_oval</item>
+    </style>
+
     <!--
    <style name="ThemeChatGPTBlueParent" parent="Theme.MaterialComponents.Light">
        <item name="colorPrimary">@color/c_azul_claro</item>

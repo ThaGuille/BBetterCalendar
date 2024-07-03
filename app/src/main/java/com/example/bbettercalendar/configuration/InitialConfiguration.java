@@ -22,8 +22,6 @@ public class InitialConfiguration extends AppCompatActivity {
     private static InitialConfiguration instance;
     private MutableLiveData<Boolean> isInitialized = new MutableLiveData<>();
 
-
-
     private final String TAG = "InitialConfigurationTag";
     private StatsDAO statsDao;
     private ConfigurationDAO configurationDao;

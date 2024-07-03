@@ -57,7 +57,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     HomeViewModel homeViewModel;
     private AlertPopup alertPopup = new AlertPopup();
     private TimerPopup timerPopup = new TimerPopup();
-    private MessagePopup messagePopup = new MessagePopup();
+    private MessagePopup messagePopup;
 
     private ToolbarHelper toolbarHelper;
     private boolean timerActive = false;
@@ -110,7 +110,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         alertPopup.setOnPopupListener(this);
         timerPopup.setOnPopupListener(this);
+        messagePopup = new MessagePopup();
         messagePopup.setOnPopupListener(this);
+
 
 
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
@@ -210,9 +212,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     }
 
     //Se pulsa el timer para pausarlo
-    private void pauseTimer(){
+    private void pauseTimer(boolean isRest){
         countDownTimer.cancel();
-        timer_state = TIMER_PAUSED;
+        timer_state = isRest ? TIMER_PAUSED_REST : TIMER_PAUSED;
     }
 
     @Override
@@ -231,8 +233,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                     startTimer(actualTime);
                 } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_PAUSED_REST){
                     startTimer(timeLeftInMillis);
-                }else if(timer_state == TIMER_RUNNING || timer_state == TIMER_RUNNING_REST){
-                    pauseTimer();
+                }else if(timer_state == TIMER_RUNNING){
+                    pauseTimer(false);
+                } else if (timer_state == TIMER_RUNNING_REST) {
+                    pauseTimer(true);
                 }else if(timer_state == TIMER_STOPPED_REST){
                     int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
                     timeLeftInMillis = actualTime;

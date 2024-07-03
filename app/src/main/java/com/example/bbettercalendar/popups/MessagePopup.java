@@ -18,6 +18,8 @@ public class MessagePopup extends DialogFragment {
     private OnPopupListener listener;
     private TextView popupText;
     private int popupType;
+    private String text;
+
 
 
     @NonNull
@@ -41,6 +43,8 @@ public class MessagePopup extends DialogFragment {
                 dismiss();
             }
         });
+        if(popupText!=null)
+            popupText.setText(text);
         return builder.create();
     }
 
@@ -50,7 +54,9 @@ public class MessagePopup extends DialogFragment {
 
     //Previamente hay que haber llamado a selectView
     public void setText(String text) {
-        if(popupText!=null) popupText.setText(text);
+        this.text = text;
+        if(popupText!=null)
+            popupText.setText(text);
     }
 
 

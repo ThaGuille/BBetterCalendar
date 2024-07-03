@@ -1,17 +1,13 @@
-package com.example.bbettercalendar.events;
+package com.example.bbettercalendar.calendarEntries;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -22,11 +18,8 @@ import android.widget.TimePicker;
 
 import androidx.appcompat.widget.Toolbar;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Lifecycle;
-import androidx.room.Room;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.database.AppDatabase;
@@ -35,7 +28,6 @@ import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.popups.NotificationsPopup;
 import com.example.bbettercalendar.popups.OnNotificationsPopupListener;
-import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,9 +53,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
     private ActivityCreateEventBinding binding;
     private ToolbarHelper toolbarHelper;
-    EventDao eventDao;
+    CalendarEntryDAO calendarEntryDAO;
 
-    private Event.EventBuilder eventBuilder;
+    private CalendarEntry.EventBuilder eventBuilder;
     private NotificationsPopup notificationsPopup = new NotificationsPopup();
 
     //private boolean[] notifications = new boolean[5];
@@ -76,9 +68,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         binding = ActivityCreateEventBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        eventDao = AppDatabase.getDatabase(this.getApplicationContext()).eventDao();
+        calendarEntryDAO = AppDatabase.getDatabase(this.getApplicationContext()).eventDao();
 
-        eventBuilder = new Event.EventBuilder();
+        eventBuilder = new CalendarEntry.EventBuilder();
         Button btnSaveEvent = findViewById(R.id.btnSaveEvent);
         ImageButton btnClose = findViewById(R.id.btnClose);
         Toolbar toolbar = findViewById(R.id.toolbar_close_or_save);
@@ -111,15 +103,15 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         /**Gson gson = new Gson();
         String jsonEvent = gson.toJson(event);**/
 
-        Event event = eventBuilder.build();
+        CalendarEntry calendarEntry = eventBuilder.build();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
-                eventDao.insert(event);
+                calendarEntryDAO.insert(calendarEntry);
             }catch (Exception e){
-                Log.i(TAG, "evento fallido -> " + event.getTitle());
+                Log.i(TAG, "evento fallido -> " + calendarEntry.getTitle());
             }
-            Log.i(TAG, "evento guardado -> " + event.getTitle());
+            Log.i(TAG, "evento guardado -> " + calendarEntry.getTitle());
             Intent returnIntent = new Intent();
             returnIntent.putExtra("resultado", 67); // "resultado" es la clave y valor es el dato que deseas retornar
             setResult(Activity.RESULT_OK, returnIntent);

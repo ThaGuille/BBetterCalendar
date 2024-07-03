@@ -9,17 +9,17 @@ import androidx.room.TypeConverters;
 
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationDAO;
-import com.example.bbettercalendar.events.Event;
-import com.example.bbettercalendar.events.EventDao;
+import com.example.bbettercalendar.calendarEntries.CalendarEntry;
+import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 
-@Database(entities = {Event.class, Stats.class, Configuration.class}, version = 3)
+@Database(entities = {CalendarEntry.class, Stats.class, Configuration.class}, version = 4)
 @TypeConverters({DBConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
-    public abstract EventDao eventDao();
+    public abstract CalendarEntryDAO eventDao();
     public abstract StatsDAO statsDao();
     public abstract ConfigurationDAO configurationDao();
 

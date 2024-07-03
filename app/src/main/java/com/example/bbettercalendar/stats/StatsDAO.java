@@ -1,12 +1,8 @@
 package com.example.bbettercalendar.stats;
 
-import com.example.bbettercalendar.events.Event;
-import com.example.bbettercalendar.stats.Stats;
-
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
-import androidx.room.Update;
 
 import java.util.Calendar;
 

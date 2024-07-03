@@ -9,10 +9,10 @@
 
     <TextView
         android:id="@+id/popupMessageText"
-        android:layout_width="wrap_content"
+        android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="16dp"
 
         android:text="message"
         android:textColor="@color/black"

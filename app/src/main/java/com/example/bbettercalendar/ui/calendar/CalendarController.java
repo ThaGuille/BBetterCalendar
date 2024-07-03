@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
-import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ScaleXSpan;
@@ -12,12 +11,11 @@ import android.util.Log;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
-import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.database.AppDatabase;
-import com.example.bbettercalendar.events.Event;
-import com.example.bbettercalendar.events.EventDao;
+import com.example.bbettercalendar.calendarEntries.CalendarEntry;
+import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.helpers.ScreenHelper;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 
@@ -35,7 +33,7 @@ public class CalendarController {
     @Inject
     Configuration config;
     public static final String TAG = "CalendarTag";
-    EventDao eventDao;
+    CalendarEntryDAO calendarEntryDAO;
     private Activity activity;
     private Context context;
     private ToolbarHelper toolbarHelper;
@@ -44,7 +42,7 @@ public class CalendarController {
 
         this.activity = activity;
         this.context = context;
-        eventDao = AppDatabase.getDatabase(context.getApplicationContext()).eventDao();
+        calendarEntryDAO = AppDatabase.getDatabase(context.getApplicationContext()).eventDao();
 
     }
 
@@ -60,11 +58,11 @@ public class CalendarController {
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    List<Event> events;
-                    events = eventDao.getAllEvents();
+                    List<CalendarEntry> calendarEntries;
+                    calendarEntries = calendarEntryDAO.getAllEvents();
                     try {
-                        for(int i=0;i<events.size();i++){
-                            printEvents(events.get(i));
+                        for(int i = 0; i< calendarEntries.size(); i++){
+                            printEvents(calendarEntries.get(i));
                         }
                     }catch (Exception e){
                         Log.i(TAG, "no hay eventos");
@@ -75,19 +73,19 @@ public class CalendarController {
         }
     }
 
-    private void printEvents(Event event){
+    private void printEvents(CalendarEntry calendarEntry){
         SimpleDateFormat dateFormat=new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Log.i(TAG, "event title: "+event.getTitle());
-        if(event.getStartDayAndHour()!=null)
-            Log.i(TAG,"dia y hora start: "+ dateFormat.format(event.getStartDayAndHour().getTime()));
+        Log.i(TAG, "event title: "+ calendarEntry.getTitle());
+        if(calendarEntry.getStartDayAndHour()!=null)
+            Log.i(TAG,"dia y hora start: "+ dateFormat.format(calendarEntry.getStartDayAndHour().getTime()));
         else
             Log.i(TAG,"dia y hora: null");
-        if(event.getEndDayAndHour()!=null)
-            Log.i(TAG,"dia y hora start: "+ dateFormat.format(event.getEndDayAndHour().getTime()));
+        if(calendarEntry.getEndDayAndHour()!=null)
+            Log.i(TAG,"dia y hora start: "+ dateFormat.format(calendarEntry.getEndDayAndHour().getTime()));
         else
             Log.i(TAG,"dia y hora: null");
-        if(event.getDescription()!=null && !event.getDescription().isEmpty()){
-            Log.i(TAG, "event description: "+event.getDescription());
+        if(calendarEntry.getDescription()!=null && !calendarEntry.getDescription().isEmpty()){
+            Log.i(TAG, "event description: "+ calendarEntry.getDescription());
         }
         Log.i(TAG, "-------------------------------------------");
     }

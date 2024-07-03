@@ -1,16 +1,13 @@
-package com.example.bbettercalendar.events;
-
-import android.location.Location;
+package com.example.bbettercalendar.calendarEntries;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Date;
 
-@Entity(tableName = "event")
-public class Event {
+@Entity(tableName = "calendarEntry")
+public class CalendarEntry {
 
     /** Esto tendrá que ser serializable para guardarlo, y usar patrón builder para su creación**/
     @PrimaryKey(autoGenerate = true)
@@ -117,12 +114,12 @@ public class Event {
             return notifications;
         }
 
-        public Event build(){
-            return new Event(this);
+        public CalendarEntry build(){
+            return new CalendarEntry(this);
         }
     }
 
-    public Event(EventBuilder builder){
+    public CalendarEntry(EventBuilder builder){
         this.id = builder.id;
         this.title = builder.title;
         this.description = builder.description;
@@ -132,5 +129,5 @@ public class Event {
         this.notifications = builder.notifications;
 
     }
-    public Event(){}
+    public CalendarEntry(){}
 }

@@ -1,23 +1,13 @@
 package com.example.bbettercalendar.ui.calendar;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.ScaleXSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -27,31 +17,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.room.Room;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.databinding.FragmentCalendarMonthBinding;
-import com.example.bbettercalendar.events.AddEventActivity;
-import com.example.bbettercalendar.events.Event;
-import com.example.bbettercalendar.events.EventDao;
+import com.example.bbettercalendar.calendarEntries.AddEventActivity;
+import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarCalendarListener;
 import com.example.bbettercalendar.helpers.ScreenHelper;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -70,7 +53,7 @@ public class CalendarFragmentMonth extends Fragment implements OnToolBarListener
     private final int daysMargin = 70;
     private OnToolBarListener onToolBarListener;
     private ToolbarHelper toolbarHelper;
-    EventDao eventDao;
+    CalendarEntryDAO calendarEntryDAO;
     ActionBar actionBar;
     private CalendarController calendarController;
 
@@ -99,7 +82,7 @@ public class CalendarFragmentMonth extends Fragment implements OnToolBarListener
         View root = binding.getRoot();
 
         //db = Room.databaseBuilder(getActivity().getApplicationContext(), AppDatabase.class, "eventDB").build();
-        eventDao = AppDatabase.getDatabase(getContext().getApplicationContext()).eventDao();
+        calendarEntryDAO = AppDatabase.getDatabase(getContext().getApplicationContext()).eventDao();
         calendarController = new CalendarController(getActivity(), getContext());
 
         //final TextView textView = binding.text_notifications;

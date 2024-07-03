@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Iniciar la configuración si no se ha hecho antes
         if (InitialConfiguration.getInstance().getInitializationStatus().getValue() == null) {
-            InitialConfiguration.getInstance().initialize(this);
+            //InitialConfiguration.getInstance().initialize(this);
         }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);

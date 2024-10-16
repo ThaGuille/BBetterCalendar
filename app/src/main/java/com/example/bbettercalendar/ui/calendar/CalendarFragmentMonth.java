@@ -186,6 +186,7 @@ public class CalendarFragmentMonth extends Fragment implements OnToolBarListener
     //todo reactivar función
     private void addEvent(){
         Intent intent = new Intent(getActivity(), AddEventActivity.class);
+        intent.putExtra("entry", AddEventActivity.TYPE_TASK);  //todo hacer sistema para elegir evento/tarea/recordatorio
         someActivityResultLauncher.launch(intent);
     }
         //añadir evento

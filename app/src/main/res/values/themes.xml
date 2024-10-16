@@ -34,6 +34,35 @@
         <item name="colorAccent">@color/c_azul_oscuro</item>
         <item name="colorOnPrimary">@color/c_verde_oscuro</item>
     </style>
+
+    <style name="ThemeChatGPTBlue_NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/c_azul_claro</item>
+        <item name="colorSecondary">@color/c_verde_claro</item>
+        <item name="colorAccent">@color/c_azul_oscuro</item>
+        <item name="colorOnPrimary">@color/c_verde_oscuro</item>
+    </style>
+
+    <!-- Hay que retocar los colores de este style -->
+    <style name="ThemeChatGPTBlue_AndroidPopups" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/c_azul_oscuro</item>
+        <item name="colorSecondary">@color/c_verde_claro</item>
+        <item name="colorAccent">@color/c_azul_claro</item>
+        <item name="colorOnPrimary">@color/c_verde_oscuro</item>
+        <item name="android:colorAccent">@color/c_azul_oscuro</item>
+        <item name="android:buttonTint">@color/c_azul_oscuro</item>
+    </style>
+
+    <!--Theme.AppCompat.DayNight.NoActionBar-->
+    <style name="ThemeColorEvenTalk" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/eventalkAzul</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorSecondary">@color/eventalkAzulSecundario</item>
+        <item name="colorAccent">@color/eventalkNaranja</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+
     <style name="ThemeChatGPTBlue.actionBar" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/c_verde_claro</item>
         <item name="colorSecondary">@color/c_azul_claro</item>
@@ -55,16 +84,7 @@
         <item name="colorOnPrimary">@color/blanco</item>
     </style>
 
-    <!--Theme.AppCompat.DayNight.NoActionBar-->
-    <style name="ThemeColorEvenTalk" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/eventalkAzul</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorSecondary">@color/eventalkAzulSecundario</item>
-        <item name="colorAccent">@color/eventalkNaranja</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorOnSecondary">@color/black</item>
-    </style>
+
 
     <style name="FakeTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->

@@ -1,5 +1,10 @@
 package com.example.bbettercalendar.helpers;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class FormatHelper {
 
     public static String formatTime(int milliseconds, String formatMask) {
@@ -18,6 +23,13 @@ public class FormatHelper {
         }else{
             return "Format mask not recognized";
         }
+    }
+
+    public static String formatDateToDateString(Calendar calendar){
+        return DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar.getTime());
+    }
+    public static String formatTimeToTimeString(Calendar calendar){
+        return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(calendar.getTime());
     }
 
     public static int millisToMinutes(int millis){

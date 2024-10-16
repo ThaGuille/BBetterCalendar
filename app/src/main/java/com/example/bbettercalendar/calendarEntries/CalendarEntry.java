@@ -20,6 +20,14 @@ public class CalendarEntry {
     private Calendar endDayAndHour;
     private boolean[] notifications = new boolean[7];
 
+    //Exclusivos de tareas
+    private int repetition;
+    //todo faltan los días en los que se repite
+    private int duration;
+    private boolean isDone;
+
+    private int type;  //1 = evento, 2 = tarea, 3 = recordatorio
+
     //private boolean isRepeated;
     //private int daysRepeated;
     //private boolean isDone;
@@ -48,15 +56,27 @@ public class CalendarEntry {
     public void setStartDayAndHour(Calendar startDayAndHour) {this.startDayAndHour = startDayAndHour;}
     public void setEndDayAndHour(Calendar endDayAndHour) {this.endDayAndHour = endDayAndHour;}
     public void setNotifications(boolean[] notifications) {this.notifications = notifications;}
+    public int getRepetition() {return repetition;}
+    public void setRepetition(int repetition) {this.repetition = repetition;}
+    public int getDuration() {return duration;}
+    public void setDuration(int duration) {this.duration = duration;}
+    public boolean isDone() {return isDone;}
+    public void setDone(boolean done) {isDone = done;}
+    public int getType() {return type;}
+    public void setType(int type) {this.type = type;}
     
     public static class EventBuilder implements Serializable {
         private int id;
         private String title;
         private String description;
         private String limitDate;
-        private Calendar startDayAndHour = Calendar.getInstance();
-        private Calendar endDayAndHour = Calendar.getInstance();
+        private Calendar startDayAndHour = null;
+        private Calendar endDayAndHour = null;
         private boolean[] notifications = new boolean[7];
+        private int repetition;
+        private int duration;
+        private boolean isDone;
+        private int type;
 
         public EventBuilder(){}  //hacer constructor con lo mínimo obligatiorio (title, description, limitDate)
 
@@ -68,32 +88,53 @@ public class CalendarEntry {
             this.title = title;
             return this;
         }
+        public String getEventTitle() {return title;}
+
         public EventBuilder setEventDescription(String description) {
             this.description = description;
             return this;
         }
+        public String getEventDescription() {return description;}
+
         public EventBuilder setEventDate(String limitDate) {
             this.limitDate = limitDate;
             return this;
         }
+        public String getEventDate() {return limitDate;}
+
         public EventBuilder setEventStartDay(Calendar startDayAndHour) {
+            if (this.startDayAndHour == null) {
+                this.startDayAndHour = Calendar.getInstance();
+            }
             this.startDayAndHour.set(Calendar.DAY_OF_MONTH, startDayAndHour.get(Calendar.DAY_OF_MONTH));
             this.startDayAndHour.set(Calendar.MONTH, startDayAndHour.get(Calendar.MONTH));
             this.startDayAndHour.set(Calendar.YEAR, startDayAndHour.get(Calendar.YEAR));
             return this;
         }
+        public Calendar getEventStartDayAndHour() {return startDayAndHour;}
+        public Calendar getEventEndDayAndHour() {return endDayAndHour;}
+
         public EventBuilder setEventEndDay(Calendar endDayAndHour) {
+            if (this.endDayAndHour == null) {
+                this.endDayAndHour = Calendar.getInstance();
+            }
             this.endDayAndHour.set(Calendar.DAY_OF_MONTH, endDayAndHour.get(Calendar.DAY_OF_MONTH));
             this.endDayAndHour.set(Calendar.MONTH, endDayAndHour.get(Calendar.MONTH));
             this.endDayAndHour.set(Calendar.YEAR, endDayAndHour.get(Calendar.YEAR));
             return this;
         }
         public EventBuilder setEventStartHour(Calendar startDayAndHour) {
+            if (this.startDayAndHour == null) {
+                this.startDayAndHour = Calendar.getInstance();
+            }
             this.startDayAndHour.set(Calendar.HOUR_OF_DAY, startDayAndHour.get(Calendar.HOUR_OF_DAY));
             this.startDayAndHour.set(Calendar.MINUTE, startDayAndHour.get(Calendar.MINUTE));
             return this;
         }
         public EventBuilder setEventEndHour(Calendar endDayAndHour) {
+            if (this.endDayAndHour == null) {
+                this.endDayAndHour = Calendar.getInstance();
+            }
             this.endDayAndHour.set(Calendar.HOUR_OF_DAY, endDayAndHour.get(Calendar.HOUR_OF_DAY));
             this.endDayAndHour.set(Calendar.MINUTE, endDayAndHour.get(Calendar.MINUTE));
             return this;
@@ -110,8 +151,23 @@ public class CalendarEntry {
             this.notifications = notifications;
             return this;
         }
-        public boolean[] getNotifications() {
-            return notifications;
+        public boolean[] getEventNotifications() {return notifications;}
+
+        public EventBuilder setEventRepetition(int repetition) {
+            this.repetition = repetition;
+            return this;
+        }
+        public EventBuilder setEventDuration(int duration) {
+            this.duration = duration;
+            return this;
+        }
+        public EventBuilder setEventIsDone(boolean isDone) {
+            this.isDone = isDone;
+            return this;
+        }
+        public EventBuilder setEventType(int type) {
+            this.type = type;
+            return this;
         }
 
         public CalendarEntry build(){
@@ -127,7 +183,10 @@ public class CalendarEntry {
         this.startDayAndHour = builder.startDayAndHour;
         this.endDayAndHour = builder.endDayAndHour;
         this.notifications = builder.notifications;
-
+        this.repetition = builder.repetition;
+        this.duration = builder.duration;
+        this.isDone = builder.isDone;
+        this.type = builder.type;
     }
     public CalendarEntry(){}
 }

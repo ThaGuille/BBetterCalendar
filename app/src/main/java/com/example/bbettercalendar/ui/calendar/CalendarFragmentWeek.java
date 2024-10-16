@@ -247,6 +247,7 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
 
     private void addEvent(){
         Intent intent = new Intent(getActivity(), AddEventActivity.class);
+        intent.putExtra("entry", AddEventActivity.TYPE_TASK);
         someActivityResultLauncher.launch(intent);
     }
 }

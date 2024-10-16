@@ -14,7 +14,7 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 
-@Database(entities = {CalendarEntry.class, Stats.class, Configuration.class}, version = 4)
+@Database(entities = {CalendarEntry.class, Stats.class, Configuration.class}, version = 6)
 @TypeConverters({DBConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 

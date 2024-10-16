@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResult;
 
+import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
@@ -20,6 +21,7 @@ import com.example.bbettercalendar.helpers.ScreenHelper;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -75,17 +77,29 @@ public class CalendarController {
 
     private void printEvents(CalendarEntry calendarEntry){
         SimpleDateFormat dateFormat=new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        if (calendarEntry.getType() == AddEventActivity.TYPE_EVENT) {
+            Log.i(TAG, "event type: event");
+        } else {
+            Log.i(TAG, "event type: task");
+        }
         Log.i(TAG, "event title: "+ calendarEntry.getTitle());
         if(calendarEntry.getStartDayAndHour()!=null)
             Log.i(TAG,"dia y hora start: "+ dateFormat.format(calendarEntry.getStartDayAndHour().getTime()));
         else
-            Log.i(TAG,"dia y hora: null");
+            Log.i(TAG,"dia y hora start: null");
         if(calendarEntry.getEndDayAndHour()!=null)
-            Log.i(TAG,"dia y hora start: "+ dateFormat.format(calendarEntry.getEndDayAndHour().getTime()));
+            Log.i(TAG,"dia y hora end: "+ dateFormat.format(calendarEntry.getEndDayAndHour().getTime()));
         else
-            Log.i(TAG,"dia y hora: null");
+            Log.i(TAG,"dia y hora end: null");
         if(calendarEntry.getDescription()!=null && !calendarEntry.getDescription().isEmpty()){
             Log.i(TAG, "event description: "+ calendarEntry.getDescription());
+        }
+        if(calendarEntry.getDuration()!=0){
+            Log.i(TAG, "event duration: "+ calendarEntry.getDuration());
+        }
+            Log.i(TAG, "event repetition: "+ calendarEntry.getRepetition());
+        if(calendarEntry.getNotifications()!=null){
+            Log.i(TAG, "event notifications: "+ Arrays.toString( calendarEntry.getNotifications()));
         }
         Log.i(TAG, "-------------------------------------------");
     }

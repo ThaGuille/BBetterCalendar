@@ -128,7 +128,11 @@ public class InitialConfiguration extends AppCompatActivity {
                 }
                 Log.i(TAG, "current Streak"+statsDao.getCurrentStreak());
                 Log.i(TAG, "max Streak"+statsDao.getMaxStreak());
+    }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

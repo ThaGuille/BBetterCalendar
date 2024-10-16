@@ -50,6 +50,7 @@ public class HomeViewModel extends AndroidViewModel {
         statsDao = db.statsDao();
         executorService = Executors.newFixedThreadPool(2);
 
+
         // Observador que se activa cuando la base de datos se ha inicializado en la clase InitialConfiguration
         /*Observer<Boolean> initializationObserver = new Observer<Boolean>() {
             @Override
@@ -149,6 +150,8 @@ public class HomeViewModel extends AndroidViewModel {
     public LiveData<String> getTimerText() {
         return timerText;
     }
+
+
     public LiveData<String> getCurrentStreakText() {return currentStreakText;}
     public LiveData<String> getTodayFailsText() {return todayFailsText;}
     public LiveData<String> getTodayTimeStudiedText() {return todayTimeStudiedText;}

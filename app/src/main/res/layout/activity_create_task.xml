@@ -11,7 +11,7 @@
         android:id="@+id/toolbar"
         layout="@layout/toolbar_close_or_save"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>-->
+        android:layout_height="wrap_content"/-->
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -30,7 +30,7 @@
         android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/create_event_linear_layout"
+            android:id="@+id/create_task_linear_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -58,10 +58,9 @@
                     android:layout_marginStart="10dp"
                     android:text="EVENT"
                     android:textSize="12sp"
-                    android:textAllCaps="false"
                     android:textColor="@color/black"
                     android:background="@drawable/rounded_square"
-                    android:backgroundTint="?attr/colorOnPrimary"
+                    android:backgroundTint="@color/white"
                     android:clickable="true"
                     android:elevation="5dp"
                     android:focusable="true" />
@@ -76,7 +75,6 @@
                     android:textSize="12sp"
                     android:layout_marginEnd="10dp"
                     android:text="TASK"
-                    android:textAllCaps="false"
                     android:textColor="@color/black"
                     android:background="@drawable/rounded_square"
                     android:backgroundTint="@color/white"
@@ -91,10 +89,9 @@
                     android:layout_weight="2"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="10dp"
                     android:textSize="12sp"
-                    android:text="NOTIFICATION"
-                    android:textAllCaps="false"
+                    android:layout_marginEnd="10dp"
+                    android:text="Notification"
                     android:textColor="@color/black"
                     android:background="@drawable/rounded_square"
                     android:backgroundTint="@color/white"
@@ -108,7 +105,7 @@
                 android:background="#D3D3D3"
                 android:layout_marginVertical="0dp"/>
             <LinearLayout
-                android:id="@+id/event_title_layout"
+                android:id="@+id/task_title_layout"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="0dp"
@@ -127,7 +124,7 @@
                     app:tint="@color/black" />
 
                 <EditText
-                    android:id="@+id/event_title"
+                    android:id="@+id/task_title"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginTop="0dp"
@@ -153,7 +150,7 @@
                 android:layout_marginVertical="0dp"/>
             <!-- START DATE LAYOUT -->
             <LinearLayout
-                android:id="@+id/event_start_date_layout"
+                android:id="@+id/task_start_date_layout"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="0dp"
@@ -172,17 +169,17 @@
                     app:tint="@color/black" />
 
                 <TextView
-                    android:id="@+id/event_start_date"
+                    android:id="@+id/task_start_date"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginTop="0dp"
                     android:layout_weight="4"
                     android:gravity="center|start"
-                    android:hint="Date"
+                    android:hint="Start date"
                     android:textColorHint="@color/black"
                     android:textSize="20sp" />
                 <TextView
-                    android:id="@+id/event_start_hour"
+                    android:id="@+id/task_start_hour"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginTop="0dp"
@@ -199,47 +196,70 @@
                 android:layout_height="1dp"
                 android:background="#D3D3D3"
                 android:layout_marginVertical="0dp"/>
+
             <!-- END DATE LAYOUT -->
             <LinearLayout
-            android:id="@+id/event_end_date_layout"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginTop="0dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center|start"
-            android:orientation="horizontal">
+                android:id="@+id/task_duration_layout"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center|start"
+                android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="0dp"
+                    android:layout_width="70dp"
                     android:layout_height="45dp"
                     android:layout_marginTop="0dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_calendar_range_24"
+                    android:src="@drawable/ic_more_time_clock_24"
                     app:tint="@color/black" />
 
-            <TextView
-                android:id="@+id/event_end_date"
-                android:layout_width="0dp"
-                android:layout_height="45dp"
-                android:layout_marginTop="0dp"
-                android:layout_weight="4"
-                android:gravity="center|start"
-                android:hint="Date"
-                android:textColorHint="@color/black"
-                android:textSize="20sp" />
-
                 <TextView
-                    android:id="@+id/event_end_hour"
+                    android:id="@+id/task_duration"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginTop="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:gravity="center|start"
-                    android:hint="24:00"
+                    android:hint="Duration"
                     android:textColorHint="@color/black"
                     android:textSize="20sp" />
+                <NumberPicker
+                    android:id="@+id/number_picker_hours"
+                    android:layout_width="50dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="center" />
+                <TextView
+                    android:id="@+id/texts_number_picker_hours"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:gravity="center|start"
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginStart="2dp"
+                    android:hint=":"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+                <NumberPicker
+                    android:id="@+id/number_picker_minutes"
+                    android:layout_width="50dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="center" />
+                <TextView
+                    android:id="@+id/texts_number_picker_minutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:gravity="center|start"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginStart="3dp"
+                    android:hint="h"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+
+
 
             </LinearLayout>
 
@@ -248,8 +268,68 @@
                 android:layout_height="1dp"
                 android:background="#D3D3D3"
                 android:layout_marginVertical="0dp"/>
+
             <LinearLayout
-                android:id="@+id/event_notifications_layout"
+                android:id="@+id/task_repetition_layout"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_restore_24"
+                    app:tint="@color/black" />
+
+                <TextView
+                    android:id="@+id/task_repetition_text"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="4"
+                    android:gravity="center|start"
+                    android:hint="Repetition"
+                    android:textColorHint="@color/black"
+                    android:textSize="20sp" />
+
+                <ToggleButton
+                    android:id="@+id/task_repetition"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+
+                    android:layout_below="@id/task_start_hour"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/toggle_button_selector"
+                    android:button="@android:color/transparent"
+                    android:textOff=""
+                    android:textOn=""
+                    app:tint="@color/black" />
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_arrow_forward_24"
+                    app:tint="@color/black" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D3D3D3"
+                android:layout_marginVertical="0dp"/>
+
+            <LinearLayout
+                android:id="@+id/task_notifications_layout"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="0dp"
@@ -268,7 +348,7 @@
                     app:tint="@color/black" />
 
                 <TextView
-                    android:id="@+id/event_notification_1"
+                    android:id="@+id/task_notification_1"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginTop="0dp"
@@ -292,8 +372,9 @@
                 android:layout_height="1dp"
                 android:background="#D3D3D3"
                 android:layout_marginVertical="0dp"/>
+
             <LinearLayout
-                android:id="@+id/event_description_layout"
+                android:id="@+id/task_description_layout"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_marginTop="0dp"
@@ -312,7 +393,7 @@
                     app:tint="@color/black" />
 
                 <TextView
-                    android:id="@+id/event_description"
+                    android:id="@+id/task_description"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginTop="0dp"

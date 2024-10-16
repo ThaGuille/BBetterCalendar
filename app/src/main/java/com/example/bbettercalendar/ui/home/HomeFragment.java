@@ -272,11 +272,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         super.onAttach(context);
 
         activityLifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
-            private int numStarted = 0;
+            private int numStarted = 1;
 
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
 
+            //Esto se activa cuando se vuelve a la app después de haberla minimizado
             @Override
             public void onActivityStarted(Activity activity) {
                 if (numStarted == 0) {

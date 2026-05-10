@@ -9,4 +9,10 @@
     <string name="task">Task</string>
     <string name="notification">Notification</string>
 
+    <string name="events_for">Events for %1$s</string>
+    <string name="add_for_this_day">Add for this day</string>
+    <string name="month_view_prev">Previous month</string>
+    <string name="month_view_next">Next month</string>
+    <string name="no_events_today">No events for this day</string>
+
 </resources>

@@ -8,16 +8,109 @@
     android:background="@color/white"
     tools:context=".ui.calendar.CalendarFragmentMonth">
 
-    <com.kizitonwose.calendar.view.CalendarView
-        android:id="@+id/monthCalendarView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        app:cv_dayViewResource="@layout/cell_month_day"
-        app:cv_orientation="vertical"
-        app:cv_outDateStyle="endOfRow"
-        app:cv_scrollPaged="true" />
+        android:orientation="vertical">
+
+        <!-- Header bar: prev arrow | month-year | next arrow -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <ImageButton
+                android:id="@+id/monthPrevButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/month_view_prev"
+                android:src="@drawable/ic_arrow_back_24" />
+
+            <TextView
+                android:id="@+id/monthTitleText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="June 2026" />
+
+            <ImageButton
+                android:id="@+id/monthNextButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/month_view_next"
+                android:scaleX="-1"
+                android:src="@drawable/ic_arrow_back_24" />
+        </LinearLayout>
+
+        <include layout="@layout/view_calendar_header" />
+
+        <com.kizitonwose.calendar.view.CalendarView
+            android:id="@+id/monthCalendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            app:cv_dayViewResource="@layout/cell_month_day"
+            app:cv_daySize="square"
+            app:cv_orientation="horizontal"
+            app:cv_outDateStyle="endOfGrid"
+            app:cv_scrollPaged="true" />
+
+        <!-- Day-detail panel -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <TextView
+                    android:id="@+id/dayDetailTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="Events for Jun 15, 2026" />
+
+                <Button
+                    android:id="@+id/dayDetailAddButton"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_for_this_day"
+                    android:textColor="@color/calendar_item_event"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/dayDetailRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp" />
+        </LinearLayout>
+
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/calendarAddEventButton"

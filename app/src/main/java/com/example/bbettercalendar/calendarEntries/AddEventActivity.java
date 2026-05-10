@@ -65,6 +65,8 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     public static final int TYPE_EVENT = 1;
     public static final int TYPE_TASK = 2;
     public static final int TYPE_NOTIFICATION = 3;
+
+    public static final String EXTRA_PRESELECTED_DATE_MILLIS = "preselected_date_millis";
     private final String TAG = "AddEventActivityTag";
 
     private boolean[] createdNotificationLayouts = new boolean[7];
@@ -110,6 +112,13 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
         Intent intent = getIntent();
         layoutType = intent.getIntExtra("entry", TYPE_EVENT); //todo algo esta mal con esto
+
+        // Apply preselected date (e.g. from "Add for this day" in the month view)
+        // before initializeComponents() reads localCalendar to populate the date fields.
+        long preselectedMillis = intent.getLongExtra(EXTRA_PRESELECTED_DATE_MILLIS, -1L);
+        if (preselectedMillis > 0L) {
+            localCalendar.setTimeInMillis(preselectedMillis);
+        }
         // Cargar el layout adecuado
         switch (layoutType) {
             case TYPE_EVENT:
@@ -131,6 +140,18 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         toolbarHelper = new ToolbarHelper(this, this, getMenuInflater(), R.id.toolbar_close_or_save, false);
         toolbarHelper.setOnToolbarListener(this);
         initializeComponents(layoutType);
+
+        // For TYPE_EVENT with a preselected date, default the end date to the same day so the
+        // event spans a single day by default. The start date was already populated from
+        // localCalendar inside initializeComponents.
+        if (preselectedMillis > 0L && layoutType == TYPE_EVENT) {
+            eventBuilder.setEventEndDay(localCalendar);
+            if (endDateView != null) {
+                endDateView.setText(java.text.DateFormat.getDateInstance(
+                        java.text.DateFormat.SHORT, java.util.Locale.getDefault())
+                        .format(localCalendar.getTime()));
+            }
+        }
 
         //binding = ActivityCreateEventBinding.inflate(getLayoutInflater());
         //setContentView(binding.getRoot();

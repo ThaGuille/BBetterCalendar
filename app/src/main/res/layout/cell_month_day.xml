@@ -1,26 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="48dp">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_calendar_day_selected">
 
     <TextView
         android:id="@+id/cellDayText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
-        android:paddingTop="4dp"
+        android:paddingTop="6dp"
         android:textColor="@color/black"
         android:textSize="14sp" />
 
     <View
-        android:id="@+id/cellEventBar"
+        android:id="@+id/cellEventBar1"
         android:layout_width="match_parent"
         android:layout_height="3dp"
         android:layout_gravity="bottom"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp"
         android:layout_marginBottom="4dp"
-        android:background="@color/calendar_item_event"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/cellEventBar2"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="9dp"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/cellEventBar3"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="14dp"
         android:visibility="gone" />
 
 </FrameLayout>

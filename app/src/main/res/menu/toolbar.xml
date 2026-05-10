@@ -3,38 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="start|left"
-    android:gravity="start|left"
-    android:background="?attr/colorAccent"
-    android:layoutDirection="rtl">
+    android:layout_gravity="end"
+    android:gravity="end"
+    android:background="?attr/colorAccent">
 
-    <group
-
+    <item
+        android:id="@+id/toolbarButtonSwitchCalendar"
         android:layout_gravity="end"
-        android:gravity="right|end">
-        <item
-            android:id="@+id/go_back"
-            android:layout_gravity="end"
-            android:gravity="end"
-            android:icon="@drawable/ic_arrow_back_24"
-            android:title="atrás"
-            app:showAsAction="always" />
-        <item
-            android:id="@+id/toolbarButtonSwitchCalendar"
-            android:layout_gravity="end"
-            android:gravity="end"
-            android:icon="@drawable/ic_calendar_24"
-            android:title="calendario"
-            app:showAsAction="always" />
-        <item
-            android:id="@+id/toolbarButtonShare"
-            android:icon="@drawable/ic_progress_24"
-            android:title="progress"
-            app:showAsAction="always"
-            />
-        <!--<item
-            android:id="@+id/salir"
-            android:title="Salir" />-->
-    </group>
+        android:gravity="end"
+        android:icon="@drawable/ic_calendar_24"
+        android:title="calendario"
+        app:showAsAction="always" />
 
 </menu>

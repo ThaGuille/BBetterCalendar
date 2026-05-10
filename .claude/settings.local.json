@@ -29,7 +29,10 @@
       "Bash(cp '/tmp/vendor/Android-Week-View/base/src/main/java/com/alamkanak/weekview/base/*.kt' c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar/app/src/main/java/com/example/bbettercalendar/ui/calendar/weekview/base/)",
       "Bash(cp /tmp/vendor/Android-Week-View/LICENSE c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar/app/src/main/java/com/example/bbettercalendar/ui/calendar/weekview/LICENSE.txt)",
       "Bash(cp /tmp/vendor/Android-Week-View/core/src/main/res/values/attrs.xml c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar/app/src/main/res/values/weekview_attrs.xml)",
-      "Bash(cp /tmp/vendor/Android-Week-View/core/src/main/res/drawable/ic_arrow_up.xml c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar/app/src/main/res/drawable/ic_arrow_up.xml)"
+      "Bash(cp /tmp/vendor/Android-Week-View/core/src/main/res/drawable/ic_arrow_up.xml c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar/app/src/main/res/drawable/ic_arrow_up.xml)",
+      "Bash(find ~/.gradle/caches -name \"view-2.5.4*.aar\" 2>/dev/null | head -3 && find ~/.gradle/caches -name \"*.jar\" -path \"*kizitonwose*\" 2>/dev/null | head -5)",
+      "Read(//c/Users/guill/.gradle/caches/**)",
+      "Bash(git fetch *)"
     ]
   }
 }

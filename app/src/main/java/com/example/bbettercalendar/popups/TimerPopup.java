@@ -116,33 +116,25 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btn_add_timer:
-                changeTime(60000, true);
-                break;
-            case R.id.btn_subtract_timer:
-                changeTime(-60000, true);
-                break;
-            case R.id.btn_add_resting_timer:
-                changeTime(60000, false);
-                break;
-            case R.id.btn_subtract_resting_timer:
-                changeTime(-60000, false);
-                break;
-            case R.id.btn_add_cycles:
-                changeCycles(1);
-                break;
-            case R.id.btn_subtract_cycles:
-                changeCycles(-1);
-                break;
-            case R.id.btn_restore:
-                getRestoredValues();
-                setValues();
-                break;
-            case R.id.btn_save:
-                saveValues();
-                dismiss();
-                break;
+        int id = view.getId();
+        if (id == R.id.btn_add_timer) {
+            changeTime(60000, true);
+        } else if (id == R.id.btn_subtract_timer) {
+            changeTime(-60000, true);
+        } else if (id == R.id.btn_add_resting_timer) {
+            changeTime(60000, false);
+        } else if (id == R.id.btn_subtract_resting_timer) {
+            changeTime(-60000, false);
+        } else if (id == R.id.btn_add_cycles) {
+            changeCycles(1);
+        } else if (id == R.id.btn_subtract_cycles) {
+            changeCycles(-1);
+        } else if (id == R.id.btn_restore) {
+            getRestoredValues();
+            setValues();
+        } else if (id == R.id.btn_save) {
+            saveValues();
+            dismiss();
         }
     }
 

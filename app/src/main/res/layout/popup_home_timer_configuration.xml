@@ -1,305 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_md">
 
-        <TextView
-            android:layout_width="140dp"
-            android:layout_height="wrap_content"
-            android:text="Timer"
-            android:textSize="20sp"/>
+        <!-- Timer -->
+        <LinearLayout style="@style/TimerRow">
 
+            <TextView
+                style="@style/TimerRowLabel"
+                android:text="Timer" />
 
-        <ImageButton
-            android:id="@+id/btn_add_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="0dp"
-            android:src="@drawable/ic_add_24"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="15dp"
-            android:background="@drawable/rounded_square"
-            android:backgroundTint="@color/gris_claro"
-            android:clickable="true"
-            android:focusable="true"
-            app:tint="@color/black" />
+            <ImageButton
+                android:id="@+id/btn_add_timer"
+                style="@style/StepperButton"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:src="@drawable/ic_add_24"
+                app:tint="@color/black" />
 
-        <TextView
-            android:id="@+id/text_time_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="20:00"
-            android:textSize="20sp"
-            android:background="@android:drawable/editbox_background"/>
+            <TextView
+                android:id="@+id/text_time_timer"
+                style="@style/StepperValue"
+                android:text="20:00" />
 
-        <ImageButton
-            android:id="@+id/btn_subtract_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="0dp"
-            android:src="@drawable/ic_substract_24"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/rounded_square"
-            android:backgroundTint="@color/gris_claro"
-            app:tint="@color/black" />
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_weight="2"
-            />
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/btn_subtract_timer"
+                style="@style/StepperButton"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:src="@drawable/ic_substract_24"
+                app:tint="@color/black" />
+        </LinearLayout>
 
-    <!-- Línea divisoria -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#D3D3D3"
-        android:layout_marginVertical="8dp"/>
+        <include layout="@layout/divider_horizontal" />
 
+        <!-- Rest -->
+        <LinearLayout style="@style/TimerRow">
 
-    <!-- Línea divisoria -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+            <TextView
+                style="@style/TimerRowLabel"
+                android:text="Rest" />
 
-        <TextView
-            android:layout_width="140dp"
-            android:layout_height="wrap_content"
-            android:text="Rest"
-            android:textSize="20sp" />
+            <ImageButton
+                android:id="@+id/btn_add_resting_timer"
+                style="@style/StepperButton"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:src="@drawable/ic_add_24"
+                app:tint="@color/black" />
 
-        <ImageButton
-            android:id="@+id/btn_add_resting_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/rounded_square"
-            android:backgroundTint="@color/gris_claro"
-            android:src="@drawable/ic_add_24"
-            app:tint="@color/black" />
+            <TextView
+                android:id="@+id/text_time_resting"
+                style="@style/StepperValue"
+                android:text="05:00" />
 
-        <TextView
-            android:id="@+id/text_time_resting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/editbox_background"
-            android:gravity="center"
-            android:text="05:00"
-            android:textSize="20sp" />
+            <ImageButton
+                android:id="@+id/btn_subtract_resting_timer"
+                style="@style/StepperButton"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:src="@drawable/ic_substract_24"
+                app:tint="@color/black" />
 
-        <ImageButton
-            android:id="@+id/btn_subtract_resting_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="0dp"
-            android:background="@drawable/rounded_square"
-            android:backgroundTint="@color/gris_claro"
-            android:src="@drawable/ic_substract_24"
-            app:tint="@color/black" />
+            <ToggleButton
+                android:id="@+id/toggle_resting"
+                style="@style/StepperToggle" />
+        </LinearLayout>
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_weight="2"
-            />
+        <include layout="@layout/divider_horizontal" />
 
-        <ToggleButton
-            android:id="@+id/toggle_resting"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginEnd="5dp"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent"
-            android:textOff=""
-            android:textOn="" />
-    </LinearLayout>
+        <!-- Automatic cycle -->
+        <LinearLayout style="@style/TimerRow">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#D3D3D3"
-        android:layout_marginVertical="8dp"/>
+            <TextView
+                style="@style/TimerRowLabel"
+                android:text="Automatic cycle" />
 
-    <!-- Ciclo activo -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+            <ToggleButton
+                android:id="@+id/toggle_auto_cycle"
+                style="@style/StepperToggle" />
+        </LinearLayout>
 
+        <include layout="@layout/divider_horizontal" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Automatic cycle"
-            android:textSize="20sp"/>
-        <ToggleButton
-            android:id="@+id/toggle_auto_cycle"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginEnd="5dp"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent"
-            android:textOff=""
-            android:textOn="" />
+        <!-- Total cycles -->
+        <LinearLayout style="@style/TimerRow">
 
-    </LinearLayout>
+            <TextView
+                style="@style/TimerRowLabel"
+                android:text="Total cycles" />
 
-    <!-- Línea divisoria -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#D3D3D3"
-        android:layout_marginVertical="8dp"/>
+            <ImageButton
+                android:id="@+id/btn_add_cycles"
+                style="@style/StepperButton"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:src="@drawable/ic_add_24"
+                app:tint="@color/black" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+            <TextView
+                android:id="@+id/text_cycles"
+                style="@style/StepperValue"
+                android:text="3" />
 
-        <TextView
-            android:layout_width="140dp"
-            android:layout_height="wrap_content"
-            android:text="Total cycles"
-            android:textSize="20sp" />
+            <ImageButton
+                android:id="@+id/btn_subtract_cycles"
+                style="@style/StepperButton"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:src="@drawable/ic_substract_24"
+                app:tint="@color/black" />
+        </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/btn_add_cycles"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/rounded_square"
-            android:backgroundTint="@color/gris_claro"
-            android:src="@drawable/ic_add_24"
-            app:tint="@color/black" />
+        <!-- Infinite cycles -->
+        <LinearLayout style="@style/TimerRow">
 
-        <TextView
-            android:id="@+id/text_cycles"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:drawable/editbox_background"
-            android:gravity="center"
-            android:text="3"
-            android:textSize="20sp" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="@dimen/form_row_icon_size"
+                android:layout_weight="1" />
 
-        <ImageButton
-            android:id="@+id/btn_subtract_cycles"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="0dp"
-            android:background="@drawable/rounded_square"
-            android:backgroundTint="@color/gris_claro"
-            android:src="@drawable/ic_substract_24"
-            app:tint="@color/black" />
+            <ImageView
+                android:layout_width="@dimen/form_row_icon_size"
+                android:layout_height="@dimen/form_row_icon_size"
+                android:src="@drawable/ic_infinite_24"
+                app:tint="@color/black" />
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_weight="2"
-            />
+            <ToggleButton
+                android:id="@+id/toggle_infinite_cycles"
+                style="@style/StepperToggle" />
+        </LinearLayout>
+
+        <include layout="@layout/divider_horizontal" />
+
+        <!-- Footer -->
+        <LinearLayout style="@style/TimerRow">
+
+            <Button
+                android:id="@+id/btn_restore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:background="@drawable/rounded_square"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="Restore"
+                android:textColor="@color/black" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="@dimen/form_row_icon_size"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:background="@drawable/rounded_square"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="Accept"
+                android:textColor="@color/black" />
+        </LinearLayout>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <Space
-            android:layout_width="125dp"
-            android:layout_height="45dp"
-            />
-        <ImageView
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginStart="102dp"
-            android:src="@drawable/ic_infinite_24"
-            app:tint="@color/black" />
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_weight="2"
-            />
-        <ToggleButton
-            android:id="@+id/toggle_infinite_cycles"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginEnd="5dp"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent"
-            android:textOff=""
-            android:textOn="" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#D3D3D3"
-        android:layout_marginVertical="8dp"/>
-
-    <!-- Total de ciclos -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <Button
-            android:id="@+id/btn_restore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Restore"
-            android:textColor="@color/black"
-            android:background="@drawable/rounded_square"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginEnd="8dp"/>
-        <Space
-            android:layout_width="1dp"
-            android:layout_height="45dp"
-            android:layout_weight="2"
-            />
-
-        <Button
-            android:id="@+id/btn_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Accept"
-            android:textColor="@color/black"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/rounded_square"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginEnd="8dp"/>
-
-    </LinearLayout>
-
-</LinearLayout>
-
+</ScrollView>

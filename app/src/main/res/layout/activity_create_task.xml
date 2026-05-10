@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<!-- Cuentan que esto es más eficiente. Si laguea o algo se mira
-    <ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,23 +10,19 @@
         android:id="@+id/toolbar"
         layout="@layout/toolbar_close_or_save"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/-->
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:textSize="20sp"
-    >
-    <include layout="@layout/toolbar_close_or_save"/>
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ScrollView
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:id="@+id/create_task_linear_layout"
@@ -39,380 +34,209 @@
                 android:id="@+id/task_type_layout"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="7dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_marginBottom="@dimen/spacing_xs"
                 android:gravity="center|start"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/switch_to_event_button"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="2"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="10dp"
+                    style="@style/SegmentedButton"
                     android:layout_marginStart="10dp"
-                    android:text="EVENT"
-                    android:textSize="12sp"
-                    android:textColor="@color/black"
-                    android:background="@drawable/rounded_square"
                     android:backgroundTint="@color/white"
-                    android:clickable="true"
-                    android:elevation="5dp"
-                    android:focusable="true" />
+                    android:text="EVENT" />
 
                 <Button
                     android:id="@+id/switch_to_task_button"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="2"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"
-                    android:textSize="12sp"
-                    android:layout_marginEnd="10dp"
-                    android:text="TASK"
-                    android:textColor="@color/black"
-                    android:background="@drawable/rounded_square"
+                    style="@style/SegmentedButton"
                     android:backgroundTint="@color/white"
-                    android:clickable="true"
-                    android:elevation="5dp"
-                    android:focusable="true" />
+                    android:text="TASK" />
 
                 <Button
                     android:id="@+id/notificationsButton"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="2"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"
-                    android:textSize="12sp"
-                    android:layout_marginEnd="10dp"
-                    android:text="Notification"
-                    android:textColor="@color/black"
-                    android:background="@drawable/rounded_square"
+                    style="@style/SegmentedButton"
                     android:backgroundTint="@color/white"
-                    android:clickable="true"
-                    android:elevation="5dp"
-                    android:focusable="true" />
+                    android:text="Notification" />
             </LinearLayout>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#D3D3D3"
-                android:layout_marginVertical="0dp"/>
+
+            <include layout="@layout/divider_horizontal" />
+
             <LinearLayout
                 android:id="@+id/task_title_layout"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center|start"
-                android:orientation="horizontal">
+                style="@style/FormRow">
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
+                    style="@style/FormRowIcon"
                     android:src="@drawable/ic_title_24"
                     app:tint="@color/black" />
 
                 <EditText
                     android:id="@+id/task_title"
+                    style="@style/FormRowText"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
                     android:layout_weight="4"
-                    android:gravity="center|start"
-                    android:hint="@string/title"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
+                    android:hint="@string/title" />
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_arrow_forward_24"
+                    style="@style/FormRowArrow"
                     app:tint="@color/black" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#D3D3D3"
-                android:layout_marginVertical="0dp"/>
-            <!-- START DATE LAYOUT -->
+            <include layout="@layout/divider_horizontal" />
+
             <LinearLayout
                 android:id="@+id/task_start_date_layout"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center|start"
-                android:orientation="horizontal">
+                style="@style/FormRow">
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
+                    style="@style/FormRowIcon"
                     android:src="@drawable/ic_calendar_empty_24"
                     app:tint="@color/black" />
 
                 <TextView
                     android:id="@+id/task_start_date"
+                    style="@style/FormRowText"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
                     android:layout_weight="4"
-                    android:gravity="center|start"
-                    android:hint="Start date"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
+                    android:hint="Start date" />
+
                 <TextView
                     android:id="@+id/task_start_hour"
+                    style="@style/FormRowText"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
                     android:layout_weight="1"
-                    android:gravity="center|start"
-                    android:hint="00:00"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
-
+                    android:hint="00:00" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#D3D3D3"
-                android:layout_marginVertical="0dp"/>
+            <include layout="@layout/divider_horizontal" />
 
-            <!-- END DATE LAYOUT -->
             <LinearLayout
                 android:id="@+id/task_duration_layout"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center|start"
-                android:orientation="horizontal">
+                style="@style/FormRow">
 
                 <ImageView
                     android:layout_width="70dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
+                    android:layout_height="@dimen/form_row_icon_size"
                     android:src="@drawable/ic_more_time_clock_24"
                     app:tint="@color/black" />
 
                 <TextView
                     android:id="@+id/task_duration"
+                    style="@style/FormRowText"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
                     android:layout_weight="2"
-                    android:gravity="center|start"
-                    android:hint="Duration"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
+                    android:hint="Duration" />
+
                 <NumberPicker
                     android:id="@+id/number_picker_hours"
                     android:layout_width="50dp"
-                    android:layout_height="70dp"
+                    android:layout_height="@dimen/form_row_height"
                     android:layout_gravity="center" />
+
                 <TextView
                     android:id="@+id/texts_number_picker_hours"
+                    style="@style/FormRowText"
                     android:layout_width="wrap_content"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
-                    android:gravity="center|start"
-                    android:layout_marginEnd="2dp"
                     android:layout_marginStart="2dp"
-                    android:hint=":"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
+                    android:layout_marginEnd="2dp"
+                    android:hint=":" />
+
                 <NumberPicker
                     android:id="@+id/number_picker_minutes"
                     android:layout_width="50dp"
-                    android:layout_height="70dp"
+                    android:layout_height="@dimen/form_row_height"
                     android:layout_gravity="center" />
+
                 <TextView
                     android:id="@+id/texts_number_picker_minutes"
+                    style="@style/FormRowText"
                     android:layout_width="wrap_content"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
-                    android:gravity="center|start"
-                    android:layout_marginEnd="20dp"
                     android:layout_marginStart="3dp"
-                    android:hint="h"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
-
-
-
+                    android:layout_marginEnd="@dimen/spacing_md"
+                    android:hint="h" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#D3D3D3"
-                android:layout_marginVertical="0dp"/>
+            <include layout="@layout/divider_horizontal" />
 
             <LinearLayout
                 android:id="@+id/task_repetition_layout"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center|start"
-                android:orientation="horizontal">
+                style="@style/FormRow">
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
+                    style="@style/FormRowIcon"
                     android:src="@drawable/ic_restore_24"
                     app:tint="@color/black" />
 
                 <TextView
                     android:id="@+id/task_repetition_text"
+                    style="@style/FormRowText"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
                     android:layout_weight="4"
-                    android:gravity="center|start"
-                    android:hint="Repetition"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
+                    android:hint="Repetition" />
 
                 <ToggleButton
                     android:id="@+id/task_repetition"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-
-                    android:layout_below="@id/task_start_hour"
-                    android:layout_marginTop="0dp"
+                    android:layout_width="@dimen/form_row_icon_size"
+                    android:layout_height="@dimen/form_row_icon_size"
                     android:layout_marginEnd="10dp"
                     android:background="@drawable/toggle_button_selector"
                     android:button="@android:color/transparent"
                     android:textOff=""
                     android:textOn=""
                     app:tint="@color/black" />
-                <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_arrow_forward_24"
-                    app:tint="@color/black" />
 
+                <ImageView
+                    style="@style/FormRowArrow"
+                    app:tint="@color/black" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#D3D3D3"
-                android:layout_marginVertical="0dp"/>
+            <include layout="@layout/divider_horizontal" />
 
             <LinearLayout
                 android:id="@+id/task_notifications_layout"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center|start"
-                android:orientation="horizontal">
+                style="@style/FormRow">
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
+                    style="@style/FormRowIcon"
                     android:src="@drawable/ic_notifications_empty_24"
                     app:tint="@color/black" />
 
                 <TextView
                     android:id="@+id/task_notification_1"
+                    style="@style/FormRowText"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
                     android:layout_weight="4"
-                    android:gravity="center|start"
-                    android:hint="Add notification"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
+                    android:hint="Add notification" />
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_arrow_forward_24"
+                    style="@style/FormRowArrow"
                     app:tint="@color/black" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#D3D3D3"
-                android:layout_marginVertical="0dp"/>
+            <include layout="@layout/divider_horizontal" />
 
             <LinearLayout
                 android:id="@+id/task_description_layout"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="0dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center|start"
-                android:orientation="horizontal">
+                style="@style/FormRow">
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
+                    style="@style/FormRowIcon"
                     android:src="@drawable/ic_text_snippet_24"
                     app:tint="@color/black" />
 
                 <TextView
                     android:id="@+id/task_description"
+                    style="@style/FormRowText"
                     android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="0dp"
                     android:layout_weight="4"
-                    android:gravity="center|start"
-                    android:hint="Add description"
                     android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
+                    android:hint="Add description"
+                    android:maxLines="1" />
 
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="0dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_arrow_forward_24"
+                    style="@style/FormRowArrow"
                     app:tint="@color/black" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

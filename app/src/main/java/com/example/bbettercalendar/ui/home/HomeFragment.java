@@ -219,32 +219,28 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.homeTimerButton:
-                timerActive= !timerActive;
-                homeTimerButton.setImageResource(timerActive ? R.drawable.ic_timer_filled_24 : R.drawable.ic_timer_empty_24);
-                break;
-            case R.id.homePlayButton:
-                Log.i(TAG, "Timer started");
-                if(timer_state == TIMER_STOPPED){
-                    int actualTime = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
-                    lastTimerTime = actualTime;
-                    timeLeftInMillis = actualTime;
-                    startTimer(actualTime);
-                } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_PAUSED_REST){
-                    startTimer(timeLeftInMillis);
-                }else if(timer_state == TIMER_RUNNING){
-                    pauseTimer(false);
-                } else if (timer_state == TIMER_RUNNING_REST) {
-                    pauseTimer(true);
-                }else if(timer_state == TIMER_STOPPED_REST){
-                    int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
-                    timeLeftInMillis = actualTime;
-                    startTimer(actualTime);
-                }
-                break;
-            default:
-                break;
+        int id = view.getId();
+        if (id == R.id.homeTimerButton) {
+            timerActive= !timerActive;
+            homeTimerButton.setImageResource(timerActive ? R.drawable.ic_timer_filled_24 : R.drawable.ic_timer_empty_24);
+        } else if (id == R.id.homePlayButton) {
+            Log.i(TAG, "Timer started");
+            if(timer_state == TIMER_STOPPED){
+                int actualTime = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
+                lastTimerTime = actualTime;
+                timeLeftInMillis = actualTime;
+                startTimer(actualTime);
+            } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_PAUSED_REST){
+                startTimer(timeLeftInMillis);
+            }else if(timer_state == TIMER_RUNNING){
+                pauseTimer(false);
+            } else if (timer_state == TIMER_RUNNING_REST) {
+                pauseTimer(true);
+            }else if(timer_state == TIMER_STOPPED_REST){
+                int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
+                timeLeftInMillis = actualTime;
+                startTimer(actualTime);
+            }
         }
     }
 

@@ -231,12 +231,8 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.calendarAddEventButton:
-                addEvent();
-                break;
-            default:
-                break;
+        if (view.getId() == R.id.calendarAddEventButton) {
+            addEvent();
         }
     }
     @Override

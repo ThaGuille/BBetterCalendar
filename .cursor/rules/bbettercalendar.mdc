@@ -1,0 +1,59 @@
+---
+description: Coding conventions for the BBetterCalendar Android project
+globs:
+  - "app/src/main/java/**/*.java"
+  - "app/build.gradle"
+  - "app/src/main/res/**/*.xml"
+---
+
+# BBetterCalendar -- Coding Rules
+
+## Language and build
+
+- Java 8 only. Do not introduce Kotlin files or Kotlin dependencies.
+- Do not upgrade `appcompat` past 1.6.1 or `Room` past 2.4.2 (causes crashes -- see `app/build.gradle` comments).
+- Single `:app` module. Do not create new modules without explicit approval.
+
+## Dependency injection (Hilt)
+
+- The Application class is `DBMigration` (in `database` package), annotated with `@HiltAndroidApp`.
+- New singletons must be provided via a Hilt `@Module` / `@Provides` method, installed in `SingletonComponent`.
+- Activities that need injection must be annotated with `@AndroidEntryPoint`.
+- Fragments that need injection: annotate with `@AndroidEntryPoint` and use `@Inject` fields.
+
+## Database (Room)
+
+- `AppDatabase` is the single Room database. Access it via `AppDatabase.getDatabase(context)`.
+- New entities must be added to the `@Database(entities = {...})` annotation and bump the version number.
+- Non-primitive field types (e.g. `Calendar`, `boolean[]`) need `@TypeConverter` methods in `DBConverter`.
+- `fallbackToDestructiveMigration()` is active -- schema changes wipe data. If data preservation is needed, add a `Migration` object instead (see commented code in `AppDatabase`).
+- All DAO calls must run on a background thread (`ExecutorService`), never on the main thread.
+
+## UI patterns
+
+- Use **ViewBinding** for all Activities and Fragments. Do not use `findViewById` in new code.
+- Use `DialogFragment` subclasses for popups/modals. Follow the existing listener pattern (`OnPopupListener<T>`).
+- Navigation is handled by Navigation Component. New screens go in `mobile_navigation.xml`.
+- The active theme is `ThemeChatGPTBlue` (defined in `values/themes.xml`).
+
+## Threading
+
+- Use `ExecutorService` (typically `Executors.newSingleThreadExecutor()` or `newFixedThreadPool(2)`) for database operations.
+- Use `LiveData.postValue()` from background threads, never `setValue()`.
+- Use `Handler(Looper.getMainLooper())` for delayed UI operations.
+- Use `runOnUiThread()` in Activities when returning to the main thread from a background task.
+
+## Naming and style
+
+- Class names in English. Comments may be in Spanish, Catalan, or English.
+- Packages follow the existing structure under `com.example.bbettercalendar`.
+- Listener interfaces are prefixed with `On` (e.g. `OnToolBarListener`, `OnPopupListener`).
+- Constants use `UPPER_SNAKE_CASE` and live in the class that owns them (e.g. `AddEventActivity.TYPE_EVENT`).
+- Log tags follow the pattern `private final String TAG = "ClassNameTag"`.
+
+## CalendarEntry conventions
+
+- Use `CalendarEntry.EventBuilder` to construct entries. Do not call the `CalendarEntry()` constructor directly in new code.
+- Entry types: `1` = event, `2` = task, `3` = reminder (constants in `AddEventActivity`).
+- Notifications are stored as `boolean[7]` (indices 0-6 map to: 5min, 10min, 15min, 30min, 1h, 3h, 1d before).
+- Repetition values: `0` = none, `1` = daily, `2` = weekly, `3` = monthly (constants in `RepetitionPopup`).

@@ -5,64 +5,45 @@
     android:id="@+id/toolbar_close_or_save"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:clickable="false"
-    android:background="?attr/colorAccent">
-
-
-    <!--android:layout_gravity="start"
-       android:gravity="start"-->
+    android:background="?attr/colorAccent"
+    android:clickable="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center|start">
+        android:gravity="center|start"
+        android:orientation="horizontal">
 
-    <ImageButton
-        android:id="@+id/btnClose"
-        android:layout_weight="1"
-        android:src="@drawable/ic_close_24"
-        android:background="@color/transparent"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:title="close"
-        app:showAsAction="always" />
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@color/transparent"
+            android:src="@drawable/ic_close_24"
+            android:title="close"
+            app:showAsAction="always" />
 
-    <TextView
-        android:id="@+id/toolbarText"
-        android:layout_weight="8"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Event"
-        android:textSize="25sp"
-        android:gravity="center">
-    </TextView>
+        <TextView
+            android:id="@+id/toolbarText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:gravity="center"
+            android:text="Event"
+            android:textSize="25sp" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnSaveEvent"
-        android:layout_width="0dp"
-        android:layout_height="36dp"
-        android:text="Guardar"
-        android:layout_weight="3"
-        android:textSize="12sp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/blue_oval"
-        android:textColor="@color/black"
-        app:showAsAction="always"
-        >
-    </androidx.appcompat.widget.AppCompatButton>
-       <!--
-    <ImageButton
-        android:id="@+id/save"
-        android:layout_weight="2"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_close_24"
-        android:background="@color/transparent"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:title="close"
-        app:showAsAction="always" />-->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSaveEvent"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/segmented_button_height"
+            android:layout_marginEnd="@dimen/spacing_sm"
+            android:layout_weight="3"
+            android:background="@drawable/blue_oval"
+            android:text="Guardar"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_small"
+            app:showAsAction="always" />
     </LinearLayout>
-
 
 </androidx.appcompat.widget.Toolbar>

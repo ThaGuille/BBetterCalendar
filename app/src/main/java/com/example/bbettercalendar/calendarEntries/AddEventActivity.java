@@ -514,27 +514,19 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.event_start_date:
-            case R.id.task_start_date:
-                openDatePicker(START);
-                break;
-            case R.id.event_start_hour:
-            case R.id.task_start_hour:
-                openHourPicker(START);
-                break;
-            case R.id.event_end_date:
-                openDatePicker(END);
-                break;
-            case R.id.event_end_hour:
-                openHourPicker(END);
-                break;
-            case R.id.switch_to_event_button:
-                switchLayout(TYPE_EVENT);
-                break;
-            case R.id.switch_to_task_button:
-                switchLayout(TYPE_TASK);
-                break;
+        int id = view.getId();
+        if (id == R.id.event_start_date || id == R.id.task_start_date) {
+            openDatePicker(START);
+        } else if (id == R.id.event_start_hour || id == R.id.task_start_hour) {
+            openHourPicker(START);
+        } else if (id == R.id.event_end_date) {
+            openDatePicker(END);
+        } else if (id == R.id.event_end_hour) {
+            openHourPicker(END);
+        } else if (id == R.id.switch_to_event_button) {
+            switchLayout(TYPE_EVENT);
+        } else if (id == R.id.switch_to_task_button) {
+            switchLayout(TYPE_TASK);
         }
 
         if(view.getId()==notificationsView.getId()){

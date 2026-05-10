@@ -1,0 +1,9 @@
+<resources>
+    <!-- Tablet overrides — bump up the largest values for 7"+ screens -->
+    <dimen name="primary_button_size">192dp</dimen>
+    <dimen name="form_row_height">88dp</dimen>
+    <dimen name="form_row_icon_size">56dp</dimen>
+    <dimen name="icon_button_size">72dp</dimen>
+    <dimen name="text_body">24sp</dimen>
+    <dimen name="text_dialog">22sp</dimen>
+</resources>

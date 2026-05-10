@@ -3,4 +3,34 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="cuarenta_y_ocho">56dp</dimen>
+
+    <!-- Spacing scale -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">25dp</dimen>
+
+    <!-- Form rows -->
+    <dimen name="form_row_height">70dp</dimen>
+    <dimen name="form_row_icon_size">45dp</dimen>
+    <dimen name="form_row_arrow_size">20dp</dimen>
+    <dimen name="form_row_inner_height">45dp</dimen>
+
+    <!-- Buttons -->
+    <dimen name="icon_button_size">56dp</dimen>
+    <dimen name="primary_button_size">128dp</dimen>
+    <dimen name="segmented_button_height">36dp</dimen>
+    <dimen name="toggle_button_size">30dp</dimen>
+
+    <!-- Text -->
+    <dimen name="text_body">20sp</dimen>
+    <dimen name="text_small">12sp</dimen>
+    <dimen name="text_dialog">18sp</dimen>
+
+    <!-- Fixed positions formerly hardcoded -->
+    <dimen name="home_timer_button_margin_bottom">45dp</dimen>
+    <dimen name="calendar_fab_margin_bottom">65dp</dimen>
+
+    <!-- Dialog widths -->
+    <dimen name="dialog_min_width">240dp</dimen>
 </resources>

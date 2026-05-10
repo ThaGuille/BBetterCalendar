@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.bbettercalendar">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:name=".database.DBMigration"
@@ -30,9 +29,12 @@
             android:exported="true"
             android:theme="@style/AppTheme.NoActionBar"/>
 
-        <service android:name=".ui.home.HomeForegroundService" />
+        <service
+            android:name=".ui.home.HomeForegroundService"
+            android:foregroundServiceType="specialUse" />
     </application>
 
     <!-- Añadir el permiso de servicio en primer plano -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 </manifest>

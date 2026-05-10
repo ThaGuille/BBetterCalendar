@@ -1,139 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:orientation="vertical"
-    android:textSize="20sp">
+    android:padding="@dimen/spacing_md">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        android:orientation="horizontal">
+        <LinearLayout style="@style/ToggleRow">
+            <ToggleButton
+                android:id="@+id/repetition_popup_toggle_none"
+                style="@style/ToggleRowButton"
+                android:background="@drawable/radio_button_selector"
+                android:button="@android:color/transparent" />
 
-        <ToggleButton
-            android:id="@+id/repetition_popup_toggle_none"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
+            <TextView
+                style="@style/ToggleRowText"
+                android:hint="No se repite" />
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:gravity="center|start"
-            android:hint="No se repite"
-            android:layout_marginLeft="20dp"
-            android:textColorHint="@color/black"
-            android:textSize="20sp" />
+        <LinearLayout style="@style/ToggleRow">
+            <ToggleButton
+                android:id="@+id/repetition_popup_toggle_daily"
+                style="@style/ToggleRowButton"
+                android:background="@drawable/radio_button_selector"
+                android:button="@android:color/transparent" />
+
+            <TextView
+                style="@style/ToggleRowText"
+                android:hint="Todos los días" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/ToggleRow">
+            <ToggleButton
+                android:id="@+id/repetition_popup_toggle_weekly"
+                style="@style/ToggleRowButton"
+                android:background="@drawable/radio_button_selector"
+                android:button="@android:color/transparent" />
+
+            <TextView
+                style="@style/ToggleRowText"
+                android:hint="Todas las semanas" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/ToggleRow">
+            <ToggleButton
+                android:id="@+id/repetition_popup_toggle_monthly"
+                style="@style/ToggleRowButton"
+                android:background="@drawable/radio_button_selector"
+                android:button="@android:color/transparent" />
+
+            <TextView
+                style="@style/ToggleRowText"
+                android:hint="Todos los meses" />
+        </LinearLayout>
+
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
-
-        android:orientation="horizontal">
-
-        <ToggleButton
-            android:id="@+id/repetition_popup_toggle_daily"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:gravity="center|start"
-            android:hint="Todos los días"
-            android:layout_marginLeft="20dp"
-            android:textColorHint="@color/black"
-            android:textSize="20sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
-
-        android:orientation="horizontal">
-
-        <ToggleButton
-            android:id="@+id/repetition_popup_toggle_weekly"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:gravity="center|start"
-            android:hint="Todas las semanas"
-            android:layout_marginLeft="20dp"
-            android:textColorHint="@color/black"
-            android:textSize="20sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
-
-        android:orientation="horizontal">
-
-        <ToggleButton
-            android:id="@+id/repetition_popup_toggle_monthly"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:gravity="center|start"
-            android:hint="Todos los meses"
-            android:layout_marginLeft="20dp"
-            android:textColorHint="@color/black"
-            android:textSize="20sp" />
-    </LinearLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

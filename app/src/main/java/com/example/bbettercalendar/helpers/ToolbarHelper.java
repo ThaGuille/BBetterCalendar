@@ -76,31 +76,26 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
 
         @Override
         public boolean onMenuItemSelected(@NonNull MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                        case R.id.toolbarButtonSwitchCalendar:
-                                if (calendarListener!=null) calendarListener.switchFragment();
-                                break;
-                        case R.id.go_back:
-                                Log.i(TAG, "onMenuItemSelected: go_back");
-                                activity.finish();
-                        case R.id.toolbarTimer:
-                                if (homeListener!=null) homeListener.onToolbarTimerClick();
-                                Log.i(TAG, "toolbar ohme timer");
-                        default:
-                                break;
+                int id = menuItem.getItemId();
+                if (id == R.id.toolbarButtonSwitchCalendar) {
+                        if (calendarListener!=null) calendarListener.switchFragment();
+                } else if (id == R.id.go_back) {
+                        Log.i(TAG, "onMenuItemSelected: go_back");
+                        activity.finish();
+                } else if (id == R.id.toolbarTimer) {
+                        if (homeListener!=null) homeListener.onToolbarTimerClick();
+                        Log.i(TAG, "toolbar ohme timer");
                 }
                 return false;
         }
 
         @Override
         public void onClick(View view) {
-                switch (view.getId()) {
-                        case R.id.btnSaveEvent:
-                                listener.onToolbarLoaded(AddEventActivity.CLOSE_AND_SAVE);
-                                break;
-                        case R.id.btnClose:
-                                listener.onToolbarLoaded(AddEventActivity.CLOSE);
-                                break;
+                int id = view.getId();
+                if (id == R.id.btnSaveEvent) {
+                        listener.onToolbarLoaded(AddEventActivity.CLOSE_AND_SAVE);
+                } else if (id == R.id.btnClose) {
+                        listener.onToolbarLoaded(AddEventActivity.CLOSE);
                 }
         }
 

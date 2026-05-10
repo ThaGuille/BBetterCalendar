@@ -3,24 +3,26 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:textSize="20sp">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/notifications_popup_header"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:orientation="horizontal"
-        android:gravity="center|start">
+        android:layout_height="@dimen/form_row_height"
+        android:gravity="center|start"
+        android:orientation="horizontal">
+
         <ImageButton
             android:id="@+id/btnCloseNotificationsPopup"
-            android:src="@drawable/ic_close_24"
-            android:background="@color/transparent"
             android:layout_width="wrap_content"
-            android:layout_marginStart="20dp"
             android:layout_height="48dp"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:background="@color/transparent"
+            android:src="@drawable/ic_close_24"
             android:title="close"
             app:showAsAction="always" />
+
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -29,240 +31,104 @@
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSaveNotificationsPopup"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:text="Guardar"
-            android:textSize="12sp"
-            android:layout_marginEnd="20dp"
+            android:layout_height="@dimen/segmented_button_height"
+            android:layout_marginEnd="@dimen/spacing_md"
             android:background="@drawable/blue_oval"
+            android:text="Guardar"
             android:textColor="@color/black"
-            app:showAsAction="always"
-            >
-
-        </androidx.appcompat.widget.AppCompatButton>
+            android:textSize="@dimen/text_small"
+            app:showAsAction="always" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
 
-        android:orientation="horizontal">
-
+    <LinearLayout style="@style/ToggleRow">
         <ToggleButton
             android:id="@+id/notifications_popup_toggle_button_5min"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            style="@style/ToggleRowButton"
             android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
+            android:button="@android:color/transparent" />
 
         <TextView
             android:id="@+id/notifications_popup_5min"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="0dp"
-            android:gravity="center|start"
-            android:hint="5 minutos antes"
-            android:layout_marginLeft="20dp"
-            android:textColorHint="@color/black"
-            android:textSize="20sp" />
+            style="@style/ToggleRowText"
+            android:hint="5 minutos antes" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
 
-        android:orientation="horizontal">
-
+    <LinearLayout style="@style/ToggleRow">
         <ToggleButton
             android:id="@+id/notifications_popup_toggle_button_10min"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            style="@style/ToggleRowButton"
             android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-    <TextView
-        android:id="@+id/notifications_popup_10min"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:gravity="center|start"
-        android:hint="10 minutos antes"
-        android:layout_marginLeft="20dp"
-        android:textColorHint="@color/black"
-        android:textSize="20sp" />
+            android:button="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/notifications_popup_10min"
+            style="@style/ToggleRowText"
+            android:hint="10 minutos antes" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
 
-        android:orientation="horizontal">
-
+    <LinearLayout style="@style/ToggleRow">
         <ToggleButton
             android:id="@+id/notifications_popup_toggle_button_15min"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            style="@style/ToggleRowButton"
             android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-    <TextView
-        android:id="@+id/notifications_popup_15min"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:gravity="center|start"
-        android:hint="15 minutos antes"
-        android:layout_marginLeft="20dp"
-        android:textColorHint="@color/black"
-        android:textSize="20sp" />
+            android:button="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/notifications_popup_15min"
+            style="@style/ToggleRowText"
+            android:hint="15 minutos antes" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
 
-        android:orientation="horizontal">
-
+    <LinearLayout style="@style/ToggleRow">
         <ToggleButton
             android:id="@+id/notifications_popup_toggle_button_30min"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            style="@style/ToggleRowButton"
             android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-    <TextView
-        android:id="@+id/notifications_popup_30min"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:gravity="center|start"
-        android:hint="30 minutos antes"
-        android:layout_marginLeft="20dp"
-        android:textColorHint="@color/black"
-        android:textSize="20sp" />
+            android:button="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/notifications_popup_30min"
+            style="@style/ToggleRowText"
+            android:hint="30 minutos antes" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
 
-        android:orientation="horizontal">
-
+    <LinearLayout style="@style/ToggleRow">
         <ToggleButton
             android:id="@+id/notifications_popup_toggle_button_1h"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            style="@style/ToggleRowButton"
             android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-    <TextView
-        android:id="@+id/notifications_popup_1h"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:gravity="center|start"
-        android:hint="1 hora antes"
-        android:layout_marginLeft="20dp"
-        android:textColorHint="@color/black"
-        android:textSize="20sp" />
+            android:button="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/notifications_popup_1h"
+            style="@style/ToggleRowText"
+            android:hint="1 hora antes" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
 
-        android:orientation="horizontal">
-
+    <LinearLayout style="@style/ToggleRow">
         <ToggleButton
             android:id="@+id/notifications_popup_toggle_button_3h"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            style="@style/ToggleRowButton"
             android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-    <TextView
-        android:id="@+id/notifications_popup_3h"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:gravity="center|start"
-        android:hint="3 horas antes"
-        android:layout_marginLeft="20dp"
-        android:textColorHint="@color/black"
-        android:textSize="20sp" />
+            android:button="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/notifications_popup_3h"
+            style="@style/ToggleRowText"
+            android:hint="3 horas antes" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|start"
 
-        android:orientation="horizontal">
-
+    <LinearLayout style="@style/ToggleRow">
         <ToggleButton
             android:id="@+id/notifications_popup_toggle_button_1d"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            style="@style/ToggleRowButton"
             android:background="@drawable/radio_button_selector"
-            android:layout_marginLeft="20dp"
-            android:textOn=""
-            android:textOff=""
-            android:button="@android:color/transparent"/>
-    <TextView
-        android:id="@+id/notifications_popup_1d"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:gravity="center|start"
-        android:hint="1 día antes"
-        android:layout_marginLeft="20dp"
-        android:textColorHint="@color/black"
-        android:textSize="20sp" />
+            android:button="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/notifications_popup_1d"
+            style="@style/ToggleRowText"
+            android:hint="1 día antes" />
     </LinearLayout>
 
 </LinearLayout>

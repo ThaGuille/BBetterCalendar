@@ -173,13 +173,9 @@ public class CalendarFragmentMonth extends Fragment implements OnToolBarListener
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.calendarAddEventButton:
-                //replaceFragmentMonthForWeek();
-                addEvent();
-                break;
-            default:
-                break;
+        if (view.getId() == R.id.calendarAddEventButton) {
+            //replaceFragmentMonthForWeek();
+            addEvent();
         }
     }
 

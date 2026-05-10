@@ -18,6 +18,10 @@ public class CalendarEntry {
     private String limitDate;
     private Calendar startDayAndHour;
     private Calendar endDayAndHour;
+    // Mirror of startDayAndHour/endDayAndHour as epoch millis. Indexable for date-range queries
+    // since the Calendar columns are stored as Gson JSON strings (not orderable).
+    private long startMillis;
+    private long endMillis;
     private boolean[] notifications = new boolean[7];
 
     //Exclusivos de tareas
@@ -64,6 +68,10 @@ public class CalendarEntry {
     public void setDone(boolean done) {isDone = done;}
     public int getType() {return type;}
     public void setType(int type) {this.type = type;}
+    public long getStartMillis() {return startMillis;}
+    public void setStartMillis(long startMillis) {this.startMillis = startMillis;}
+    public long getEndMillis() {return endMillis;}
+    public void setEndMillis(long endMillis) {this.endMillis = endMillis;}
     
     public static class EventBuilder implements Serializable {
         private int id;
@@ -182,6 +190,8 @@ public class CalendarEntry {
         this.limitDate = builder.limitDate;
         this.startDayAndHour = builder.startDayAndHour;
         this.endDayAndHour = builder.endDayAndHour;
+        this.startMillis = builder.startDayAndHour != null ? builder.startDayAndHour.getTimeInMillis() : 0L;
+        this.endMillis = builder.endDayAndHour != null ? builder.endDayAndHour.getTimeInMillis() : this.startMillis;
         this.notifications = builder.notifications;
         this.repetition = builder.repetition;
         this.duration = builder.duration;

@@ -1,246 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/calendarWeekRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.calendar.CalendarFragmentWeek"
-    android:orientation="vertical">
+    android:background="@color/white"
+    tools:context=".ui.calendar.CalendarFragmentWeek">
 
-    <!-- Días de la sermana superiores -->
-    <LinearLayout
-        android:id="@+id/calendarDayInitialsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:textSize="15sp"
-        android:layout_marginStart="33dp"
-        >
-        <TextView
-            android:id="@+id/calendarDayInitial1"
-            style="@style/AppTheme.WeekDays"
-            android:text="M"
-           />
-        <TextView
-            android:id="@+id/calendarDayInitial2"
-            style="@style/AppTheme.WeekDays"
-            android:text="T"
-            />
-        <TextView
-            android:id="@+id/calendarDayInitial3"
-            style="@style/AppTheme.WeekDays"
-            android:text="W"
-          />
-        <TextView
-            android:id="@+id/calendarDayInitial4"
-            style="@style/AppTheme.WeekDays"
-            android:text="T"
-            />
-    </LinearLayout>
-    <!-- ______________________________________________________________ -->
-
-    <RelativeLayout
-        android:id="@+id/godofredo"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="7"
-        android:layout_marginTop="5dp"
-        android:background="@android:color/white"
-        >
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/weekCalendarTopRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/white"></androidx.recyclerview.widget.RecyclerView>
-
-
-        <!-- Sistema de líneas verticales -->
-    <LinearLayout
+    <com.example.bbettercalendar.ui.calendar.weekview.WeekView
+        android:id="@+id/weekView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:layout_marginStart="33dp"
-        >
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-            <View
-                android:id="@+id/calendarVerticalLine0"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:background="@color/black"
-                android:visibility="visible" />
-        </FrameLayout>
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-            <View
-                android:id="@+id/calendarVerticalLine1"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:background="@color/black"
-                android:visibility="visible" />
-        </FrameLayout>
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-            <View
-                android:id="@+id/calendarVerticalLine2"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:background="@color/black"
-                android:visibility="visible" />
-        </FrameLayout>
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-            <View
-                android:id="@+id/calendarVerticalLine3"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:background="@color/black"
-                android:visibility="visible" />
-        </FrameLayout>
-    </LinearLayout>
-        <!-- ______________________________________________________________ -->
+        app:numberOfVisibleDays="7"
+        app:showCurrentTimeFirst="true"
+        app:showFirstDayOfWeekFirst="true" />
 
-    </RelativeLayout>
+    <ImageButton
+        android:id="@+id/calendarAddEventButton2"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="65dp"
+        android:background="@drawable/rounded_square"
+        android:backgroundTint="@color/white"
+        android:clickable="true"
+        android:elevation="5dp"
+        android:focusable="true"
+        android:src="@drawable/ic_add_24" />
 
-    <!-- ______________________________________________________________ -->
-    <!-- ______________________________________________________________ -->
-
-    <!-- Días de la semana inferiores -->
-    <LinearLayout
-        android:id="@+id/calendarDayInitialsLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:textSize="15sp"
-        android:layout_marginStart="33dp"
-        >
-        <TextView
-            android:id="@+id/calendarDayInitial5"
-            android:text="F"
-            style="@style/AppTheme.WeekDays"/>
-        <TextView
-            android:id="@+id/calendarDayInitial6"
-            style="@style/AppTheme.WeekDays"
-            android:text="S"
-            />
-        <TextView
-            android:id="@+id/calendarDayInitial7"
-            style="@style/AppTheme.WeekDays"
-            android:text="U"
-            />
-        <TextView
-            android:id="@+id/calendarDayInitial8"
-            style="@style/AppTheme.WeekDays"
-            android:text="X"
-            />
-    </LinearLayout>
-
-    <!-- ______________________________________________________________ -->
-
-    <!-- Mitad inferior de la pantalla -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="7"
-        android:layout_below="@id/calendarDayInitialsLayout"
-        android:fillViewport="true">
-
-        <RelativeLayout
-            android:id="@+id/calendarWeekLayout2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:id="@+id/calendarHourLayout"
-                android:layout_width="33dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <!-- Horas del calendario -->
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_toRightOf="@id/calendarHourLayout"
-                android:layout_alignTop="@id/calendarHourLayout"
-                android:layout_alignBottom="@id/calendarHourLayout"
-                android:layout_marginStart="1dp"
-                >
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/black"
-                        android:visibility="visible" />
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:background="@color/black"
-                        android:visibility="visible" />
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentEnd="true"
-                        android:background="@color/black"
-                        android:visibility="visible" />
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:background="@color/black"
-                        android:visibility="visible" />
-                </FrameLayout>
-            </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/calendarAddEventButton2"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginEnd="10dp"
-                android:layout_marginBottom="65dp"
-                android:background="@drawable/rounded_square"
-                android:backgroundTint="@color/white"
-                android:clickable="true"
-                android:elevation="5dp"
-                android:focusable="true"
-                android:src="@drawable/ic_add_24" />
-
-        </RelativeLayout>
-    </ScrollView>
-</LinearLayout>
+</FrameLayout>

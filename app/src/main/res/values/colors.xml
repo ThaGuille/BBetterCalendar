@@ -38,5 +38,8 @@
     <color name="c_azul_oscuro">#4A90E2</color>
     <color name="c_verde_oscuro">#77DD77</color>
 
+    <color name="calendar_item_event">#FF4A90E2</color>
+    <color name="calendar_item_task">#FF2ECC71</color>
+    <color name="calendar_item_reminder">#FFFF9F40</color>
 
 </resources>

@@ -1,125 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/calendarMonthRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".ui.calendar.CalendarFragmentMonth">
 
-    <!-- Reservar un pequeño espacio arriba, de 70 pixels, donde escribir las
-     iniciales de los días de la semana. Cada letra está a la misma distancia
-     de la siguiente y ocupan el ancho de la pantalla -->
-    <TextView
-        android:id="@+id/calendarDayInitials"
+    <com.kizitonwose.calendar.view.CalendarView
+        android:id="@+id/monthCalendarView"
         android:layout_width="match_parent"
-        android:layout_height="25dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="1dp"
-        android:layout_marginEnd="1dp"
-        android:background="@color/white"
-        android:gravity="center"
-        android:text="L   M   X   J   V   S   D"
-        android:textColor="@color/black"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:visibility="visible" />
-
-
-    <!-- Horizontal lines -->
-    <View
-        android:id="@+id/calendarHorizontalLine0"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarHorizontalLine1"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarHorizontalLine2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarHorizontalLine3"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarHorizontalLine4"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarHorizontalLine5"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/black"
-        android:visibility="visible" />
-
-    <!-- Vertical lines -->
-    <View
-        android:id="@+id/calendarVerticalLine0"
-        android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:layout_below="@id/calendarDayInitials"
-        android:layout_alignParentBottom="true"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarVerticalLine1"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarVerticalLine2"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarVerticalLine3"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarVerticalLine4"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:visibility="visible" />
-    <View
-        android:id="@+id/calendarVerticalLine5"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:visibility="visible" />
-
-
-    <TextView
-        android:id="@+id/text_notifications"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp" />
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        app:cv_dayViewResource="@layout/cell_month_day"
+        app:cv_orientation="vertical"
+        app:cv_outDateStyle="endOfRow"
+        app:cv_scrollPaged="true" />
 
     <ImageButton
         android:id="@+id/calendarAddEventButton"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
+        android:layout_gravity="end|bottom"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="65dp"
         android:background="@drawable/rounded_square"
@@ -129,5 +33,4 @@
         android:focusable="true"
         android:src="@drawable/ic_add_24" />
 
-
-</RelativeLayout>
+</FrameLayout>

@@ -39,4 +39,14 @@ public class DBMigration extends Application {
 
         }
     };
+
+    // Adds long mirror columns for date-range queries. Pre-existing rows get 0 for both
+    // (new rows from EventBuilder.build() populate them from the Calendar fields).
+    static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN startMillis INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN endMillis INTEGER NOT NULL DEFAULT 0");
+        }
+    };
 }

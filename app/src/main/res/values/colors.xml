@@ -9,6 +9,7 @@
     <color name="bb_surface">#FFF6F1E8</color>
     <color name="bb_surface_card">#FFFFFFFF</color>
     <color name="bb_surface_subtle">#FFE8EFE8</color>
+    <color name="bb_surface_energy_subtle">#FFFBE9DF</color>
 
     <color name="bb_primary">#FF5F8A78</color>
     <color name="bb_primary_dark">#FF2F4F4A</color>

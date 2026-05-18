@@ -27,4 +27,24 @@
     <string name="home_stat_streak_placeholder">0 days</string>
     <string name="home_stat_fails_placeholder">0</string>
 
+    <!-- Timer (Pomodoro) popup -->
+    <string name="timer_popup_title">Pomodoro timer</string>
+    <string name="timer_popup_subtitle">Tune your focus session</string>
+    <string name="timer_concentration_label">Concentration</string>
+    <string name="timer_rest_label">Rest</string>
+    <string name="timer_minutes_unit">minutes</string>
+    <string name="timer_range_min">1 min</string>
+    <string name="timer_range_max">90 min</string>
+    <string name="timer_range_rest_max">≤ focus</string>
+    <string name="timer_cycles_label">Total cycles</string>
+    <string name="timer_infinite_label">Infinite</string>
+    <string name="timer_infinite_symbol">∞</string>
+    <string name="timer_auto_cycle_label">Auto-chain cycles</string>
+    <string name="timer_auto_cycle_hint">Start the next session automatically</string>
+    <string name="timer_btn_restore">Restore defaults</string>
+    <string name="timer_btn_save">Save</string>
+    <string name="timer_error_range">Timer must be between 1 and 90 minutes.</string>
+    <string name="timer_error_rest_range">Rest must be between 1 minute and the concentration time.</string>
+    <string name="timer_error_cycles_range">Cycles must be between 1 and 15.</string>
+
 </resources>

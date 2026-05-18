@@ -1,45 +1,116 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in this repository. **These rules override defaults — follow them exactly.**
 
 ## Project Overview
 
-BBetterCalendar is an Android productivity app combining a Pomodoro timer, habit streak tracking, and a calendar for events/tasks/reminders. Single-module Java project (`com.example.bbettercalendar`).
+BBetterCalendar is an Android productivity app: Pomodoro timer + habit streaks + calendar for events / tasks / reminders. Single-module Java project (`com.example.bbettercalendar`).
 
-## Tech Stack
+## Tech Stack (canonical numbers — match `app/build.gradle`)
 
-- **Language:** Java (source compat Java 8)
+- **Language:** Java 8 (source/target compat 1.8). No Kotlin sources.
 - **Architecture:** MVVM + Hilt DI + Room + LiveData
-- **Min/Target SDK:** 21 / 34 — **do not upgrade `material` past `1.9.0`**
-- **Build:** AGP 8.13.0, Gradle 8.13
-- **Key libs:** Room 2.6.1, Hilt 2.51.1, Navigation 2.5.3, Gson 2.9.1
+- **Min / target / compile SDK:** 21 / 34 / 34
+- **Build:** AGP 8.13.2, Gradle wrapper 8.13
+- **Key libs:** Hilt 2.51.1, Room 2.6.1, Navigation 2.5.3, Material 1.9.0, Gson 2.9.1, Kizitonwose Calendar 2.5.4
+- **Pin:** Do not upgrade `com.google.android.material` past `1.9.0` (see `app/build.gradle:47`).
 
-## Key Directories
+## Environment
 
-| Path | Purpose |
-|---|---|
-| `app/src/main/java/.../ui/` | MVVM screen packages: `home/`, `calendar/`, `progress/`, `projects/` |
-| `app/src/main/java/.../calendarEntries/` | `CalendarEntry` entity + `EventBuilder`; `AddEventActivity` |
-| `app/src/main/java/.../configuration/` | `Configuration` entity, `ConfigurationManager` singleton, `InitialConfiguration` (startup logic), Hilt modules |
-| `app/src/main/java/.../database/` | `AppDatabase` (v6, destructive migration), `DBConverter` (Gson type converters) |
-| `app/src/main/java/.../stats/` | `Stats` entity + DAO |
-| `app/src/main/java/.../helpers/` | `FormatHelper`, `ScreenHelper`, `ToolbarHelper`, toolbar listener interfaces |
-| `app/src/main/java/.../popups/` | `PopupHelper` base + 6 concrete dialog fragments |
-| `app/src/main/res/navigation/` | Navigation graph (Bottom Nav: Home, Progress, Calendar, Projects) |
+- **OS:** Windows 11
+- **Shell:** PowerShell 5.1 — no `&&` / `||`. Use `; if ($?) { B }` to chain on success.
+- **Path style:** Backslashes in Windows paths (`app\src\main\...`). Forward slashes are accepted by most tools and fine in Markdown/links.
+- **Gradle wrapper:** `.\gradlew.bat <task>` from PowerShell. `./gradlew <task>` via the Bash tool also works (allow-listed), but `.\gradlew.bat` is the canonical form.
+
+Full PowerShell / `gradlew.bat` / `adb` reference: [`.claude/docs/windows_commands.md`](.claude/docs/windows_commands.md).
 
 ## Build & Test Commands
 
-```bash
-./gradlew assembleDebug       # build debug APK
-./gradlew assembleRelease     # build release APK
-./gradlew test                # unit tests
-./gradlew connectedAndroidTest # instrumented (Espresso) tests
-./gradlew lint                # lint
-./gradlew clean               # clean
+```powershell
+.\gradlew.bat assembleDebug        # build debug APK
+.\gradlew.bat assembleRelease      # build release APK
+.\gradlew.bat test                 # JVM unit tests
+.\gradlew.bat connectedAndroidTest # instrumented (Espresso) tests
+.\gradlew.bat lint                 # lint
+.\gradlew.bat clean                # clean
 ```
 
-## Additional Documentation
+Use the [`bb-build`](.claude/skills/bb-build/SKILL.md) skill or invoke directly. If a build hangs: `.\gradlew.bat --stop` then retry.
 
-Check these files when working on the relevant area:
+## Project rules
 
-- [`.claude/docs/architectural_patterns.md`](.claude/docs/architectural_patterns.md) — threading model, DI wiring, DAO conventions, LiveData flow, popup creation, singleton initialization
+### 1. Plans live in `.claude/plans/`
+
+Any design or implementation plan you produce (an `ExitPlanMode` payload, a written proposal, or a multi-step approach the user wants persisted) is saved as a Markdown file under:
+
+```
+.claude/plans/<kebab-slug>.md
+```
+
+- Use the [`save-plan`](.claude/skills/save-plan/SKILL.md) skill, or write the file directly following the same template.
+- Slug is short and descriptive (`add-reminder-popup.md`), not random words.
+- File header has `Status:` (proposed / in progress / merged / abandoned), `Created:`, `Last updated:`.
+- Don't delete old plans — update the status line instead.
+- Don't write plans inline into CLAUDE.md or PR descriptions; link to the file.
+
+### 2. Style tokens are mandatory for new UI
+
+New layouts, drawables, and themes must use the `bb_*` semantic palette and `TextAppearance.BBetter.*` typography. Don't reference the legacy palette (`azul`, `verde`, `purple_500`, etc.) in new code — those exist only so old screens keep rendering. Full rules: [`.claude/docs/style_guide.md`](.claude/docs/style_guide.md).
+
+### 3. Threading
+
+DB / disk work runs on `ExecutorService`. UI updates from background go through `LiveData.postValue(...)`, never `setValue(...)`. Observe with `getViewLifecycleOwner()` inside Fragments. See [`.claude/docs/architectural_patterns.md`](.claude/docs/architectural_patterns.md).
+
+### 4. Entity creation
+
+Build `CalendarEntry` via `CalendarEntry.EventBuilder` and call `.build()`. Direct field assignment skips defaults.
+
+### 5. Don't normalise mixed-language comments
+
+Spanish, Catalan, and English comments coexist on purpose. Don't auto-translate them.
+
+### 6. Schema bumps wipe the DB
+
+`AppDatabase` uses `fallbackToDestructiveMigration()`. Bumping `@Database(version)` wipes user data unless you also add real `Migration` objects. If real migration is needed, follow [`.claude/docs/workflows.md`](.claude/docs/workflows.md) §7.
+
+## Knowledge index — `.claude/docs/`
+
+Open the file that matches the task before guessing:
+
+| File | When to open it |
+|---|---|
+| [`overview.md`](.claude/docs/overview.md) | Quick map: stack, packages, key conventions, gotchas summary |
+| [`architecture.md`](.claude/docs/architecture.md) | Per-package class table, layer/nav diagrams, flow walkthroughs |
+| [`architectural_patterns.md`](.claude/docs/architectural_patterns.md) | Threading, DI wiring, DAO conventions, LiveData, popup pattern, type converters, builder pattern |
+| [`style_guide.md`](.claude/docs/style_guide.md) | Palette, typography, dimens, drawables, themes, layout patterns |
+| [`workflows.md`](.claude/docs/workflows.md) | Recipes: add popup / entity / screen / colour / schema migration / vendoring |
+| [`common_errors.md`](.claude/docs/common_errors.md) | Symptom → root cause → fix tables (build, Room, Hilt, popups, calendar, timer) |
+| [`windows_commands.md`](.claude/docs/windows_commands.md) | PowerShell, `gradlew.bat`, `adb`, AVD reference |
+| [`android_studio.md`](.claude/docs/android_studio.md) | IDE-specific tips: sync, run, logcat, database inspector, AVD |
+
+## Skills — `.claude/skills/`
+
+Project-level skills (invokable with `/bb-build`, `/save-plan`):
+
+| Skill | Purpose |
+|---|---|
+| [`bb-build`](.claude/skills/bb-build/SKILL.md) | Run gradle on Windows correctly. Handles common build failures. |
+| [`save-plan`](.claude/skills/save-plan/SKILL.md) | Persist a plan to `.claude/plans/<slug>.md` with the right header. |
+
+## Key directories
+
+| Path | Purpose |
+|---|---|
+| `app/src/main/java/.../ui/` | MVVM screens: `home/`, `calendar/`, `progress/`, `projects/` |
+| `app/src/main/java/.../calendarEntries/` | `CalendarEntry` entity + `EventBuilder`, `AddEventActivity` |
+| `app/src/main/java/.../configuration/` | `Configuration` entity, `ConfigurationManager`, `SplashActivity`, Hilt modules |
+| `app/src/main/java/.../database/` | `AppDatabase` (v6), `DBConverter`, `DBMigration` (Application class) |
+| `app/src/main/java/.../stats/` | `Stats` entity + DAO |
+| `app/src/main/java/.../helpers/` | `FormatHelper`, `ScreenHelper`, `ToolbarHelper`, toolbar listener interfaces |
+| `app/src/main/java/.../popups/` | `PopupHelper` base + 6 concrete dialog fragments |
+| `app/src/main/java/.../feedback/` | `HapticFeedback`, `SoundFeedback` |
+| `app/src/main/res/navigation/` | Bottom-nav graph (Home, Progress, Calendar, Projects) |
+| `app/src/main/res/values/` | `colors.xml` (palette), `themes.xml`, `styles_typography.xml`, `style.xml`, `dimens.xml`, `strings.xml` |
+| `.claude/docs/` | Knowledge base (see index above) |
+| `.claude/plans/` | Saved design plans |
+| `.claude/skills/` | Project-level skills |

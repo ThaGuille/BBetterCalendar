@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(xargs grep *)",
-      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew *)",
+      "Bash(./gradlew.bat *)",
+      "PowerShell(.\\gradlew.bat *)",
+      "PowerShell(.\\gradlew *)",
+      "Bash(adb *)",
+      "PowerShell(adb *)",
       "Bash(gh auth *)",
       "PowerShell(gh auth status)",
       "PowerShell(git fetch --all --prune)",
@@ -20,9 +25,8 @@
       "Bash(gh api *)",
       "Bash(gh search *)",
       "WebFetch(domain:docs.gradle.org)",
+      "WebFetch(domain:developer.android.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(./gradlew.bat assembleDebug --no-daemon)",
-      "Bash(./gradlew.bat clean *)",
       "Read(//tmp/vendor/**)",
       "Read(//tmp/vendor/Android-Week-View/core/src/main/**)",
       "Bash(cp '/tmp/vendor/Android-Week-View/core/src/main/java/com/alamkanak/weekview/*.kt' c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar/app/src/main/java/com/example/bbettercalendar/ui/calendar/weekview/)",
@@ -32,7 +36,14 @@
       "Bash(cp /tmp/vendor/Android-Week-View/core/src/main/res/drawable/ic_arrow_up.xml c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar/app/src/main/res/drawable/ic_arrow_up.xml)",
       "Bash(find ~/.gradle/caches -name \"view-2.5.4*.aar\" 2>/dev/null | head -3 && find ~/.gradle/caches -name \"*.jar\" -path \"*kizitonwose*\" 2>/dev/null | head -5)",
       "Read(//c/Users/guill/.gradle/caches/**)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(git -C \"c:/Users/guill/OneDrive/Documentos/Proyectos/BBetter/BBetterCalendar\" diff app/src/main/res/values/style.xml app/src/main/res/values/themes.xml app/src/main/AndroidManifest.xml)",
+      "Bash(dir \"C:\\\\Users\\\\guill\\\\OneDrive\\\\Documentos\\\\Proyectos\\\\BBetter\\\\BBetterCalendar\\\\.claude\" /b)",
+      "Bash(findstr /i \"play timer rounded chip bg_ rest ic_add ic_substract ic_infinite\")",
+      "Skill(save-plan)",
+      "Skill(save-plan:*)",
+      "Skill(bb-build)",
+      "Skill(bb-build:*)"
     ]
   }
 }

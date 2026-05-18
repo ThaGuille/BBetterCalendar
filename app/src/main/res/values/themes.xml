@@ -27,6 +27,12 @@
         <item name="android:textColorHint">@color/bb_on_surface_muted</item>
     </style>
 
+    <!-- No-action-bar variant for activities that supply their own Toolbar. -->
+    <style name="Theme.BBetter.NoActionBar" parent="Theme.BBetter">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="Theme.BBetterCalendar" parent="Theme.BBetter" />
 
@@ -49,7 +55,7 @@
          refreshed look without per-layout edits. -->
     <style name="ThemeChatGPTBlue" parent="Theme.BBetter" />
 
-    <style name="ThemeChatGPTBlue_NoActionBar" parent="Theme.BBetter" />
+    <style name="ThemeChatGPTBlue_NoActionBar" parent="Theme.BBetter.NoActionBar" />
 
     <style name="ThemeChatGPTBlue_AndroidPopups" parent="Theme.MaterialComponents.Light.Dialog.Alert">
         <item name="colorPrimary">@color/bb_primary</item>

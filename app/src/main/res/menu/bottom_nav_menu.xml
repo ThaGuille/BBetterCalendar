@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="?attr/colorAccent">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/navigation_home"
-        android:icon="@drawable/ic_home_black_24dp"
+        android:icon="@drawable/ic_home_v2_24"
         android:title="@string/title_home" />
 
     <item
@@ -14,8 +13,9 @@
 
     <item
         android:id="@+id/navigation_calendar_month"
-        android:icon="@drawable/ic_calendar_24"
+        android:icon="@drawable/ic_calendar_v2_24"
         android:title="@string/title_calendar" />
+
     <item
         android:id="@+id/navigation_projects"
         android:icon="@drawable/ic_projects_24"

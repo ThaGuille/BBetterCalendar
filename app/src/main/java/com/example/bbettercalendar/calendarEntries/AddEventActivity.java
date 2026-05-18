@@ -250,9 +250,13 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 endDateView.setOnClickListener(this);
                 startDateView.setOnClickListener(this);
                 notificationsView.setOnClickListener(this);
+                descriptionLayout.setOnClickListener(this);
                 switchToEventButton.setOnClickListener(this);
                 switchToTaskButton.setOnClickListener(this);
-                indexLayout=5;
+                // Index of the description row inside create_event_linear_layout — new
+                // notification rows are inserted just above it so they appear right under
+                // the notifications row in the form.
+                indexLayout=10;
 
                 eventBuilder.setEventType(TYPE_EVENT);
 

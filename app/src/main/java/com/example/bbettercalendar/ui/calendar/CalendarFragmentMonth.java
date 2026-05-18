@@ -74,7 +74,10 @@ public class CalendarFragmentMonth extends Fragment
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    // LiveData from Room auto-refreshes the UI; no manual reload needed.
+                    // Room's InvalidationTracker occasionally lags after the add-activity
+                    // commits a row, so the just-inserted entry doesn't appear until the
+                    // next insert nudges the LiveData. Force a re-query on return.
+                    if (viewModel != null) viewModel.refresh();
                 }
             });
 

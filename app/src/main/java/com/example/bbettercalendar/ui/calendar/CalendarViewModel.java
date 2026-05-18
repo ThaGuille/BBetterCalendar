@@ -58,4 +58,14 @@ public class CalendarViewModel extends AndroidViewModel {
     public LiveData<List<CalendarItem>> getItems() {
         return items;
     }
+
+    // Re-emit the current range as a new DateRange instance. switchMap rebuilds the underlying
+    // Room LiveData, forcing a fresh query. Use after returning from a screen that inserts
+    // entries — Room's InvalidationTracker can lag and miss the first refresh otherwise.
+    public void refresh() {
+        DateRange current = range.getValue();
+        if (current != null) {
+            range.setValue(new DateRange(current.startMillis, current.endMillis));
+        }
+    }
 }

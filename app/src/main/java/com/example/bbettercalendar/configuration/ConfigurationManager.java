@@ -38,8 +38,11 @@ public class ConfigurationManager {
 
     public Configuration getConfiguration() {
         if (configuration == null) {
-            loadConfiguration();
-            return configuration;
+            configuration = configurationDAO.getConfiguration();
+            if (configuration == null) {
+                configuration = new Configuration();
+                configurationDAO.insert(configuration);
+            }
         }
         return configuration;
     }

@@ -22,10 +22,28 @@
     <dimen name="segmented_button_height">36dp</dimen>
     <dimen name="toggle_button_size">30dp</dimen>
 
-    <!-- Text -->
-    <dimen name="text_body">20sp</dimen>
+    <!-- Text scale -->
+    <dimen name="text_display">56sp</dimen>
+    <dimen name="text_headline">24sp</dimen>
+    <dimen name="text_title">18sp</dimen>
+    <dimen name="text_body">16sp</dimen>
+    <dimen name="text_label">13sp</dimen>
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_dialog">18sp</dimen>
+
+    <!-- Corner radii -->
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">14dp</dimen>
+    <dimen name="radius_lg">24dp</dimen>
+
+    <!-- Elevations -->
+    <dimen name="elevation_card">2dp</dimen>
+    <dimen name="elevation_floating">8dp</dimen>
+
+    <!-- Home screen -->
+    <dimen name="home_card_padding">20dp</dimen>
+    <dimen name="home_play_button_size">88dp</dimen>
+    <dimen name="home_stat_icon_size">28dp</dimen>
 
     <!-- Fixed positions formerly hardcoded -->
     <dimen name="home_timer_button_margin_bottom">45dp</dimen>

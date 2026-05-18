@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ============================================================ -->
+    <!-- BBetter typography scale                                       -->
+    <!-- Body / UI: Plus Jakarta Sans (humanist sans).                  -->
+    <!-- Display: Fraunces (soft modern serif, for big numbers).        -->
+    <!-- All TextAppearances inherit from MaterialComponents so they    -->
+    <!-- gracefully fall back to system sans if downloadable fonts are  -->
+    <!-- not yet available.                                             -->
+    <!-- ============================================================ -->
+
+    <style name="TextAppearance.BBetter" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.Display">
+        <item name="android:fontFamily">@font/fraunces</item>
+        <item name="android:textSize">@dimen/text_display</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.Headline">
+        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/text_headline</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.Title">
+        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.Body">
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.BodyMuted">
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.Label">
+        <item name="android:fontFamily">@font/plus_jakarta_sans_medium</item>
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.Chip">
+        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/bb_on_primary</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- Reusable component backgrounds                                 -->
+    <!-- ============================================================ -->
+
+    <style name="Widget.BBetter.Card" parent="">
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:elevation">@dimen/elevation_card</item>
+        <item name="android:padding">@dimen/home_card_padding</item>
+    </style>
+
+</resources>

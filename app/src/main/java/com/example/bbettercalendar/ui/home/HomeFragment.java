@@ -26,6 +26,8 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
+import com.example.bbettercalendar.feedback.HapticFeedback;
+import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarHomeListener;
@@ -36,6 +38,9 @@ import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.TimerPopup;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -122,8 +127,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), todayTimeStudiedText::setText);
         homeViewModel.getTimerModeText().observe(getViewLifecycleOwner(), timerModeText::setText);
 
+        binding.homeDateText.setText(
+                new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
+
+        SoundFeedback.get(requireContext()); // warm singleton so first tap is silent-fast
+
         setTopMenu();
         return root;
+    }
+
+    private void updateModeChip(boolean isRest) {
+        if (timerModeText == null) return;
+        timerModeText.setBackgroundResource(
+                isRest ? R.drawable.bg_chip_secondary : R.drawable.bg_chip_energy);
     }
 
     private void startTimer(long time){
@@ -197,6 +213,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
         homeViewModel.setRestTimer();
         timeLeftInMillis = actualTime;
+        updateModeChip(true);
         //todo se puede implementar una función para que solo se inicicie el descanso automático si el usuario lo desea
         startTimer(actualTime);
     }
@@ -209,6 +226,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private void resetTimer(){
         timeLeftInMillis =  configurationManager.getConfiguration().getHomeTimerTime();
         homeViewModel.resetTimer();
+        updateModeChip(false);
     }
 
     //Se pulsa el timer para pausarlo
@@ -220,26 +238,34 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     @Override
     public void onClick(View view) {
         int id = view.getId();
+        HapticFeedback.lightTap(view);
         if (id == R.id.homeTimerButton) {
             timerActive= !timerActive;
             homeTimerButton.setImageResource(timerActive ? R.drawable.ic_timer_filled_24 : R.drawable.ic_timer_empty_24);
+            SoundFeedback.get(requireContext()).playTap();
         } else if (id == R.id.homePlayButton) {
             Log.i(TAG, "Timer started");
+            SoundFeedback feedback = SoundFeedback.get(requireContext());
             if(timer_state == TIMER_STOPPED){
                 int actualTime = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
                 lastTimerTime = actualTime;
                 timeLeftInMillis = actualTime;
                 startTimer(actualTime);
+                feedback.playStart();
             } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_PAUSED_REST){
                 startTimer(timeLeftInMillis);
+                feedback.playStart();
             }else if(timer_state == TIMER_RUNNING){
                 pauseTimer(false);
+                feedback.playStop();
             } else if (timer_state == TIMER_RUNNING_REST) {
                 pauseTimer(true);
+                feedback.playStop();
             }else if(timer_state == TIMER_STOPPED_REST){
                 int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
                 timeLeftInMillis = actualTime;
                 startTimer(actualTime);
+                feedback.playStart();
             }
         }
     }

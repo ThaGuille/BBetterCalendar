@@ -1,163 +1,243 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimary"
+    android:background="@color/bb_surface"
+    android:fillViewport="true"
+    android:scrollbars="none"
     tools:context=".ui.home.HomeFragment">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_top"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.10" />
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_lg">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_play_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.22" />
+        <!-- ============ Header strip ============ -->
+        <TextView
+            android:id="@+id/text_home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.BBetter.Headline"
+            android:textColor="@color/bb_primary_dark"
+            tools:text="Hi there" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_today_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.62" />
+        <TextView
+            android:id="@+id/homeDateText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.BBetter.Label"
+            tools:text="Tuesday, May 18" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_streak"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.78" />
+        <!-- ============ Timer card ============ -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:background="@drawable/bg_card"
+            android:elevation="@dimen/elevation_card"
+            android:padding="@dimen/home_card_padding">
 
-    <TextView
-        android:id="@+id/text_home"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_marginTop="@dimen/spacing_sm"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:textAlignment="center"
-        android:textSize="@dimen/text_body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/homeTimerText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textSize="@dimen/text_body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guideline_top" />
+                <!-- Mode chip -->
+                <TextView
+                    android:id="@+id/homeTimerTypeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip_energy"
+                    android:hint="@string/home_mode_concentration"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:textAppearance="@style/TextAppearance.BBetter.Chip"
+                    android:textColor="@color/bb_on_primary"
+                    android:textColorHint="@color/bb_on_primary" />
 
-    <ImageButton
-        android:id="@+id/homePlayButton"
-        android:layout_width="@dimen/primary_button_size"
-        android:layout_height="@dimen/primary_button_size"
-        android:background="@drawable/round_background"
-        android:backgroundTint="@color/transparent"
-        android:clickable="true"
-        android:elevation="5dp"
-        android:focusable="true"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_play_circle_filled_24"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guideline_play_button"
-        app:tint="?attr/colorAccent" />
+                <!-- Countdown -->
+                <TextView
+                    android:id="@+id/homeTimerText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:textAppearance="@style/TextAppearance.BBetter.Display"
+                    android:textColor="@color/bb_on_surface"
+                    tools:text="25:00" />
 
-    <TextView
-        android:id="@+id/homeTimerTypeText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_marginTop="@dimen/spacing_sm"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:hint="-- Concentration --"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textColorHint="?attr/colorAccent"
-        android:textSize="@dimen/text_body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/homePlayButton" />
+                <!-- Play button -->
+                <ImageButton
+                    android:id="@+id/homePlayButton"
+                    android:layout_width="@dimen/home_play_button_size"
+                    android:layout_height="@dimen/home_play_button_size"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_play_button"
+                    android:clickable="true"
+                    android:contentDescription="@string/home_mode_concentration"
+                    android:elevation="@dimen/elevation_floating"
+                    android:focusable="true"
+                    android:padding="20dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_play_v2_filled_24" />
 
-    <ImageView
-        android:id="@+id/homeStreakImage"
-        android:layout_width="@dimen/icon_button_size"
-        android:layout_height="@dimen/icon_button_size"
-        android:src="@drawable/a_streak_logo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            </LinearLayout>
 
-    <TextView
-        android:id="@+id/homeTodayTimeText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:hint="Today studied time: 00:00"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:textSize="@dimen/text_body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guideline_today_time" />
+            <!-- Mode toggle (top-right of card) -->
+            <ImageButton
+                android:id="@+id/homeTimerButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_mode_toggle"
+                android:clickable="true"
+                android:contentDescription="@string/title"
+                android:focusable="true"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_timer_empty_24"
+                app:tint="@color/bb_on_surface_muted" />
+        </FrameLayout>
 
-    <TextView
-        android:id="@+id/homeCurrentStreakText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:hint="Current Streak: 0 days"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:textSize="@dimen/text_body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guideline_streak" />
+        <!-- ============ Today card ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:elevation="@dimen/elevation_card"
+            android:orientation="vertical"
+            android:padding="@dimen/home_card_padding">
 
-    <TextView
-        android:id="@+id/homeToadyFailsText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:layout_marginBottom="@dimen/spacing_lg"
-        android:hint="Today failed attempts: 0"
-        android:textAlignment="center"
-        android:textColor="@color/black"
-        android:textColorHint="@color/magenta"
-        android:textSize="@dimen/text_body"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/home_today_card_title"
+                android:textAppearance="@style/TextAppearance.BBetter.Title" />
 
-    <ImageButton
-        android:id="@+id/homeTimerButton"
-        style="@style/IconButtonSquare"
-        android:backgroundTint="@color/white"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="@dimen/home_timer_button_margin_bottom"
-        android:src="@drawable/ic_timer_empty_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+            <!-- Studied today -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <ImageView
+                    android:layout_width="@dimen/home_stat_icon_size"
+                    android:layout_height="@dimen/home_stat_icon_size"
+                    android:contentDescription="@string/home_stat_studied_label"
+                    android:src="@drawable/ic_clock_v2_24"
+                    app:tint="@color/bb_primary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_stat_studied_label"
+                        android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+                    <TextView
+                        android:id="@+id/homeTodayTimeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/home_stat_studied_placeholder"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Streak -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/homeStreakImage"
+                    android:layout_width="@dimen/home_stat_icon_size"
+                    android:layout_height="@dimen/home_stat_icon_size"
+                    android:contentDescription="@string/home_stat_streak_label"
+                    android:src="@drawable/ic_flame_v2_24"
+                    app:tint="@color/bb_accent_reward" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_stat_streak_label"
+                        android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+                    <TextView
+                        android:id="@+id/homeCurrentStreakText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/home_stat_streak_placeholder"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Missed -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/home_stat_icon_size"
+                    android:layout_height="@dimen/home_stat_icon_size"
+                    android:contentDescription="@string/home_stat_fails_label"
+                    android:src="@drawable/ic_cross_v2_24"
+                    app:tint="@color/bb_danger" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_stat_fails_label"
+                        android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+                    <TextView
+                        android:id="@+id/homeToadyFailsText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/home_stat_fails_placeholder"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body"
+                        android:textColor="@color/bb_danger" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

@@ -192,4 +192,18 @@
         <item name="android:textOn"></item>
     </style>
 
+    <!-- Bottom nav active item pill (subtle sage-tinted background) -->
+    <style name="Widget.BBetter.BottomNav.ActiveIndicator" parent="">
+        <item name="android:color">@color/bb_surface_subtle</item>
+        <item name="android:width">56dp</item>
+        <item name="android:height">32dp</item>
+        <item name="marginHorizontal">8dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.NavIndicator</item>
+    </style>
+
+    <style name="ShapeAppearance.BBetter.NavIndicator" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
 </resources>

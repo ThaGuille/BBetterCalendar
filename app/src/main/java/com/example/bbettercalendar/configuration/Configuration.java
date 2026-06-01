@@ -21,6 +21,9 @@ public class Configuration {
 
 
     private String country;
+
+    private int notificationPermissionAskCount;
+    private long notificationPermissionLastAskedMillis;
     /** Clase contenedor para las configuraciones de la aplicación **/
     public Configuration(int homeTimerTime, int homeRestTime, int homeNumberOfCycles, boolean homeIsInfiniteCycleEnabled,
                          boolean homeIsRestEnabled, boolean homeIsAutoCycle, boolean homeIsPauseEnabled, boolean homeIsAlarmEnabled, boolean homeIsVibrationEnabled) {
@@ -111,5 +114,18 @@ public class Configuration {
     }
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public int getNotificationPermissionAskCount() {
+        return notificationPermissionAskCount;
+    }
+    public void setNotificationPermissionAskCount(int notificationPermissionAskCount) {
+        this.notificationPermissionAskCount = notificationPermissionAskCount;
+    }
+    public long getNotificationPermissionLastAskedMillis() {
+        return notificationPermissionLastAskedMillis;
+    }
+    public void setNotificationPermissionLastAskedMillis(long notificationPermissionLastAskedMillis) {
+        this.notificationPermissionLastAskedMillis = notificationPermissionLastAskedMillis;
     }
 }

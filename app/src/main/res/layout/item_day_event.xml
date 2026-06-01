@@ -15,22 +15,43 @@
         android:layout_width="10dp"
         android:layout_height="10dp"
         android:layout_marginEnd="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="top"
         android:background="@color/calendar_item_event" />
 
-    <TextView
-        android:id="@+id/eventTitle"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="@color/black"
-        android:textSize="15sp" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/eventTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.BBetter.Body"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/eventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+            android:textSize="12sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/eventTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:textColor="@color/gris"
-        android:textSize="13sp" />
+        android:layout_gravity="top"
+        android:textAppearance="@style/TextAppearance.BBetter.Label" />
 
 </LinearLayout>

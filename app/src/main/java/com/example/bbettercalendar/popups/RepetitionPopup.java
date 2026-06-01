@@ -19,13 +19,17 @@ import com.example.bbettercalendar.R;
 
 public class RepetitionPopup extends DialogFragment implements CompoundButton.OnCheckedChangeListener{
 
-    public static final int REPETITION_NONE = 0;
-    public static final int REPETITION_DAILY = 1;
-    public static final int REPETITION_WEEKLY = 2;
-    public static final int REPETITION_MONTHLY = 3;
+    /** @deprecated use {@link RepetitionOptions#NONE}. Kept for binary compatibility. */
+    @Deprecated public static final int REPETITION_NONE = RepetitionOptions.NONE;
+    /** @deprecated use {@link RepetitionOptions#DAILY}. */
+    @Deprecated public static final int REPETITION_DAILY = RepetitionOptions.DAILY;
+    /** @deprecated use {@link RepetitionOptions#WEEKLY}. */
+    @Deprecated public static final int REPETITION_WEEKLY = RepetitionOptions.WEEKLY;
+    /** @deprecated use {@link RepetitionOptions#MONTHLY}. */
+    @Deprecated public static final int REPETITION_MONTHLY = RepetitionOptions.MONTHLY;
 
     private OnPopupListener listener;
-    private int repetitionToggleSelected=0;
+    private int repetitionToggleSelected = RepetitionOptions.NONE;
     private ToggleButton[] toggleButtons = new ToggleButton[4];
     private boolean blocked = false;
     private final String TAG = "RepetitionPopupTAG";
@@ -52,6 +56,22 @@ public class RepetitionPopup extends DialogFragment implements CompoundButton.On
 
         for(ToggleButton tb:toggleButtons){tb.setOnCheckedChangeListener(this);}
 
+        // Whole-row click selects the corresponding toggle (the toggle itself is non-clickable).
+        int[] rowIds = {
+                R.id.repetition_popup_row_none,
+                R.id.repetition_popup_row_daily,
+                R.id.repetition_popup_row_weekly,
+                R.id.repetition_popup_row_monthly
+        };
+        for (int i = 0; i < rowIds.length; i++) {
+            final int idx = i;
+            view.findViewById(rowIds[i]).setOnClickListener(v -> {
+                if (!toggleButtons[idx].isChecked()) {
+                    toggleButtons[idx].setChecked(true);
+                }
+            });
+        }
+
         return builder.create();
     }
 
@@ -74,13 +94,13 @@ public class RepetitionPopup extends DialogFragment implements CompoundButton.On
             }
         }
         if (toggleButtons[0] == buttonView)
-            repetitionToggleSelected = REPETITION_NONE;
+            repetitionToggleSelected = RepetitionOptions.NONE;
         else if (toggleButtons[1] == buttonView)
-            repetitionToggleSelected = REPETITION_DAILY;
+            repetitionToggleSelected = RepetitionOptions.DAILY;
         else if (toggleButtons[2] == buttonView)
-            repetitionToggleSelected = REPETITION_WEEKLY;
+            repetitionToggleSelected = RepetitionOptions.WEEKLY;
         else if (toggleButtons[3] == buttonView)
-            repetitionToggleSelected = REPETITION_MONTHLY;
+            repetitionToggleSelected = RepetitionOptions.MONTHLY;
         else
             Log.d(TAG, "onCheckedChanged: ERROR");
 

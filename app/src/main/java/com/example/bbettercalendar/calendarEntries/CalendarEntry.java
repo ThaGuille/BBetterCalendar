@@ -165,6 +165,7 @@ public class CalendarEntry {
             this.repetition = repetition;
             return this;
         }
+        public int getEventRepetition() {return repetition;}
         public EventBuilder setEventDuration(int duration) {
             this.duration = duration;
             return this;

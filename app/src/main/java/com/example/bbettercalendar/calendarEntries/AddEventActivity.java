@@ -35,13 +35,20 @@ import com.example.bbettercalendar.databinding.ActivityCreateEventBinding;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
+import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import com.example.bbettercalendar.popups.DescriptionPopup;
+import com.example.bbettercalendar.popups.NotificationOffsets;
 import com.example.bbettercalendar.popups.NotificationsPopup;
 import com.example.bbettercalendar.popups.OnNotificationsPopupListener;
 import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
+import com.example.bbettercalendar.popups.RepetitionOptions;
 import com.example.bbettercalendar.popups.RepetitionPopup;
 import com.google.android.material.textfield.TextInputEditText;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -53,8 +60,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
+@AndroidEntryPoint
 public class AddEventActivity extends AppCompatActivity implements OnToolBarListener, OnNotificationsPopupListener, OnPopupListener<Object>,
         NumberPicker.OnValueChangeListener, View.OnClickListener{
+
+    @Inject EventReminderScheduler eventReminderScheduler;
 
 
     public static final int CLOSE_AND_SAVE = 1;
@@ -95,10 +105,12 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     private TextView endTimeView;
     private TextView notificationsView = null;  //todo IMPORTANT cambiar View por Layout cuando haga falta
     private LinearLayout repetitionView = null;
+    private TextView repetitionTextView = null;
     private LinearLayout descriptionLayout = null;
     private NumberPicker numberPickerMinutesView;
     private NumberPicker numberPickerHoursView;
     private LinearLayout createEntryLinearLayout;
+    private LinearLayout optionsCard;
     private Button switchToEventButton;
     private Button switchToTaskButton;
 
@@ -240,8 +252,10 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 numberPickerMinutesView = null;
                 numberPickerHoursView = null;
                 repetitionView = null;
+                repetitionTextView = null;
                 descriptionLayout = findViewById(R.id.event_description_layout);
                 createEntryLinearLayout = findViewById(R.id.create_event_linear_layout);
+                optionsCard = findViewById(R.id.options_card);
                 switchToEventButton = findViewById(R.id.switch_to_event_button);
                 switchToTaskButton = findViewById(R.id.switch_to_task_button);
 
@@ -253,10 +267,12 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 descriptionLayout.setOnClickListener(this);
                 switchToEventButton.setOnClickListener(this);
                 switchToTaskButton.setOnClickListener(this);
-                // Index of the description row inside create_event_linear_layout — new
-                // notification rows are inserted just above it so they appear right under
-                // the notifications row in the form.
-                indexLayout=10;
+                switchToEventButton.setSelected(true);
+                switchToTaskButton.setSelected(false);
+                // Position inside options_card where new notification rows are inserted:
+                // 0=event_notifications_layout, 1=divider, 2=event_description_layout.
+                // Insert at 1 so injected rows sit between the notifications row and the divider.
+                indexLayout=1;
 
                 eventBuilder.setEventType(TYPE_EVENT);
 
@@ -266,7 +282,11 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
                 break;
             case TYPE_TASK:
-                indexLayout=12;
+                // Position inside options_card where new notification rows are inserted:
+                // 0=task_repetition_layout, 1=divider, 2=task_notifications_layout,
+                // 3=divider, 4=task_description_layout.
+                // Insert at 3 so injected rows sit between the notifications row and the divider.
+                indexLayout=3;
                 titleView = findViewById(R.id.task_title);
                 descriptionView = findViewById(R.id.task_description);
                 startDateView = findViewById(R.id.task_start_date);
@@ -276,8 +296,11 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 endTimeView = null;
                 notificationsView = findViewById(R.id.task_notification_1);
                 repetitionView = findViewById(R.id.task_repetition_layout);
+                repetitionTextView = findViewById(R.id.task_repetition_text);
+                repetitionTextView.setText(RepetitionOptions.labelResIdFor(eventBuilder.getEventRepetition()));
                 descriptionLayout = findViewById(R.id.task_description_layout);
                 createEntryLinearLayout = findViewById(R.id.create_task_linear_layout);
+                optionsCard = findViewById(R.id.options_card);
                 numberPickerMinutesView = findViewById(R.id.number_picker_minutes);
                 numberPickerHoursView = findViewById(R.id.number_picker_hours);
                 switchToEventButton = findViewById(R.id.switch_to_event_button);
@@ -290,6 +313,8 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 descriptionLayout.setOnClickListener(this);
                 switchToEventButton.setOnClickListener(this);
                 switchToTaskButton.setOnClickListener(this);
+                switchToEventButton.setSelected(false);
+                switchToTaskButton.setSelected(true);
 
                 startDateView.setText(DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(localCalendar.getTime()));
                 startTimeView.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(localCalendar.getTime()));
@@ -333,7 +358,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
-                calendarEntryDAO.insert(calendarEntry);
+                long rowId = calendarEntryDAO.insert(calendarEntry);
+                calendarEntry.setId((int) rowId);
+                eventReminderScheduler.scheduleFor(calendarEntry);
             }catch (Exception e){
                 Log.i(TAG, "evento fallido -> " + calendarEntry.getTitle());
             }
@@ -369,6 +396,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 case PopupHelper.REPETITION_POPUP:
                     int repetition = (Integer) value;
                     eventBuilder.setEventRepetition(repetition);
+                    if (repetitionTextView != null) {
+                        repetitionTextView.setText(RepetitionOptions.labelResIdFor(repetition));
+                    }
                     break;
                 case PopupHelper.DESCRIPTION_POPUP:
                     String description = (String) value;
@@ -476,32 +506,19 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     private void addNotificationLayout(int indexNotification, int indexLayout){
         View newView = LayoutInflater.from(this).inflate(R.layout.add_notification, null);
         TextView notificationText = newView.findViewById(R.id.event_notification_text);
-        if(indexNotification==0)
-            notificationText.setText("5 minutos antes");
-        else if(indexNotification==1)
-            notificationText.setText("10 minutos antes");
-        else if(indexNotification==2)
-            notificationText.setText("15 minutos antes");
-        else if(indexNotification==3)
-            notificationText.setText("30 minutos antes");
-        else if(indexNotification==4)
-            notificationText.setText("1 hora antes");
-        else if(indexNotification==5)
-            notificationText.setText("3 horas antes");
-        else if(indexNotification==6)
-            notificationText.setText("1 día antes");
+        notificationText.setText(NotificationOffsets.labelResIdFor(indexNotification));
 
         newView.findViewById(R.id.event_notification_close).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createdNotificationLayouts[indexNotification]=false;
-                createEntryLinearLayout.removeView(newView);
+                optionsCard.removeView(newView);
                 eventBuilder.getEventNotifications()[indexNotification]=false;
             }
         });
 
-        //Añadir la vista al layout general, en la posición indexLayout que cambia entre evento y tarea
-        createEntryLinearLayout.addView(newView, indexLayout);
+        // Insert into the Options card just under the existing notifications row.
+        optionsCard.addView(newView, indexLayout);
     }
 
     @Override

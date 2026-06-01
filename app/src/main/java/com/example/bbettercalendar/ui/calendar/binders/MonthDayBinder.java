@@ -61,6 +61,9 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
         boolean inMonth = day.getPosition() == DayPosition.MonthDate;
         container.dayText.setAlpha(inMonth ? 1.0f : 0.3f);
 
+        boolean isToday = inMonth && day.getDate().equals(LocalDate.now());
+        container.todayIndicator.setVisibility(isToday ? View.VISIBLE : View.GONE);
+
         List<CalendarItem> items = inMonth ? itemsByDate.get(day.getDate()) : null;
         for (int i = 0; i < container.eventBars.length; i++) {
             View bar = container.eventBars[i];
@@ -78,12 +81,14 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
 
     public static class DayContainer extends ViewContainer {
         final TextView dayText;
+        final View todayIndicator;
         final View[] eventBars;
         CalendarDay currentDay;
 
         public DayContainer(@NonNull View view) {
             super(view);
             this.dayText = view.findViewById(R.id.cellDayText);
+            this.todayIndicator = view.findViewById(R.id.cellTodayIndicator);
             this.eventBars = new View[]{
                     view.findViewById(R.id.cellEventBar1),
                     view.findViewById(R.id.cellEventBar2),

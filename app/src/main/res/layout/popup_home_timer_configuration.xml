@@ -76,9 +76,8 @@
                     android:id="@+id/text_time_timer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/fraunces"
-                    android:letterSpacing="-0.02"
                     android:text="20:00"
+                    android:textAppearance="@style/TextAppearance.BBetter.Title"
                     android:textColor="@color/bb_accent_energy"
                     android:textSize="44sp" />
 
@@ -183,9 +182,8 @@
                         android:id="@+id/text_time_resting"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/fraunces"
-                        android:letterSpacing="-0.02"
                         android:text="05:00"
+                        android:textAppearance="@style/TextAppearance.BBetter.Title"
                         android:textColor="@color/bb_primary"
                         android:textSize="44sp" />
 
@@ -205,7 +203,7 @@
                     android:layout_marginTop="@dimen/spacing_xs"
                     android:stepSize="1"
                     android:valueFrom="1"
-                    android:valueTo="20"
+                    android:valueTo="30"
                     app:haloColor="@color/bb_primary"
                     app:thumbColor="@color/bb_primary"
                     app:tickVisible="false"
@@ -294,16 +292,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_infinite_pill"
-                android:fontFamily="@font/plus_jakarta_sans_medium"
                 android:minHeight="36dp"
                 android:minWidth="0dp"
                 android:paddingStart="@dimen/spacing_md"
                 android:paddingEnd="@dimen/spacing_md"
                 android:textAllCaps="false"
+                android:textAppearance="@style/TextAppearance.BBetter.Label"
                 android:textColor="@color/bb_on_surface"
                 android:textOff="∞ Infinite"
-                android:textOn="∞ Infinite"
-                android:textSize="@dimen/text_label" />
+                android:textOn="∞ Infinite" />
         </LinearLayout>
 
         <View
@@ -361,21 +358,44 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
+            <LinearLayout
                 android:id="@+id/btn_restore"
-                style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/timer_btn_restore"
-                android:textAllCaps="false"
-                android:textColor="@color/bb_on_surface_muted"
-                app:icon="@drawable/ic_restore_24"
-                app:iconTint="@color/bb_on_surface_muted" />
-
-            <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/spacing_xs"
+                android:paddingBottom="@dimen/spacing_xs"
+                android:paddingEnd="@dimen/spacing_sm">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_restore_24"
+                    app:tint="@color/bb_on_surface_muted" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_xs"
+                    android:text="@string/timer_btn_restore"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label"
+                    android:textColor="@color/bb_on_surface_muted" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_cancel"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_xs"
+                android:text="@string/timer_btn_cancel"
+                android:textAllCaps="false"
+                android:textColor="@color/bb_on_surface_muted" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save"

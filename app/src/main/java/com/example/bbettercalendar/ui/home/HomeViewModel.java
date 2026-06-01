@@ -14,6 +14,8 @@ import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.stats.FocusEvent;
+import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 
@@ -34,6 +36,7 @@ public class HomeViewModel extends AndroidViewModel {
     private String currentStreakString;
     private ExecutorService executorService;
     private StatsDAO statsDao;
+    private FocusEventDAO focusEventDao;
     public ConfigurationManager configManager;
 
     public HomeViewModel(@NonNull Application application) {
@@ -48,6 +51,7 @@ public class HomeViewModel extends AndroidViewModel {
         timerText.setValue("20:00");
         AppDatabase db = AppDatabase.getDatabase(application);
         statsDao = db.statsDao();
+        focusEventDao = db.focusEventDao();
         executorService = Executors.newFixedThreadPool(2);
 
 
@@ -95,6 +99,7 @@ public class HomeViewModel extends AndroidViewModel {
             public void run() {
                 Log.i(TAG, "View Model addFails()");
                 statsDao.addFails();
+                logFocusEvent(FocusEvent.TYPE_FAIL, 0);
                 todayFailsText.postValue("Today fails: "+statsDao.getTodayFails());
             }
         });
@@ -108,10 +113,21 @@ public class HomeViewModel extends AndroidViewModel {
                 Log.i(TAG, "View Model addTimeStudied( " + timerTime + " )");
                 statsDao.addTimeStudied(timerTime);
                 statsDao.addTasksDone();
+                logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime));
                 String formattedTime = FormatHelper.formatTime(statsDao.getTodayTimeStudied(), "HH:mm");
                 todayTimeStudiedText.postValue("Today studied time: " + formattedTime);
             }
         });
+    }
+
+    // Registra un evento con timestamp para el histórico por horas de Progress.
+    // Se llama desde dentro del executorService, así que ya está fuera del hilo principal.
+    private void logFocusEvent(int type, int durationMin){
+        FocusEvent ev = new FocusEvent();
+        ev.timestamp = System.currentTimeMillis();
+        ev.type = type;
+        ev.durationMin = durationMin;
+        focusEventDao.insert(ev);
     }
 
     public void setRestTimer(){

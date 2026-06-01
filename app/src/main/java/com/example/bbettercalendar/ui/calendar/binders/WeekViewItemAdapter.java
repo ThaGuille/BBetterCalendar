@@ -10,6 +10,16 @@ import java.util.Calendar;
 
 public class WeekViewItemAdapter extends WeekView.SimpleAdapter<CalendarItem> {
 
+    public interface OnRangeChangedListener {
+        void onRangeChanged(Calendar firstVisibleDate, Calendar lastVisibleDate);
+    }
+
+    private OnRangeChangedListener rangeListener;
+
+    public void setOnRangeChangedListener(OnRangeChangedListener listener) {
+        this.rangeListener = listener;
+    }
+
     @Override
     public WeekViewEntity onCreateEntity(CalendarItem item) {
         Calendar start = Calendar.getInstance();
@@ -33,5 +43,12 @@ public class WeekViewItemAdapter extends WeekView.SimpleAdapter<CalendarItem> {
                 .setEndTime(end)
                 .setStyle(style)
                 .build();
+    }
+
+    @Override
+    public void onRangeChanged(Calendar firstVisibleDate, Calendar lastVisibleDate) {
+        if (rangeListener != null) {
+            rangeListener.onRangeChanged(firstVisibleDate, lastVisibleDate);
+        }
     }
 }

@@ -49,18 +49,19 @@ public class NotificationsPopup extends DialogFragment implements CompoundButton
 
         for(ToggleButton tb:toggleButtons){tb.setOnCheckedChangeListener(this);}
 
-        int[] labelIds = {
-                R.id.notifications_popup_5min,
-                R.id.notifications_popup_10min,
-                R.id.notifications_popup_15min,
-                R.id.notifications_popup_30min,
-                R.id.notifications_popup_1h,
-                R.id.notifications_popup_3h,
-                R.id.notifications_popup_1d
+        // Whole-row click toggles the corresponding ToggleButton (which is itself non-clickable).
+        int[] rowIds = {
+                R.id.notifications_popup_row_5min,
+                R.id.notifications_popup_row_10min,
+                R.id.notifications_popup_row_15min,
+                R.id.notifications_popup_row_30min,
+                R.id.notifications_popup_row_1h,
+                R.id.notifications_popup_row_3h,
+                R.id.notifications_popup_row_1d
         };
-        for (int i = 0; i < labelIds.length; i++) {
+        for (int i = 0; i < rowIds.length; i++) {
             final int idx = i;
-            view.findViewById(labelIds[i]).setOnClickListener(v -> toggleButtons[idx].toggle());
+            view.findViewById(rowIds[i]).setOnClickListener(v -> toggleButtons[idx].toggle());
         }
 
         setToggleButtons();

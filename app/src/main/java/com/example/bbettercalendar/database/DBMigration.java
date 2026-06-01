@@ -6,6 +6,8 @@ import androidx.room.Room;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import com.example.bbettercalendar.notifications.NotificationChannels;
+
 import dagger.hilt.android.HiltAndroidApp;
 
 @HiltAndroidApp
@@ -14,6 +16,7 @@ public class DBMigration extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        NotificationChannels.createAll(this);
     }
 
     static final Migration MIGRATION_1_2 = new Migration(1, 2) {
@@ -47,6 +50,14 @@ public class DBMigration extends Application {
         public void migrate(SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE calendarEntry ADD COLUMN startMillis INTEGER NOT NULL DEFAULT 0");
             database.execSQL("ALTER TABLE calendarEntry ADD COLUMN endMillis INTEGER NOT NULL DEFAULT 0");
+        }
+    };
+
+    static final Migration MIGRATION_7_8 = new Migration(7, 8) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE configuration ADD COLUMN notificationPermissionAskCount INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE configuration ADD COLUMN notificationPermissionLastAskedMillis INTEGER NOT NULL DEFAULT 0");
         }
     };
 }

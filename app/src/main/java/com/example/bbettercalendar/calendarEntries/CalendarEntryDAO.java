@@ -12,7 +12,7 @@ import java.util.List;
 @Dao
 public interface CalendarEntryDAO {
     @Insert
-    void insert(CalendarEntry calendarEntry);
+    long insert(CalendarEntry calendarEntry);
 
     @Update
     void update(CalendarEntry calendarEntry);

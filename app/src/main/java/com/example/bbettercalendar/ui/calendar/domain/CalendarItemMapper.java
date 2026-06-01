@@ -1,6 +1,7 @@
 package com.example.bbettercalendar.ui.calendar.domain;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class CalendarItemMapper {
+
+    private static final String TAG = "CalendarItemMapper";
 
     private CalendarItemMapper() {}
 
@@ -28,6 +31,7 @@ public final class CalendarItemMapper {
         return new CalendarItem(
                 entry.getId(),
                 entry.getTitle() != null ? entry.getTitle() : "",
+                entry.getDescription(),
                 start,
                 end,
                 ColorResolver.colorFor(type, ctx),
@@ -41,6 +45,12 @@ public final class CalendarItemMapper {
             CalendarItem item = toItem(e, ctx);
             if (item.getStartMillis() > 0L) {
                 out.add(item);
+            } else {
+                // Diagnostic for the "events added are not shown" report: entries land here when
+                // both startMillis and startDayAndHour resolve to 0. If logs show this firing for
+                // EVENT rows, we have a data-layer fix to make.
+                Log.w(TAG, "Dropping CalendarItem with startMillis<=0 id=" + e.getId()
+                        + " type=" + e.getType() + " title=" + e.getTitle());
             }
         }
         return out;

@@ -1,134 +1,264 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <LinearLayout
-        android:id="@+id/notifications_popup_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/form_row_height"
-        android:gravity="center|start"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_md">
 
-        <ImageButton
-            android:id="@+id/btnCloseNotificationsPopup"
-            android:layout_width="wrap_content"
+        <!-- Header -->
+        <LinearLayout
+            android:id="@+id/notifications_popup_header"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:layout_marginStart="@dimen/spacing_md"
-            android:background="@color/transparent"
-            android:src="@drawable/ic_close_24"
-            android:title="close"
-            app:showAsAction="always" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <Space
-            android:layout_width="0dp"
+            <ImageButton
+                android:id="@+id/btnCloseNotificationsPopup"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_close_circle"
+                android:contentDescription="@string/create_entry_btn_close"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_close_24"
+                app:tint="@color/bb_on_surface" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_weight="1"
+                android:text="@string/notifications_popup_title"
+                android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSaveNotificationsPopup"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_save_pill"
+                android:minWidth="88dp"
+                android:minHeight="0dp"
+                android:paddingStart="@dimen/spacing_md"
+                android:paddingEnd="@dimen/spacing_md"
+                android:stateListAnimator="@null"
+                android:text="@string/create_entry_btn_save"
+                android:textAllCaps="false"
+                android:textAppearance="@style/TextAppearance.BBetter.Label"
+                android:textColor="@color/bb_on_primary" />
+        </LinearLayout>
+
+        <!-- Rows -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_marginTop="@dimen/spacing_md"
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnSaveNotificationsPopup"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/segmented_button_height"
-            android:layout_marginEnd="@dimen/spacing_md"
-            android:background="@drawable/blue_oval"
-            android:text="Guardar"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_small"
-            app:showAsAction="always" />
+            <LinearLayout
+                android:id="@+id/notifications_popup_row_5min"
+                style="@style/BBetter.CardFormRow">
+
+                <TextView
+                    android:id="@+id/notifications_popup_5min"
+                    style="@style/BBetter.CardFormRow.Value"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/notifications_offset_5min" />
+
+                <ToggleButton
+                    android:id="@+id/notifications_popup_toggle_button_5min"
+                    android:layout_width="@dimen/toggle_button_size"
+                    android:layout_height="@dimen/toggle_button_size"
+                    android:background="@drawable/bb_radio_indicator"
+                    android:button="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_marginEnd="@dimen/spacing_md"
+                android:background="@color/bb_divider" />
+
+            <LinearLayout
+                android:id="@+id/notifications_popup_row_10min"
+                style="@style/BBetter.CardFormRow">
+
+                <TextView
+                    android:id="@+id/notifications_popup_10min"
+                    style="@style/BBetter.CardFormRow.Value"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/notifications_offset_10min" />
+
+                <ToggleButton
+                    android:id="@+id/notifications_popup_toggle_button_10min"
+                    android:layout_width="@dimen/toggle_button_size"
+                    android:layout_height="@dimen/toggle_button_size"
+                    android:background="@drawable/bb_radio_indicator"
+                    android:button="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_marginEnd="@dimen/spacing_md"
+                android:background="@color/bb_divider" />
+
+            <LinearLayout
+                android:id="@+id/notifications_popup_row_15min"
+                style="@style/BBetter.CardFormRow">
+
+                <TextView
+                    android:id="@+id/notifications_popup_15min"
+                    style="@style/BBetter.CardFormRow.Value"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/notifications_offset_15min" />
+
+                <ToggleButton
+                    android:id="@+id/notifications_popup_toggle_button_15min"
+                    android:layout_width="@dimen/toggle_button_size"
+                    android:layout_height="@dimen/toggle_button_size"
+                    android:background="@drawable/bb_radio_indicator"
+                    android:button="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_marginEnd="@dimen/spacing_md"
+                android:background="@color/bb_divider" />
+
+            <LinearLayout
+                android:id="@+id/notifications_popup_row_30min"
+                style="@style/BBetter.CardFormRow">
+
+                <TextView
+                    android:id="@+id/notifications_popup_30min"
+                    style="@style/BBetter.CardFormRow.Value"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/notifications_offset_30min" />
+
+                <ToggleButton
+                    android:id="@+id/notifications_popup_toggle_button_30min"
+                    android:layout_width="@dimen/toggle_button_size"
+                    android:layout_height="@dimen/toggle_button_size"
+                    android:background="@drawable/bb_radio_indicator"
+                    android:button="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_marginEnd="@dimen/spacing_md"
+                android:background="@color/bb_divider" />
+
+            <LinearLayout
+                android:id="@+id/notifications_popup_row_1h"
+                style="@style/BBetter.CardFormRow">
+
+                <TextView
+                    android:id="@+id/notifications_popup_1h"
+                    style="@style/BBetter.CardFormRow.Value"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/notifications_offset_1h" />
+
+                <ToggleButton
+                    android:id="@+id/notifications_popup_toggle_button_1h"
+                    android:layout_width="@dimen/toggle_button_size"
+                    android:layout_height="@dimen/toggle_button_size"
+                    android:background="@drawable/bb_radio_indicator"
+                    android:button="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_marginEnd="@dimen/spacing_md"
+                android:background="@color/bb_divider" />
+
+            <LinearLayout
+                android:id="@+id/notifications_popup_row_3h"
+                style="@style/BBetter.CardFormRow">
+
+                <TextView
+                    android:id="@+id/notifications_popup_3h"
+                    style="@style/BBetter.CardFormRow.Value"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/notifications_offset_3h" />
+
+                <ToggleButton
+                    android:id="@+id/notifications_popup_toggle_button_3h"
+                    android:layout_width="@dimen/toggle_button_size"
+                    android:layout_height="@dimen/toggle_button_size"
+                    android:background="@drawable/bb_radio_indicator"
+                    android:button="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_marginEnd="@dimen/spacing_md"
+                android:background="@color/bb_divider" />
+
+            <LinearLayout
+                android:id="@+id/notifications_popup_row_1d"
+                style="@style/BBetter.CardFormRow">
+
+                <TextView
+                    android:id="@+id/notifications_popup_1d"
+                    style="@style/BBetter.CardFormRow.Value"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/notifications_offset_1d" />
+
+                <ToggleButton
+                    android:id="@+id/notifications_popup_toggle_button_1d"
+                    android:layout_width="@dimen/toggle_button_size"
+                    android:layout_height="@dimen/toggle_button_size"
+                    android:background="@drawable/bb_radio_indicator"
+                    android:button="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textOff=""
+                    android:textOn="" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
-
-    <LinearLayout style="@style/ToggleRow">
-        <ToggleButton
-            android:id="@+id/notifications_popup_toggle_button_5min"
-            style="@style/ToggleRowButton"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/notifications_popup_5min"
-            style="@style/ToggleRowText"
-            android:hint="5 minutos antes" />
-    </LinearLayout>
-
-    <LinearLayout style="@style/ToggleRow">
-        <ToggleButton
-            android:id="@+id/notifications_popup_toggle_button_10min"
-            style="@style/ToggleRowButton"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/notifications_popup_10min"
-            style="@style/ToggleRowText"
-            android:hint="10 minutos antes" />
-    </LinearLayout>
-
-    <LinearLayout style="@style/ToggleRow">
-        <ToggleButton
-            android:id="@+id/notifications_popup_toggle_button_15min"
-            style="@style/ToggleRowButton"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/notifications_popup_15min"
-            style="@style/ToggleRowText"
-            android:hint="15 minutos antes" />
-    </LinearLayout>
-
-    <LinearLayout style="@style/ToggleRow">
-        <ToggleButton
-            android:id="@+id/notifications_popup_toggle_button_30min"
-            style="@style/ToggleRowButton"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/notifications_popup_30min"
-            style="@style/ToggleRowText"
-            android:hint="30 minutos antes" />
-    </LinearLayout>
-
-    <LinearLayout style="@style/ToggleRow">
-        <ToggleButton
-            android:id="@+id/notifications_popup_toggle_button_1h"
-            style="@style/ToggleRowButton"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/notifications_popup_1h"
-            style="@style/ToggleRowText"
-            android:hint="1 hora antes" />
-    </LinearLayout>
-
-    <LinearLayout style="@style/ToggleRow">
-        <ToggleButton
-            android:id="@+id/notifications_popup_toggle_button_3h"
-            style="@style/ToggleRowButton"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/notifications_popup_3h"
-            style="@style/ToggleRowText"
-            android:hint="3 horas antes" />
-    </LinearLayout>
-
-    <LinearLayout style="@style/ToggleRow">
-        <ToggleButton
-            android:id="@+id/notifications_popup_toggle_button_1d"
-            style="@style/ToggleRowButton"
-            android:background="@drawable/radio_button_selector"
-            android:button="@android:color/transparent" />
-
-        <TextView
-            android:id="@+id/notifications_popup_1d"
-            style="@style/ToggleRowText"
-            android:hint="1 día antes" />
-    </LinearLayout>
-
-</LinearLayout>
+</ScrollView>

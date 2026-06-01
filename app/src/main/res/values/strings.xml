@@ -35,16 +35,70 @@
     <string name="timer_minutes_unit">minutes</string>
     <string name="timer_range_min">1 min</string>
     <string name="timer_range_max">90 min</string>
-    <string name="timer_range_rest_max">≤ focus</string>
+    <string name="timer_range_rest_max">30 min</string>
     <string name="timer_cycles_label">Total cycles</string>
     <string name="timer_infinite_label">Infinite</string>
     <string name="timer_infinite_symbol">∞</string>
     <string name="timer_auto_cycle_label">Auto-chain cycles</string>
     <string name="timer_auto_cycle_hint">Start the next session automatically</string>
-    <string name="timer_btn_restore">Restore defaults</string>
+    <string name="timer_btn_restore">Restore\ndefaults</string>
+    <string name="timer_btn_cancel">Cancel</string>
     <string name="timer_btn_save">Save</string>
     <string name="timer_error_range">Timer must be between 1 and 90 minutes.</string>
     <string name="timer_error_rest_range">Rest must be between 1 minute and the concentration time.</string>
     <string name="timer_error_cycles_range">Cycles must be between 1 and 15.</string>
+
+    <!-- Create event / task screen -->
+    <string name="create_entry_headline_event">New event</string>
+    <string name="create_entry_headline_task">New task</string>
+    <string name="create_entry_segment_event">Event</string>
+    <string name="create_entry_segment_task">Task</string>
+    <string name="create_entry_segment_reminder">Reminder</string>
+    <string name="create_entry_btn_save">Save</string>
+    <string name="create_entry_btn_close">Close</string>
+    <string name="create_entry_starts">Starts</string>
+    <string name="create_entry_ends">Ends</string>
+    <string name="create_entry_duration">Duration</string>
+    <string name="create_entry_repetition">Repetition</string>
+    <string name="create_entry_notification_hint">Add notification</string>
+    <string name="create_entry_description_hint">Add description</string>
+    <string name="create_entry_title_hint">Title</string>
+    <string name="create_entry_time_placeholder">00:00</string>
+    <string name="create_entry_date_placeholder">Date</string>
+    <string name="create_entry_duration_separator">:</string>
+    <string name="create_entry_duration_unit">h</string>
+
+    <!-- Notifications popup -->
+    <string name="notifications_popup_title">Notifications</string>
+    <string name="notifications_offset_5min">5 minutes before</string>
+    <string name="notifications_offset_10min">10 minutes before</string>
+    <string name="notifications_offset_15min">15 minutes before</string>
+    <string name="notifications_offset_30min">30 minutes before</string>
+    <string name="notifications_offset_1h">1 hour before</string>
+    <string name="notifications_offset_3h">3 hours before</string>
+    <string name="notifications_offset_1d">1 day before</string>
+
+    <!-- Notification channels -->
+    <string name="notif_channel_foreground_service_name">Background service</string>
+    <string name="notif_channel_foreground_service_desc">Keeps the focus timer running while the app is open.</string>
+    <string name="notif_channel_event_reminders_name">Event reminders</string>
+    <string name="notif_channel_event_reminders_desc">Reminders for upcoming events and tasks.</string>
+    <string name="notif_channel_focus_alerts_name">Focus alerts</string>
+    <string name="notif_channel_focus_alerts_desc">Alerts when you leave the app during a focus session.</string>
+
+    <!-- Event reminder notification -->
+    <string name="notif_event_default_title">Upcoming event</string>
+    <string name="notif_event_body_format">Starting %1$s</string>
+
+    <!-- Focus-fail notification -->
+    <string name="notif_focus_fail_title">Concentration broken</string>
+    <string name="notif_focus_fail_body">You left the app — your focus session was lost.</string>
+
+    <!-- Repetition popup -->
+    <string name="repetition_popup_title">Repetition</string>
+    <string name="repetition_option_none">Doesn\'t repeat</string>
+    <string name="repetition_option_daily">Daily</string>
+    <string name="repetition_option_weekly">Weekly</string>
+    <string name="repetition_option_monthly">Monthly</string>
 
 </resources>

@@ -10,9 +10,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.stats.DailyStat;
+import com.example.bbettercalendar.stats.DailyStatDAO;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +25,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private final String TAG = "SplashScreenTag";
     private StatsDAO statsDao;
+    private DailyStatDAO dailyStatDao;
     private ConfigurationDAO configurationDao;
     private ExecutorService executorService;
 
@@ -30,6 +35,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         statsDao = AppDatabase.getDatabase(this).statsDao();
+        dailyStatDao = AppDatabase.getDatabase(this).dailyStatDao();
         configurationDao = AppDatabase.getDatabase(this).configurationDao();
         executorService = Executors.newFixedThreadPool(2);
 
@@ -63,9 +69,26 @@ public class SplashActivity extends AppCompatActivity {
         Calendar lastDayStreak = statsDao.getLastDayStreak();
         if (lastDayStreak!=null){
             if(lastDayStreak.before(today)){
+                // Guardamos los valores de "hoy" en el histórico ANTES de ponerlos a 0.
+                // Pertenecen al último día activo (lastDayStreak), no necesariamente a ayer.
+                persistDailyStat(lastDayStreak);
                 statsDao.resetDailyStats();
             }
         }
+    }
+
+    // Vuelca los contadores de "hoy" de Stats en una fila DailyStat, indexada por el día
+    // (ISO) del último día activo. todayTimeStudied está en milisegundos -> a minutos.
+    private void persistDailyStat(Calendar lastDayStreak){
+        Stats s = statsDao.getStats();
+        DailyStat ds = new DailyStat();
+        ds.day = LocalDate.of(lastDayStreak.get(Calendar.YEAR),
+                lastDayStreak.get(Calendar.MONTH) + 1,
+                lastDayStreak.get(Calendar.DAY_OF_MONTH)).toString();
+        ds.focusMinutes = FormatHelper.millisToMinutes(s.todayTimeStudied);
+        ds.fails = s.todayFails;
+        ds.tasksDone = s.todayTasksDone;
+        dailyStatDao.upsert(ds);
     }
 
     private void initializeStats() {

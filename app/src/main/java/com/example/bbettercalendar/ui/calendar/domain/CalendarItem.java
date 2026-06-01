@@ -9,14 +9,16 @@ public class CalendarItem {
 
     private final int id;
     private final String title;
+    private final String description;
     private final long startMillis;
     private final long endMillis;
     private final int colorArgb;
     private final Type type;
 
-    public CalendarItem(int id, String title, long startMillis, long endMillis, int colorArgb, Type type) {
+    public CalendarItem(int id, String title, String description, long startMillis, long endMillis, int colorArgb, Type type) {
         this.id = id;
         this.title = title;
+        this.description = description;
         this.startMillis = startMillis;
         this.endMillis = endMillis;
         this.colorArgb = colorArgb;
@@ -25,6 +27,7 @@ public class CalendarItem {
 
     public int getId() { return id; }
     public String getTitle() { return title; }
+    public String getDescription() { return description; }
     public long getStartMillis() { return startMillis; }
     public long getEndMillis() { return endMillis; }
     public int getColorArgb() { return colorArgb; }

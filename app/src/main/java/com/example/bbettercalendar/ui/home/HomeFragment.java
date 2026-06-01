@@ -26,6 +26,7 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
+import com.example.bbettercalendar.notifications.focus.FocusFailNotifier;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.helpers.FormatHelper;
@@ -86,6 +87,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
     @Inject
     ConfigurationManager configurationManager;
+
+    @Inject
+    FocusFailNotifier focusFailNotifier;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -342,7 +346,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                                 // Código a ejecutar después del retraso
                                 failTimer();
                             }
-                        }, 4000); // Retraso en milisegundos, por ejemplo, 5000 para 5 segundos
+                        }, FocusSessionConstants.FAIL_GRACE_MILLIS);
                     }
                 }
             }
@@ -354,6 +358,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                     countDownTimer.cancel();
                     timer_state = TIMER_STOPPED;
                     homeViewModel.addFails();
+                    focusFailNotifier.fire();
                     isTimerFailed=true;
                     isBackground=false;
                 }

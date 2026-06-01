@@ -26,9 +26,13 @@ import com.example.bbettercalendar.helpers.OnToolbarCalendarListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.ui.calendar.binders.WeekViewItemAdapter;
 
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
 
 public class CalendarFragmentWeek extends Fragment
         implements View.OnClickListener, OnToolBarListener, OnToolbarCalendarListener {
@@ -37,6 +41,8 @@ public class CalendarFragmentWeek extends Fragment
     private CalendarViewModel viewModel;
     private ToolbarHelper toolbarHelper;
     private WeekViewItemAdapter adapter;
+    private final SimpleDateFormat monthYearFormat =
+            new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
 
     private final ActivityResultLauncher<Intent> addEventLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -67,7 +73,9 @@ public class CalendarFragmentWeek extends Fragment
         binding.calendarAddEventButton2.setOnClickListener(this);
 
         adapter = new WeekViewItemAdapter();
+        adapter.setOnRangeChangedListener(this::updateMonthTitle);
         binding.weekView.setAdapter(adapter);
+        binding.weekMonthTitleText.setText(monthYearFormat.format(new Date()));
 
         // Cover ~3 months around now so scrolling forward/back stays inside the queried window.
         ZonedDateTime now = ZonedDateTime.now();
@@ -82,6 +90,27 @@ public class CalendarFragmentWeek extends Fragment
         });
 
         return binding.getRoot();
+    }
+
+    private void updateMonthTitle(Calendar firstVisibleDate, Calendar lastVisibleDate) {
+        if (binding == null) return;
+        int firstMonth = firstVisibleDate.get(Calendar.MONTH);
+        int firstYear = firstVisibleDate.get(Calendar.YEAR);
+        int lastMonth = lastVisibleDate.get(Calendar.MONTH);
+        int lastYear = lastVisibleDate.get(Calendar.YEAR);
+
+        String text;
+        if (firstMonth == lastMonth && firstYear == lastYear) {
+            text = monthYearFormat.format(firstVisibleDate.getTime());
+        } else {
+            SimpleDateFormat monthOnly = new SimpleDateFormat("MMM", Locale.getDefault());
+            String first = monthOnly.format(firstVisibleDate.getTime());
+            String last = monthOnly.format(lastVisibleDate.getTime());
+            text = firstYear == lastYear
+                    ? first + " – " + last + " " + lastYear
+                    : first + " " + firstYear + " – " + last + " " + lastYear;
+        }
+        binding.weekMonthTitleText.setText(text);
     }
 
     @Override

@@ -50,6 +50,13 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
         holder.title.setText(item.getTitle() != null && !item.getTitle().isEmpty()
                 ? item.getTitle()
                 : "(untitled)");
+        String description = item.getDescription();
+        if (description != null && !description.trim().isEmpty()) {
+            holder.description.setText(description);
+            holder.description.setVisibility(View.VISIBLE);
+        } else {
+            holder.description.setVisibility(View.GONE);
+        }
         holder.time.setText(timeFormat.format(new Date(item.getStartMillis())));
         holder.swatch.setBackgroundColor(item.getColorArgb());
         holder.itemView.setOnClickListener(v -> {
@@ -65,12 +72,14 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
     static class VH extends RecyclerView.ViewHolder {
         final View swatch;
         final TextView title;
+        final TextView description;
         final TextView time;
 
         VH(@NonNull View itemView) {
             super(itemView);
             swatch = itemView.findViewById(R.id.eventColorSwatch);
             title = itemView.findViewById(R.id.eventTitle);
+            description = itemView.findViewById(R.id.eventDescription);
             time = itemView.findViewById(R.id.eventTime);
         }
     }

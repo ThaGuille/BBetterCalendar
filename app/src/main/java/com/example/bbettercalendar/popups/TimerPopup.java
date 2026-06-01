@@ -26,6 +26,7 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
 
     private static final int MIN_MINUTES = 1;
     private static final int MAX_MINUTES = 90;
+    private static final int MAX_REST_MINUTES = 30;
     private static final int MIN_CYCLES = 1;
     private static final int MAX_CYCLES = 15;
     private static final int DEFAULT_TIMER_MS = 60000 * 20;
@@ -80,6 +81,7 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
         btnAddCycles.setOnClickListener(this);
         btnSubtractCycles.setOnClickListener(this);
         view.findViewById(R.id.btn_restore).setOnClickListener(this);
+        view.findViewById(R.id.btn_cancel).setOnClickListener(this);
         view.findViewById(R.id.btn_save).setOnClickListener(this);
 
         getInitialValues();
@@ -94,7 +96,6 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
             int newMinutes = (int) value;
             timerTime = FormatHelper.minutesToMillis(newMinutes);
             timerTimeTextView.setText(formatTime(timerTime));
-            updateRestSliderBounds();
         });
 
         restSlider.addOnChangeListener((slider, value, fromUser) -> {
@@ -143,7 +144,12 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
         timerSlider.setValue(timerMinutes);
         timerTimeTextView.setText(formatTime(timerTime));
 
-        updateRestSliderBounds();
+        int restMinutes = clamp(restTime / 60000, MIN_MINUTES, MAX_REST_MINUTES);
+        restTime = FormatHelper.minutesToMillis(restMinutes);
+        restSlider.setValueFrom(MIN_MINUTES);
+        restSlider.setValueTo(MAX_REST_MINUTES);
+        restSlider.setValue(restMinutes);
+        restTimeTextView.setText(formatTime(restTime));
 
         restEnabledSwitch.setChecked(isRestEnabled);
         autoCycleSwitch.setChecked(isAutoCycleEnabled);
@@ -153,17 +159,6 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
         applyInfiniteCyclesState();
     }
 
-    private void updateRestSliderBounds() {
-        int maxRestMinutes = Math.max(MIN_MINUTES, timerTime / 60000);
-        restSlider.setValueFrom(MIN_MINUTES);
-        restSlider.setValueTo(maxRestMinutes);
-
-        int restMinutes = clamp(restTime / 60000, MIN_MINUTES, maxRestMinutes);
-        restTime = FormatHelper.minutesToMillis(restMinutes);
-        restSlider.setValue(restMinutes);
-        restTimeTextView.setText(formatTime(restTime));
-    }
-
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -171,6 +166,8 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
             changeCycles(1);
         } else if (id == R.id.btn_subtract_cycles) {
             changeCycles(-1);
+        } else if (id == R.id.btn_cancel) {
+            dismiss();
         } else if (id == R.id.btn_restore) {
             getRestoredValues();
             bindValues();

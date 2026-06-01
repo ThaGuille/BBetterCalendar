@@ -43,7 +43,13 @@
       "Skill(save-plan)",
       "Skill(save-plan:*)",
       "Skill(bb-build)",
-      "Skill(bb-build:*)"
+      "Skill(bb-build:*)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\guill\\\\OneDrive\\\\Documentos\\\\Proyectos\\\\BBetter\\\\BBetterCalendar\\\\app\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bbettercalendar\\\\ui\\\\calendar\\\\\" -Recurse | Select-Object FullName)",
+      "Bash(grep -E \"\\\\.\\(java|xml\\)$\")",
+      "Bash(.\\\\gradlew.bat assembleDebug)",
+      "PowerShell(.\\\\gradlew.bat assembleDebug)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\guill\\\\OneDrive\\\\Documentos\\\\Proyectos\\\\BBetter\\\\BBetterCalendar\\\\app\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bbettercalendar\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)"
     ]
   }
 }

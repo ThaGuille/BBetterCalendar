@@ -283,9 +283,9 @@ internal fun Calendar.copy(): Calendar = clone() as Calendar
 internal fun defaultDateFormatter(
     numberOfDays: Int
 ): SimpleDateFormat = when (numberOfDays) {
-    1 -> SimpleDateFormat("EEEE M/dd", Locale.getDefault()) // full weekday
-    in 2..6 -> SimpleDateFormat("EEE M/dd", Locale.getDefault()) // first three characters
-    else -> SimpleDateFormat("EEEEE M/dd", Locale.getDefault()) // first character
+    1 -> SimpleDateFormat("EEEE dd", Locale.getDefault()) // full weekday
+    in 2..6 -> SimpleDateFormat("EEE dd", Locale.getDefault()) // first three characters
+    else -> SimpleDateFormat("EEEEE dd", Locale.getDefault()) // first character
 }
 
 internal fun defaultTimeFormatter(): SimpleDateFormat = SimpleDateFormat("hh a", Locale.getDefault())

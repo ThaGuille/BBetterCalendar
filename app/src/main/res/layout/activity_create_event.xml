@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface">
 
     <include
         android:id="@+id/toolbar"
@@ -28,159 +29,219 @@
             android:id="@+id/create_event_linear_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:background="@color/bb_surface"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingBottom="@dimen/spacing_lg">
 
+            <!-- 1. Headline -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:text="@string/create_entry_headline_event"
+                android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+            <!-- 2. Segmented track -->
             <LinearLayout
                 android:id="@+id/task_type_layout"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:layout_marginBottom="@dimen/spacing_xs"
-                android:gravity="center|start"
-                android:orientation="horizontal">
+                android:layout_height="44dp"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_segmented_track"
+                android:orientation="horizontal"
+                android:padding="4dp">
 
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/switch_to_event_button"
-                    style="@style/SegmentedButton"
-                    android:layout_marginStart="10dp"
-                    android:backgroundTint="?attr/colorOnPrimary"
-                    android:text="EVENT" />
+                    style="@style/BBetter.SegmentedTrack.Item"
+                    android:background="@drawable/bg_segmented_item"
+                    android:text="@string/create_entry_segment_event" />
 
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/switch_to_task_button"
-                    style="@style/SegmentedButton"
-                    android:backgroundTint="@color/white"
-                    android:text="TASK" />
+                    style="@style/BBetter.SegmentedTrack.Item"
+                    android:background="@drawable/bg_segmented_item"
+                    android:text="@string/create_entry_segment_task" />
 
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/notificationsButton"
-                    style="@style/SegmentedButton"
-                    android:backgroundTint="@color/white"
-                    android:text="NOTIFICATION" />
+                    style="@style/BBetter.SegmentedTrack.Item"
+                    android:alpha="0.35"
+                    android:background="@drawable/bg_segmented_item_disabled"
+                    android:enabled="false"
+                    android:text="@string/create_entry_segment_reminder" />
             </LinearLayout>
 
-            <include layout="@layout/divider_horizontal" />
-
+            <!-- 3. Title card -->
             <LinearLayout
                 android:id="@+id/event_title_layout"
-                style="@style/FormRow">
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:elevation="@dimen/elevation_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/spacing_md"
+                android:paddingEnd="@dimen/spacing_md">
 
                 <ImageView
-                    style="@style/FormRowIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_title_24"
-                    app:tint="@color/black" />
+                    app:tint="@color/bb_primary" />
 
                 <EditText
                     android:id="@+id/event_title"
-                    style="@style/FormRowText"
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
-                    android:hint="@string/title" />
-
-                <ImageView
-                    style="@style/FormRowArrow"
-                    app:tint="@color/black" />
-            </LinearLayout>
-
-            <include layout="@layout/divider_horizontal" />
-
-            <LinearLayout
-                android:id="@+id/event_start_date_layout"
-                style="@style/FormRow">
-
-                <ImageView
-                    style="@style/FormRowIcon"
-                    android:src="@drawable/ic_calendar_empty_24"
-                    app:tint="@color/black" />
-
-                <TextView
-                    android:id="@+id/event_start_date"
-                    style="@style/FormRowText"
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
-                    android:hint="Date" />
-
-                <TextView
-                    android:id="@+id/event_start_hour"
-                    style="@style/FormRowText"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:hint="00:00" />
-            </LinearLayout>
-
-            <include layout="@layout/divider_horizontal" />
-
-            <LinearLayout
-                android:id="@+id/event_end_date_layout"
-                style="@style/FormRow">
-
-                <ImageView
-                    style="@style/FormRowIcon"
-                    android:src="@drawable/ic_calendar_range_24"
-                    app:tint="@color/black" />
-
-                <TextView
-                    android:id="@+id/event_end_date"
-                    style="@style/FormRowText"
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
-                    android:hint="Date" />
-
-                <TextView
-                    android:id="@+id/event_end_hour"
-                    style="@style/FormRowText"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:hint="24:00" />
-            </LinearLayout>
-
-            <include layout="@layout/divider_horizontal" />
-
-            <LinearLayout
-                android:id="@+id/event_notifications_layout"
-                style="@style/FormRow">
-
-                <ImageView
-                    style="@style/FormRowIcon"
-                    android:src="@drawable/ic_notifications_empty_24"
-                    app:tint="@color/black" />
-
-                <TextView
-                    android:id="@+id/event_notification_1"
-                    style="@style/FormRowText"
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
-                    android:hint="Add notification" />
-
-                <ImageView
-                    style="@style/FormRowArrow"
-                    app:tint="@color/black" />
-            </LinearLayout>
-
-            <include layout="@layout/divider_horizontal" />
-
-            <LinearLayout
-                android:id="@+id/event_description_layout"
-                style="@style/FormRow">
-
-                <ImageView
-                    style="@style/FormRowIcon"
-                    android:src="@drawable/ic_text_snippet_24"
-                    app:tint="@color/black" />
-
-                <TextView
-                    android:id="@+id/event_description"
-                    style="@style/FormRowText"
-                    android:layout_width="0dp"
-                    android:layout_weight="4"
-                    android:ellipsize="end"
-                    android:hint="Add description"
+                    style="@style/BBetter.CardFormRow.Title"
+                    android:hint="@string/create_entry_title_hint"
+                    android:inputType="textCapSentences"
                     android:maxLines="1" />
-
-                <ImageView
-                    style="@style/FormRowArrow"
-                    app:tint="@color/black" />
             </LinearLayout>
+
+            <!-- 4. When card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:background="@drawable/bg_card"
+                android:elevation="@dimen/elevation_card"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/event_start_date_layout"
+                    style="@style/BBetter.CardFormRow">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_calendar_empty_24"
+                        app:tint="@color/bb_primary" />
+
+                    <TextView
+                        android:id="@+id/event_start_date"
+                        style="@style/BBetter.CardFormRow.Value"
+                        android:hint="@string/create_entry_date_placeholder" />
+
+                    <TextView
+                        android:id="@+id/event_start_hour"
+                        style="@style/BBetter.CardFormRow.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="0"
+                        android:gravity="end"
+                        android:hint="@string/create_entry_time_placeholder" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_marginEnd="@dimen/spacing_md"
+                    android:background="@color/bb_divider" />
+
+                <LinearLayout
+                    android:id="@+id/event_end_date_layout"
+                    style="@style/BBetter.CardFormRow">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_calendar_range_24"
+                        app:tint="@color/bb_primary" />
+
+                    <TextView
+                        android:id="@+id/event_end_date"
+                        style="@style/BBetter.CardFormRow.Value"
+                        android:hint="@string/create_entry_date_placeholder" />
+
+                    <TextView
+                        android:id="@+id/event_end_hour"
+                        style="@style/BBetter.CardFormRow.Value"
+                        android:layout_width="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="0"
+                        android:gravity="end"
+                        android:hint="@string/create_entry_time_placeholder" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 5. Options card -->
+            <LinearLayout
+                android:id="@+id/options_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:background="@drawable/bg_card"
+                android:elevation="@dimen/elevation_card"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/event_notifications_layout"
+                    style="@style/BBetter.CardFormRow">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_notifications_empty_24"
+                        app:tint="@color/bb_primary" />
+
+                    <TextView
+                        android:id="@+id/event_notification_1"
+                        style="@style/BBetter.CardFormRow.Value"
+                        android:hint="@string/create_entry_notification_hint" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_arrow_forward_24"
+                        app:tint="@color/bb_on_surface_muted" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_marginEnd="@dimen/spacing_md"
+                    android:background="@color/bb_divider" />
+
+                <LinearLayout
+                    android:id="@+id/event_description_layout"
+                    style="@style/BBetter.CardFormRow">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_text_snippet_24"
+                        app:tint="@color/bb_primary" />
+
+                    <TextView
+                        android:id="@+id/event_description"
+                        style="@style/BBetter.CardFormRow.Value"
+                        android:ellipsize="end"
+                        android:hint="@string/create_entry_description_hint"
+                        android:maxLines="1" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_arrow_forward_24"
+                        app:tint="@color/bb_on_surface_muted" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp" />
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

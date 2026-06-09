@@ -55,7 +55,11 @@
       "Skill(check)",
       "Skill(check:*)",
       "PowerShell(& \".\\\\.claude\\\\skills\\\\adb-ui-test\\\\scripts\\\\find-node.ps1\" -List)",
-      "PowerShell(\"---- locator self-test \\(whatever is on screen\\) ----\")"
+      "PowerShell(\"---- locator self-test \\(whatever is on screen\\) ----\")",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "PowerShell(try { $j = Get-Content \".claude\\\\settings.local.json\" -Raw | ConvertFrom-Json; \"JSON OK\"; \"Stop hook cmd: \" + $j.hooks.Stop[0].hooks[0].command } catch { \"JSON INVALID: $_\" })",
+      "PowerShell($d = & adb devices 2>$null; \"adb exit: $LASTEXITCODE\"; $d)"
     ]
   },
   "hooks": {
@@ -76,6 +80,17 @@
           {
             "type": "command",
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\session-context.ps1\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\verify-ui-reminder.ps1\"",
+            "timeout": 30
           }
         ]
       }

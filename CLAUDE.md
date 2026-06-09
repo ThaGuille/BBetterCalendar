@@ -74,6 +74,23 @@ Spanish, Catalan, and English comments coexist on purpose. Don't auto-translate 
 
 `AppDatabase` uses `fallbackToDestructiveMigration()`. Bumping `@Database(version)` wipes user data unless you also add real `Migration` objects. If real migration is needed, follow [`.claude/docs/workflows.md`](.claude/docs/workflows.md) §7.
 
+### 7. Verify big runtime changes on the emulator
+
+After a **substantial** change to UI or runtime behaviour (a plan- or `/spec`-driven
+implementation — *not* a small bug fix), verify the app actually runs before declaring it
+done. **Don't trust the compiler alone.** Delegate to the [`ui-tester`](.claude/agents/ui-tester.md)
+subagent, which drives the running emulator via the [`adb-ui-test`](.claude/skills/adb-ui-test/SKILL.md)
+flow (build → install → navigate by resource-id → scan `logcat -b crash` for `FATAL EXCEPTION`)
+in an isolated context. The `adb-ui-test` skill runs **inline** and does not spawn the subagent
+itself — go through `ui-tester` to keep the XML dumps/logcat out of the main conversation.
+
+This rule is **enforced** by the `Stop` hook `verify-ui-reminder.ps1`: it fires once when the
+uncommitted runtime diff (`git diff HEAD` over `app/src/main` java + layout + nav) crosses a size
+threshold **and** an emulator is attached, blocking the stop with an instruction to verify. Small
+fixes, clean trees, and "no device" stay silent; it re-arms after you commit. Thresholds are
+tunable via `BB_UI_VERIFY_LINES` / `BB_UI_VERIFY_FILES`. This hook is the **standing
+authorization** to launch the `ui-tester` subagent for this workflow.
+
 ## Knowledge index — `.claude/docs/`
 
 Open the file that matches the task before guessing:
@@ -121,6 +138,7 @@ with e.g. "use the code-reviewer subagent".
 |---|---|---|
 | PostToolUse (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**, non-blocking: flags a legacy palette token added to a `.java`/`.xml` edit (rule #2). |
 | SessionStart | `session-context.ps1` | Injects active `/spec` changes + key rule reminders into the session. |
+| Stop | `verify-ui-reminder.ps1` | **Blocking-once**: when the uncommitted runtime diff is *big* (not a small fix) and an emulator is attached, blocks the stop with an instruction to verify via the `ui-tester` subagent (rule #7). Silent on small/clean/no-device; re-arms after commit. |
 
 > Hook commands use absolute Windows paths in `settings.local.json` (a machine-local file). Generalize them to `$CLAUDE_PROJECT_DIR` when extracting the reusable plugin (roadmap Phase 4).
 

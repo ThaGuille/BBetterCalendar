@@ -70,4 +70,10 @@ dependencies {
     // Calendario mensual (kizitonwose) — 2.5.4 mantiene compileSdk 33 (fallback per plan R1)
     implementation 'com.kizitonwose.calendar:view:2.5.4'
 
+    // Gráficos de Progress (Phase 1). Apache-2.0, vía JitPack (ver settings.gradle).
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Carrusel de gráficos (ViewPager2 + dots vía TabLayoutMediator de Material)
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+
 }

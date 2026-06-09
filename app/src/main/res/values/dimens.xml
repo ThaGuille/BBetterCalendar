@@ -51,4 +51,7 @@
 
     <!-- Dialog widths -->
     <dimen name="dialog_min_width">240dp</dimen>
+
+    <!-- Progress screen -->
+    <dimen name="progress_chart_height">240dp</dimen>
 </resources>

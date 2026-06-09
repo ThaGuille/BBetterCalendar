@@ -94,6 +94,16 @@
     <string name="notif_focus_fail_title">Concentration broken</string>
     <string name="notif_focus_fail_body">You left the app — your focus session was lost.</string>
 
+    <!-- Progress screen -->
+    <string name="progress_granularity_day">Day</string>
+    <string name="progress_granularity_week">Week</string>
+    <string name="progress_granularity_month">Month</string>
+    <string name="progress_range_prev">Previous range</string>
+    <string name="progress_range_next">Next range</string>
+    <string name="progress_chart_concent">concent</string>
+    <string name="progress_chart_fails">fails</string>
+    <string name="progress_chart_when">when I focus / fail</string>
+
     <!-- Repetition popup -->
     <string name="repetition_popup_title">Repetition</string>
     <string name="repetition_option_none">Doesn\'t repeat</string>

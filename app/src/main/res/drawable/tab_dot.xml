@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Punto del indicador del carrusel de gráficos (Progress). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <size android:width="8dp" android:height="8dp" />
+            <solid android:color="@color/bb_primary" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="8dp" android:height="8dp" />
+            <solid android:color="@color/bb_divider" />
+        </shape>
+    </item>
+</selector>

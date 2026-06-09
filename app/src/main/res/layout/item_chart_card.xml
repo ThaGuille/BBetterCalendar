@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Una tarjeta del carrusel de gráficos. El gráfico (LineChart/BarChart) se crea en código
+     y se añade a chart_container; la etiqueta es el único título (descripción del chart off). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginStart="@dimen/spacing_sm"
+    android:layout_marginEnd="@dimen/spacing_sm"
+    android:background="@drawable/bg_card"
+    android:elevation="@dimen/elevation_card"
+    android:orientation="vertical"
+    android:padding="@dimen/home_card_padding">
+
+    <TextView
+        android:id="@+id/chart_card_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        tools:text="concent" />
+
+    <FrameLayout
+        android:id="@+id/chart_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:layout_weight="1" />
+</LinearLayout>

@@ -1,0 +1,9 @@
+﻿# scenario: progress-smoke
+# recorded: 2026-06-09T23:34:32.2750242+02:00  serial=emulator-5554 pkg=com.example.bbettercalendar
+1781040872953	CLEAR
+1781040873223	START .configuration.SplashActivity
+1781040876078	WAIT 2800
+1781040878792	TAP id=navigation_progress
+1781040881171	ASSERT id=range_label
+1781040883427	TAP id=range_prev
+1781040885604	ASSERT id=range_label

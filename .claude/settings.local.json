@@ -53,7 +53,9 @@
       "Skill(spec)",
       "Skill(spec:*)",
       "Skill(check)",
-      "Skill(check:*)"
+      "Skill(check:*)",
+      "PowerShell(& \".\\\\.claude\\\\skills\\\\adb-ui-test\\\\scripts\\\\find-node.ps1\" -List)",
+      "PowerShell(\"---- locator self-test \\(whatever is on screen\\) ----\")"
     ]
   },
   "hooks": {

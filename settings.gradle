@@ -10,6 +10,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }   // MPAndroidChart (no está en Maven Central)
     }
 }
 rootProject.name = "BBetterCalendar"

@@ -52,6 +52,7 @@ Any design or implementation plan you produce (an `ExitPlanMode` payload, a writ
 - File header has `Status:` (proposed / in progress / merged / abandoned), `Created:`, `Last updated:`.
 - Don't delete old plans — update the status line instead.
 - Don't write plans inline into CLAUDE.md or PR descriptions; link to the file.
+- For changes you intend to **implement**, prefer the [`spec`](.claude/skills/spec/SKILL.md) lifecycle (`.claude/specs/`, proposal → apply → archive) over a loose plan; keep `save-plan` for exploration that may not ship.
 
 ### 2. Style tokens are mandatory for new UI
 
@@ -87,15 +88,41 @@ Open the file that matches the task before guessing:
 | [`common_errors.md`](.claude/docs/common_errors.md) | Symptom → root cause → fix tables (build, Room, Hilt, popups, calendar, timer) |
 | [`windows_commands.md`](.claude/docs/windows_commands.md) | PowerShell, `gradlew.bat`, `adb`, AVD reference |
 | [`android_studio.md`](.claude/docs/android_studio.md) | IDE-specific tips: sync, run, logcat, database inspector, AVD |
+| [`harness.md`](.claude/docs/harness.md) | **Operating manual** for the AI harness: skills, subagents, hooks, the `/spec` loop, and the reusable `claude-harness` plugin — what to type, what's automatic |
 
 ## Skills — `.claude/skills/`
 
-Project-level skills (invokable with `/bb-build`, `/save-plan`):
+Project-level skills (invokable with `/bb-build`, `/save-plan`, `/spec`, `/check`):
 
 | Skill | Purpose |
 |---|---|
 | [`bb-build`](.claude/skills/bb-build/SKILL.md) | Run gradle on Windows correctly. Handles common build failures. |
 | [`save-plan`](.claude/skills/save-plan/SKILL.md) | Persist a plan to `.claude/plans/<slug>.md` with the right header. |
+| [`spec`](.claude/skills/spec/SKILL.md) | Spec-driven change lifecycle: propose → apply → archive under `.claude/specs/`. |
+| [`check`](.claude/skills/check/SKILL.md) | On-demand build/lint/test verification (manual — there is no gradle-on-stop hook). |
+
+## Subagents — `.claude/agents/`
+
+The main session is the orchestrator: it auto-delegates to a subagent when the task matches that
+agent's `description` (the descriptions **are** the routing logic — there is no central router).
+Each runs in an isolated context window and returns a summary; they don't nest. Invoke explicitly
+with e.g. "use the code-reviewer subagent".
+
+| Agent | Role |
+|---|---|
+| [`explorer`](.claude/agents/explorer.md) | Read-only code search/trace; codegraph-first; returns `file:line` summaries. |
+| [`planner`](.claude/agents/planner.md) | Read-only; turns a goal into a step plan / `/spec` proposal (opus). |
+| [`code-reviewer`](.claude/agents/code-reviewer.md) | Read-only diff review vs CLAUDE.md rules (local; cloud review = `/code-review`). |
+| [`test-writer`](.claude/agents/test-writer.md) | Writes JUnit/Espresso tests; may edit test sources + run `test`. |
+
+## Hooks — `.claude/settings.local.json` + `.claude/hooks/`
+
+| Event | Script | Behavior |
+|---|---|---|
+| PostToolUse (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**, non-blocking: flags a legacy palette token added to a `.java`/`.xml` edit (rule #2). |
+| SessionStart | `session-context.ps1` | Injects active `/spec` changes + key rule reminders into the session. |
+
+> Hook commands use absolute Windows paths in `settings.local.json` (a machine-local file). Generalize them to `$CLAUDE_PROJECT_DIR` when extracting the reusable plugin (roadmap Phase 4).
 
 ## Key directories
 
@@ -114,3 +141,7 @@ Project-level skills (invokable with `/bb-build`, `/save-plan`):
 | `.claude/docs/` | Knowledge base (see index above) |
 | `.claude/plans/` | Saved design plans |
 | `.claude/skills/` | Project-level skills |
+| `.claude/specs/` | Spec-driven changes (`/spec`): `changes/`, `capabilities/`, `archive/` |
+| `.claude/agents/` | Subagent definitions (explorer, planner, code-reviewer, test-writer) |
+| `.claude/hooks/` | PowerShell hook scripts referenced by `settings.local.json` |
+| `.claude/harness-marketplace/` | Reusable `claude-harness` plugin + marketplace (Phase 4) — install in new apps |

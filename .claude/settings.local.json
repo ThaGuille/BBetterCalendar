@@ -49,7 +49,34 @@
       "Bash(.\\\\gradlew.bat assembleDebug)",
       "PowerShell(.\\\\gradlew.bat assembleDebug)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\guill\\\\OneDrive\\\\Documentos\\\\Proyectos\\\\BBetter\\\\BBetterCalendar\\\\app\\\\src\\\\main\\\\java\\\\com\\\\example\\\\bbettercalendar\" -Directory)",
-      "Bash(Select-Object -ExpandProperty Name)"
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Skill(spec)",
+      "Skill(spec:*)",
+      "Skill(check)",
+      "Skill(check:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\check-legacy-palette.ps1\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\session-context.ps1\""
+          }
+        ]
+      }
     ]
   }
 }

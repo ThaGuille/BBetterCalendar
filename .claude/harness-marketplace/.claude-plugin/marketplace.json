@@ -1,0 +1,17 @@
+{
+  "name": "harness-marketplace",
+  "owner": {
+    "name": "ThaGuille"
+  },
+  "metadata": {
+    "description": "Personal Claude Code harness — reusable spec loop, subagents, and context hook.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "claude-harness",
+      "source": "./claude-harness",
+      "description": "Spec-driven change loop (/spec) + /save-plan + read-only explorer/planner/code-reviewer/test-writer subagents (codegraph-first) + a SessionStart context hook. Start new projects at ~80%."
+    }
+  ]
+}

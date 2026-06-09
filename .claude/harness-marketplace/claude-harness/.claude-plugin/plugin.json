@@ -1,0 +1,15 @@
+{
+  "name": "claude-harness",
+  "version": "0.1.0",
+  "description": "Reusable Claude Code harness: native spec-driven change loop (/spec), /save-plan, and four read-only/codegraph-first subagents (explorer, planner, code-reviewer, test-writer), plus a SessionStart context hook.",
+  "author": {
+    "name": "ThaGuille"
+  },
+  "keywords": [
+    "harness",
+    "spec-driven-development",
+    "subagents",
+    "codegraph",
+    "workflow"
+  ]
+}

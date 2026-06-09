@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.bbettercalendar.R;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -75,17 +76,29 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         int axis = ContextCompat.getColor(ctx, R.color.bb_on_surface_muted);
         int grid = ContextCompat.getColor(ctx, R.color.bb_divider);
 
+        Chart<?> chart;
         switch (position) {
             case PAGE_CONCENT:
-                h.container.addView(buildLineChart(ctx, bundle.dayLabels, bundle.focusMinutes, primary, axis, grid));
+                chart = buildLineChart(ctx, bundle.dayLabels, bundle.focusMinutes, primary, axis, grid);
                 break;
             case PAGE_FAILS:
-                h.container.addView(buildLineChart(ctx, bundle.dayLabels, bundle.fails, danger, axis, grid));
+                chart = buildLineChart(ctx, bundle.dayLabels, bundle.fails, danger, axis, grid);
                 break;
             case PAGE_HOURLY:
-                h.container.addView(buildHourlyChart(ctx, bundle.focusByHour, bundle.failByHour, primary, danger, axis, grid));
+            default:
+                chart = buildHourlyChart(ctx, bundle.focusByHour, bundle.failByHour, primary, danger, axis, grid);
                 break;
         }
+        h.container.addView(chart);
+
+        // Dentro de ViewPager2 (RecyclerView) el chart se añade durante el bind, antes de que la
+        // vista tenga tamaño: el invalidate() de styleCommon dibuja un viewport vacío y no se vuelve
+        // a pintar hasta un swipe. Forzamos un repintado tras el layout para que aparezca a la primera.
+        final Chart<?> bound = chart;
+        bound.post(() -> {
+            bound.notifyDataSetChanged();
+            bound.invalidate();
+        });
     }
 
     private String labelFor(Context ctx, int position) {

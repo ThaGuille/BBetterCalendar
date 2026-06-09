@@ -173,4 +173,9 @@ public class HomeViewModel extends AndroidViewModel {
     public LiveData<String> getTodayTimeStudiedText() {return todayTimeStudiedText;}
     public LiveData<String> getTimerModeText() {return timerModeText;}
 
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        executorService.shutdown();
+    }
 }

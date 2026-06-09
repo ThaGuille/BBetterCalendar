@@ -67,6 +67,6 @@
         android:elevation="5dp"
         android:focusable="true"
         android:src="@drawable/ic_add_24"
-        android:tint="@color/bb_on_primary" />
+        app:tint="@color/bb_on_primary" />
 
 </FrameLayout>

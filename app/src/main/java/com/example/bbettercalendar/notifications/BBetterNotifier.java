@@ -1,6 +1,7 @@
 package com.example.bbettercalendar.notifications;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -24,6 +25,9 @@ public class BBetterNotifier {
         this.appContext = appContext;
     }
 
+    // canPost() comprueba POST_NOTIFICATIONS (o areNotificationsEnabled en <33) antes de notificar;
+    // lint no puede seguir esa guarda entre métodos, de ahí la supresión.
+    @SuppressLint("MissingPermission")
     public void notify(NotificationSpec spec) {
         if (!canPost()) return;
 

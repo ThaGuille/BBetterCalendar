@@ -38,6 +38,10 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
     private static final int PAGE_FAILS = 1;
     private static final int PAGE_HOURLY = 2;
     private static final int PAGE_COUNT = 3;
+    // En vista DAY la serie diaria es un único día (un punto): los gráficos de concentración y
+    // fallos pasan a ser barras por hora del día, y el gráfico "When" sobra (sería el solapado de
+    // esos dos), así que el carrusel se reduce a 2 páginas.
+    private static final int PAGE_COUNT_DAY = 2;
 
     private ChartBundle bundle;
 
@@ -46,9 +50,13 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         notifyDataSetChanged();
     }
 
+    private boolean isDay() {
+        return bundle != null && bundle.granularity == Granularity.DAY;
+    }
+
     @Override
     public int getItemCount() {
-        return PAGE_COUNT;
+        return isDay() ? PAGE_COUNT_DAY : PAGE_COUNT;
     }
 
     @Override
@@ -77,17 +85,26 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         int grid = ContextCompat.getColor(ctx, R.color.bb_divider);
 
         Chart<?> chart;
-        switch (position) {
-            case PAGE_CONCENT:
-                chart = buildLineChart(ctx, bundle.dayLabels, bundle.focusMinutes, primary, axis, grid);
-                break;
-            case PAGE_FAILS:
-                chart = buildLineChart(ctx, bundle.dayLabels, bundle.fails, danger, axis, grid);
-                break;
-            case PAGE_HOURLY:
-            default:
-                chart = buildHourlyChart(ctx, bundle.focusByHour, bundle.failByHour, primary, danger, axis, grid);
-                break;
+        if (isDay()) {
+            // DAY: ambas páginas son barras por hora del día (no hay tendencia con un solo día).
+            if (position == PAGE_CONCENT) {
+                chart = buildHourlyBarChart(ctx, bundle.focusMinutesByHour, primary, axis, grid);
+            } else {
+                chart = buildHourlyBarChart(ctx, bundle.failByHour, danger, axis, grid);
+            }
+        } else {
+            switch (position) {
+                case PAGE_CONCENT:
+                    chart = buildLineChart(ctx, bundle.dayLabels, bundle.focusMinutes, primary, axis, grid);
+                    break;
+                case PAGE_FAILS:
+                    chart = buildLineChart(ctx, bundle.dayLabels, bundle.fails, danger, axis, grid);
+                    break;
+                case PAGE_HOURLY:
+                default:
+                    chart = buildHourlyChart(ctx, bundle.focusByHour, bundle.failByHour, primary, danger, axis, grid);
+                    break;
+            }
         }
         h.container.addView(chart);
 
@@ -130,6 +147,10 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         set.setDrawFilled(true);
         set.setFillColor(color);
         set.setFillAlpha(40);
+        // En rangos largos (mes) dibujar un círculo por día satura el eje 0 de puntos:
+        // mostramos los marcadores sólo cuando hay pocos (día/semana). La línea + relleno
+        // siguen marcando los picos en cualquier caso.
+        set.setDrawCircles(values.length <= 10);
         chart.setData(new LineData(set));
         styleCommon(chart, labels, axisColor, gridColor);
         return chart;
@@ -172,12 +193,43 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         return chart;
     }
 
+    // Barra única por hora del día (0–23). Usado en vista DAY para concentración (minutos) y
+    // fallos (conteo), donde la serie diaria sería un solo punto.
+    private BarChart buildHourlyBarChart(Context ctx, int[] values,
+                                         int color, int axisColor, int gridColor) {
+        BarChart chart = new BarChart(ctx);
+        List<BarEntry> entries = new ArrayList<>();
+        String[] hourLabels = new String[24];
+        for (int hr = 0; hr < 24; hr++) {
+            entries.add(new BarEntry(hr, values[hr]));
+            hourLabels[hr] = String.valueOf(hr);
+        }
+        BarDataSet set = new BarDataSet(entries, "");
+        set.setColor(color);
+        set.setDrawValues(false);
+        BarData data = new BarData(set);
+        data.setBarWidth(0.6f);
+        chart.setData(data);
+
+        styleCommon(chart, hourLabels, axisColor, gridColor);
+        XAxis x = chart.getXAxis();
+        // Una etiqueta cada pocas horas: 24 etiquetas pegadas se solapan en un eje estrecho.
+        x.setLabelCount(7, false);
+        x.setAxisMinimum(-0.5f);
+        x.setAxisMaximum(23.5f);
+        return chart;
+    }
+
     private void styleCommon(BarLineChartBase<?> chart, String[] labels, int axisColor, int gridColor) {
         chart.getDescription().setEnabled(false);
         chart.setDrawGridBackground(false);
         chart.setScaleEnabled(false);
         chart.setDoubleTapToZoomEnabled(false);
         chart.setPinchZoom(false);
+        // Son gráficos de sólo lectura: sin resaltado al tocar/arrastrar (evita la línea
+        // vertical de highlight que aparecía al deslizar el carrusel).
+        chart.setHighlightPerTapEnabled(false);
+        chart.setHighlightPerDragEnabled(false);
         chart.getAxisRight().setEnabled(false);
         chart.setExtraBottomOffset(4f);
 
@@ -192,6 +244,10 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         y.setTextColor(axisColor);
         y.setGridColor(gridColor);
         y.setAxisMinimum(0f);
+        // Los valores son cuentas/minutos enteros: pasos de 1 como mínimo para no mostrar
+        // etiquetas fraccionarias sin sentido (p.ej. "0,4 fails").
+        y.setGranularity(1f);
+        y.setGranularityEnabled(true);
 
         chart.getLegend().setEnabled(false);
         chart.invalidate();

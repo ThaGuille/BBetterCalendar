@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Punto del indicador del carrusel de gráficos (Progress). -->
+<!-- Punto del indicador del carrusel de gráficos (Progress).
+     El <shape> va envuelto en un <layer-list> con tamaño fijo y gravity=center para que
+     el punto NO se estire al rellenar la celda del tab (que mide ~48dp de alto): así
+     queda un círculo de 8dp centrado en lugar de una elipse vertical. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
-        <shape android:shape="oval">
-            <size android:width="8dp" android:height="8dp" />
-            <solid android:color="@color/bb_primary" />
-        </shape>
+        <layer-list>
+            <item android:width="8dp" android:height="8dp" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_primary" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
     <item>
-        <shape android:shape="oval">
-            <size android:width="8dp" android:height="8dp" />
-            <solid android:color="@color/bb_divider" />
-        </shape>
+        <layer-list>
+            <item android:width="8dp" android:height="8dp" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_divider" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
 </selector>

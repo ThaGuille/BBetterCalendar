@@ -14,6 +14,9 @@
         WAIT <ms>                          Start-Sleep
         ASSERT id=<idSuffix> expect~=<sub> find-node -Id ...; text must contain <sub>
                                            (<sub> empty => node must merely exist)
+        SHOT <label>                       capture-screen -Label <label> (visual
+                                           checkpoint PNG; use only for charts /
+                                           layout / failure artifacts)
 
     Invoke-BBStep returns a hashtable: @{ ok = <bool>; info = <string> }.
 #>
@@ -21,12 +24,18 @@
 function Invoke-BBStep {
     param(
         [Parameter(Mandatory)] [string]$Step,
-        [string]$Serial   = 'emulator-5554',
+        [string]$Serial   = '',
         [string]$Pkg      = 'com.example.bbettercalendar',
         [string]$ScriptDir = $PSScriptRoot
     )
 
+    if (-not $Serial) {
+        . (Join-Path $ScriptDir '_device.ps1')
+        $Serial = Get-BBSerial -Requested $Serial
+    }
+
     $finder = Join-Path $ScriptDir 'find-node.ps1'
+    $shooter = Join-Path $ScriptDir 'capture-screen.ps1'
     $verb   = ($Step -split '\s+', 2)[0]
     $rest   = if ($Step.Length -gt $verb.Length) { $Step.Substring($verb.Length).Trim() } else { '' }
 
@@ -89,6 +98,11 @@ function Invoke-BBStep {
                 return @{ ok = $true; info = "ASSERT ok: id=$idSuffix exists" }
             }
             return @{ ok = $false; info = "bad ASSERT: $rest" }
+        }
+        'SHOT' {
+            $label = if ($rest) { $rest } else { $null }
+            $out = & $shooter -Label $label -Serial $Serial
+            return @{ ok = ($LASTEXITCODE -eq 0); info = ($out -join '; ') }
         }
         default {
             return @{ ok = $false; info = "unknown step verb: $verb" }

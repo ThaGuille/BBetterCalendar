@@ -133,6 +133,7 @@ public class ProgressViewModel extends AndroidViewModel {
         ZoneId zone = ZoneId.systemDefault();
         long startMillis = start.atStartOfDay(zone).toInstant().toEpochMilli();
         long endMillis = end.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1;
+        int[] focusMinutesByHour = new int[24];
         int[] focusByHour = new int[24];
         int[] failByHour = new int[24];
         for (FocusEvent ev : focusEventDao.getRange(startMillis, endMillis)) {
@@ -141,10 +142,15 @@ public class ProgressViewModel extends AndroidViewModel {
                 failByHour[hour]++;
             } else if (ev.type == FocusEvent.TYPE_FOCUS) {
                 focusByHour[hour]++;
+                // Minutos por hora: alimenta el gráfico de concentración en vista DAY (misma
+                // unidad que la serie diaria), mientras focusByHour mantiene el conteo de sesiones
+                // que usa el gráfico "When" en week/month.
+                focusMinutesByHour[hour] += ev.durationMin;
             }
         }
 
-        return new ChartBundle(labels, focusMinutes, fails, focusByHour, failByHour);
+        return new ChartBundle(range.granularity, labels, focusMinutes, fails,
+                focusMinutesByHour, focusByHour, failByHour);
     }
 
     @Override

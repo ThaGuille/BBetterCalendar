@@ -1,6 +1,6 @@
 ---
 name: adb-ui-test
-description: Drive the running BBetter app on the emulator over adb to catch crashes and verify screen state — screenshot-free and MCP-free. Use when the user says "test the app", "run a UI flow", "drive the emulator", "does screen X work", "click through the progress screen", or asks to verify a change actually runs (not just compiles). Navigates by resource-id via uiautomator XML; records/replays flows cheaply.
+description: Drive the running BBetter app on the emulator over adb to catch crashes and verify screen state — screenshot-free and MCP-free. Use when the user says "test the app", "run a UI flow", "drive the emulator", "does screen X work", "click through the progress screen", or asks to verify a change actually runs (not just compiles). Navigates by resource-id via uiautomator XML; records/replays flows cheaply. For the one case the XML dump can't see — a chart/graph rendering or a layout/palette visual check — capture-screen.ps1 grabs a real PNG to inspect (use only when a visual judgement is actually needed).
 ---
 
 # adb-ui-test — screenshot-free UI testing over adb
@@ -24,6 +24,12 @@ re-derive ids.
     (list with `-list-avds`). You **cannot** create an AVD, accept SDK licenses, or authorize
     a physical device's "Allow USB debugging" prompt yourself.
 - Run scripts from the skill's `scripts\` dir (or pass full paths).
+- **Targets the emulator, never the phone, by default.** Every script resolves `-Serial`
+  through [`_device.ps1`](scripts/_device.ps1): if you don't pass `-Serial` explicitly, it
+  picks the first attached `emulator-*` device from `adb devices`, ignoring any physical
+  phone — even if the phone is connected and is the active/preselected device in Android
+  Studio. Pass `-Serial <phone-serial>` explicitly only if you genuinely want to drive the
+  phone.
 
 ## Workflow
 
@@ -55,7 +61,18 @@ re-derive ids.
    adb -s emulator-5554 logcat -d -b crash                     # must contain no FATAL EXCEPTION
    ```
 
-5. **Reset** between scenarios (hermetic):
+5. **Visual checkpoint — ONLY for charts / layout** (the one escape hatch from the
+   screenshot-free rule). Custom-canvas content (MPAndroidChart) is invisible to the XML
+   dump, so when you must actually *see* a graph rendered, capture a real PNG and Read it:
+   ```powershell
+   .\scripts\capture-screen.ps1 -Label progress-month-chart   # -> SAVED <abs-path>.png
+   ```
+   Then use the **Read** tool on the printed path to inspect the image. Use this sparingly —
+   it costs image tokens and isn't free to replay. For structure/text/crash, stay on
+   `find-node.ps1`. (Why device-side `screencap` + `adb pull`, not `exec-out ... > out.png`:
+   PowerShell's `>` re-encodes the byte stream and corrupts the PNG; `adb pull` is binary-clean.)
+
+6. **Reset** between scenarios (hermetic):
    ```powershell
    adb -s emulator-5554 shell pm clear com.example.bbettercalendar
    ```
@@ -79,8 +96,10 @@ cd .claude\skills\adb-ui-test\scripts
 ```
 
 Recordings are flat text under `recordings/<scenario>.log` (epoch-ms `\t` STEP). The
-grammar (START / GRANT / CLEAR / TAP / TYPE / KEY / SWIPE / WAIT / ASSERT) is documented in
-[`scripts/_steps.ps1`](scripts/_steps.ps1).
+grammar (START / GRANT / CLEAR / TAP / TYPE / KEY / SWIPE / WAIT / ASSERT / SHOT) is
+documented in [`scripts/_steps.ps1`](scripts/_steps.ps1). `SHOT <label>` (recorder flag
+`-Shot <label>`) drops a visual-checkpoint PNG into `captures/` — include it in a flow only
+when that scenario renders a chart you need to eyeball.
 
 ## RIGHT / WRONG
 
@@ -95,10 +114,16 @@ grammar (START / GRANT / CLEAR / TAP / TYPE / KEY / SWIPE / WAIT / ASSERT) is do
 - **RIGHT:** `pm grant POST_NOTIFICATIONS`. **WRONG:** trying to tap a system permission
   dialog (you can't see it, and the grant avoids it entirely).
 
-## Hard limits (by design — this is the cost of "no screenshots")
+## Hard limits (the cost of "no screenshots" — with one deliberate escape hatch)
 
-- No pixel/visual verification: chart shapes, layout, `bb_*` palette can't be judged.
-- Custom-canvas content (charts) is invisible to the dump → covered by JUnit, not here.
+- Default flow is screenshot-free: chart shapes, layout, and `bb_*` palette are **not** in the
+  XML dump and can't be judged from it.
+- **Escape hatch for visuals:** `capture-screen.ps1` (step `SHOT`) grabs a real PNG you can
+  Read — use it *only* when a graph/layout actually needs eyeballing, not as a default. It
+  costs image tokens and isn't free to replay, so the no-screenshot default still stands for
+  structure/text/crash checks.
+- Chart *data* correctness still belongs in JUnit on `ProgressViewModel`; a screenshot proves
+  "it rendered / looks right", not "the numbers are correct".
 - Segmented selection state isn't reliably in the dump → assert the resulting `range_label`
   text or a logcat marker instead.
 
@@ -109,10 +134,13 @@ grammar (START / GRANT / CLEAR / TAP / TYPE / KEY / SWIPE / WAIT / ASSERT) is do
 - [ ] `find-node.ps1 -Id range_label` returns `FOUND ...` (proves navigation reached Progress).
 - [ ] A non-existent id returns `NOT FOUND` with exit code 1 (proves assertions actually gate).
 - [ ] `replay.ps1 <scenario>` reports `PASS`.
+- [ ] (charts only) `capture-screen.ps1 -Label x` prints `SAVED ...png` and the file opens as a
+      real PNG; Reading it shows the rendered graph.
 
 ## Cross-refs
 
 - [`references/bbetter-selectors.md`](references/bbetter-selectors.md) — ids & device facts.
+- [`scripts/capture-screen.ps1`](scripts/capture-screen.ps1) — visual-checkpoint PNG (charts/layout only).
 - [`bb-build`](../bb-build/SKILL.md) — gradle invocation & build-failure recovery.
 - [`check`](../check/SKILL.md) — compile/lint/unit gate (run logic/data checks there).
 - `ui-tester` subagent — runs this loop in an isolated context (keeps dumps/logcat out of

@@ -25,6 +25,7 @@
 .PARAMETER Wait     milliseconds to sleep
 .PARAMETER AssertId resource-id suffix to assert exists (+ optional -Expect substring)
 .PARAMETER Expect   substring the asserted node's text must contain
+.PARAMETER Shot     capture a visual-checkpoint PNG (label); for charts/layout only
 
 .EXAMPLE
     .\bb-adb.ps1 -Scenario progress-smoke -Init
@@ -48,12 +49,15 @@ param(
     [int]$Wait,
     [string]$AssertId,
     [string]$Expect,
-    [string]$Serial = 'emulator-5554',
+    [string]$Shot,
+    [string]$Serial = '',
     [string]$Pkg    = 'com.example.bbettercalendar'
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '_device.ps1')
 . (Join-Path $PSScriptRoot '_steps.ps1')
+$Serial = Get-BBSerial -Requested $Serial
 
 $recDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'recordings'
 if (-not (Test-Path $recDir)) { New-Item -ItemType Directory -Path $recDir | Out-Null }
@@ -65,7 +69,7 @@ if ($Init) {
     & adb -s $Serial logcat -c -b crash 2>$null
     & adb -s $Serial logcat -c          2>$null
     Write-Output "Initialized recording: $log"
-    if (-not ($Start -or $Grant -or $Clear -or $Tap -or $TapText -or $Type -or $Key -or $Swipe -or $Wait -or $AssertId)) {
+    if (-not ($Start -or $Grant -or $Clear -or $Tap -or $TapText -or $Type -or $Key -or $Swipe -or $Wait -or $AssertId -or $Shot)) {
         return
     }
 }
@@ -84,9 +88,10 @@ elseif ($PSBoundParameters.ContainsKey('Wait')) { $step = "WAIT $Wait" }
 elseif ($AssertId)         {
     $step = if ($Expect) { "ASSERT id=$AssertId expect~=$Expect" } else { "ASSERT id=$AssertId" }
 }
+elseif ($Shot)             { $step = "SHOT $Shot" }
 
 if (-not $step) {
-    Write-Output "No action supplied. Pass one of -Start/-Grant/-Clear/-Tap/-TapText/-Type/-Key/-Swipe/-Wait/-AssertId (or just -Init)."
+    Write-Output "No action supplied. Pass one of -Start/-Grant/-Clear/-Tap/-TapText/-Type/-Key/-Swipe/-Wait/-AssertId/-Shot (or just -Init)."
     exit 2
 }
 

@@ -22,7 +22,9 @@
     (token-bounded). Ignores -Id/-Text/-Tap.
 
 .PARAMETER Serial
-    adb device serial. Defaults to the running emulator.
+    adb device serial. Defaults to the first attached emulator-* device --
+    even if a phone is also connected and preselected in Android Studio.
+    Pass explicitly to target something else (e.g. a physical device).
 
 .OUTPUTS
     Exit code 0 = found (and tapped if -Tap), 1 = not found, 2 = dump failed.
@@ -39,11 +41,13 @@ param(
     [string]$Text,
     [switch]$Tap,
     [switch]$List,
-    [string]$Serial = 'emulator-5554',
+    [string]$Serial = '',
     [string]$DumpPath = '/sdcard/bb_dump.xml'
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '_device.ps1')
+$Serial = Get-BBSerial -Requested $Serial
 
 function Invoke-UiDump {
     # uiautomator dump is flaky ("could not get idle state") -- try twice.

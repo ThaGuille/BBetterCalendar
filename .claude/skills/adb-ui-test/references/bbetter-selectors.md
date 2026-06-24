@@ -46,4 +46,6 @@ Tab labels (for `-Text` fallback): Home · Progress · Calendar · Projects.
 - **Chart correctness is out of band.** `chart_container` / chart data points are
   canvas-drawn and absent from the XML. Cover chart *data* with JUnit on
   `ProgressViewModel`; this UI layer only confirms the screen builds without crashing.
+  To eyeball that a chart actually *rendered*, grab a PNG with
+  `scripts\capture-screen.ps1 -Label <name>` and Read it (visual escape hatch — charts only).
 - **Crashes** surface in `adb -s emulator-5554 logcat -d -b crash` as `FATAL EXCEPTION`.

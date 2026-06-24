@@ -20,12 +20,14 @@ param(
     [double]$Speed   = 1.0,
     [int]$MinSettle  = 400,
     [int]$MaxSettle  = 4000,
-    [string]$Serial  = 'emulator-5554',
+    [string]$Serial  = '',
     [string]$Pkg     = 'com.example.bbettercalendar'
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '_device.ps1')
 . (Join-Path $PSScriptRoot '_steps.ps1')
+$Serial = Get-BBSerial -Requested $Serial
 
 $log = Join-Path (Split-Path $PSScriptRoot -Parent) "recordings\$Scenario.log"
 if (-not (Test-Path $log)) { Write-Output "No recording: $log"; exit 2 }

@@ -11,16 +11,9 @@
     android:paddingTop="@dimen/spacing_md"
     tools:context=".ui.progress.ProgressFragment">
 
-    <!-- ============ Header ============ -->
-    <TextView
-        android:id="@+id/text_dashboard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/title_progress"
-        android:textAppearance="@style/TextAppearance.BBetter.Headline"
-        android:textColor="@color/bb_primary_dark" />
-
     <!-- ============ (2) Chart carousel ============ -->
+    <!-- El título de la pantalla ya lo pone la toolbar ("Progress"); aquí no repetimos
+         el headline para no duplicarlo y dar más aire a las tarjetas. -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/chart_pager"
         android:layout_width="match_parent"
@@ -33,11 +26,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/spacing_sm"
+        android:background="@android:color/transparent"
         app:tabBackground="@drawable/tab_dot"
         app:tabGravity="center"
         app:tabIndicatorHeight="0dp"
-        app:tabPaddingEnd="4dp"
-        app:tabPaddingStart="4dp" />
+        app:tabPaddingEnd="6dp"
+        app:tabPaddingStart="6dp" />
 
     <!-- ============ (4) Time-span navigator ============ -->
     <!-- Day / Week / Month segmented toggle (selección gestionada en el Fragment) -->

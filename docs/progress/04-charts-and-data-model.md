@@ -81,6 +81,50 @@ public class AppUsageDaily {
 This is a Tier-2 nicety — for "today / a recent day / this week" we can read the OS live and skip
 storage.
 
+### `AppRule` — the user's tracked apps + limit/block rules (Phase 2–4)
+
+The screen is **user-curated**: the user picks which installed apps to track/limit (see
+[`01`](01-usage-tracking.md#the-app-picker-user-curated-list)), and Phase 4 attaches a daily limit
+and/or instant block to each. One row per chosen app:
+
+```java
+@Entity(tableName = "app_rule")
+public class AppRule {
+    @PrimaryKey @NonNull public String packageName;
+    public boolean tracked;          // shown in the Progress app list
+    public int  dailyLimitMinutes;   // 0 = no limit (track only)
+    public int  warnBeforeMinutes;   // pre-limit notification lead time (default ~5)
+    public boolean instantBlock;     // user flipped the 🚫 toggle: blocked right now, all day
+    public boolean blockedToday;     // set true when today's limit is hit; cleared at daily reset
+    public int  blockStyle;          // 0 = cover overlay (default), 1 = bounce-to-home
+}
+```
+
+- The **app list** (band 3) is `SELECT * FROM app_rule WHERE tracked` joined with live usage for
+  the selected range.
+- The **monitor service** ([`02`](02-blocking-and-reminders.md)) reads `dailyLimitMinutes` +
+  `warnBeforeMinutes` to fire the pre-limit notification and to set `blockedToday`.
+- The **AccessibilityService** checks `instantBlock || blockedToday` for the foreground package and
+  applies `blockStyle`.
+- `blockedToday` is cleared in the **same daily-reset hook** that upserts `DailyStat` — one boundary,
+  one place.
+
+### `ConsentRecord` — proof of affirmative consent (Phase 2 + 4)
+
+Play requires *affirmative consent after a prominent disclosure* before using Usage Access and the
+AccessibilityService ([`07`](07-legal-and-compliance.md)). Persist that the user accepted, and which
+disclosure version, so we can prove it and re-prompt if the text changes. A tiny table (or
+equivalent fields on `Configuration`) is enough:
+
+```java
+@Entity(tableName = "consent_record")
+public class ConsentRecord {
+    @PrimaryKey @NonNull public String key;  // "usage_access" | "accessibility_block"
+    public long acceptedAt;                   // epoch millis, 0 = not yet accepted
+    public int  disclosureVersion;            // bump when the disclosure copy changes
+}
+```
+
 ### ⚠️ Migration discipline (project rule #6)
 
 `AppDatabase` uses `fallbackToDestructiveMigration()` — **bumping `@Database(version)` wipes the

@@ -1,8 +1,14 @@
-# 03 — Per-website usage ("even webpages")
+# 03 — Per-website usage ("even webpages") — ⛔ OUT OF SCOPE
 
-> The sketch and brief mention tracking **websites** (e.g. time on youtube.com), not just apps.
-> This is the single **least reliable** request. Here's exactly why, and what we can honestly
-> deliver.
+> **Descoped (2026-06-28).** We are **forgetting about webpages for now** and tracking/blocking
+> **apps only**. This whole file is **deferred reference** — nothing here is being built. It stays
+> in the repo because the analysis is sound and we may revisit website blocking later (the
+> AccessibilityService we ship for app blocking would make URL-bar reading "free" incremental
+> work). Until then: ignore for implementation.
+
+> _Original note:_ The sketch and brief mention tracking **websites** (e.g. time on youtube.com),
+> not just apps. This is the single **least reliable** request. Here's exactly why, and what we
+> can honestly deliver.
 
 ## The core problem
 

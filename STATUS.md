@@ -16,32 +16,35 @@ the live state** (active specs, plans, recent commits). It refreshes itself — 
 
 _This is the only section that isn't auto-derived. Update it when you finish a thing or change direction._
 
-1. **Apply `persist-pomodoro-session-state`** (proposed, not started) — timer is silently lost on
-   rotation / back-stack return. Small, `HomeFragment`-only. `/spec apply persist-pomodoro-session-state`.
-2. **Then Progress Phase 2 — phone & app usage** (`PACKAGE_USAGE_STATS` + usage-access onboarding +
-   per-app list). First phase that needs a permission; still Play-safe.
+1. **Progress Phase 2 — phone & app usage** (`PACKAGE_USAGE_STATS` + usage-access disclosure +
+   **user-curated app-picker** + per-app list). First phase that needs a permission; Play-safe.
+   Next action: `/spec propose` it (no spec exists yet). Captures the picker, the daily-snapshot
+   table, the locked-state onboarding, and block toggles stubbed for Phase 4.
+2. **Then Phase 3 (per-app daily limits + a notification a few min before)**, then **Phase 4 (soft
+   block: full-screen cover, bounce fallback, after the limit)** — Phase 4 carries the Play
+   compliance work ([docs/progress/07-legal-and-compliance.md](docs/progress/07-legal-and-compliance.md)).
 
-   _Done: Progress Phase 1 (Charts MVP) — coded, built, on-device QA passed 2026-06-28 (all 3
-   scenarios: empty install, live 1-min session, stepper), `/spec archive`d to
-   `.claude/specs/archive/progress-charts-mvp/`._
+   _Done: `persist-pomodoro-session-state` (committed 9926fa9, archived). Progress Phase 1 (Charts
+   MVP) — on-device QA passed 2026-06-28, archived to `.claude/specs/archive/progress-charts-mvp/`._
 
-**Decisions still owed** (block Phase 4+): distribution intent (sideload vs Play) · block style
-(bounce / cover / kill-network) · is per-website timing worth its fragility. See the roadmap's
-*Open questions*.
+**Decisions — RESOLVED 2026-06-28:** ship to **Google Play with the full blocking system** (compliance
+mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bounce fallback**, triggered
+**after a per-app daily limit** · **websites dropped** (apps only). Details:
+[docs/progress/](docs/progress/README.md) decisions banner + [07-legal-and-compliance.md](docs/progress/07-legal-and-compliance.md).
 
 ---
 
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 24f2ed7 (2026-06-28)
+**Branch:** `main`  |  **State as of commit:** 0344a59 (2026-06-28)
 
 ### 1. What we touched last (recent commits)
+- 0344a59 2026-06-28 Archive progress-charts-mvp spec and update status
+- 9926fa9 2026-06-28 Persist in-progress Pomodoro session across fragment recreation
 - 24f2ed7 2026-06-28 status system
 - d518be4 2026-06-24 improvement in progress grpahs
 - 9d16872 2026-06-10 progress UI bug + bug fixing
-- 2b527fc 2026-06-10 improvement testing skill
-- 1047338 2026-06-09 progress UI screen + testing skill
 
 ### 2. In flight - active `/spec` changes
 _None active._

@@ -4,6 +4,22 @@
 > me to close it, or block it for the rest of the day."* This is the hardest, most
 > permission-heavy, most policy-sensitive part. Read the verdict first, then the mechanics.
 
+## Decisions locked (2026-06-28)
+
+| Question | Decision |
+|---|---|
+| Do we build blocking at all? | **Yes** — it's a committed feature, shipping on Google Play (see [`07`](07-legal-and-compliance.md)). |
+| Block mechanism | **Path A: AccessibilityService + overlay** (the only viable one for normal apps). |
+| Block *style* | **Full-screen cover overlay is primary** (matches commercial apps — *one sec* / *Opal* / *ScreenZen*), with **bounce-to-home as a secondary/fallback** when an overlay can't be drawn (e.g. Android 12+ `setHideOverlayWindows`). |
+| Trigger model | **Soft block applied after a per-app daily time limit is reached** — *not* an all-day hard block by default. A user-set **instant block** toggle is still available per app. |
+| Pre-limit warning | **Notify a few minutes before** the limit (e.g. "5 min left on Instagram") so the cover isn't a surprise. |
+| Websites | **Out of scope** — dropped (see [`03`](03-web-usage-tracking.md)). Apps only for now. |
+
+The rest of this doc explains the mechanics behind those choices. The data model for per-app
+limit/block rules is in [`04-charts-and-data-model.md`](04-charts-and-data-model.md); the Play
+declarations + disclosure/consent these features require are in
+[`07-legal-and-compliance.md`](07-legal-and-compliance.md).
+
 ## Verdict up front
 
 | What the user imagined | What's actually possible | How |
@@ -32,11 +48,18 @@ This is the architecture behind essentially every Play-Store screen-time app.
 2. The service receives `TYPE_WINDOW_STATE_CHANGED` events. Each carries the **package name** of
    whatever just came to the foreground — instantly, no polling.
 3. We check that package against the user's block/limit rules.
-4. If it's blocked (or over its limit), we **react**:
-   - **Bounce:** `performGlobalAction(GLOBAL_ACTION_HOME)` → user is thrown to the launcher.
-   - **Cover:** draw a full-screen overlay ("Instagram is blocked until tomorrow / breathe for
-     10 s / 3h30 used today") on top of the app.
-   - **Pause/friction:** show the overlay with a countdown and a "continue anyway / close" choice.
+4. If it's blocked (or over its limit), we **react**. **Our chosen style (2026-06-28):**
+   - **Cover (primary):** draw a full-screen `TYPE_ACCESSIBILITY_OVERLAY` ("Instagram is blocked
+     for today — 3h30 used") on top of the app. This is the commercial-app look we want and the
+     overlay the user sees.
+   - **Bounce (fallback):** `performGlobalAction(GLOBAL_ACTION_HOME)` when the cover can't be
+     guaranteed — e.g. a target app on Android 12+ calls `setHideOverlayWindows(true)`, or the
+     overlay is slow to attach. Bounce is the robust backstop so a blocked app never just stays open.
+   - **Pause/friction (limit-reached variant):** the same cover with a countdown + an explicit
+     "Close" (and optionally "continue anyway" for soft limits) — the *one sec* pattern.
+
+   In practice the service tries to cover; if covering isn't possible it bounces to home, and may
+   do both (bounce, then the cover greets the user if they reopen the app).
 
 ### Overlay specifics
 
@@ -122,7 +145,11 @@ So this gives a *true* lock but the provisioning cost makes it a non-starter for
 Worth knowing it exists; not worth building for v1. (A power-user "advanced mode" that walks
 through the ADB device-owner setup is theoretically possible but niche.)
 
-## Path C — `VpnService` local filter (for network/website blocking)
+## Path C — `VpnService` local filter (for network/website blocking) — ⛔ descoped
+
+> **Out of scope (2026-06-28):** websites are dropped and we don't need network-level app blocking,
+> so `VpnService` is **not** part of the plan. Kept below for reference only.
+
 
 A local-only `VpnService` (no remote server) can intercept the device's traffic and **drop
 connections** to chosen hostnames/IPs — this is how NetGuard and several blockers cut off apps'
@@ -152,18 +179,38 @@ For a first version, **(1) is the sweet spot**: it delivers the user's core wish
 on Instagram, remind me") using **only the Usage Access permission they already granted for the
 stats**, with **zero** accessibility/overlay/Play-policy exposure.
 
+## The committed flow: limit → warn → cover (2026-06-28)
+
+This is the behaviour we're building, combining the pieces above into one per-app rule:
+
+1. **User sets a daily limit** on a chosen app (e.g. Instagram = 60 min/day), or flips its
+   **instant-block** toggle (blocked right now for the rest of today).
+2. A **foreground monitor service** tracks today's foreground time for the app
+   (`UsageStatsManager`, [`01`](01-usage-tracking.md)).
+3. **A few minutes before** the limit (configurable, default ~5 min) → **post a notification**
+   ("5 min left on Instagram today"). Only Usage Access + notifications — no accessibility needed
+   for this warning.
+4. **When the limit is hit** (or instant-block is on) → mark the app blocked-for-today and let the
+   **AccessibilityService cover** it on next foreground (bounce as fallback, per the style above).
+5. The block **resets at the daily boundary** (reuse the existing daily-reset hook the stats use).
+
+Steps 1–3 are Play-safe and need no accessibility. Step 4 is the accessibility-gated part, behind
+the explicit opt-in + disclosure in [`07`](07-legal-and-compliance.md). The screen degrades
+gracefully: without accessibility the user still gets limits + warnings (just no enforced cover).
+
 ## Recommended layering
 
 ```
 Tier 0 (MVP)      Measure usage  ............... PACKAGE_USAGE_STATS only
-Tier 1 (easy win) Usage-limit reminders ........ + nothing (notifications we have)
-Tier 2 (opt-in)   Soft block / friction screens  + AccessibilityService + overlay
-Tier 3 (advanced) Website/network blocking ..... + VpnService   (or accessibility URL match)
+Tier 1 (easy win) Usage-limit reminders ........ + nothing (notifications we have)  ← pre-limit warning
+Tier 2 (opt-in)   Soft block / friction screens  + AccessibilityService + overlay   ← cover/bounce after limit
+Tier X (skip)     Website/network blocking ..... DROPPED for now (see 03) — apps only
 Tier X (skip)     Hard OS lock ................. DevicePolicyManager device-owner — not viable
 ```
 
 Each tier is independently shippable and independently gated by its own permission, so the
-screen degrades gracefully when a permission is absent.
+screen degrades gracefully when a permission is absent. **Website/network blocking via VpnService
+(Path C below) is descoped** — kept in the doc for reference only.
 
 ## Sources
 

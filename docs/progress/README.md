@@ -1,11 +1,24 @@
 # Progress screen — feasibility investigation
 
-> Status: investigation / proposal · Created: 2026-06-01 · Last updated: 2026-06-01
+> Status: investigation → **decisions locked** · Created: 2026-06-01 · Last updated: 2026-06-28
 >
-> This folder is a **deep feasibility study** for the second bottom-nav screen, **Progress**
-> (statistics + digital-wellbeing). It is research, not a committed implementation plan.
-> When we decide what to build, the chosen slice should be turned into a plan under
-> [`.claude/plans/`](../../.claude/plans/) (use the `save-plan` skill).
+> This folder began as a **deep feasibility study** for the second bottom-nav screen, **Progress**
+> (statistics + digital-wellbeing). As of 2026-06-28 the key product decisions are **made** (see
+> banner below), so it's now research **+ a committed direction**. Phases 0–1 have shipped; turn
+> each next slice into a `/spec` proposal before building.
+
+## Decisions locked (2026-06-28)
+
+| Question | Decision |
+|---|---|
+| **Distribution** | **Google Play**, keeping the **full blocking system** → compliance is mandatory: [`07-legal-and-compliance.md`](07-legal-and-compliance.md) (+ sideload/F-Droid fallback). |
+| **App list** | **User-curated** — user picks installed apps to track ([`01`](01-usage-tracking.md#the-app-picker-user-curated-list)). |
+| **Block style** | **Full-screen cover (primary) + bounce-to-home (fallback)** ([`02`](02-blocking-and-reminders.md)). |
+| **Block trigger** | **After a per-app daily limit**, with a **notification a few minutes before** + optional instant-block toggle. |
+| **Websites** | **Dropped** — apps only ([`03`](03-web-usage-tracking.md) is deferred reference). |
+
+Next up: **Phase 2** (usage list + app-picker). See [`06`](06-screen-mapping-and-roadmap.md) for the
+phase sequence.
 
 The screen, as sketched, has three bands:
 
@@ -53,10 +66,10 @@ main trap:
 | Per-app usage time (Instagram 3h30…) | 🟢 Feasible | `UsageStatsManager` | Same permission; sum foreground intervals |
 | Per-hour phone-usage heat (work vs fail hours) | 🟢 Feasible | `UsageStatsManager.queryEvents` | Bucket RESUMED→PAUSED intervals by hour |
 | Time-span selector (today / day / week / month) | 🟢 Feasible | Query params | Drives both charts and the app list |
-| Per-**website** time (e.g. youtube.com) | 🟡 Partial | `AccessibilityService` reads URL bar | Fragile, known-browsers only, policy risk |
-| "Set a timer → remind me to close app" | 🟡 Feasible (soft) | Monitor + notification/overlay | Like *one sec* / *ScreenZen*; a nudge, not a lock |
-| "Block app for the rest of the day" | 🟡 Soft only | Accessibility overlay kicks you out | True OS lock (`setPackagesSuspended`) needs device-owner → 🔴 |
-| "Block website for the rest of the day" | 🟡 Soft only | Accessibility nudge **or** local `VpnService` filter | VPN approach is more robust for web |
+| Per-**website** time (e.g. youtube.com) | ⛔ Dropped | — | Descoped 2026-06-28 — apps only |
+| "Set a timer → remind me to close app" | 🟡 Feasible (soft) | Monitor + notification/overlay | **Chosen:** warn a few min before a daily limit |
+| "Block app for the rest of the day" | 🟡 Soft only | Accessibility **cover** (bounce fallback) | **Chosen style**; true OS lock (`setPackagesSuspended`) needs device-owner → 🔴 |
+| "Block website for the rest of the day" | ⛔ Dropped | — | Descoped with web tracking |
 | Hard, un-bypassable app lock | 🔴 Not feasible | `DevicePolicyManager` device-owner | Only via ADB/MDM provisioning, not a normal install |
 
 🟢 = ship it · 🟡 = possible with caveats / a "good-enough" cousin of the original idea · 🔴 = not feasible for a normal app
@@ -80,6 +93,7 @@ main trap:
 | [`04-charts-and-data-model.md`](04-charts-and-data-model.md) | Chart library choice (MPAndroidChart) + the new Room tables we need for time-series + time-span queries |
 | [`05-permissions-and-play-policy.md`](05-permissions-and-play-policy.md) | Every permission, how to request it, onboarding UX, Google Play policy risk, distribution strategy |
 | [`06-screen-mapping-and-roadmap.md`](06-screen-mapping-and-roadmap.md) | Sketch → concrete components, phased roadmap (MVP → advanced), effort estimates |
+| [`07-legal-and-compliance.md`](07-legal-and-compliance.md) | **Shipping the blocker on Play legally:** in-app disclosure/consent, Play declarations, Data-safety, privacy policy, per-phase compliance checklist |
 
 ## Sources (shared across files)
 

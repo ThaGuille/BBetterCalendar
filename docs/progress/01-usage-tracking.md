@@ -102,7 +102,27 @@ while (events.hasNextEvent()) {
 
 Then map package → app label + icon via `PackageManager` (`getApplicationLabel`,
 `getApplicationIcon`), filter out our own package, launchers, and system UI, sort descending,
-and that's the list in the sketch.
+and that's the raw per-app usage. **What we *show* is filtered by the user's picks** — see next.
+
+## The app picker (user-curated list) — design decision (2026-06-28)
+
+The Progress app list is **not** an auto-populated "everything you used today" dump. The user
+explicitly **chooses which apps to track**:
+
+- A separate **"add apps" screen** lists all launchable installed apps
+  (`PackageManager.getInstalledApplications` / a `queryIntentActivities` for `LAUNCHER`, label +
+  icon), with a multi-select. The user ticks as many as they want.
+- Picks are persisted as `AppRule` rows (`tracked = true`) — see
+  [`04-charts-and-data-model.md`](04-charts-and-data-model.md#apprule).
+- The Progress band 3 then shows **only** the tracked apps, each with its usage for the selected
+  day/week/month range (driven by the same time-span navigator as the charts). Apps the user didn't
+  pick are simply not displayed, even if they have usage.
+- The same picked set is what Phase 4 attaches limits / block toggles to — pick once, use for both
+  display and blocking.
+
+This keeps the list intentional and short (the apps the user actually cares about) instead of a
+noisy ranking, and gives blocking a clear target set. Usage is still **measured** for all apps by
+the OS; we just **display** the chosen subset.
 
 ### Version note on the event constants ⚠️
 

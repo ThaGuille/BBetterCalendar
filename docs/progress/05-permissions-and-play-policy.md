@@ -3,6 +3,12 @@
 > Every special permission this screen could need, how the user grants it, and the **distribution
 > risk** that comes attached. This is where "technically possible" meets "will Google let me ship
 > it."
+>
+> **Decision locked (2026-06-28): ship to Google Play *and* keep the full blocking system.** That
+> means the AccessibilityService path is **in scope**, and the Play compliance work it requires is
+> **mandatory, not optional**. The concrete checklist — declarations, disclosure/consent screens,
+> privacy policy — lives in [`07-legal-and-compliance.md`](07-legal-and-compliance.md). This doc
+> stays the permission reference; 07 is the "how we ship it legally" layer.
 
 ## Permission inventory
 
@@ -68,11 +74,15 @@ This is the policy that sinks app-blocker apps:
 | **F-Droid** | ✅ Generally | No accessibility-tool restriction like Play's |
 | **Google Play** | ⚠️ With declaration + disclosure + consent, ongoing risk | Fine for measurement; risky for accessibility blocking |
 
-**Recommendation:** build **measurement + reminders** (low-risk, Play-safe) as the shippable
-core, and gate **accessibility blocking** behind an explicit opt-in that's safe to ship as a
-sideload/F-Droid feature and only carefully on Play. Given this is currently a personal project
-(`com.example.bbettercalendar`), the policy risk is **deferred, not blocking** — but bake the
-disclosure/consent flow in from the start so a future Play release isn't a rewrite.
+**Decision (2026-06-28):** we are shipping **measurement + reminders + accessibility blocking** to
+**Google Play**. So the disclosure/consent flow is **built in from the start** and the
+accessibility blocking is gated behind an explicit, clearly-labelled opt-in — not because the risk
+is deferred (it isn't), but because graceful per-band degradation is good UX *and* the exact shape
+Play wants: a sensitive permission requested only at the moment the user chooses the feature, after
+a prominent disclosure. The full set of declarations, in-app disclosures, consent capture, and the
+hosted privacy policy required to ship this on Play is enumerated in
+[`07-legal-and-compliance.md`](07-legal-and-compliance.md). Keep a **sideload/F-Droid build path**
+as a fallback channel in case Play pulls the accessibility feature (residual risk, see 07 §6).
 
 ## Sources
 

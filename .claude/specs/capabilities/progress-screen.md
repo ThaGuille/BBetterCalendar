@@ -10,10 +10,10 @@
 |---|---|---|
 | 0 — Persist history | ✅ Done | `DailyStat` + `FocusEvent` tables live in DB v9. Upsert before reset wired in `SplashActivity` + `InitialConfiguration`. `TYPE_TASK` FocusEvent not yet emitted (stubbed). |
 | 1 — Charts MVP | ✅ Done | MPAndroidChart v3.1.0 (JitPack). 3-page `ViewPager2` carousel (concent / fails / when-I-focus-or-fail) + Day/Week/Month toggle & `‹ label ›` stepper, one `TimeRange` drives both. On-device QA passed 2026-06-28 (empty install, live session, stepper). Archived: [progress-charts-mvp](../archive/progress-charts-mvp/proposal.md). |
-| 2 — Phone & app usage | 🔲 Not started | Needs `PACKAGE_USAGE_STATS` permission + usage-access onboarding + app list |
-| 3 — Reminders | 🔲 Not started | Reuses Phase 2 data + existing `POST_NOTIFICATIONS` |
-| 4 — Soft blocking | 🔲 Not started | AccessibilityService + overlay; high Play-policy risk |
-| 5 — Web | 🔲 Not started | VpnService DNS or accessibility URL match; stretch goal |
+| 2 — Phone & app usage | 🔲 Not started | `PACKAGE_USAGE_STATS` + usage-access disclosure + **user-curated app-picker** + per-app list. Compliance: privacy policy + Play declaration ([`07`](../../../docs/progress/07-legal-and-compliance.md)) |
+| 3 — Limits + pre-limit warnings | 🔲 Not started | Per-app daily limit + monitor service + **notify a few min before** limit. Reuses Phase 2 data + existing `POST_NOTIFICATIONS` |
+| 4 — Soft blocking | 🔲 Not started | AccessibilityService **cover overlay (primary) + bounce-to-home (fallback)**, triggered after the daily limit / instant-block toggle. Play-policy heavy → disclosure + consent + declaration + demo video ([`07`](../../../docs/progress/07-legal-and-compliance.md)) |
+| ~~5 — Web~~ | ⛔ Dropped | Websites descoped 2026-06-28 — apps only |
 
 ## What exists today (post-Phase 0)
 
@@ -34,8 +34,15 @@
 - **`res/layout/fragment_progress.xml` + `item_chart_card.xml`** — carousel + dots + Day/Week/Month segmented toggle + `‹ label ›` stepper; `bb_*` tokens only. Forward arrow disables when the range reaches today.
 - Deps: `MPAndroidChart:v3.1.0` (new JitPack repo in `settings.gradle`) + `viewpager2:1.0.0`. Material stays 1.9.0; no DB schema change.
 
-## Open questions (carry forward until decided)
+## Open questions — RESOLVED (2026-06-28)
 
-- Distribution intent: personal/sideload vs Google Play (affects Phase 4 scope)
+- ~~Distribution intent: personal/sideload vs Google Play~~ → **Google Play, with the full blocking
+  system.** Compliance mandatory ([`07-legal-and-compliance.md`](../../../docs/progress/07-legal-and-compliance.md));
+  keep sideload/F-Droid as fallback.
+- ~~Block style~~ → **Full-screen cover (primary) + bounce-to-home (fallback)**, triggered after a
+  per-app daily limit, with a notification a few minutes before.
 - ~~Navigator granularity: toggle vs stepper~~ → **Resolved** (Phase 1): Day/Week/Month toggle + single `‹`/`›` stepper, no big arrows.
-- Is per-website timing worth its fragility (Phase 5), or is blocking alone enough?
+- ~~Per-website timing~~ → **Dropped** — apps only for now.
+
+New design decisions folded into the roadmap: **user-curated app-picker** (user selects which
+installed apps to track/limit) and **block-after-daily-limit** with a pre-limit warning.

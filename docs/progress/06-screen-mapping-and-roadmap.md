@@ -3,6 +3,22 @@
 > Turns the drawing into concrete Android pieces and sequences the build so each phase ships
 > something usable and is gated by one clearly-scoped permission.
 
+## Decisions locked (2026-06-28) — read before the roadmap
+
+The earlier "open questions" are now answered. The roadmap below assumes these:
+
+| Decision | Choice |
+|---|---|
+| **Distribution** | **Google Play** — and we keep the **full blocking system** on it. Compliance is mandatory: [`07-legal-and-compliance.md`](07-legal-and-compliance.md). Keep a sideload/F-Droid fallback channel. |
+| **App list** | **User-curated** — the user picks which installed apps to track via an "add apps" screen; only picked apps show. ([`01`](01-usage-tracking.md#the-app-picker-user-curated-list)) |
+| **Blocking style** | **Full-screen cover overlay (primary) + bounce-to-home (fallback).** ([`02`](02-blocking-and-reminders.md)) |
+| **Block trigger** | **After a per-app daily time limit** (with an optional instant-block toggle), plus a **notification a few minutes before** the limit. |
+| **Websites** | **Dropped** for now — apps only. ([`03`](03-web-usage-tracking.md) is descoped reference.) |
+
+These collapse the old Phases 2–5 into a tighter **Phase 2 (usage list) → Phase 3 (limits + warnings)
+→ Phase 4 (cover/bounce blocking)** sequence; the web phase is removed. See the updated roadmap and
+the resolved *Open questions* section at the bottom.
+
 ## The sketch, decoded
 
 ```
@@ -70,53 +86,67 @@ Keep DB/usage reads on the `ExecutorService` and publish with `postValue` (proje
 - **Ships:** a real, useful stats screen with **no special permissions at all.**
 
 ### Phase 2 — Phone & app usage *(`PACKAGE_USAGE_STATS`)*
-- Add the permission + the Usage-Access onboarding/locked-state ([`05`](05-permissions-and-play-policy.md)).
-- Build the app-usage list (3, read-only: icon · name · time) via `queryEvents`
-  ([`01`](01-usage-tracking.md)); add the "total screen time" chart card to the carousel.
-- The navigator (4) now also re-queries the app list.
-- **Ships:** the Instagram-3h30 list + screen-time graph. One user-granted permission, Play-safe.
+- Add the permission + the Usage-Access **disclosure** screen + locked-state
+  ([`05`](05-permissions-and-play-policy.md), disclosure copy per [`07`](07-legal-and-compliance.md)).
+- Build the **app-picker** ("add apps" multi-select) → persist `AppRule(tracked)` rows
+  ([`01`](01-usage-tracking.md#the-app-picker-user-curated-list), [`04`](04-charts-and-data-model.md#apprule)).
+- Build the per-app usage list (3, read-only: icon · name · time) via `queryEvents`
+  ([`01`](01-usage-tracking.md)), showing **only tracked apps**; add the "total screen time" card.
+- The navigator (4) re-queries the app list too.
+- **Compliance (ship with the feature):** privacy policy hosted + linked; Play Permissions
+  declaration + Data-safety form ([`07` §5](07-legal-and-compliance.md)).
+- **Ships:** the user-curated Instagram-3h30 list + screen-time graph. One user-granted permission.
 
-### Phase 3 — Reminders *(no new permission)*
-- Per-app usage-limit reminders via the foreground service + notifications
-  ([`02`](02-blocking-and-reminders.md), "Remind me to close"). Reuses Phase 2 data +
-  `POST_NOTIFICATIONS` we already hold.
-- **Ships:** "set a timer on Instagram → nudge me" — the user's core wish, cheaply.
+### Phase 3 — Limits & pre-limit warnings *(no new permission)*
+- Per-app **daily limit** (`AppRule.dailyLimitMinutes`) + the foreground monitor service tracking
+  today's time ([`02`](02-blocking-and-reminders.md), [`01`](01-usage-tracking.md)).
+- **Notify a few minutes before** the limit (`warnBeforeMinutes`, default ~5) — pure
+  measurement + notification; reuses `POST_NOTIFICATIONS` we already hold.
+- **Ships:** "set a 1h limit on Instagram → warn me at 55 min" — the user's core wish, no
+  accessibility yet.
 
-### Phase 4 — Soft blocking *(opt-in: AccessibilityService + overlay)*
-- The ▣/🚫 toggles (3-left) become real: AccessibilityService detects the app, overlay/bounce
-  enforces "blocked for the rest of the day" ([`02`](02-blocking-and-reminders.md), Path A).
-- Full disclosure + consent flow; ship to sideload/F-Droid freely, to Play only with the
-  declaration ([`05`](05-permissions-and-play-policy.md)).
-- **Ships:** the blocking the sketch's 🚫 implies — as a *soft* block, the only kind that's real.
+### Phase 4 — Soft blocking *(opt-in: AccessibilityService + cover/bounce)*
+- The ▣/🚫 toggles (3-left) become real: at the limit (or instant-block), mark `blockedToday`;
+  the AccessibilityService **covers** the app full-screen, **bouncing to home** as fallback
+  ([`02`](02-blocking-and-reminders.md), Path A; style locked above). Resets at the daily boundary.
+- Full **disclosure + affirmative-consent** flow + `isAccessibilityTool=false`; **Play
+  Accessibility API declaration + demo video** ([`07` §1–2, §5](07-legal-and-compliance.md)).
+  Sideload/F-Droid fallback stays available (residual Play risk, [`07` §6](07-legal-and-compliance.md)).
+- **Ships:** the blocking the sketch's 🚫 implies — a *soft* cover-screen block after a limit, the
+  only kind that's real.
 
-### Phase 5 — Web *(advanced, optional)*
-- Website **blocking** via `VpnService` DNS filter (robust) and/or accessibility URL match;
-  treat per-website **timing** as best-effort, known-browsers-only ([`03`](03-web-usage-tracking.md)).
-- **Ships:** "block youtube.com" — timing stays a stretch goal.
+### ~~Phase 5 — Web~~ *(dropped 2026-06-28)*
+- **Out of scope.** Websites are descoped; we track/block **apps only**
+  ([`03`](03-web-usage-tracking.md) kept as deferred reference). Revisit later if desired — the
+  Phase-4 accessibility service would make URL-bar reading incremental.
 
 ## Effort / risk summary
 
 | Phase | Rough effort | New permission | Play risk | User value |
 |---|---|---|---|---|
-| 0 Persist history | S | none | none | (enabler) |
-| 1 Charts MVP | M | none | none | High |
-| 2 Usage list | M | Usage Access | Low | High |
-| 3 Reminders | S–M | none | none | High |
-| 4 Soft blocking | L | Accessibility + overlay | **High** | High (but adversarially leaky) |
-| 5 Web | L | VPN / accessibility | Med–High | Medium |
+| 0 Persist history | S | none | none | (enabler) — ✅ done |
+| 1 Charts MVP | M | none | none | High — ✅ done |
+| 2 Usage list + app-picker | M | Usage Access | Low (declare + privacy policy) | High |
+| 3 Limits + pre-limit warnings | S–M | none | none | High |
+| 4 Soft blocking (cover/bounce) | L | Accessibility + overlay | **High** (declaration + disclosure + consent + video; ongoing) | High (but adversarially leaky) |
+| ~~5 Web~~ | — | — | — | **dropped** |
 
-**Recommended first cut: Phases 0–2** (+3 if time allows). That delivers ~80% of the sketch's
-visible value — the graphs and the per-app time list with a working time-span selector — with
-only one easy permission and **zero** Play-policy exposure. Blocking is a deliberate later opt-in,
-not the foundation.
+**Status:** Phases 0–1 are shipped. **Next up is Phase 2** (usage list + user-curated app-picker).
+Phases 3 and 4 follow; 4 is the permission/policy cliff — build it as an explicit opt-in with the
+[`07`](07-legal-and-compliance.md) compliance artifacts shipping alongside it. Each compliance item
+ships *with* its phase, not as a final pass.
 
-## Open questions for the user
+## Open questions — RESOLVED (2026-06-28)
 
-- **Distribution intent?** Personal/sideload vs Google Play decides how aggressively we can do
-  accessibility blocking ([`05`](05-permissions-and-play-policy.md)).
-- **Block = bounce, cover-screen, or kill-network?** All soft; different feel
-  ([`02`](02-blocking-and-reminders.md)).
-- **Navigator granularity:** explicit Day/Week/Month toggle, or the `« ‹ › »` stepper alone?
-- Is **per-website timing** important enough to justify its fragility, or is website *blocking*
-  enough?
+- ~~**Distribution intent?**~~ → **Google Play, with the full blocking system.** Compliance is
+  mandatory and enumerated in [`07-legal-and-compliance.md`](07-legal-and-compliance.md); keep a
+  sideload/F-Droid fallback.
+- ~~**Block = bounce, cover-screen, or kill-network?**~~ → **Full-screen cover (primary) +
+  bounce-to-home (fallback).** No network/VPN blocking. ([`02`](02-blocking-and-reminders.md))
+- ~~**Navigator granularity?**~~ → **Resolved in Phase 1:** Day/Week/Month toggle + single
+  `‹`/`›` stepper.
+- ~~**Per-website timing?**~~ → **Dropped** — apps only for now ([`03`](03-web-usage-tracking.md)).
+
+No open questions remain blocking Phases 2–4. New design choices folded in: **user-curated
+app-picker** and **block-after-daily-limit with a pre-limit notification.**
 </content>

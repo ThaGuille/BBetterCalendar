@@ -42,6 +42,10 @@
 ## Verify
 - [x] `/check`: `assembleDebug` BUILD SUCCESSFUL; `lintDebug` only fails on 5 pre-existing errors in
       untouched calendar/notification files (zero new lint issues from Progress).
-- [ ] Manual on-device QA (do when running the app): empty install → flat-zero charts no crash;
+- [x] Manual on-device QA (do when running the app): empty install → flat-zero charts no crash;
       a completed session today shows in the trailing point + the right hour bucket; navigator steps
       day/week/month and the forward arrow disables at "today".
+      Verified 2026-06-28 on Pixel_9a (emulator-5554) via ui-tester — all 3 scenarios PASS:
+      empty install renders flat-zero on all carousel pages; a 1-min session bumped today's point
+      and placed a bar at the current hour (18); Day/Week/Month stepper labels correct and the
+      forward arrow disables at "today" in every granularity. No FATAL EXCEPTION in logcat -b crash.

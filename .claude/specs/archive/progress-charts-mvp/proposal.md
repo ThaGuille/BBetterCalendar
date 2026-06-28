@@ -1,9 +1,9 @@
 # Progress Charts MVP — our-data-only stats screen (Phase 1)
 
 **Slug:** progress-charts-mvp
-**Status:** applied
+**Status:** archived
 **Created:** 2026-06-09
-**Last updated:** 2026-06-09
+**Last updated:** 2026-06-28
 
 > Roadmap: Phase 1 of [`docs/progress/06-screen-mapping-and-roadmap.md`](../../../../docs/progress/06-screen-mapping-and-roadmap.md).
 > Builds on the now-done Phase 0 (see [`capabilities/progress-screen.md`](../../capabilities/progress-screen.md)).

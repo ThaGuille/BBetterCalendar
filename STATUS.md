@@ -16,14 +16,14 @@ the live state** (active specs, plans, recent commits). It refreshes itself — 
 
 _This is the only section that isn't auto-derived. Update it when you finish a thing or change direction._
 
-1. **Finish Progress Phase 1 — on-device QA.** The Charts MVP (`progress-charts-mvp`) is coded and
-   builds; the only open task is the manual emulator pass (empty install = flat-zero charts, no crash;
-   a completed session shows in the trailing point + right hour bucket; Day/Week/Month stepper, forward
-   arrow disables at "today"). Drive it via the `ui-tester` subagent, then `/spec archive progress-charts-mvp`.
-2. **Apply `persist-pomodoro-session-state`** (proposed, not started) — timer is silently lost on
+1. **Apply `persist-pomodoro-session-state`** (proposed, not started) — timer is silently lost on
    rotation / back-stack return. Small, `HomeFragment`-only. `/spec apply persist-pomodoro-session-state`.
-3. **Then Progress Phase 2 — phone & app usage** (`PACKAGE_USAGE_STATS` + usage-access onboarding +
+2. **Then Progress Phase 2 — phone & app usage** (`PACKAGE_USAGE_STATS` + usage-access onboarding +
    per-app list). First phase that needs a permission; still Play-safe.
+
+   _Done: Progress Phase 1 (Charts MVP) — coded, built, on-device QA passed 2026-06-28 (all 3
+   scenarios: empty install, live 1-min session, stepper), `/spec archive`d to
+   `.claude/specs/archive/progress-charts-mvp/`._
 
 **Decisions still owed** (block Phase 4+): distribution intent (sideload vs Play) · block style
 (bounce / cover / kill-network) · is per-website timing worth its fragility. See the roadmap's
@@ -34,23 +34,23 @@ _This is the only section that isn't auto-derived. Update it when you finish a t
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** d518be4 (2026-06-24)
+**Branch:** `main`  |  **State as of commit:** 24f2ed7 (2026-06-28)
 
 ### 1. What we touched last (recent commits)
+- 24f2ed7 2026-06-28 status system
 - d518be4 2026-06-24 improvement in progress grpahs
 - 9d16872 2026-06-10 progress UI bug + bug fixing
 - 2b527fc 2026-06-10 improvement testing skill
 - 1047338 2026-06-09 progress UI screen + testing skill
-- dde3a95 2026-06-09 harness and Phas0 of progress window: persist our history in db
 
 ### 2. In flight - active `/spec` changes
-| Change | Status | Tasks | Proposal |
-|---|---|---|---|
-| Preserve in-progress Pomodoro session across fragment recreation | proposed | 0/6 | [proposal](.claude/specs/changes/persist-pomodoro-session-state/proposal.md) |
-| Progress Charts MVP — our-data-only stats screen (Phase 1) | applied | 18/19 | [proposal](.claude/specs/changes/progress-charts-mvp/proposal.md) |
+_None active._
 
 ### 3. Living capability docs (how the system behaves now)
+- [Capability — Home Pomodoro timer](.claude/specs/capabilities/home-pomodoro.md)
 - [Capability: Progress Screen](.claude/specs/capabilities/progress-screen.md)
+
+**Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`
 
 ### 4. Plans (`.claude/plans`) - undone first
 | Plan | Status | File |

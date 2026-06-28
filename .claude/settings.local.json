@@ -102,6 +102,11 @@
           {
             "type": "command",
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\session-context.ps1\""
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\update-status.ps1\"",
+            "timeout": 20
           }
         ]
       }
@@ -113,6 +118,11 @@
             "type": "command",
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\verify-ui-reminder.ps1\"",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\update-status.ps1\"",
+            "timeout": 20
           }
         ]
       }

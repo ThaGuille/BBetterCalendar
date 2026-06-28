@@ -1,9 +1,9 @@
 # Preserve in-progress Pomodoro session across fragment recreation
 
 **Slug:** persist-pomodoro-session-state
-**Status:** proposed
+**Status:** archived
 **Created:** 2026-06-07
-**Last updated:** 2026-06-07
+**Last updated:** 2026-06-28
 
 ## Why
 

@@ -57,6 +57,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private final int TIMER_RUNNING_REST = 5;
     private final int TIMER_PAUSED_REST = 6;
 
+    // Saved-instance keys: keep the live Pomodoro state across fragment recreation
+    // (rotation, back-stack return, short-lived process death).
+    private static final String KEY_TIMER_STATE = "bb_home_timer_state";
+    private static final String KEY_TIME_LEFT = "bb_home_time_left_millis";
+    private static final String KEY_LAST_TIMER_TIME = "bb_home_last_timer_time";
+    private static final String KEY_CYCLES_COMPLETED = "bb_home_cycles_completed";
+
 
     private final String TAG = "HomeFragmentTag";
     private FragmentHomeBinding binding;
@@ -136,8 +143,53 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         SoundFeedback.get(requireContext()); // warm singleton so first tap is silent-fast
 
+        if (savedInstanceState != null) {
+            timer_state = savedInstanceState.getInt(KEY_TIMER_STATE, timer_state);
+            timeLeftInMillis = savedInstanceState.getLong(KEY_TIME_LEFT, timeLeftInMillis);
+            lastTimerTime = savedInstanceState.getInt(KEY_LAST_TIMER_TIME, lastTimerTime);
+            cyclesCompleted = savedInstanceState.getInt(KEY_CYCLES_COMPLETED, cyclesCompleted);
+            // Defer the render: setConfigManager() above posts the default configured time
+            // to the timerText LiveData, which would otherwise clobber the restored countdown.
+            // Posting to the view queue runs after that pending LiveData delivery.
+            root.post(this::renderRestoredState);
+        }
+
         setTopMenu();
         return root;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_TIMER_STATE, timer_state);
+        outState.putLong(KEY_TIME_LEFT, timeLeftInMillis);
+        outState.putInt(KEY_LAST_TIMER_TIME, lastTimerTime);
+        outState.putInt(KEY_CYCLES_COMPLETED, cyclesCompleted);
+    }
+
+    /**
+     * Re-render the timer UI from restored instance fields and, if it was running,
+     * resume the countdown from the saved remaining time. Paused/stopped states are
+     * only re-rendered, never auto-started.
+     */
+    private void renderRestoredState() {
+        if (binding == null) return;
+
+        boolean isRest = timer_state == TIMER_RUNNING_REST
+                || timer_state == TIMER_PAUSED_REST
+                || timer_state == TIMER_STOPPED_REST;
+        updateModeChip(isRest);
+        timerText.setText(FormatHelper.formatTime((int) timeLeftInMillis, "mm:ss"));
+
+        if (timer_state == TIMER_RUNNING) {
+            // startTimer() flips PAUSED -> RUNNING; pretend we were paused so it resumes cleanly.
+            timer_state = TIMER_PAUSED;
+            startTimer(timeLeftInMillis);
+        } else if (timer_state == TIMER_RUNNING_REST) {
+            timer_state = TIMER_PAUSED_REST;
+            startTimer(timeLeftInMillis);
+        }
+        // PAUSED* / STOPPED* : text + chip restored above, do not auto-start.
     }
 
     private void updateModeChip(boolean isRest) {

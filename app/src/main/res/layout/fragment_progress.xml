@@ -1,101 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Toda la pantalla scrollea como una sola unidad (NestedScrollView): el carrusel de gráficos
+     (altura fija) + la banda de uso + el navegador no caben a la vez en un teléfono normal, así que
+     en lugar de exprimir la banda con weight (que la colapsaba a ~0), dejamos que el contenido fluya
+     y haga scroll. La lista de uso va wrap_content con nestedScrolling desactivado para que scrollee
+     junto con la página (la lista de apps seguidas es corta). -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bb_surface"
-    android:orientation="vertical"
+    android:fillViewport="true"
     android:paddingStart="@dimen/spacing_md"
     android:paddingEnd="@dimen/spacing_md"
     android:paddingTop="@dimen/spacing_md"
     tools:context=".ui.progress.ProgressFragment">
 
-    <!-- ============ (2) Chart carousel ============ -->
-    <!-- El título de la pantalla ya lo pone la toolbar ("Progress"); aquí no repetimos
-         el headline para no duplicarlo y dar más aire a las tarjetas. -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/chart_pager"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/progress_chart_height"
-        android:layout_marginTop="@dimen/spacing_md" />
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/chart_dots"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/spacing_sm"
-        android:background="@android:color/transparent"
-        app:tabBackground="@drawable/tab_dot"
-        app:tabGravity="center"
-        app:tabIndicatorHeight="0dp"
-        app:tabPaddingEnd="6dp"
-        app:tabPaddingStart="6dp" />
-
-    <!-- ============ (4) Time-span navigator ============ -->
-    <!-- Day / Week / Month segmented toggle (selección gestionada en el Fragment) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginTop="@dimen/spacing_md"
-        android:background="@drawable/bg_segmented_track"
-        android:orientation="horizontal"
-        android:padding="4dp">
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/granularity_day"
-            style="@style/BBetter.SegmentedTrack.Item"
-            android:background="@drawable/bg_segmented_item"
-            android:text="@string/progress_granularity_day" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/granularity_week"
-            style="@style/BBetter.SegmentedTrack.Item"
-            android:background="@drawable/bg_segmented_item_selected"
-            android:text="@string/progress_granularity_week" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/granularity_month"
-            style="@style/BBetter.SegmentedTrack.Item"
-            android:background="@drawable/bg_segmented_item"
-            android:text="@string/progress_granularity_month" />
-    </LinearLayout>
-
-    <!-- ‹ label › stepper (sin flechas grandes) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_md"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/spacing_lg">
 
-        <ImageButton
-            android:id="@+id/range_prev"
-            android:layout_width="@dimen/icon_button_size"
-            android:layout_height="@dimen/icon_button_size"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/progress_range_prev"
-            android:src="@drawable/ic_arrow_back_24"
-            app:tint="@color/bb_on_surface" />
+        <!-- ============ (2) Chart carousel ============ -->
+        <!-- El título de la pantalla ya lo pone la toolbar ("Progress"); aquí no repetimos
+             el headline para no duplicarlo y dar más aire a las tarjetas. -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/chart_pager"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/progress_chart_height" />
 
-        <TextView
-            android:id="@+id/range_label"
-            android:layout_width="0dp"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/chart_dots"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textAppearance="@style/TextAppearance.BBetter.Title"
-            tools:text="This week" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:background="@android:color/transparent"
+            app:tabBackground="@drawable/tab_dot"
+            app:tabGravity="center"
+            app:tabIndicatorHeight="0dp"
+            app:tabPaddingEnd="6dp"
+            app:tabPaddingStart="6dp" />
 
-        <ImageButton
-            android:id="@+id/range_next"
-            android:layout_width="@dimen/icon_button_size"
-            android:layout_height="@dimen/icon_button_size"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/progress_range_next"
-            android:src="@drawable/ic_arrow_forward_24"
-            app:tint="@color/bb_on_surface" />
+        <!-- ============ (3) App-usage band (Phase 2) ============ -->
+        <!-- Banda de uso por app: cabecera (screen time + "Add apps") + lista, o tarjeta de estado
+             (LOCKED / EMPTY) / spinner. -->
+        <LinearLayout
+            android:id="@+id/usage_band"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/progress_usage_header"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+                <TextView
+                    android:id="@+id/usage_screen_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:textAppearance="@style/TextAppearance.BBetter.Title"
+                    tools:text="3h 30m" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/usage_add_apps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="@dimen/spacing_sm"
+                    android:text="@string/progress_usage_add_apps"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label"
+                    android:textColor="@color/bb_primary" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:minHeight="@dimen/progress_usage_band_min_height">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/usage_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false" />
+
+                <ProgressBar
+                    android:id="@+id/usage_loading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/bb_primary"
+                    android:visibility="gone" />
+
+                <!-- Sin android:id en el <include>: si lo lleva, sobrescribe el id del root incluido
+                     (usage_state_card) y findViewById(R.id.usage_state_card) devolvería null. -->
+                <include
+                    layout="@layout/view_usage_locked"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- ============ (4) Time-span navigator ============ -->
+        <!-- Day / Week / Month segmented toggle (selección gestionada en el Fragment) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:background="@drawable/bg_segmented_track"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/granularity_day"
+                style="@style/BBetter.SegmentedTrack.Item"
+                android:background="@drawable/bg_segmented_item"
+                android:text="@string/progress_granularity_day" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/granularity_week"
+                style="@style/BBetter.SegmentedTrack.Item"
+                android:background="@drawable/bg_segmented_item_selected"
+                android:text="@string/progress_granularity_week" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/granularity_month"
+                style="@style/BBetter.SegmentedTrack.Item"
+                android:background="@drawable/bg_segmented_item"
+                android:text="@string/progress_granularity_month" />
+        </LinearLayout>
+
+        <!-- ‹ label › stepper (sin flechas grandes) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/range_prev"
+                android:layout_width="@dimen/icon_button_size"
+                android:layout_height="@dimen/icon_button_size"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/progress_range_prev"
+                android:src="@drawable/ic_arrow_back_24"
+                app:tint="@color/bb_on_surface" />
+
+            <TextView
+                android:id="@+id/range_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.BBetter.Title"
+                tools:text="This week" />
+
+            <ImageButton
+                android:id="@+id/range_next"
+                android:layout_width="@dimen/icon_button_size"
+                android:layout_height="@dimen/icon_button_size"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/progress_range_next"
+                android:src="@drawable/ic_arrow_forward_24"
+                app:tint="@color/bb_on_surface" />
+        </LinearLayout>
+
     </LinearLayout>
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

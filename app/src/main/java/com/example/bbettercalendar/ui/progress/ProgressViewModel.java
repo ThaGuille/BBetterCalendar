@@ -1,6 +1,8 @@
 package com.example.bbettercalendar.ui.progress;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -9,18 +11,27 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.stats.AppRule;
+import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.stats.ConsentRecord;
+import com.example.bbettercalendar.stats.ConsentRecordDAO;
 import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
 import com.example.bbettercalendar.stats.FocusEvent;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
+import com.example.bbettercalendar.usage.UsageAccess;
+import com.example.bbettercalendar.usage.UsageStatsRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -37,13 +48,27 @@ public class ProgressViewModel extends AndroidViewModel {
     private final MutableLiveData<TimeRange> selectedRange;
     private final MutableLiveData<ChartBundle> charts;
 
+    // Banda 3 (uso de apps). Independiente de los gráficos: los gráficos nunca dependen del permiso.
+    private final MutableLiveData<UsageBandState> usageState;
+    private final MutableLiveData<List<AppUsageRow>> apps;
+    private final MutableLiveData<Long> screenTimeMillis;
+
     private final ExecutorService executorService;
     private final DailyStatDAO dailyStatDao;
     private final FocusEventDAO focusEventDao;
     private final StatsDAO statsDao;
+    private final AppRuleDAO appRuleDao;
+    private final ConsentRecordDAO consentRecordDao;
+    private final UsageStatsRepository usageRepo;
+    private final Handler mainHandler;
 
     private static final DateTimeFormatter X_LABEL =
             DateTimeFormatter.ofPattern("d/M", Locale.getDefault());
+
+    // Decisión del CTA "Turn on usage access": ¿hay que mostrar la divulgación o ir directo a Ajustes?
+    public interface DisclosureDecision {
+        void decided(boolean needsDisclosure);
+    }
 
     public ProgressViewModel(@NonNull Application application) {
         super(application);
@@ -51,11 +76,18 @@ public class ProgressViewModel extends AndroidViewModel {
         mText.setValue("This is progress fragment");
         selectedRange = new MutableLiveData<>();
         charts = new MutableLiveData<>();
+        usageState = new MutableLiveData<>();
+        apps = new MutableLiveData<>();
+        screenTimeMillis = new MutableLiveData<>();
 
         AppDatabase db = AppDatabase.getDatabase(application);
         dailyStatDao = db.dailyStatDao();
         focusEventDao = db.focusEventDao();
         statsDao = db.statsDao();
+        appRuleDao = db.appRuleDao();
+        consentRecordDao = db.consentRecordDao();
+        usageRepo = new UsageStatsRepository(application);
+        mainHandler = new Handler(Looper.getMainLooper());
         executorService = Executors.newFixedThreadPool(2);
 
         applyRange(TimeRange.currentWeek());
@@ -64,6 +96,9 @@ public class ProgressViewModel extends AndroidViewModel {
     public LiveData<String> getText() { return mText; }
     public LiveData<TimeRange> getSelectedRange() { return selectedRange; }
     public LiveData<ChartBundle> getCharts() { return charts; }
+    public LiveData<UsageBandState> getUsageState() { return usageState; }
+    public LiveData<List<AppUsageRow>> getApps() { return apps; }
+    public LiveData<Long> getScreenTimeMillis() { return screenTimeMillis; }
 
     // --- intents del navegador (se llaman desde clicks de UI = hilo principal) ---
 
@@ -86,10 +121,71 @@ public class ProgressViewModel extends AndroidViewModel {
     }
 
     // selectedRange se publica en el hilo actual (UI/constructor); el cálculo pesado de los
-    // gráficos se hace en el executor y se publica con postValue.
+    // gráficos y del uso de apps se hace en el executor y se publica con postValue.
     private void applyRange(TimeRange range) {
         selectedRange.setValue(range);
         executorService.execute(() -> charts.postValue(buildBundle(range)));
+        executorService.execute(() -> refreshUsage(range));
+    }
+
+    // --- banda 3: uso de apps ---
+
+    // Re-evalúa el acceso a uso y recarga la lista para el rango actual. Lo llama el Fragment en
+    // onResume() (al volver de Ajustes o del picker no hay callback ni cambio de configuración).
+    public void refreshUsageAccess() {
+        TimeRange current = selectedRange.getValue();
+        if (current == null) return;
+        executorService.execute(() -> refreshUsage(current));
+    }
+
+    // Corre SIEMPRE en el executor (queryEvents + DAO fuera del hilo principal, regla #3).
+    // Si no hay permiso -> LOCKED y no se lee nada. Con permiso pero sin apps -> EMPTY_NO_APPS.
+    // Con apps -> READY con la lista (apps seguidas ⨝ uso del rango). El total de pantalla del
+    // rango se publica siempre que haya permiso (cabecera de la banda).
+    private void refreshUsage(TimeRange range) {
+        if (!UsageAccess.hasUsageAccess(getApplication())) {
+            apps.postValue(Collections.emptyList());
+            screenTimeMillis.postValue(0L);
+            usageState.postValue(UsageBandState.LOCKED);
+            return;
+        }
+
+        ZoneId zone = ZoneId.systemDefault();
+        long begin = range.startDay().atStartOfDay(zone).toInstant().toEpochMilli();
+        long end = range.endDay().plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli();
+
+        screenTimeMillis.postValue(usageRepo.totalScreenTime(begin, end));
+
+        List<AppRule> tracked = appRuleDao.getTracked();
+        if (tracked.isEmpty()) {
+            apps.postValue(Collections.emptyList());
+            usageState.postValue(UsageBandState.EMPTY_NO_APPS);
+            return;
+        }
+
+        Map<String, Long> foreground = usageRepo.foregroundMillis(begin, end);
+        List<AppUsageRow> rows = new ArrayList<>(tracked.size());
+        for (AppRule rule : tracked) {
+            Long millis = foreground.get(rule.packageName);
+            rows.add(new AppUsageRow(rule.packageName, usageRepo.labelFor(rule.packageName),
+                    millis == null ? 0L : millis));
+        }
+        // Más usadas primero.
+        Collections.sort(rows, (a, b) -> Long.compare(b.foregroundMillis, a.foregroundMillis));
+
+        apps.postValue(rows);
+        usageState.postValue(UsageBandState.READY);
+    }
+
+    // El CTA de la tarjeta LOCKED: comprueba (fuera del hilo principal) si ya hay un consentimiento
+    // vigente. needsDisclosure=true -> mostrar la divulgación antes de Ajustes; false -> ir directo.
+    public void resolveUsageAccessCta(DisclosureDecision decision) {
+        executorService.execute(() -> {
+            ConsentRecord rec = consentRecordDao.get(ConsentRecord.KEY_USAGE_ACCESS);
+            boolean needsDisclosure = rec == null
+                    || rec.disclosureVersion < ConsentRecord.USAGE_ACCESS_DISCLOSURE_VERSION;
+            mainHandler.post(() -> decision.decided(needsDisclosure));
+        });
     }
 
     private ChartBundle buildBundle(TimeRange range) {

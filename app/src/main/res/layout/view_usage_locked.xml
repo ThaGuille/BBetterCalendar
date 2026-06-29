@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta de estado reutilizable de la banda de uso: sirve para LOCKED (permiso apagado) y para
+     EMPTY_NO_APPS (sin apps elegidas). El Fragment cambia título / cuerpo / CTA según el estado. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/usage_state_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:elevation="@dimen/elevation_card"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/home_card_padding">
+
+    <TextView
+        android:id="@+id/usage_state_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+    <TextView
+        android:id="@+id/usage_state_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+    <TextView
+        android:id="@+id/usage_state_cta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:background="@drawable/bg_save_pill"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingStart="@dimen/spacing_lg"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_sm"
+        android:textAppearance="@style/TextAppearance.BBetter.Title"
+        android:textColor="@color/bb_on_primary" />
+
+</LinearLayout>

@@ -39,4 +39,18 @@ public class FormatHelper {
     public static int minutesToMillis(int minutes){
            return minutes * 60000;
     }
+
+    // Duración legible para la lista de uso de apps: "3h 30m" / "45m" / "<1m".
+    // Acepta long (los milisegundos de uso pueden superar Integer.MAX_VALUE en rangos largos).
+    public static String formatDuration(long millis) {
+        if (millis <= 0) return "0m";
+        long totalMinutes = millis / 60000L;
+        if (totalMinutes < 1) return "<1m";
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        if (hours > 0) {
+            return String.format(Locale.getDefault(), "%dh %02dm", hours, minutes);
+        }
+        return String.format(Locale.getDefault(), "%dm", minutes);
+    }
 }

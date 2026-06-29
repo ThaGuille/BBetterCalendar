@@ -60,4 +60,21 @@ public class DBMigration extends Application {
             database.execSQL("ALTER TABLE configuration ADD COLUMN notificationPermissionLastAskedMillis INTEGER NOT NULL DEFAULT 0");
         }
     };
+
+    // Phase 2 (uso de apps): añade las tablas app_rule (apps seguidas + campos de límite/bloqueo
+    // reservados para Phases 3-4) y consent_record (acuse de la divulgación de Usage Access).
+    // Migración aditiva (sólo CREATE TABLE) -> el histórico v9 (daily_stat / focus_event) se conserva.
+    static final Migration MIGRATION_9_10 = new Migration(9, 10) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS app_rule (" +
+                    "packageName TEXT NOT NULL PRIMARY KEY, tracked INTEGER NOT NULL DEFAULT 0, " +
+                    "dailyLimitMinutes INTEGER NOT NULL DEFAULT 0, warnBeforeMinutes INTEGER NOT NULL DEFAULT 5, " +
+                    "instantBlock INTEGER NOT NULL DEFAULT 0, blockedToday INTEGER NOT NULL DEFAULT 0, " +
+                    "blockStyle INTEGER NOT NULL DEFAULT 0)");
+            database.execSQL("CREATE TABLE IF NOT EXISTS consent_record (" +
+                    "`key` TEXT NOT NULL PRIMARY KEY, acceptedAt INTEGER NOT NULL DEFAULT 0, " +
+                    "disclosureVersion INTEGER NOT NULL DEFAULT 0)");
+        }
+    };
 }

@@ -7,6 +7,22 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Phase 2: lectura de uso de apps (acceso especial; se concede en Ajustes -> Acceso a uso,
+         no por diálogo en runtime). tools:ignore para que lint no marque ProtectedPermissions. -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- Visibilidad de paquetes (API 30+): para listar apps lanzables en el picker y resolver
+         nombre/icono de los paquetes que devuelve UsageStatsManager. Visibilidad por intent
+         (apps con actividad LAUNCHER), no QUERY_ALL_PACKAGES. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".database.DBMigration"
         android:allowBackup="true"
@@ -36,6 +52,11 @@
         <activity
             android:name=".calendarEntries.AddEventActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".ui.progress.apppicker.AppPickerActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"/>
 

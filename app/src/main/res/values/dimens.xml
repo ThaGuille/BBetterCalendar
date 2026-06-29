@@ -53,5 +53,10 @@
     <dimen name="dialog_min_width">240dp</dimen>
 
     <!-- Progress screen -->
-    <dimen name="progress_chart_height">300dp</dimen>
+    <!-- Carrusel algo más bajo (era 300dp) para dejar sitio a la banda de uso de Phase 2; la
+         pantalla scrollea entera, así que en pantallas pequeñas no se recorta nada. -->
+    <dimen name="progress_chart_height">240dp</dimen>
+    <!-- Altura mínima del área de la banda de uso (tarjeta LOCKED/EMPTY o lista) para que no quede
+         aplastada cuando hay pocas apps. -->
+    <dimen name="progress_usage_band_min_height">180dp</dimen>
 </resources>

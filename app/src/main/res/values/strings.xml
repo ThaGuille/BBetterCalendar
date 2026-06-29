@@ -104,6 +104,31 @@
     <string name="progress_chart_fails">fails</string>
     <string name="progress_chart_when">when I focus / fail</string>
 
+    <!-- Progress screen — phone & app usage (Phase 2) -->
+    <string name="progress_usage_header">Screen time</string>
+    <string name="progress_usage_time_none">—</string>
+    <string name="progress_usage_add_apps">Add apps</string>
+    <string name="progress_usage_block_toggle">Block app (coming soon)</string>
+    <string name="progress_usage_locked_title">See your app usage</string>
+    <string name="progress_usage_locked_body">Turn on Usage access to track the time you spend in the apps you choose. Your usage stays on this device.</string>
+    <string name="progress_usage_locked_cta">Turn on usage access</string>
+    <string name="progress_usage_empty_title">No apps tracked yet</string>
+    <string name="progress_usage_empty_body">Pick the apps you want to keep an eye on and they\'ll show up here.</string>
+    <string name="progress_usage_empty_cta">Add apps</string>
+
+    <!-- App picker (Phase 2) -->
+    <string name="app_picker_title">Add apps</string>
+    <string name="app_picker_save">Save</string>
+    <string name="app_picker_close">Close</string>
+    <string name="app_picker_empty">No apps found</string>
+    <string name="app_picker_check">Track this app</string>
+
+    <!-- Usage-access disclosure (Phase 2 — shown before the Settings deep-link) -->
+    <string name="usage_disclosure_title">Track your app usage</string>
+    <string name="usage_disclosure_body">To show how long you spend in each app, BBetter reads your device\'s app-usage information (which apps run in the foreground and for how long) and the list of installed apps.\n\nThis stays on your device — it is never uploaded, shared, or used for ads. You choose which apps to track, and you can turn this off any time in Settings → Usage access.</string>
+    <string name="usage_disclosure_continue">Continue</string>
+    <string name="usage_disclosure_cancel">Not now</string>
+
     <!-- Repetition popup -->
     <string name="repetition_popup_title">Repetition</string>
     <string name="repetition_option_none">Doesn\'t repeat</string>

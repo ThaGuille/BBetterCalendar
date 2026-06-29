@@ -20,6 +20,9 @@
     <string name="home_today_card_title">Today</string>
     <string name="home_mode_concentration">Concentration</string>
     <string name="home_mode_rest">Rest</string>
+    <string name="home_skip_rest">Skip rest</string>
+    <string name="home_play">Start timer</string>
+    <string name="home_pause">Pause timer</string>
     <string name="home_stat_studied_label">Studied today</string>
     <string name="home_stat_streak_label">Current streak</string>
     <string name="home_stat_fails_label">Missed sessions</string>

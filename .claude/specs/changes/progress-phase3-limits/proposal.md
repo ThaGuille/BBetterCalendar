@@ -21,6 +21,12 @@ Grounded in: [`docs/progress/06-screen-mapping-and-roadmap.md`](../../../../docs
 ("limit → warn → cover" flow, Tier 1), [`01-usage-tracking.md`](../../../../docs/progress/01-usage-tracking.md),
 [`04-charts-and-data-model.md`](../../../../docs/progress/04-charts-and-data-model.md#apprule).
 
+## Decisions — CONFIRMED (2026-06-29)
+
+- **Both notifications ship:** the pre-limit warning **and** the limit-reached notice (§"two
+  notifications per app per day" below). Neither blocks — both only inform.
+- **Check cadence = ~5 min** (the default in [`design.md`](design.md) §1). Settled; not revisiting.
+
 ## What changes (deltas vs current behavior)
 
 - **ADDED — set a daily limit per app.** Tapping a row in the Progress usage list opens

@@ -73,9 +73,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private MessagePopup messagePopup;
 
     private ToolbarHelper toolbarHelper;
-    private boolean timerActive = false;
-    private ImageButton homeTimerButton;
     private ImageButton playButton;
+    private TextView skipRestButton;
     private TextView timerText;
     private TextView currentStreakText;
     private TextView todayFailsText;
@@ -107,10 +106,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         homeViewModel.setConfigManager(configurationManager);
         final TextView textView = binding.textHome;
-        homeTimerButton = binding.homeTimerButton;
-        homeTimerButton.setOnClickListener(this);
         playButton = binding.homePlayButton;
         playButton.setOnClickListener(this);
+        skipRestButton = binding.homeSkipRestButton;
+        skipRestButton.setOnClickListener(this);
         timerText = binding.homeTimerText;
         currentStreakText = binding.homeCurrentStreakText;
         todayFailsText = binding.homeToadyFailsText;
@@ -190,6 +189,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             startTimer(timeLeftInMillis);
         }
         // PAUSED* / STOPPED* : text + chip restored above, do not auto-start.
+        updateTimerControls();
     }
 
     private void updateModeChip(boolean isRest) {
@@ -221,6 +221,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             timer_state = TIMER_RUNNING_REST;
         else
             Log.e(TAG, "Error en el estado del timer");
+        updateTimerControls();
     }
 
     //Cuando el timer logra llegar a 0
@@ -283,23 +284,21 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         timeLeftInMillis =  configurationManager.getConfiguration().getHomeTimerTime();
         homeViewModel.resetTimer();
         updateModeChip(false);
+        updateTimerControls();
     }
 
     //Se pulsa el timer para pausarlo
     private void pauseTimer(boolean isRest){
         countDownTimer.cancel();
         timer_state = isRest ? TIMER_PAUSED_REST : TIMER_PAUSED;
+        updateTimerControls();
     }
 
     @Override
     public void onClick(View view) {
         int id = view.getId();
         HapticFeedback.lightTap(view);
-        if (id == R.id.homeTimerButton) {
-            timerActive= !timerActive;
-            homeTimerButton.setImageResource(timerActive ? R.drawable.ic_timer_filled_24 : R.drawable.ic_timer_empty_24);
-            SoundFeedback.get(requireContext()).playTap();
-        } else if (id == R.id.homePlayButton) {
+        if (id == R.id.homePlayButton) {
             Log.i(TAG, "Timer started");
             SoundFeedback feedback = SoundFeedback.get(requireContext());
             if(timer_state == TIMER_STOPPED){
@@ -323,7 +322,47 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                 startTimer(actualTime);
                 feedback.playStart();
             }
+            updateTimerControls();
+        } else if (id == R.id.homeSkipRestButton) {
+            cancelRest();
+            SoundFeedback.get(requireContext()).playStop();
         }
+    }
+
+    /**
+     * Cancel the rest period (running, paused or pending) and return to a stopped
+     * concentration state so the user can start working again immediately.
+     * The focus cycle that triggered this rest still counts as completed.
+     */
+    private void cancelRest() {
+        if (timer_state != TIMER_RUNNING_REST
+                && timer_state != TIMER_PAUSED_REST
+                && timer_state != TIMER_STOPPED_REST) {
+            return;
+        }
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        cyclesCompleted++;
+        timer_state = TIMER_STOPPED;
+        resetTimer();
+        updateTimerControls();
+    }
+
+    /** Keep the play/pause icon and the skip-rest button in sync with timer_state. */
+    private void updateTimerControls() {
+        if (binding == null) return;
+
+        boolean isRunning = timer_state == TIMER_RUNNING || timer_state == TIMER_RUNNING_REST;
+        playButton.setImageResource(
+                isRunning ? R.drawable.ic_pause_v2_filled_24 : R.drawable.ic_play_v2_filled_24);
+        playButton.setContentDescription(
+                getString(isRunning ? R.string.home_pause : R.string.home_play));
+
+        boolean isRest = timer_state == TIMER_RUNNING_REST
+                || timer_state == TIMER_PAUSED_REST
+                || timer_state == TIMER_STOPPED_REST;
+        skipRestButton.setVisibility(isRest ? View.VISIBLE : View.GONE);
     }
 
 
@@ -413,6 +452,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                     focusFailNotifier.fire();
                     isTimerFailed=true;
                     isBackground=false;
+                    updateTimerControls();
                 }
             }
 
@@ -473,6 +513,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             }
             if (timer_state == TIMER_RUNNING_REST || timer_state == TIMER_PAUSED_REST) {
                 countDownTimer.cancel();
+                timer_state = TIMER_STOPPED;
                 resetTimerAndCycles();
             }
         }

@@ -37,25 +37,23 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 58c888e (2026-06-28)
+**Branch:** `main`  |  **State as of commit:** b7a3e54 (2026-06-29)
 
 ### 1. What we touched last (recent commits)
+- b7a3e54 2026-06-29 app time tracking functionality 0 to 100 with app selector and permissions
 - 58c888e 2026-06-28 new phase proposal: app blocker in progress screen + time tracker
 - 0344a59 2026-06-28 Archive progress-charts-mvp spec and update status
 - 9926fa9 2026-06-28 Persist in-progress Pomodoro session across fragment recreation
 - 24f2ed7 2026-06-28 status system
-- d518be4 2026-06-24 improvement in progress grpahs
 
 ### 2. In flight - active `/spec` changes
-| Change | Status | Tasks | Proposal |
-|---|---|---|---|
-| Progress Phase 2 — Phone & app usage (user-curated list + app-picker) | applied | 21/22 | [proposal](.claude/specs/changes/progress-phase2-usage/proposal.md) |
+_None active._
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer](.claude/specs/capabilities/home-pomodoro.md)
 - [Capability: Progress Screen](.claude/specs/capabilities/progress-screen.md)
 
-**Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`
+**Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`
 
 ### 4. Plans (`.claude/plans`) - undone first
 | Plan | Status | File |

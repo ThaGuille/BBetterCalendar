@@ -1,7 +1,7 @@
 # Progress Phase 2 — Phone & app usage (user-curated list + app-picker)
 
 **Slug:** progress-phase2-usage
-**Status:** applied
+**Status:** archived
 **Created:** 2026-06-28
 **Last updated:** 2026-06-29
 

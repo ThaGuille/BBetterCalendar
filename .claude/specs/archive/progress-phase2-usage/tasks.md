@@ -60,7 +60,7 @@ Ordered so each group builds on the previous. Don't bump `@Database(version)` wi
 - [x] `docs/legal/privacy-policy.md` — on-device-only posture, what we access (per-app foreground
       time, installed-app list), purpose, never transmitted, how to revoke. Draft the Play
       Permissions-declaration + Data-safety answers in the same doc.
-- [ ] Update `.claude/specs/capabilities/progress-screen.md` Phase-2 row → done (during archive).
+- [x] Update `.claude/specs/capabilities/progress-screen.md` Phase-2 row → done (during archive).
 
 ## G. Verify
 - [x] `/check` (build + lint) passes. (`assembleDebug` + `lintDebug` both BUILD SUCCESSFUL, no errors.)

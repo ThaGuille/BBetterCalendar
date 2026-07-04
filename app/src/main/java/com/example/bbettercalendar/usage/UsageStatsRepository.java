@@ -41,28 +41,43 @@ public final class UsageStatsRepository {
         UsageEvents events = usm.queryEvents(begin, end);
         if (events == null) return totals;
 
-        // package -> instante del último MOVE_TO_FOREGROUND aún sin cerrar.
-        Map<String, Long> openSince = new HashMap<>();
+        // Sólo UNA app está en primer plano a la vez: un MOVE_TO_FOREGROUND cierra la anterior en
+        // ese instante. Así, si a un intervalo le falta su MOVE_TO_BACKGROUND (proceso muerto,
+        // force-stop, o el evento de cierre cae fuera de la ventana), no se arrastra hasta `end`
+        // inflando el total — se cierra en cuanto otra app pasa a primer plano. Nuestro propio
+        // paquete participa en la máquina de estados (al abrir BBetter cierra la app anterior) pero
+        // se descarta del resultado al final.
+        String currentPkg = null;
+        long currentSince = 0L;
         UsageEvents.Event ev = new UsageEvents.Event();
         while (events.hasNextEvent()) {
             events.getNextEvent(ev);
             String pkg = ev.getPackageName();
-            if (pkg == null || pkg.equals(ownPackage)) continue;
+            if (pkg == null) continue;
 
             int type = ev.getEventType();
             if (type == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                openSince.put(pkg, ev.getTimeStamp());
+                if (currentPkg != null) {
+                    addInterval(totals, currentPkg, currentSince, ev.getTimeStamp(), begin, end);
+                }
+                currentPkg = pkg;
+                currentSince = ev.getTimeStamp();
             } else if (type == UsageEvents.Event.MOVE_TO_BACKGROUND) {
-                Long start = openSince.remove(pkg);
-                if (start != null) {
-                    addInterval(totals, pkg, start, ev.getTimeStamp(), begin, end);
+                if (pkg.equals(currentPkg)) {
+                    addInterval(totals, currentPkg, currentSince, ev.getTimeStamp(), begin, end);
+                    currentPkg = null;
                 }
             }
         }
-        // Intervalos abiertos al final de la ventana: se cierran en `end`.
-        for (Map.Entry<String, Long> open : openSince.entrySet()) {
-            addInterval(totals, open.getKey(), open.getValue(), end, begin, end);
+        // El intervalo que quede abierto al final se cierra en min(end, ahora): nunca se cuenta
+        // tiempo futuro (el rango "esta semana" termina en el futuro) ni un intervalo sin cerrar
+        // más allá del presente.
+        if (currentPkg != null) {
+            addInterval(totals, currentPkg, currentSince,
+                    Math.min(end, System.currentTimeMillis()), begin, end);
         }
+
+        totals.remove(ownPackage);
         return totals;
     }
 

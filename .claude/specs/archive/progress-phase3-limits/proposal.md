@@ -1,7 +1,7 @@
 # Progress Phase 3 — Per-app daily limits + pre-limit warnings
 
 **Slug:** progress-phase3-limits
-**Status:** applied
+**Status:** archived
 **Created:** 2026-06-29
 **Last updated:** 2026-07-04
 

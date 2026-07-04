@@ -11,7 +11,7 @@
 | 0 — Persist history | ✅ Done | `DailyStat` + `FocusEvent` tables live in DB v9. Upsert before reset wired in `SplashActivity` + `InitialConfiguration`. `TYPE_TASK` FocusEvent not yet emitted (stubbed). |
 | 1 — Charts MVP | ✅ Done | MPAndroidChart v3.1.0 (JitPack). 3-page `ViewPager2` carousel (concent / fails / when-I-focus-or-fail) + Day/Week/Month toggle & `‹ label ›` stepper, one `TimeRange` drives both. On-device QA passed 2026-06-28 (empty install, live session, stepper). Archived: [progress-charts-mvp](../archive/progress-charts-mvp/proposal.md). |
 | 2 — Phone & app usage | ✅ Done | `PACKAGE_USAGE_STATS` (special-access) + usage-access disclosure/consent + **user-curated app-picker** + per-app usage list + screen-time total. DB v9→v10 (real `MIGRATION_9_10`). Privacy policy + Play declaration drafted in-repo. On-device QA passed 2026-06-29. Archived: [progress-phase2-usage](../archive/progress-phase2-usage/proposal.md). |
-| 3 — Limits + pre-limit warnings | 🔲 Not started | Per-app daily limit + monitor service + **notify a few min before** limit. Reuses Phase 2 data + existing `POST_NOTIFICATIONS` |
+| 3 — Limits + pre-limit warnings | ✅ Done | **Warn-only** tier: per-app daily limit (`AppLimitDialog`) + self-rescheduling `AlarmManager` check + two on-device notifications (pre-limit warning + limit-reached), **no enforcement**. No new permission, no schema change (`dailyLimitMinutes`/`warnBeforeMinutes` already existed). On-device QA passed 2026-07-04 (alarm-firing/de-dup not exercised live — mirrors proven event-reminder infra). Archived: [progress-phase3-limits](../archive/progress-phase3-limits/proposal.md). |
 | 4 — Soft blocking | 🔲 Not started | AccessibilityService **cover overlay (primary) + bounce-to-home (fallback)**, triggered after the daily limit / instant-block toggle. Play-policy heavy → disclosure + consent + declaration + demo video ([`07`](../../../docs/progress/07-legal-and-compliance.md)) |
 | ~~5 — Web~~ | ⛔ Dropped | Websites descoped 2026-06-28 — apps only |
 
@@ -79,6 +79,34 @@
   card root id → null `findViewById` ([[include-id-overrides-root-id]]).
 - Deps: **none** — `UsageStatsManager`/`AppOpsManager`/`PackageManager` are platform APIs (API 21+).
   `FormatHelper.formatDuration` + `ic_block_24.xml` added.
+
+## What Phase 3 added (Limits + pre-limit warnings — shipped, warn-only)
+
+- **No new permission, no schema bump.** Reuses Phase 2 Usage Access + already-held
+  `POST_NOTIFICATIONS` / `USE_EXACT_ALARM` / `RECEIVE_BOOT_COMPLETED`. The `AppRule.dailyLimitMinutes`
+  / `warnBeforeMinutes` columns (created unused in `MIGRATION_9_10`) are now read/written — DB stays v10.
+- **Set a per-app daily limit:** tapping a usage row opens `ui/progress/AppLimitDialog.java`
+  (`PopupHelper`, `dialog_app_limit.xml`, `bb_*` tokens) — minutes input + Save / Clear →
+  `ProgressViewModel.setDailyLimit(pkg, minutes)` (write off the executor → re-arm monitor →
+  refresh list via `postValue`). `0 = no limit`.
+- **Row shows limit + progress:** `AppUsageRow` gained `dailyLimitMinutes`; `AppUsageAdapter` +
+  `item_app_usage_row.xml` render `used / limit` with an over-limit tint. Block-toggle stub still
+  disabled (Phase 4).
+- **Data access:** `AppRuleDAO.setDailyLimit(pkg, minutes)` + `getLimited()`
+  (`tracked = 1 AND dailyLimitMinutes > 0`).
+- **Periodic check, no foreground service:** `usage/limits/` — `UsageLimitScheduler` (arm/disarm,
+  exact-alarm-with-inexact-fallback, mirrors `EventReminderScheduler`; armed only while ≥1 limited
+  app hasn't fired today), `UsageLimitReceiver` (`@AndroidEntryPoint`, `goAsync()` + executor →
+  run → reschedule), `UsageLimitChecker` (per limited app: today's foreground ms via
+  `UsageStatsRepository.foregroundMillis` vs thresholds), `WarnedTodayStore` (`SharedPreferences`
+  day+package de-dup). Armed on app start, on limit change, and after boot (`BootReceiver` extended).
+- **Two notifications, both Play-safe (inform only):** pre-limit warning (crosses `limit − warnBefore`)
+  + limit-reached (crosses `limit`), each once per app per day, tap → Progress. New channel
+  `NotificationChannels.CHANNEL_USAGE_LIMITS`; built by `notifications/usage/UsageLimitNotifier.java`
+  (mirrors `FocusFailNotifier`).
+- **Deliberately deferred to Phase 4:** all actual blocking (cover overlay, bounce-to-home,
+  AccessibilityService), the functional block toggle, and the Play accessibility declaration.
+- Deps: **none** — `AlarmManager` / `UsageStatsManager` / `NotificationCompat` are platform/AndroidX.
 
 ## Open questions — RESOLVED (2026-06-28)
 

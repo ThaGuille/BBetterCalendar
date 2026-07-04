@@ -69,6 +69,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".usage.limits.UsageLimitReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".notifications.event.BootReceiver"
             android:exported="true">
             <intent-filter>

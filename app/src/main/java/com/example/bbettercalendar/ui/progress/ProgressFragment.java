@@ -54,7 +54,9 @@ public class ProgressFragment extends Fragment {
         binding.rangeNext.setOnClickListener(v -> viewModel.stepForward());
 
         // --- banda 3: uso de apps ---
-        usageAdapter = new AppUsageAdapter(requireContext());
+        usageAdapter = new AppUsageAdapter(requireContext(), (packageName, label, currentLimitMinutes) ->
+                AppLimitDialog.newInstance(packageName, label, currentLimitMinutes)
+                        .show(getChildFragmentManager(), "app_limit"));
         binding.usageList.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.usageList.setAdapter(usageAdapter);
 
@@ -80,7 +82,10 @@ public class ProgressFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // No hay callback al volver de Ajustes (permiso) ni del picker: re-evaluar acceso + lista.
-        if (viewModel != null) viewModel.refreshUsageAccess();
+        if (viewModel != null) {
+            viewModel.refreshUsageAccess();
+            viewModel.armUsageLimitMonitor();
+        }
     }
 
     private void renderRange(TimeRange range) {

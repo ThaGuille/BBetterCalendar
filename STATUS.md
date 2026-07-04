@@ -37,19 +37,19 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 821c6d3 (2026-06-29)
+**Branch:** `main`  |  **State as of commit:** 20a493c (2026-06-29)
 
 ### 1. What we touched last (recent commits)
+- 20a493c 2026-06-29 main page visual improvements, skip rest button, pause timer icon, cleanup etc
 - 821c6d3 2026-06-29 phase 3 proposition
 - c364157 2026-06-29 Archive progress-phase2-usage spec (phase 2 QA-passed)
 - b7a3e54 2026-06-29 app time tracking functionality 0 to 100 with app selector and permissions
 - 58c888e 2026-06-28 new phase proposal: app blocker in progress screen + time tracker
-- 0344a59 2026-06-28 Archive progress-charts-mvp spec and update status
 
 ### 2. In flight - active `/spec` changes
 | Change | Status | Tasks | Proposal |
 |---|---|---|---|
-| Progress Phase 3 — Per-app daily limits + pre-limit warnings | proposed | 0/23 | [proposal](.claude/specs/changes/progress-phase3-limits/proposal.md) |
+| Progress Phase 3 — Per-app daily limits + pre-limit warnings | applied | 22/23 | [proposal](.claude/specs/changes/progress-phase3-limits/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer](.claude/specs/capabilities/home-pomodoro.md)

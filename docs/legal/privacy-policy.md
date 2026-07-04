@@ -2,9 +2,10 @@
 
 **Version:** 1 (matches `ConsentRecord.USAGE_ACCESS_DISCLOSURE_VERSION = 1`)
 **Last updated:** 2026-06-28
-**Scope at this version:** Phase 2 — phone & app-usage measurement (`PACKAGE_USAGE_STATS`).
-Blocking / accessibility features (Phase 4) are **not** part of this version and will be added here
-when they ship.
+**Scope at this version:** Phase 2 — phone & app-usage measurement (`PACKAGE_USAGE_STATS`) — plus
+Phase 3 — optional daily limits with warn-only notifications, computed from the same on-device usage
+data (no new permission, no new data type). Blocking / accessibility features (Phase 4) are **not**
+part of this version and will be added here when they ship.
 
 > This in-repo file is the **source of truth**. The public privacy-policy page linked from the Play
 > listing and from inside the app mirrors this text verbatim. Keep them in sync; bump the version
@@ -33,6 +34,12 @@ contacts, your files, or anything you type. BBetter has no account and no login.
 
 Solely to display **your own** usage back to you inside the app (the App-usage list and the
 screen-time total on the Progress screen). There is no other purpose.
+
+**Daily limits (optional, Phase 3):** if you set a daily limit for a tracked app, BBetter compares
+your on-device usage against that limit and shows a plain notification when you're close to (or past)
+it. This is computed and stored entirely on-device — the limit, the "already warned today" markers,
+and the check itself never leave your phone — and it only informs you; it never blocks or closes an
+app.
 
 ## Where it goes
 

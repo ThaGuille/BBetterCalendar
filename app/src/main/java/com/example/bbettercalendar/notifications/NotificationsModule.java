@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.stats.AppRuleDAO;
 
 import dagger.Module;
 import dagger.Provides;
@@ -28,5 +29,11 @@ public class NotificationsModule {
     @Singleton
     public static CalendarEntryDAO provideCalendarEntryDAO(AppDatabase database) {
         return database.eventDao();
+    }
+
+    @Provides
+    @Singleton
+    public static AppRuleDAO provideAppRuleDAO(AppDatabase database) {
+        return database.appRuleDao();
     }
 }

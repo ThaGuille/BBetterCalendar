@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +25,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Inject CalendarEntryDAO calendarEntryDAO;
     @Inject EventReminderScheduler scheduler;
+    @Inject UsageLimitScheduler usageLimitScheduler;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -48,6 +50,8 @@ public class BootReceiver extends BroadcastReceiver {
                     }
                 }
                 Log.i(TAG, "Rescheduled reminders for " + rescheduled + " future events");
+
+                usageLimitScheduler.arm();
             } catch (Exception e) {
                 Log.e(TAG, "Boot reschedule failed", e);
             } finally {

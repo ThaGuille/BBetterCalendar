@@ -32,6 +32,14 @@ public interface AppRuleDAO {
     @Query("UPDATE app_rule SET tracked = :tracked WHERE packageName = :pkg")
     void setTracked(String pkg, boolean tracked);
 
+    // Phase 3: límite diario en minutos (0 = sin límite). Columna ya existente desde MIGRATION_9_10.
+    @Query("UPDATE app_rule SET dailyLimitMinutes = :minutes WHERE packageName = :pkg")
+    void setDailyLimit(String pkg, int minutes);
+
+    // Apps seguidas Y con un límite activo — lo que UsageLimitChecker/Scheduler necesitan comprobar.
+    @Query("SELECT * FROM app_rule WHERE tracked = 1 AND dailyLimitMinutes > 0")
+    List<AppRule> getLimited();
+
     @Query("DELETE FROM app_rule WHERE packageName = :pkg")
     void delete(String pkg);
 }

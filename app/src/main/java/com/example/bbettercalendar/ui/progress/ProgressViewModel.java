@@ -1,6 +1,8 @@
 package com.example.bbettercalendar.ui.progress;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -11,6 +13,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.notifications.BBetterNotifier;
+import com.example.bbettercalendar.notifications.usage.UsageLimitNotifier;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 import com.example.bbettercalendar.stats.ConsentRecord;
@@ -23,6 +27,9 @@ import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 import com.example.bbettercalendar.usage.UsageAccess;
 import com.example.bbettercalendar.usage.UsageStatsRepository;
+import com.example.bbettercalendar.usage.limits.UsageLimitChecker;
+import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
+import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -60,6 +67,8 @@ public class ProgressViewModel extends AndroidViewModel {
     private final AppRuleDAO appRuleDao;
     private final ConsentRecordDAO consentRecordDao;
     private final UsageStatsRepository usageRepo;
+    private final UsageLimitScheduler usageLimitScheduler;
+    private final UsageLimitChecker usageLimitChecker;
     private final Handler mainHandler;
 
     private static final DateTimeFormatter X_LABEL =
@@ -87,6 +96,11 @@ public class ProgressViewModel extends AndroidViewModel {
         appRuleDao = db.appRuleDao();
         consentRecordDao = db.consentRecordDao();
         usageRepo = new UsageStatsRepository(application);
+        AlarmManager alarmManager = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
+        WarnedTodayStore warnedStore = new WarnedTodayStore(application);
+        usageLimitScheduler = new UsageLimitScheduler(application, alarmManager, appRuleDao, warnedStore);
+        usageLimitChecker = new UsageLimitChecker(application, appRuleDao, warnedStore,
+                new UsageLimitNotifier(application, new BBetterNotifier(application)));
         mainHandler = new Handler(Looper.getMainLooper());
         executorService = Executors.newFixedThreadPool(2);
 
@@ -164,17 +178,42 @@ public class ProgressViewModel extends AndroidViewModel {
         }
 
         Map<String, Long> foreground = usageRepo.foregroundMillis(begin, end);
+        // El límite es diario: sólo tiene sentido mostrar "usado/límite" cuando el rango
+        // seleccionado es un único día — en Semana/Mes el usado acumulado no es comparable
+        // contra un límite diario (saldría "superado" casi siempre). dailyLimitMinutes se
+        // conserva siempre (lo necesita AppLimitDialog para precargar el valor actual).
+        boolean showLimit = range.granularity == Granularity.DAY;
         List<AppUsageRow> rows = new ArrayList<>(tracked.size());
         for (AppRule rule : tracked) {
             Long millis = foreground.get(rule.packageName);
             rows.add(new AppUsageRow(rule.packageName, usageRepo.labelFor(rule.packageName),
-                    millis == null ? 0L : millis));
+                    millis == null ? 0L : millis, rule.dailyLimitMinutes, showLimit));
         }
         // Más usadas primero.
         Collections.sort(rows, (a, b) -> Long.compare(b.foregroundMillis, a.foregroundMillis));
 
         apps.postValue(rows);
         usageState.postValue(UsageBandState.READY);
+    }
+
+    // Phase 3: fija (o borra, con minutes=0) el límite diario de una app seguida. Escribe fuera
+    // del hilo principal (regla #3), evalúa el límite ya mismo (el uso de hoy puede ya superar el
+    // umbral de aviso si la app llevaba tiempo abierta antes de fijar el límite — si no, la primera
+    // comprobación periódica no llega hasta dentro de 5 min y puede saltarse la ventana de aviso),
+    // reprograma el monitor de límites y refresca la lista.
+    public void setDailyLimit(String packageName, int minutes) {
+        executorService.execute(() -> {
+            appRuleDao.setDailyLimit(packageName, minutes);
+            usageLimitChecker.run();
+            usageLimitScheduler.arm();
+            TimeRange current = selectedRange.getValue();
+            if (current != null) refreshUsage(current);
+        });
+    }
+
+    // Reevalúa si el monitor de límites debe seguir armado (llamarlo, p.ej., en onResume).
+    public void armUsageLimitMonitor() {
+        executorService.execute(usageLimitScheduler::arm);
     }
 
     // El CTA de la tarjeta LOCKED: comprueba (fuera del hilo principal) si ya hay un consentimiento

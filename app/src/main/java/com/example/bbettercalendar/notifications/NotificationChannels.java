@@ -12,6 +12,7 @@ public final class NotificationChannels {
     public static final String CHANNEL_FOREGROUND_SERVICE = "channelId";
     public static final String CHANNEL_EVENT_REMINDERS = "bb_event_reminders";
     public static final String CHANNEL_FOCUS_ALERTS = "bb_focus_alerts";
+    public static final String CHANNEL_USAGE_LIMITS = "bb_usage_limits";
 
     public static void createAll(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -38,9 +39,16 @@ public final class NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH);
         focus.setDescription(context.getString(R.string.notif_channel_focus_alerts_desc));
 
+        NotificationChannel usageLimits = new NotificationChannel(
+                CHANNEL_USAGE_LIMITS,
+                context.getString(R.string.notif_channel_usage_limits_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        usageLimits.setDescription(context.getString(R.string.notif_channel_usage_limits_desc));
+
         nm.createNotificationChannel(foreground);
         nm.createNotificationChannel(events);
         nm.createNotificationChannel(focus);
+        nm.createNotificationChannel(usageLimits);
     }
 
     private NotificationChannels() {}

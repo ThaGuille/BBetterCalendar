@@ -88,6 +88,8 @@
     <string name="notif_channel_event_reminders_desc">Reminders for upcoming events and tasks.</string>
     <string name="notif_channel_focus_alerts_name">Focus alerts</string>
     <string name="notif_channel_focus_alerts_desc">Alerts when you leave the app during a focus session.</string>
+    <string name="notif_channel_usage_limits_name">App limit nudges</string>
+    <string name="notif_channel_usage_limits_desc">Warns you when you\'re close to or past a daily app limit.</string>
 
     <!-- Event reminder notification -->
     <string name="notif_event_default_title">Upcoming event</string>
@@ -96,6 +98,12 @@
     <!-- Focus-fail notification -->
     <string name="notif_focus_fail_title">Concentration broken</string>
     <string name="notif_focus_fail_body">You left the app — your focus session was lost.</string>
+
+    <!-- App-limit notifications (Phase 3 — warn only, never blocks) -->
+    <string name="notif_app_limit_warn_title">Almost at your %1$s limit</string>
+    <string name="notif_app_limit_warn_body">About %1$d min left today.</string>
+    <string name="notif_app_limit_reached_title">%1$s limit reached</string>
+    <string name="notif_app_limit_reached_body">You\'ve hit your limit for today.</string>
 
     <!-- Progress screen -->
     <string name="progress_granularity_day">Day</string>
@@ -118,6 +126,16 @@
     <string name="progress_usage_empty_title">No apps tracked yet</string>
     <string name="progress_usage_empty_body">Pick the apps you want to keep an eye on and they\'ll show up here.</string>
     <string name="progress_usage_empty_cta">Add apps</string>
+    <string name="progress_usage_no_limit">no limit</string>
+    <string name="progress_usage_limit_progress_format">%1$s / %2$s</string>
+
+    <!-- App-limit dialog (Phase 3 — tap a usage row to set/clear a daily limit) -->
+    <string name="app_limit_dialog_title">Daily limit</string>
+    <string name="app_limit_dialog_minutes_hint">Minutes per day</string>
+    <string name="app_limit_dialog_save">Save</string>
+    <string name="app_limit_dialog_clear">Clear</string>
+    <string name="app_limit_dialog_cancel">Cancel</string>
+    <string name="app_limit_dialog_invalid_minutes">Enter a number of minutes greater than 0</string>
 
     <!-- App picker (Phase 2) -->
     <string name="app_picker_title">Add apps</string>

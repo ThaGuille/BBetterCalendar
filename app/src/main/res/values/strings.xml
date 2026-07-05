@@ -23,6 +23,7 @@
     <string name="home_skip_rest">Skip rest</string>
     <string name="home_play">Start timer</string>
     <string name="home_pause">Pause timer</string>
+    <string name="home_block_mode">🚫 Block mode 🚫</string>
     <string name="home_stat_studied_label">Studied today</string>
     <string name="home_stat_streak_label">Current streak</string>
     <string name="home_stat_fails_label">Missed sessions</string>
@@ -172,6 +173,10 @@
     <string name="block_cover_title">Daily limit reached</string>
     <string name="block_cover_subtitle">%1$s used today</string>
     <string name="block_cover_close">Close</string>
+
+    <!-- Full-screen block cover, pomodoro focus mode variant -->
+    <string name="block_cover_focus_title">Focus mode active</string>
+    <string name="block_cover_focus_subtitle">Pause or stop your Pomodoro session to use this app.</string>
 
     <!-- Repetition popup -->
     <string name="repetition_popup_title">Repetition</string>

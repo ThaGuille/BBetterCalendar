@@ -21,6 +21,19 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <!-- Modo bloqueo total (pomodoro): BlockerAccessibilityService necesita resolver el
+             paquete del launcher/home para eximirlo del bloqueo (categoría HOME, distinta de
+             LAUNCHER arriba). -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+        <!-- Modo bloqueo total: el manejador por defecto de ASSIST (el buscador/"at a glance" de
+             Google incrustado en la pantalla de inicio) también se resuelve para eximirlo; ver
+             comentario junto a resolvedAssist en BlockerAccessibilityService. -->
+        <intent>
+            <action android:name="android.intent.action.ASSIST" />
+        </intent>
     </queries>
 
     <application

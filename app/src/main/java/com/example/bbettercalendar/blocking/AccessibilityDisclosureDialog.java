@@ -33,6 +33,12 @@ public class AccessibilityDisclosureDialog extends DialogFragment {
 
     private static final String ARG_PACKAGE = "package";
 
+    // Implementado por un host (p. ej. HomeFragment) que arma un permiso NO ligado a un paquete
+    // concreto (el modo bloqueo total del pomodoro) en vez de un enforceAtLimit por-app.
+    public interface OnConsentGrantedListener {
+        void onAccessibilityConsentGranted();
+    }
+
     // packageName: la app cuyo toggle 🚫 disparó el diálogo (se arma su enforce en "Enable").
     public static AccessibilityDisclosureDialog newInstance(String packageName) {
         AccessibilityDisclosureDialog dialog = new AccessibilityDisclosureDialog();
@@ -40,6 +46,12 @@ public class AccessibilityDisclosureDialog extends DialogFragment {
         args.putString(ARG_PACKAGE, packageName);
         dialog.setArguments(args);
         return dialog;
+    }
+
+    // Variante sin paquete: el host se entera del consentimiento vía OnConsentGrantedListener
+    // (usada por el modo bloqueo total de HomeFragment, que no arma un AppRule).
+    public static AccessibilityDisclosureDialog newInstance() {
+        return new AccessibilityDisclosureDialog();
     }
 
     @NonNull
@@ -74,16 +86,21 @@ public class AccessibilityDisclosureDialog extends DialogFragment {
         }
     }
 
-    // Arma enforceAtLimit para la app que disparó el diálogo, reutilizando el MISMO ProgressViewModel
-    // del fragmento padre (mismo scope). El servicio aún no está activo -> la fila se pinta "pendiente"
-    // (ámbar), no "activa" (rojo), hasta que el usuario active el servicio en Ajustes.
+    // Arma el permiso correspondiente. Con packageName -> enforceAtLimit de esa app, vía el MISMO
+    // ProgressViewModel del fragmento padre (mismo scope). Sin packageName -> el host (p. ej.
+    // HomeFragment) se entera vía OnConsentGrantedListener y arma lo que le corresponda (modo
+    // bloqueo total). En ambos casos el servicio aún no está activo -> el toggle se pinta
+    // "pendiente" (ámbar), no "activo" (rojo), hasta que el usuario active el servicio en Ajustes.
     private void armEnforce() {
         String packageName = getArguments() != null ? getArguments().getString(ARG_PACKAGE) : null;
-        if (packageName == null) return;
         androidx.fragment.app.Fragment parent = getParentFragment();
         if (parent == null) return;
-        new ViewModelProvider(parent).get(ProgressViewModel.class)
-                .setEnforceAtLimit(packageName, true);
+        if (packageName != null) {
+            new ViewModelProvider(parent).get(ProgressViewModel.class)
+                    .setEnforceAtLimit(packageName, true);
+        } else if (parent instanceof OnConsentGrantedListener) {
+            ((OnConsentGrantedListener) parent).onAccessibilityConsentGranted();
+        }
     }
 
     // Inserta el acuse fuera del hilo principal (regla #3). Executor de un uso, cerrado tras encolar.

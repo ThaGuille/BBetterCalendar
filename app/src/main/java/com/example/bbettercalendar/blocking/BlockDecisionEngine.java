@@ -7,9 +7,11 @@ import com.example.bbettercalendar.usage.UsageStatsRepository;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -27,14 +29,22 @@ public class BlockDecisionEngine {
     // positivos no dependen de esto (quedan en el latch hasta medianoche).
     private static final long NEGATIVE_TTL_MILLIS = TimeUnit.SECONDS.toMillis(20);
 
-    // Resultado de una decisión: si cubrir + el uso de hoy (para el texto de la portada).
+    // Resultado de una decisión: si cubrir + el uso de hoy (para el texto de la portada) + si el
+    // motivo fue el modo bloqueo total del pomodoro (focusMode) en vez de un límite por-app, para
+    // que el servicio pinte la portada con el texto correcto.
     public static final class Decision {
         public final boolean block;
         public final long usedMillis;
+        public final boolean focusMode;
 
         Decision(boolean block, long usedMillis) {
+            this(block, usedMillis, false);
+        }
+
+        Decision(boolean block, long usedMillis, boolean focusMode) {
             this.block = block;
             this.usedMillis = usedMillis;
+            this.focusMode = focusMode;
         }
     }
 
@@ -44,6 +54,10 @@ public class BlockDecisionEngine {
     // Reglas a hacer cumplir, refrescadas por observeEnforced() desde el servicio (hilo principal);
     // leídas en decide() (executor) -> mapa concurrente y referencia volátil.
     private volatile Map<String, AppRule> enforcedByPkg = new HashMap<>();
+
+    // Paquetes exentos del modo bloqueo total (launcher/home), resueltos una vez por
+    // BlockerAccessibilityService.onServiceConnected() y leídos en decide() (executor).
+    private volatile Set<String> focusExemptPackages = Collections.emptySet();
 
     // Caché de la última comprobación negativa por paquete (timestamp) y latch de "bloqueado hoy".
     private final Map<String, Long> lastNegativeCheckAt = new ConcurrentHashMap<>();
@@ -64,10 +78,25 @@ public class BlockDecisionEngine {
         this.enforcedByPkg = map;
     }
 
+    // Sustituye el conjunto de paquetes exentos del modo bloqueo total (launcher/home).
+    public void setFocusExemptPackages(Set<String> packages) {
+        this.focusExemptPackages = packages;
+    }
+
     public Decision decide(String packageName) {
         resetIfNewDay();
 
         if (packageName == null) return new Decision(false, 0L);
+
+        // Modo bloqueo total del pomodoro: independiente del interruptor maestro de límites por-app
+        // (BlockingSettings) y de cualquier AppRule — cubre TODO salvo nuestra propia app y el
+        // launcher/home (para que "cerrar -> ir a inicio" siga siendo una salida real).
+        if (FocusBlockState.isActive(appContext)
+                && !appContext.getPackageName().equals(packageName)
+                && !focusExemptPackages.contains(packageName)) {
+            return new Decision(true, 0L, true);
+        }
+
         if (!BlockingSettings.isEnforcementEnabled(appContext)) return new Decision(false, 0L);
 
         AppRule rule = enforcedByPkg.get(packageName);

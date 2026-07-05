@@ -23,6 +23,9 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.blocking.AccessibilityAccess;
+import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
+import com.example.bbettercalendar.blocking.FocusBlockState;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
@@ -48,7 +51,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnToolbarHomeListener, OnPopupListener<Object> {
+public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnToolbarHomeListener, OnPopupListener<Object>, AccessibilityDisclosureDialog.OnConsentGrantedListener {
 
     private final int TIMER_STOPPED = 0;
     private final int TIMER_RUNNING = 1;
@@ -63,6 +66,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private static final String KEY_TIME_LEFT = "bb_home_time_left_millis";
     private static final String KEY_LAST_TIMER_TIME = "bb_home_last_timer_time";
     private static final String KEY_CYCLES_COMPLETED = "bb_home_cycles_completed";
+    private static final String KEY_BLOCK_MODE_ARMED = "bb_home_block_mode_armed";
 
 
     private final String TAG = "HomeFragmentTag";
@@ -75,6 +79,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private ToolbarHelper toolbarHelper;
     private ImageButton playButton;
     private TextView skipRestButton;
+    private TextView blockModeButton;
     private TextView timerText;
     private TextView currentStreakText;
     private TextView todayFailsText;
@@ -90,6 +95,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private boolean isTimerFailed = false;
 
     private int cyclesCompleted = 0;
+    private boolean blockModeArmed = false;
 
     @Inject
     ConfigurationManager configurationManager;
@@ -110,6 +116,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         playButton.setOnClickListener(this);
         skipRestButton = binding.homeSkipRestButton;
         skipRestButton.setOnClickListener(this);
+        blockModeButton = binding.homeBlockModeButton;
+        blockModeButton.setOnClickListener(this);
         timerText = binding.homeTimerText;
         currentStreakText = binding.homeCurrentStreakText;
         todayFailsText = binding.homeToadyFailsText;
@@ -147,6 +155,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             timeLeftInMillis = savedInstanceState.getLong(KEY_TIME_LEFT, timeLeftInMillis);
             lastTimerTime = savedInstanceState.getInt(KEY_LAST_TIMER_TIME, lastTimerTime);
             cyclesCompleted = savedInstanceState.getInt(KEY_CYCLES_COMPLETED, cyclesCompleted);
+            blockModeArmed = savedInstanceState.getBoolean(KEY_BLOCK_MODE_ARMED, blockModeArmed);
             // Defer the render: setConfigManager() above posts the default configured time
             // to the timerText LiveData, which would otherwise clobber the restored countdown.
             // Posting to the view queue runs after that pending LiveData delivery.
@@ -164,6 +173,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         outState.putLong(KEY_TIME_LEFT, timeLeftInMillis);
         outState.putInt(KEY_LAST_TIMER_TIME, lastTimerTime);
         outState.putInt(KEY_CYCLES_COMPLETED, cyclesCompleted);
+        outState.putBoolean(KEY_BLOCK_MODE_ARMED, blockModeArmed);
     }
 
     /**
@@ -326,7 +336,37 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         } else if (id == R.id.homeSkipRestButton) {
             cancelRest();
             SoundFeedback.get(requireContext()).playStop();
+        } else if (id == R.id.homeBlockModeButton) {
+            handleBlockModeToggle();
         }
+    }
+
+    /**
+     * Tap on the 🚫 block-mode toggle. Off -> on requires the accessibility grant (same gate as
+     * the Progress enforce toggle): if already granted, arm immediately; otherwise show the shared
+     * disclosure dialog and arm only once the user consents (onAccessibilityConsentGranted()).
+     * On -> off never needs permission. The button itself is disabled while TIMER_RUNNING (see
+     * updateBlockModeButton()), so this never fires mid-block.
+     */
+    private void handleBlockModeToggle() {
+        if (blockModeArmed) {
+            blockModeArmed = false;
+            updateTimerControls();
+            return;
+        }
+        if (AccessibilityAccess.isEnabled(requireContext())) {
+            blockModeArmed = true;
+            updateTimerControls();
+        } else {
+            AccessibilityDisclosureDialog.newInstance()
+                    .show(getChildFragmentManager(), "accessibility_disclosure");
+        }
+    }
+
+    @Override
+    public void onAccessibilityConsentGranted() {
+        blockModeArmed = true;
+        updateTimerControls();
     }
 
     /**
@@ -363,6 +403,38 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                 || timer_state == TIMER_PAUSED_REST
                 || timer_state == TIMER_STOPPED_REST;
         skipRestButton.setVisibility(isRest ? View.VISIBLE : View.GONE);
+
+        updateBlockModeButton();
+    }
+
+    /**
+     * Render the 🚫 block-mode toggle's 3 states (muted off / bb_danger active / bb_accent_reward
+     * pending-permission — same visual language as the Progress enforce toggle) and push the actual
+     * live-blocking flag. FocusBlockState is only ever true here, exactly while a concentration run
+     * (not rest) is running AND armed — this is the single writer for that state (see
+     * blocking/FocusBlockState.java for the kill-trap mitigation this depends on).
+     */
+    private void updateBlockModeButton() {
+        if (binding == null || blockModeButton == null) return;
+
+        int tint;
+        float alpha;
+        if (!blockModeArmed) {
+            tint = R.color.bb_on_surface_muted;
+            alpha = 0.35f;
+        } else if (AccessibilityAccess.isEnabled(requireContext())) {
+            tint = R.color.bb_danger;
+            alpha = 1f;
+        } else {
+            tint = R.color.bb_accent_reward;
+            alpha = 0.9f;
+        }
+        blockModeButton.setBackgroundTintList(
+                ContextCompat.getColorStateList(requireContext(), tint));
+        blockModeButton.setAlpha(alpha);
+        blockModeButton.setEnabled(timer_state != TIMER_RUNNING);
+
+        FocusBlockState.setActive(requireContext(), blockModeArmed && timer_state == TIMER_RUNNING);
     }
 
 
@@ -424,7 +496,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                 if (numStarted == 0) {
                     // App enters background
                     Log.i(TAG, "App enters background");
-                    if(timer_state == TIMER_RUNNING){
+                    // En modo bloqueo total (blockModeArmed), FocusBlockState ya cubre cualquier
+                    // otra app con la portada -- el usuario no puede realmente "irse" a usar otra
+                    // cosa, así que salir a segundo plano no debe fallar la sesión como en el modo
+                    // normal (ver blocking/FocusBlockState.java y el proposal de pomodoro-block-mode).
+                    if(timer_state == TIMER_RUNNING && !blockModeArmed){
                         isBackground = true;
 
                         // Crea una instancia de Handler
@@ -476,6 +552,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // No callback from Settings -> Accessibility (same caveat as ProgressFragment): re-check
+        // and re-render in case the user granted/revoked the service while away.
+        updateBlockModeButton();
+    }
 
     @Override
     public void onStart() {

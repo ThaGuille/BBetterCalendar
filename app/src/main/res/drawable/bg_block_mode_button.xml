@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo del toggle "Modo bloqueo total" del pomodoro. Color base bb_danger; HomeFragment lo
+     retinta en tiempo real (setBackgroundTintList) para reflejar los 3 estados igual que el
+     toggle 🚫 de Progress (muted / activo / pendiente de permiso). Tokens bb_* únicamente (regla #2). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_danger" />
+    <corners android:radius="100dp" />
+</shape>

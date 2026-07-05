@@ -92,6 +92,26 @@
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_play_v2_filled_24" />
 
+                <!-- Focus block-mode toggle: arms/disarms blocking every other app while the
+                     concentration timer runs (see blocking/FocusBlockState.java). Editable only
+                     while stopped/paused; disabled mid-run (disarming would instantly unblock). -->
+                <TextView
+                    android:id="@+id/homeBlockModeButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_block_mode_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/home_block_mode"
+                    android:textAppearance="@style/TextAppearance.BBetter.Chip"
+                    android:textColor="@color/bb_on_primary" />
+
                 <!-- Skip-rest button (only shown while resting) -->
                 <TextView
                     android:id="@+id/homeSkipRestButton"

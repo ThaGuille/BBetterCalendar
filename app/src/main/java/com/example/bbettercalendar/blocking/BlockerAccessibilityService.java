@@ -49,6 +49,14 @@ public class BlockerAccessibilityService extends AccessibilityService {
     private View coverView;
     private String coveredPackage;
 
+    // Se pone a true al arrancar teardown() (onDestroy/onUnbind, hilo principal). Una decisión que
+    // ya estaba en curso en el executor cuando arrancó el teardown termina y hace mainHandler.post()
+    // DESPUÉS de que teardown() ya haya corrido: sin esta guarda, ese post podría enganchar una
+    // portada nueva vía un WindowManager atado a un servicio ya desvinculado -> portada huérfana que
+    // nadie vuelve a retirar (su propio botón Cerrar llama a performGlobalAction en un servicio ya
+    // destruido). Se comprueba dentro del propio Runnable posteado, en el hilo principal.
+    private volatile boolean destroyed;
+
     // Paquetes de teclados (IME) instalados: sus ventanas emiten TYPE_WINDOW_STATE_CHANGED sin que
     // el usuario haya cambiado de app — se ignoran (ver isNoise). Se resuelven una vez al conectar.
     private Set<String> imePackages = Collections.emptySet();
@@ -90,6 +98,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
         executor.execute(() -> {
             BlockDecisionEngine.Decision decision = engine.decide(fg);
             mainHandler.post(() -> {
+                if (destroyed) return;
                 if (decision.block) {
                     showCover(fg, decision.usedMillis);
                 } else if (coveredPackage != null && !coveredPackage.equals(fg)) {
@@ -211,6 +220,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
     }
 
     private void teardown() {
+        destroyed = true;
         if (enforcedRules != null && enforcedObserver != null) {
             enforcedRules.removeObserver(enforcedObserver);
             enforcedObserver = null;

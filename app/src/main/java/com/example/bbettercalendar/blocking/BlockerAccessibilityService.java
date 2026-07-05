@@ -125,7 +125,10 @@ public class BlockerAccessibilityService extends AccessibilityService {
         if (getPackageName().equals(pkg)) {
             // R está generado en el namespace (com.example.bbettercalendar), que es lo que prefijan
             // los className de NUESTRAS Activities — no getPackageName() (el applicationId renombrado).
-            String namespace = R.class.getPackage().getName();
+            // R.class.getPackage() puede devolver null según el ClassLoader (no garantizado en
+            // Android) -> se deriva del nombre de clase, que nunca es null, en vez de reflexión.
+            String rClassName = R.class.getName();
+            String namespace = rClassName.substring(0, rClassName.lastIndexOf('.'));
             return className == null || !className.toString().startsWith(namespace);
         }
         return false;

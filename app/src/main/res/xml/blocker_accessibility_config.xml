@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Configuración del BlockerAccessibilityService (Phase 4a). Superficie mínima a propósito:
+     sólo TYPE_WINDOW_STATE_CHANGED (detectar la app en primer plano), sin captura de gestos y sin
+     leer contenido de ventana. isAccessibilityTool="false": NO es una herramienta de accesibilidad
+     para usuarios con discapacidad — es control parental/bienestar digital; declararlo honestamente
+     es parte de la mitigación del riesgo de revisión de Play. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/blocker_accessibility_description"
+    android:isAccessibilityTool="false"
+    android:notificationTimeout="100" />

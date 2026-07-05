@@ -12,13 +12,16 @@ public class AppUsageRow {
     // seleccionado es un único día (foregroundMillis de una semana/mes no es comparable contra
     // un límite diario). dailyLimitMinutes se conserva siempre para precargar AppLimitDialog.
     public final boolean showLimitProgress;
+    // Phase 4a: si el usuario activó "hacer cumplir el límite" para esta app (toggle 🚫 de la fila).
+    public final boolean enforceAtLimit;
 
     public AppUsageRow(String packageName, String label, long foregroundMillis, int dailyLimitMinutes,
-                        boolean showLimitProgress) {
+                        boolean showLimitProgress, boolean enforceAtLimit) {
         this.packageName = packageName;
         this.label = label;
         this.foregroundMillis = foregroundMillis;
         this.dailyLimitMinutes = dailyLimitMinutes;
         this.showLimitProgress = showLimitProgress;
+        this.enforceAtLimit = enforceAtLimit;
     }
 }

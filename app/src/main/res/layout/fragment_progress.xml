@@ -120,6 +120,22 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical" />
             </FrameLayout>
+
+            <!-- Interruptor maestro de "hacer cumplir los límites" (Phase 4a): pausa/reanuda TODO el
+                 bloqueo sin tocar los grants del OS. El texto refleja el estado (por defecto ON). -->
+            <TextView
+                android:id="@+id/usage_enforce_master"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="@dimen/spacing_sm"
+                android:textAppearance="@style/TextAppearance.BBetter.Label"
+                android:textColor="@color/bb_on_surface_muted"
+                tools:text="Enforcing app limits · tap to pause" />
         </LinearLayout>
 
         <!-- ============ (4) Time-span navigator ============ -->

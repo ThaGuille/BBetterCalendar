@@ -9,6 +9,7 @@
     <dimen name="spacing_sm">8dp</dimen>
     <dimen name="spacing_md">16dp</dimen>
     <dimen name="spacing_lg">25dp</dimen>
+    <dimen name="spacing_xl">36dp</dimen>
 
     <!-- Form rows -->
     <dimen name="form_row_height">70dp</dimen>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Portada de bloqueo de pantalla completa (Phase 4a). Opaca y clickable a propósito: intercepta
+     todos los toques sobre la app cubierta. Tokens bb_* únicamente (regla #2). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_lg">
+
+    <ImageView
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_block_24"
+        app:tint="@color/bb_danger" />
+
+    <TextView
+        android:id="@+id/block_cover_app_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_lg"
+        android:textAppearance="@style/TextAppearance.BBetter.Headline"
+        tools:text="Instagram" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:text="@string/block_cover_title"
+        android:textAppearance="@style/TextAppearance.BBetter.Title"
+        android:textColor="@color/bb_danger" />
+
+    <TextView
+        android:id="@+id/block_cover_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
+        android:textColor="@color/bb_on_surface_muted"
+        tools:text="2h 15m used today" />
+
+    <TextView
+        android:id="@+id/block_cover_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xl"
+        android:background="@drawable/bg_save_pill"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingStart="@dimen/spacing_xl"
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_xl"
+        android:paddingBottom="@dimen/spacing_md"
+        android:text="@string/block_cover_close"
+        android:textAppearance="@style/TextAppearance.BBetter.Title"
+        android:textColor="@color/bb_on_primary" />
+
+</LinearLayout>

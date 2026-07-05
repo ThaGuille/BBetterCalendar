@@ -14,6 +14,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.blocking.AccessibilityAccess;
+import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
+import com.example.bbettercalendar.blocking.BlockingSettings;
 import com.example.bbettercalendar.databinding.FragmentProgressBinding;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.ui.progress.apppicker.AppPickerActivity;
@@ -54,11 +57,19 @@ public class ProgressFragment extends Fragment {
         binding.rangeNext.setOnClickListener(v -> viewModel.stepForward());
 
         // --- banda 3: uso de apps ---
-        usageAdapter = new AppUsageAdapter(requireContext(), (packageName, label, currentLimitMinutes) ->
-                AppLimitDialog.newInstance(packageName, label, currentLimitMinutes)
-                        .show(getChildFragmentManager(), "app_limit"));
+        usageAdapter = new AppUsageAdapter(requireContext(),
+                (packageName, label, currentLimitMinutes) ->
+                        AppLimitDialog.newInstance(packageName, label, currentLimitMinutes)
+                                .show(getChildFragmentManager(), "app_limit"),
+                this::onEnforceToggle);
         binding.usageList.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.usageList.setAdapter(usageAdapter);
+
+        binding.usageEnforceMaster.setOnClickListener(v -> {
+            boolean nowEnabled = !BlockingSettings.isEnforcementEnabled(requireContext());
+            BlockingSettings.setEnforcementEnabled(requireContext(), nowEnabled);
+            updateEnforceMaster();
+        });
 
         View root = binding.getRoot();
         usageStateCard = root.findViewById(R.id.usage_state_card);
@@ -81,11 +92,50 @@ public class ProgressFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // No hay callback al volver de Ajustes (permiso) ni del picker: re-evaluar acceso + lista.
+        // No hay callback al volver de Ajustes (permiso/accesibilidad) ni del picker: re-evaluar.
         if (viewModel != null) {
             viewModel.refreshUsageAccess();
             viewModel.armUsageLimitMonitor();
         }
+        // Al volver de Ajustes -> Accesibilidad el usuario pudo (o no) activar el servicio: re-leer y
+        // re-pintar los toggles (pendiente ámbar -> activo rojo si ya está activado, o al revés).
+        if (usageAdapter != null) {
+            usageAdapter.setAccessibilityEnabled(AccessibilityAccess.isEnabled(requireContext()));
+        }
+        updateEnforceMaster();
+    }
+
+    // Tap en el toggle 🚫 de una fila (Phase 4a). Sin límite -> abrir primero el diálogo de límite (no
+    // se puede hacer cumplir lo que no existe). Apagar enforce no requiere permiso -> se hace directo.
+    // Encender: si el servicio de Accesibilidad ya está activado, se arma ya (rojo). Si no, se muestra
+    // SIEMPRE la divulgación/guía (no sólo la 1ª vez) — y NO se arma nada hasta que el usuario pulse
+    // "Enable" en ella (así el toggle no se pone "activo" sin que el usuario acepte y active el servicio).
+    private void onEnforceToggle(String packageName, String label, int currentLimitMinutes,
+                                 boolean currentlyEnforced) {
+        if (currentLimitMinutes <= 0) {
+            AppLimitDialog.newInstance(packageName, label, currentLimitMinutes)
+                    .show(getChildFragmentManager(), "app_limit");
+            return;
+        }
+        if (currentlyEnforced) {
+            viewModel.setEnforceAtLimit(packageName, false);
+            return;
+        }
+        if (AccessibilityAccess.isEnabled(requireContext())) {
+            viewModel.setEnforceAtLimit(packageName, true);
+        } else {
+            AccessibilityDisclosureDialog.newInstance(packageName)
+                    .show(getChildFragmentManager(), "accessibility_disclosure");
+        }
+    }
+
+    // Interruptor maestro "hacer cumplir los límites": refleja el estado guardado (por defecto ON).
+    private void updateEnforceMaster() {
+        if (binding == null) return;
+        boolean enabled = BlockingSettings.isEnforcementEnabled(requireContext());
+        binding.usageEnforceMaster.setText(enabled
+                ? R.string.progress_enforce_master_on
+                : R.string.progress_enforce_master_off);
     }
 
     private void renderRange(TimeRange range) {

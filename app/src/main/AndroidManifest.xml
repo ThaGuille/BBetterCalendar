@@ -64,6 +64,21 @@
             android:name=".ui.home.HomeForegroundService"
             android:foregroundServiceType="specialUse" />
 
+        <!-- Phase 4a: servicio de Accesibilidad que hace cumplir los límites diarios cubriendo la
+             app. BIND_ACCESSIBILITY_SERVICE va en la etiqueta <service> (no es <uses-permission>);
+             exported=false + el sistema es quien lo enlaza cuando el usuario lo activa en Ajustes. -->
+        <service
+            android:name=".blocking.BlockerAccessibilityService"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/blocker_accessibility_config" />
+        </service>
+
         <receiver
             android:name=".notifications.event.EventReminderReceiver"
             android:exported="false" />

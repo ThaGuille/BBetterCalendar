@@ -187,7 +187,8 @@ public class ProgressViewModel extends AndroidViewModel {
         for (AppRule rule : tracked) {
             Long millis = foreground.get(rule.packageName);
             rows.add(new AppUsageRow(rule.packageName, usageRepo.labelFor(rule.packageName),
-                    millis == null ? 0L : millis, rule.dailyLimitMinutes, showLimit));
+                    millis == null ? 0L : millis, rule.dailyLimitMinutes, showLimit,
+                    rule.enforceAtLimit));
         }
         // Más usadas primero.
         Collections.sort(rows, (a, b) -> Long.compare(b.foregroundMillis, a.foregroundMillis));
@@ -214,6 +215,17 @@ public class ProgressViewModel extends AndroidViewModel {
     // Reevalúa si el monitor de límites debe seguir armado (llamarlo, p.ej., en onResume).
     public void armUsageLimitMonitor() {
         executorService.execute(usageLimitScheduler::arm);
+    }
+
+    // Phase 4a: activa/desactiva "hacer cumplir el límite" para una app (toggle 🚫 de la fila).
+    // Escribe fuera del hilo principal (regla #3) y refresca la lista. El servicio de Accesibilidad
+    // observa observeEnforced(), así que recoge el cambio solo — aquí no hace falta notificarlo.
+    public void setEnforceAtLimit(String packageName, boolean enforce) {
+        executorService.execute(() -> {
+            appRuleDao.setEnforceAtLimit(packageName, enforce);
+            TimeRange current = selectedRange.getValue();
+            if (current != null) refreshUsage(current);
+        });
     }
 
     // El CTA de la tarjeta LOCKED: comprueba (fuera del hilo principal) si ya hay un consentimiento

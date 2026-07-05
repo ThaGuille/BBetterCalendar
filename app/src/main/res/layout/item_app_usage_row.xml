@@ -11,16 +11,21 @@
     android:paddingStart="@dimen/spacing_md"
     android:paddingEnd="@dimen/spacing_md">
 
-    <!-- Toggle de bloqueo: placeholder visual deshabilitado (se activa de verdad en Phase 4). -->
+    <!-- Toggle "hacer cumplir el límite" (Phase 4a): estado (tint/alpha) y click los pone el adapter.
+         padding + minWidth/Height amplían el área táctil sin agrandar el icono. -->
     <ImageView
         android:id="@+id/usage_block_toggle"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:alpha="0.35"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
         android:contentDescription="@string/progress_usage_block_toggle"
-        android:enabled="false"
-        android:src="@drawable/ic_block_24"
-        app:tint="@color/bb_on_surface_muted" />
+        android:focusable="true"
+        android:minWidth="40dp"
+        android:minHeight="40dp"
+        android:padding="@dimen/spacing_sm"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_block_24" />
 
     <ImageView
         android:id="@+id/usage_app_icon"

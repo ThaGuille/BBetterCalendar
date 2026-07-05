@@ -37,19 +37,19 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** be1dd0f (2026-07-04)
+**Branch:** `main`  |  **State as of commit:** c361bfc (2026-07-04)
 
 ### 1. What we touched last (recent commits)
+- c361bfc 2026-07-04 specs for the phase 4 - blocking apps
 - be1dd0f 2026-07-04 solving some bugs
 - 584c68a 2026-07-04 time limit for apps + notifications
 - 20a493c 2026-06-29 main page visual improvements, skip rest button, pause timer icon, cleanup etc
 - 821c6d3 2026-06-29 phase 3 proposition
-- c364157 2026-06-29 Archive progress-phase2-usage spec (phase 2 QA-passed)
 
 ### 2. In flight - active `/spec` changes
 | Change | Status | Tasks | Proposal |
 |---|---|---|---|
-| Progress Phase 4a — Soft blocking: accessibility cover + bounce at the daily limit | proposed | 0/22 | [proposal](.claude/specs/changes/progress-phase4a-blocking/proposal.md) |
+| Progress Phase 4a — Soft blocking: accessibility cover + bounce at the daily limit | applied | 21/22 | [proposal](.claude/specs/changes/progress-phase4a-blocking/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer](.claude/specs/capabilities/home-pomodoro.md)

@@ -1,11 +1,12 @@
 # BBetter — Privacy Policy
 
-**Version:** 1 (matches `ConsentRecord.USAGE_ACCESS_DISCLOSURE_VERSION = 1`)
-**Last updated:** 2026-06-28
-**Scope at this version:** Phase 2 — phone & app-usage measurement (`PACKAGE_USAGE_STATS`) — plus
-Phase 3 — optional daily limits with warn-only notifications, computed from the same on-device usage
-data (no new permission, no new data type). Blocking / accessibility features (Phase 4) are **not**
-part of this version and will be added here when they ship.
+**Version:** 1 (matches `ConsentRecord.USAGE_ACCESS_DISCLOSURE_VERSION = 1` and
+`ConsentRecord.ACCESSIBILITY_DISCLOSURE_VERSION = 1`)
+**Last updated:** 2026-07-04
+**Scope at this version:** Phase 2 — phone & app-usage measurement (`PACKAGE_USAGE_STATS`); Phase 3 —
+optional daily limits with warn-only notifications, computed from the same on-device usage data; and
+Phase 4a — optional **enforcement** of those limits via an Accessibility service that detects the
+foreground app and covers the apps you chose to limit (no new data type, no network, on-device only).
 
 > This in-repo file is the **source of truth**. The public privacy-policy page linked from the Play
 > listing and from inside the app mirrors this text verbatim. Keep them in sync; bump the version
@@ -27,6 +28,14 @@ With your explicit consent (you grant **Usage access** in system Settings), BBet
 - **The list of installed apps** — to let you pick which apps to track and to show each app's name
   and icon. This is read from the device's `PackageManager`.
 
+- **The foreground app's package name (only if you enable enforcement, Phase 4a)** — if you turn on
+  "Enforce daily limit" for an app, BBetter uses an **Accessibility service** that receives a signal
+  when an app comes to the foreground. It reads **only the package name** of that app to decide
+  whether it is one you chose to limit and whether it has passed its daily limit. It does **not**
+  retrieve window content (`canRetrieveWindowContent="false"`), read text on screen, capture
+  keystrokes, or observe any other app. When a limited app passes its limit, BBetter draws its own
+  full-screen cover over it (and, as a fallback, sends you to the home screen).
+
 We do **not** read the contents of any app, your messages, your keystrokes, your location, your
 contacts, your files, or anything you type. BBetter has no account and no login.
 
@@ -40,6 +49,13 @@ your on-device usage against that limit and shows a plain notification when you'
 it. This is computed and stored entirely on-device — the limit, the "already warned today" markers,
 and the check itself never leave your phone — and it only informs you; it never blocks or closes an
 app.
+
+**Enforcement (optional, Phase 4a):** if you additionally turn on "Enforce daily limit" for an app
+and grant the Accessibility permission, BBetter goes one step further than notifying: once that app
+passes its daily limit, BBetter covers it with a full-screen reminder for the rest of the day (reset
+at midnight). This is the **only** thing the Accessibility service does — it is not a screen reader
+or assistive tool, and it reads no screen content. You can pause enforcement for all apps from the
+Progress screen without revoking the permission, or revoke the permission entirely in Settings.
 
 ## Where it goes
 
@@ -58,6 +74,11 @@ You are always in control:
 - **Stop all usage reading:** open system **Settings → Apps → Special app access → Usage access →
   BBetter** and turn it off. The App-usage band immediately returns to its locked state and reads
   nothing.
+- **Stop enforcement (keep the permission):** tap the **"Enforcing app limits · tap to pause"**
+  control on the Progress screen — this pauses all covering without touching the OS grant. Turning
+  off "Enforce daily limit" on an individual app row stops enforcing just that app.
+- **Revoke the Accessibility permission entirely:** open system **Settings → Accessibility → BBetter**
+  and turn it off. The service stops receiving any foreground signal.
 - **Change which apps are tracked:** use **Add apps** on the Progress screen to add or remove apps at
   any time.
 - **Remove all stored data:** clearing the app's storage (or uninstalling) deletes the local
@@ -122,6 +143,11 @@ Draft answers for the **Data safety** section.
 | Consent record storage | Room table `consent_record` (`stats/ConsentRecord.java`) |
 | Revoke path | Progress screen "Add apps" (change tracked set) + system Settings → Usage access (full revoke) |
 | Permission re-check on return | `ProgressFragment.onResume()` → `ProgressViewModel.refreshUsageAccess()` |
+| **Accessibility disclosure** (shown before the Accessibility-settings deep-link) | `blocking/AccessibilityDisclosureDialog` + `popup_accessibility_disclosure.xml`; copy in `strings.xml` (`accessibility_disclosure_*`) |
+| **Accessibility affirmative consent** | "Enable" in `AccessibilityDisclosureDialog` → `ConsentRecord("accessibility_blocking", acceptedAt, version)` |
+| **Accessibility service** (foreground-package detection + own overlay) | `blocking/BlockerAccessibilityService` + `res/xml/blocker_accessibility_config.xml` (`isAccessibilityTool="false"`, `canRetrieveWindowContent="false"`, `typeWindowStateChanged` only) |
+| **Enforcement pause (no OS revoke)** | Progress screen master toggle → `blocking/BlockingSettings` (SharedPreferences) |
+| **Accessibility re-check on return** | `ProgressFragment.onResume()` (re-reads `AccessibilityAccess.isEnabled`) |
 
 > **On-device-only is an architectural invariant** (see `docs/progress/07-legal-and-compliance.md` §4).
 > Adding any cloud sync, analytics, or remote logging of this data would invalidate this policy, the

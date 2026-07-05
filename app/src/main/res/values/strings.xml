@@ -119,7 +119,9 @@
     <string name="progress_usage_header">Screen time</string>
     <string name="progress_usage_time_none">—</string>
     <string name="progress_usage_add_apps">Add apps</string>
-    <string name="progress_usage_block_toggle">Block app (coming soon)</string>
+    <string name="progress_usage_block_toggle">Enforce daily limit</string>
+    <string name="progress_enforce_master_on">Enforcing app limits · tap to pause</string>
+    <string name="progress_enforce_master_off">App-limit enforcement paused · tap to resume</string>
     <string name="progress_usage_locked_title">See your app usage</string>
     <string name="progress_usage_locked_body">Turn on Usage access to track the time you spend in the apps you choose. Your usage stays on this device.</string>
     <string name="progress_usage_locked_cta">Turn on usage access</string>
@@ -149,6 +151,22 @@
     <string name="usage_disclosure_body">To show how long you spend in each app, BBetter reads your device\'s app-usage information (which apps run in the foreground and for how long) and the list of installed apps.\n\nThis stays on your device — it is never uploaded, shared, or used for ads. You choose which apps to track, and you can turn this off any time in Settings → Usage access.</string>
     <string name="usage_disclosure_continue">Continue</string>
     <string name="usage_disclosure_cancel">Not now</string>
+
+    <!-- Accessibility-blocking disclosure (Phase 4a — shown before the Accessibility settings deep-link) -->
+    <string name="accessibility_disclosure_title">Enforce app limits</string>
+    <string name="accessibility_disclosure_body">To actually block an app when it hits its daily limit, BBetter uses an Accessibility service. It only detects which app is in the foreground and covers the apps <b>you</b> chose to limit — it never reads, records, or transmits the content of your screen, and everything stays on this device.\n\nYou can turn it off any time in Settings → Accessibility, or pause enforcement from the Progress screen.</string>
+    <string name="accessibility_disclosure_steps_title">After you tap Enable:</string>
+    <string name="accessibility_disclosure_steps">1. Find <b>BBetter</b> in the list of services\n2. Tap it, then turn the switch <b>On</b>\n3. Accept the system confirmation\n4. Come back here — the app will show as blocked</string>
+    <string name="accessibility_disclosure_continue">Enable</string>
+    <string name="accessibility_disclosure_cancel">Not now</string>
+
+    <!-- Accessibility service description (shown in the system Accessibility settings list) -->
+    <string name="blocker_accessibility_description">Covers the apps you chose to limit once they pass their daily time limit. Only detects the foreground app; never reads or transmits screen content. On-device only.</string>
+
+    <!-- Full-screen block cover (Phase 4a) -->
+    <string name="block_cover_title">Daily limit reached</string>
+    <string name="block_cover_subtitle">%1$s used today</string>
+    <string name="block_cover_close">Close</string>
 
     <!-- Repetition popup -->
     <string name="repetition_popup_title">Repetition</string>

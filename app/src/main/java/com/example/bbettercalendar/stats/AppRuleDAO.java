@@ -40,6 +40,18 @@ public interface AppRuleDAO {
     @Query("SELECT * FROM app_rule WHERE tracked = 1 AND dailyLimitMinutes > 0")
     List<AppRule> getLimited();
 
+    // Phase 4a: activa/desactiva el "hacer cumplir el límite" por app (columna física 'instantBlock').
+    @Query("UPDATE app_rule SET instantBlock = :enforce WHERE packageName = :pkg")
+    void setEnforceAtLimit(String pkg, boolean enforce);
+
+    // Apps que el bloqueador debe hacer cumplir: seguidas, con límite y con enforce activo.
+    @Query("SELECT * FROM app_rule WHERE tracked = 1 AND dailyLimitMinutes > 0 AND instantBlock = 1")
+    List<AppRule> getEnforced();
+
+    // Versión observable — la usa BlockerAccessibilityService para mantener su caché de reglas viva.
+    @Query("SELECT * FROM app_rule WHERE tracked = 1 AND dailyLimitMinutes > 0 AND instantBlock = 1")
+    LiveData<List<AppRule>> observeEnforced();
+
     @Query("DELETE FROM app_rule WHERE packageName = :pkg")
     void delete(String pkg);
 }

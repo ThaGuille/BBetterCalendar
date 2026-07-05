@@ -11,10 +11,15 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "consent_record")
 public class ConsentRecord {
     public static final String KEY_USAGE_ACCESS = "usage_access";
+    public static final String KEY_ACCESSIBILITY_BLOCKING = "accessibility_blocking";
 
     // Versión del texto de divulgación de Usage Access. Subir este número fuerza a volver a mostrar
     // la divulgación (consentimiento afirmativo sobre el texto nuevo) aunque ya se hubiera aceptado.
     public static final int USAGE_ACCESS_DISCLOSURE_VERSION = 1;
+
+    // Versión del texto de divulgación del bloqueo por Accesibilidad (Phase 4a). Misma semántica:
+    // subirlo re-pide el consentimiento afirmativo sobre el texto nuevo.
+    public static final int ACCESSIBILITY_DISCLOSURE_VERSION = 1;
 
     @PrimaryKey
     @NonNull

@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.lifecycle.LiveData;
@@ -20,7 +22,10 @@ import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.AppRule;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +49,10 @@ public class BlockerAccessibilityService extends AccessibilityService {
     private View coverView;
     private String coveredPackage;
 
+    // Paquetes de teclados (IME) instalados: sus ventanas emiten TYPE_WINDOW_STATE_CHANGED sin que
+    // el usuario haya cambiado de app — se ignoran (ver isNoise). Se resuelven una vez al conectar.
+    private Set<String> imePackages = Collections.emptySet();
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
@@ -51,6 +60,15 @@ public class BlockerAccessibilityService extends AccessibilityService {
         mainHandler = new Handler(Looper.getMainLooper());
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         engine = new BlockDecisionEngine(this);
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        Set<String> imes = new HashSet<>();
+        if (imm != null) {
+            for (InputMethodInfo info : imm.getInputMethodList()) {
+                imes.add(info.getPackageName());
+            }
+        }
+        imePackages = imes;
 
         // observeForever desde el hilo principal (onServiceConnected lo es); se retira en onUnbind.
         enforcedRules = AppDatabase.getDatabase(this).appRuleDao().observeEnforced();
@@ -67,6 +85,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
         if (pkgCs == null) return;
         final String fg = pkgCs.toString();
         if (engine == null || executor == null) return;
+        if (isNoise(fg, event.getClassName())) return;
 
         executor.execute(() -> {
             BlockDecisionEngine.Decision decision = engine.decide(fg);
@@ -84,6 +103,25 @@ public class BlockerAccessibilityService extends AccessibilityService {
     @Override
     public void onInterrupt() {
         // Sin acción: no procesamos gestos ni feedback continuo.
+    }
+
+    // Eventos de ventana que NO significan "el usuario cambió de app". Si se dejaran pasar, la rama
+    // de removeCover() los tomaría por una salida de la app cubierta y retiraría la portada:
+    //  - Nuestra PROPIA portada al engancharse: addView(TYPE_ACCESSIBILITY_OVERLAY) emite un
+    //    TYPE_WINDOW_STATE_CHANGED con nuestro paquete y el className del layout raíz (no de una
+    //    Activity nuestra) -> el servicio se quitaba su propia portada un instante después de
+    //    ponerla (el icono 🚫 parpadeaba y la app seguía usable). Una Activity NUESTRA real en
+    //    primer plano sí pasa (className empieza por nuestro paquete) y retira la portada.
+    //  - System UI (persiana de notificaciones, transiciones de recents): abrirla no es salir.
+    //  - El teclado: la app cubierta conserva el foco (la portada es FLAG_NOT_FOCUSABLE) y puede
+    //    abrir el IME justo al arrancar; la ventana del IME no es un cambio de app.
+    private boolean isNoise(String pkg, CharSequence className) {
+        if ("com.android.systemui".equals(pkg)) return true;
+        if (imePackages.contains(pkg)) return true;
+        if (getPackageName().equals(pkg)) {
+            return className == null || !className.toString().startsWith(getPackageName());
+        }
+        return false;
     }
 
     // --- portada de bloqueo ---

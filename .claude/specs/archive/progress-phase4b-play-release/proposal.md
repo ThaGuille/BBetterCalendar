@@ -1,7 +1,7 @@
 # Progress Phase 4b — Play compliance close-out + first-release readiness
 
 **Slug:** progress-phase4b-play-release
-**Status:** applied
+**Status:** archived
 **Created:** 2026-07-05
 **Last updated:** 2026-07-05
 

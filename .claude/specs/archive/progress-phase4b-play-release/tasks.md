@@ -32,5 +32,5 @@
 ## Verify
 - [x] `assembleDebug` compiles clean (isNoise namespace fix + link wiring)
 - [x] `assembleRelease` builds unsigned (graceful fallback, no `keystore.properties`); lintVitalRelease passed
-- [ ] Update `capabilities/progress-screen.md` Phase 4b row on archive
+- [x] Update `capabilities/progress-screen.md` Phase 4b row on archive
 - [ ] (user, on real phone) live end-to-end block QA per guide Part 7 — deferred to the user

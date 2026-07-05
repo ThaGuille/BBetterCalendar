@@ -12,7 +12,7 @@
 | 1 — Charts MVP | ✅ Done | MPAndroidChart v3.1.0 (JitPack). 3-page `ViewPager2` carousel (concent / fails / when-I-focus-or-fail) + Day/Week/Month toggle & `‹ label ›` stepper, one `TimeRange` drives both. On-device QA passed 2026-06-28 (empty install, live session, stepper). Archived: [progress-charts-mvp](../archive/progress-charts-mvp/proposal.md). |
 | 2 — Phone & app usage | ✅ Done | `PACKAGE_USAGE_STATS` (special-access) + usage-access disclosure/consent + **user-curated app-picker** + per-app usage list + screen-time total. DB v9→v10 (real `MIGRATION_9_10`). Privacy policy + Play declaration drafted in-repo. On-device QA passed 2026-06-29. Archived: [progress-phase2-usage](../archive/progress-phase2-usage/proposal.md). |
 | 3 — Limits + pre-limit warnings | ✅ Done | **Warn-only** tier: per-app daily limit (`AppLimitDialog`) + self-rescheduling `AlarmManager` check + two on-device notifications (pre-limit warning + limit-reached), **no enforcement**. No new permission, no schema change (`dailyLimitMinutes`/`warnBeforeMinutes` already existed). On-device QA passed 2026-07-04 (alarm-firing/de-dup not exercised live — mirrors proven event-reminder infra). Archived: [progress-phase3-limits](../archive/progress-phase3-limits/proposal.md). |
-| 4 — Soft blocking | 🔲 Not started | AccessibilityService **cover overlay (primary) + bounce-to-home (fallback)**, triggered after the daily limit / instant-block toggle. Play-policy heavy → disclosure + consent + declaration + demo video ([`07`](../../../docs/progress/07-legal-and-compliance.md)) |
+| 4a — Soft blocking | ✅ Done | AccessibilityService **cover overlay (primary) + bounce-to-home (fallback)**, live per-foreground-event decision, opt-in per-app **enforce toggle** (no schema bump — `instantBlock` repurposed as `enforceAtLimit`). Disclosure + consent + drafted Play declaration in-repo; Console submission + demo video deferred to Phase 4b. On-device QA passed 2026-07-04 (crash-free service lifecycle + dialog routing; live over-limit cover exercised structurally only). Archived: [progress-phase4a-blocking](../archive/progress-phase4a-blocking/proposal.md). |
 | ~~5 — Web~~ | ⛔ Dropped | Websites descoped 2026-06-28 — apps only |
 
 ## What exists today (post-Phase 0)
@@ -107,6 +107,39 @@
 - **Deliberately deferred to Phase 4:** all actual blocking (cover overlay, bounce-to-home,
   AccessibilityService), the functional block toggle, and the Play accessibility declaration.
 - Deps: **none** — `AlarmManager` / `UsageStatsManager` / `NotificationCompat` are platform/AndroidX.
+
+## What Phase 4a added (Soft blocking — shipped)
+
+- **No schema bump.** `AppRule.instantBlock` (unused since Phase 2) repurposed as
+  `enforceAtLimit` via `@ColumnInfo(name = "instantBlock")` rename. DB stays v10.
+  `AppRuleDAO` gained `setEnforceAtLimit`, `getEnforced()`, `observeEnforced()`.
+- **`blocking/` package (new):** `BlockerAccessibilityService` (handles
+  `TYPE_WINDOW_STATE_CHANGED`, guarded by `BIND_ACCESSIBILITY_SERVICE`,
+  `exported=false`, `isAccessibilityTool=false`, no gesture capability) +
+  `BlockDecisionEngine` (in-memory enforced-rules cache via `observeEnforced()`, TTL-cached
+  live usage decision + blocked-until-midnight latch, day-key self-reset à la
+  `WarnedTodayStore` — never hits `UsageStatsRepository.queryEvents` on every window event).
+  Decision is **live per foreground event**, not the Phase-3 alarm poll's lag.
+- **Cover UI:** `view_block_cover.xml` — full-screen `bb_*`-token overlay (app label,
+  "blocked for today — Xh Ym used", Close button removes overlay + bounces home);
+  `GLOBAL_ACTION_HOME` fallback if the overlay can't attach.
+- **Opt-in / consent (mirrors Phase 2 usage-access pattern):** `blocking/AccessibilityAccess`
+  (`isEnabled`/`accessibilitySettingsIntent`, re-checked in `onResume()`) +
+  `AccessibilityDisclosureDialog` (bespoke `DialogFragment`, explicit "I understand / Enable")
+  + `ConsentRecord(KEY_ACCESSIBILITY_BLOCKING, disclosureVersion=1)`.
+- **Progress screen:** `item_app_usage_row.xml` block-toggle stub goes live (enforce-on =
+  `bb_danger` tinted, off = muted); tap routing — no limit set → `AppLimitDialog`; service not
+  enabled → disclosure flow; else flips `enforceAtLimit`. `ProgressViewModel` gained
+  `setEnforceAtLimit(pkg, enforce)` + accessibility-state exposure. Master "Enforce app limits"
+  off-switch added (disables all enforcement without touching OS grants).
+- **Compliance:** `docs/legal/privacy-policy.md` updated (foreground-package detection + own
+  overlay, on-device only, revoke steps); new `docs/legal/play-declarations-phase4.md` —
+  drafted Accessibility API declaration, Data-safety deltas, demo-video shot-list (Console
+  submission + video recording deferred to Phase 4b, tracked by the user).
+- **Out of scope (deferred/dropped):** instant-block feature (dropped), snooze/"continue
+  anyway" escape hatch, battery-optimisation exemption + foreground keep-alive
+  ([`docs/defered.md`](../../../docs/defered.md)).
+- Deps: **none** — `AccessibilityService` is a platform API (API 21+).
 
 ## Open questions — RESOLVED (2026-06-28)
 

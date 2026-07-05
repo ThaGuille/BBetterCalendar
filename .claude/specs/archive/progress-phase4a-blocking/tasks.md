@@ -35,4 +35,4 @@
 - [x] `/check` (build + lint) — `assembleDebug` + `lintDebug` both BUILD SUCCESSFUL (2026-07-04)
 - [x] Emulator via **ui-tester** (2026-07-04): PASS — master toggle flips; `usage_block_toggle` on a no-limit row → `AppLimitDialog`; toggle with limit-set + service-off → `AccessibilityDisclosureDialog`; enabling the service via `settings` → `onServiceConnected`/event handling crash-free; `logcat -b crash` clean throughout. (Live over-limit cover not driven — needs real accumulated foreground usage; overlay path exercised only structurally.)
 - [x] Screenshot (visual/bb_* check) via `capture-screen.ps1`: enforced row icon = `bb_danger` full-alpha, unenforced = muted/faded — matches spec. (Cover overlay screenshot deferred with the live-trigger.)
-- [ ] Update `.claude/specs/capabilities/progress-screen.md` Phase 4 row (on archive)
+- [x] Update `.claude/specs/capabilities/progress-screen.md` Phase 4 row (on archive)

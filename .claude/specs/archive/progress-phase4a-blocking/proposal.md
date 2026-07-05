@@ -1,7 +1,7 @@
 # Progress Phase 4a — Soft blocking: accessibility cover + bounce at the daily limit
 
 **Slug:** progress-phase4a-blocking
-**Status:** applied
+**Status:** archived
 **Created:** 2026-07-04
 **Last updated:** 2026-07-05
 

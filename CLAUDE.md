@@ -97,8 +97,7 @@ Open the file that matches the task before guessing:
 
 | File | When to open it |
 |---|---|
-| [`overview.md`](.claude/docs/overview.md) | Quick map: stack, packages, key conventions, gotchas summary |
-| [`architecture.md`](.claude/docs/architecture.md) | Per-package class table, layer/nav diagrams, flow walkthroughs |
+| [`architecture.md`](.claude/docs/architecture.md) | Stack table, layer diagram, nav graph, system topology — pointer to the system docs below for per-package detail |
 | [`architectural_patterns.md`](.claude/docs/architectural_patterns.md) | Threading, DI wiring, DAO conventions, LiveData, popup pattern, type converters, builder pattern |
 | [`style_guide.md`](.claude/docs/style_guide.md) | Palette, typography, dimens, drawables, themes, layout patterns |
 | [`workflows.md`](.claude/docs/workflows.md) | Recipes: add popup / entity / screen / colour / schema migration / vendoring |
@@ -106,6 +105,22 @@ Open the file that matches the task before guessing:
 | [`windows_commands.md`](.claude/docs/windows_commands.md) | PowerShell, `gradlew.bat`, `adb`, AVD reference |
 | [`android_studio.md`](.claude/docs/android_studio.md) | IDE-specific tips: sync, run, logcat, database inspector, AVD |
 | [`harness.md`](.claude/docs/harness.md) | **Operating manual** for the AI harness: skills, subagents, hooks, the `/spec` loop, and the reusable `claude-harness` plugin — what to type, what's automatic |
+
+### System docs — `.claude/docs/systems/`
+
+Per-runtime-subsystem living docs (intent, async/manifest wiring, invariants, contracts) — open the one matching the task, not `architecture.md`, for implementation detail:
+
+| System | Doc | Open for |
+|---|---|---|
+| Data model | [`data-model.md`](.claude/docs/systems/data-model.md) | Room entities/DAOs, DB version + migrations, AppRule contract table |
+| App usage limits | [`app-limits.md`](.claude/docs/systems/app-limits.md) | Usage measurement, warn alarms, accessibility-service blocking |
+| Progress screen | [`progress-screen.md`](.claude/docs/systems/progress-screen.md) | Charts + usage-band UI (pipeline lives in `app-limits.md`) |
+| Pomodoro timer | [`pomodoro-timer.md`](.claude/docs/systems/pomodoro-timer.md) | Timer state machine, session persistence, background-fail grace |
+| Calendar | [`calendar.md`](.claude/docs/systems/calendar.md) | Month/week views, `CalendarEntry`, event reminders |
+| Notifications | [`notifications.md`](.claude/docs/systems/notifications.md) | Channels, `BBetterNotifier`, permission gate |
+| Startup & config | [`startup-config.md`](.claude/docs/systems/startup-config.md) | `SplashActivity` boot sequence, `ConfigurationManager` |
+
+Excluded (owned elsewhere): `ui/projects` (genuine stub), `popups`/`helpers`/`feedback` (see `architectural_patterns.md`). **Code wins on conflict** — if a doc drifts, fix it and bump its `Last verified:` date.
 
 ## Skills — `.claude/skills/`
 
@@ -149,14 +164,18 @@ with e.g. "use the code-reviewer subagent".
 | `app/src/main/java/.../ui/` | MVVM screens: `home/`, `calendar/`, `progress/`, `projects/` |
 | `app/src/main/java/.../calendarEntries/` | `CalendarEntry` entity + `EventBuilder`, `AddEventActivity` |
 | `app/src/main/java/.../configuration/` | `Configuration` entity, `ConfigurationManager`, `SplashActivity`, Hilt modules |
-| `app/src/main/java/.../database/` | `AppDatabase` (v6), `DBConverter`, `DBMigration` (Application class) |
-| `app/src/main/java/.../stats/` | `Stats` entity + DAO |
+| `app/src/main/java/.../database/` | `AppDatabase` (v10, 3 real migrations + destructive fallback), `DBConverter`, `DBMigration` (Application class) |
+| `app/src/main/java/.../stats/` | `Stats`, `DailyStat`, `FocusEvent`, `AppRule`, `ConsentRecord` entities + DAOs |
+| `app/src/main/java/.../usage/` | Usage measurement (`UsageStatsRepository`) + `limits/` (alarm-based warn pipeline) |
+| `app/src/main/java/.../blocking/` | Accessibility-service enforcement (cover overlay / bounce-to-home) |
+| `app/src/main/java/.../notifications/` | Channels, `BBetterNotifier`, permission gate + per-feature notifiers (`focus/`, `usage/`, `event/`) |
 | `app/src/main/java/.../helpers/` | `FormatHelper`, `ScreenHelper`, `ToolbarHelper`, toolbar listener interfaces |
 | `app/src/main/java/.../popups/` | `PopupHelper` base + 6 concrete dialog fragments |
 | `app/src/main/java/.../feedback/` | `HapticFeedback`, `SoundFeedback` |
 | `app/src/main/res/navigation/` | Bottom-nav graph (Home, Progress, Calendar, Projects) |
 | `app/src/main/res/values/` | `colors.xml` (palette), `themes.xml`, `styles_typography.xml`, `style.xml`, `dimens.xml`, `strings.xml` |
 | `.claude/docs/` | Knowledge base (see index above) |
+| `.claude/docs/systems/` | Per-runtime-subsystem living docs (see System docs table above) |
 | `.claude/plans/` | Saved design plans |
 | `.claude/skills/` | Project-level skills |
 | `.claude/specs/` | Spec-driven changes (`/spec`): `changes/`, `capabilities/`, `archive/` |

@@ -218,5 +218,5 @@ The marketplace currently lives inside BBetter. To use it on another machine, co
 | [`.claude/settings.local.json`](../settings.local.json) | hook wiring + permission allow-list (machine-local) |
 | [`.claude/specs/`](../specs/) | the `/spec` loop: `changes/`, `capabilities/`, `archive/` |
 | [`.claude/plans/`](../plans/) | saved plans (incl. the harness roadmap) |
-| [`.claude/docs/`](.) | knowledge base (this file included) |
+| [`.claude/docs/`](.) | knowledge base (this file included); [`systems/`](systems/) holds the per-runtime-subsystem living docs — `capabilities/` is retired in favor of these |
 | [`.claude/harness-marketplace/`](../harness-marketplace/) | the reusable plugin + marketplace (Phase 4) |

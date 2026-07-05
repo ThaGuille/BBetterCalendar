@@ -19,7 +19,7 @@ the `save-plan` habit for changes that actually get *implemented* — keep
     proposal.md        # WHY + WHAT (expressed as deltas vs current behavior)
     tasks.md           # implementation checklist
     design.md          # OPTIONAL: deeper technical notes / alternatives considered
-  capabilities/        # living "how the system behaves now" docs (grows over time)
+  capabilities/        # RETIRED — living docs moved to .claude/docs/systems/
   archive/<slug>/      # completed changes (moved here on archive)
 ```
 
@@ -71,8 +71,11 @@ run it now — verify never substitutes for the build/lint check, it's a layer o
    for small changes where a full verify pass is overkill).
 2. Move the folder: `changes/<slug>/` → `archive/<slug>/` (`git mv` or `Move-Item`).
 3. Set `Status: archived`, bump `Last updated:`.
-4. Fold any lasting behavior change into a `capabilities/<area>.md` doc so it becomes the
-   new "current behavior" baseline future proposals delta against.
+4. Fold any lasting behavior change into the owning **system doc** under
+   `.claude/docs/systems/<system>.md` (create from `_template.md` if missing): add a `## History`
+   row linking this archive, update the Files table / Flow / Invariants that changed, and bump
+   `Last verified:`. If the change spans systems, update every owner's doc. Keep it distilled —
+   invariants and contracts, not a change-log narrative.
 
 ## Templates
 
@@ -125,6 +128,8 @@ run it now — verify never substitutes for the build/lint check, it's a layer o
 - Don't skip `verify` on anything non-trivial just to close it out faster — a tiny one-file
   fix can go straight from `apply` to `archive` via `/check`, but if `code-reviewer` or the
   `ui-tester` subagent would normally be warranted, `verify` is where that happens.
+- Don't archive a change without updating the affected `.claude/docs/systems/` doc — it is the
+  baseline the next proposal deltas against.
 
 ## Cross-refs
 

@@ -37,21 +37,23 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 383fcd2 (2026-07-05)
+**Branch:** `main`  |  **State as of commit:** f92f570 (2026-07-05)
 
 ### 1. What we touched last (recent commits)
+- f92f570 2026-07-05 bugs solved
 - 383fcd2 2026-07-05 Fix potential NPE in isNoise() namespace check
 - 6b84d9c 2026-07-05 Archive progress-phase4b-play-release spec
 - a653de8 2026-07-05 Phase 4b: Play compliance close-out + first-release readiness
 - d25490d 2026-07-05 archived phase 4 - blocking apps
-- c1dc969 2026-07-05 blocking apps actually working!
 
 ### 2. In flight - active `/spec` changes
-_None active._
+| Change | Status | Tasks | Proposal |
+|---|---|---|---|
+| Pomodoro focus block mode ("🚫 Block mode 🚫") | proposed | 0/15 | [proposal](.claude/specs/changes/pomodoro-block-mode/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
-- [Capability — Home Pomodoro timer](.claude/specs/capabilities/home-pomodoro.md)
-- [Capability: Progress Screen](.claude/specs/capabilities/progress-screen.md)
+- [Capability — Home Pomodoro timer (moved)](.claude/specs/capabilities/home-pomodoro.md)
+- [Capability — Progress screen (moved)](.claude/specs/capabilities/progress-screen.md)
 
 **Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`
 
@@ -59,6 +61,7 @@ _None active._
 | Plan | Status | File |
 |---|---|---|
 | Advanced AI Harness Roadmap | in progress | [ai-harness-roadmap.md](.claude/plans/ai-harness-roadmap.md) |
+| Agent-first system documentation layer (`.claude/docs/systems/`) | implemented | [ok-let-s-design-a-encapsulated-adleman.md](.claude/plans/ok-let-s-design-a-encapsulated-adleman.md) |
 | Phase 0 — Persist Progress history (DailyStat + FocusEvent) | in progress (implemented + builds; runtime verification pending) | [phase-0-progress-history-tables.md](.claude/plans/phase-0-progress-history-tables.md) |
 | Redesign `activity_create_event` (and matching task layout) | in progress | [improve_addEvent_layout.md](.claude/plans/improve_addEvent_layout.md) |
 | Calendar UI polish — month + week views | proposed | [now-let-s-improve-the-crystalline-sloth.md](.claude/plans/now-let-s-improve-the-crystalline-sloth.md) |

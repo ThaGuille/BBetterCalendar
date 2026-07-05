@@ -18,7 +18,8 @@ tooling and fully portable. Use it for changes that actually get *implemented*; 
     proposal.md        # WHY + WHAT (expressed as deltas vs current behavior)
     tasks.md           # implementation checklist
     design.md          # OPTIONAL: deeper technical notes / alternatives considered
-  capabilities/        # living "how the system behaves now" docs (grows over time)
+  capabilities/        # living "how the system behaves now" docs (grows over time) —
+                       # or retired in favor of a project's own per-system docs (e.g. .claude/docs/systems/)
   archive/<slug>/      # completed changes (moved here on archive)
 ```
 
@@ -70,8 +71,11 @@ during `apply`, run it now — verify never substitutes for that check, it's a l
    check passed, for small changes where a full verify pass is overkill).
 2. Move the folder: `changes/<slug>/` → `archive/<slug>/` (`git mv` or `Move-Item`).
 3. Set `Status: archived`, bump `Last updated:`.
-4. Fold any lasting behavior change into a `capabilities/<area>.md` doc so it becomes the
-   new "current behavior" baseline future proposals delta against.
+4. Fold any lasting behavior change into this project's living docs so it becomes the new
+   "current behavior" baseline future proposals delta against — a `capabilities/<area>.md` doc
+   by default, or the project's own per-system docs if it has adopted that pattern instead (e.g.
+   `.claude/docs/systems/<system>.md`: update its Files table / Flow / Invariants, add a
+   `## History` row linking this archive, bump its "last verified" date).
 
 ## Templates
 
@@ -123,6 +127,8 @@ during `apply`, run it now — verify never substitutes for that check, it's a l
 - Don't skip `verify` on anything non-trivial just to close it out faster — a tiny one-file
   fix can go straight from `apply` to `archive` via the build/test check, but `verify` is
   where a real review pass belongs.
+- Don't archive a change without updating the project's living docs (`capabilities/` or its
+  per-system-doc equivalent) — that's the baseline the next proposal deltas against.
 
 ## Cross-refs
 

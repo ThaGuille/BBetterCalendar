@@ -1,14 +1,14 @@
 ---
 name: spec
-description: Run the native spec-driven change lifecycle (propose -> apply -> archive) under `.claude/specs/`. Use when starting a non-trivial change ("propose a spec for X", "/spec propose ..."), implementing an approved proposal ("/spec apply <slug>"), or closing one out ("/spec archive <slug>"). A lightweight, dependency-free alternative to OpenSpec.
+description: Run the native spec-driven change lifecycle (propose -> apply -> verify -> archive) under `.claude/specs/`. Use when starting a non-trivial change ("propose a spec for X", "/spec propose ..."), implementing an approved proposal ("/spec apply <slug>"), checking the implementation matches the proposal before closing it ("/spec verify <slug>"), or closing one out ("/spec archive <slug>"). A lightweight, dependency-free alternative to OpenSpec.
 ---
 
 # spec — native spec-driven change lifecycle
 
 A dependency-free spec loop that lives entirely in `.claude/specs/`. Same
-**proposal -> apply -> archive** discipline as OpenSpec, but no npm/Python tooling and
-fully portable. Use it for changes that actually get *implemented*; keep `/save-plan`
-for loose exploration that may not ship.
+**proposal -> apply -> verify -> archive** discipline as OpenSpec, but no npm/Python
+tooling and fully portable. Use it for changes that actually get *implemented*; keep
+`/save-plan` for loose exploration that may not ship.
 
 ## Directory layout
 
@@ -24,7 +24,7 @@ for loose exploration that may not ship.
 
 A SessionStart hook lists folders in `changes/` so every new session knows what is in flight.
 
-## Lifecycle — three verbs
+## Lifecycle — four verbs
 
 ### 1. `propose`  →  `/spec propose <topic>`
 
@@ -45,9 +45,29 @@ A SessionStart hook lists folders in `changes/` so every new session knows what 
 4. Verify with the project's build/test command (or a `/check`-style skill if it has one).
    Set `Status: applied`.
 
-### 3. `archive`  →  `/spec archive <slug>`
+### 3. `verify`  →  `/spec verify <slug>`
 
-1. Confirm tasks are done and verification passed.
+Catches scope drift and half-finished work *before* it gets archived and forgotten.
+Checks the implementation against the proposal's own artifacts along three axes:
+
+1. **Completeness** — every box in `tasks.md` is checked. If not, stop and list what's left;
+   don't proceed to archive.
+2. **Correctness** — diff the actual touched files (`git diff` / `git status`) against
+   proposal.md's "Impact: Files / packages touched". Flag anything touched that isn't listed
+   (undisclosed scope creep) and anything listed that wasn't touched.
+3. **Coherence** — a read-only review pass over the diff against this project's `CLAUDE.md`
+   conventions and for correctness bugs. Use a code-review subagent if this project has one;
+   otherwise do the pass directly. Fold any findings back into `tasks.md` as follow-ups
+   rather than silently fixing them.
+
+Append a short `## Verify` section to `proposal.md` recording the verdict (pass / issues
+found + how resolved). Set `Status: verified`. If the build/test command wasn't already run
+during `apply`, run it now — verify never substitutes for that check, it's a layer on top.
+
+### 4. `archive`  →  `/spec archive <slug>`
+
+1. Confirm tasks are done and the change has been `verify`'d (or at minimum the build/test
+   check passed, for small changes where a full verify pass is overkill).
 2. Move the folder: `changes/<slug>/` → `archive/<slug>/` (`git mv` or `Move-Item`).
 3. Set `Status: archived`, bump `Last updated:`.
 4. Fold any lasting behavior change into a `capabilities/<area>.md` doc so it becomes the
@@ -61,7 +81,7 @@ A SessionStart hook lists folders in `changes/` so every new session knows what 
 # <Change title>
 
 **Slug:** <slug>
-**Status:** proposed | approved | applied | archived
+**Status:** proposed | approved | applied | verified | archived
 **Created:** YYYY-MM-DD
 **Last updated:** YYYY-MM-DD
 
@@ -80,6 +100,9 @@ A SessionStart hook lists folders in `changes/` so every new session knows what 
 
 ## Out of scope
 - <explicitly not doing>
+
+## Verify
+<filled in by `/spec verify` — verdict + any issues found and how resolved>
 ```
 
 `tasks.md`:
@@ -97,7 +120,11 @@ A SessionStart hook lists folders in `changes/` so every new session knows what 
 - Don't start coding before the proposal exists and is approved.
 - Don't delete a change folder — `archive` it (status header is the history).
 - Don't put specs inline into `CLAUDE.md` — `.claude/specs/` is the home.
+- Don't skip `verify` on anything non-trivial just to close it out faster — a tiny one-file
+  fix can go straight from `apply` to `archive` via the build/test check, but `verify` is
+  where a real review pass belongs.
 
 ## Cross-refs
 
 - `/save-plan` — looser plans that may not ship.
+- A code-review subagent (if this project has one) — diff-vs-rules pass used in `verify`.

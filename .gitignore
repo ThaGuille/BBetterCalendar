@@ -14,3 +14,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firma de release — la clave privada y sus contraseñas NUNCA se versionan (Phase 4b)
+keystore.properties
+*.jks
+*.keystore

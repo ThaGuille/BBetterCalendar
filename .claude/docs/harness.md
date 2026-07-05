@@ -19,7 +19,7 @@ the only non-free piece; everything else is free and local.
 
 ```
 DISTRIBUTION   claude-harness plugin + marketplace   -> reuse across N apps
-WORKFLOW       /spec  (propose -> apply -> archive)   -> .claude/specs/
+WORKFLOW       /spec  (propose -> apply -> verify -> archive)   -> .claude/specs/
 CAPABILITIES   skills + 4 subagents + (a few MCP servers)
 KNOWLEDGE      CLAUDE.md + .claude/docs + CodeGraph index (just-in-time)
 GUARDRAILS     hooks + /check verification + file memory
@@ -103,6 +103,7 @@ no production code yet. Then:
 ```
 /spec apply <slug>      # implement, ticking off tasks, honoring CLAUDE.md rules
 /check                  # verify it builds/lints (apply calls this for you)
+/spec verify <slug>     # completeness/scope/coherence pass (code-reviewer) before closing out
 /spec archive <slug>    # move to archive/, fold lasting behavior into capabilities/
 ```
 
@@ -189,7 +190,7 @@ The marketplace currently lives inside BBetter. To use it on another machine, co
 
 | I want to… | Do this |
 |---|---|
-| Start a real change | `/spec propose <desc>` → `/spec apply <slug>` → `/spec archive <slug>` |
+| Start a real change | `/spec propose <desc>` → `/spec apply <slug>` → `/spec verify <slug>` → `/spec archive <slug>` |
 | See what changes are in flight | look at the SessionStart banner, or `.claude/specs/changes/` |
 | Understand how some code works | just ask — **explorer** + CodeGraph answer with `file:line` |
 | Plan before coding | ask for a plan (**planner**), then `/save-plan` or `/spec propose` |

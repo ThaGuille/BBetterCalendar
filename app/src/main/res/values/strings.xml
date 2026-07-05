@@ -146,6 +146,11 @@
     <string name="app_picker_empty">No apps found</string>
     <string name="app_picker_check">Track this app</string>
 
+    <!-- Privacy policy (Phase 4b) — hosted mirror of docs/legal/privacy-policy.md; linked from both
+         disclosure dialogs and the Play listing. Keep the URL in one place. -->
+    <string name="privacy_policy_label">Privacy policy</string>
+    <string name="privacy_policy_url" translatable="false">https://thaguille.github.io/BBetterCalendar/legal/privacy-policy/</string>
+
     <!-- Usage-access disclosure (Phase 2 — shown before the Settings deep-link) -->
     <string name="usage_disclosure_title">Track your app usage</string>
     <string name="usage_disclosure_body">To show how long you spend in each app, BBetter reads your device\'s app-usage information (which apps run in the foreground and for how long) and the list of installed apps.\n\nThis stays on your device — it is never uploaded, shared, or used for ads. You choose which apps to track, and you can turn this off any time in Settings → Usage access.</string>

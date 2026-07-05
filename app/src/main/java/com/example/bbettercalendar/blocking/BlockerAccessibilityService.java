@@ -118,8 +118,15 @@ public class BlockerAccessibilityService extends AccessibilityService {
     private boolean isNoise(String pkg, CharSequence className) {
         if ("com.android.systemui".equals(pkg)) return true;
         if (imePackages.contains(pkg)) return true;
+        // OJO: className viene del namespace (com.example.bbettercalendar.*), que tras el rename de
+        // applicationId (Phase 4b) YA NO coincide con getPackageName() (io.github.thaguille...). Hay
+        // que comparar contra el namespace, no contra el applicationId: si no, una Activity NUESTRA
+        // real en primer plano no se reconocería y la portada se quedaría pegada sobre BBetter.
         if (getPackageName().equals(pkg)) {
-            return className == null || !className.toString().startsWith(getPackageName());
+            // R está generado en el namespace (com.example.bbettercalendar), que es lo que prefijan
+            // los className de NUESTRAS Activities — no getPackageName() (el applicationId renombrado).
+            String namespace = R.class.getPackage().getName();
+            return className == null || !className.toString().startsWith(namespace);
         }
         return false;
     }

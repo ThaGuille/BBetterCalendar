@@ -34,6 +34,20 @@
         android:textAppearance="@style/TextAppearance.BBetter.Body"
         android:textColor="@color/bb_on_surface_muted" />
 
+    <TextView
+        android:id="@+id/accessibility_disclosure_privacy_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingBottom="@dimen/spacing_sm"
+        android:text="@string/privacy_policy_label"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
+        android:textColor="@color/bb_primary" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

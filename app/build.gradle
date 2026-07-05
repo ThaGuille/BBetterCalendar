@@ -4,12 +4,26 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+// Clave de subida (upload key) para builds de release firmadas. keystore.properties NO se versiona
+// (.gitignore); si falta (CI, otra máquina, clon limpio) assembleRelease sale SIN firmar en vez de
+// romper el build. La clave privada nunca entra al repo. Genera el keystore con el comando de
+// docs/legal/play-release-guide.md §Firma.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.example.bbettercalendar'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.bbettercalendar"
+        // OJO: applicationId es PERMANENTE tras la 1ª subida a Play; no puede cambiarse nunca más.
+        // namespace se queda en com.example.bbettercalendar a propósito -> los paquetes Java, la clase
+        // R y el codegen de Hilt/Room no se mueven. (Phase 4b)
+        applicationId "io.github.thaguille.bbettercalendar"
         minSdk 21
         targetSdk 34
         versionCode 1
@@ -18,10 +32,27 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            if (hasReleaseKeystore) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // minifyEnabled se queda en false para la 1ª release: Hilt/Room/Gson usan reflexión y las
+            // reglas ProGuard no están probadas. Revisar más adelante para reducir el tamaño del APK.
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Firma sólo si hay keystore.properties; si no, release sale sin firmar (no rompe el build).
+            if (hasReleaseKeystore) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {

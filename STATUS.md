@@ -37,17 +37,19 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** c1dc969 (2026-07-05)
+**Branch:** `main`  |  **State as of commit:** d25490d (2026-07-05)
 
 ### 1. What we touched last (recent commits)
+- d25490d 2026-07-05 archived phase 4 - blocking apps
 - c1dc969 2026-07-05 blocking apps actually working!
 - f7c50c9 2026-07-05 BLOCKING APPS first iteration. Permissions work, blocking does not
 - c361bfc 2026-07-04 specs for the phase 4 - blocking apps
 - be1dd0f 2026-07-04 solving some bugs
-- 584c68a 2026-07-04 time limit for apps + notifications
 
 ### 2. In flight - active `/spec` changes
-_None active._
+| Change | Status | Tasks | Proposal |
+|---|---|---|---|
+| Progress Phase 4b — Play compliance close-out + first-release readiness | applied | 17/19 | [proposal](.claude/specs/changes/progress-phase4b-play-release/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer](.claude/specs/capabilities/home-pomodoro.md)

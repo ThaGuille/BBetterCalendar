@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,8 +57,21 @@ public class AccessibilityDisclosureDialog extends DialogFragment {
             dismiss();
         });
         view.findViewById(R.id.accessibility_disclosure_cancel).setOnClickListener(v -> dismiss());
+        view.findViewById(R.id.accessibility_disclosure_privacy_link)
+                .setOnClickListener(v -> openPrivacyPolicy());
 
         return builder.create();
+    }
+
+    // Abre la política de privacidad alojada (GitHub Pages) en el navegador. No cierra el diálogo:
+    // el usuario debería poder leerla y volver a decidir Enable / Not now.
+    private void openPrivacyPolicy() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(getString(R.string.privacy_policy_url))));
+        } catch (ActivityNotFoundException e) {
+            // Sin navegador disponible; no bloquea el flujo de consentimiento.
+        }
     }
 
     // Arma enforceAtLimit para la app que disparó el diálogo, reutilizando el MISMO ProgressViewModel

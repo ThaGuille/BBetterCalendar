@@ -1,8 +1,16 @@
+---
+title: BBetter — Privacy Policy
+permalink: /legal/privacy-policy/
+---
+
 # BBetter — Privacy Policy
 
 **Version:** 1 (matches `ConsentRecord.USAGE_ACCESS_DISCLOSURE_VERSION = 1` and
 `ConsentRecord.ACCESSIBILITY_DISCLOSURE_VERSION = 1`)
-**Last updated:** 2026-07-04
+**Last updated:** 2026-07-05
+**Public URL:** <https://thaguille.github.io/BBetterCalendar/legal/privacy-policy/>
+(GitHub Pages, source `main` / `docs`; this file is the source rendered there and linked from
+both in-app disclosures and the Play listing)
 **Scope at this version:** Phase 2 — phone & app-usage measurement (`PACKAGE_USAGE_STATS`); Phase 3 —
 optional daily limits with warn-only notifications, computed from the same on-device usage data; and
 Phase 4a — optional **enforcement** of those limits via an Accessibility service that detects the

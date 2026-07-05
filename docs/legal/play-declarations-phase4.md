@@ -4,10 +4,12 @@
 **Last updated:** 2026-07-04
 **Applies to:** the `BlockerAccessibilityService` shipped in the `progress-phase4a-blocking` change.
 
-> This file is the **prepared text** for the Play Console steps that are a manual, external task
-> (the user's — Phase 4b closes them). The privacy-policy source of truth is
-> [`privacy-policy.md`](privacy-policy.md); this file only holds the Console-specific answers plus
-> the demo-video shot-list Google requires for accessibility-using apps. Keep both in sync.
+> This file is the **prepared text** for the Play Console steps that are a manual, external task.
+> For the full step-by-step submission runbook (account, signing, tracks, timeline) see
+> [`play-release-guide.md`](play-release-guide.md) — this file is just the answer-text it points at.
+> The privacy-policy source of truth is [`privacy-policy.md`](privacy-policy.md); this file only holds
+> the Console-specific answers plus the demo-video shot-list Google requires for accessibility-using
+> apps. Keep them in sync.
 
 The `IsAccessibilityTool` / `AccessibilityServices` policy is the **known high-risk review item**
 (see [`docs/progress/07-legal-and-compliance.md`](../progress/07-legal-and-compliance.md) §2). The

@@ -1,0 +1,14 @@
+# GitHub Pages (Jekyll) config for BBetter's public site.
+# Source: branch `main`, folder `/docs`. The ONLY page we intend to publish is the privacy policy
+# (Play requires a stable public URL). Everything else under docs/ is internal design/spec material
+# and is excluded from the build so it is not rendered as a website. (Phase 4b)
+title: BBetter
+description: Privacy policy for the BBetter app.
+theme: jekyll-theme-minimal
+
+exclude:
+  - progress/
+  - defered.md
+  - README.md
+  - legal/play-declarations-phase4.md
+  - legal/play-release-guide.md

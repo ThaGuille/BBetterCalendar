@@ -17,6 +17,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
+import com.example.bbettercalendar.popups.OnPopupListener;
+import com.example.bbettercalendar.popups.PopupHelper;
+import com.example.bbettercalendar.popups.RepetitionPopup;
+import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.Calendar;
@@ -30,14 +34,17 @@ import java.util.Locale;
  * La inserción vive en HomeViewModel (compartido con HomeFragment vía
  * requireParentFragment(), por eso hay que mostrarlo con getChildFragmentManager()).
  */
-public class QuickAddTaskSheet extends BottomSheetDialogFragment {
+public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPopupListener<Object> {
 
     public static final String SHEET_TAG = "quick_add_task_sheet";
 
     private EditText titleInput;
     private TextView timeButton;
+    private TextView repeatButton;
     private int selectedHour = -1;
     private int selectedMinute = -1;
+    private final RepetitionPopup repetitionPopup = new RepetitionPopup();
+    private RepetitionSpec repetitionSpec = RepetitionSpec.none();
 
     @Nullable
     @Override
@@ -52,10 +59,14 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment {
 
         titleInput = view.findViewById(R.id.quickAddTitleInput);
         timeButton = view.findViewById(R.id.quickAddTimeButton);
+        repeatButton = view.findViewById(R.id.quickAddRepeatButton);
 
         timeButton.setOnClickListener(v -> showTimePicker());
+        repeatButton.setOnClickListener(v -> showRepeatPicker());
         view.findViewById(R.id.quickAddSaveButton).setOnClickListener(v -> save());
         view.findViewById(R.id.quickAddMoreOptionsButton).setOnClickListener(v -> openMoreOptions());
+
+        repetitionPopup.setOnPopupListener(this);
 
         // Sheet de captura rápida: teclado listo sin un tap extra.
         titleInput.requestFocus();
@@ -77,6 +88,25 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment {
         }, hour, minute, DateFormat.is24HourFormat(requireContext())).show();
     }
 
+    private void showRepeatPicker() {
+        repetitionPopup.setInitialSpec(repetitionSpec);
+        repetitionPopup.show(getChildFragmentManager(), "quick_add_repeat_popup");
+    }
+
+    // Resultado del RepetitionPopup (spec tasks-recurrence).
+    @Override
+    public void OnClosePopup(int popupType, Object result) {
+        if (popupType == PopupHelper.REPETITION_POPUP && result instanceof RepetitionSpec) {
+            repetitionSpec = (RepetitionSpec) result;
+            repeatButton.setText(repetitionSpec.repeats()
+                    ? repetitionSpec.describe(requireContext())
+                    : getString(R.string.quick_add_repeat_label));
+        }
+    }
+
+    @Override
+    public void OnClosePopup(int popupType) { }
+
     private void save() {
         String title = titleInput.getText().toString().trim();
         if (title.isEmpty()) {
@@ -93,7 +123,7 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment {
 
         HomeViewModel viewModel =
                 new ViewModelProvider(requireParentFragment()).get(HomeViewModel.class);
-        viewModel.quickAddTask(title, start);
+        viewModel.quickAddTask(title, start, repetitionSpec);
         dismiss();
     }
 

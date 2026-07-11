@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Selector de recurrencia (spec tasks-recurrence). Las 4 filas base ya no auto-cierran el
+     diálogo: al elegir "Diaria" aparece el intervalo "cada X días" y al elegir "Semanal" los
+     toggles de día de la semana. El botón Hecho confirma y devuelve un RepetitionSpec. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,7 +11,6 @@
     android:paddingEnd="@dimen/spacing_md"
     android:paddingBottom="@dimen/spacing_md">
 
-    <!-- Title -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,7 +20,6 @@
         android:text="@string/repetition_popup_title"
         android:textAppearance="@style/TextAppearance.BBetter.Title" />
 
-    <!-- Rows -->
     <LinearLayout
         android:id="@+id/repetition_popup_row_none"
         style="@style/BBetter.CardFormRow">
@@ -68,6 +69,63 @@
             android:textOn="" />
     </LinearLayout>
 
+    <!-- Intervalo "cada X días", visible sólo con Diaria seleccionada. -->
+    <LinearLayout
+        android:id="@+id/repetition_popup_daily_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|end"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_sm"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/repetition_every_label"
+            android:textAppearance="@style/TextAppearance.BBetter.Label"
+            android:textColor="@color/bb_on_surface_muted" />
+
+        <TextView
+            android:id="@+id/repetition_interval_minus"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_stepper_circle"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="@string/repetition_stepper_minus"
+            android:textAppearance="@style/TextAppearance.BBetter.Title"
+            android:textColor="@color/bb_on_surface" />
+
+        <TextView
+            android:id="@+id/repetition_interval_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:minWidth="56dp"
+            android:gravity="center"
+            android:text="@string/repetition_interval_days_one"
+            android:textAppearance="@style/TextAppearance.BBetter.Body"
+            android:textColor="@color/bb_on_surface" />
+
+        <TextView
+            android:id="@+id/repetition_interval_plus"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_stepper_circle"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="@string/repetition_stepper_plus"
+            android:textAppearance="@style/TextAppearance.BBetter.Title"
+            android:textColor="@color/bb_on_surface" />
+    </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -94,6 +152,48 @@
             android:focusable="false"
             android:textOff=""
             android:textOn="" />
+    </LinearLayout>
+
+    <!-- Días de la semana, visibles sólo con Semanal seleccionada. Los 7 toggles se rellenan
+         y etiquetan en RepetitionPopup desde R.array.weekday_initials. -->
+    <LinearLayout
+        android:id="@+id/repetition_popup_weekly_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_sm"
+        android:paddingBottom="@dimen/spacing_sm"
+        android:visibility="gone">
+
+        <ToggleButton
+            android:id="@+id/repetition_weekday_0"
+            style="@style/BBetter.WeekdayToggle" />
+
+        <ToggleButton
+            android:id="@+id/repetition_weekday_1"
+            style="@style/BBetter.WeekdayToggle" />
+
+        <ToggleButton
+            android:id="@+id/repetition_weekday_2"
+            style="@style/BBetter.WeekdayToggle" />
+
+        <ToggleButton
+            android:id="@+id/repetition_weekday_3"
+            style="@style/BBetter.WeekdayToggle" />
+
+        <ToggleButton
+            android:id="@+id/repetition_weekday_4"
+            style="@style/BBetter.WeekdayToggle" />
+
+        <ToggleButton
+            android:id="@+id/repetition_weekday_5"
+            style="@style/BBetter.WeekdayToggle" />
+
+        <ToggleButton
+            android:id="@+id/repetition_weekday_6"
+            style="@style/BBetter.WeekdayToggle" />
     </LinearLayout>
 
     <View
@@ -123,4 +223,24 @@
             android:textOff=""
             android:textOn="" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/repetition_popup_confirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_sm"
+        android:background="@drawable/bg_chip_energy"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:text="@string/repetition_popup_confirm"
+        android:textAppearance="@style/TextAppearance.BBetter.Chip"
+        android:textColor="@color/bb_on_primary" />
+
 </LinearLayout>

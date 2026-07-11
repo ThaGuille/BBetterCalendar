@@ -198,5 +198,33 @@
     <string name="repetition_option_daily">Daily</string>
     <string name="repetition_option_weekly">Weekly</string>
     <string name="repetition_option_monthly">Monthly</string>
+    <string name="repetition_popup_confirm">Done</string>
+    <string name="repetition_every_label">Every</string>
+    <string name="repetition_stepper_minus">−</string>
+    <string name="repetition_stepper_plus">+</string>
+    <string name="repetition_interval_days_one">1 day</string>
+    <plurals name="repetition_interval_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <!-- Resúmenes para la fila "Repetir" (spec tasks-recurrence) -->
+    <string name="repetition_summary_every_n_days">Every %1$d days</string>
+    <string name="repetition_summary_weekly_on">Weekly · %1$s</string>
+    <!-- Iniciales de día (bit 0 = lunes … bit 6 = domingo), usadas por RepetitionPopup + RepetitionSpec -->
+    <string-array name="weekday_initials">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
+
+    <!-- Tareas recurrentes en Home (spec tasks-recurrence) -->
+    <string name="home_overdue_missed_count">missed %1$d×</string>
+    <string name="home_overdue_remove_symbol">✕</string>
+    <string name="home_overdue_remove_desc">Remove missed task</string>
+    <string name="quick_add_repeat_label">Repeat</string>
 
 </resources>

@@ -100,4 +100,23 @@ public class DBMigration extends Application {
                     "disclosureVersion INTEGER NOT NULL DEFAULT 0)");
         }
     };
+
+    // Phase 2 tareas (spec tasks-recurrence): recurrencia real basada en plantilla + ocurrencias
+    // materializadas. Aditiva (sólo ADD COLUMN) -> el histórico de calendarEntry se conserva.
+    //   isTemplate/templateId  -> fila-definición de la serie / vínculo ocurrencia->plantilla
+    //   repetitionInterval     -> "cada X días" (default 1 para no romper filas legacy diarias)
+    //   repetitionDays         -> bitmask de días de la semana (weekly)
+    //   materializedUntilMillis-> marca de agua por plantilla (top-up idempotente)
+    //   isDismissed            -> tarea retirada de las listas sin borrado (datos para stats)
+    static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN isTemplate INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN templateId INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN repetitionInterval INTEGER NOT NULL DEFAULT 1");
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN repetitionDays INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN materializedUntilMillis INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN isDismissed INTEGER NOT NULL DEFAULT 0");
+        }
+    };
 }

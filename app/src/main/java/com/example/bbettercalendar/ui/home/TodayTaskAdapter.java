@@ -32,14 +32,28 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         void onTaskChecked(CalendarEntry entry, boolean isDone);
     }
 
+    /** Botón "quitar" de la sección de atrasadas (spec tasks-recurrence). */
+    public interface OnTaskRemoveListener {
+        void onTaskRemove(CalendarEntry entry);
+    }
+
     private final List<CalendarEntry> tasks = new ArrayList<>();
     // La sección "older uncompleted" muestra la fecha de la tarea; la de hoy, su hora.
     private final boolean showDate;
     private final OnTaskCheckedListener listener;
+    // Sólo la sección de atrasadas pasa un removeListener: habilita el botón "quitar" y el
+    // contador de días fallados en las filas colapsadas.
+    private final OnTaskRemoveListener removeListener;
 
     public TodayTaskAdapter(boolean showDate, OnTaskCheckedListener listener) {
+        this(showDate, listener, null);
+    }
+
+    public TodayTaskAdapter(boolean showDate, OnTaskCheckedListener listener,
+                            OnTaskRemoveListener removeListener) {
         this.showDate = showDate;
         this.listener = listener;
+        this.removeListener = removeListener;
     }
 
     public void submitList(List<CalendarEntry> newTasks) {
@@ -81,6 +95,20 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
 
         holder.time.setText(formatWhen(entry));
 
+        // Fila colapsada de una serie recurrente atrasada: muestra "missed N×" (spec tasks-recurrence).
+        if (showDate && entry.getSeriesMissedCount() > 1) {
+            holder.time.setText(holder.itemView.getContext().getString(
+                    R.string.home_overdue_missed_count, entry.getSeriesMissedCount()));
+        }
+
+        if (removeListener != null) {
+            holder.remove.setVisibility(View.VISIBLE);
+            holder.remove.setOnClickListener(v -> removeListener.onTaskRemove(entry));
+        } else {
+            holder.remove.setVisibility(View.GONE);
+            holder.remove.setOnClickListener(null);
+        }
+
         holder.checkbox.setOnCheckedChangeListener((button, isChecked) -> {
             if (listener != null) {
                 listener.onTaskChecked(entry, isChecked);
@@ -116,12 +144,14 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         final CheckBox checkbox;
         final TextView title;
         final TextView time;
+        final TextView remove;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
             checkbox = itemView.findViewById(R.id.taskDoneCheckbox);
             title = itemView.findViewById(R.id.taskTitleText);
             time = itemView.findViewById(R.id.taskTimeText);
+            remove = itemView.findViewById(R.id.taskRemoveButton);
         }
     }
 }

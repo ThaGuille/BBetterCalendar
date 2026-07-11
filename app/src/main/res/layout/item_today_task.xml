@@ -35,4 +35,21 @@
         android:layout_marginStart="@dimen/spacing_sm"
         android:textAppearance="@style/TextAppearance.BBetter.Label" />
 
+    <!-- "Quitar" de una tarea atrasada (spec tasks-recurrence): oculto salvo en la sección de
+         atrasadas, donde TodayTaskAdapter recibe un OnTaskRemoveListener. No borra: retira. -->
+    <TextView
+        android:id="@+id/taskRemoveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/home_overdue_remove_desc"
+        android:focusable="true"
+        android:padding="@dimen/spacing_xs"
+        android:text="@string/home_overdue_remove_symbol"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        android:textColor="@color/bb_on_surface_muted"
+        android:visibility="gone" />
+
 </LinearLayout>

@@ -1,8 +1,8 @@
 # Projects & Tasks Roadmap
 
-**Status:** in progress (Phase 1 spec `tasks-home-today` proposed)
+**Status:** in progress (Phase 1 `tasks-home-today` archived; Phase 2 spec `tasks-recurrence` proposed)
 **Created:** 2026-07-06
-**Last updated:** 2026-07-06
+**Last updated:** 2026-07-11
 
 ## Summary
 

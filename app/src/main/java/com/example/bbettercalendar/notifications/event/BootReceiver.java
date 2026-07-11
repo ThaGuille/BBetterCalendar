@@ -44,7 +44,9 @@ public class BootReceiver extends BroadcastReceiver {
                 long now = System.currentTimeMillis();
                 int rescheduled = 0;
                 for (CalendarEntry entry : all) {
-                    if (entry.getStartMillis() > now) {
+                    // Las plantillas de recurrencia no reciben alarmas (spec tasks-recurrence):
+                    // sólo sus ocurrencias materializadas, que ya están en 'all' como filas propias.
+                    if (!entry.isTemplate() && entry.getStartMillis() > now) {
                         scheduler.scheduleFor(entry);
                         rescheduled++;
                     }

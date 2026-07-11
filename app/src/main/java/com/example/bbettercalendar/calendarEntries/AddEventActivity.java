@@ -44,6 +44,7 @@ import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.RepetitionOptions;
 import com.example.bbettercalendar.popups.RepetitionPopup;
+import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.google.android.material.textfield.TextInputEditText;
 
 import javax.inject.Inject;
@@ -93,6 +94,8 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     private Runnable runnableHours;
 
     private CalendarEntry.EventBuilder eventBuilder;
+    // Recurrencia elegida en el RepetitionPopup (spec tasks-recurrence). Sólo aplica a TYPE_TASK.
+    private RepetitionSpec repetitionSpec = RepetitionSpec.none();
     private Calendar localCalendar = Calendar.getInstance();
     private NotificationsPopup notificationsPopup = new NotificationsPopup();
     private RepetitionPopup repetitionPopup = new RepetitionPopup();
@@ -365,17 +368,31 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 int minute = Integer.parseInt ((numberPickerMinutesView.getDisplayedValues())[numberPickerMinutesView.getValue()]);
                 eventBuilder.setEventDuration(minute * 60000 + hour * 3600000);
             }
+            // Recurrencia (spec tasks-recurrence): una tarea que se repite se guarda como PLANTILLA;
+            // sus ocurrencias (con sus propios recordatorios) las crea el materializador, no esta fila.
+            if (repetitionSpec != null && repetitionSpec.repeats()) {
+                eventBuilder.setEventRepetition(repetitionSpec.repetition);
+                eventBuilder.setEventRepetitionInterval(repetitionSpec.interval);
+                eventBuilder.setEventRepetitionDays(repetitionSpec.daysMask);
+                eventBuilder.setEventIsTemplate(true);
+            }
         }
         /**Gson gson = new Gson();
         String jsonEvent = gson.toJson(event);**/
 
         CalendarEntry calendarEntry = eventBuilder.build();
+        boolean isTemplate = calendarEntry.isTemplate();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
                 long rowId = calendarEntryDAO.insert(calendarEntry);
                 calendarEntry.setId((int) rowId);
-                eventReminderScheduler.scheduleFor(calendarEntry);
+                if (isTemplate) {
+                    new RecurrenceMaterializer(getApplicationContext(), calendarEntryDAO)
+                            .materializeTemplate((int) rowId);
+                } else {
+                    eventReminderScheduler.scheduleFor(calendarEntry);
+                }
             }catch (Exception e){
                 Log.i(TAG, "evento fallido -> " + calendarEntry.getTitle());
             }
@@ -401,6 +418,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     }
 
     private void openRepetitionPicker(){
+        repetitionPopup.setInitialSpec(repetitionSpec);
         repetitionPopup.show(getSupportFragmentManager(), "popup_tag");
     }
 
@@ -409,10 +427,12 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         try {
             switch (type){
                 case PopupHelper.REPETITION_POPUP:
-                    int repetition = (Integer) value;
-                    eventBuilder.setEventRepetition(repetition);
+                    repetitionSpec = (RepetitionSpec) value;
+                    eventBuilder.setEventRepetition(repetitionSpec.repetition);
+                    eventBuilder.setEventRepetitionInterval(repetitionSpec.interval);
+                    eventBuilder.setEventRepetitionDays(repetitionSpec.daysMask);
                     if (repetitionTextView != null) {
-                        repetitionTextView.setText(RepetitionOptions.labelResIdFor(repetition));
+                        repetitionTextView.setText(repetitionSpec.describe(this));
                     }
                     break;
                 case PopupHelper.DESCRIPTION_POPUP:

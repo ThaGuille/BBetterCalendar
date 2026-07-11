@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.DailyStat;
@@ -27,6 +29,7 @@ public class SplashActivity extends AppCompatActivity {
     private StatsDAO statsDao;
     private DailyStatDAO dailyStatDao;
     private ConfigurationDAO configurationDao;
+    private CalendarEntryDAO calendarEntryDao;
     private ExecutorService executorService;
 
     @Override
@@ -37,6 +40,7 @@ public class SplashActivity extends AppCompatActivity {
         statsDao = AppDatabase.getDatabase(this).statsDao();
         dailyStatDao = AppDatabase.getDatabase(this).dailyStatDao();
         configurationDao = AppDatabase.getDatabase(this).configurationDao();
+        calendarEntryDao = AppDatabase.getDatabase(this).eventDao();
         executorService = Executors.newFixedThreadPool(2);
 
         Calendar today = Calendar.getInstance();
@@ -61,6 +65,11 @@ public class SplashActivity extends AppCompatActivity {
                 finish();
             });
         });
+
+        // Top-up de recurrencia (spec tasks-recurrence): adopta series legacy y rellena la ventana
+        // de ocurrencias de cada plantilla. En su propia tarea para no retrasar el arranque de la UI.
+        executorService.execute(() ->
+                new RecurrenceMaterializer(getApplicationContext(), calendarEntryDao).materializeAll());
 
     }
 

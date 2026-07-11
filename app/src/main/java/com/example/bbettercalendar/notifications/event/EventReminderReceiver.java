@@ -12,9 +12,7 @@ import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.NotificationChannels;
 import com.example.bbettercalendar.notifications.NotificationSpec;
 import com.example.bbettercalendar.popups.NotificationOffsets;
-import com.example.bbettercalendar.popups.RepetitionOptions;
 
-import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,7 +28,6 @@ public class EventReminderReceiver extends BroadcastReceiver {
 
     @Inject CalendarEntryDAO calendarEntryDAO;
     @Inject BBetterNotifier notifier;
-    @Inject EventReminderScheduler scheduler;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -49,7 +46,6 @@ public class EventReminderReceiver extends BroadcastReceiver {
                     return;
                 }
                 fireNotification(appContext, entry, offsetIndex);
-                rescheduleIfRepeating(entry, offsetIndex);
             } catch (Exception e) {
                 Log.e(TAG, "onReceive failed", e);
             } finally {
@@ -75,42 +71,9 @@ public class EventReminderReceiver extends BroadcastReceiver {
         notifier.notify(spec);
     }
 
-    private void rescheduleIfRepeating(CalendarEntry entry, int offsetIndex) {
-        int rep = entry.getRepetition();
-        if (rep == RepetitionOptions.NONE) return;
-
-        long currentStart = entry.getStartMillis();
-        long nextStart = advanceStart(currentStart, rep);
-        if (nextStart <= 0L) return;
-
-        entry.setStartMillis(nextStart);
-        if (entry.getStartDayAndHour() != null) {
-            entry.getStartDayAndHour().setTimeInMillis(nextStart);
-        }
-        long endDelta = entry.getEndMillis() - currentStart;
-        if (endDelta > 0L) {
-            entry.setEndMillis(nextStart + endDelta);
-            if (entry.getEndDayAndHour() != null) {
-                entry.getEndDayAndHour().setTimeInMillis(nextStart + endDelta);
-            }
-        }
-        calendarEntryDAO.update(entry);
-
-        scheduler.scheduleFor(entry);
-    }
-
-    private static long advanceStart(long startMillis, int repetition) {
-        if (startMillis <= 0L) return 0L;
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(startMillis);
-        switch (repetition) {
-            case RepetitionOptions.DAILY: cal.add(Calendar.DAY_OF_YEAR, 1); break;
-            case RepetitionOptions.WEEKLY: cal.add(Calendar.WEEK_OF_YEAR, 1); break;
-            case RepetitionOptions.MONTHLY: cal.add(Calendar.MONTH, 1); break;
-            default: return 0L;
-        }
-        return cal.getTimeInMillis();
-    }
+    // La recurrencia ya no se avanza aquí (spec tasks-recurrence): las ocurrencias se
+    // pre-materializan como filas propias con sus recordatorios (ver RecurrenceMaterializer),
+    // así que el receiver sólo notifica.
 
     private static int eventNotificationId(int entryId, int offsetIndex) {
         return 100_000 + entryId * 10 + offsetIndex;

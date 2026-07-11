@@ -1,6 +1,7 @@
 package com.example.bbettercalendar.calendarEntries;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -26,9 +27,29 @@ public class CalendarEntry {
 
     //Exclusivos de tareas
     private int repetition;
-    //todo faltan los días en los que se repite
+    // Recurrencia (spec tasks-recurrence). repetition sigue siendo el ordinal base
+    // (RepetitionOptions.NONE/DAILY/WEEKLY/MONTHLY); estos campos lo detallan:
+    //   repetitionInterval -> "cada X días" cuando repetition == DAILY
+    //   repetitionDays     -> bitmask Lun..Dom (bit 0 = lunes) cuando repetition == WEEKLY
+    private int repetitionInterval = 1;
+    private int repetitionDays;
     private int duration;
     private boolean isDone;
+    // Recurrencia (spec tasks-recurrence): una plantilla (isTemplate) es la definición de la
+    // serie — conserva fecha ancla + hora pero se excluye de TODAS las queries de superficie
+    // (nunca se pinta ni programa alarmas). Sus ocurrencias son filas propias con templateId
+    // apuntando a ella. materializedUntilMillis = marca de agua por plantilla (top-up idempotente).
+    private boolean isTemplate;
+    private int templateId;
+    private long materializedUntilMillis;
+    // isDismissed = ocultada de las listas accionables SIN borrar (los datos se conservan para
+    // estadísticas/gráficas futuras). Distinto de isDone: "deja de recordármela", no "completada".
+    private boolean isDismissed;
+
+    // Transitorio (no persistido): nº de ocurrencias atrasadas que una fila colapsada representa
+    // en la sección de atrasadas de Home. 0 = fila normal (tarea suelta o no colapsada).
+    @Ignore
+    private int seriesMissedCount;
 
     private int type;  //1 = evento, 2 = tarea, 3 = recordatorio
 
@@ -62,10 +83,24 @@ public class CalendarEntry {
     public void setNotifications(boolean[] notifications) {this.notifications = notifications;}
     public int getRepetition() {return repetition;}
     public void setRepetition(int repetition) {this.repetition = repetition;}
+    public int getRepetitionInterval() {return repetitionInterval;}
+    public void setRepetitionInterval(int repetitionInterval) {this.repetitionInterval = repetitionInterval;}
+    public int getRepetitionDays() {return repetitionDays;}
+    public void setRepetitionDays(int repetitionDays) {this.repetitionDays = repetitionDays;}
     public int getDuration() {return duration;}
     public void setDuration(int duration) {this.duration = duration;}
     public boolean isDone() {return isDone;}
     public void setDone(boolean done) {isDone = done;}
+    public boolean isTemplate() {return isTemplate;}
+    public void setTemplate(boolean template) {isTemplate = template;}
+    public int getTemplateId() {return templateId;}
+    public void setTemplateId(int templateId) {this.templateId = templateId;}
+    public long getMaterializedUntilMillis() {return materializedUntilMillis;}
+    public void setMaterializedUntilMillis(long materializedUntilMillis) {this.materializedUntilMillis = materializedUntilMillis;}
+    public boolean isDismissed() {return isDismissed;}
+    public void setDismissed(boolean dismissed) {isDismissed = dismissed;}
+    public int getSeriesMissedCount() {return seriesMissedCount;}
+    public void setSeriesMissedCount(int seriesMissedCount) {this.seriesMissedCount = seriesMissedCount;}
     public int getType() {return type;}
     public void setType(int type) {this.type = type;}
     public long getStartMillis() {return startMillis;}
@@ -82,8 +117,12 @@ public class CalendarEntry {
         private Calendar endDayAndHour = null;
         private boolean[] notifications = new boolean[7];
         private int repetition;
+        private int repetitionInterval = 1;
+        private int repetitionDays;
         private int duration;
         private boolean isDone;
+        private boolean isTemplate;
+        private int templateId;
         private int type;
 
         public EventBuilder(){}  //hacer constructor con lo mínimo obligatiorio (title, description, limitDate)
@@ -166,6 +205,22 @@ public class CalendarEntry {
             return this;
         }
         public int getEventRepetition() {return repetition;}
+        public EventBuilder setEventRepetitionInterval(int repetitionInterval) {
+            this.repetitionInterval = repetitionInterval;
+            return this;
+        }
+        public EventBuilder setEventRepetitionDays(int repetitionDays) {
+            this.repetitionDays = repetitionDays;
+            return this;
+        }
+        public EventBuilder setEventIsTemplate(boolean isTemplate) {
+            this.isTemplate = isTemplate;
+            return this;
+        }
+        public EventBuilder setEventTemplateId(int templateId) {
+            this.templateId = templateId;
+            return this;
+        }
         public EventBuilder setEventDuration(int duration) {
             this.duration = duration;
             return this;
@@ -195,8 +250,12 @@ public class CalendarEntry {
         this.endMillis = builder.endDayAndHour != null ? builder.endDayAndHour.getTimeInMillis() : this.startMillis;
         this.notifications = builder.notifications;
         this.repetition = builder.repetition;
+        this.repetitionInterval = builder.repetitionInterval;
+        this.repetitionDays = builder.repetitionDays;
         this.duration = builder.duration;
         this.isDone = builder.isDone;
+        this.isTemplate = builder.isTemplate;
+        this.templateId = builder.templateId;
         this.type = builder.type;
     }
     public CalendarEntry(){}

@@ -191,8 +191,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private void setUpTaskList() {
         todayTaskAdapter = new TodayTaskAdapter(false,
                 (entry, done) -> homeViewModel.setTaskDone(entry, done));
+        // La sección de atrasadas pasa un removeListener: habilita el botón "quitar" que retira
+        // (sin borrar) la serie/tarea atrasada — datos conservados para stats (spec tasks-recurrence).
         overdueTaskAdapter = new TodayTaskAdapter(true,
-                (entry, done) -> homeViewModel.setTaskDone(entry, done));
+                (entry, done) -> homeViewModel.setTaskDone(entry, done),
+                entry -> homeViewModel.dismissSeries(entry));
 
         binding.homeTodayTaskList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.homeTodayTaskList.setAdapter(todayTaskAdapter);

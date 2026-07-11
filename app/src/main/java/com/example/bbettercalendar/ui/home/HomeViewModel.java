@@ -13,11 +13,13 @@ import androidx.lifecycle.Transformations;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.example.bbettercalendar.stats.FocusEvent;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.Stats;
@@ -26,7 +28,10 @@ import com.example.bbettercalendar.stats.StatsDAO;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -86,7 +91,9 @@ public class HomeViewModel extends AndroidViewModel {
             if (before == null) {
                 return emptyEntryList();
             }
-            return calendarEntryDao.getUndoneTasksBefore(before);
+            return Transformations.map(
+                    calendarEntryDao.getUndoneTasksBefore(before),
+                    HomeViewModel::collapseOverdue);
         });
         refreshToday();
 
@@ -148,6 +155,42 @@ public class HomeViewModel extends AndroidViewModel {
         return tasks;
     }
 
+    /**
+     * Colapsa la lista de atrasadas (spec tasks-recurrence): una serie recurrente ignorada N días
+     * no debe apilar N filas. Las ocurrencias de una misma plantilla se reducen a UNA fila
+     * representante (la más antigua no hecha) que lleva el nº de días fallados; las tareas sueltas
+     * (templateId == 0) se muestran individualmente. Entrada ya ordenada por startMillis ASC.
+     */
+    // Package-private (no private) para poder cubrirla con tests JVM — ver HomeViewModelCollapseTest.
+    static List<CalendarEntry> collapseOverdue(List<CalendarEntry> entries) {
+        List<CalendarEntry> result = new ArrayList<>();
+        if (entries == null) {
+            return result;
+        }
+        Map<Integer, CalendarEntry> firstByTemplate = new LinkedHashMap<>();
+        Map<Integer, Integer> countByTemplate = new HashMap<>();
+        for (CalendarEntry e : entries) {
+            int templateId = e.getTemplateId();
+            if (templateId == 0) {
+                result.add(e); // tarea suelta atrasada: fila propia
+                continue;
+            }
+            if (!firstByTemplate.containsKey(templateId)) {
+                firstByTemplate.put(templateId, e);
+            }
+            Integer count = countByTemplate.get(templateId);
+            countByTemplate.put(templateId, count == null ? 1 : count + 1);
+        }
+        for (Map.Entry<Integer, CalendarEntry> en : firstByTemplate.entrySet()) {
+            CalendarEntry representative = en.getValue();
+            representative.setSeriesMissedCount(countByTemplate.get(en.getKey()));
+            result.add(representative);
+        }
+        Collections.sort(result,
+                (a, b) -> Long.compare(a.getStartMillis(), b.getStartMillis()));
+        return result;
+    }
+
     private static LiveData<List<CalendarEntry>> emptyEntryList() {
         MutableLiveData<List<CalendarEntry>> empty = new MutableLiveData<>();
         empty.setValue(Collections.emptyList());
@@ -193,14 +236,58 @@ public class HomeViewModel extends AndroidViewModel {
         });
     }
 
-    public void quickAddTask(String title, Calendar startDayAndHour) {
-        CalendarEntry task = new CalendarEntry.EventBuilder()
+    public void quickAddTask(String title, Calendar startDayAndHour, RepetitionSpec repetition) {
+        boolean repeats = repetition != null && repetition.repeats();
+        CalendarEntry.EventBuilder builder = new CalendarEntry.EventBuilder()
                 .setEventType(AddEventActivity.TYPE_TASK)  // build() no pone defaults (regla #4)
                 .setEventTitle(title)
                 .setEventStartDayAndHour(startDayAndHour)
-                .setEventIsDone(false)
-                .build();
-        executorService.execute(() -> calendarEntryDao.insert(task));
+                .setEventIsDone(false);
+        if (repeats) {
+            // Tarea recurrente: se guarda como PLANTILLA; el materializador crea sus ocurrencias.
+            builder.setEventRepetition(repetition.repetition)
+                    .setEventRepetitionInterval(repetition.interval)
+                    .setEventRepetitionDays(repetition.daysMask)
+                    .setEventIsTemplate(true);
+        }
+        CalendarEntry task = builder.build();
+        executorService.execute(() -> {
+            long rowId = calendarEntryDao.insert(task);
+            if (repeats) {
+                new RecurrenceMaterializer(getApplication(), calendarEntryDao)
+                        .materializeTemplate((int) rowId);
+            }
+        });
+    }
+
+    /**
+     * Retira (sin borrar) una tarea atrasada desde Home (spec tasks-recurrence): si es una serie
+     * recurrente, retira todas sus ocurrencias pasadas no hechas; si es una tarea suelta, sólo esa
+     * fila. Los datos quedan en la BD para estadísticas/gráficas futuras.
+     */
+    public void dismissSeries(CalendarEntry entry) {
+        final int entryId = entry.getId();
+        final int templateId = entry.getTemplateId();
+        executorService.execute(() -> {
+            if (templateId != 0) {
+                calendarEntryDao.dismissSeriesBefore(templateId, startOfTodayMillis());
+            } else {
+                CalendarEntry fresh = calendarEntryDao.getEventById(entryId);
+                if (fresh != null) {
+                    fresh.setDismissed(true);
+                    calendarEntryDao.update(fresh);
+                }
+            }
+        });
+    }
+
+    private static long startOfTodayMillis() {
+        Calendar day = Calendar.getInstance();
+        day.set(Calendar.HOUR_OF_DAY, 0);
+        day.set(Calendar.MINUTE, 0);
+        day.set(Calendar.SECOND, 0);
+        day.set(Calendar.MILLISECOND, 0);
+        return day.getTimeInMillis();
     }
 
     public LiveData<List<CalendarEntry>> getTodayTasks() {

@@ -253,4 +253,19 @@
         <item name="android:textColorHint">@color/bb_on_surface_muted</item>
     </style>
 
+    <!-- Toggle circular de día de la semana en el RepetitionPopup (spec tasks-recurrence). -->
+    <style name="BBetter.WeekdayToggle" parent="">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginStart">3dp</item>
+        <item name="android:layout_marginEnd">3dp</item>
+        <item name="android:background">@drawable/bg_weekday_toggle</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Label</item>
+        <item name="android:textColor">@color/weekday_toggle_text</item>
+    </style>
+
 </resources>

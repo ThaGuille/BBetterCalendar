@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo de los toggles de día de la semana del RepetitionPopup (spec tasks-recurrence).
+     Círculo relleno bb_primary cuando está marcado, contorno tenue cuando no. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_primary" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/bb_divider" />
+        </shape>
+    </item>
+</selector>

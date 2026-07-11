@@ -1,6 +1,6 @@
 # System — Data model (`stats/` + `database/`)
 
-**Last verified:** 2026-07-05 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-07-07 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Room persistence layer: `AppDatabase` (7 entities, version 10) plus every entity/DAO under
 `stats/`. This is the **contract hub** — sibling system docs (`app-limits.md`,
@@ -49,7 +49,7 @@ anchors below instead of re-describing entity shape.
 | `AppRule` | `ProgressViewModel` (`setTracked`, `setDailyLimit`, `setEnforceAtLimit` — see `app-limits.md`) | `ProgressViewModel`, `UsageLimitChecker`/`UsageLimitScheduler` (`getLimited`), `BlockDecisionEngine` (`observeEnforced`), `DBMigration` (arms scheduler on cold start) |
 | `ConsentRecord` | `UsageDisclosureDialog`, `AccessibilityDisclosureDialog` | `ProgressViewModel`, `ProgressFragment`/blocking flow (gate before Settings deep-link) |
 | `Configuration` | `ConfigurationManager.updateConfiguration()`, `PermissionGate` (ask-count/timestamp) | `ConfigurationManager` (cached in memory), `HomeViewModel`/`HomeFragment` (timer/rest/cycle values) |
-| `CalendarEntry` | `AddEventActivity` (via `EventBuilder.build()`) | `CalendarFragmentMonth`/`Week` via `CalendarViewModel`, `EventReminderScheduler`, `BootReceiver` |
+| `CalendarEntry` | `AddEventActivity` (via `EventBuilder.build()`), `HomeViewModel` (`quickAddTask` via `EventBuilder`; `setTaskDone` re-reads via `getEventById` + `update`) | `CalendarFragmentMonth`/`Week` via `CalendarViewModel`, `HomeViewModel` (today's `TYPE_TASK` via `getEventsBetween` + overdue via `getUndoneTasksBefore`), `EventReminderScheduler`, `BootReceiver` |
 
 **Cross-system coupling to know:** `UsageLimitChecker` (alarm poll, warn-only) and
 `BlockDecisionEngine` (live per-foreground-event, enforcement) each independently read `AppRule` +
@@ -70,3 +70,4 @@ anchors below instead of re-describing entity shape.
 |---|---|---|
 | 2026-06-28 | `DailyStat` + `FocusEvent` added (DB v8→v9, no migration written) | `.claude/specs/archive/progress-charts-mvp/proposal.md` |
 | 2026-06-29 | `AppRule` + `ConsentRecord` added (DB v9→v10, `MIGRATION_9_10`) | `.claude/specs/archive/progress-phase2-usage/proposal.md` |
+| 2026-07-07 | Home surfaces today's `TYPE_TASK` entries — additive `getUndoneTasksBefore` `@Query` (overdue undone tasks), `HomeViewModel` now a `CalendarEntry` reader/writer; no schema change (still v10) | `.claude/specs/archive/tasks-home-today/proposal.md` |

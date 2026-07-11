@@ -37,26 +37,25 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** bde26d6 (2026-07-05)
+**Branch:** `main`  |  **State as of commit:** b4869e3 (2026-07-06)
 
 ### 1. What we touched last (recent commits)
+- b4869e3 2026-07-06 roadmap to the next BIG STEPS - PROJECTS + time completeness system + dayly tasks + deadlines
 - bde26d6 2026-07-05 documentation system + propse for strict blocking pomodoro
 - f92f570 2026-07-05 bugs solved
 - 383fcd2 2026-07-05 Fix potential NPE in isNoise() namespace check
 - 6b84d9c 2026-07-05 Archive progress-phase4b-play-release spec
-- a653de8 2026-07-05 Phase 4b: Play compliance close-out + first-release readiness
 
 ### 2. In flight - active `/spec` changes
 | Change | Status | Tasks | Proposal |
 |---|---|---|---|
 | Pomodoro focus block mode ("🚫 Block mode 🚫") | verified | 15/16 | [proposal](.claude/specs/changes/pomodoro-block-mode/proposal.md) |
-| "Today" tasks in Home (roadmap Phase 1) | proposed | 0/17 | [proposal](.claude/specs/changes/tasks-home-today/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer (moved)](.claude/specs/capabilities/home-pomodoro.md)
 - [Capability — Progress screen (moved)](.claude/specs/capabilities/progress-screen.md)
 
-**Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`
+**Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`, `tasks-home-today`
 
 ### 4. Plans (`.claude/plans`) - undone first
 | Plan | Status | File |

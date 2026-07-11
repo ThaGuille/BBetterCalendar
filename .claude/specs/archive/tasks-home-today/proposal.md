@@ -1,9 +1,9 @@
 # "Today" tasks in Home (roadmap Phase 1)
 
 **Slug:** tasks-home-today
-**Status:** proposed
+**Status:** archived
 **Created:** 2026-07-06
-**Last updated:** 2026-07-06
+**Last updated:** 2026-07-07
 
 Parent roadmap: [`.claude/plans/projects-tasks-roadmap.md`](../../../plans/projects-tasks-roadmap.md) (Phase 1).
 Decisions locked there are not re-litigated here.
@@ -59,9 +59,19 @@ with **no DB change**.
 - ADDED: **"More options"** link in the sheet → launches `AddEventActivity` with
   `entry=TYPE_TASK` + `EXTRA_PRESELECTED_DATE_MILLIS=today` (already supported), plus a
   new optional `EXTRA_PREFILL_TITLE` extra so a typed title isn't lost.
-- CHANGED: **Timer card compacted** — tighter padding / smaller countdown step.
+- CHANGED: **Timer card compacted** — tighter margins, smaller countdown text and play
+  button (`home_play_button_size` 88→72dp, new `text_display_compact` dimen).
 - CHANGED: **Stats card collapsed** from 3 stacked icon-rows to one horizontal row
-  (3 equal-weight columns: studied time, streak, fails).
+  (3 equal-weight columns: studied time, streak, fails); the redundant "Today" card
+  title is dropped. `HomeViewModel` stat LiveData now posts **bare values** ("07:00",
+  "3", "0") instead of full sentences ("Today studied time: 07:00") — the sentences
+  don't fit the columns and duplicated the on-screen labels anyway.
+- CHANGED (bug fix, discovered during apply): `AddEventActivity.saveAndQuit()` now
+  defaults the builder's start date to `localCalendar` (the date already shown in the
+  form) when the user never opened the date picker. Previously `startDayAndHour`
+  stayed null → `startMillis = 0` → the saved entry was invisible to every date-range
+  query (Calendar month/day *and* the new Today list). The quick-add "More options"
+  path hits this immediately, so it's in scope.
 - REMOVED: nothing. Calendar day-detail keeps rendering the same rows unchanged.
 
 ## Impact
@@ -76,12 +86,12 @@ with **no DB change**.
   - `app/src/main/java/.../calendarEntries/CalendarEntryDAO.java` — one new `@Query`
     (overdue undone tasks before a millis)
   - `app/src/main/java/.../calendarEntries/AddEventActivity.java` — read optional
-    `EXTRA_PREFILL_TITLE`
+    `EXTRA_PREFILL_TITLE`; default null start date in `saveAndQuit()` (bug fix above)
   - `app/src/main/res/layout/fragment_home.xml` — compaction + Today-tasks card
     (⚠ same in-flight caveat)
   - `app/src/main/res/layout/item_today_task.xml` — NEW
   - `app/src/main/res/layout/sheet_quick_add_task.xml` — NEW
-  - `app/src/main/res/values/strings.xml` (+ `dimens.xml` if a new dimen is warranted)
+  - `app/src/main/res/values/strings.xml` + `dimens.xml` (compaction dimens)
 - DB schema: **none** (stays v10; new `@Query` only, no entity/column change)
 - UI tokens: bb_* + `TextAppearance.BBetter.*` only (rule #2); card = existing
   `bg_card` / `home_card_padding` pattern
@@ -105,4 +115,19 @@ with **no DB change**.
 
 ## Verify
 
-<filled in by `/spec verify` — verdict + any issues found and how resolved>
+**Verdict: PASS** (2026-07-07). All three axes clean:
+
+1. **Completeness** — every box in `tasks.md` is checked (layout compaction, data layer,
+   card UI, quick-add, and the in-apply verify steps: `/check`, `ui-tester` 8/8, code-reviewer).
+2. **Correctness** — every touched file under `app/src/main` matches the Impact list exactly;
+   no undisclosed scope creep. New files (`TodayTaskAdapter`, `QuickAddTaskSheet`,
+   `item_today_task.xml`, `sheet_quick_add_task.xml`) all declared. Non-code changes
+   (`bbetter-selectors.md` side fix, `STATUS.md`) already noted. (`fragment_home.xml` /
+   `HomeFragment.java` also carry intermixed in-flight `pomodoro-block-mode` edits — expected,
+   flagged in the Impact section.)
+3. **Coherence** — `/check` (`assembleDebug` + `lintDebug`) passes. Fresh code-reviewer pass
+   over the current diff: **Ship**, no High findings. The two Mediums are both already
+   intentional/documented — the `saveAndQuit()` start-date fallback is the declared in-scope
+   bug fix (CHANGED above), and the missing `EventReminderScheduler` call matches the "no
+   notification options in the sheet" decision (harmless today; builder defaults are all-false).
+   All Low findings already captured in `tasks.md` Follow-ups.

@@ -42,4 +42,11 @@ public interface CalendarEntryDAO {
             "(endMillis BETWEEN :startMillis AND :endMillis) OR " +
             "(startMillis <= :startMillis AND endMillis >= :endMillis)")
     LiveData<List<CalendarEntry>> getEventsBetween(long startMillis, long endMillis);
+
+    // Tareas (type = 2 = TYPE_TASK) sin completar anteriores a un instante — sección
+    // "older uncompleted" de la lista de tareas de Home. startMillis > 0 excluye filas
+    // legacy que nunca recibieron el espejo de fecha en millis.
+    @Query("SELECT * FROM CalendarEntry WHERE type = 2 AND isDone = 0 " +
+            "AND startMillis > 0 AND startMillis < :beforeMillis ORDER BY startMillis ASC")
+    LiveData<List<CalendarEntry>> getUndoneTasksBefore(long beforeMillis);
 }

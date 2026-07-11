@@ -31,6 +31,20 @@
     <string name="home_stat_streak_placeholder">0 days</string>
     <string name="home_stat_fails_placeholder">0</string>
 
+    <!-- Home: Today task list + quick-add (spec tasks-home-today) -->
+    <string name="home_tasks_card_title">Tasks</string>
+    <string name="home_tasks_add">Add task</string>
+    <string name="home_tasks_empty">Nothing for today — add a task</string>
+    <string name="home_tasks_show_overdue">Show older uncompleted tasks</string>
+    <string name="home_tasks_hide_overdue">Hide older uncompleted tasks</string>
+    <string name="home_tasks_overdue_empty">No older uncompleted tasks</string>
+    <string name="quick_add_header">New task for today</string>
+    <string name="quick_add_title_hint">Task title</string>
+    <string name="quick_add_title_required">Give it a title</string>
+    <string name="quick_add_set_time">Set time (optional)</string>
+    <string name="quick_add_save">Add task</string>
+    <string name="quick_add_more_options">More options</string>
+
     <!-- Timer (Pomodoro) popup -->
     <string name="timer_popup_title">Pomodoro timer</string>
     <string name="timer_popup_subtitle">Tune your focus session</string>

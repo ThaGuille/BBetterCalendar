@@ -35,11 +35,11 @@
             android:textAppearance="@style/TextAppearance.BBetter.Label"
             tools:text="Tuesday, May 18" />
 
-        <!-- ============ Timer card ============ -->
+        <!-- ============ Timer card (compactado — spec tasks-home-today) ============ -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_lg"
+            android:layout_marginTop="@dimen/spacing_md"
             android:background="@drawable/bg_card"
             android:elevation="@dimen/elevation_card"
             android:padding="@dimen/home_card_padding">
@@ -72,9 +72,10 @@
                     android:id="@+id/homeTimerText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
+                    android:layout_marginTop="@dimen/spacing_sm"
                     android:textAppearance="@style/TextAppearance.BBetter.Display"
                     android:textColor="@color/bb_on_surface"
+                    android:textSize="@dimen/text_display_compact"
                     tools:text="25:00" />
 
                 <!-- Play / pause button -->
@@ -82,13 +83,13 @@
                     android:id="@+id/homePlayButton"
                     android:layout_width="@dimen/home_play_button_size"
                     android:layout_height="@dimen/home_play_button_size"
-                    android:layout_marginTop="@dimen/spacing_md"
+                    android:layout_marginTop="@dimen/spacing_sm"
                     android:background="@drawable/bg_play_button"
                     android:clickable="true"
                     android:contentDescription="@string/home_play"
                     android:elevation="@dimen/elevation_floating"
                     android:focusable="true"
-                    android:padding="20dp"
+                    android:padding="16dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_play_v2_filled_24" />
 
@@ -99,7 +100,7 @@
                     android:id="@+id/homeBlockModeButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
+                    android:layout_marginTop="@dimen/spacing_sm"
                     android:background="@drawable/bg_block_mode_button"
                     android:clickable="true"
                     android:focusable="true"
@@ -134,29 +135,27 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- ============ Today card ============ -->
+        <!-- ============ Stats row (antes "Today" en 3 filas — compactado a 1 fila,
+             spec tasks-home-today) ============ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_md"
             android:background="@drawable/bg_card"
             android:elevation="@dimen/elevation_card"
-            android:orientation="vertical"
-            android:padding="@dimen/home_card_padding">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/home_today_card_title"
-                android:textAppearance="@style/TextAppearance.BBetter.Title" />
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_md"
+            android:paddingBottom="@dimen/spacing_md">
 
             <!-- Studied today -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <ImageView
                     android:layout_width="@dimen/home_stat_icon_size"
@@ -165,35 +164,29 @@
                     android:src="@drawable/ic_clock_v2_24"
                     app:tint="@color/bb_primary" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/homeTodayTimeText"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_md"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:hint="@string/home_stat_studied_placeholder"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/home_stat_studied_label"
-                        android:textAppearance="@style/TextAppearance.BBetter.Label" />
-
-                    <TextView
-                        android:id="@+id/homeTodayTimeText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/home_stat_studied_placeholder"
-                        android:textAppearance="@style/TextAppearance.BBetter.Body" />
-                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/home_stat_studied_label"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label" />
             </LinearLayout>
 
             <!-- Streak -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <ImageView
                     android:id="@+id/homeStreakImage"
@@ -203,35 +196,29 @@
                     android:src="@drawable/ic_flame_v2_24"
                     app:tint="@color/bb_accent_reward" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/homeCurrentStreakText"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_md"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:hint="@string/home_stat_streak_placeholder"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/home_stat_streak_label"
-                        android:textAppearance="@style/TextAppearance.BBetter.Label" />
-
-                    <TextView
-                        android:id="@+id/homeCurrentStreakText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/home_stat_streak_placeholder"
-                        android:textAppearance="@style/TextAppearance.BBetter.Body" />
-                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/home_stat_streak_label"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label" />
             </LinearLayout>
 
             <!-- Missed -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <ImageView
                     android:layout_width="@dimen/home_stat_icon_size"
@@ -240,27 +227,112 @@
                     android:src="@drawable/ic_cross_v2_24"
                     app:tint="@color/bb_danger" />
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/homeToadyFailsText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:hint="@string/home_stat_fails_placeholder"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body"
+                    android:textColor="@color/bb_danger" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/home_stat_fails_label"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ============ Today tasks card (spec tasks-home-today) ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:elevation="@dimen/elevation_card"
+            android:orientation="vertical"
+            android:padding="@dimen/home_card_padding">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_md"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:text="@string/home_tasks_card_title"
+                    android:textAppearance="@style/TextAppearance.BBetter.Title" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/home_stat_fails_label"
-                        android:textAppearance="@style/TextAppearance.BBetter.Label" />
+                <ImageButton
+                    android:id="@+id/homeAddTaskButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/home_tasks_add"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_add_24"
+                    app:tint="@color/bb_primary" />
+            </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/homeToadyFailsText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/home_stat_fails_placeholder"
-                        android:textAppearance="@style/TextAppearance.BBetter.Body"
-                        android:textColor="@color/bb_danger" />
-                </LinearLayout>
+            <TextView
+                android:id="@+id/homeTasksEmptyText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/home_tasks_empty"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/homeTodayTaskList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never" />
+
+            <TextView
+                android:id="@+id/homeShowOverdueButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingTop="@dimen/spacing_xs"
+                android:paddingBottom="@dimen/spacing_xs"
+                android:text="@string/home_tasks_show_overdue"
+                android:textAppearance="@style/TextAppearance.BBetter.Label"
+                android:textColor="@color/bb_primary" />
+
+            <LinearLayout
+                android:id="@+id/homeOverdueSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/homeOverdueEmptyText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:text="@string/home_tasks_overdue_empty"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/homeOverdueTaskList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never" />
             </LinearLayout>
 
         </LinearLayout>

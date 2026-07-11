@@ -8,9 +8,10 @@ Resource-ids below are the **suffix** after `:id/` — pass them bare to
 
 | Thing | Value |
 |---|---|
-| Package | `com.example.bbettercalendar` |
-| Launcher activity | `.configuration.SplashActivity` (full: `com.example.bbettercalendar/.configuration.SplashActivity`) |
-| Other activities | `.MainActivity`, `.calendarEntries.AddEventActivity` |
+| applicationId (use for `am start -n`, `pm`, install) | `io.github.thaguille.bbettercalendar` |
+| namespace (Java package + resource-id prefix `<ns>:id/…`) | `com.example.bbettercalendar` |
+| Launcher activity | `.configuration.SplashActivity` (full: `io.github.thaguille.bbettercalendar/com.example.bbettercalendar.configuration.SplashActivity`) |
+| Other activities | `com.example.bbettercalendar.MainActivity`, `.calendarEntries.AddEventActivity` (class names keep the namespace; `-n` uses the applicationId before the `/`) |
 | Debug APK | `app\build\outputs\apk\debug\app-debug.apk` |
 | Build cmd | `.\gradlew.bat assembleDebug` |
 | Runtime permission to grant | `android.permission.POST_NOTIFICATIONS` (API 33+; granting avoids the on-screen dialog) |

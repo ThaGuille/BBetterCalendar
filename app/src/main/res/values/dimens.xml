@@ -25,6 +25,9 @@
 
     <!-- Text scale -->
     <dimen name="text_display">56sp</dimen>
+    <!-- Contador del pomodoro compactado para que el timer + lista de tareas de hoy
+         quepan sin scroll pesado (spec tasks-home-today). -->
+    <dimen name="text_display_compact">44sp</dimen>
     <dimen name="text_headline">24sp</dimen>
     <dimen name="text_title">18sp</dimen>
     <dimen name="text_body">16sp</dimen>
@@ -43,7 +46,7 @@
 
     <!-- Home screen -->
     <dimen name="home_card_padding">20dp</dimen>
-    <dimen name="home_play_button_size">88dp</dimen>
+    <dimen name="home_play_button_size">72dp</dimen>
     <dimen name="home_stat_icon_size">28dp</dimen>
 
     <!-- Fixed positions formerly hardcoded -->

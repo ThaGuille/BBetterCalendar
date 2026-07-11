@@ -77,6 +77,8 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     public static final int TYPE_NOTIFICATION = 3;
 
     public static final String EXTRA_PRESELECTED_DATE_MILLIS = "preselected_date_millis";
+    // Título tecleado en el quick-add de Home antes de saltar a "More options" (spec tasks-home-today).
+    public static final String EXTRA_PREFILL_TITLE = "prefill_title";
     private final String TAG = "AddEventActivityTag";
 
     private boolean[] createdNotificationLayouts = new boolean[7];
@@ -163,6 +165,11 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                         java.text.DateFormat.SHORT, java.util.Locale.getDefault())
                         .format(localCalendar.getTime()));
             }
+        }
+
+        String prefillTitle = intent.getStringExtra(EXTRA_PREFILL_TITLE);
+        if (prefillTitle != null && !prefillTitle.isEmpty() && titleView != null) {
+            titleView.setText(prefillTitle);
         }
 
         //binding = ActivityCreateEventBinding.inflate(getLayoutInflater());
@@ -343,6 +350,14 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     private void saveAndQuit(){
         eventBuilder.setEventTitle(titleView.getText().toString());
         //eventBuilder.setEventDescription(editDescription.getText().toString());
+
+        // Si el usuario nunca abrió el date picker el builder no tiene fecha y startMillis
+        // quedaría a 0 — invisible para todas las queries por rango (mes del calendario y
+        // lista de Home). Por defecto: la fecha que ya muestra el formulario (localCalendar,
+        // preseleccionada o "ahora").
+        if (eventBuilder.getEventStartDayAndHour() == null) {
+            eventBuilder.setEventStartDayAndHour(localCalendar);
+        }
 
         if(layoutType==AddEventActivity.TYPE_TASK){
             if(numberPickerMinutesView.getValue()!=0 || numberPickerHoursView.getValue()!=0) {

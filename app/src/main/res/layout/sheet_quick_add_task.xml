@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom sheet de alta rápida de tareas desde Home (spec tasks-home-today).
+     Título + hora opcional; "More options" abre AddEventActivity precargada. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bb_surface_card"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingEnd="@dimen/spacing_md"
+    android:paddingTop="@dimen/spacing_md"
+    android:paddingBottom="@dimen/spacing_lg">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/quick_add_header"
+        android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+    <EditText
+        android:id="@+id/quickAddTitleInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:hint="@string/quick_add_title_hint"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="textCapSentences"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
+        android:textColor="@color/bb_on_surface"
+        android:textColorHint="@color/bb_on_surface_muted" />
+
+    <TextView
+        android:id="@+id/quickAddTimeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingTop="@dimen/spacing_xs"
+        android:paddingBottom="@dimen/spacing_xs"
+        android:text="@string/quick_add_set_time"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        android:textColor="@color/bb_primary" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/quickAddMoreOptionsButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingTop="@dimen/spacing_xs"
+            android:paddingBottom="@dimen/spacing_xs"
+            android:text="@string/quick_add_more_options"
+            android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+        <TextView
+            android:id="@+id/quickAddSaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_chip_energy"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="@string/quick_add_save"
+            android:textAppearance="@style/TextAppearance.BBetter.Chip"
+            android:textColor="@color/bb_on_primary" />
+    </LinearLayout>
+
+</LinearLayout>

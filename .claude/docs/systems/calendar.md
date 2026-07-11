@@ -1,6 +1,6 @@
 # System — Calendar (`ui/calendar/` + `calendarEntries/` + `notifications/event/`)
 
-**Last verified:** 2026-07-05 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-07-07 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Month and week views over a single unified entity (`CalendarEntry`) that represents events,
 tasks, and reminders via an int `type` field. Includes creation (`AddEventActivity`) and the
@@ -19,7 +19,7 @@ alarm-based reminder-notification pipeline that fires ahead of an entry's start 
 | Class | Path | Role |
 |---|---|---|
 | `CalendarEntry` / `EventBuilder` | `calendarEntries/CalendarEntry.java` | Room `@Entity`; unified event/task/reminder via `type` int. **Always build via `EventBuilder.build()`** (CLAUDE.md rule #4) — direct field assignment skips `startMillis`/`endMillis` derivation |
-| `CalendarEntryDAO` | `calendarEntries/CalendarEntryDAO.java` | CRUD + date-range queries (incl. `LiveData<List<CalendarEntry>>` for `CalendarViewModel`) |
+| `CalendarEntryDAO` | `calendarEntries/CalendarEntryDAO.java` | CRUD + date-range queries (incl. `LiveData<List<CalendarEntry>>` for `CalendarViewModel`); `getUndoneTasksBefore(startOfToday)` — overdue undone `TYPE_TASK` rows for Home's overdue section |
 | `Task` | `calendarEntries/Task.java` | Empty placeholder — not a real entity |
 | `AddEventActivity` | `calendarEntries/AddEventActivity.java` | Create/edit form; switches `setContentView` between event/task layouts by `type`; on save, calls `EventReminderScheduler.scheduleFor()` |
 | `CalendarFragmentMonth` | `ui/calendar/CalendarFragmentMonth.java` | Month grid (Kizitonwose Calendar); day-detail panel; "add for this day" FAB |
@@ -52,10 +52,12 @@ alarm-based reminder-notification pipeline that fires ahead of an entry's start 
 - **One entity, three meanings.** Task-only fields (`duration`, `isDone`) exist on every `CalendarEntry` row regardless of `type` — don't assume a non-task row has meaningful values there.
 - **`CalendarFragmentWeek` is a vendored library**, not app code — `ui/calendar/weekview/` is a Kotlin port of Alamkanak Week-View; treat it as third-party when deciding whether to patch vs. work around.
 - **Reminder offsets are indexed positionally** (`NotificationOffsets.OFFSET_MILLIS[i]` ↔ `notifications[i]`) — reordering or resizing that array without a matching migration silently desyncs existing scheduled/persisted offset indices.
-- **`CalendarItemMapper` logs and drops** any entry whose resolved `startMillis` is still ≤0 after both the primary and fallback path — a silently-missing calendar item is a data-layer symptom, not a UI bug; check that log line (`Dropping CalendarItem with startMillis<=0`) first.
+- **`CalendarItemMapper` logs and drops** any entry whose resolved `startMillis` is still ≤0 after both the primary and fallback path — a silently-missing calendar item is a data-layer symptom, not a UI bug; check that log line (`Dropping CalendarItem with startMillis<=0`) first. One historical source of such rows was closed 2026-07-07: `AddEventActivity.saveAndQuit()` now defaults the builder's start date to the form's `localCalendar` when the user never opened the date picker (previously left `startMillis=0` → entry invisible to every range query).
+- **Home also consumes `CalendarEntry`** (as of 2026-07-07): `HomeViewModel` reads today's `TYPE_TASK` rows via `getEventsBetween` and overdue via `getUndoneTasksBefore`, and writes via `quickAddTask` (`EventBuilder`) / `setTaskDone` (`getEventById` re-read + `update`). Home binds `CalendarEntry` directly (not `CalendarItem`) so the checkbox toggle path stays one hop — see `data-model.md` contract table.
 
 ## History
 
 | Date | Change | Spec |
 |---|---|---|
 | *(pre-dates the /spec loop)* | Long-mirror columns (`startMillis`/`endMillis`) added via `MIGRATION_6_7` for range queries | — |
+| 2026-07-07 | Home surfaces today's tasks: new `getUndoneTasksBefore` DAO query, `HomeViewModel` consumes/writes `CalendarEntry`, `saveAndQuit()` null-start-date fallback (closes a `startMillis=0` drop source) | `.claude/specs/archive/tasks-home-today/proposal.md` |

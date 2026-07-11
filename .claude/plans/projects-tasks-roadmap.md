@@ -32,13 +32,15 @@ but painted in Calendar.
 1. **Process**: this roadmap + one `/spec` per phase (same pattern as the Progress phases).
 2. **Recurrence lives in `CalendarEntry`** — recurring tasks are task-type entries with a
    repetition rule; each occurrence is a row with its own `isDone`. No separate Habit entity.
-3. **Timer↔task link, both accesses, phased**: optional picker at timer start first (Phase 4);
-   "focus this" deep-link from the task/item later (backlog).
+3. **Timer↔task link — "focus this" is primary**: a task/project-item that has a duration shows a
+   *start-pomodoro* button that binds the session to that entry and auto-completes it on finish
+   (Phase 4). The optional "what are you working on?" picker at generic timer start is secondary.
 4. **Order**: tasks-in-Home first, projects after.
 5. **Quick-add from Home** is a bottom-sheet (title + optional fields growing per phase), with
    a "more options" link into `AddEventActivity`.
 6. **Project % = completed items / total items** (equal weight, one nesting level:
-   project → items). Weights are a possible later migration, not MVP.
+   project → items). Items are `CalendarEntry` rows with a `projectId`, not a separate table
+   (see Data model below). Weights are a possible later migration, not MVP.
 7. **Time-target auto-complete**: when a task/item with a minutes target accumulates enough
    attributed focus time it marks itself done (with feedback); manual un-check always possible.
 8. **Recurring-task history view is deferred** — MVP shows today/future occurrences only; the
@@ -47,6 +49,39 @@ but painted in Calendar.
 10. **Cut from scope**: 5th nav tab, file attachments (plain-text notes only), infinite nesting.
 11. **Deferred but pending**: scheduled study-block system (block all apps N hours/day). It will
     integrate with projects (attributed time) — placement decided when we get there.
+12. **Project items are date-assignable and, when dated, show in Home + Calendar** like any task
+    (user directive 2026-07-06). This forces the unified model in the next section.
+
+## Data model (cross-phase)
+
+Resolved before Phase 1 so each per-phase spec inherits one coherent model instead of inventing a
+local one — this is the expensive-to-change part, since migrations run under a live destructive
+fallback (rule #6).
+
+**Project items are `CalendarEntry` rows, not a separate table.** A project item ("study topic 10,
+2h") is structurally a task: name, `isDone`, optional day, optional time target, timer-focusable,
+auto-completable. So a `Project` is its own table (name, notes, soft deadline, %), but its *items*
+are `CalendarEntry` (type task) carrying a nullable `projectId` FK.
+
+| | Standalone task | Project item |
+|---|---|---|
+| Row | `CalendarEntry` task, `projectId` = 0/null | `CalendarEntry` task, `projectId` = a project |
+| In Home "Today" | if dated today | if dated today |
+| In Calendar | if dated | if dated (undated items dropped by `CalendarItemMapper` — correct) |
+| In Project detail | — | queried by `projectId` |
+| Focus attribution | `FocusEvent.entryId` → this row | same |
+
+- **Assigning a day to an item surfaces it in Home + Calendar for free** (decision #12) — same rows,
+  same queries, zero new plumbing. An undated item lives only inside its project.
+- **Attribution is a single nullable `entryId` on `FocusEvent`** (→ `CalendarEntry.id`), *not* a
+  polymorphic `targetType`+`targetId`, because tasks and items are the same entity. Time on an
+  entry = sum of its `FocusEvent.durationMin`; auto-complete when that ≥ target.
+- **Recurrence extends the existing half-done `repetition` field** on `CalendarEntry` (+ the
+  original author's `//todo faltan los días` at `CalendarEntry.java:29`), not a green-field design.
+
+Trade-off accepted: this pushes `CalendarEntry` further into "one entity, many meanings" (already a
+gotcha in `calendar.md`). We take it because a parallel `project_item` table would duplicate the
+date, Home, calendar, reminder, and attribution machinery for identical behaviour.
 
 ## Plan
 
@@ -81,28 +116,36 @@ DB v10→v11: recurrence fields on `calendarEntry` (rule + parent/template refer
 
 ### Phase 3 — Projects MVP (spec: `projects-mvp`)
 
-DB v11→v12: `project` + `project_item` tables (+DAOs). One nesting level.
+DB v11→v12: new `project` table (+DAO) and a nullable `projectId` column on `calendarEntry`
+(items are entries, not a separate table — see Data model). One nesting level.
 
-1. Entities: `Project` (name, notes, soft deadline, color?) and `ProjectItem` (name, `isDone`,
-   later `targetMinutes`). % = done/total items.
-2. Projects tab UI (stub `ui/projects/` becomes real): project list with % bar + deadline
-   state chip; detail screen with items, checkboxes, notes, deadline picker.
-3. Deadline projection into Calendar (read-only there, edited in Projects). Amber/red states
+1. Entity `Project` (name, notes, soft deadline, color?). Items = `CalendarEntry` (type task) with
+   `projectId` set. % = done/total of a project's entries.
+2. Projects tab UI (stub `ui/projects/` becomes real): project list with % bar + deadline state
+   chip; detail screen listing the project's entries (checkboxes, notes, deadline picker, "add
+   item").
+3. An item can optionally be assigned a day; when it is, it surfaces in Home's Today list and the
+   calendar automatically (same rows). Undated items live only inside the project.
+4. Deadline projection into Calendar (read-only there, edited in Projects). Amber/red states
    per decision #9.
-4. Follow MVVM + Hilt + LiveData patterns from `architectural_patterns.md`.
+5. Follow MVVM + Hilt + LiveData patterns from `architectural_patterns.md`.
 
 ### Phase 4 — Time targets + focus attribution (spec: `focus-attribution`)
 
-DB v12→v13: `targetMinutes` on task entries and `project_item`; nullable target reference on
-`FocusEvent` (the reserved `TYPE_TASK` finally gets emitted).
+DB v12→v13: a target-minutes field on task entries (reuse/supersede the existing `duration`
+column — verify its current use in the spec) and a single nullable `entryId` on `FocusEvent`
+(→ `CalendarEntry.id`; the reserved `TYPE_TASK` finally gets emitted). No polymorphic target —
+tasks and project items are the same entity.
 
-1. Optional "what are you working on?" picker when starting the pomodoro (task with target /
-   project item / nothing). Selection persists for the session.
-2. Completed focus sessions log `FocusEvent` rows attributed to the target; accumulated
-   minutes derive from those rows (no double bookkeeping).
-3. Auto-complete on reaching target (decision #7) with feedback (notification or animation).
-4. Quick-add sheet and project-item editor gain the "target minutes" field.
-5. Progress % of time shown on the task chip / item row.
+1. A task/item that has a target shows a *start-pomodoro* button ("focus this") that opens the
+   timer bound to that entry (primary access, decision #3).
+2. Completed focus sessions log `FocusEvent` rows with `entryId` set; minutes accumulated for an
+   entry = sum of its focus events (no double bookkeeping).
+3. Auto-complete when accumulated ≥ target (decision #7) with feedback (notification or animation);
+   manual un-check still possible.
+4. Secondary: optional "what are you working on?" picker at generic timer start.
+5. Quick-add sheet and project-item editor gain the "target minutes" field; time progress shown on
+   the task chip / item row.
 
 ### Phase 5 — Deadlines & Progress integration (spec: `project-deadlines-progress`)
 
@@ -115,7 +158,6 @@ No schema change expected.
 
 ### Backlog (post-roadmap, order undecided)
 
-- "Focus this" deep-link from a task/item into a preloaded timer (completes decision #3).
 - Recurring-task history view (+ optional per-task streak) — decision #8.
 - Manual per-item weights if equal-weight % proves too coarse.
 - Scheduled study-block system (decision #11) — integrates with project time attribution.
@@ -123,7 +165,9 @@ No schema change expected.
 ## Open questions
 
 - Recurrence materialization strategy (Phase 2 spec decides: generate-on-complete vs rolling
-  window vs virtual occurrences).
+  window vs virtual occurrences), building on the existing half-done `repetition` field.
+- Does the Phase 4 target reuse `CalendarEntry.duration` or add a new `targetMinutes` column?
+  (Depends on whether `duration` is already read anywhere — verify in the spec.)
 - Does `Project` get a color for its calendar deadline projection, or reuse
   `calendar_item_*` colors?
 - Auto-complete feedback form: notification vs in-app animation vs both (Phase 4 spec).

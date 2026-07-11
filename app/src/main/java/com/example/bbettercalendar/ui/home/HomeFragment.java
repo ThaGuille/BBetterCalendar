@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
@@ -97,6 +98,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private int cyclesCompleted = 0;
     private boolean blockModeArmed = false;
 
+    // "Today" task list (spec tasks-home-today)
+    private TodayTaskAdapter todayTaskAdapter;
+    private TodayTaskAdapter overdueTaskAdapter;
+    private boolean overdueExpanded = false;
+
     @Inject
     ConfigurationManager configurationManager;
 
@@ -148,6 +154,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         binding.homeDateText.setText(
                 new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
 
+        setUpTaskList();
+
         SoundFeedback.get(requireContext()); // warm singleton so first tap is silent-fast
 
         if (savedInstanceState != null) {
@@ -174,6 +182,48 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         outState.putInt(KEY_LAST_TIMER_TIME, lastTimerTime);
         outState.putInt(KEY_CYCLES_COMPLETED, cyclesCompleted);
         outState.putBoolean(KEY_BLOCK_MODE_ARMED, blockModeArmed);
+    }
+
+    /**
+     * Tarjeta "Tasks" de Home (spec tasks-home-today): lista de hoy con checkbox,
+     * alta rápida (bottom sheet) y sección plegable de tareas atrasadas.
+     */
+    private void setUpTaskList() {
+        todayTaskAdapter = new TodayTaskAdapter(false,
+                (entry, done) -> homeViewModel.setTaskDone(entry, done));
+        overdueTaskAdapter = new TodayTaskAdapter(true,
+                (entry, done) -> homeViewModel.setTaskDone(entry, done));
+
+        binding.homeTodayTaskList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.homeTodayTaskList.setAdapter(todayTaskAdapter);
+        binding.homeOverdueTaskList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.homeOverdueTaskList.setAdapter(overdueTaskAdapter);
+
+        binding.homeAddTaskButton.setOnClickListener(this);
+        binding.homeShowOverdueButton.setOnClickListener(this);
+
+        // La vista siempre renace plegada (overdueExpanded = false), pero el ViewModel
+        // sobrevive a la rotación: sin este reset su query de atrasadas seguiría viva
+        // e invisible tras recrear la vista.
+        homeViewModel.setOverdueVisible(false);
+
+        homeViewModel.getTodayTasks().observe(getViewLifecycleOwner(), tasks -> {
+            todayTaskAdapter.submitList(tasks);
+            binding.homeTasksEmptyText.setVisibility(tasks.isEmpty() ? View.VISIBLE : View.GONE);
+        });
+        homeViewModel.getOverdueTasks().observe(getViewLifecycleOwner(), tasks -> {
+            overdueTaskAdapter.submitList(tasks);
+            binding.homeOverdueEmptyText.setVisibility(
+                    overdueExpanded && tasks.isEmpty() ? View.VISIBLE : View.GONE);
+        });
+    }
+
+    private void toggleOverdueSection() {
+        overdueExpanded = !overdueExpanded;
+        binding.homeOverdueSection.setVisibility(overdueExpanded ? View.VISIBLE : View.GONE);
+        binding.homeShowOverdueButton.setText(overdueExpanded
+                ? R.string.home_tasks_hide_overdue : R.string.home_tasks_show_overdue);
+        homeViewModel.setOverdueVisible(overdueExpanded);
     }
 
     /**
@@ -338,6 +388,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             SoundFeedback.get(requireContext()).playStop();
         } else if (id == R.id.homeBlockModeButton) {
             handleBlockModeToggle();
+        } else if (id == R.id.homeAddTaskButton) {
+            // childFragmentManager: QuickAddTaskSheet localiza este fragment como parent
+            // para compartir el HomeViewModel.
+            new QuickAddTaskSheet().show(getChildFragmentManager(), QuickAddTaskSheet.SHEET_TAG);
+        } else if (id == R.id.homeShowOverdueButton) {
+            toggleOverdueSection();
         }
     }
 
@@ -559,6 +615,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         // No callback from Settings -> Accessibility (same caveat as ProgressFragment): re-check
         // and re-render in case the user granted/revoked the service while away.
         updateBlockModeButton();
+        // Rango de hoy + requery: cubre volver de AddEventActivity (lag del
+        // InvalidationTracker) y el cambio de día con la app abierta.
+        homeViewModel.refreshToday();
     }
 
     @Override

@@ -119,4 +119,19 @@ public class DBMigration extends Application {
             database.execSQL("ALTER TABLE calendarEntry ADD COLUMN isDismissed INTEGER NOT NULL DEFAULT 0");
         }
     };
+
+    // Phase 3 (spec projects-mvp): tabla `project` + columna `projectId` en calendarEntry —
+    // los items de un proyecto son CalendarEntry (type task) normales, no una tabla propia
+    // (decisión de datos del roadmap). Aditiva -> el histórico se conserva (regla #6).
+    static final Migration MIGRATION_11_12 = new Migration(11, 12) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS project (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT, notes TEXT, " +
+                    "status INTEGER NOT NULL DEFAULT 0, softDeadlineMillis INTEGER NOT NULL DEFAULT 0, " +
+                    "colorIndex INTEGER NOT NULL DEFAULT 0, createdAtMillis INTEGER NOT NULL DEFAULT 0, " +
+                    "completedAtMillis INTEGER NOT NULL DEFAULT 0)");
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN projectId INTEGER NOT NULL DEFAULT 0");
+        }
+    };
 }

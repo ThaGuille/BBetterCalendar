@@ -21,9 +21,11 @@ import com.example.bbettercalendar.stats.FocusEvent;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
+import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.projects.ProjectDAO;
 
 @Database(entities = {CalendarEntry.class, Stats.class, Configuration.class, DailyStat.class,
-        FocusEvent.class, AppRule.class, ConsentRecord.class}, version = 11)
+        FocusEvent.class, AppRule.class, ConsentRecord.class, Project.class}, version = 12)
 @TypeConverters({DBConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -35,6 +37,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract FocusEventDAO focusEventDao();
     public abstract AppRuleDAO appRuleDao();
     public abstract ConsentRecordDAO consentRecordDao();
+    public abstract ProjectDAO projectDao();
 
     //Esto sirve para que solo haya una instancia de la base de datos -> la borra y la vuelve a crear
     public static AppDatabase getDatabase(final Context context) {
@@ -44,7 +47,8 @@ public abstract class AppDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "eventDB")
                             .addMigrations(DBMigration.MIGRATION_6_7, DBMigration.MIGRATION_7_8,
-                                    DBMigration.MIGRATION_9_10, DBMigration.MIGRATION_10_11)
+                                    DBMigration.MIGRATION_9_10, DBMigration.MIGRATION_10_11,
+                                    DBMigration.MIGRATION_11_12)
                             .fallbackToDestructiveMigration() // Si una migración no existe, recrea la BD
                             .build();
                 }

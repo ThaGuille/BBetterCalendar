@@ -41,6 +41,20 @@
         android:id="@+id/navigation_projects"
         android:name="com.example.bbettercalendar.ui.projects.ProjectsFragment"
         android:label="@string/title_projects"
-        tools:layout="@layout/fragment_projects" />
+        tools:layout="@layout/fragment_projects" >
+        <action
+            android:id="@+id/action_navigation_projects_to_navigation_project_detail"
+            app:destination="@id/navigation_project_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_project_detail"
+        android:name="com.example.bbettercalendar.ui.projects.ProjectDetailFragment"
+        android:label="@string/project_detail_title"
+        tools:layout="@layout/fragment_project_detail" >
+        <argument
+            android:name="projectId"
+            app:argType="integer" />
+    </fragment>
 
 </navigation>

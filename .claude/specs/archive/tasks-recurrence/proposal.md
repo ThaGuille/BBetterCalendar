@@ -1,9 +1,9 @@
 # Recurring tasks — template + materialized occurrences
 
 **Slug:** tasks-recurrence
-**Status:** verified
+**Status:** archived
 **Created:** 2026-07-11
-**Last updated:** 2026-07-11
+**Last updated:** 2026-07-12
 
 Phase 2 of [`projects-tasks-roadmap`](../../../plans/projects-tasks-roadmap.md). Decisions #2
 (recurrence lives in `CalendarEntry`, each occurrence is a row with its own `isDone`) and #8

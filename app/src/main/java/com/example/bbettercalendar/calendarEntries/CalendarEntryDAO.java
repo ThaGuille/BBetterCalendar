@@ -75,4 +75,16 @@ public interface CalendarEntryDAO {
     @Query("UPDATE CalendarEntry SET isDismissed = 1 WHERE templateId = :templateId " +
             "AND isDone = 0 AND startMillis < :beforeMillis")
     void dismissSeriesBefore(int templateId, long beforeMillis);
+
+    // --- Proyectos (spec projects-mvp) ---
+
+    // Items (dated o undated) de un proyecto, para la pantalla de detalle. isTemplate/isDismissed
+    // se filtran igual que en el resto de queries de superficie — plantillas/retiradas no cuentan.
+    @Query("SELECT * FROM CalendarEntry WHERE projectId = :projectId " +
+            "AND isTemplate = 0 AND isDismissed = 0 ORDER BY startMillis ASC")
+    LiveData<List<CalendarEntry>> observeItemsByProject(int projectId);
+
+    // Cascade manual del borrado de proyecto (decisión #3 del proposal — sin Room FK onDelete).
+    @Query("DELETE FROM CalendarEntry WHERE projectId = :projectId")
+    void deleteItemsByProject(int projectId);
 }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Alta de proyecto (spec projects-mvp) — nombre obligatorio, notas y soft deadline opcionales.
+     Mismo patrón que dialog_app_limit.xml (AlertDialog.Builder + RoundedDialog). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_lg">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/create_project_title"
+        android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+    <EditText
+        android:id="@+id/createProjectNameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:hint="@string/create_project_name_hint"
+        android:importantForAutofill="no"
+        android:inputType="textCapSentences"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.BBetter.Body" />
+
+    <EditText
+        android:id="@+id/createProjectNotesInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:gravity="top"
+        android:hint="@string/create_project_notes_hint"
+        android:importantForAutofill="no"
+        android:inputType="textMultiLine|textCapSentences"
+        android:minLines="2"
+        android:maxLines="4"
+        android:textAppearance="@style/TextAppearance.BBetter.Body" />
+
+    <TextView
+        android:id="@+id/createProjectDeadlineButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingTop="@dimen/spacing_xs"
+        android:paddingBottom="@dimen/spacing_xs"
+        android:text="@string/create_project_set_deadline"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        android:textColor="@color/bb_primary" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_lg"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/createProjectCancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/spacing_sm"
+            android:text="@string/create_project_cancel"
+            android:textAppearance="@style/TextAppearance.BBetter.Title"
+            android:textColor="@color/bb_on_surface_muted" />
+
+        <TextView
+            android:id="@+id/createProjectSaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/spacing_sm"
+            android:text="@string/create_project_save"
+            android:textAppearance="@style/TextAppearance.BBetter.Title"
+            android:textColor="@color/bb_primary" />
+    </LinearLayout>
+
+</LinearLayout>

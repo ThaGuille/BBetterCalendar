@@ -1,11 +1,11 @@
 # System — Data model (`stats/` + `database/`)
 
-**Last verified:** 2026-07-07 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-07-12 (DB v12) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
-The Room persistence layer: `AppDatabase` (7 entities, version 10) plus every entity/DAO under
+The Room persistence layer: `AppDatabase` (8 entities, version 12) plus every entity/DAO under
 `stats/`. This is the **contract hub** — sibling system docs (`app-limits.md`,
-`progress-screen.md`, `pomodoro-timer.md`, `calendar.md`, `startup-config.md`) link into the
-anchors below instead of re-describing entity shape.
+`progress-screen.md`, `pomodoro-timer.md`, `calendar.md`, `startup-config.md`, `projects.md`)
+link into the anchors below instead of re-describing entity shape.
 
 ## Surface (manifest + entry points)
 | Kind | Entry |
@@ -16,7 +16,7 @@ anchors below instead of re-describing entity shape.
 ## Files
 | Class | Path | Role |
 |---|---|---|
-| `AppDatabase` | `database/AppDatabase.java` | Room `@Database`, v10, 7 entities, `fallbackToDestructiveMigration()` + 3 real migrations registered |
+| `AppDatabase` | `database/AppDatabase.java` | Room `@Database`, v12, 8 entities, `fallbackToDestructiveMigration()` + 5 real migrations registered |
 | `DBMigration` | `database/DBMigration.java` | `Application` class + migration `Migration` constants (misleading name: it's both) |
 | `DBConverter` | `database/DBConverter.java` | `@TypeConverter`s: `Calendar`↔JSON (Gson), `boolean[]`↔JSON (Gson), `Location`→null (stub) |
 | `Stats` / `StatsDAO` | `stats/Stats.java`, `StatsDAO.java` | Single-row lifetime + today counters (time studied, tasks, streaks, fails) |
@@ -26,8 +26,9 @@ anchors below instead of re-describing entity shape.
 | `ConsentRecord` / `ConsentRecordDAO` | `stats/ConsentRecord.java`, `ConsentRecordDAO.java` | Affirmative-consent acknowledgement (usage access, accessibility blocking) |
 | `Configuration` / `ConfigurationDAO` | `configuration/Configuration.java`, `ConfigurationDAO.java` | Timer/rest/cycle settings + notification-permission ask tracking (owned by `startup-config.md`, listed here since it's a DB entity) |
 | `CalendarEntry` / `CalendarEntryDAO` | `calendarEntries/CalendarEntry.java`, `CalendarEntryDAO.java` | Events/tasks/reminders (owned by `calendar.md`, listed here since it's a DB entity) |
+| `Project` / `ProjectDAO` | `projects/Project.java`, `ProjectDAO.java` | Project grouping over `CalendarEntry` items via `projectId` (owned by `projects.md`, listed here since it's a DB entity) |
 
-## Schema history (v6 → v10)
+## Schema history (v6 → v12)
 
 | Version | Migration | What changed |
 |---|---|---|
@@ -35,6 +36,8 @@ anchors below instead of re-describing entity shape.
 | 7 → 8 | `MIGRATION_7_8` | Adds `notificationPermissionAskCount` / `notificationPermissionLastAskedMillis` to `configuration` |
 | 8 → 9 | *(none — destructive)* | `DailyStat` + `FocusEvent` tables introduced; no migration was written, so upgraders on v8 lost data here |
 | 9 → 10 | `MIGRATION_9_10` | Adds `app_rule` + `consent_record` tables (additive `CREATE TABLE IF NOT EXISTS` only — v9 history preserved) |
+| 10 → 11 | `MIGRATION_10_11` | Adds 6 additive columns to `calendarEntry` for recurring tasks: `isTemplate`, `templateId`, `repetitionInterval`, `repetitionDays`, `materializedUntilMillis`, `isDismissed` (all `NOT NULL DEFAULT`, `ALTER TABLE ADD COLUMN` — no data loss) |
+| 11 → 12 | `MIGRATION_11_12` | Adds `project` table (`CREATE TABLE IF NOT EXISTS`) + additive `projectId` column on `calendarEntry` (`NOT NULL DEFAULT 0` — no data loss) |
 
 `fallbackToDestructiveMigration()` is still active for any version gap without a registered
 `Migration` — see CLAUDE.md rule #6 before bumping `@Database(version)`.
@@ -49,7 +52,8 @@ anchors below instead of re-describing entity shape.
 | `AppRule` | `ProgressViewModel` (`setTracked`, `setDailyLimit`, `setEnforceAtLimit` — see `app-limits.md`) | `ProgressViewModel`, `UsageLimitChecker`/`UsageLimitScheduler` (`getLimited`), `BlockDecisionEngine` (`observeEnforced`), `DBMigration` (arms scheduler on cold start) |
 | `ConsentRecord` | `UsageDisclosureDialog`, `AccessibilityDisclosureDialog` | `ProgressViewModel`, `ProgressFragment`/blocking flow (gate before Settings deep-link) |
 | `Configuration` | `ConfigurationManager.updateConfiguration()`, `PermissionGate` (ask-count/timestamp) | `ConfigurationManager` (cached in memory), `HomeViewModel`/`HomeFragment` (timer/rest/cycle values) |
-| `CalendarEntry` | `AddEventActivity` (via `EventBuilder.build()`), `HomeViewModel` (`quickAddTask` via `EventBuilder`; `setTaskDone` re-reads via `getEventById` + `update`) | `CalendarFragmentMonth`/`Week` via `CalendarViewModel`, `HomeViewModel` (today's `TYPE_TASK` via `getEventsBetween` + overdue via `getUndoneTasksBefore`), `EventReminderScheduler`, `BootReceiver` |
+| `CalendarEntry` | `AddEventActivity` (via `EventBuilder.build()`), `HomeViewModel` (`quickAddTask` via `EventBuilder`; `setTaskDone` re-reads via `getEventById` + `update`), `RecurrenceMaterializer` (occurrence rows via `EventBuilder.build()`, template `materializedUntilMillis` updates, `dismissSeriesBefore`), `ProjectDetailViewModel` (`addItem` via `EventBuilder` with `projectId` set, `setItemDone` re-read + `update`, `deleteItemsByProject` cascade) | `CalendarFragmentMonth`/`Week` via `CalendarViewModel`, `HomeViewModel` (today's `TYPE_TASK` via `getEventsBetween` + overdue via `getUndoneTasksBefore`, both `isTemplate = 0`), `EventReminderScheduler`, `BootReceiver`, `RecurrenceMaterializer` (`getTemplates`, `getLegacyRepeatingRows`), `ProjectDetailViewModel`/`ProjectsViewModel` (`observeItemsByProject`, `ProjectDAO`'s cross-table done/total counts) |
+| `Project` | `ProjectsViewModel` (`createProject`), `ProjectDetailViewModel` (`updateHeader`, `updateDeadline`, `completeProject`, `deleteProject`) | `ProjectsViewModel` (`observeAll()` + per-project counts), `ProjectDetailViewModel` (`observeById`) — see `projects.md` |
 
 **Cross-system coupling to know:** `UsageLimitChecker` (alarm poll, warn-only) and
 `BlockDecisionEngine` (live per-foreground-event, enforcement) each independently read `AppRule` +
@@ -71,3 +75,5 @@ anchors below instead of re-describing entity shape.
 | 2026-06-28 | `DailyStat` + `FocusEvent` added (DB v8→v9, no migration written) | `.claude/specs/archive/progress-charts-mvp/proposal.md` |
 | 2026-06-29 | `AppRule` + `ConsentRecord` added (DB v9→v10, `MIGRATION_9_10`) | `.claude/specs/archive/progress-phase2-usage/proposal.md` |
 | 2026-07-07 | Home surfaces today's `TYPE_TASK` entries — additive `getUndoneTasksBefore` `@Query` (overdue undone tasks), `HomeViewModel` now a `CalendarEntry` reader/writer; no schema change (still v10) | `.claude/specs/archive/tasks-home-today/proposal.md` |
+| 2026-07-12 | Recurring tasks: `calendarEntry` +6 columns (DB v10→v11, `MIGRATION_10_11`), new `RecurrenceMaterializer` reader/writer | `.claude/specs/archive/tasks-recurrence/proposal.md` |
+| 2026-07-12 | Projects MVP: new `Project` entity (DB v11→v12, `MIGRATION_11_12`), `calendarEntry` +`projectId` column | `.claude/specs/archive/projects-mvp/proposal.md` |

@@ -1,8 +1,8 @@
 # Projects & Tasks Roadmap
 
-**Status:** in progress (Phase 1 `tasks-home-today` archived; Phase 2 spec `tasks-recurrence` proposed)
+**Status:** in progress (Phases 1 `tasks-home-today` + 2 `tasks-recurrence` archived; Phase 3 spec `projects-mvp` proposed)
 **Created:** 2026-07-06
-**Last updated:** 2026-07-11
+**Last updated:** 2026-07-12
 
 ## Summary
 
@@ -51,6 +51,23 @@ but painted in Calendar.
     integrate with projects (attributed time) — placement decided when we get there.
 12. **Project items are date-assignable and, when dated, show in Home + Calendar** like any task
     (user directive 2026-07-06). This forces the unified model in the next section.
+13. **Retention is first-class** (user directive 2026-07-12): past projects, deadlines, and
+    completed tasks must survive for future graphs/stats. **Completing a project is a status
+    transition, not a deletion** — project row + item rows are retained. `Project` records
+    `createdAtMillis` + `completedAtMillis` so lateness is answerable later. Only an explicit
+    manual **delete of an incomplete project** removes data, and it **cascades** to that project's
+    `CalendarEntry` items (manual executor step; no Room FK — the codebase uses none).
+14. **Deadline-in-Calendar deferred to Phase 5** (2026-07-12): the calendar pipeline is
+    `CalendarEntry`-only (`CalendarItemMapper`), so painting a `Project` deadline means teaching
+    the calendar query/mapper to read projects — that lands with Phase 5's deadline integration.
+    Phase 3 shows deadline state only inside the Projects tab.
+15. **Project items are non-recurring in MVP** (2026-07-12): `projectId` + `templateId` on one row
+    would inflate the % denominator; recurrence UI is suppressed for project items.
+16. **Detail screen is a Fragment + nav-graph action**, not an Activity (2026-07-12) — keeps the
+    bottom-nav back-stack and makes the Phase 5 calendar→project jump a trivial nav destination.
+    The UI ViewModels are plain `AndroidViewModel`s pulling DAOs from `AppDatabase` (Home/Calendar
+    pattern), **not** `@HiltViewModel` — "MVVM + Hilt" in this roadmap means Hilt app-wide, not on
+    the screen VMs.
 
 ## Data model (cross-phase)
 

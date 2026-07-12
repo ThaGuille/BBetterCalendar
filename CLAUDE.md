@@ -119,8 +119,9 @@ Per-runtime-subsystem living docs (intent, async/manifest wiring, invariants, co
 | Calendar | [`calendar.md`](.claude/docs/systems/calendar.md) | Month/week views, `CalendarEntry`, event reminders |
 | Notifications | [`notifications.md`](.claude/docs/systems/notifications.md) | Channels, `BBetterNotifier`, permission gate |
 | Startup & config | [`startup-config.md`](.claude/docs/systems/startup-config.md) | `SplashActivity` boot sequence, `ConfigurationManager` |
+| Projects | [`projects.md`](.claude/docs/systems/projects.md) | `Project` entity, `projectId` on `CalendarEntry`, Projects tab + detail screen |
 
-Excluded (owned elsewhere): `ui/projects` (genuine stub), `popups`/`helpers`/`feedback` (see `architectural_patterns.md`). **Code wins on conflict** — if a doc drifts, fix it and bump its `Last verified:` date.
+Excluded (owned elsewhere): `popups`/`helpers`/`feedback` (see `architectural_patterns.md`). **Code wins on conflict** — if a doc drifts, fix it and bump its `Last verified:` date.
 
 ## Skills — `.claude/skills/`
 

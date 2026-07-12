@@ -91,11 +91,14 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
                 R.id.repetition_weekday_6
         };
         String[] initials = getResources().getStringArray(R.array.weekday_initials);
+        String[] names = getResources().getStringArray(R.array.weekday_names);
         for (int i = 0; i < weekdayIds.length; i++) {
             ToggleButton tb = view.findViewById(weekdayIds[i]);
             tb.setTextOn(initials[i]);
             tb.setTextOff(initials[i]);
             tb.setText(initials[i]);
+            // TalkBack lee el nombre completo en vez del par ambiguo de letras.
+            tb.setContentDescription(names[i]);
             final int bit = i;
             tb.setOnClickListener(v -> toggleWeekday(bit, ((ToggleButton) v).isChecked()));
             weekdayToggles[i] = tb;

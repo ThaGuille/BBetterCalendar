@@ -4,30 +4,55 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.databinding.FragmentProjectsBinding;
-import com.example.bbettercalendar.ui.progress.ProgressViewModel;
 
 public class ProjectsFragment extends Fragment {
 
     private FragmentProjectsBinding binding;
+    private ProjectsViewModel projectsViewModel;
+    private ProjectListAdapter adapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        ProgressViewModel progressViewModel =
-                new ViewModelProvider(this).get(ProgressViewModel.class);
+        projectsViewModel = new ViewModelProvider(this).get(ProjectsViewModel.class);
 
         binding = FragmentProjectsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textProjects;
-        progressViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        adapter = new ProjectListAdapter(project -> {
+            Bundle args = new Bundle();
+            args.putInt("projectId", project.id);
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_navigation_projects_to_navigation_project_detail, args);
+        });
+        binding.projectsList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.projectsList.setAdapter(adapter);
+
+        binding.projectsAddButton.setOnClickListener(v ->
+                new CreateProjectDialog().show(getChildFragmentManager(), "create_project_dialog"));
+
+        projectsViewModel.getProjects().observe(getViewLifecycleOwner(), items -> {
+            adapter.submitList(items);
+            binding.projectsEmptyText.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+        });
+
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Recuenta % al volver (p.ej. desde el detalle tras marcar un item) — ver el comentario
+        // de ProjectsViewModel.refresh() sobre por qué el LiveData de Room no basta solo.
+        projectsViewModel.refresh();
     }
 
     @Override

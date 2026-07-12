@@ -46,6 +46,10 @@ public class CalendarEntry {
     // estadísticas/gráficas futuras). Distinto de isDone: "deja de recordármela", no "completada".
     private boolean isDismissed;
 
+    // 0 = tarea suelta (no pertenece a ningún proyecto); si no, el id del Project dueño
+    // (spec projects-mvp). Los items de proyecto son CalendarEntry type=TASK normales.
+    private int projectId;
+
     // Transitorio (no persistido): nº de ocurrencias atrasadas que una fila colapsada representa
     // en la sección de atrasadas de Home. 0 = fila normal (tarea suelta o no colapsada).
     @Ignore
@@ -107,6 +111,8 @@ public class CalendarEntry {
     public void setStartMillis(long startMillis) {this.startMillis = startMillis;}
     public long getEndMillis() {return endMillis;}
     public void setEndMillis(long endMillis) {this.endMillis = endMillis;}
+    public int getProjectId() {return projectId;}
+    public void setProjectId(int projectId) {this.projectId = projectId;}
     
     public static class EventBuilder implements Serializable {
         private int id;
@@ -124,6 +130,7 @@ public class CalendarEntry {
         private boolean isTemplate;
         private int templateId;
         private int type;
+        private int projectId;
 
         public EventBuilder(){}  //hacer constructor con lo mínimo obligatiorio (title, description, limitDate)
 
@@ -233,6 +240,11 @@ public class CalendarEntry {
             this.type = type;
             return this;
         }
+        public EventBuilder setEventProjectId(int projectId) {
+            this.projectId = projectId;
+            return this;
+        }
+        public int getEventProjectId() {return projectId;}
 
         public CalendarEntry build(){
             return new CalendarEntry(this);
@@ -257,6 +269,7 @@ public class CalendarEntry {
         this.isTemplate = builder.isTemplate;
         this.templateId = builder.templateId;
         this.type = builder.type;
+        this.projectId = builder.projectId;
     }
     public CalendarEntry(){}
 }

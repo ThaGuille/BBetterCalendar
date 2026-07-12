@@ -37,26 +37,25 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** d82b341 (2026-07-11)
+**Branch:** `main`  |  **State as of commit:** d7a6b39 (2026-07-12)
 
 ### 1. What we touched last (recent commits)
+- d7a6b39 2026-07-12 minor bug fixing
 - d82b341 2026-07-11 added recurrence for the tasks - phase 2
 - 299fc03 2026-07-11 tasks in home screen
 - b4869e3 2026-07-06 roadmap to the next BIG STEPS - PROJECTS + time completeness system + dayly tasks + deadlines
 - bde26d6 2026-07-05 documentation system + propse for strict blocking pomodoro
-- f92f570 2026-07-05 bugs solved
 
 ### 2. In flight - active `/spec` changes
 | Change | Status | Tasks | Proposal |
 |---|---|---|---|
 | Pomodoro focus block mode ("🚫 Block mode 🚫") | verified | 15/16 | [proposal](.claude/specs/changes/pomodoro-block-mode/proposal.md) |
-| Recurring tasks — template + materialized occurrences | verified | 19/22 | [proposal](.claude/specs/changes/tasks-recurrence/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer (moved)](.claude/specs/capabilities/home-pomodoro.md)
 - [Capability — Progress screen (moved)](.claude/specs/capabilities/progress-screen.md)
 
-**Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`, `tasks-home-today`
+**Archived changes:** `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`, `projects-mvp`, `tasks-home-today`, `tasks-recurrence`
 
 ### 4. Plans (`.claude/plans`) - undone first
 | Plan | Status | File |
@@ -64,7 +63,7 @@ _Tables below are auto-generated from repo state by `.claude/hooks/update-status
 | Advanced AI Harness Roadmap | in progress | [ai-harness-roadmap.md](.claude/plans/ai-harness-roadmap.md) |
 | Agent-first system documentation layer (`.claude/docs/systems/`) | implemented | [ok-let-s-design-a-encapsulated-adleman.md](.claude/plans/ok-let-s-design-a-encapsulated-adleman.md) |
 | Phase 0 — Persist Progress history (DailyStat + FocusEvent) | in progress (implemented + builds; runtime verification pending) | [phase-0-progress-history-tables.md](.claude/plans/phase-0-progress-history-tables.md) |
-| Projects & Tasks Roadmap | in progress (Phase 1 `tasks-home-today` archived; Phase 2 spec `tasks-recurrence` proposed) | [projects-tasks-roadmap.md](.claude/plans/projects-tasks-roadmap.md) |
+| Projects & Tasks Roadmap | in progress (Phases 1 `tasks-home-today` + 2 `tasks-recurrence` archived; Phase 3 spec `projects-mvp` proposed) | [projects-tasks-roadmap.md](.claude/plans/projects-tasks-roadmap.md) |
 | Redesign `activity_create_event` (and matching task layout) | in progress | [improve_addEvent_layout.md](.claude/plans/improve_addEvent_layout.md) |
 | Calendar UI polish — month + week views | proposed | [now-let-s-improve-the-crystalline-sloth.md](.claude/plans/now-let-s-improve-the-crystalline-sloth.md) |
 | Plan: Screenshot-free, MCP-free ADB UI-testing system for BBetterCalendar | proposed | [forget-about-the-skills-ticklish-breeze.md](.claude/plans/forget-about-the-skills-ticklish-breeze.md) |

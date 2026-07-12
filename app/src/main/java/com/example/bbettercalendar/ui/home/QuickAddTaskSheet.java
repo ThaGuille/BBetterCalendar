@@ -21,6 +21,7 @@ import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.RepetitionPopup;
 import com.example.bbettercalendar.popups.RepetitionSpec;
+import com.example.bbettercalendar.ui.projects.ProjectDetailViewModel;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.Calendar;
@@ -38,6 +39,8 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
 
     public static final String SHEET_TAG = "quick_add_task_sheet";
 
+    private static final String ARG_PROJECT_ID = "project_id";
+
     private EditText titleInput;
     private TextView timeButton;
     private TextView repeatButton;
@@ -45,6 +48,21 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     private int selectedMinute = -1;
     private final RepetitionPopup repetitionPopup = new RepetitionPopup();
     private RepetitionSpec repetitionSpec = RepetitionSpec.none();
+    // 0 = alta normal desde Home; si no, el proyecto dueño del item (spec projects-mvp).
+    private int projectId = 0;
+
+    /**
+     * Alta de un item dentro de un proyecto (spec projects-mvp): oculta "Repeat" (decisión #4 —
+     * los items de proyecto no recurren) y, si no se elige hora, el item se guarda sin fecha (vive
+     * sólo dentro del proyecto) en vez de "hoy a las 00:00" como en el alta normal de Home.
+     */
+    public static QuickAddTaskSheet forProject(int projectId) {
+        QuickAddTaskSheet sheet = new QuickAddTaskSheet();
+        Bundle args = new Bundle();
+        args.putInt(ARG_PROJECT_ID, projectId);
+        sheet.setArguments(args);
+        return sheet;
+    }
 
     @Nullable
     @Override
@@ -57,9 +75,18 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Bundle args = getArguments();
+        if (args != null) {
+            projectId = args.getInt(ARG_PROJECT_ID, 0);
+        }
+
         titleInput = view.findViewById(R.id.quickAddTitleInput);
         timeButton = view.findViewById(R.id.quickAddTimeButton);
         repeatButton = view.findViewById(R.id.quickAddRepeatButton);
+
+        if (projectId != 0) {
+            repeatButton.setVisibility(View.GONE);
+        }
 
         timeButton.setOnClickListener(v -> showTimePicker());
         repeatButton.setOnClickListener(v -> showRepeatPicker());
@@ -114,6 +141,11 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
             return;
         }
 
+        if (projectId != 0) {
+            saveProjectItem(title);
+            return;
+        }
+
         Calendar start = Calendar.getInstance();
         // Sin hora elegida la tarea queda a las 00:00 de hoy (la lista no muestra esa hora).
         start.set(Calendar.HOUR_OF_DAY, Math.max(selectedHour, 0));
@@ -124,6 +156,23 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
         HomeViewModel viewModel =
                 new ViewModelProvider(requireParentFragment()).get(HomeViewModel.class);
         viewModel.quickAddTask(title, start, repetitionSpec);
+        dismiss();
+    }
+
+    // spec projects-mvp: sin hora elegida el item queda SIN fecha (vive sólo dentro del proyecto),
+    // a diferencia del alta normal de Home que siempre lo fecha a hoy.
+    private void saveProjectItem(String title) {
+        Calendar start = null;
+        if (selectedHour >= 0) {
+            start = Calendar.getInstance();
+            start.set(Calendar.HOUR_OF_DAY, selectedHour);
+            start.set(Calendar.MINUTE, Math.max(selectedMinute, 0));
+            start.set(Calendar.SECOND, 0);
+            start.set(Calendar.MILLISECOND, 0);
+        }
+        ProjectDetailViewModel viewModel =
+                new ViewModelProvider(requireParentFragment()).get(ProjectDetailViewModel.class);
+        viewModel.addItem(title, start);
         dismiss();
     }
 

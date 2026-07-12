@@ -199,12 +199,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     /** Recalcula el rango de hoy y re-dispara las queries. Llamar desde onResume (main thread). */
     public void refreshToday() {
-        Calendar day = Calendar.getInstance();
-        day.set(Calendar.HOUR_OF_DAY, 0);
-        day.set(Calendar.MINUTE, 0);
-        day.set(Calendar.SECOND, 0);
-        day.set(Calendar.MILLISECOND, 0);
-        long startOfToday = day.getTimeInMillis();
+        long startOfToday = startOfTodayMillis();
         long endOfToday = startOfToday + 24L * 60 * 60 * 1000 - 1;
         todayRange.setValue(new long[]{startOfToday, endOfToday});
         if (overdueBefore.getValue() != null) {

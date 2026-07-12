@@ -3,6 +3,31 @@
     <string name="title_home">Home</string>
     <string name="title_progress">Progress</string>
     <string name="title_projects">Projects</string>
+
+    <!-- Projects (spec projects-mvp) -->
+    <string name="projects_add">Add project</string>
+    <string name="projects_empty">No projects yet — add one to group your tasks</string>
+    <string name="create_project_title">New project</string>
+    <string name="create_project_name_hint">Project name</string>
+    <string name="create_project_notes_hint">Notes (optional)</string>
+    <string name="create_project_set_deadline">Set soft deadline (optional)</string>
+    <string name="create_project_cancel">Cancel</string>
+    <string name="create_project_save">Create</string>
+    <string name="create_project_name_required">Give it a name</string>
+    <string name="project_progress_format">%1$d/%2$d done</string>
+    <string name="project_progress_empty">No items yet</string>
+    <string name="project_deadline_approaching">Due soon</string>
+    <string name="project_deadline_passed">Overdue</string>
+    <string name="project_detail_title">Project</string>
+    <string name="project_detail_save">Save</string>
+    <string name="project_detail_items_title">Items</string>
+    <string name="project_detail_add_item">Add item</string>
+    <string name="project_detail_items_empty">No items yet — add one</string>
+    <string name="project_detail_complete">Mark complete</string>
+    <string name="project_detail_delete">Delete project</string>
+    <string name="project_detail_delete_confirm_title">Delete this project?</string>
+    <string name="project_detail_delete_confirm_message">This deletes the project and all its items. This can\'t be undone.</string>
+    <string name="project_item_no_date">No date</string>
     <string name="title_calendar">Calendar</string>
     <string name="title">Title</string>
     <string name="event">Event</string>
@@ -211,14 +236,27 @@
     <string name="repetition_summary_every_n_days">Every %1$d days</string>
     <string name="repetition_summary_weekly_on">Weekly · %1$s</string>
     <!-- Iniciales de día (bit 0 = lunes … bit 6 = domingo), usadas por RepetitionPopup + RepetitionSpec -->
+    <!-- 2-letter labels: Tue/Thu (Tu/Th) and Sat/Sun (Sa/Su) are indistinguishable as single
+         initials in the weekday picker. Full names live in weekday_names (contentDescription). -->
     <string-array name="weekday_initials">
-        <item>M</item>
-        <item>T</item>
-        <item>W</item>
-        <item>T</item>
-        <item>F</item>
-        <item>S</item>
-        <item>S</item>
+        <item>Mo</item>
+        <item>Tu</item>
+        <item>We</item>
+        <item>Th</item>
+        <item>Fr</item>
+        <item>Sa</item>
+        <item>Su</item>
+    </string-array>
+
+    <!-- Nombres completos para contentDescription de los toggles de día (accesibilidad/TalkBack). -->
+    <string-array name="weekday_names">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
     </string-array>
 
     <!-- Tareas recurrentes en Home (spec tasks-recurrence) -->

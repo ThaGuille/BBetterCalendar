@@ -37,14 +37,14 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 299fc03 (2026-07-11)
+**Branch:** `main`  |  **State as of commit:** d82b341 (2026-07-11)
 
 ### 1. What we touched last (recent commits)
+- d82b341 2026-07-11 added recurrence for the tasks - phase 2
 - 299fc03 2026-07-11 tasks in home screen
 - b4869e3 2026-07-06 roadmap to the next BIG STEPS - PROJECTS + time completeness system + dayly tasks + deadlines
 - bde26d6 2026-07-05 documentation system + propse for strict blocking pomodoro
 - f92f570 2026-07-05 bugs solved
-- 383fcd2 2026-07-05 Fix potential NPE in isNoise() namespace check
 
 ### 2. In flight - active `/spec` changes
 | Change | Status | Tasks | Proposal |

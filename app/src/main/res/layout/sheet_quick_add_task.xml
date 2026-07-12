@@ -59,6 +59,21 @@
         android:textAppearance="@style/TextAppearance.BBetter.Label"
         android:textColor="@color/bb_primary" />
 
+    <!-- Objetivo de minutos de concentración (spec focus-attribution). Opcional; en blanco = 0. -->
+    <EditText
+        android:id="@+id/quickAddTargetInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:hint="@string/quick_add_target_hint"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        android:maxLength="4"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
+        android:textColor="@color/bb_on_surface"
+        android:textColorHint="@color/bb_on_surface_muted" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

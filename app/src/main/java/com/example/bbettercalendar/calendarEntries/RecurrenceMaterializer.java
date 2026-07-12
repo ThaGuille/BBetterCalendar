@@ -196,6 +196,7 @@ public class RecurrenceMaterializer {
                 .setEventDescription(template.getDescription())
                 .setEventStartDayAndHour(start)
                 .setEventDuration(template.getDuration())
+                .setEventTargetMinutes(template.getTargetMinutes())
                 .setEventNotifications(notifications)
                 .setEventIsDone(false)
                 .setEventTemplateId(template.getId())

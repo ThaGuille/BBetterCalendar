@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
@@ -20,6 +21,7 @@ import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.popups.RepetitionSpec;
+import com.example.bbettercalendar.stats.AttributedMinutes;
 import com.example.bbettercalendar.stats.FocusEvent;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.Stats;
@@ -46,6 +48,10 @@ public class HomeViewModel extends AndroidViewModel {
     private final MutableLiveData<String> todayFailsText;
     private final MutableLiveData<String> todayTimeStudiedText;
     private final MutableLiveData<String> timerModeText;
+    // Evento one-shot: título de la tarea recién auto-completada al alcanzar su objetivo de minutos
+    // (spec focus-attribution). El fragment lo consume para disparar feedback + notificación y luego
+    // lo limpia. null = nada pendiente.
+    private final MutableLiveData<String> autoCompletedTaskTitle = new MutableLiveData<>();
     private String currentStreakString;
     private ExecutorService executorService;
     private StatsDAO statsDao;
@@ -61,6 +67,9 @@ public class HomeViewModel extends AndroidViewModel {
     // Instante "antes de hoy" para la sección de atrasadas; null = sección plegada, sin query.
     private final MutableLiveData<Long> overdueBefore = new MutableLiveData<>();
     private final LiveData<List<CalendarEntry>> todayTasks;
+    // Lista de hoy enriquecida con los minutos atribuidos por tarea (spec focus-attribution),
+    // calculados fuera del hilo principal a partir de todayTasks. Es la que observa el fragment.
+    private final MediatorLiveData<List<CalendarEntry>> todayTasksEnriched = new MediatorLiveData<>();
     private final LiveData<List<CalendarEntry>> overdueTasks;
 
     public HomeViewModel(@NonNull Application application) {
@@ -87,6 +96,7 @@ public class HomeViewModel extends AndroidViewModel {
                     calendarEntryDao.getEventsBetween(range[0], range[1]),
                     HomeViewModel::filterAndSortTasks);
         });
+        todayTasksEnriched.addSource(todayTasks, this::enrichWithAttributedMinutes);
         overdueTasks = Transformations.switchMap(overdueBefore, before -> {
             if (before == null) {
                 return emptyEntryList();
@@ -231,12 +241,14 @@ public class HomeViewModel extends AndroidViewModel {
         });
     }
 
-    public void quickAddTask(String title, Calendar startDayAndHour, RepetitionSpec repetition) {
+    public void quickAddTask(String title, Calendar startDayAndHour, RepetitionSpec repetition,
+                             int targetMinutes) {
         boolean repeats = repetition != null && repetition.repeats();
         CalendarEntry.EventBuilder builder = new CalendarEntry.EventBuilder()
                 .setEventType(AddEventActivity.TYPE_TASK)  // build() no pone defaults (regla #4)
                 .setEventTitle(title)
                 .setEventStartDayAndHour(startDayAndHour)
+                .setEventTargetMinutes(targetMinutes)
                 .setEventIsDone(false);
         if (repeats) {
             // Tarea recurrente: se guarda como PLANTILLA; el materializador crea sus ocurrencias.
@@ -286,7 +298,30 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<CalendarEntry>> getTodayTasks() {
-        return todayTasks;
+        return todayTasksEnriched;
+    }
+
+    // Rellena CalendarEntry.attributedMinutes (transitorio) para las tareas con objetivo, con una
+    // sola query agrupada, fuera del hilo principal. Las que no tienen objetivo se dejan en 0.
+    private void enrichWithAttributedMinutes(List<CalendarEntry> tasks) {
+        if (tasks == null || tasks.isEmpty()) {
+            todayTasksEnriched.setValue(tasks);
+            return;
+        }
+        executorService.execute(() -> {
+            List<AttributedMinutes> sums = focusEventDao.getAttributedMinutesByEntry();
+            Map<Integer, Integer> byId = new HashMap<>();
+            for (AttributedMinutes am : sums) {
+                byId.put(am.entryId, am.minutes);
+            }
+            for (CalendarEntry e : tasks) {
+                if (e.getTargetMinutes() > 0) {
+                    Integer m = byId.get(e.getId());
+                    e.setAttributedMinutes(m == null ? 0 : m);
+                }
+            }
+            todayTasksEnriched.postValue(tasks);
+        });
     }
 
     public LiveData<List<CalendarEntry>> getOverdueTasks() {
@@ -294,41 +329,72 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     //Cuando el usuario cierra la app a medio contador
-    public void addFails() {
+    public void addFails(int boundEntryId) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "View Model addFails()");
                 statsDao.addFails();
-                logFocusEvent(FocusEvent.TYPE_FAIL, 0);
+                // El fallo registra la tarea vinculada pero con 0 minutos: no avanza el objetivo.
+                logFocusEvent(FocusEvent.TYPE_FAIL, 0, boundEntryId);
                 todayFailsText.postValue(String.valueOf(statsDao.getTodayFails()));
             }
         });
     }
 
     //Cuando el temporizador llega a 0 se actualizan y guardan estadísticas
-    public void completeTimer(int timerTime){
+    public void completeTimer(int timerTime, int boundEntryId){
         executorService.execute(new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "View Model addTimeStudied( " + timerTime + " )");
                 statsDao.addTimeStudied(timerTime);
                 statsDao.addTasksDone();
-                logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime));
+                logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime), boundEntryId);
+                if (boundEntryId != 0) {
+                    maybeAutoComplete(boundEntryId);
+                }
                 String formattedTime = FormatHelper.formatTime(statsDao.getTodayTimeStudied(), "HH:mm");
                 todayTimeStudiedText.postValue(formattedTime);
             }
         });
     }
 
+    // Auto-completado (spec focus-attribution, decisión #7): sólo se evalúa AQUÍ, al terminar una
+    // sesión vinculada — nunca en un recálculo pasivo — para que un des-marcado manual no se vuelva
+    // a marcar solo. Marca isDone y emite el evento de feedback si se alcanza el objetivo.
+    // Corre dentro del executorService (fuera del hilo principal).
+    private void maybeAutoComplete(int entryId) {
+        CalendarEntry entry = calendarEntryDao.getEventById(entryId);
+        if (entry == null || entry.isDone() || entry.getTargetMinutes() <= 0) {
+            return;
+        }
+        int attributed = focusEventDao.sumAttributedMinutes(entryId);
+        if (attributed >= entry.getTargetMinutes()) {
+            entry.setDone(true);
+            calendarEntryDao.update(entry);
+            autoCompletedTaskTitle.postValue(entry.getTitle());
+        }
+    }
+
     // Registra un evento con timestamp para el histórico por horas de Progress.
     // Se llama desde dentro del executorService, así que ya está fuera del hilo principal.
-    private void logFocusEvent(int type, int durationMin){
+    private void logFocusEvent(int type, int durationMin, int entryId){
         FocusEvent ev = new FocusEvent();
         ev.timestamp = System.currentTimeMillis();
         ev.type = type;
         ev.durationMin = durationMin;
+        ev.entryId = entryId;
         focusEventDao.insert(ev);
+    }
+
+    public LiveData<String> getAutoCompletedTaskTitle() {
+        return autoCompletedTaskTitle;
+    }
+
+    /** El fragment lo llama tras consumir el evento de auto-completado (evita re-disparo). */
+    public void clearAutoCompletedTaskTitle() {
+        autoCompletedTaskTitle.setValue(null);
     }
 
     public void setRestTimer(){

@@ -134,4 +134,16 @@ public class DBMigration extends Application {
             database.execSQL("ALTER TABLE calendarEntry ADD COLUMN projectId INTEGER NOT NULL DEFAULT 0");
         }
     };
+
+    // Phase 4 (spec focus-attribution): objetivo de minutos en la tarea + atribución de la sesión.
+    //   calendarEntry.targetMinutes -> objetivo de concentración (0 = sin objetivo)
+    //   focus_event.entryId         -> tarea/item a la que se atribuye la sesión (0 = genérica)
+    // Aditiva (sólo ADD COLUMN) -> el histórico se conserva (regla #6).
+    static final Migration MIGRATION_12_13 = new Migration(12, 13) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN targetMinutes INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE focus_event ADD COLUMN entryId INTEGER NOT NULL DEFAULT 0");
+        }
+    };
 }

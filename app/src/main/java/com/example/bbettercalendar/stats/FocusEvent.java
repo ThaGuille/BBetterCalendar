@@ -16,6 +16,10 @@ public class FocusEvent {
     public long timestamp;   // System.currentTimeMillis() en el momento del evento
     public int type;
     public int durationMin;  // minutos para sesiones de concentración, 0 para fallos
+    // Tarea/item a la que se atribuye esta sesión (spec focus-attribution): CalendarEntry.id.
+    // 0 = sesión genérica sin vincular (comportamiento previo). La atribución se expresa aquí,
+    // no con un type nuevo: una sesión vinculada sigue siendo un TYPE_FOCUS real.
+    public int entryId;
 
     public FocusEvent() {
     }

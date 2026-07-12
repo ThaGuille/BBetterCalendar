@@ -27,9 +27,11 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.blocking.FocusBlockState;
+import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
+import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
 import com.example.bbettercalendar.notifications.focus.FocusFailNotifier;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
@@ -81,6 +83,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private ImageButton playButton;
     private TextView skipRestButton;
     private TextView blockModeButton;
+    private TextView focusBanner;
     private TextView timerText;
     private TextView currentStreakText;
     private TextView todayFailsText;
@@ -109,6 +112,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     @Inject
     FocusFailNotifier focusFailNotifier;
 
+    @Inject
+    FocusCompleteNotifier focusCompleteNotifier;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
@@ -124,6 +130,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         skipRestButton.setOnClickListener(this);
         blockModeButton = binding.homeBlockModeButton;
         blockModeButton.setOnClickListener(this);
+        focusBanner = binding.homeFocusBanner;
+        // Tap en el banner = desvincular la sesión en curso (spec focus-attribution).
+        focusBanner.setOnClickListener(v -> {
+            FocusTarget.clear();
+            updateFocusBanner();
+        });
         timerText = binding.homeTimerText;
         currentStreakText = binding.homeCurrentStreakText;
         todayFailsText = binding.homeToadyFailsText;
@@ -150,6 +162,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         homeViewModel.getTodayFailsText().observe(getViewLifecycleOwner(), todayFailsText::setText);
         homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), todayTimeStudiedText::setText);
         homeViewModel.getTimerModeText().observe(getViewLifecycleOwner(), timerModeText::setText);
+
+        // Auto-completado de una tarea al alcanzar su objetivo (spec focus-attribution): feedback
+        // in-app (háptico + sonido) + notificación de fallback, y se desvincula el timer.
+        homeViewModel.getAutoCompletedTaskTitle().observe(getViewLifecycleOwner(), title -> {
+            if (title == null) {
+                return;
+            }
+            HapticFeedback.confirm(focusBanner);
+            SoundFeedback.get(requireContext()).playSuccess();
+            focusCompleteNotifier.fire(title);
+            FocusTarget.clear();
+            updateFocusBanner();
+            homeViewModel.clearAutoCompletedTaskTitle();
+        });
 
         binding.homeDateText.setText(
                 new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
@@ -191,6 +217,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private void setUpTaskList() {
         todayTaskAdapter = new TodayTaskAdapter(false,
                 (entry, done) -> homeViewModel.setTaskDone(entry, done));
+        // "Focus this" (spec focus-attribution): vincula el timer de Home a la tarea y arranca.
+        todayTaskAdapter.setOnTaskFocusListener(this::onFocusRequested);
         // La sección de atrasadas pasa un removeListener: habilita el botón "quitar" que retira
         // (sin borrar) la serie/tarea atrasada — datos conservados para stats (spec tasks-recurrence).
         overdueTaskAdapter = new TodayTaskAdapter(true,
@@ -291,7 +319,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private void completeTimer(){
         timer_state = TIMER_STOPPED;
         //reproducir sonido indicador
-        homeViewModel.completeTimer(lastTimerTime);
+        // Atribuye la sesión a la tarea vinculada (0 = genérica). El auto-completado, si procede,
+        // lo evalúa el ViewModel y avisa por getAutoCompletedTaskTitle() (spec focus-attribution).
+        homeViewModel.completeTimer(lastTimerTime, FocusTarget.getEntryId());
         //Si el descanso está activado, y no se ha llegado al límite de descansos predefinidos, se activa el descanso
         if(configurationManager.getConfiguration().isHomeIsRestEnabled() )
         {
@@ -355,6 +385,45 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         countDownTimer.cancel();
         timer_state = isRest ? TIMER_PAUSED_REST : TIMER_PAUSED;
         updateTimerControls();
+    }
+
+    /**
+     * "Focus this" (spec focus-attribution): vincula el ÚNICO timer de Home a esta tarea/item y,
+     * si el timer está parado, arranca una sesión de concentración. Si ya hay una sesión corriendo,
+     * sólo re-vincula (la sesión en curso se atribuirá al completar). Punto de entrada primario
+     * (decisión #3) tanto desde la lista de hoy como, tras navegar a Home, desde el detalle de proyecto.
+     */
+    private void onFocusRequested(CalendarEntry entry) {
+        FocusTarget.set(entry.getId(), entry.getTitle());
+        FocusTarget.consumePendingAutoStart(); // el arranque lo hacemos aquí; evita doble arranque en onResume
+        startBoundConcentrationIfIdle();
+        updateFocusBanner();
+    }
+
+    /** Arranca una sesión de concentración sólo si el timer está parado (no pisa una en curso). */
+    private void startBoundConcentrationIfIdle() {
+        if (timer_state != TIMER_STOPPED) {
+            return;
+        }
+        int actualTime = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
+        lastTimerTime = actualTime;
+        timeLeftInMillis = actualTime;
+        startTimer(actualTime);
+        SoundFeedback.get(requireContext()).playStart();
+        updateTimerControls();
+    }
+
+    /** Muestra/oculta el banner "Focusing: <tarea>" según el estado de FocusTarget. */
+    private void updateFocusBanner() {
+        if (binding == null || focusBanner == null) {
+            return;
+        }
+        if (FocusTarget.isSet()) {
+            focusBanner.setVisibility(View.VISIBLE);
+            focusBanner.setText(getString(R.string.home_focus_banner, FocusTarget.getTitle()));
+        } else {
+            focusBanner.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -583,7 +652,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                     Log.i(TAG, "fragment, Timer failed");
                     countDownTimer.cancel();
                     timer_state = TIMER_STOPPED;
-                    homeViewModel.addFails();
+                    homeViewModel.addFails(FocusTarget.getEntryId());
                     focusFailNotifier.fire();
                     isTimerFailed=true;
                     isBackground=false;
@@ -621,6 +690,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         // Rango de hoy + requery: cubre volver de AddEventActivity (lag del
         // InvalidationTracker) y el cambio de día con la app abierta.
         homeViewModel.refreshToday();
+        // "Focus this" desde otra pantalla (p. ej. detalle de proyecto) fija FocusTarget y navega a
+        // Home; aquí consumimos el arranque pendiente (una vez) y refrescamos el banner.
+        if (FocusTarget.consumePendingAutoStart()) {
+            startBoundConcentrationIfIdle();
+        }
+        updateFocusBanner();
     }
 
     @Override

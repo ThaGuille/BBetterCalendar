@@ -37,6 +37,11 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         void onTaskRemove(CalendarEntry entry);
     }
 
+    /** Botón "focus this" (spec focus-attribution): arranca el timer de Home vinculado a la tarea. */
+    public interface OnTaskFocusListener {
+        void onTaskFocus(CalendarEntry entry);
+    }
+
     private final List<CalendarEntry> tasks = new ArrayList<>();
     // La sección "older uncompleted" muestra la fecha de la tarea; la de hoy, su hora.
     private final boolean showDate;
@@ -44,6 +49,12 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
     // Sólo la sección de atrasadas pasa un removeListener: habilita el botón "quitar" y el
     // contador de días fallados en las filas colapsadas.
     private final OnTaskRemoveListener removeListener;
+    // Opcional (sólo la sección de hoy lo pasa): habilita el botón "focus this" en tareas con objetivo.
+    private OnTaskFocusListener focusListener;
+
+    public void setOnTaskFocusListener(OnTaskFocusListener focusListener) {
+        this.focusListener = focusListener;
+    }
 
     public TodayTaskAdapter(boolean showDate, OnTaskCheckedListener listener) {
         this(showDate, listener, null);
@@ -109,6 +120,25 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
             holder.remove.setOnClickListener(null);
         }
 
+        // Progreso + "focus this" sólo en la sección de hoy (!showDate), para tareas con objetivo.
+        // La sección de atrasadas no enriquece attributedMinutes, así que nunca los muestra.
+        boolean hasTarget = !showDate && entry.getTargetMinutes() > 0;
+        if (hasTarget) {
+            holder.progress.setVisibility(View.VISIBLE);
+            holder.progress.setText(holder.itemView.getContext().getString(
+                    R.string.focus_progress_format,
+                    entry.getAttributedMinutes(), entry.getTargetMinutes()));
+        } else {
+            holder.progress.setVisibility(View.GONE);
+        }
+        if (hasTarget && !entry.isDone() && focusListener != null) {
+            holder.focus.setVisibility(View.VISIBLE);
+            holder.focus.setOnClickListener(v -> focusListener.onTaskFocus(entry));
+        } else {
+            holder.focus.setVisibility(View.GONE);
+            holder.focus.setOnClickListener(null);
+        }
+
         holder.checkbox.setOnCheckedChangeListener((button, isChecked) -> {
             if (listener != null) {
                 listener.onTaskChecked(entry, isChecked);
@@ -145,6 +175,8 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         final TextView title;
         final TextView time;
         final TextView remove;
+        final TextView progress;
+        final TextView focus;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -152,6 +184,8 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
             title = itemView.findViewById(R.id.taskTitleText);
             time = itemView.findViewById(R.id.taskTimeText);
             remove = itemView.findViewById(R.id.taskRemoveButton);
+            progress = itemView.findViewById(R.id.taskProgressText);
+            focus = itemView.findViewById(R.id.taskFocusButton);
         }
     }
 }

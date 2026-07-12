@@ -5,6 +5,7 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
@@ -14,10 +15,14 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
+import com.example.bbettercalendar.stats.AttributedMinutes;
+import com.example.bbettercalendar.stats.FocusEventDAO;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,10 +31,14 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     private final ExecutorService executorService;
     private final ProjectDAO projectDao;
     private final CalendarEntryDAO calendarEntryDao;
+    private final FocusEventDAO focusEventDao;
 
     private final MutableLiveData<Integer> projectIdLiveData = new MutableLiveData<>();
     private final LiveData<Project> project;
     private final LiveData<List<CalendarEntry>> items;
+    // Items enriquecidos con los minutos atribuidos por item (spec focus-attribution), calculados
+    // fuera del hilo principal. Es la que observa el fragment.
+    private final MediatorLiveData<List<CalendarEntry>> itemsEnriched = new MediatorLiveData<>();
     private final MutableLiveData<Boolean> projectDeleted = new MutableLiveData<>();
 
     public ProjectDetailViewModel(@NonNull Application application) {
@@ -38,11 +47,36 @@ public class ProjectDetailViewModel extends AndroidViewModel {
         AppDatabase db = AppDatabase.getDatabase(application);
         projectDao = db.projectDao();
         calendarEntryDao = db.eventDao();
+        focusEventDao = db.focusEventDao();
 
         project = Transformations.switchMap(projectIdLiveData, id ->
                 id == null ? emptyProject() : projectDao.observeById(id));
         items = Transformations.switchMap(projectIdLiveData, id ->
                 id == null ? emptyEntryList() : calendarEntryDao.observeItemsByProject(id));
+        itemsEnriched.addSource(items, this::enrichWithAttributedMinutes);
+    }
+
+    // Rellena CalendarEntry.attributedMinutes (transitorio) para los items con objetivo, con una
+    // sola query agrupada, fuera del hilo principal.
+    private void enrichWithAttributedMinutes(List<CalendarEntry> entries) {
+        if (entries == null || entries.isEmpty()) {
+            itemsEnriched.setValue(entries);
+            return;
+        }
+        executorService.execute(() -> {
+            List<AttributedMinutes> sums = focusEventDao.getAttributedMinutesByEntry();
+            Map<Integer, Integer> byId = new HashMap<>();
+            for (AttributedMinutes am : sums) {
+                byId.put(am.entryId, am.minutes);
+            }
+            for (CalendarEntry e : entries) {
+                if (e.getTargetMinutes() > 0) {
+                    Integer m = byId.get(e.getId());
+                    e.setAttributedMinutes(m == null ? 0 : m);
+                }
+            }
+            itemsEnriched.postValue(entries);
+        });
     }
 
     private static LiveData<Project> emptyProject() {
@@ -67,7 +101,7 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<CalendarEntry>> getItems() {
-        return items;
+        return itemsEnriched;
     }
 
     public LiveData<Boolean> getProjectDeleted() {
@@ -86,11 +120,12 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     }
 
     /** Item de proyecto (spec projects-mvp): startDayAndHour null -> undated, vive sólo aquí. */
-    public void addItem(String title, Calendar startDayAndHour) {
+    public void addItem(String title, Calendar startDayAndHour, int targetMinutes) {
         int projectId = requireProjectId();
         CalendarEntry.EventBuilder builder = new CalendarEntry.EventBuilder()
                 .setEventType(AddEventActivity.TYPE_TASK)
                 .setEventTitle(title)
+                .setEventTargetMinutes(targetMinutes)
                 .setEventIsDone(false)
                 .setEventProjectId(projectId);
         if (startDayAndHour != null) {

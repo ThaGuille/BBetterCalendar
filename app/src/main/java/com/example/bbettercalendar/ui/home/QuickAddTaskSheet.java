@@ -42,6 +42,7 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     private static final String ARG_PROJECT_ID = "project_id";
 
     private EditText titleInput;
+    private EditText targetInput;
     private TextView timeButton;
     private TextView repeatButton;
     private int selectedHour = -1;
@@ -81,6 +82,7 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
         }
 
         titleInput = view.findViewById(R.id.quickAddTitleInput);
+        targetInput = view.findViewById(R.id.quickAddTargetInput);
         timeButton = view.findViewById(R.id.quickAddTimeButton);
         repeatButton = view.findViewById(R.id.quickAddRepeatButton);
 
@@ -155,8 +157,21 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
 
         HomeViewModel viewModel =
                 new ViewModelProvider(requireParentFragment()).get(HomeViewModel.class);
-        viewModel.quickAddTask(title, start, repetitionSpec);
+        viewModel.quickAddTask(title, start, repetitionSpec, parseTargetMinutes());
         dismiss();
+    }
+
+    // Objetivo de minutos (spec focus-attribution). Vacío o inválido -> 0 (sin objetivo).
+    private int parseTargetMinutes() {
+        String raw = targetInput.getText().toString().trim();
+        if (raw.isEmpty()) {
+            return 0;
+        }
+        try {
+            return Math.max(0, Integer.parseInt(raw));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     // spec projects-mvp: sin hora elegida el item queda SIN fecha (vive sólo dentro del proyecto),
@@ -172,7 +187,7 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
         }
         ProjectDetailViewModel viewModel =
                 new ViewModelProvider(requireParentFragment()).get(ProjectDetailViewModel.class);
-        viewModel.addItem(title, start);
+        viewModel.addItem(title, start, parseTargetMinutes());
         dismiss();
     }
 

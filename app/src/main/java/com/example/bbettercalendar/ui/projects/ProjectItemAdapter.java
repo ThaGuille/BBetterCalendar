@@ -29,11 +29,21 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
         void onItemChecked(CalendarEntry entry, boolean isDone);
     }
 
+    /** Botón "focus this" (spec focus-attribution): navega a Home y arranca el timer vinculado. */
+    public interface OnItemFocusListener {
+        void onItemFocus(CalendarEntry entry);
+    }
+
     private final List<CalendarEntry> items = new ArrayList<>();
     private final OnItemCheckedListener listener;
+    private OnItemFocusListener focusListener;
 
     public ProjectItemAdapter(OnItemCheckedListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnItemFocusListener(OnItemFocusListener focusListener) {
+        this.focusListener = focusListener;
     }
 
     public void submitList(List<CalendarEntry> newItems) {
@@ -75,6 +85,23 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
                 ? new SimpleDateFormat("MMM d", Locale.getDefault()).format(new Date(entry.getStartMillis()))
                 : holder.itemView.getContext().getString(R.string.project_item_no_date));
 
+        boolean hasTarget = entry.getTargetMinutes() > 0;
+        if (hasTarget) {
+            holder.progress.setVisibility(View.VISIBLE);
+            holder.progress.setText(holder.itemView.getContext().getString(
+                    R.string.focus_progress_format,
+                    entry.getAttributedMinutes(), entry.getTargetMinutes()));
+        } else {
+            holder.progress.setVisibility(View.GONE);
+        }
+        if (hasTarget && !entry.isDone() && focusListener != null) {
+            holder.focus.setVisibility(View.VISIBLE);
+            holder.focus.setOnClickListener(v -> focusListener.onItemFocus(entry));
+        } else {
+            holder.focus.setVisibility(View.GONE);
+            holder.focus.setOnClickListener(null);
+        }
+
         holder.checkbox.setOnCheckedChangeListener((button, isChecked) -> {
             if (listener != null) {
                 listener.onItemChecked(entry, isChecked);
@@ -91,12 +118,16 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
         final CheckBox checkbox;
         final TextView title;
         final TextView date;
+        final TextView progress;
+        final TextView focus;
 
         ItemViewHolder(@NonNull View itemView) {
             super(itemView);
             checkbox = itemView.findViewById(R.id.projectItemDoneCheckbox);
             title = itemView.findViewById(R.id.projectItemTitleText);
             date = itemView.findViewById(R.id.projectItemDateText);
+            progress = itemView.findViewById(R.id.projectItemProgressText);
+            focus = itemView.findViewById(R.id.projectItemFocusButton);
         }
     }
 }

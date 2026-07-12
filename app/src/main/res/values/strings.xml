@@ -139,6 +139,10 @@
     <string name="notif_focus_fail_title">Concentration broken</string>
     <string name="notif_focus_fail_body">You left the app — your focus session was lost.</string>
 
+    <!-- Focus-complete notification (spec focus-attribution) -->
+    <string name="notif_focus_complete_title">Task complete!</string>
+    <string name="notif_focus_complete_body">%1$s reached its focus target.</string>
+
     <!-- App-limit notifications (Phase 3 — warn only, never blocks) -->
     <string name="notif_app_limit_warn_title">Almost at your %1$s limit</string>
     <string name="notif_app_limit_warn_body">About %1$d min left today.</string>
@@ -264,5 +268,12 @@
     <string name="home_overdue_remove_symbol">✕</string>
     <string name="home_overdue_remove_desc">Remove missed task</string>
     <string name="quick_add_repeat_label">Repeat</string>
+
+    <!-- Objetivos de minutos + "focus this" (spec focus-attribution) -->
+    <string name="quick_add_target_hint">Target minutes (optional)</string>
+    <string name="focus_progress_format">%1$d/%2$dm</string>
+    <string name="task_focus_this_symbol">▶</string>
+    <string name="task_focus_this_desc">Focus this task</string>
+    <string name="home_focus_banner">Focusing: %1$s</string>
 
 </resources>

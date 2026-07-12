@@ -28,12 +28,40 @@
         android:textAppearance="@style/TextAppearance.BBetter.Body"
         android:textColor="@color/bb_on_surface" />
 
+    <!-- Progreso de minutos atribuidos "X/Ym" (spec focus-attribution). Sólo visible para tareas
+         con objetivo; lo rellena TodayTaskAdapter desde CalendarEntry.attributedMinutes. -->
+    <TextView
+        android:id="@+id/taskProgressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        android:textColor="@color/bb_primary"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/taskTimeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/spacing_sm"
         android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+    <!-- "Focus this" (spec focus-attribution): vincula el timer de Home a esta tarea y arranca la
+         sesión. Sólo visible para tareas con objetivo no completadas. -->
+    <TextView
+        android:id="@+id/taskFocusButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/task_focus_this_desc"
+        android:focusable="true"
+        android:padding="@dimen/spacing_xs"
+        android:text="@string/task_focus_this_symbol"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        android:textColor="@color/bb_primary"
+        android:visibility="gone" />
 
     <!-- "Quitar" de una tarea atrasada (spec tasks-recurrence): oculto salvo en la sección de
          atrasadas, donde TodayTaskAdapter recibe un OnTaskRemoveListener. No borra: retira. -->

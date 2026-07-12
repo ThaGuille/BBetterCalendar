@@ -34,6 +34,11 @@ public class CalendarEntry {
     private int repetitionInterval = 1;
     private int repetitionDays;
     private int duration;
+    // Objetivo de minutos de concentración para una tarea (spec focus-attribution). 0 = sin objetivo.
+    // Distinto de `duration` (que guarda una duración de evento en MILISEGUNDOS y es prácticamente
+    // de sólo escritura): targetMinutes se compara contra la suma de FocusEvent.durationMin
+    // atribuidos a esta fila para auto-completarla.
+    private int targetMinutes;
     private boolean isDone;
     // Recurrencia (spec tasks-recurrence): una plantilla (isTemplate) es la definición de la
     // serie — conserva fecha ancla + hora pero se excluye de TODAS las queries de superficie
@@ -54,6 +59,12 @@ public class CalendarEntry {
     // en la sección de atrasadas de Home. 0 = fila normal (tarea suelta o no colapsada).
     @Ignore
     private int seriesMissedCount;
+
+    // Transitorio (no persistido): minutos de concentración ya atribuidos a esta fila
+    // (suma de FocusEvent.durationMin con entryId = este id). Lo rellena el ViewModel al
+    // enriquecer la lista para pintar el progreso "X/Ym"; no se guarda en la BD.
+    @Ignore
+    private int attributedMinutes;
 
     private int type;  //1 = evento, 2 = tarea, 3 = recordatorio
 
@@ -93,6 +104,10 @@ public class CalendarEntry {
     public void setRepetitionDays(int repetitionDays) {this.repetitionDays = repetitionDays;}
     public int getDuration() {return duration;}
     public void setDuration(int duration) {this.duration = duration;}
+    public int getTargetMinutes() {return targetMinutes;}
+    public void setTargetMinutes(int targetMinutes) {this.targetMinutes = targetMinutes;}
+    public int getAttributedMinutes() {return attributedMinutes;}
+    public void setAttributedMinutes(int attributedMinutes) {this.attributedMinutes = attributedMinutes;}
     public boolean isDone() {return isDone;}
     public void setDone(boolean done) {isDone = done;}
     public boolean isTemplate() {return isTemplate;}
@@ -126,6 +141,7 @@ public class CalendarEntry {
         private int repetitionInterval = 1;
         private int repetitionDays;
         private int duration;
+        private int targetMinutes;
         private boolean isDone;
         private boolean isTemplate;
         private int templateId;
@@ -232,6 +248,11 @@ public class CalendarEntry {
             this.duration = duration;
             return this;
         }
+        public EventBuilder setEventTargetMinutes(int targetMinutes) {
+            this.targetMinutes = targetMinutes;
+            return this;
+        }
+        public int getEventTargetMinutes() {return targetMinutes;}
         public EventBuilder setEventIsDone(boolean isDone) {
             this.isDone = isDone;
             return this;
@@ -265,6 +286,7 @@ public class CalendarEntry {
         this.repetitionInterval = builder.repetitionInterval;
         this.repetitionDays = builder.repetitionDays;
         this.duration = builder.duration;
+        this.targetMinutes = builder.targetMinutes;
         this.isDone = builder.isDone;
         this.isTemplate = builder.isTemplate;
         this.templateId = builder.templateId;

@@ -25,7 +25,7 @@ import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
 
 @Database(entities = {CalendarEntry.class, Stats.class, Configuration.class, DailyStat.class,
-        FocusEvent.class, AppRule.class, ConsentRecord.class, Project.class}, version = 12)
+        FocusEvent.class, AppRule.class, ConsentRecord.class, Project.class}, version = 13)
 @TypeConverters({DBConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -48,7 +48,7 @@ public abstract class AppDatabase extends RoomDatabase {
                                     AppDatabase.class, "eventDB")
                             .addMigrations(DBMigration.MIGRATION_6_7, DBMigration.MIGRATION_7_8,
                                     DBMigration.MIGRATION_9_10, DBMigration.MIGRATION_10_11,
-                                    DBMigration.MIGRATION_11_12)
+                                    DBMigration.MIGRATION_11_12, DBMigration.MIGRATION_12_13)
                             .fallbackToDestructiveMigration() // Si una migración no existe, recrea la BD
                             .build();
                 }

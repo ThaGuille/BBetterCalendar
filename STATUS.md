@@ -37,18 +37,19 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** d7a6b39 (2026-07-12)
+**Branch:** `main`  |  **State as of commit:** 5333052 (2026-07-12)
 
 ### 1. What we touched last (recent commits)
+- 5333052 2026-07-12 PROJECTS PAGE
 - d7a6b39 2026-07-12 minor bug fixing
 - d82b341 2026-07-11 added recurrence for the tasks - phase 2
 - 299fc03 2026-07-11 tasks in home screen
 - b4869e3 2026-07-06 roadmap to the next BIG STEPS - PROJECTS + time completeness system + dayly tasks + deadlines
-- bde26d6 2026-07-05 documentation system + propse for strict blocking pomodoro
 
 ### 2. In flight - active `/spec` changes
 | Change | Status | Tasks | Proposal |
 |---|---|---|---|
+| Time targets + focus attribution ("focus this") | verified | 22/28 | [proposal](.claude/specs/changes/focus-attribution/proposal.md) |
 | Pomodoro focus block mode ("🚫 Block mode 🚫") | verified | 15/16 | [proposal](.claude/specs/changes/pomodoro-block-mode/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)

@@ -22,6 +22,7 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.databinding.FragmentProjectDetailBinding;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
+import com.example.bbettercalendar.ui.home.FocusTarget;
 import com.example.bbettercalendar.ui.home.QuickAddTaskSheet;
 
 import java.util.Calendar;
@@ -53,6 +54,12 @@ public class ProjectDetailFragment extends Fragment {
         viewModel.setProjectId(projectId);
 
         itemAdapter = new ProjectItemAdapter((entry, done) -> viewModel.setItemDone(entry, done));
+        // "Focus this" (spec focus-attribution): el timer vive sólo en Home, así que vinculamos el
+        // item y navegamos a Home, que consume el arranque pendiente (FocusTarget.pendingAutoStart).
+        itemAdapter.setOnItemFocusListener(entry -> {
+            FocusTarget.set(entry.getId(), entry.getTitle());
+            NavHostFragment.findNavController(this).navigate(R.id.navigation_home);
+        });
         binding.projectDetailItemsList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.projectDetailItemsList.setAdapter(itemAdapter);
 

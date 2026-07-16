@@ -57,13 +57,26 @@
 
     <style name="ThemeChatGPTBlue_NoActionBar" parent="Theme.BBetter.NoActionBar" />
 
-    <style name="ThemeChatGPTBlue_AndroidPopups" parent="Theme.MaterialComponents.Light.Dialog.Alert">
-        <item name="colorPrimary">@color/bb_primary</item>
-        <item name="colorSecondary">@color/bb_secondary</item>
-        <item name="colorAccent">@color/bb_accent_energy</item>
-        <item name="colorOnPrimary">@color/bb_on_primary</item>
+    <!-- Tema de los diálogos de sistema (framework android.app) de reloj/calendario: los pickers
+         android.app.TimePickerDialog / DatePickerDialog. DEBE heredar de un tema FRAMEWORK
+         (android:Theme.Material), no de MaterialComponents: esos diálogos usan botones del framework
+         y con un tema MaterialComponents el texto OK/Cancel salía blanco sobre fondo blanco (botones
+         invisibles). android:colorAccent pinta los botones y el resaltado del picker. -->
+    <style name="ThemeChatGPTBlue_AndroidPopups" parent="@android:style/Theme.Material.Light.Dialog">
         <item name="android:colorAccent">@color/bb_primary</item>
-        <item name="android:buttonTint">@color/bb_primary</item>
+        <item name="android:textColorPrimary">@color/bb_on_surface</item>
+        <item name="android:windowBackground">@color/bb_surface_card</item>
+        <!-- colorAccent llega al reloj/calendario pero NO al texto de los botones OK/Cancel, que
+             salía blanco sobre fondo blanco. Forzamos el color del texto del button bar de forma
+             explícita para que sean visibles pase lo que pase. -->
+        <item name="android:buttonBarButtonStyle">@style/BBetterPickerDialogButton</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/BBetterPickerDialogButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/BBetterPickerDialogButton</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/BBetterPickerDialogButton</item>
+    </style>
+
+    <style name="BBetterPickerDialogButton" parent="@android:style/Widget.Material.Light.Button.Borderless.Colored">
+        <item name="android:textColor">@color/bb_primary</item>
     </style>
 
     <!--Theme.AppCompat.DayNight.NoActionBar-->

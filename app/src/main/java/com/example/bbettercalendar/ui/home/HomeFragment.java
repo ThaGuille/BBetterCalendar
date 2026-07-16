@@ -394,7 +394,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
      * (decisión #3) tanto desde la lista de hoy como, tras navegar a Home, desde el detalle de proyecto.
      */
     private void onFocusRequested(CalendarEntry entry) {
-        FocusTarget.set(entry.getId(), entry.getTitle());
+        FocusTarget.set(entry.getId(), entry.getTitle(), entry.getTargetMinutes());
         FocusTarget.consumePendingAutoStart(); // el arranque lo hacemos aquí; evita doble arranque en onResume
         startBoundConcentrationIfIdle();
         updateFocusBanner();
@@ -405,7 +405,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         if (timer_state != TIMER_STOPPED) {
             return;
         }
-        int actualTime = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
+        // Si el item vinculado trae objetivo de minutos, el pomodoro arranca con esa duración
+        // (lo que el usuario eligió en el item); si no, la duración por defecto del timer.
+        int targetMinutes = FocusTarget.getTargetMinutes();
+        int actualTime = targetMinutes > 0
+                ? FormatHelper.minutesToMillis(targetMinutes)
+                : homeViewModel.configManager.getConfiguration().getHomeTimerTime();
         lastTimerTime = actualTime;
         timeLeftInMillis = actualTime;
         startTimer(actualTime);

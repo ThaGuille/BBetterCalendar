@@ -2,6 +2,7 @@
 <!-- Fila de la lista de tareas de hoy en Home (spec tasks-home-today).
      Checkbox + título + hora/fecha; el tachado de tareas hechas lo aplica TodayTaskAdapter. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
@@ -47,20 +48,21 @@
         android:textAppearance="@style/TextAppearance.BBetter.Label" />
 
     <!-- "Focus this" (spec focus-attribution): vincula el timer de Home a esta tarea y arranca la
-         sesión. Sólo visible para tareas con objetivo no completadas. -->
-    <TextView
+         sesión. Icono del pomodoro (mismo que el timer) para dejar claro que lleva ahí.
+         Sólo visible para tareas con objetivo no completadas. -->
+    <ImageView
         android:id="@+id/taskFocusButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_marginStart="@dimen/spacing_sm"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
         android:contentDescription="@string/task_focus_this_desc"
         android:focusable="true"
         android:padding="@dimen/spacing_xs"
-        android:text="@string/task_focus_this_symbol"
-        android:textAppearance="@style/TextAppearance.BBetter.Label"
-        android:textColor="@color/bb_primary"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_timer_clock_24"
+        app:tint="@color/bb_primary"
         android:visibility="gone" />
 
     <!-- "Quitar" de una tarea atrasada (spec tasks-recurrence): oculto salvo en la sección de

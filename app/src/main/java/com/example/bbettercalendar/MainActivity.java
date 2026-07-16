@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private StatsDAO statsDao;
     private ExecutorService executorService;
+    private NavController navController;
+    private AppBarConfiguration appBarConfiguration;
 
     @Inject PermissionGate permissionGate;
 
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+        appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_progress, R.id.navigation_calendar_month, R.id.navigation_projects)
                 .build();
         // Con FragmentContainerView, obtener el NavController vía el NavHostFragment (no con
@@ -63,9 +65,17 @@ public class MainActivity extends AppCompatActivity {
         // del fragment aún no tiene asignado el NavController en su tag).
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment_activity_main);
-        NavController navController = navHostFragment.getNavController();
+        navController = navHostFragment.getNavController();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+    }
+
+    // Sin esto la flecha "Up" de la ActionBar (destinos no top-level, p. ej. el detalle de proyecto)
+    // se muestra pero no navega. Delega en el NavController para volver a la lista de proyectos.
+    @Override
+    public boolean onSupportNavigateUp() {
+        return NavigationUI.navigateUp(navController, appBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 
     @Override

@@ -13,6 +13,9 @@ public final class FocusTarget {
 
     private static int entryId = 0;
     private static String title = null;
+    // Objetivo de minutos del item (spec focus-attribution): la sesión de concentración vinculada
+    // arranca el pomodoro con esta duración en vez de la del timer por defecto. 0 = sin objetivo.
+    private static int targetMinutes = 0;
     // Pedir arranque automático UNA vez: lo consume HomeFragment al llegar a Home (p. ej. tras
     // pulsar "focus this" en el detalle de proyecto y navegar). Evita que un objetivo aún no
     // cumplido re-arranque el timer en cada onResume después de cada pomodoro.
@@ -20,16 +23,22 @@ public final class FocusTarget {
 
     private FocusTarget() { }
 
-    /** Vincula el timer a una tarea/item y pide arranque automático. entryId 0 desvincula. */
-    public static void set(int newEntryId, String newTitle) {
+    /**
+     * Vincula el timer a una tarea/item y pide arranque automático. entryId 0 desvincula.
+     * newTargetMinutes es el objetivo del item (duración con la que arranca el pomodoro); 0 = usar
+     * la duración por defecto del timer de Home.
+     */
+    public static void set(int newEntryId, String newTitle, int newTargetMinutes) {
         entryId = newEntryId;
         title = newTitle;
+        targetMinutes = newTargetMinutes;
         pendingAutoStart = newEntryId != 0;
     }
 
     public static void clear() {
         entryId = 0;
         title = null;
+        targetMinutes = 0;
         pendingAutoStart = false;
     }
 
@@ -50,5 +59,10 @@ public final class FocusTarget {
 
     public static String getTitle() {
         return title;
+    }
+
+    /** Objetivo de minutos del item vinculado; 0 = usar la duración por defecto del timer. */
+    public static int getTargetMinutes() {
+        return targetMinutes;
     }
 }

@@ -41,3 +41,7 @@
 - [ ] LOW (product): mid-session "Focus this" re-binds the in-progress session's credit to the newly-tapped task (documented decision, banner updates) — confirm intended / consider a confirm.
 - [ ] LOW (product): un-check an already-over-target task then run any bound minute re-fires auto-complete off the pre-existing sum — matches the letter of decision #7, confirm the spirit is acceptable.
 - [ ] LOW: nothing clears `FocusTarget` when a bound task is deleted/completed via the ordinary checkbox — inert today (null-guarded no-op), flagged as global-static state a future background caller could misuse.
+
+## Re-verify follow-ups (2026-07-17 post-verify batch)
+- [ ] PRODUCT (decision): bound pomodoro now runs for the item's full `targetMinutes` (one session = whole target) instead of accumulating multiple default-length pomodoros — confirm this is the intended model; if a target is large (e.g. 240m) the "pomodoro" becomes a single multi-hour countdown with no breaks. Proposal "focus this" bullet updated to match.
+- [ ] TEST: on-device `ui-tester` pass owed for this batch (rule #7) — verify: focus-this starts a `targetMinutes`-length countdown; ActionBar Up returns from project detail; header auto-saves on leaving detail (and empty name doesn't wipe it); Time/Date pickers show visible OK/Cancel buttons in QuickAdd / CreateProject / ProjectDetail / AddEvent.

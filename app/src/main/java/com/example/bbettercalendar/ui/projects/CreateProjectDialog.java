@@ -59,7 +59,8 @@ public class CreateProjectDialog extends DialogFragment {
 
     private void showDeadlinePicker(TextView deadlineButton) {
         Calendar now = Calendar.getInstance();
-        new DatePickerDialog(requireContext(), (picker, year, month, dayOfMonth) -> {
+        new DatePickerDialog(requireContext(), R.style.ThemeChatGPTBlue_AndroidPopups,
+                (picker, year, month, dayOfMonth) -> {
             Calendar deadline = Calendar.getInstance();
             deadline.set(year, month, dayOfMonth, 23, 59, 59);
             selectedDeadlineMillis = deadline.getTimeInMillis();

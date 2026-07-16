@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -81,9 +82,15 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
                     holder.itemView.getContext(), R.color.bb_on_surface));
         }
 
-        holder.date.setText(entry.getStartMillis() > 0L
-                ? new SimpleDateFormat("MMM d", Locale.getDefault()).format(new Date(entry.getStartMillis()))
-                : holder.itemView.getContext().getString(R.string.project_item_no_date));
+        // Sin fecha (item que vive sólo dentro del proyecto): ocultamos la etiqueta en vez de
+        // mostrar "sin fecha", que sólo añadía ruido.
+        if (entry.getStartMillis() > 0L) {
+            holder.date.setVisibility(View.VISIBLE);
+            holder.date.setText(
+                    new SimpleDateFormat("MMM d", Locale.getDefault()).format(new Date(entry.getStartMillis())));
+        } else {
+            holder.date.setVisibility(View.GONE);
+        }
 
         boolean hasTarget = entry.getTargetMinutes() > 0;
         if (hasTarget) {
@@ -119,7 +126,7 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
         final TextView title;
         final TextView date;
         final TextView progress;
-        final TextView focus;
+        final ImageView focus;
 
         ItemViewHolder(@NonNull View itemView) {
             super(itemView);

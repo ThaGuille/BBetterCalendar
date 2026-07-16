@@ -57,14 +57,13 @@ public class ProjectDetailFragment extends Fragment {
         // "Focus this" (spec focus-attribution): el timer vive sólo en Home, así que vinculamos el
         // item y navegamos a Home, que consume el arranque pendiente (FocusTarget.pendingAutoStart).
         itemAdapter.setOnItemFocusListener(entry -> {
-            FocusTarget.set(entry.getId(), entry.getTitle());
+            FocusTarget.set(entry.getId(), entry.getTitle(), entry.getTargetMinutes());
             NavHostFragment.findNavController(this).navigate(R.id.navigation_home);
         });
         binding.projectDetailItemsList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.projectDetailItemsList.setAdapter(itemAdapter);
 
         binding.projectDetailDeadlineButton.setOnClickListener(v -> showDeadlinePicker());
-        binding.projectDetailSaveHeaderButton.setOnClickListener(v -> saveHeader());
         binding.projectDetailAddItemButton.setOnClickListener(v ->
                 QuickAddTaskSheet.forProject(projectId).show(getChildFragmentManager(), QuickAddTaskSheet.SHEET_TAG));
         binding.projectDetailCompleteButton.setOnClickListener(v -> viewModel.completeProject());
@@ -127,17 +126,22 @@ public class ProjectDetailFragment extends Fragment {
 
     private void showDeadlinePicker() {
         Calendar now = Calendar.getInstance();
-        new DatePickerDialog(requireContext(), (picker, year, month, dayOfMonth) -> {
+        new DatePickerDialog(requireContext(), R.style.ThemeChatGPTBlue_AndroidPopups,
+                (picker, year, month, dayOfMonth) -> {
             Calendar deadline = Calendar.getInstance();
             deadline.set(year, month, dayOfMonth, 23, 59, 59);
             viewModel.updateDeadline(deadline.getTimeInMillis());
         }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    private void saveHeader() {
+    // Ya no hay botón "Save": el header (nombre/notas) se persiste solo al abandonar la pantalla
+    // (back, flecha Up, o app a background). Un nombre vacío no se guarda para no pisar el actual.
+    private void persistHeaderIfValid() {
+        if (binding == null) {
+            return;
+        }
         String name = binding.projectDetailNameInput.getText().toString().trim();
         if (name.isEmpty()) {
-            binding.projectDetailNameInput.setError(getString(R.string.create_project_name_required));
             return;
         }
         String notes = binding.projectDetailNotesInput.getText().toString().trim();
@@ -151,6 +155,12 @@ public class ProjectDetailFragment extends Fragment {
                 .setPositiveButton(R.string.project_detail_delete, (dialog, which) -> viewModel.deleteProject())
                 .setNegativeButton(R.string.create_project_cancel, null)
                 .show();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        persistHeaderIfValid();
     }
 
     @Override

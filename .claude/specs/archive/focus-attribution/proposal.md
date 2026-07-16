@@ -1,9 +1,9 @@
 # Time targets + focus attribution ("focus this")
 
 **Slug:** focus-attribution
-**Status:** verified
+**Status:** archived
 **Created:** 2026-07-12
-**Last updated:** 2026-07-12
+**Last updated:** 2026-07-17
 
 Phase 4 of the [Projects & Tasks Roadmap](../../../plans/projects-tasks-roadmap.md). Closes the
 timer↔task loop: a task/project-item can carry a minutes target, be focused directly from a
@@ -37,8 +37,12 @@ met. `FocusEvent.TYPE_TASK` was reserved for exactly this and is still unemitted
   still log `durationMin = 0`, so a failed bound session records the id but advances no target.
 - **ADDED — "focus this" affordance** on Today task rows (Home) and project-item rows
   (`ProjectItemAdapter`) for entries with `targetMinutes > 0`: sets the bound entry, navigates to
-  Home if needed, and starts a normal pomodoro. Multiple pomodoros accumulate toward the target
-  (the countdown length is unchanged — the configured Home timer time).
+  Home if needed, and starts a pomodoro. **REVISED post-verify (2026-07-17):** a bound session's
+  countdown is now the item's `targetMinutes` (`FormatHelper.minutesToMillis`) when it has a target,
+  falling back to the configured Home timer time only when `targetMinutes == 0` — so one focus block
+  runs the whole target and a single completed session meets the auto-complete threshold, rather than
+  accumulating multiple default-length pomodoros toward it. (Original design was: fixed Home-timer
+  length, multiple pomodoros accumulate.)
 - **ADDED — auto-complete at session finish.** When a bound `completeTimer` pushes the entry's
   attributed sum ≥ its `targetMinutes`, mark `isDone = true`. Feedback = **both**: in-app
   (`HapticFeedback` + `SoundFeedback`) since the user just finished a pomodoro in-foreground,
@@ -100,3 +104,28 @@ met. `FocusEvent.TYPE_TASK` was reserved for exactly this and is still unemitted
   (`ALTER TABLE` both new columns; `@Ignore attributedMinutes` correctly excluded), no destructive
   wipe. 3 Medium (code duplication ×2 + an unconditional extra DB round-trip on every list refresh)
   and 3 Low (product/semantics) findings folded into `tasks.md` as non-blocking follow-ups.
+
+**Re-verify (2026-07-17)** — a post-verify polish/fix batch (uncommitted working tree) touching
+6 focus-attribution files + adjacent projects/picker fixes. Verdict: **PASS with one reconciled
+behavior change.**
+- **Completeness** — core tasks still all checked. The 6 non-blocking follow-ups remain open; this
+  batch did *not* address them (notably the `startBoundConcentrationIfIdle` MED DRY item — that
+  method was edited here but still not extracted into a shared `startConcentration`).
+- **Correctness (files vs Impact)** — beyond the focus-attribution files this batch also touches, by
+  design, files outside this proposal's scope: `MainActivity` (ActionBar Up-nav for project detail),
+  `CreateProjectDialog`/`ProjectDetailFragment`/`fragment_project_detail.xml` (drop the "Save" header
+  button → auto-persist header on `onPause`), and `themes.xml`/`QuickAddTaskSheet` (framework picker
+  theming fix, shared with `AddEventActivity`). These belong to the Projects area / a cross-cutting
+  dialog-theming fix, not focus-attribution — logged, not scope-creep *into* this spec.
+- **Coherence (inline review — full diff in context, not delegated)** — clean on rules #2 (bb_* only,
+  ImageView focus icon `app:tint="@color/bb_primary"`), #3 (`updateHeader` on executor; auto-persist
+  fires on `onPause` but stays off-thread), #4 (n/a), #6 (no schema bump). `assembleDebug` clean; all
+  referenced symbols/resources resolve; removed Save button leaves no dangling refs (only an orphaned
+  `project_detail_save` string). `ThemeChatGPTBlue_AndroidPopups` parent switch (MaterialComponents →
+  framework `Theme.Material.Light.Dialog`) is safe: used only by framework Time/DatePickerDialog, never
+  an `AlertDialog.Builder`. **One material finding:** the countdown-length change above reversed a
+  documented proposal behavior — reconciled by updating the "focus this" bullet; a product-decision
+  follow-up added to `tasks.md`.
+- **Not exercised on-device** — rule #7 (emulator ui-tester) still owed for this batch: the timer-length
+  change, Up-nav, header auto-save, and picker theming are all runtime/UI-visible. Recommend a
+  `ui-tester` pass before archive.

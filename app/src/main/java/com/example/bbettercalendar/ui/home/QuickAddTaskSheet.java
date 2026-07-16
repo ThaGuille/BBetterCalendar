@@ -100,8 +100,11 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
         // Sheet de captura rápida: teclado listo sin un tap extra.
         titleInput.requestFocus();
         if (getDialog() != null && getDialog().getWindow() != null) {
+            // ADJUST_RESIZE: sin esto el teclado tapa media hoja (los campos de abajo y el botón
+            // guardar); con él la hoja se empuja por encima del teclado.
             getDialog().getWindow().setSoftInputMode(
-                    WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+                            | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }
     }
 
@@ -109,7 +112,10 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
         Calendar now = Calendar.getInstance();
         int hour = selectedHour >= 0 ? selectedHour : now.get(Calendar.HOUR_OF_DAY);
         int minute = selectedMinute >= 0 ? selectedMinute : now.get(Calendar.MINUTE);
-        new TimePickerDialog(requireContext(), (picker, pickedHour, pickedMinute) -> {
+        // Tema explícito (igual que AddEventActivity): sin él los botones OK/Cancel del reloj
+        // quedan del color del fondo y no se ven.
+        new TimePickerDialog(requireContext(), R.style.ThemeChatGPTBlue_AndroidPopups,
+                (picker, pickedHour, pickedMinute) -> {
             selectedHour = pickedHour;
             selectedMinute = pickedMinute;
             timeButton.setText(String.format(Locale.getDefault(), "%02d:%02d",

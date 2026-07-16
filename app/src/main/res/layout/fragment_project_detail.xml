@@ -88,24 +88,6 @@
                     android:visibility="gone" />
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/projectDetailSaveHeaderButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:background="@drawable/bg_chip_energy"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:paddingStart="18dp"
-                android:paddingEnd="18dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:text="@string/project_detail_save"
-                android:textAppearance="@style/TextAppearance.BBetter.Chip"
-                android:textColor="@color/bb_on_primary" />
-
         </LinearLayout>
 
         <!-- ============ Items card ============ -->

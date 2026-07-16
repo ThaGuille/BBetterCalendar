@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -176,7 +177,7 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         final TextView time;
         final TextView remove;
         final TextView progress;
-        final TextView focus;
+        final ImageView focus;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);

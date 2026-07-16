@@ -1,8 +1,8 @@
 # System — Data model (`stats/` + `database/`)
 
-**Last verified:** 2026-07-12 (DB v12) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-07-17 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
-The Room persistence layer: `AppDatabase` (8 entities, version 12) plus every entity/DAO under
+The Room persistence layer: `AppDatabase` (8 entities, version 13) plus every entity/DAO under
 `stats/`. This is the **contract hub** — sibling system docs (`app-limits.md`,
 `progress-screen.md`, `pomodoro-timer.md`, `calendar.md`, `startup-config.md`, `projects.md`)
 link into the anchors below instead of re-describing entity shape.
@@ -16,19 +16,19 @@ link into the anchors below instead of re-describing entity shape.
 ## Files
 | Class | Path | Role |
 |---|---|---|
-| `AppDatabase` | `database/AppDatabase.java` | Room `@Database`, v12, 8 entities, `fallbackToDestructiveMigration()` + 5 real migrations registered |
+| `AppDatabase` | `database/AppDatabase.java` | Room `@Database`, v13, 8 entities, `fallbackToDestructiveMigration()` + 6 real migrations registered |
 | `DBMigration` | `database/DBMigration.java` | `Application` class + migration `Migration` constants (misleading name: it's both) |
 | `DBConverter` | `database/DBConverter.java` | `@TypeConverter`s: `Calendar`↔JSON (Gson), `boolean[]`↔JSON (Gson), `Location`→null (stub) |
 | `Stats` / `StatsDAO` | `stats/Stats.java`, `StatsDAO.java` | Single-row lifetime + today counters (time studied, tasks, streaks, fails) |
 | `DailyStat` / `DailyStatDAO` | `stats/DailyStat.java`, `DailyStatDAO.java` | One row per ISO day — history that feeds Progress charts |
-| `FocusEvent` / `FocusEventDAO` | `stats/FocusEvent.java`, `FocusEventDAO.java` | One row per completed session / fail, real timestamp — feeds the by-hour charts |
+| `FocusEvent` / `FocusEventDAO` | `stats/FocusEvent.java`, `FocusEventDAO.java` | One row per completed session / fail, real timestamp — feeds the by-hour charts. Carries `entryId` (0 = unattributed) linking a session to the `CalendarEntry` it was focused on; `sumAttributedMinutes(entryId)` + grouped `getAttributedMinutesByEntry()` (→ `AttributedMinutes` POJO) feed task/item time-progress |
 | `AppRule` / `AppRuleDAO` | `stats/AppRule.java`, `AppRuleDAO.java` | One row per app the user tracks — usage limits + enforcement flags |
 | `ConsentRecord` / `ConsentRecordDAO` | `stats/ConsentRecord.java`, `ConsentRecordDAO.java` | Affirmative-consent acknowledgement (usage access, accessibility blocking) |
 | `Configuration` / `ConfigurationDAO` | `configuration/Configuration.java`, `ConfigurationDAO.java` | Timer/rest/cycle settings + notification-permission ask tracking (owned by `startup-config.md`, listed here since it's a DB entity) |
 | `CalendarEntry` / `CalendarEntryDAO` | `calendarEntries/CalendarEntry.java`, `CalendarEntryDAO.java` | Events/tasks/reminders (owned by `calendar.md`, listed here since it's a DB entity) |
 | `Project` / `ProjectDAO` | `projects/Project.java`, `ProjectDAO.java` | Project grouping over `CalendarEntry` items via `projectId` (owned by `projects.md`, listed here since it's a DB entity) |
 
-## Schema history (v6 → v12)
+## Schema history (v6 → v13)
 
 | Version | Migration | What changed |
 |---|---|---|
@@ -38,6 +38,7 @@ link into the anchors below instead of re-describing entity shape.
 | 9 → 10 | `MIGRATION_9_10` | Adds `app_rule` + `consent_record` tables (additive `CREATE TABLE IF NOT EXISTS` only — v9 history preserved) |
 | 10 → 11 | `MIGRATION_10_11` | Adds 6 additive columns to `calendarEntry` for recurring tasks: `isTemplate`, `templateId`, `repetitionInterval`, `repetitionDays`, `materializedUntilMillis`, `isDismissed` (all `NOT NULL DEFAULT`, `ALTER TABLE ADD COLUMN` — no data loss) |
 | 11 → 12 | `MIGRATION_11_12` | Adds `project` table (`CREATE TABLE IF NOT EXISTS`) + additive `projectId` column on `calendarEntry` (`NOT NULL DEFAULT 0` — no data loss) |
+| 12 → 13 | `MIGRATION_12_13` | Two additive columns: `calendarEntry.targetMinutes` + `focus_event.entryId` (both `NOT NULL DEFAULT 0`, `ALTER TABLE ADD COLUMN` — no data loss). `CalendarEntry.attributedMinutes` is `@Ignore` (transient row-progress, not a column) |
 
 `fallbackToDestructiveMigration()` is still active for any version gap without a registered
 `Migration` — see CLAUDE.md rule #6 before bumping `@Database(version)`.
@@ -48,7 +49,7 @@ link into the anchors below instead of re-describing entity shape.
 |---|---|---|
 | `Stats` | `HomeViewModel` (`addFails`, `completeTimer`), `SplashActivity`/`InitialConfiguration` (`resetDailyStats`, streak update) | `HomeViewModel`, `SplashActivity`/`InitialConfiguration`, `ProgressViewModel` (today merged as trailing chart point) |
 | `DailyStat` | `SplashActivity`/`InitialConfiguration` (`persistDailyStat`, upsert before daily reset) | `ProgressViewModel` (chart history) |
-| `FocusEvent` | `HomeViewModel.logFocusEvent()` (`TYPE_FOCUS` on `completeTimer`, `TYPE_FAIL` on `addFails`; `TYPE_TASK` reserved, never emitted) | `ProgressViewModel` (by-hour buckets) |
+| `FocusEvent` | `HomeViewModel.logFocusEvent()` (`TYPE_FOCUS` on `completeTimer`, `TYPE_FAIL` on `addFails`; both now carry the bound `entryId` from `FocusTarget`, 0 when unbound; `TYPE_TASK` reserved, never emitted) | `ProgressViewModel` (by-hour buckets), `HomeViewModel`/`ProjectDetailViewModel` (`sumAttributedMinutes`/`getAttributedMinutesByEntry` for task-time progress + auto-complete) |
 | `AppRule` | `ProgressViewModel` (`setTracked`, `setDailyLimit`, `setEnforceAtLimit` — see `app-limits.md`) | `ProgressViewModel`, `UsageLimitChecker`/`UsageLimitScheduler` (`getLimited`), `BlockDecisionEngine` (`observeEnforced`), `DBMigration` (arms scheduler on cold start) |
 | `ConsentRecord` | `UsageDisclosureDialog`, `AccessibilityDisclosureDialog` | `ProgressViewModel`, `ProgressFragment`/blocking flow (gate before Settings deep-link) |
 | `Configuration` | `ConfigurationManager.updateConfiguration()`, `PermissionGate` (ask-count/timestamp) | `ConfigurationManager` (cached in memory), `HomeViewModel`/`HomeFragment` (timer/rest/cycle values) |
@@ -77,3 +78,4 @@ link into the anchors below instead of re-describing entity shape.
 | 2026-07-07 | Home surfaces today's `TYPE_TASK` entries — additive `getUndoneTasksBefore` `@Query` (overdue undone tasks), `HomeViewModel` now a `CalendarEntry` reader/writer; no schema change (still v10) | `.claude/specs/archive/tasks-home-today/proposal.md` |
 | 2026-07-12 | Recurring tasks: `calendarEntry` +6 columns (DB v10→v11, `MIGRATION_10_11`), new `RecurrenceMaterializer` reader/writer | `.claude/specs/archive/tasks-recurrence/proposal.md` |
 | 2026-07-12 | Projects MVP: new `Project` entity (DB v11→v12, `MIGRATION_11_12`), `calendarEntry` +`projectId` column | `.claude/specs/archive/projects-mvp/proposal.md` |
+| 2026-07-17 | Time targets + focus attribution: `calendarEntry` +`targetMinutes`, `focus_event` +`entryId` (DB v12→v13, `MIGRATION_12_13`); `FocusEvent` now attributed to a `CalendarEntry`, new `FocusEventDAO` sum queries + `AttributedMinutes` POJO | `.claude/specs/archive/focus-attribution/proposal.md` |

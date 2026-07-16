@@ -1,6 +1,6 @@
 # System — Projects (`projects/` + `ui/projects/`)
 
-**Last verified:** 2026-07-12 (DB v12) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-07-17 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Projects bottom-nav tab: a `Project` entity that groups existing `CalendarEntry` (type
 task) rows via a nullable `projectId` — there is no separate "project item" table. Progress is
@@ -24,9 +24,9 @@ transition, never a delete, so history survives for future stats.
 | `ProjectListItem` | `ui/projects/ProjectListItem.java` | Non-entity UI composition: `Project` + `doneCount`/`totalCount` + `percent()` |
 | `ProjectListAdapter` | `ui/projects/ProjectListAdapter.java` | RecyclerView rows: name, % bar, deadline chip, color accent |
 | `CreateProjectDialog` | `ui/projects/CreateProjectDialog.java` | Name + optional notes/deadline; same `AlertDialog.Builder` pattern as `AppLimitDialog` |
-| `ProjectDetailFragment` | `ui/projects/ProjectDetailFragment.java` | Header (name/notes edit, deadline picker + chip), item list, add-item, complete, delete (confirm dialog) |
-| `ProjectDetailViewModel` | `ui/projects/ProjectDetailViewModel.java` | `Transformations.switchMap` on `projectId` over `ProjectDAO.observeById` + `CalendarEntryDAO.observeItemsByProject`; `addItem`, `updateHeader`, `updateDeadline`, `completeProject`, `deleteProject` (cascade) |
-| `ProjectItemAdapter` | `ui/projects/ProjectItemAdapter.java` | Checkbox rows over the project's `CalendarEntry` items |
+| `ProjectDetailFragment` | `ui/projects/ProjectDetailFragment.java` | Header (name/notes edit — **auto-persisted on `onPause`**, no Save button; deadline picker + chip), item list, add-item, complete, delete (confirm dialog), focus-this → Home |
+| `ProjectDetailViewModel` | `ui/projects/ProjectDetailViewModel.java` | `Transformations.switchMap` on `projectId` over `ProjectDAO.observeById` + `CalendarEntryDAO.observeItemsByProject` (items enriched with attributed minutes off-thread); `addItem`, `updateHeader`, `updateDeadline`, `completeProject`, `deleteProject` (cascade) |
+| `ProjectItemAdapter` | `ui/projects/ProjectItemAdapter.java` | Checkbox rows over the project's `CalendarEntry` items; `X/Ym` time-progress + a focus-this pomodoro-icon `ImageView` for items with `targetMinutes > 0`; hides the date label for undated items |
 
 ## Flow — non-obvious hops only
 
@@ -67,9 +67,15 @@ transition, never a delete, so history survives for future stats.
   template row parented to a project would otherwise silently inflate the denominator.
 - **0 items ⇒ "no items yet", never a divide-by-zero** — `ProjectListItem.percent()` guards
   `totalCount == 0` explicitly.
+- **Header persists on `onPause`, not on a button** — `persistHeaderIfValid()` writes on leaving the
+  screen (back / ActionBar Up / background); an **empty name is silently skipped** so it can't wipe the
+  current name. `MainActivity.onSupportNavigateUp()` drives the Up arrow (non-top-level destinations
+  wouldn't navigate up without it). Project completion/percent is still item-count based — the
+  focus-attribution `targetMinutes` drives per-item *time* progress, not the project %.
 
 ## History
 
 | Date | Change | Spec |
 |---|---|---|
 | 2026-07-12 | Projects MVP: `Project` entity + `ProjectDAO` (DB v11→v12, `MIGRATION_11_12`), `projectId` column on `calendarEntry`, real Projects list + detail screens, `QuickAddTaskSheet` project-mode reuse | `.claude/specs/archive/projects-mvp/proposal.md` |
+| 2026-07-17 | Focus attribution: project items gain `targetMinutes` + `X/Ym` progress + focus-this (binds Home timer via `FocusTarget`, navigates to Home); header Save button replaced by `onPause` auto-persist; ActionBar Up-nav wired | `.claude/specs/archive/focus-attribution/proposal.md` |

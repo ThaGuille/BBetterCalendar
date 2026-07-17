@@ -1,6 +1,6 @@
 # System — Calendar (`ui/calendar/` + `calendarEntries/` + `notifications/event/`)
 
-**Last verified:** 2026-07-12 (DB v12) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-07-17 (DB v12) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Month and week views over a single unified entity (`CalendarEntry`) that represents events,
 tasks, and reminders via an int `type` field. Includes creation (`AddEventActivity`) and the
@@ -38,13 +38,13 @@ or get alarms.
 | `binders/MonthDayBinder` | `ui/calendar/binders/MonthDayBinder.java` | Kizitonwose `MonthDayBinder` — day cell rendering, up to 3 event-color bars, selection/today state |
 | `binders/DayDetailAdapter` | `ui/calendar/binders/DayDetailAdapter.java` | RecyclerView adapter for the selected-day list |
 | `binders/WeekViewItemAdapter` | `ui/calendar/binders/WeekViewItemAdapter.java` | Adapts `CalendarItem` → vendored `WeekViewEntity` |
-| `EventReminderScheduler` | `notifications/event/EventReminderScheduler.java` | `AlarmManager.setExactAndAllowWhileIdle` (falls back to inexact `set()` on `SecurityException`) per enabled offset |
+| `EventReminderScheduler` | `notifications/event/EventReminderScheduler.java` | Thin client of `AlarmReminderCore` (see `notifications.md`): `AlarmManager.setExactAndAllowWhileIdle` (falls back to inexact `set()` on `SecurityException`) per enabled offset |
 | `EventReminderReceiver` | `notifications/event/EventReminderReceiver.java` | Fires the actual reminder notification when an alarm lands |
 | `BootReceiver` | `notifications/event/BootReceiver.java` | `goAsync()` + executor: reloads all `CalendarEntry` rows, reschedules future ones, also re-arms `UsageLimitScheduler` |
 
 ## Flow — non-obvious hops only
 
-1. **Reminder scheduling is per-offset, not per-entry.** `EventReminderScheduler.scheduleFor(entry)` reads `entry.getNotifications()` (a `boolean[]` of offset slots, see `popups/NotificationOffsets`) and schedules one `AlarmManager` alarm per enabled offset, each with its own `PendingIntent` (`requestCode = entryId * 10 + offsetIndex`) — cancelling an entry means cancelling all its offset alarms individually (`cancelFor`), not one alarm.
+1. **Reminder scheduling is per-offset, not per-entry.** `EventReminderScheduler.scheduleFor(entry)` reads `entry.getNotifications()` (a `boolean[]` of offset slots, see `notifications/NotificationOffsets`) and delegates to the shared `AlarmReminderCore` (`notifications.md`), which schedules one `AlarmManager` alarm per enabled offset, each with its own `PendingIntent` (`requestCode = entryId * 10 + offsetIndex`, reproduced via a `RequestCodeNamespace` lambda) — cancelling an entry means cancelling all its offset alarms individually (`cancelFor`), not one alarm.
 2. **`CalendarItemMapper` has a legacy-data fallback**: if `startMillis`/`endMillis` are both 0 (pre-`MIGRATION_6_7` rows that never got backfilled), it falls back to reading the JSON-serialized `Calendar` fields — a call graph won't show this defensive branch is load-bearing for old data, not dead code.
 3. **`CalendarViewModel.refresh()` exists because Room's `InvalidationTracker` can lag** after returning from `AddEventActivity` — re-emitting the same `DateRange` forces `switchMap` to rebuild the underlying `LiveData` and get a fresh query, rather than relying on automatic invalidation.
 4. **`BootReceiver` does two unrelated things in one `goAsync()` block**: reschedules calendar reminders *and* re-arms the usage-limit alarm (`app-limits.md`) — they're bundled here because both need a boot-time entry point and Android only gives you one receiver per intent-filter combination cleanly (also filters `isTemplate = 0` since 2026-07-12).

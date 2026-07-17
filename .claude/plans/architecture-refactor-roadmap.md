@@ -1,8 +1,9 @@
 # Architecture refactor roadmap — data/DI infrastructure consolidation
 
-**Status:** in progress — T1 (DI + threading consolidation) applied + verified + archived
-2026-07-17 (`.claude/specs/archive/di-threading-consolidation/`); T4 in progress in parallel
-(separate worktree); T3 merges into Phase 5's schema bump if one is needed; T2 after.
+**Status:** in progress — T1 (DI + threading consolidation) and T4 (reminder generalization)
+both applied + verified + archived 2026-07-17 (`.claude/specs/archive/di-threading-consolidation/`,
+`.claude/specs/archive/reminder-generalization/`), implemented in parallel isolated worktrees.
+T3 merges into Phase 5's schema bump if one is needed; T2 next.
 **Created:** 2026-07-17
 **Last updated:** 2026-07-17
 
@@ -138,7 +139,7 @@ un-injectable, untestable, and invisible to Hilt's object graph.
 - **Schema:** v14 + real `MIGRATION_13_14`. **Risk:** medium (migration correctness; test the
   v13-seeded upgrade path like focus-attribution did). **Effort:** ~1 session.
 
-### T4 — Reminder generalization *(the direct Phase 5 enabler)*
+### T4 — Reminder generalization *(the direct Phase 5 enabler)* — DONE 2026-07-17
 1. Extract the alarm mechanics of `EventReminderScheduler` into a shared core parameterized
    by *(receiver class, id-namespace, anchor millis, offsets)*; entry reminders and project
    deadline reminders become two thin clients with **disjoint PendingIntent request-code

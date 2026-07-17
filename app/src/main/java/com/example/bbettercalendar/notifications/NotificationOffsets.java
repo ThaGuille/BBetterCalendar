@@ -1,4 +1,4 @@
-package com.example.bbettercalendar.popups;
+package com.example.bbettercalendar.notifications;
 
 import android.content.Context;
 
@@ -6,11 +6,15 @@ import com.example.bbettercalendar.R;
 
 /**
  * Single source of truth for the notification offsets shown across the create-entry flow:
- * the {@link NotificationsPopup} rows and the chip-style rows injected under the
+ * the {@code NotificationsPopup} rows and the chip-style rows injected under the
  * notifications row inside the create event / task screen.
  *
  * Index order matches {@code notificationsArray[]} in {@code AddEventActivity}, which is
  * persisted on the entry; don't reorder entries without migrating stored data.
+ *
+ * Moved here from {@code popups/} (spec reminder-generalization / roadmap finding F7): this is
+ * notification-domain data, not a UI concern — anything on the notification-scheduling side
+ * importing from a UI package (`popups/`) was a dependency smell.
  */
 public final class NotificationOffsets {
 

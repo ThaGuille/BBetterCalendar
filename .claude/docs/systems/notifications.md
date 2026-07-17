@@ -1,6 +1,6 @@
 # System — Notifications infra (`notifications/`)
 
-**Last verified:** 2026-07-05 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-07-17 · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Shared notification plumbing every feature-specific notifier builds on: channel definitions, the
 actual `NotificationManagerCompat` wrapper, a spec builder, and `POST_NOTIFICATIONS` runtime
@@ -23,6 +23,8 @@ respectively) — this doc covers only the shared root.
 | `PermissionGate` | `notifications/PermissionGate.java` | Decides *when* to auto-request `POST_NOTIFICATIONS`: backoff schedule (7d after 1st deny, 14d after 2nd), capped at 3 auto-asks total |
 | `PermissionHelper` | `notifications/PermissionHelper.java` | Stateless checks: `notificationsGranted()`, `requiresRuntimePostNotificationsPermission()` (false below API 33) |
 | `NotificationsModule` | `notifications/NotificationsModule.java` | Hilt `@Module` wiring the above for injection |
+| `NotificationOffsets` | `notifications/NotificationOffsets.java` | Offset-millis table + labels for the entry-reminder create-event flow (moved here from `popups/` — notification-domain data, not a UI concern) |
+| `AlarmReminderCore` | `notifications/event/AlarmReminderCore.java` | Reusable alarm schedule/cancel/exact-with-inexact-fallback mechanics, parameterized by receiver class + a `RequestCodeNamespace` (disjoint PendingIntent request-code id space) + an `IntentPopulator`. Not itself Hilt-provided — each client (e.g. `EventReminderScheduler`) constructs its own instance. See `calendar.md` for the entry-reminder client. |
 
 ## Flow — non-obvious hops only
 
@@ -45,3 +47,4 @@ respectively) — this doc covers only the shared root.
 | Date | Change | Spec |
 |---|---|---|
 | 2026-07-04 | `CHANNEL_USAGE_LIMITS` added for Phase 3 warn/reached notifications | `.claude/specs/archive/progress-phase3-limits/proposal.md` |
+| 2026-07-17 | Alarm-scheduling mechanics extracted into reusable `AlarmReminderCore` (receiver + disjoint request-code namespace + offsets, parameterized); `EventReminderScheduler` is now a thin client reproducing the original `entityId * 10 + offsetIndex` request-code formula exactly (zero behavior change). `NotificationOffsets` moved `popups/` → `notifications/` (dependency-smell fix, roadmap finding F7); no wrapper kept, single UI caller (`AddEventActivity`) repointed. | `.claude/specs/archive/reminder-generalization/proposal.md` |

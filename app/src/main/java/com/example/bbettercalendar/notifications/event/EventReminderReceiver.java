@@ -11,8 +11,8 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.NotificationChannels;
+import com.example.bbettercalendar.notifications.NotificationOffsets;
 import com.example.bbettercalendar.notifications.NotificationSpec;
-import com.example.bbettercalendar.popups.NotificationOffsets;
 
 import java.util.concurrent.ExecutorService;
 

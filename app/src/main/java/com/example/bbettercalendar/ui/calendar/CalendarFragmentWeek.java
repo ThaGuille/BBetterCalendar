@@ -34,6 +34,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class CalendarFragmentWeek extends Fragment
         implements View.OnClickListener, OnToolBarListener, OnToolbarCalendarListener {
 

@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
-import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.databinding.FragmentCalendarMonthBinding;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarCalendarListener;
@@ -48,13 +47,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.inject.Inject;
+import dagger.hilt.android.AndroidEntryPoint;
 
+@AndroidEntryPoint
 public class CalendarFragmentMonth extends Fragment
         implements OnToolBarListener, OnToolbarCalendarListener, View.OnClickListener {
-
-    @Inject
-    Configuration config;
 
     private FragmentCalendarMonthBinding binding;
     private CalendarViewModel viewModel;

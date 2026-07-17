@@ -28,6 +28,9 @@ import com.example.bbettercalendar.ui.home.QuickAddTaskSheet;
 import java.util.Calendar;
 import java.util.Date;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ProjectDetailFragment extends Fragment {
 
     private static final String ARG_PROJECT_ID = "projectId";

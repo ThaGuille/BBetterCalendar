@@ -11,7 +11,7 @@ import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
@@ -21,27 +21,25 @@ import com.example.bbettercalendar.stats.StatsDAO;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SplashActivity extends AppCompatActivity {
 
     private final String TAG = "SplashScreenTag";
-    private StatsDAO statsDao;
-    private DailyStatDAO dailyStatDao;
-    private ConfigurationDAO configurationDao;
-    private CalendarEntryDAO calendarEntryDao;
-    private ExecutorService executorService;
+    @Inject StatsDAO statsDao;
+    @Inject DailyStatDAO dailyStatDao;
+    @Inject ConfigurationDAO configurationDao;
+    @Inject CalendarEntryDAO calendarEntryDao;
+    @Inject @IoExecutor ExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
-        statsDao = AppDatabase.getDatabase(this).statsDao();
-        dailyStatDao = AppDatabase.getDatabase(this).dailyStatDao();
-        configurationDao = AppDatabase.getDatabase(this).configurationDao();
-        calendarEntryDao = AppDatabase.getDatabase(this).eventDao();
-        executorService = Executors.newFixedThreadPool(2);
 
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0);
@@ -140,9 +138,4 @@ public class SplashActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        executorService.shutdown();
-    }
 }

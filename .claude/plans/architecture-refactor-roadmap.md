@@ -1,7 +1,8 @@
 # Architecture refactor roadmap — data/DI infrastructure consolidation
 
-**Status:** in progress — sequencing approved 2026-07-17: T1 + T4 land as specs before
-`project-deadlines-progress`; T3 merges into Phase 5's schema bump if one is needed; T2 after.
+**Status:** in progress — T1 (DI + threading consolidation) applied + verified + archived
+2026-07-17 (`.claude/specs/archive/di-threading-consolidation/`); T4 in progress in parallel
+(separate worktree); T3 merges into Phase 5's schema bump if one is needed; T2 after.
 **Created:** 2026-07-17
 **Last updated:** 2026-07-17
 
@@ -99,7 +100,7 @@ un-injectable, untestable, and invisible to Hilt's object graph.
 
 ## Proposals — four tranches, ordered by (leverage / risk)
 
-### T1 — DI + threading consolidation *(do first; mechanical, unlocks the rest)*
+### T1 — DI + threading consolidation *(do first; mechanical, unlocks the rest)* — DONE 2026-07-17
 1. `DatabaseModule` (rename/extend `ConfigurationDatabaseModule`): `@Provides` for **all 8 DAOs**.
 2. Two Hilt-provided executors: `@IoExecutor` (fixed pool, reads/parallel work) and
    `@DbWriteExecutor` (single thread — global write ordering for free). Delete the 16 ad-hoc

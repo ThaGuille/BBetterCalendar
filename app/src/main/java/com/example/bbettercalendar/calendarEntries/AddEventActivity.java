@@ -30,7 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.configuration.Configuration;
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.databinding.ActivityCreateEventBinding;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
@@ -58,7 +58,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 @AndroidEntryPoint
@@ -66,6 +65,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         NumberPicker.OnValueChangeListener, View.OnClickListener{
 
     @Inject EventReminderScheduler eventReminderScheduler;
+    @Inject @IoExecutor ExecutorService ioExecutor;
 
 
     public static final int CLOSE_AND_SAVE = 1;
@@ -88,7 +88,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
     private ActivityCreateEventBinding binding;
     private ToolbarHelper toolbarHelper;
-    CalendarEntryDAO calendarEntryDAO;
+    @Inject CalendarEntryDAO calendarEntryDAO;
     private Handler handler;
     private Runnable runnableMinutes;
     private Runnable runnableHours;
@@ -177,8 +177,6 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
         //binding = ActivityCreateEventBinding.inflate(getLayoutInflater());
         //setContentView(binding.getRoot();
-
-        calendarEntryDAO = AppDatabase.getDatabase(this.getApplicationContext()).eventDao();
 
         /**Button btnSaveEvent = findViewById(R.id.btnSaveEvent);
         ImageButton btnClose = findViewById(R.id.btnClose);
@@ -382,8 +380,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
         CalendarEntry calendarEntry = eventBuilder.build();
         boolean isTemplate = calendarEntry.isTemplate();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
+        ioExecutor.execute(() -> {
             try {
                 long rowId = calendarEntryDAO.insert(calendarEntry);
                 calendarEntry.setId((int) rowId);

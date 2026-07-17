@@ -7,11 +7,11 @@ import android.util.Log;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -21,11 +21,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class BootReceiver extends BroadcastReceiver {
 
     private static final String TAG = "BootReceiver";
-    private static final ExecutorService IO = Executors.newSingleThreadExecutor();
 
     @Inject CalendarEntryDAO calendarEntryDAO;
     @Inject EventReminderScheduler scheduler;
     @Inject UsageLimitScheduler usageLimitScheduler;
+    @Inject @IoExecutor ExecutorService IO;
 
     @Override
     public void onReceive(Context context, Intent intent) {

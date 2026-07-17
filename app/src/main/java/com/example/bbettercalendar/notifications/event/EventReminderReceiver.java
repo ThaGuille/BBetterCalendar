@@ -8,13 +8,13 @@ import android.util.Log;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.NotificationChannels;
 import com.example.bbettercalendar.notifications.NotificationSpec;
 import com.example.bbettercalendar.popups.NotificationOffsets;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -24,10 +24,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class EventReminderReceiver extends BroadcastReceiver {
 
     private static final String TAG = "EventReminderReceiver";
-    private static final ExecutorService IO = Executors.newSingleThreadExecutor();
 
     @Inject CalendarEntryDAO calendarEntryDAO;
     @Inject BBetterNotifier notifier;
+    @Inject @IoExecutor ExecutorService IO;
 
     @Override
     public void onReceive(Context context, Intent intent) {

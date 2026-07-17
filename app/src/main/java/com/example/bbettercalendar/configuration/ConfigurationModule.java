@@ -1,7 +1,6 @@
 package com.example.bbettercalendar.configuration;
 
 
-import com.example.bbettercalendar.database.AppDatabase;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -18,11 +17,8 @@ public class ConfigurationModule {
 
     //Aquí es donde debo cargar los ajustes desde una base de datos o cualquier otra fuente externa.
 
-    @Provides
-    @Singleton
-    public static ConfigurationDAO provideConfigurationDAO(AppDatabase database) {
-        return database.configurationDao();
-    }
+    // ConfigurationDAO se provee ahora desde database/DatabaseModule.java (spec
+    // di-threading-consolidation: un único módulo con @Provides para las 8 DAOs).
 
     @Provides
     @Singleton

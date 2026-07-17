@@ -1,7 +1,7 @@
 # DI + threading consolidation (refactor tranche T1)
 
 **Slug:** di-threading-consolidation
-**Status:** proposed
+**Status:** verified
 **Created:** 2026-07-17
 **Last updated:** 2026-07-17
 
@@ -80,4 +80,62 @@ build on this being settled.
 
 ## Verify
 
-<filled in by `/spec verify` — verdict + any issues found and how resolved>
+**Verdict: PASS.** Implemented task-by-task from `tasks.md`; `/check`-equivalent
+(`assembleDebug` + `lintDebug` + `test`) all green, and a full on-device pass on
+`emulator-5554` found zero `FATAL EXCEPTION` / Hilt `MissingBinding` errors across every
+touched screen.
+
+**Completeness.** All `tasks.md` boxes checked (see that file). No half-finished items.
+
+**Correctness vs proposal's Impact section.** Diff matches the declared file list, with two
+additions the proposal implied but didn't spell out to the line:
+- `app/build.gradle`: added `androidx.hilt:hilt-navigation-fragment:1.2.0` (implementation) +
+  `androidx.hilt:hilt-compiler:1.2.0` (annotationProcessor). Required for `@HiltViewModel` to
+  compile at all (it wasn't on the classpath before) — an unavoidable consequence of "5
+  ViewModels become `@HiltViewModel`", not scope creep.
+- `ui/calendar/CalendarFragmentMonth.java`: deleted a dead, never-referenced
+  `@Inject Configuration config;` field. It compiled silently before only because the class
+  wasn't `@AndroidEntryPoint`; adding the annotation (required by this tranche) turned it into
+  a live Dagger `MissingBinding` error (`Configuration` has no `@Provides`/`@Inject`
+  constructor). Fixing required removing the field, not adding a new provider — no proposal
+  scope change, just an incidental unblock.
+
+**Known, deliberate exceptions to the "zero outside scope" grep check** (both explicitly
+out-of-scope per the proposal's own Impact/Out-of-scope sections, confirmed by grep):
+- `configuration/ConfigurationManager.java:15` still has its own `Executors.newFixedThreadPool(2)`
+  — never listed in Impact's touched-files, and matches "F2's 16th site" from the roadmap
+  finding that this tranche doesn't claim to close.
+- `ui/calendar/weekview/EventsProcessor.kt:18` has an unrelated `Executors.newSingleThreadExecutor()`
+  default parameter — a vendored/adapted Kotlin file outside this tranche's package list.
+- Grep otherwise confirms zero `AppDatabase.getDatabase` outside `database/` and zero
+  `Executors.new*` outside `database/ThreadingModule.java` (plus the two exceptions above).
+
+**Coherence.** Threading semantics preserved per rule #3 (`postValue` from background,
+`observe(getViewLifecycleOwner(), ...)` unchanged). One behavior note: ViewModels/
+Activities/receivers that used to call `.shutdown()` on their own per-instance executor in
+`onCleared()`/`onDestroy()`/`teardown()` no longer do — correct, since the executor is now a
+shared app-wide `@Singleton` that outlives any single consumer; shutting it down would break
+every other consumer. `BlockerAccessibilityService`'s `executor == null` guard (used to detect
+"not yet connected / already tearing down") was replaced with the pre-existing `destroyed`
+flag, since the injected executor is never null.
+
+**Build/lint/test:** `.\gradlew.bat assembleDebug` — BUILD SUCCESSFUL. `.\gradlew.bat
+lintDebug` — BUILD SUCCESSFUL, 0 lint errors. `.\gradlew.bat test` — BUILD SUCCESSFUL (JVM
+unit tests, incl. `HomeViewModelCollapseTest`, unaffected by the constructor signature
+changes since they only call the static `collapseOverdue` helper).
+
+**On-device (emulator-5554, applicationId `io.github.thaguille.bbettercalendar`):** fresh
+install, `pm clear` + launch via `SplashActivity` → `MainActivity`. Exercised: Home (timer
+start + pause, quick-add task, task appears in today list), Calendar month view (renders,
+switch to week view and back), Calendar week view, Progress (charts render with data,
+granularity Day/Week/Month switch updates `range_label`, usage band renders LOCKED state
+correctly), Projects (list, create project, open detail, add item), `AddEventActivity`
+(save an event from the Calendar week FAB). `adb logcat -b crash` and a full-log grep for
+`FATAL EXCEPTION`/`MissingBinding`/`dagger.`/`hilt` stayed empty throughout. Test data
+cleared afterward (`pm clear`).
+
+**One tooling note (not a code issue):** this worktree didn't have `local.properties` or the
+untracked spec/plan files (git worktrees only carry tracked history, not the main
+worktree's untracked/uncommitted files) — copied `local.properties` from the main repo and
+copied `proposal.md`/`tasks.md`/`architecture-refactor-roadmap.md` into this worktree before
+starting, so they could be edited and later moved into `archive/` from here.

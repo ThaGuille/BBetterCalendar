@@ -9,13 +9,17 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
-import com.example.bbettercalendar.database.AppDatabase;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItemMapper;
 
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class CalendarViewModel extends AndroidViewModel {
 
     public static class DateRange {
@@ -31,9 +35,10 @@ public class CalendarViewModel extends AndroidViewModel {
     private final MutableLiveData<DateRange> range = new MutableLiveData<>();
     private final LiveData<List<CalendarItem>> items;
 
-    public CalendarViewModel(@NonNull Application application) {
+    @Inject
+    public CalendarViewModel(@NonNull Application application, CalendarEntryDAO dao) {
         super(application);
-        this.dao = AppDatabase.getDatabase(application).eventDao();
+        this.dao = dao;
         this.items = Transformations.switchMap(range, r -> {
             if (r == null) {
                 MutableLiveData<List<CalendarItem>> empty = new MutableLiveData<>();

@@ -14,12 +14,18 @@ import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.HiltAndroidApp;
 
 @HiltAndroidApp
 public class DBMigration extends Application {
+
+    // Inyectados por Hilt (spec di-threading-consolidation): @HiltAndroidApp también soporta
+    // inyección de campos en la propia clase Application, disponible antes de onCreate().
+    @Inject AppRuleDAO appRuleDao;
+    @Inject @IoExecutor ExecutorService ioExecutor;
 
     @Override
     public void onCreate() {
@@ -29,17 +35,14 @@ public class DBMigration extends Application {
     }
 
     // Arma el chequeo periódico de límites en cada arranque en frío. BootReceiver hace lo mismo
-    // tras un reinicio del dispositivo. Construido a mano (no vía Hilt: Application no es un
-    // target de @AndroidEntryPoint) fuera del hilo principal, ya que arm() lee app_rule (regla #3).
+    // tras un reinicio del dispositivo. Corre fuera del hilo principal, ya que arm() lee app_rule
+    // (regla #3), en el executor de IO compartido (@IoExecutor -- no se cierra: es @Singleton).
     private void armUsageLimitScheduler() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
+        ioExecutor.execute(() -> {
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            AppRuleDAO appRuleDao = AppDatabase.getDatabase(this).appRuleDao();
             WarnedTodayStore warnedStore = new WarnedTodayStore(this);
             new UsageLimitScheduler(this, alarmManager, appRuleDao, warnedStore).arm();
         });
-        executor.shutdown();
     }
 
     static final Migration MIGRATION_1_2 = new Migration(1, 2) {

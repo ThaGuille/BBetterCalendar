@@ -3,10 +3,6 @@ package com.example.bbettercalendar.notifications;
 import android.app.AlarmManager;
 import android.content.Context;
 
-import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
-import com.example.bbettercalendar.database.AppDatabase;
-import com.example.bbettercalendar.stats.AppRuleDAO;
-
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -25,15 +21,6 @@ public class NotificationsModule {
         return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
-    @Provides
-    @Singleton
-    public static CalendarEntryDAO provideCalendarEntryDAO(AppDatabase database) {
-        return database.eventDao();
-    }
-
-    @Provides
-    @Singleton
-    public static AppRuleDAO provideAppRuleDAO(AppDatabase database) {
-        return database.appRuleDao();
-    }
+    // CalendarEntryDAO / AppRuleDAO se proveen ahora desde database/DatabaseModule.java (spec
+    // di-threading-consolidation: un único módulo con @Provides para las 8 DAOs).
 }

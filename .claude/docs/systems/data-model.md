@@ -11,7 +11,7 @@ link into the anchors below instead of re-describing entity shape.
 | Kind | Entry |
 |---|---|
 | Application class | `.database.DBMigration` (manifest `android:name`, `@HiltAndroidApp`) — creates notification channels + arms the usage-limit alarm on cold start |
-| DB file | Room `"eventDB"`, singleton via `AppDatabase.getDatabase(context)` (double-checked locking, no Hilt for the singleton itself — `ConfigurationDatabaseModule` wraps it for injection) |
+| DB file | Room `"eventDB"`, singleton via package-private `AppDatabase.getDatabase(context)` (double-checked locking; callable only from `database/` — `database/DatabaseModule.java` is the sole Hilt door, also providing all 8 DAOs) |
 
 ## Files
 | Class | Path | Role |
@@ -79,3 +79,4 @@ link into the anchors below instead of re-describing entity shape.
 | 2026-07-12 | Recurring tasks: `calendarEntry` +6 columns (DB v10→v11, `MIGRATION_10_11`), new `RecurrenceMaterializer` reader/writer | `.claude/specs/archive/tasks-recurrence/proposal.md` |
 | 2026-07-12 | Projects MVP: new `Project` entity (DB v11→v12, `MIGRATION_11_12`), `calendarEntry` +`projectId` column | `.claude/specs/archive/projects-mvp/proposal.md` |
 | 2026-07-17 | Time targets + focus attribution: `calendarEntry` +`targetMinutes`, `focus_event` +`entryId` (DB v12→v13, `MIGRATION_12_13`); `FocusEvent` now attributed to a `CalendarEntry`, new `FocusEventDAO` sum queries + `AttributedMinutes` POJO | `.claude/specs/archive/focus-attribution/proposal.md` |
+| 2026-07-17 | DI + threading consolidation: `database/DatabaseModule.java` now the single `@Provides` source for `AppDatabase` + all 8 DAOs (absorbed `ConfigurationDatabaseModule`, deleted); `AppDatabase.getDatabase()` made package-private; `database/ThreadingModule.java` adds shared `@IoExecutor`/`@DbWriteExecutor` singletons replacing ~15 ad-hoc `Executors.new*` sites. No schema change. | `.claude/specs/archive/di-threading-consolidation/proposal.md` |

@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.databinding.FragmentProjectsBinding;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ProjectsFragment extends Fragment {
 
     private FragmentProjectsBinding binding;

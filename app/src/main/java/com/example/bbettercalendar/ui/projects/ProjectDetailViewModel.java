@@ -12,7 +12,7 @@ import androidx.lifecycle.Transformations;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
 import com.example.bbettercalendar.stats.AttributedMinutes;
@@ -24,8 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class ProjectDetailViewModel extends AndroidViewModel {
 
     private final ExecutorService executorService;
@@ -41,13 +45,15 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     private final MediatorLiveData<List<CalendarEntry>> itemsEnriched = new MediatorLiveData<>();
     private final MutableLiveData<Boolean> projectDeleted = new MutableLiveData<>();
 
-    public ProjectDetailViewModel(@NonNull Application application) {
+    @Inject
+    public ProjectDetailViewModel(@NonNull Application application, ProjectDAO projectDao,
+                                   CalendarEntryDAO calendarEntryDao, FocusEventDAO focusEventDao,
+                                   @IoExecutor ExecutorService executorService) {
         super(application);
-        executorService = Executors.newSingleThreadExecutor();
-        AppDatabase db = AppDatabase.getDatabase(application);
-        projectDao = db.projectDao();
-        calendarEntryDao = db.eventDao();
-        focusEventDao = db.focusEventDao();
+        this.executorService = executorService;
+        this.projectDao = projectDao;
+        this.calendarEntryDao = calendarEntryDao;
+        this.focusEventDao = focusEventDao;
 
         project = Transformations.switchMap(projectIdLiveData, id ->
                 id == null ? emptyProject() : projectDao.observeById(id));
@@ -189,9 +195,6 @@ public class ProjectDetailViewModel extends AndroidViewModel {
         return id == null ? 0 : id;
     }
 
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        executorService.shutdown();
-    }
+    // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra
+    // aquí; onCleared() no tiene nada más que liberar.
 }

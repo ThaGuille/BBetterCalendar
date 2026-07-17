@@ -11,7 +11,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.usage.UsageLimitNotifier;
@@ -42,11 +42,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
 // ViewModel de la pantalla Progress (Phase 1). Lee daily_stat / focus_event / stats fuera del
 // hilo principal (ExecutorService) y publica con postValue (regla #3). No importa tipos de
 // MPAndroidChart: produce un ChartBundle plano que el Fragment/adapter convierte en entries.
+@HiltViewModel
 public class ProgressViewModel extends AndroidViewModel {
 
     // Conservado para que ProjectsFragment (que reutiliza este VM) siga compilando.
@@ -79,7 +83,10 @@ public class ProgressViewModel extends AndroidViewModel {
         void decided(boolean needsDisclosure);
     }
 
-    public ProgressViewModel(@NonNull Application application) {
+    @Inject
+    public ProgressViewModel(@NonNull Application application, DailyStatDAO dailyStatDao,
+                              FocusEventDAO focusEventDao, StatsDAO statsDao, AppRuleDAO appRuleDao,
+                              ConsentRecordDAO consentRecordDao, @IoExecutor ExecutorService executorService) {
         super(application);
         mText = new MutableLiveData<>();
         mText.setValue("This is progress fragment");
@@ -89,12 +96,11 @@ public class ProgressViewModel extends AndroidViewModel {
         apps = new MutableLiveData<>();
         screenTimeMillis = new MutableLiveData<>();
 
-        AppDatabase db = AppDatabase.getDatabase(application);
-        dailyStatDao = db.dailyStatDao();
-        focusEventDao = db.focusEventDao();
-        statsDao = db.statsDao();
-        appRuleDao = db.appRuleDao();
-        consentRecordDao = db.consentRecordDao();
+        this.dailyStatDao = dailyStatDao;
+        this.focusEventDao = focusEventDao;
+        this.statsDao = statsDao;
+        this.appRuleDao = appRuleDao;
+        this.consentRecordDao = consentRecordDao;
         usageRepo = new UsageStatsRepository(application);
         AlarmManager alarmManager = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
         WarnedTodayStore warnedStore = new WarnedTodayStore(application);
@@ -102,7 +108,7 @@ public class ProgressViewModel extends AndroidViewModel {
         usageLimitChecker = new UsageLimitChecker(application, appRuleDao, warnedStore,
                 new UsageLimitNotifier(application, new BBetterNotifier(application)));
         mainHandler = new Handler(Looper.getMainLooper());
-        executorService = Executors.newFixedThreadPool(2);
+        this.executorService = executorService;
 
         applyRange(TimeRange.currentWeek());
     }
@@ -300,9 +306,6 @@ public class ProgressViewModel extends AndroidViewModel {
                 focusMinutesByHour, focusByHour, failByHour);
     }
 
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        executorService.shutdown();
-    }
+    // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra
+    // aquí; onCleared() no tiene nada más que liberar.
 }

@@ -8,19 +8,23 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
 
 // Lista de proyectos (spec projects-mvp). El % de cada proyecto exige leer calendarEntry además
 // de project, así que no se puede resolver con un Transformations.map puro sobre el LiveData de
 // Room (correría en el hilo principal) — en su lugar se observa projectDao.observeAll() con un
 // Observer manual que recalcula los recuentos en el executor y postea la lista compuesta (regla #3).
+@HiltViewModel
 public class ProjectsViewModel extends AndroidViewModel {
 
     private final ExecutorService executorService;
@@ -29,11 +33,12 @@ public class ProjectsViewModel extends AndroidViewModel {
     private final MutableLiveData<List<ProjectListItem>> projectItems = new MutableLiveData<>();
     private final Observer<List<Project>> sourceObserver = this::onProjectsChanged;
 
-    public ProjectsViewModel(@NonNull Application application) {
+    @Inject
+    public ProjectsViewModel(@NonNull Application application, ProjectDAO projectDao,
+                              @IoExecutor ExecutorService executorService) {
         super(application);
-        executorService = Executors.newSingleThreadExecutor();
-        AppDatabase db = AppDatabase.getDatabase(application);
-        projectDao = db.projectDao();
+        this.executorService = executorService;
+        this.projectDao = projectDao;
         projectsSource = projectDao.observeAll();
         projectsSource.observeForever(sourceObserver);
     }
@@ -81,10 +86,11 @@ public class ProjectsViewModel extends AndroidViewModel {
         });
     }
 
+    // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra
+    // aquí; sólo queda por retirar el observer manual del LiveData de Room.
     @Override
     protected void onCleared() {
         super.onCleared();
         projectsSource.removeObserver(sourceObserver);
-        executorService.shutdown();
     }
 }

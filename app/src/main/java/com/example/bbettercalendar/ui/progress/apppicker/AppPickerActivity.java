@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 
@@ -27,15 +27,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 // Pantalla "Add apps": lista las apps lanzables instaladas (icono + nombre) con una casilla por
 // fila, pre-marcando las ya seguidas. Al guardar persiste el set elegido como AppRule(tracked).
 // Carga y guardado van en un executor (PackageManager + DB fuera del hilo principal, regla #3).
+@AndroidEntryPoint
 public class AppPickerActivity extends AppCompatActivity {
 
-    private AppRuleDAO appRuleDao;
-    private ExecutorService executor;
+    @Inject AppRuleDAO appRuleDao;
+    @Inject @IoExecutor ExecutorService executor;
 
     private AppPickerAdapter adapter;
     private ProgressBar loading;
@@ -45,9 +49,6 @@ public class AppPickerActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_picker);
-
-        appRuleDao = AppDatabase.getDatabase(getApplicationContext()).appRuleDao();
-        executor = Executors.newSingleThreadExecutor();
 
         RecyclerView list = findViewById(R.id.app_picker_list);
         loading = findViewById(R.id.app_picker_loading);
@@ -117,9 +118,4 @@ public class AppPickerActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (executor != null) executor.shutdown();
-    }
 }

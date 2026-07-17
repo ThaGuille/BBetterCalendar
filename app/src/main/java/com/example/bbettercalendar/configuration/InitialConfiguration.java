@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
@@ -19,18 +19,28 @@ import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+// OJO (spec di-threading-consolidation): esta clase nunca se instancia como una Activity real de
+// Android -- getInstance() hace "new InitialConfiguration()" a mano, y initialize() no la llama
+// nadie (la única llamada, en MainActivity, está comentada). Los campos @Inject de abajo nunca
+// llegan a poblarse en la práctica (Hilt inyecta durante el ciclo de vida real de una Activity
+// arrancada por el sistema), así que este camino sigue siendo código muerto -- se anota igual que
+// SplashActivity para que ya no quede ninguna llamada directa a AppDatabase.getDatabase() aquí.
+@AndroidEntryPoint
 public class InitialConfiguration extends AppCompatActivity {
 
     private static InitialConfiguration instance;
     private MutableLiveData<Boolean> isInitialized = new MutableLiveData<>();
 
     private final String TAG = "InitialConfigurationTag";
-    private StatsDAO statsDao;
-    private DailyStatDAO dailyStatDao;
-    private ConfigurationDAO configurationDao;
-    private ExecutorService executorService;
+    @Inject StatsDAO statsDao;
+    @Inject DailyStatDAO dailyStatDao;
+    @Inject ConfigurationDAO configurationDao;
+    @Inject @IoExecutor ExecutorService executorService;
     //Esto sirve para que la app espere a que se terminen X tareas en background antes de continuar, en este caso una
     final CountDownLatch latch = new CountDownLatch(1);
 
@@ -46,11 +56,6 @@ public class InitialConfiguration extends AppCompatActivity {
     }
 
     public void initialize(Context context) {
-        statsDao = AppDatabase.getDatabase(this).statsDao();
-        dailyStatDao = AppDatabase.getDatabase(this).dailyStatDao();
-        configurationDao = AppDatabase.getDatabase(this).configurationDao();
-        executorService = Executors.newFixedThreadPool(2);
-
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0);
         today.set(Calendar.MINUTE, 0);
@@ -153,9 +158,4 @@ public class InitialConfiguration extends AppCompatActivity {
                 Log.i(TAG, "max Streak"+statsDao.getMaxStreak());
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        executorService.shutdown();
-    }
 }

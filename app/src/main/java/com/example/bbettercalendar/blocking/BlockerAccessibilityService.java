@@ -21,9 +21,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.AppRule;
+import com.example.bbettercalendar.stats.AppRuleDAO;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 // Servicio de Accesibilidad que hace cumplir los límites diarios (Phase 4a). Sólo escucha
 // TYPE_WINDOW_STATE_CHANGED: cuando una app entra en primer plano, pregunta al motor si superó su
@@ -41,9 +45,12 @@ import java.util.concurrent.Executors;
 // GLOBAL_ACTION_HOME (rebote a inicio). No lee ni transmite contenido de pantalla — sólo el nombre
 // del paquete en primer plano. La decisión pesada corre en un executor (regla #3); addView/removeView
 // vuelven al hilo principal.
+@AndroidEntryPoint
 public class BlockerAccessibilityService extends AccessibilityService {
 
-    private ExecutorService executor;
+    @Inject AppRuleDAO appRuleDao;
+    @Inject @IoExecutor ExecutorService executor;
+
     private Handler mainHandler;
     private WindowManager windowManager;
     private BlockDecisionEngine engine;
@@ -69,7 +76,6 @@ public class BlockerAccessibilityService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        executor = Executors.newSingleThreadExecutor();
         mainHandler = new Handler(Looper.getMainLooper());
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         engine = new BlockDecisionEngine(this);
@@ -120,7 +126,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
         FocusBlockState.setActive(this, false);
 
         // observeForever desde el hilo principal (onServiceConnected lo es); se retira en onUnbind.
-        enforcedRules = AppDatabase.getDatabase(this).appRuleDao().observeEnforced();
+        enforcedRules = appRuleDao.observeEnforced();
         enforcedObserver = rules -> engine.setEnforcedRules(rules);
         enforcedRules.observeForever(enforcedObserver);
     }
@@ -134,7 +140,9 @@ public class BlockerAccessibilityService extends AccessibilityService {
         if (pkgCs == null) return;
         final String fg = pkgCs.toString();
         final CharSequence className = event.getClassName();
-        if (engine == null || executor == null) return;
+        // executor es un singleton inyectado (@IoExecutor) -- nunca es null; destroyed marca si el
+        // servicio ya está en teardown (mismo propósito que la antigua guarda "executor == null").
+        if (engine == null || destroyed) return;
         if (isNoise(fg, className)) return;
 
         executor.execute(() -> {
@@ -313,9 +321,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
             enforcedObserver = null;
         }
         removeCover();
-        if (executor != null) {
-            executor.shutdown();
-            executor = null;
-        }
+        // executor es el @IoExecutor compartido de la app (Hilt @Singleton) -- no se cierra aquí,
+        // lo sigue usando el resto de la app tras desconectarse este servicio.
     }
 }

@@ -18,7 +18,7 @@ import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.example.bbettercalendar.stats.AttributedMinutes;
@@ -35,10 +35,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class HomeViewModel extends AndroidViewModel {
 
     private final String TAG = "HomeFragmentTag";
@@ -72,7 +74,10 @@ public class HomeViewModel extends AndroidViewModel {
     private final MediatorLiveData<List<CalendarEntry>> todayTasksEnriched = new MediatorLiveData<>();
     private final LiveData<List<CalendarEntry>> overdueTasks;
 
-    public HomeViewModel(@NonNull Application application) {
+    @Inject
+    public HomeViewModel(@NonNull Application application, StatsDAO statsDao, FocusEventDAO focusEventDao,
+                         CalendarEntryDAO calendarEntryDao, ConfigurationManager configManager,
+                         @IoExecutor ExecutorService executorService) {
         super(application);
         mText = new MutableLiveData<>();
         timerText = new MutableLiveData<>();
@@ -82,11 +87,14 @@ public class HomeViewModel extends AndroidViewModel {
         timerModeText = new MutableLiveData<>();
         mText.setValue("This is home fragment");
         timerText.setValue("20:00");
-        AppDatabase db = AppDatabase.getDatabase(application);
-        statsDao = db.statsDao();
-        focusEventDao = db.focusEventDao();
-        calendarEntryDao = db.eventDao();
-        executorService = Executors.newFixedThreadPool(2);
+        this.statsDao = statsDao;
+        this.focusEventDao = focusEventDao;
+        this.calendarEntryDao = calendarEntryDao;
+        this.executorService = executorService;
+        // HomeFragment inyecta su propio ConfigurationManager y lo vuelve a fijar vía
+        // setConfigManager() (mismo Singleton de Hilt) -- se mantiene por compatibilidad, ver ese
+        // método más abajo.
+        this.configManager = configManager;
 
         todayTasks = Transformations.switchMap(todayRange, range -> {
             if (range == null) {
@@ -440,9 +448,6 @@ public class HomeViewModel extends AndroidViewModel {
     public LiveData<String> getTodayTimeStudiedText() {return todayTimeStudiedText;}
     public LiveData<String> getTimerModeText() {return timerModeText;}
 
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        executorService.shutdown();
-    }
+    // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra
+    // aquí; onCleared() no tiene nada más que liberar.
 }

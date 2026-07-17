@@ -5,8 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.example.bbettercalendar.database.IoExecutor;
+
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -16,10 +17,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class UsageLimitReceiver extends BroadcastReceiver {
 
     private static final String TAG = "UsageLimitReceiver";
-    private static final ExecutorService IO = Executors.newSingleThreadExecutor();
 
     @Inject UsageLimitChecker checker;
     @Inject UsageLimitScheduler scheduler;
+    @Inject @IoExecutor ExecutorService IO;
 
     @Override
     public void onReceive(Context context, Intent intent) {

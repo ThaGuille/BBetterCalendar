@@ -25,6 +25,9 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.time.LocalDate;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ProgressFragment extends Fragment {
 
     private FragmentProgressBinding binding;

@@ -3,7 +3,6 @@ package com.example.bbettercalendar.blocking;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,12 +14,16 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.stats.ConsentRecord;
+import com.example.bbettercalendar.stats.ConsentRecordDAO;
 import com.example.bbettercalendar.ui.progress.ProgressViewModel;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 // Divulgación prominente del bloqueo por Accesibilidad (requisito de Play: disclosure + consentimiento
 // afirmativo ANTES del deep-link a Ajustes). Texto en lenguaje llano: el servicio SÓLO detecta la app
@@ -29,9 +32,13 @@ import java.util.concurrent.Executors;
 // guía de "qué tocar en Ajustes". En "Enable" persiste el ConsentRecord, ARMA el enforce de la app que
 // disparó el diálogo (para que el bloqueo funcione en cuanto se active el servicio) y abre Ajustes ->
 // Accesibilidad; en "Not now" no cambia nada (no se arma nada sin consentimiento afirmativo).
+@AndroidEntryPoint
 public class AccessibilityDisclosureDialog extends DialogFragment {
 
     private static final String ARG_PACKAGE = "package";
+
+    @Inject ConsentRecordDAO consentRecordDao;
+    @Inject @IoExecutor ExecutorService executor;
 
     // Implementado por un host (p. ej. HomeFragment) que arma un permiso NO ligado a un paquete
     // concreto (el modo bloqueo total del pomodoro) en vez de un enforceAtLimit por-app.
@@ -103,14 +110,10 @@ public class AccessibilityDisclosureDialog extends DialogFragment {
         }
     }
 
-    // Inserta el acuse fuera del hilo principal (regla #3). Executor de un uso, cerrado tras encolar.
+    // Inserta el acuse fuera del hilo principal (regla #3), en el executor de IO compartido.
     private void persistConsent() {
-        Context appContext = requireContext().getApplicationContext();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> AppDatabase.getDatabase(appContext).consentRecordDao()
-                .upsert(new ConsentRecord(ConsentRecord.KEY_ACCESSIBILITY_BLOCKING,
-                        System.currentTimeMillis(), ConsentRecord.ACCESSIBILITY_DISCLOSURE_VERSION)));
-        executor.shutdown();
+        executor.execute(() -> consentRecordDao.upsert(new ConsentRecord(ConsentRecord.KEY_ACCESSIBILITY_BLOCKING,
+                System.currentTimeMillis(), ConsentRecord.ACCESSIBILITY_DISCLOSURE_VERSION)));
     }
 
     private void openAccessibilitySettings() {

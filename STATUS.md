@@ -16,16 +16,32 @@ the live state** (active specs, plans, recent commits). It refreshes itself — 
 
 _This is the only section that isn't auto-derived. Update it when you finish a thing or change direction._
 
-1. **Progress Phase 2 — phone & app usage** (`PACKAGE_USAGE_STATS` + usage-access disclosure +
-   **user-curated app-picker** + per-app list). First phase that needs a permission; Play-safe.
-   Next action: `/spec propose` it (no spec exists yet). Captures the picker, the daily-snapshot
-   table, the locked-state onboarding, and block toggles stubbed for Phase 4.
-2. **Then Phase 3 (per-app daily limits + a notification a few min before)**, then **Phase 4 (soft
-   block: full-screen cover, bounce fallback, after the limit)** — Phase 4 carries the Play
-   compliance work ([docs/progress/07-legal-and-compliance.md](docs/progress/07-legal-and-compliance.md)).
+**Corrected 2026-08-29 — this section was stale.** It still described Progress Phases 2–4 as
+upcoming, but all of them shipped and archived long ago: `progress-phase2-usage` (2026-06-29),
+`progress-phase3-limits` + `progress-phase4a-blocking` (2026-07-04), and the Play compliance
+close-out `progress-phase4b-play-release`. `docs/progress/06-screen-mapping-and-roadmap.md`'s
+"Status" line has the same staleness (still says "Phases 0–1 shipped, next up is Phase 2") — fix
+that doc too next time it's touched. The Progress screen roadmap is fully shipped; the real open
+thread is the architecture refactor below.
 
-   _Done: `persist-pomodoro-session-state` (committed 9926fa9, archived). Progress Phase 1 (Charts
-   MVP) — on-device QA passed 2026-06-28, archived to `.claude/specs/archive/progress-charts-mvp/`._
+1. **Architecture refactor — tranche T2 (repository layer)**, per
+   [architecture-refactor-roadmap.md](.claude/plans/architecture-refactor-roadmap.md): T1 (DI +
+   threading) and T4 (reminder generalization) are both done/archived; the plan's own sequencing
+   note names **T2 next**. Adds `FocusAttributionRepository` (dedupes `enrichWithAttributedMinutes`,
+   currently copy-pasted in `HomeViewModel` + `ProjectDetailViewModel`) and `ProjectsRepository`
+   (replaces `ProjectsViewModel`'s manual Observer/recompute with one Room `@Query` join, so the
+   `InvalidationTracker` watches both tables and the `refresh()`/`onResume()` staleness workaround
+   can be deleted). No schema change, no new UI — pure internal consolidation; verify via `/check`
+   + a `ui-tester` pass confirming Home/Calendar/Projects still update correctly after a
+   cross-screen insert. Next action: `/spec propose` it (no spec exists yet).
+2. **After T2:** propose the Phase 5 spec (`project-deadlines-progress`, project deadlines surfaced
+   on Calendar + Projects + a reminder) — T4 is its prerequisite (already done); T3 (schema v13→v14
+   hygiene: indexes, legacy-column cleanup, drop `fallbackToDestructiveMigration()`) merges into
+   Phase 5's migration if one is needed, per the roadmap's sequencing note.
+
+   _Done: `pomodoro-block-mode` (archived 2026-08-29 — see `app-limits.md`/`pomodoro-timer.md`
+   History). `persist-pomodoro-session-state` (committed 9926fa9, archived). Progress Phase 1
+   (Charts MVP) — archived to `.claude/specs/archive/progress-charts-mvp/`._
 
 **Decisions — RESOLVED 2026-06-28:** ship to **Google Play with the full blocking system** (compliance
 mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bounce fallback**, triggered
@@ -37,33 +53,32 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** e848e3f (2026-07-12)
+**Branch:** `main`  |  **State as of commit:** 74bc6d7 (2026-07-17)
 
 ### 1. What we touched last (recent commits)
-- e848e3f 2026-07-12 time targets + focus attribution - phase 4
-- 5333052 2026-07-12 PROJECTS PAGE
-- d7a6b39 2026-07-12 minor bug fixing
-- d82b341 2026-07-11 added recurrence for the tasks - phase 2
-- 299fc03 2026-07-11 tasks in home screen
+- 74bc6d7 2026-07-17 Merge T4: reminder generalization
+- 0100b9f 2026-07-17 Merge T1: DI + threading consolidation
+- c01a085 2026-07-17 DI + threading consolidation (refactor tranche T1)
+- a8bb6c3 2026-07-17 Generalize reminder scheduling into a reusable alarm core (T4)
+- 00f1567 2026-07-17 Archive focus-attribution spec; polish time targets and projects UI
 
 ### 2. In flight - active `/spec` changes
 | Change | Status | Tasks | Proposal |
 |---|---|---|---|
-| DI + threading consolidation (refactor tranche T1) | proposed | 0/20 | [proposal](.claude/specs/changes/di-threading-consolidation/proposal.md) |
-| Pomodoro focus block mode ("🚫 Block mode 🚫") | verified | 15/16 | [proposal](.claude/specs/changes/pomodoro-block-mode/proposal.md) |
+| Pomodoro focus block mode ("🚫 Block mode 🚫") | verified | 16/16 | [proposal](.claude/specs/changes/pomodoro-block-mode/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer (moved)](.claude/specs/capabilities/home-pomodoro.md)
 - [Capability — Progress screen (moved)](.claude/specs/capabilities/progress-screen.md)
 
-**Archived changes:** `focus-attribution`, `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`, `projects-mvp`, `tasks-home-today`, `tasks-recurrence`
+**Archived changes:** `di-threading-consolidation`, `focus-attribution`, `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`, `projects-mvp`, `reminder-generalization`, `tasks-home-today`, `tasks-recurrence`
 
 ### 4. Plans (`.claude/plans`) - undone first
 | Plan | Status | File |
 |---|---|---|
 | Advanced AI Harness Roadmap | in progress | [ai-harness-roadmap.md](.claude/plans/ai-harness-roadmap.md) |
 | Agent-first system documentation layer (`.claude/docs/systems/`) | implemented | [ok-let-s-design-a-encapsulated-adleman.md](.claude/plans/ok-let-s-design-a-encapsulated-adleman.md) |
-| Architecture refactor roadmap — data/DI infrastructure consolidation | in progress — sequencing approved 2026-07-17: T1 + T4 land as specs before | [architecture-refactor-roadmap.md](.claude/plans/architecture-refactor-roadmap.md) |
+| Architecture refactor roadmap — data/DI infrastructure consolidation | in progress — T1 (DI + threading consolidation) and T4 (reminder generalization) | [architecture-refactor-roadmap.md](.claude/plans/architecture-refactor-roadmap.md) |
 | Phase 0 — Persist Progress history (DailyStat + FocusEvent) | in progress (implemented + builds; runtime verification pending) | [phase-0-progress-history-tables.md](.claude/plans/phase-0-progress-history-tables.md) |
 | Projects & Tasks Roadmap | in progress (Phases 1 `tasks-home-today` + 2 `tasks-recurrence` archived; Phase 3 spec `projects-mvp` proposed) | [projects-tasks-roadmap.md](.claude/plans/projects-tasks-roadmap.md) |
 | Redesign `activity_create_event` (and matching task layout) | in progress | [improve_addEvent_layout.md](.claude/plans/improve_addEvent_layout.md) |

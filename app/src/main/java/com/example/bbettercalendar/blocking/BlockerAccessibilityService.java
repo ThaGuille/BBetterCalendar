@@ -27,11 +27,11 @@ import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -198,8 +198,9 @@ public class BlockerAccessibilityService extends AccessibilityService {
     }
 
     // Caché (paquete/clase -> ¿es una Activity real?) para no golpear PackageManager en cada
-    // evento. Sólo se toca desde el executor de un único hilo -> HashMap sin sincronizar.
-    private final Map<String, Boolean> activityWindowCache = new HashMap<>();
+    // evento. Desde la consolidación T1, @IoExecutor es un pool de varios hilos (no uno solo),
+    // así que necesita ser thread-safe -> ConcurrentHashMap.
+    private final Map<String, Boolean> activityWindowCache = new ConcurrentHashMap<>();
 
     // ¿El className del evento es una Activity REAL declarada en el paquete? Los launchers y el
     // buscador de Google emiten TYPE_WINDOW_STATE_CHANGED por ventanas TRANSITORIAS (widgets,

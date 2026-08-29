@@ -127,10 +127,21 @@ path was exercised by the prior `ui-tester` pass with no issues. A future pass c
 "Continue" manually to double check `OnConsentGrantedListener` end-to-end, though the code path is
 a straightforward interface callback with no new risk surface.
 
-Status: **verified** in substance (bug found, fixed, re-tested); a separate `code-reviewer`
-coherence pass (the third leg of `/spec verify`) has not been run yet — worth doing before
-archive if you want the full three-axis check, but the functional risk this proposal called out
-(the cover actually working) has been directly exercised and confirmed.
+Status: **verified** in substance (bug found, fixed, re-tested).
+
+**`code-reviewer` coherence pass (2026-08-29), the third leg of `/spec verify`:** found and fixed
+one real regression introduced by the later T1 DI+threading consolidation (`c01a085`):
+`BlockerAccessibilityService.activityWindowCache` was a plain `HashMap`, documented as safe
+because it was "only touched from a single-thread executor" — but T1 replaced that dedicated
+single-thread executor with the shared 4-thread `@IoExecutor` pool, so bursts of
+`TYPE_WINDOW_STATE_CHANGED` events (exactly the fast-app-switch scenario the two follow-up bugs
+above involve) could now mutate the unsynchronized map from multiple pool threads concurrently.
+Fixed by switching to `ConcurrentHashMap` and correcting the stale comment. Also tightened a
+`FocusBlockState.java` doc comment that overstated `HomeFragment` as the "only" writer (the
+kill-trap reset in `onServiceConnected()` also writes `false`). No other CLAUDE.md rule
+violations found; re-verified with `.\gradlew.bat assembleDebug` (BUILD SUCCESSFUL). All three
+verification legs (functional on-device, build/lint, code-reviewer coherence) are now complete —
+ready to archive.
 
 ## Follow-up fixes (post-verify, real-usage reports)
 

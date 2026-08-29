@@ -6,8 +6,9 @@ import android.content.SharedPreferences;
 // Interruptor "modo bloqueo total" del pomodoro: mientras está activo, BlockDecisionEngine cubre
 // CUALQUIER app que no sea la nuestra ni el launcher (ver focusExemptPackages), no sólo las que
 // tienen un AppRule con límite. Vive en SharedPreferences, igual que BlockingSettings (no es
-// por-app, no justifica columna nueva, regla #6). El ÚNICO escritor es HomeFragment: engancha este
-// flag a updateTimerControls(), así que queda activo exactamente mientras hay un ciclo de
+// por-app, no justifica columna nueva, regla #6). El escritor durante operación normal es
+// HomeFragment: engancha este flag a updateTimerControls(), así que queda activo exactamente
+// mientras hay un ciclo de
 // concentración corriendo (TIMER_RUNNING) Y el usuario lo armó con el botón 🚫.
 //
 // Riesgo de "kill-trap": si el proceso muere con esto en true, no queda ningún timer vivo que lo

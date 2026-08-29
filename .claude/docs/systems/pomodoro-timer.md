@@ -1,6 +1,6 @@
 # System — Pomodoro timer (`ui/home/` + `notifications/focus/`)
 
-**Last verified:** 2026-07-17 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-08-29 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Home-screen focus timer — the app's core feature. A 6-state machine (stopped/running/paused
 × normal/rest) driven by a single `CountDownTimer`, with session state surviving fragment
@@ -42,6 +42,8 @@ recreation and a background-fail grace period that treats "left the app mid-sess
 - **`HomeFragment` tracks 6 states** (`STOPPED`/`RUNNING`/`PAUSED` × normal/rest) as raw `int` constants, not an enum — grep for `TIMER_STOPPED`/`TIMER_RUNNING`/etc. rather than assuming a typed state.
 - **A single `CountDownTimer` drives both the concentration and rest countdowns** — switching modes replaces the timer instance rather than branching inside `onTick`.
 - **Background detection is app-wide** (`ActivityLifecycleCallbacks.onActivityStopped`), not fragment-scoped — leaving `HomeFragment` for *any* other screen while `TIMER_RUNNING` starts the grace timer, including in-app navigation, not just backgrounding the whole app.
+- **The background-fail grace timer doesn't arm when focus block mode is active** (`timer_state == TIMER_RUNNING && !blockModeArmed`) — with block mode on, the accessibility cover (see `app-limits.md`) physically prevents leaving to another app, so a background transition can't mean "the user left," and shouldn't cost the session.
+- **The 🚫 block-mode toggle on Home drives `FocusBlockState`, not the timer state machine itself.** `blockModeArmed` is a `HomeFragment` field (not one of the 6 timer states) written by the button's `onClickListener` (gated on `AccessibilityAccess.isEnabled`, else shows `AccessibilityDisclosureDialog`) and restored via a saved-instance key. The **single** place that pushes it into effect is `updateTimerControls()`: `FocusBlockState.setActive(ctx, blockModeArmed && timer_state == TIMER_RUNNING)` — one line, run on every timer transition, so pause/stop/cancel/complete/fail/rest all correctly clear the block with no per-path edits. See `app-limits.md` for the enforcement side (`BlockDecisionEngine`/`BlockerAccessibilityService`).
 - **Restore ordering is fragile by design** (see Flow #4) — if you touch `setConfigManager()` or the restore path, verify on-device that a rotate-mid-timer doesn't reset to the default configured time.
 - **`FocusEvent.TYPE_TASK` is reserved but never emitted** from this system (see `data-model.md`) — task attribution is expressed by `entryId` on an ordinary `TYPE_FOCUS` event, *not* by a new type; a bound session is still a real `TYPE_FOCUS`.
 - **`FocusTarget` is process-wide mutable static state** — binding persists across pomodoro cycles until auto-complete or an explicit unbind (banner tap). Nothing clears it when a bound task is deleted/completed by the ordinary checkbox (inert null-guarded no-op today; flagged follow-up). A large `targetMinutes` makes one bound "pomodoro" a single long countdown with no interposed breaks.
@@ -52,3 +54,4 @@ recreation and a background-fail grace period that treats "left the app mid-sess
 |---|---|---|
 | 2026-06-28 | Session state persists across fragment recreation (rotation, back-stack, short process death) | `.claude/specs/archive/persist-pomodoro-session-state/proposal.md` |
 | 2026-07-17 | Focus attribution: bound timer via `FocusTarget`, `completeTimer`/`logFocusEvent` thread `entryId`, `maybeAutoComplete`, `FocusCompleteNotifier`; bound countdown = entry `targetMinutes` | `.claude/specs/archive/focus-attribution/proposal.md` |
+| 2026-07-05 | Pomodoro "focus block mode": 🚫 toggle on Home arms `FocusBlockState` (see `app-limits.md`) for the current concentration run; grace timer skipped while armed | `.claude/specs/archive/pomodoro-block-mode/proposal.md` |

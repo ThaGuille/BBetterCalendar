@@ -1,9 +1,9 @@
 # Pomodoro focus block mode ("🚫 Block mode 🚫")
 
 **Slug:** pomodoro-block-mode
-**Status:** verified
+**Status:** archived
 **Created:** 2026-07-05
-**Last updated:** 2026-07-05
+**Last updated:** 2026-08-29
 
 ## Why
 The app already has an accessibility-based blocking system (Phase 4a) that covers a *specific*

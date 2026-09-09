@@ -33,7 +33,6 @@
         android:hint="@string/create_project_notes_hint"
         android:importantForAutofill="no"
         android:inputType="textMultiLine|textCapSentences"
-        android:minLines="2"
         android:maxLines="4"
         android:textAppearance="@style/TextAppearance.BBetter.Body" />
 

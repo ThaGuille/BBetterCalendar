@@ -25,9 +25,20 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     }
 
     // Franjas de acento de la lista: cicla la paleta bb_* por colorIndex (spec projects-mvp).
-    private static final int[] ACCENT_COLORS = {
+    // Público desde project-deadlines-progress: la banda de proyectos de Progress pinta el mismo
+    // acento para el mismo proyecto, así que la paleta y el ciclado viven en un único sitio.
+    public static final int[] ACCENT_COLORS = {
             R.color.bb_primary, R.color.bb_secondary, R.color.bb_accent_energy, R.color.bb_accent_reward
     };
+
+    /** Color de acento de un colorIndex, tolerando índices negativos (% en Java no lo es). */
+    public static int accentColorResFor(int colorIndex) {
+        int index = colorIndex % ACCENT_COLORS.length;
+        if (index < 0) {
+            index += ACCENT_COLORS.length;
+        }
+        return ACCENT_COLORS[index];
+    }
 
     private final List<ProjectListItem> items = new ArrayList<>();
     private final OnProjectClickListener listener;
@@ -60,11 +71,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
 
         holder.name.setText(project.name);
 
-        int accentIndex = project.colorIndex % ACCENT_COLORS.length;
-        if (accentIndex < 0) {
-            accentIndex += ACCENT_COLORS.length;
-        }
-        int accent = ACCENT_COLORS[accentIndex];
+        int accent = accentColorResFor(project.colorIndex);
         holder.colorAccent.setBackgroundColor(ContextCompat.getColor(context, accent));
 
         holder.progressBar.setProgress(item.percent());

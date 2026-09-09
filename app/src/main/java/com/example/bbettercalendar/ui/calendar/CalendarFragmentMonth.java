@@ -29,6 +29,7 @@ import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.ui.calendar.binders.DayDetailAdapter;
 import com.example.bbettercalendar.ui.calendar.binders.MonthDayBinder;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
+import com.example.bbettercalendar.ui.calendar.domain.ProjectDeadlineItemMapper;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.view.CalendarView;
 
@@ -71,10 +72,9 @@ public class CalendarFragmentMonth extends Fragment
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    // Room's InvalidationTracker occasionally lags after the add-activity
-                    // commits a row, so the just-inserted entry doesn't appear until the
-                    // next insert nudges the LiveData. Force a re-query on return.
-                    if (viewModel != null) viewModel.refresh();
+                    // No-op: viewModel.getItems() is a Room LiveData query -- it invalidates
+                    // and re-queries on its own as soon as AddEventActivity's insert commits
+                    // (repository-layer-consolidation, T2; see data-model.md).
                 }
             });
 
@@ -154,10 +154,25 @@ public class CalendarFragmentMonth extends Fragment
 
     private void setupDayDetail() {
         dayDetailAdapter = new DayDetailAdapter();
+        // Hasta ahora nadie ponía este listener: la lista del día era inerte. Se cablea SÓLO para
+        // los deadlines de proyecto (spec project-deadlines-progress) -- los demás tipos conservan
+        // el no-op de siempre, así que esto es una adición pura, no un cambio de comportamiento.
+        dayDetailAdapter.setOnItemClickListener(this::onDayDetailItemClick);
         binding.dayDetailRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.dayDetailRecycler.setAdapter(dayDetailAdapter);
         binding.dayDetailAddButton.setOnClickListener(v -> launchAddEvent(selectedDate));
         refreshDayDetail();
+    }
+
+    // El calendario pinta el deadline pero NO lo edita (principio "un hecho, un dueño" del
+    // roadmap): tocarlo lleva al detalle del proyecto, que es donde se cambia.
+    private void onDayDetailItemClick(CalendarItem item) {
+        int projectId = ProjectDeadlineItemMapper.projectIdOf(item);
+        if (projectId <= 0) return;
+        Bundle args = new Bundle();
+        args.putInt("projectId", projectId);
+        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main)
+                .navigate(R.id.action_global_project_detail, args);
     }
 
     private void onDaySelected(LocalDate date) {

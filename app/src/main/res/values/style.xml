@@ -268,4 +268,12 @@
         <item name="android:textColor">@color/weekday_toggle_text</item>
     </style>
 
+    <!-- Diálogo de recompensa (spec focus-mode-and-streak): ventana transparente para que la
+         tarjeta pueda entrar con escala + overshoot sin que se vea el rectángulo del diálogo. -->
+    <style name="RewardDialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimAmount">0.55</item>
+    </style>
+
 </resources>

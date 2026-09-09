@@ -130,10 +130,18 @@
     <string name="notif_channel_focus_alerts_desc">Alerts when you leave the app during a focus session.</string>
     <string name="notif_channel_usage_limits_name">App limit nudges</string>
     <string name="notif_channel_usage_limits_desc">Warns you when you\'re close to or past a daily app limit.</string>
+    <string name="notif_channel_project_deadlines_name">Project deadlines</string>
+    <string name="notif_channel_project_deadlines_desc">Nudges as a project\'s deadline approaches.</string>
 
     <!-- Event reminder notification -->
     <string name="notif_event_default_title">Upcoming event</string>
     <string name="notif_event_body_format">Starting %1$s</string>
+
+    <!-- Project-deadline notification (spec project-deadlines-progress). Un cuerpo por offset:
+         los dos avisos ({3d, 1d}) son fijos, así que el texto es literal y no un formato. -->
+    <string name="notif_project_deadline_default_title">Project deadline</string>
+    <string name="notif_project_deadline_body_3d">Due in 3 days</string>
+    <string name="notif_project_deadline_body_1d">Due tomorrow</string>
 
     <!-- Focus-fail notification -->
     <string name="notif_focus_fail_title">Concentration broken</string>
@@ -155,9 +163,15 @@
     <string name="progress_granularity_month">Month</string>
     <string name="progress_range_prev">Previous range</string>
     <string name="progress_range_next">Next range</string>
+    <string name="progress_charts_header">Charts</string>
     <string name="progress_chart_concent">concent</string>
     <string name="progress_chart_fails">fails</string>
     <string name="progress_chart_when">when I focus / fail</string>
+    <string name="progress_chart_projects">time per project</string>
+
+    <!-- Progress screen — project-progress band (spec project-deadlines-progress) -->
+    <string name="progress_projects_header">Projects</string>
+    <string name="progress_project_minutes_format">%1$dm</string>
 
     <!-- Progress screen — phone & app usage (Phase 2) -->
     <string name="progress_usage_header">Screen time</string>
@@ -239,6 +253,8 @@
     <!-- Resúmenes para la fila "Repetir" (spec tasks-recurrence) -->
     <string name="repetition_summary_every_n_days">Every %1$d days</string>
     <string name="repetition_summary_weekly_on">Weekly · %1$s</string>
+    <string name="repetition_hide_in_calendar">Hide from calendar</string>
+    <string name="repetition_hide_in_calendar_hint">Still shows in your Home task list</string>
     <!-- Iniciales de día (bit 0 = lunes … bit 6 = domingo), usadas por RepetitionPopup + RepetitionSpec -->
     <!-- 2-letter labels: Tue/Thu (Tu/Th) and Sat/Sun (Sa/Su) are indistinguishable as single
          initials in the weekday picker. Full names live in weekday_names (contentDescription). -->
@@ -275,5 +291,24 @@
     <string name="task_focus_this_symbol">▶</string>
     <string name="task_focus_this_desc">Focus this task</string>
     <string name="home_focus_banner">Focusing: %1$s</string>
+
+    <!-- Focus mode + racha de 30 días (spec focus-mode-and-streak) -->
+    <string name="home_cancel_session">Cancel session</string>
+    <string name="home_streak_title">Focus days</string>
+    <string name="home_streak_desc">Days with a completed pomodoro</string>
+    <string name="home_streak_placeholder">0</string>
+    <string name="focus_streak_popup_title">Focus days</string>
+    <string name="focus_streak_summary">%1$d of the last 30 days with a completed pomodoro</string>
+    <string name="focus_streak_legend">Day you finished a pomodoro</string>
+    <string name="focus_streak_close">Close</string>
+    <string name="focus_streak_empty">No finished pomodoros yet — start one and this fills up.</string>
+    <string name="first_focus_title">Congratulations!</string>
+    <string name="first_focus_message">First pomodoro of the day, done and dusted.</string>
+    <string name="first_focus_button">Keep it up</string>
+    <string name="first_focus_badge">🔥</string>
+    <plurals name="first_focus_days_this_month">
+        <item quantity="one">day with a pomodoro this month</item>
+        <item quantity="other">days with a pomodoro this month</item>
+    </plurals>
 
 </resources>

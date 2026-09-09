@@ -74,5 +74,9 @@
     <color name="calendar_item_event">#FF3F4E8C</color>
     <color name="calendar_item_task">#FF5F8A78</color>
     <color name="calendar_item_reminder">#FFE07A5F</color>
+    <!-- Deadline de proyecto (spec project-deadlines-progress): alias del ámbar de recompensa, el
+         mismo lenguaje visual que el chip de "Due soon" y que la banda de app-limits. Sin token
+         nuevo: es el mismo significado ("atención, se acerca"), no una categoría más. -->
+    <color name="calendar_item_deadline">@color/bb_accent_reward</color>
 
 </resources>

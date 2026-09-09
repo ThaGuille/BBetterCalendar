@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
@@ -32,6 +33,11 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
         boolean isMenuResFile;
         public final static int FINISH =1;
         Toolbar toolbar;
+        // Contador de racha de Home (spec focus-mode-and-streak). Puede llegar antes de que el
+        // menú exista (LiveData -> setStreakCount) o después (recreación de la vista), así que el
+        // valor se guarda aquí y se re-aplica en cada onCreateMenu.
+        private TextView streakCountText;
+        private int streakDays = 0;
 
         public ToolbarHelper(Context context, Activity activity, MenuInflater menuInflater, int menuRes, boolean isMenuResFile) {
                 this.context = context;
@@ -68,6 +74,7 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                         //View customToolbarLayout = activity.getLayoutInflater().inflate(menuRes, toolbar, false);
                         //toolbar.addView(customToolbarLayout);
                 }
+                bindStreakItem(menu);
                 // Obtener el color del tema y establecerlo como fondo de la toolbar
                 //MenuItem itemMaxStreak = menu.findItem(R.id.toolbarMaxStreak);
 
@@ -87,6 +94,39 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                         Log.i(TAG, "toolbar ohme timer");
                 }
                 return false;
+        }
+
+        /**
+         * Cablea el item de racha si el menú inflado lo tiene (sólo home_toolbar; el resto de
+         * pantallas comparten este helper con otros menús y aquí no encuentran nada).
+         */
+        private void bindStreakItem(@NonNull Menu menu) {
+                streakCountText = null;
+                MenuItem streakItem = menu.findItem(R.id.toolbarStreak);
+                if (streakItem == null) {
+                        return;
+                }
+                View actionView = streakItem.getActionView();
+                if (actionView == null) {
+                        return;
+                }
+                streakCountText = actionView.findViewById(R.id.actionStreakCount);
+                actionView.setOnClickListener(v -> {
+                        if (homeListener != null) homeListener.onToolbarStreakClick();
+                });
+                applyStreakCount();
+        }
+
+        /** Nº de días de los últimos 30 con un pomodoro completado. Idempotente y main-thread. */
+        public void setStreakCount(int days) {
+                this.streakDays = days;
+                applyStreakCount();
+        }
+
+        private void applyStreakCount() {
+                if (streakCountText != null) {
+                        streakCountText.setText(String.valueOf(streakDays));
+                }
         }
 
         @Override

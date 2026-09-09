@@ -48,6 +48,12 @@
     <dimen name="home_card_padding">20dp</dimen>
     <dimen name="home_play_button_size">72dp</dimen>
     <dimen name="home_stat_icon_size">28dp</dimen>
+    <!-- Iconos del par fecha / tiempo estudiado del header (spec focus-mode-and-streak) -->
+    <dimen name="home_inline_stat_icon_size">16dp</dimen>
+    <!-- Botón "cancelar sesión" del focus mode: satélite del play, deliberadamente menor -->
+    <dimen name="home_secondary_button_size">48dp</dimen>
+    <!-- Celda del calendario de rachas dentro del popup -->
+    <dimen name="streak_day_marker_size">30dp</dimen>
 
     <!-- Fixed positions formerly hardcoded -->
     <dimen name="home_timer_button_margin_bottom">45dp</dimen>

@@ -14,7 +14,8 @@ import dagger.hilt.components.SingletonComponent;
 // receiver creaba el suyo (Executors.newFixedThreadPool/newSingleThreadExecutor -- ~15 sitios,
 // ninguno se cerraba nunca al recrearse la instancia que lo poseía). @IoExecutor cubre TODO uso
 // existente 1:1 (mismo pool fijo-4 o más paralelismo que antes -> sin cambio de comportamiento).
-// @DbWriteExecutor se deja provisto para T2 (orden global de escritura); sin consumidores en T1.
+// @DbWriteExecutor se dejó provisto en T1 para T2 (orden global de escritura); desde
+// repository-layer-consolidation (T2) ya tiene consumidores reales.
 // Ninguno de los dos se cierra nunca (@Singleton, vive todo el proceso -- igual que AppDatabase).
 @Module
 @InstallIn(SingletonComponent.class)

@@ -19,18 +19,34 @@ public final class RepetitionSpec implements Serializable {
     /** Bit 0 = lunes … bit 6 = domingo. */
     public static final int MASK_ALL_DAYS = 0b1111111;
 
+    /** Marcado por defecto al elegir una recurrencia (spec recurrence-calendar-visibility). */
+    public static final boolean DEFAULT_HIDDEN_IN_CALENDAR = true;
+
     public final int repetition;
     public final int interval;   // "cada X días" cuando repetition == DAILY (>= 1)
     public final int daysMask;   // bitmask Lun..Dom cuando repetition == WEEKLY
+    // true = la serie no se pinta en la pantalla de Calendario (sigue en las listas de Home).
+    // Sólo tiene efecto si repeats(); una tarea suelta nunca se oculta.
+    public final boolean hiddenInCalendar;
 
     public RepetitionSpec(int repetition, int interval, int daysMask) {
+        this(repetition, interval, daysMask, DEFAULT_HIDDEN_IN_CALENDAR);
+    }
+
+    public RepetitionSpec(int repetition, int interval, int daysMask, boolean hiddenInCalendar) {
         this.repetition = repetition;
         this.interval = Math.max(1, interval);
         this.daysMask = daysMask;
+        this.hiddenInCalendar = hiddenInCalendar;
     }
 
     public static RepetitionSpec none() {
-        return new RepetitionSpec(RepetitionOptions.NONE, 1, 0);
+        return new RepetitionSpec(RepetitionOptions.NONE, 1, 0, false);
+    }
+
+    /** Sólo una serie puede ocultarse; para una tarea suelta el flag no aplica. */
+    public boolean hidesFromCalendar() {
+        return repeats() && hiddenInCalendar;
     }
 
     public boolean repeats() {

@@ -52,10 +52,9 @@ public class CalendarFragmentWeek extends Fragment
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    // Room's InvalidationTracker occasionally lags after the add-activity
-                    // commits a row, so the just-inserted entry doesn't appear until the
-                    // next insert nudges the LiveData. Force a re-query on return.
-                    if (viewModel != null) viewModel.refresh();
+                    // No-op: viewModel.getItems() is a Room LiveData query -- it invalidates
+                    // and re-queries on its own as soon as AddEventActivity's insert commits
+                    // (repository-layer-consolidation, T2; see data-model.md).
                 }
             });
 

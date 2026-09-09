@@ -58,6 +58,20 @@ public final class NotificationSpec {
             return this;
         }
 
+        /**
+         * Como {@link #openMainActivity(Context)} pero pidiendo a MainActivity que navegue al
+         * detalle del proyecto (spec project-deadlines-progress). La construcción del Intent se
+         * queda aquí, donde ya vivía; MainActivity sólo consume el extra.
+         */
+        public Builder openProjectDetail(Context context, int projectId) {
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra(MainActivity.EXTRA_OPEN_PROJECT_ID, projectId);
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+            this.contentIntent = PendingIntent.getActivity(context, notificationId, intent, flags);
+            return this;
+        }
+
         public NotificationSpec build() {
             return new NotificationSpec(this);
         }

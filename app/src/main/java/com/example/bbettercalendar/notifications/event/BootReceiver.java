@@ -8,6 +8,9 @@ import android.util.Log;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.IoExecutor;
+import com.example.bbettercalendar.notifications.project.ProjectDeadlineScheduler;
+import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.projects.ProjectDAO;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 
 import java.util.List;
@@ -25,6 +28,8 @@ public class BootReceiver extends BroadcastReceiver {
     @Inject CalendarEntryDAO calendarEntryDAO;
     @Inject EventReminderScheduler scheduler;
     @Inject UsageLimitScheduler usageLimitScheduler;
+    @Inject ProjectDAO projectDao;
+    @Inject ProjectDeadlineScheduler projectDeadlineScheduler;
     @Inject @IoExecutor ExecutorService IO;
 
     @Override
@@ -39,19 +44,33 @@ public class BootReceiver extends BroadcastReceiver {
         final PendingResult pendingResult = goAsync();
         IO.execute(() -> {
             try {
-                List<CalendarEntry> all = calendarEntryDAO.getAllEvents();
-                if (all == null) return;
                 long now = System.currentTimeMillis();
+                // El bloque tiene ya tres inquilinos independientes: que uno no encuentre filas no
+                // puede saltarse los otros dos (antes un getAllEvents() nulo se llevaba por delante
+                // el arm() del monitor de límites).
+                List<CalendarEntry> all = calendarEntryDAO.getAllEvents();
                 int rescheduled = 0;
-                for (CalendarEntry entry : all) {
-                    // Las plantillas de recurrencia no reciben alarmas (spec tasks-recurrence):
-                    // sólo sus ocurrencias materializadas, que ya están en 'all' como filas propias.
-                    if (!entry.isTemplate() && entry.getStartMillis() > now) {
-                        scheduler.scheduleFor(entry);
-                        rescheduled++;
+                if (all != null) {
+                    for (CalendarEntry entry : all) {
+                        // Las plantillas de recurrencia no reciben alarmas (spec tasks-recurrence):
+                        // sólo sus ocurrencias materializadas, que ya están en 'all' como filas propias.
+                        if (!entry.isTemplate() && entry.getStartMillis() > now) {
+                            scheduler.scheduleFor(entry);
+                            rescheduled++;
+                        }
                     }
                 }
                 Log.i(TAG, "Rescheduled reminders for " + rescheduled + " future events");
+
+                // Tercer inquilino de este bloque (spec project-deadlines-progress): las alarmas de
+                // deadline de proyecto también se pierden en el reinicio.
+                List<Project> projects = projectDao.getActiveWithDeadlineAfter(now);
+                if (projects != null) {
+                    for (Project project : projects) {
+                        projectDeadlineScheduler.scheduleFor(project);
+                    }
+                    Log.i(TAG, "Rescheduled deadlines for " + projects.size() + " active projects");
+                }
 
                 usageLimitScheduler.arm();
             } catch (Exception e) {

@@ -9,12 +9,18 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.usage.UsageLimitNotifier;
+import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.projects.ProjectDeadlineState;
+import com.example.bbettercalendar.projects.ProjectWithCounts;
+import com.example.bbettercalendar.projects.ProjectsRepository;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 import com.example.bbettercalendar.stats.ConsentRecord;
@@ -23,6 +29,7 @@ import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
 import com.example.bbettercalendar.stats.FocusEvent;
 import com.example.bbettercalendar.stats.FocusEventDAO;
+import com.example.bbettercalendar.stats.ProjectMinutes;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 import com.example.bbettercalendar.usage.UsageAccess;
@@ -59,12 +66,21 @@ public class ProgressViewModel extends AndroidViewModel {
     private final MutableLiveData<TimeRange> selectedRange;
     private final MutableLiveData<ChartBundle> charts;
 
+    // Banda 2 (progreso por proyecto, spec project-deadlines-progress). Se compone de DOS fuentes
+    // vivas: los proyectos con sus recuentos (LiveData de Room, se invalida sola al escribir en
+    // project O en calendarEntry) y los minutos del rango seleccionado (los publica applyRange
+    // desde el executor). A diferencia de la banda de uso, no depende de ningún permiso.
+    private final MutableLiveData<Map<Integer, Integer>> projectMinutesInRange;
+    private final MediatorLiveData<List<ProjectProgressRow>> projectRows;
+    private List<ProjectWithCounts> latestProjectCounts;
+
     // Banda 3 (uso de apps). Independiente de los gráficos: los gráficos nunca dependen del permiso.
     private final MutableLiveData<UsageBandState> usageState;
     private final MutableLiveData<List<AppUsageRow>> apps;
     private final MutableLiveData<Long> screenTimeMillis;
 
     private final ExecutorService executorService;
+    private final ExecutorService dbWriteExecutor;
     private final DailyStatDAO dailyStatDao;
     private final FocusEventDAO focusEventDao;
     private final StatsDAO statsDao;
@@ -86,12 +102,16 @@ public class ProgressViewModel extends AndroidViewModel {
     @Inject
     public ProgressViewModel(@NonNull Application application, DailyStatDAO dailyStatDao,
                               FocusEventDAO focusEventDao, StatsDAO statsDao, AppRuleDAO appRuleDao,
-                              ConsentRecordDAO consentRecordDao, @IoExecutor ExecutorService executorService) {
+                              ConsentRecordDAO consentRecordDao, ProjectsRepository projectsRepository,
+                              @IoExecutor ExecutorService executorService,
+                              @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
         mText = new MutableLiveData<>();
         mText.setValue("This is progress fragment");
         selectedRange = new MutableLiveData<>();
         charts = new MutableLiveData<>();
+        projectMinutesInRange = new MutableLiveData<>();
+        projectRows = new MediatorLiveData<>();
         usageState = new MutableLiveData<>();
         apps = new MutableLiveData<>();
         screenTimeMillis = new MutableLiveData<>();
@@ -109,6 +129,16 @@ public class ProgressViewModel extends AndroidViewModel {
                 new UsageLimitNotifier(application, new BBetterNotifier(application)));
         mainHandler = new Handler(Looper.getMainLooper());
         this.executorService = executorService;
+        this.dbWriteExecutor = dbWriteExecutor;
+
+        // La composición en sí es en memoria (dos listas ya cargadas), así que va en el hilo
+        // principal: el trabajo de BD ya está fuera de él -- Room en su propio hilo para los
+        // recuentos, el executor para los minutos del rango (regla #3).
+        projectRows.addSource(projectsRepository.observeAllWithCounts(), counts -> {
+            latestProjectCounts = counts;
+            rebuildProjectRows();
+        });
+        projectRows.addSource(projectMinutesInRange, minutes -> rebuildProjectRows());
 
         applyRange(TimeRange.currentWeek());
     }
@@ -116,6 +146,7 @@ public class ProgressViewModel extends AndroidViewModel {
     public LiveData<String> getText() { return mText; }
     public LiveData<TimeRange> getSelectedRange() { return selectedRange; }
     public LiveData<ChartBundle> getCharts() { return charts; }
+    public LiveData<List<ProjectProgressRow>> getProjectRows() { return projectRows; }
     public LiveData<UsageBandState> getUsageState() { return usageState; }
     public LiveData<List<AppUsageRow>> getApps() { return apps; }
     public LiveData<Long> getScreenTimeMillis() { return screenTimeMillis; }
@@ -144,8 +175,71 @@ public class ProgressViewModel extends AndroidViewModel {
     // gráficos y del uso de apps se hace en el executor y se publica con postValue.
     private void applyRange(TimeRange range) {
         selectedRange.setValue(range);
-        executorService.execute(() -> charts.postValue(buildBundle(range)));
+        executorService.execute(() -> {
+            // Una sola query de minutos por proyecto alimenta las dos superficies: la página de
+            // proyectos del carrusel (nombre -> minutos) y la banda (id -> minutos).
+            List<ProjectMinutes> byProject = queryProjectMinutes(range);
+            charts.postValue(buildBundle(range, byProject));
+            projectMinutesInRange.postValue(toMinutesById(byProject));
+        });
         executorService.execute(() -> refreshUsage(range));
+    }
+
+    // --- banda 2: progreso por proyecto ---
+
+    private List<ProjectMinutes> queryProjectMinutes(TimeRange range) {
+        ZoneId zone = ZoneId.systemDefault();
+        long start = range.startDay().atStartOfDay(zone).toInstant().toEpochMilli();
+        long end = range.endDay().plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1;
+        return focusEventDao.getMinutesByProject(start, end);
+    }
+
+    private static Map<Integer, Integer> toMinutesById(List<ProjectMinutes> byProject) {
+        Map<Integer, Integer> map = new HashMap<>();
+        if (byProject != null) {
+            for (ProjectMinutes pm : byProject) {
+                map.put(pm.projectId, pm.minutes);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Compone las filas de la banda. Pertenencia: un proyecto aparece si está ACTIVO, O si tuvo
+     * minutos atribuidos dentro del rango — así la banda es retrospectiva (un proyecto que
+     * terminaste el mes pasado sigue apareciendo en la semana en que trabajaste en él) sin crecer
+     * sin límite según se acumulan proyectos completados. Orden: minutos del rango desc, luego
+     * nombre — el mismo criterio que la gráfica, porque responden a la misma pregunta.
+     */
+    private void rebuildProjectRows() {
+        List<ProjectWithCounts> counts = latestProjectCounts;
+        if (counts == null) {
+            projectRows.setValue(Collections.emptyList());
+            return;
+        }
+        Map<Integer, Integer> minutes = projectMinutesInRange.getValue();
+        long now = System.currentTimeMillis();
+
+        List<ProjectProgressRow> rows = new ArrayList<>(counts.size());
+        for (ProjectWithCounts pwc : counts) {
+            Project project = pwc.project;
+            if (project == null) continue;
+            Integer m = minutes == null ? null : minutes.get(project.id);
+            int minutesInRange = m == null ? 0 : m;
+            if (project.status != Project.STATUS_ACTIVE && minutesInRange <= 0) continue;
+
+            rows.add(new ProjectProgressRow(project.id, project.name, project.colorIndex,
+                    pwc.doneCount, pwc.totalCount, minutesInRange,
+                    ProjectDeadlineState.from(project.softDeadlineMillis, now)));
+        }
+        Collections.sort(rows, (a, b) -> {
+            int byMinutes = Integer.compare(b.minutesInRange, a.minutesInRange);
+            if (byMinutes != 0) return byMinutes;
+            String an = a.name == null ? "" : a.name;
+            String bn = b.name == null ? "" : b.name;
+            return an.compareToIgnoreCase(bn);
+        });
+        projectRows.setValue(rows);
     }
 
     // --- banda 3: uso de apps ---
@@ -209,12 +303,19 @@ public class ProgressViewModel extends AndroidViewModel {
     // comprobación periódica no llega hasta dentro de 5 min y puede saltarse la ventana de aviso),
     // reprograma el monitor de límites y refresca la lista.
     public void setDailyLimit(String packageName, int minutes) {
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             appRuleDao.setDailyLimit(packageName, minutes);
-            usageLimitChecker.run();
-            usageLimitScheduler.arm();
-            TimeRange current = selectedRange.getValue();
-            if (current != null) refreshUsage(current);
+            // El seguimiento (checker/scheduler/refreshUsage) no es parte de la escritura -- se
+            // reenvía a @IoExecutor para que corra en el mismo pool que applyRange()/
+            // refreshUsageAccess() (repository-layer-consolidation, T2: evita que refreshUsage()
+            // quede reenganchable desde dos pools sin orden entre sí, hallazgo del code-reviewer
+            // en la verificación de este tramo).
+            executorService.execute(() -> {
+                usageLimitChecker.run();
+                usageLimitScheduler.arm();
+                TimeRange current = selectedRange.getValue();
+                if (current != null) refreshUsage(current);
+            });
         });
     }
 
@@ -227,10 +328,14 @@ public class ProgressViewModel extends AndroidViewModel {
     // Escribe fuera del hilo principal (regla #3) y refresca la lista. El servicio de Accesibilidad
     // observa observeEnforced(), así que recoge el cambio solo — aquí no hace falta notificarlo.
     public void setEnforceAtLimit(String packageName, boolean enforce) {
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             appRuleDao.setEnforceAtLimit(packageName, enforce);
-            TimeRange current = selectedRange.getValue();
-            if (current != null) refreshUsage(current);
+            // Ver comentario en setDailyLimit(): refreshUsage() se reenvía a @IoExecutor, el
+            // único pool desde el que se dispara en toda la clase.
+            executorService.execute(() -> {
+                TimeRange current = selectedRange.getValue();
+                if (current != null) refreshUsage(current);
+            });
         });
     }
 
@@ -245,7 +350,7 @@ public class ProgressViewModel extends AndroidViewModel {
         });
     }
 
-    private ChartBundle buildBundle(TimeRange range) {
+    private ChartBundle buildBundle(TimeRange range, List<ProjectMinutes> byProject) {
         LocalDate start = range.startDay();
         LocalDate end = range.endDay();
         LocalDate today = LocalDate.now();
@@ -302,8 +407,18 @@ public class ProgressViewModel extends AndroidViewModel {
             }
         }
 
+        // Página de proyectos del carrusel: la query ya viene ordenada por minutos desc.
+        int projectCount = byProject == null ? 0 : byProject.size();
+        String[] projectLabels = new String[projectCount];
+        int[] projectMinutes = new int[projectCount];
+        for (int i = 0; i < projectCount; i++) {
+            ProjectMinutes pm = byProject.get(i);
+            projectLabels[i] = pm.projectName != null ? pm.projectName : "";
+            projectMinutes[i] = pm.minutes;
+        }
+
         return new ChartBundle(range.granularity, labels, focusMinutes, fails,
-                focusMinutesByHour, focusByHour, failByHour);
+                focusMinutesByHour, focusByHour, failByHour, projectLabels, projectMinutes);
     }
 
     // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra

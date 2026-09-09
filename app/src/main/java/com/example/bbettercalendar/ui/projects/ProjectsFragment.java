@@ -51,14 +51,6 @@ public class ProjectsFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        // Recuenta % al volver (p.ej. desde el detalle tras marcar un item) — ver el comentario
-        // de ProjectsViewModel.refresh() sobre por qué el LiveData de Room no basta solo.
-        projectsViewModel.refresh();
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

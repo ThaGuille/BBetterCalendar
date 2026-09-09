@@ -12,6 +12,17 @@
 
         android:layout_gravity="end"
         android:gravity="right|end">
+        <!-- Racha "días con pomodoro" (spec focus-mode-and-streak). actionLayout en vez de icono
+             porque tiene que pintar un número que cambia; el click lo cablea ToolbarHelper sobre
+             la propia action view (un item con actionLayout NO pasa por onMenuItemSelected). -->
+        <item
+            android:id="@+id/toolbarStreak"
+            android:layout_gravity="end"
+            android:gravity="end"
+            android:icon="@drawable/ic_flame_v2_24"
+            android:title="@string/home_streak_title"
+            app:actionLayout="@layout/action_streak_counter"
+            app:showAsAction="always" />
         <item
             android:id="@+id/toolbarTimer"
             android:layout_gravity="end"

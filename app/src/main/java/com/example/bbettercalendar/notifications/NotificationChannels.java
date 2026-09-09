@@ -13,6 +13,7 @@ public final class NotificationChannels {
     public static final String CHANNEL_EVENT_REMINDERS = "bb_event_reminders";
     public static final String CHANNEL_FOCUS_ALERTS = "bb_focus_alerts";
     public static final String CHANNEL_USAGE_LIMITS = "bb_usage_limits";
+    public static final String CHANNEL_PROJECT_DEADLINES = "bb_project_deadlines";
 
     public static void createAll(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -45,10 +46,19 @@ public final class NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH);
         usageLimits.setDescription(context.getString(R.string.notif_channel_usage_limits_desc));
 
+        // Canal propio, no CHANNEL_EVENT_REMINDERS: un aviso de deadline de proyecto se silencia
+        // (o no) independientemente de los recordatorios de eventos (spec project-deadlines-progress).
+        NotificationChannel projectDeadlines = new NotificationChannel(
+                CHANNEL_PROJECT_DEADLINES,
+                context.getString(R.string.notif_channel_project_deadlines_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        projectDeadlines.setDescription(context.getString(R.string.notif_channel_project_deadlines_desc));
+
         nm.createNotificationChannel(foreground);
         nm.createNotificationChannel(events);
         nm.createNotificationChannel(focus);
         nm.createNotificationChannel(usageLimits);
+        nm.createNotificationChannel(projectDeadlines);
     }
 
     private NotificationChannels() {}

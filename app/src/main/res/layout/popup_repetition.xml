@@ -224,6 +224,53 @@
             android:textOn="" />
     </LinearLayout>
 
+    <!-- spec recurrence-calendar-visibility: sólo aparece con una recurrencia elegida (para una
+         tarea que no se repite no hay nada que descongestionar). Marcado por defecto. -->
+    <View
+        android:id="@+id/repetition_popup_hide_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:background="@color/bb_divider" />
+
+    <LinearLayout
+        android:id="@+id/repetition_popup_row_hide"
+        style="@style/BBetter.CardFormRow"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingBottom="@dimen/spacing_sm">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/repetition_hide_in_calendar"
+                android:textAppearance="@style/TextAppearance.BBetter.Body" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/repetition_hide_in_calendar_hint"
+                android:textAppearance="@style/TextAppearance.BBetter.Label" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/repetition_popup_hide_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/bb_primary"
+            android:clickable="false"
+            android:contentDescription="@string/repetition_hide_in_calendar"
+            android:focusable="false" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/repetition_popup_confirm"
         android:layout_width="wrap_content"

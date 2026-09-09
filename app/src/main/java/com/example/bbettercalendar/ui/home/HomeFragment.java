@@ -9,6 +9,8 @@ import android.os.CountDownTimer;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -40,6 +44,8 @@ import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.OnToolbarHomeListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.popups.AlertPopup;
+import com.example.bbettercalendar.popups.FirstFocusCelebrationPopup;
+import com.example.bbettercalendar.popups.FocusStreakPopup;
 import com.example.bbettercalendar.popups.MessagePopup;
 import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
@@ -81,11 +87,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
     private ToolbarHelper toolbarHelper;
     private ImageButton playButton;
+    private ImageButton cancelButton;
     private TextView skipRestButton;
     private TextView blockModeButton;
     private TextView focusBanner;
     private TextView timerText;
-    private TextView currentStreakText;
     private TextView todayFailsText;
     private TextView todayTimeStudiedText;
     private TextView timerModeText;
@@ -100,6 +106,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
     private int cyclesCompleted = 0;
     private boolean blockModeArmed = false;
+    // Focus mode (spec focus-mode-and-streak): con el timer en marcha la tarjeta del pomodoro
+    // ocupa la pantalla y desaparece todo lo demás. Es un estado DERIVADO de timer_state, no una
+    // preferencia: por eso no se guarda en onSaveInstanceState -- se recalcula al re-renderizar.
+    private boolean focusModeActive = false;
 
     // "Today" task list (spec tasks-home-today)
     private TodayTaskAdapter todayTaskAdapter;
@@ -126,6 +136,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         final TextView textView = binding.textHome;
         playButton = binding.homePlayButton;
         playButton.setOnClickListener(this);
+        cancelButton = binding.homeCancelButton;
+        cancelButton.setOnClickListener(this);
         skipRestButton = binding.homeSkipRestButton;
         skipRestButton.setOnClickListener(this);
         blockModeButton = binding.homeBlockModeButton;
@@ -137,7 +149,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             updateFocusBanner();
         });
         timerText = binding.homeTimerText;
-        currentStreakText = binding.homeCurrentStreakText;
         todayFailsText = binding.homeToadyFailsText;
         todayTimeStudiedText = binding.homeTodayTimeText;
         timerModeText = binding.homeTimerTypeText;
@@ -158,8 +169,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         homeViewModel.getTimerText().observe(getViewLifecycleOwner(), timerText::setText);
-        homeViewModel.getCurrentStreakText().observe(getViewLifecycleOwner(), currentStreakText::setText);
-        homeViewModel.getTodayFailsText().observe(getViewLifecycleOwner(), todayFailsText::setText);
+        // Los fallos ya no tienen tarjeta propia: acompañan a la fecha y sólo si los hay
+        // (spec focus-mode-and-streak).
+        homeViewModel.getTodayFailsText().observe(getViewLifecycleOwner(), fails -> {
+            todayFailsText.setText(fails);
+            boolean any = fails != null && !fails.isEmpty() && !"0".equals(fails);
+            binding.homeFailsChip.setVisibility(any ? View.VISIBLE : View.GONE);
+        });
+        // Racha = días de los últimos 30 con un pomodoro completado; vive en la toolbar.
+        homeViewModel.getActiveDaysLast30().observe(getViewLifecycleOwner(), days ->
+                toolbarHelper.setStreakCount(days == null ? 0 : days));
+        // Primer pomodoro del día -> celebración.
+        homeViewModel.getFirstFocusOfDay()
+                .observe(getViewLifecycleOwner(), this::maybeShowFirstFocusCelebration);
         homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), todayTimeStudiedText::setText);
         homeViewModel.getTimerModeText().observe(getViewLifecycleOwner(), timerModeText::setText);
 
@@ -247,6 +269,25 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             binding.homeOverdueEmptyText.setVisibility(
                     overdueExpanded && tasks.isEmpty() ? View.VISIBLE : View.GONE);
         });
+    }
+
+    /**
+     * Muestra la celebración del primer pomodoro del día si hay una pendiente.
+     *
+     * <p>La guarda es {@code isStateSaved()} y NO {@code isResumed()}: un observador de LiveData
+     * se activa en STARTED y el valor retenido se entrega ANTES de onResume, así que exigir
+     * RESUMED aquí descartaba el premio en la propia entrega — y como LiveData sólo reentrega al
+     * pasar de inactivo a activo, nadie volvía a intentarlo y la celebración se perdía del todo.
+     * Lo único que hay que evitar de verdad es el commit posterior a onSaveInstanceState; de ese
+     * caso se recupera onResume() releyendo el valor, que sigue sin limpiar.
+     */
+    private void maybeShowFirstFocusCelebration(Integer daysThisMonth) {
+        if (daysThisMonth == null || isStateSaved()) {
+            return;
+        }
+        FirstFocusCelebrationPopup.newInstance(daysThisMonth)
+                .show(getParentFragmentManager(), FirstFocusCelebrationPopup.POPUP_TAG);
+        homeViewModel.clearFirstFocusOfDay();
     }
 
     private void toggleOverdueSection() {
@@ -460,6 +501,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
                 feedback.playStart();
             }
             updateTimerControls();
+        } else if (id == R.id.homeCancelButton) {
+            cancelSession();
         } else if (id == R.id.homeSkipRestButton) {
             cancelRest();
             SoundFeedback.get(requireContext()).playStop();
@@ -478,8 +521,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
      * Tap on the 🚫 block-mode toggle. Off -> on requires the accessibility grant (same gate as
      * the Progress enforce toggle): if already granted, arm immediately; otherwise show the shared
      * disclosure dialog and arm only once the user consents (onAccessibilityConsentGranted()).
-     * On -> off never needs permission. The button itself is disabled while TIMER_RUNNING (see
-     * updateBlockModeButton()), so this never fires mid-block.
+     * On -> off never needs permission. El botón está SIEMPRE activo, también con el timer
+     * corriendo (spec focus-mode-and-streak): armar a mitad de sesión bloquea al instante y
+     * desarmar devuelve el móvil al usuario, que si no quedaría atrapado hasta acabar el ciclo.
      */
     private void handleBlockModeToggle() {
         if (blockModeArmed) {
@@ -500,6 +544,28 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     public void onAccessibilityConsentGranted() {
         blockModeArmed = true;
         updateTimerControls();
+    }
+
+    /**
+     * Cancelar la sesión desde el focus mode (spec focus-mode-and-streak): corta el contador, tira
+     * el ciclo entero y vuelve a Home en reposo. NO registra fallo — un fallo es haberse ido de la
+     * app a mitad de sesión; esto es una decisión explícita del usuario y penalizarla haría que la
+     * única salida "barata" fuese aguantar mirando la pantalla.
+     */
+    private void cancelSession() {
+        if (timer_state == TIMER_STOPPED) {
+            return;
+        }
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        timer_state = TIMER_STOPPED;
+        // Desvincular: dejar el banner "Focusing: X" colgado sin sesión viva confunde sobre si la
+        // siguiente cuenta atrás se atribuiría sola a esa tarea.
+        FocusTarget.clear();
+        updateFocusBanner();
+        resetTimerAndCycles();
+        SoundFeedback.get(requireContext()).playStop();
     }
 
     /**
@@ -538,12 +604,111 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         skipRestButton.setVisibility(isRest ? View.VISIBLE : View.GONE);
 
         updateBlockModeButton();
+        updateFocusMode();
+    }
+
+    /**
+     * Focus mode (spec focus-mode-and-streak): el estado se DERIVA de timer_state, no de un flag
+     * propio, así que cualquier salida del temporizador (fin de ciclo, cancelación, fallo por
+     * background, cambio de configuración) devuelve Home a la normalidad sin ruta especial.
+     */
+    private void updateFocusMode() {
+        boolean shouldBeActive = timer_state != TIMER_STOPPED;
+        if (binding == null || shouldBeActive == focusModeActive) {
+            return;
+        }
+        focusModeActive = shouldBeActive;
+        applyFocusMode();
+    }
+
+    private void applyFocusMode() {
+        if (binding == null) {
+            return;
+        }
+        TransitionManager.beginDelayedTransition(binding.homeContent,
+                new AutoTransition().setDuration(220));
+
+        binding.homeHeaderSection.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
+        binding.homeTasksCard.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
+        cancelButton.setVisibility(focusModeActive ? View.VISIBLE : View.GONE);
+        // El hueco sólo existe para compensar el botón de cancelar y mantener centrado el play.
+        binding.homeControlsSpacer.setVisibility(focusModeActive ? View.VISIBLE : View.GONE);
+
+        // match_parent + el resto GONE: con fillViewport el ScrollView re-mide su hijo a la altura
+        // del viewport, así que la tarjeta pasa a ocupar la pantalla entera (ver fragment_home.xml).
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) binding.homeTimerCard.getLayoutParams();
+        params.height = focusModeActive
+                ? ViewGroup.LayoutParams.MATCH_PARENT : ViewGroup.LayoutParams.WRAP_CONTENT;
+        params.topMargin = focusModeActive
+                ? 0 : getResources().getDimensionPixelSize(R.dimen.spacing_md);
+        binding.homeTimerCard.setLayoutParams(params);
+
+        // A sangre: sin el padding del contenedor, sin esquinas y sin sombra, la tarjeta deja de
+        // leerse como "una tarjeta estirada" y pasa a ser la pantalla. Con el marco puesto se veía
+        // el fondo beige alrededor y delataba que seguíamos en Home.
+        applyFocusModeChrome();
+
+        setAppChromeVisible(!focusModeActive);
+    }
+
+    /** Quita/restaura el marco de tarjeta del timer según el focus mode. */
+    private void applyFocusModeChrome() {
+        int side = focusModeActive ? 0 : getResources().getDimensionPixelSize(R.dimen.spacing_md);
+        int bottom = focusModeActive ? 0 : getResources().getDimensionPixelSize(R.dimen.spacing_lg);
+        binding.homeContent.setPadding(side, side, side, bottom);
+
+        if (focusModeActive) {
+            binding.homeTimerCard.setBackgroundResource(R.color.bb_surface_card);
+            binding.homeTimerCard.setElevation(0f);
+        } else {
+            binding.homeTimerCard.setBackgroundResource(R.drawable.bg_card);
+            binding.homeTimerCard.setElevation(
+                    getResources().getDimensionPixelSize(R.dimen.elevation_card));
+        }
+        // setBackgroundResource pisa el padding del propio card: hay que reponerlo siempre.
+        int cardPadding = getResources().getDimensionPixelSize(R.dimen.home_card_padding);
+        binding.homeTimerCard.setPadding(cardPadding, cardPadding, cardPadding, cardPadding);
+    }
+
+    /**
+     * Oculta/restaura la navegación inferior y la ActionBar de la Activity. En focus mode las
+     * únicas acciones son pausar, cancelar y el modo bloqueo: dejar la bottom-nav a mano invitaría
+     * a irse a otra pestaña con la sesión corriendo. Idempotente y siempre restaurado en
+     * onDestroyView, así que ninguna otra pantalla puede heredar el chrome escondido.
+     */
+    private void setAppChromeVisible(boolean visible) {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        View navView = activity.findViewById(R.id.nav_view);
+        View navDivider = activity.findViewById(R.id.nav_divider);
+        if (navView != null) {
+            navView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        if (navDivider != null) {
+            navDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        if (activity instanceof AppCompatActivity) {
+            ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
+            if (actionBar != null) {
+                if (visible) {
+                    actionBar.show();
+                } else {
+                    actionBar.hide();
+                }
+            }
+        }
     }
 
     /**
      * Render the 🚫 block-mode toggle's 3 states (muted off / bb_danger active / bb_accent_reward
      * pending-permission — same visual language as the Progress enforce toggle) and push the actual
-     * live-blocking flag. FocusBlockState is only ever true here, exactly while a concentration run
+     * live-blocking flag. Se puede armar y desarmar en cualquier momento, también a mitad de
+     * sesión (spec focus-mode-and-streak): como el flag se recalcula aquí en cada
+     * updateTimerControls(), armarlo con el timer corriendo bloquea al instante.
+     * FocusBlockState is only ever true here, exactly while a concentration run
      * (not rest) is running AND armed — this is the single writer for that state (see
      * blocking/FocusBlockState.java for the kill-trap mitigation this depends on).
      */
@@ -565,7 +730,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         blockModeButton.setBackgroundTintList(
                 ContextCompat.getColorStateList(requireContext(), tint));
         blockModeButton.setAlpha(alpha);
-        blockModeButton.setEnabled(timer_state != TIMER_RUNNING);
 
         FocusBlockState.setActive(requireContext(), blockModeArmed && timer_state == TIMER_RUNNING);
     }
@@ -573,6 +737,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
     @Override
     public void onDestroyView() {
+        // Antes de soltar el binding: si la vista muere en focus mode (rotación, proceso), la
+        // bottom-nav y la ActionBar son de la Activity y se quedarían ocultas para siempre.
+        setAppChromeVisible(true);
+        focusModeActive = false;
         super.onDestroyView();
         binding = null;
     }
@@ -692,8 +860,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         // No callback from Settings -> Accessibility (same caveat as ProgressFragment): re-check
         // and re-render in case the user granted/revoked the service while away.
         updateBlockModeButton();
-        // Rango de hoy + requery: cubre volver de AddEventActivity (lag del
-        // InvalidationTracker) y el cambio de día con la app abierta.
+        // Recalcula [startOfToday, endOfToday]: sólo re-dispara la query si el día cambió con
+        // la app abierta -- volver de AddEventActivity no lo necesita, la lista de hoy ya se
+        // re-emite sola (LiveData de Room, ver repository-layer-consolidation T2).
         homeViewModel.refreshToday();
         // "Focus this" desde otra pantalla (p. ej. detalle de proyecto) fija FocusTarget y navega a
         // Home; aquí consumimos el arranque pendiente (una vez) y refrescamos el banner.
@@ -701,6 +870,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             startBoundConcentrationIfIdle();
         }
         updateFocusBanner();
+        // Red de seguridad: si el premio llegó mientras el estado estaba guardado, el observador
+        // no pudo abrirlo y el valor sigue sin limpiar. Aquí ya es seguro comitear.
+        maybeShowFirstFocusCelebration(homeViewModel.getFirstFocusOfDay().getValue());
     }
 
     @Override
@@ -767,6 +939,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         } catch (ClassCastException e) {
             Log.e(TAG, "Error on closing popup: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void onToolbarStreakClick() {
+        new FocusStreakPopup().show(getParentFragmentManager(), FocusStreakPopup.POPUP_TAG);
     }
 
     @Override

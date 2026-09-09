@@ -55,6 +55,12 @@ public class CalendarEntry {
     // (spec projects-mvp). Los items de proyecto son CalendarEntry type=TASK normales.
     private int projectId;
 
+    // spec recurrence-calendar-visibility: true = la fila NO se pinta en la pantalla de
+    // Calendario, pero sigue apareciendo en las listas de Home. Pensado para series recurrentes
+    // (una tarea diaria llenaba el mes entero), por eso las series nuevas nacen ocultas. Las
+    // ocurrencias heredan el flag de su plantilla.
+    private boolean hiddenInCalendar;
+
     // Transitorio (no persistido): nº de ocurrencias atrasadas que una fila colapsada representa
     // en la sección de atrasadas de Home. 0 = fila normal (tarea suelta o no colapsada).
     @Ignore
@@ -128,6 +134,8 @@ public class CalendarEntry {
     public void setEndMillis(long endMillis) {this.endMillis = endMillis;}
     public int getProjectId() {return projectId;}
     public void setProjectId(int projectId) {this.projectId = projectId;}
+    public boolean isHiddenInCalendar() {return hiddenInCalendar;}
+    public void setHiddenInCalendar(boolean hiddenInCalendar) {this.hiddenInCalendar = hiddenInCalendar;}
     
     public static class EventBuilder implements Serializable {
         private int id;
@@ -147,6 +155,7 @@ public class CalendarEntry {
         private int templateId;
         private int type;
         private int projectId;
+        private boolean hiddenInCalendar;
 
         public EventBuilder(){}  //hacer constructor con lo mínimo obligatiorio (title, description, limitDate)
 
@@ -267,6 +276,12 @@ public class CalendarEntry {
         }
         public int getEventProjectId() {return projectId;}
 
+        public EventBuilder setEventHiddenInCalendar(boolean hiddenInCalendar) {
+            this.hiddenInCalendar = hiddenInCalendar;
+            return this;
+        }
+        public boolean getEventHiddenInCalendar() {return hiddenInCalendar;}
+
         public CalendarEntry build(){
             return new CalendarEntry(this);
         }
@@ -292,6 +307,7 @@ public class CalendarEntry {
         this.templateId = builder.templateId;
         this.type = builder.type;
         this.projectId = builder.projectId;
+        this.hiddenInCalendar = builder.hiddenInCalendar;
     }
     public CalendarEntry(){}
 }

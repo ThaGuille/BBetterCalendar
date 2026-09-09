@@ -101,6 +101,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".notifications.project.ProjectDeadlineReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".notifications.event.BootReceiver"
             android:exported="true">
             <intent-filter>

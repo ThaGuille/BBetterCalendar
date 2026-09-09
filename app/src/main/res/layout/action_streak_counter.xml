@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- actionLayout del item de racha de home_toolbar. layoutDirection=ltr porque el <menu> padre
+     fuerza rtl para ordenar los iconos, y sin esto el número saldría a la izquierda de la llama. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/actionStreakRoot"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:clickable="true"
+    android:contentDescription="@string/home_streak_desc"
+    android:focusable="true"
+    android:gravity="center"
+    android:layoutDirection="ltr"
+    android:minWidth="48dp"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/spacing_sm"
+    android:paddingEnd="@dimen/spacing_sm">
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:contentDescription="@string/home_streak_desc"
+        android:src="@drawable/ic_flame_v2_24"
+        app:tint="@color/bb_accent_reward" />
+
+    <TextView
+        android:id="@+id/actionStreakCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_xs"
+        android:text="@string/home_streak_placeholder"
+        android:textAppearance="@style/TextAppearance.BBetter.Title"
+        android:textColor="@color/bb_on_primary"
+        android:textSize="@dimen/text_body" />
+
+</LinearLayout>

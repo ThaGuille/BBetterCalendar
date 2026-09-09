@@ -149,4 +149,19 @@ public class DBMigration extends Application {
             database.execSQL("ALTER TABLE focus_event ADD COLUMN entryId INTEGER NOT NULL DEFAULT 0");
         }
     };
+
+    // spec recurrence-calendar-visibility: flag por fila para sacarla de la pantalla de Calendario
+    // sin sacarla de las listas de Home. Las filas ya existentes de una serie recurrente (plantillas,
+    // sus ocurrencias y las repetitivas legacy aún sin adoptar) se marcan ocultas de golpe: el
+    // comportamiento nuevo por defecto se aplica también a lo que ya había, que es justo el
+    // calendario saturado que motivó el cambio. Las tareas sueltas y los eventos no se tocan.
+    static final Migration MIGRATION_13_14 = new Migration(13, 14) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE calendarEntry ADD COLUMN hiddenInCalendar INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("UPDATE calendarEntry SET hiddenInCalendar = 1 " +
+                    "WHERE isTemplate = 1 OR templateId != 0 " +
+                    "OR (repetition != 0 AND type = 2)");
+        }
+    };
 }

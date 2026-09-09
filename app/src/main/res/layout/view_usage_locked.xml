@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Tarjeta de estado reutilizable de la banda de uso: sirve para LOCKED (permiso apagado) y para
-     EMPTY_NO_APPS (sin apps elegidas). El Fragment cambia título / cuerpo / CTA según el estado. -->
+     EMPTY_NO_APPS (sin apps elegidas). El Fragment cambia título / cuerpo / CTA según el estado.
+     Sin fondo/elevation propios: vive dentro de la tarjeta usage_band (fragment_progress.xml), que
+     ya aporta el bg_card + elevation — duplicarlos aquí se vería como tarjeta-dentro-de-tarjeta. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/usage_state_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_card"
-    android:elevation="@dimen/elevation_card"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="@dimen/home_card_padding">
+    android:padding="@dimen/spacing_sm">
 
     <TextView
         android:id="@+id/usage_state_title"

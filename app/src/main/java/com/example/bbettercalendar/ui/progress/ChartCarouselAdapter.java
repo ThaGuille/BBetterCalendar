@@ -29,7 +29,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-// Carrusel (ViewPager2) de 3 gráficos de Progress. Convierte el ChartBundle plano del ViewModel
+// Carrusel (ViewPager2) de los gráficos de Progress. Convierte el ChartBundle plano del ViewModel
 // en LineChart/BarChart de MPAndroidChart, estilados con el palette bb_*. Cada página tiene su
 // propio viewType para que el gráfico se cree una sola vez por posición.
 public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdapter.CardVH> {
@@ -37,11 +37,13 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
     private static final int PAGE_CONCENT = 0;
     private static final int PAGE_FAILS = 1;
     private static final int PAGE_HOURLY = 2;
-    private static final int PAGE_COUNT = 3;
+    private static final int PAGE_PROJECTS = 3;
+    private static final int PAGE_COUNT = 4;
     // En vista DAY la serie diaria es un único día (un punto): los gráficos de concentración y
     // fallos pasan a ser barras por hora del día, y el gráfico "When" sobra (sería el solapado de
-    // esos dos), así que el carrusel se reduce a 2 páginas.
-    private static final int PAGE_COUNT_DAY = 2;
+    // esos dos), así que esa página se cae y las posiciones se remapean.
+    private static final int PAGE_COUNT_DAY = 3;
+    private static final int PAGE_PROJECTS_DAY = 2;
 
     private ChartBundle bundle;
 
@@ -72,6 +74,13 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         return new CardVH(v);
     }
 
+    // Título de la página, expuesto para el selector con nombre (TabLayout en ProgressFragment):
+    // así el tab y la tarjeta del carrusel siempre muestran la misma etiqueta, incluida la
+    // remapeada de DAY, sin duplicar el switch en dos sitios.
+    public CharSequence pageTitle(Context ctx, int position) {
+        return labelFor(ctx, position);
+    }
+
     @Override
     public void onBindViewHolder(@NonNull CardVH h, int position) {
         Context ctx = h.itemView.getContext();
@@ -86,11 +95,14 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
 
         Chart<?> chart;
         if (isDay()) {
-            // DAY: ambas páginas son barras por hora del día (no hay tendencia con un solo día).
+            // DAY: concentración y fallos son barras por hora del día (no hay tendencia con un
+            // solo día); la de proyectos se comporta igual en los dos modos.
             if (position == PAGE_CONCENT) {
                 chart = buildHourlyBarChart(ctx, bundle.focusMinutesByHour, primary, axis, grid);
-            } else {
+            } else if (position == PAGE_FAILS) {
                 chart = buildHourlyBarChart(ctx, bundle.failByHour, danger, axis, grid);
+            } else {
+                chart = buildProjectChart(ctx, primary, axis, grid);
             }
         } else {
             switch (position) {
@@ -101,8 +113,11 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
                     chart = buildLineChart(ctx, bundle.dayLabels, bundle.fails, danger, axis, grid);
                     break;
                 case PAGE_HOURLY:
-                default:
                     chart = buildHourlyChart(ctx, bundle.focusByHour, bundle.failByHour, primary, danger, axis, grid);
+                    break;
+                case PAGE_PROJECTS:
+                default:
+                    chart = buildProjectChart(ctx, primary, axis, grid);
                     break;
             }
         }
@@ -118,15 +133,22 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         });
     }
 
+    // Las posiciones son posicionales y DAY las remapea, así que la etiqueta también depende del
+    // modo: en DAY la posición 2 ya no es "When" sino la de proyectos.
     private String labelFor(Context ctx, int position) {
+        if (isDay() && position == PAGE_PROJECTS_DAY) {
+            return ctx.getString(R.string.progress_chart_projects);
+        }
         switch (position) {
             case PAGE_CONCENT:
                 return ctx.getString(R.string.progress_chart_concent);
             case PAGE_FAILS:
                 return ctx.getString(R.string.progress_chart_fails);
             case PAGE_HOURLY:
-            default:
                 return ctx.getString(R.string.progress_chart_when);
+            case PAGE_PROJECTS:
+            default:
+                return ctx.getString(R.string.progress_chart_projects);
         }
     }
 
@@ -217,6 +239,41 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         x.setLabelCount(7, false);
         x.setAxisMinimum(-0.5f);
         x.setAxisMaximum(23.5f);
+        return chart;
+    }
+
+    // Minutos de concentración atribuidos por proyecto dentro del rango (spec
+    // project-deadlines-progress). Deliberadamente básica: una barra por proyecto, sin filtros ni
+    // métricas seleccionables — eso llega más adelante. Rango sin datos -> el estado "sin datos"
+    // propio de MPAndroidChart, sin vista vacía a medida.
+    private BarChart buildProjectChart(Context ctx, int color, int axisColor, int gridColor) {
+        BarChart chart = new BarChart(ctx);
+        String[] labels = bundle.projectLabels;
+        int[] values = bundle.projectMinutes;
+        if (labels == null || values == null || values.length == 0) {
+            chart.getDescription().setEnabled(false);
+            chart.setNoDataTextColor(axisColor);
+            return chart;
+        }
+
+        List<BarEntry> entries = new ArrayList<>();
+        for (int i = 0; i < values.length; i++) {
+            entries.add(new BarEntry(i, values[i]));
+        }
+        BarDataSet set = new BarDataSet(entries, "");
+        set.setColor(color);
+        set.setDrawValues(false);
+        BarData data = new BarData(set);
+        data.setBarWidth(0.5f);
+        chart.setData(data);
+
+        styleCommon(chart, labels, axisColor, gridColor);
+        XAxis x = chart.getXAxis();
+        // Un nombre de proyecto es mucho más ancho que "12" o "3/5": con muchos proyectos las
+        // etiquetas se solaparían, así que se limita cuántas se dibujan.
+        x.setLabelCount(Math.min(values.length, 5), false);
+        x.setAxisMinimum(-0.5f);
+        x.setAxisMaximum(values.length - 0.5f);
         return chart;
     }
 

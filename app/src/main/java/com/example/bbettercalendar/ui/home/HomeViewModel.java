@@ -6,7 +6,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
@@ -18,10 +17,11 @@ import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
+import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.popups.RepetitionSpec;
-import com.example.bbettercalendar.stats.AttributedMinutes;
+import com.example.bbettercalendar.stats.FocusAttributionRepository;
 import com.example.bbettercalendar.stats.FocusEvent;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.Stats;
@@ -43,54 +43,69 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class HomeViewModel extends AndroidViewModel {
 
+    private static final long DAY_MILLIS = 24L * 60 * 60 * 1000;
+
     private final String TAG = "HomeFragmentTag";
     private final MutableLiveData<String> mText;
     private final MutableLiveData<String> timerText;
-    private final MutableLiveData<String> currentStreakText;
     private final MutableLiveData<String> todayFailsText;
     private final MutableLiveData<String> todayTimeStudiedText;
     private final MutableLiveData<String> timerModeText;
-    // Evento one-shot: título de la tarea recién auto-completada al alcanzar su objetivo de minutos
-    // (spec focus-attribution). El fragment lo consume para disparar feedback + notificación y luego
-    // lo limpia. null = nada pendiente.
-    private final MutableLiveData<String> autoCompletedTaskTitle = new MutableLiveData<>();
-    private String currentStreakString;
-    private ExecutorService executorService;
+    private ExecutorService ioExecutor;
+    private ExecutorService dbWriteExecutor;
     private StatsDAO statsDao;
     private FocusEventDAO focusEventDao;
     private CalendarEntryDAO calendarEntryDao;
+    private FocusAttributionRepository focusAttributionRepository;
     public ConfigurationManager configManager;
 
     // --- "Today" task list (spec tasks-home-today) ---
-    // Trigger [startOfToday, endOfToday]: re-emitirlo desde onResume fuerza a switchMap a
-    // reconstruir la query Room (mismo workaround que CalendarViewModel.refresh() para el
-    // lag del InvalidationTracker tras insertar desde otra pantalla) y cubre el cambio de día.
+    // Trigger [startOfToday, endOfToday]: sólo se re-emite cuando el día cambia con la app
+    // abierta (ver refreshToday()) -- el propio LiveData de Room ya se invalida sola en
+    // cualquier escritura a calendarEntry, así que no hace falta forzarla desde onResume
+    // (repository-layer-consolidation, T2: ver data-model.md invariante de invalidación).
     private final MutableLiveData<long[]> todayRange = new MutableLiveData<>();
     // Instante "antes de hoy" para la sección de atrasadas; null = sección plegada, sin query.
     private final MutableLiveData<Long> overdueBefore = new MutableLiveData<>();
     private final LiveData<List<CalendarEntry>> todayTasks;
     // Lista de hoy enriquecida con los minutos atribuidos por tarea (spec focus-attribution),
-    // calculados fuera del hilo principal a partir de todayTasks. Es la que observa el fragment.
-    private final MediatorLiveData<List<CalendarEntry>> todayTasksEnriched = new MediatorLiveData<>();
+    // ahora observando también focus_event (spec repository-layer-consolidation) -- es la que
+    // observa el fragment.
+    private final LiveData<List<CalendarEntry>> todayTasksEnriched;
     private final LiveData<List<CalendarEntry>> overdueTasks;
+
+    // --- Racha "días con pomodoro" (spec focus-mode-and-streak) ---
+    // Inicio de la ventana de 30 días (00:00 de hace 29 días). Es una LiveData y no una constante
+    // porque la ventana se desliza: refreshToday() la reajusta cuando el día cambia con la app
+    // abierta, igual que hace con todayRange.
+    private final MutableLiveData<Long> streakWindowStart = new MutableLiveData<>();
+    private final LiveData<Integer> activeDaysLast30;
+    // Evento de un solo disparo: nº de días con pomodoro de ESTE MES, emitido sólo cuando la
+    // sesión recién completada es la primera del día. null = nada pendiente que celebrar.
+    private final MutableLiveData<Integer> firstFocusOfDay = new MutableLiveData<>();
 
     @Inject
     public HomeViewModel(@NonNull Application application, StatsDAO statsDao, FocusEventDAO focusEventDao,
                          CalendarEntryDAO calendarEntryDao, ConfigurationManager configManager,
-                         @IoExecutor ExecutorService executorService) {
+                         FocusAttributionRepository focusAttributionRepository,
+                         @IoExecutor ExecutorService ioExecutor,
+                         @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
         mText = new MutableLiveData<>();
         timerText = new MutableLiveData<>();
-        currentStreakText = new MutableLiveData<>();
         todayFailsText = new MutableLiveData<>();
         todayTimeStudiedText = new MutableLiveData<>();
         timerModeText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+        // R.string.home_greeting ("Hi there") ya existía sin usar; el literal anterior era un
+        // placeholder de plantilla que se estaba mostrando en producción.
+        mText.setValue(application.getString(com.example.bbettercalendar.R.string.home_greeting));
         timerText.setValue("20:00");
         this.statsDao = statsDao;
         this.focusEventDao = focusEventDao;
         this.calendarEntryDao = calendarEntryDao;
-        this.executorService = executorService;
+        this.focusAttributionRepository = focusAttributionRepository;
+        this.ioExecutor = ioExecutor;
+        this.dbWriteExecutor = dbWriteExecutor;
         // HomeFragment inyecta su propio ConfigurationManager y lo vuelve a fijar vía
         // setConfigManager() (mismo Singleton de Hilt) -- se mantiene por compatibilidad, ver ese
         // método más abajo.
@@ -104,7 +119,7 @@ public class HomeViewModel extends AndroidViewModel {
                     calendarEntryDao.getEventsBetween(range[0], range[1]),
                     HomeViewModel::filterAndSortTasks);
         });
-        todayTasksEnriched.addSource(todayTasks, this::enrichWithAttributedMinutes);
+        todayTasksEnriched = focusAttributionRepository.enrich(todayTasks);
         overdueTasks = Transformations.switchMap(overdueBefore, before -> {
             if (before == null) {
                 return emptyEntryList();
@@ -112,6 +127,14 @@ public class HomeViewModel extends AndroidViewModel {
             return Transformations.map(
                     calendarEntryDao.getUndoneTasksBefore(before),
                     HomeViewModel::collapseOverdue);
+        });
+        // La query sólo se re-suscribe cuando la ventana se mueve (cambio de día); dentro de la
+        // misma ventana la LiveData de Room ya se reemite sola al insertar un FocusEvent.
+        activeDaysLast30 = Transformations.switchMap(streakWindowStart, since -> {
+            if (since == null) {
+                return zeroLive();
+            }
+            return focusEventDao.observeActiveDaysSince(since);
         });
         refreshToday();
 
@@ -134,7 +157,7 @@ public class HomeViewModel extends AndroidViewModel {
             }
         };
         InitialConfiguration.getInstance().getInitializationStatus().observeForever(initializationObserver);*/
-        executorService.execute(() -> {
+        ioExecutor.execute(() -> {
             Stats initialStats = statsDao.getStats();
             setInitialTexts(initialStats);
         });
@@ -145,7 +168,6 @@ public class HomeViewModel extends AndroidViewModel {
         Log.i(TAG, "View Model setInitialTexts()");
         // Valores "pelados" (sin frase): la fila compacta de stats ya pinta su label al lado
         // (spec tasks-home-today) y la frase completa duplicaba esa etiqueta.
-        currentStreakText.postValue(String.valueOf(initialStats.currentStreak));
         todayFailsText.postValue(String.valueOf(initialStats.todayFails));
         String formattedTime = FormatHelper.formatTime(initialStats.todayTimeStudied, "HH:mm");
         todayTimeStudiedText.postValue(formattedTime);
@@ -209,17 +231,33 @@ public class HomeViewModel extends AndroidViewModel {
         return result;
     }
 
+    private static LiveData<Integer> zeroLive() {
+        MutableLiveData<Integer> zero = new MutableLiveData<>();
+        zero.setValue(0);
+        return zero;
+    }
+
     private static LiveData<List<CalendarEntry>> emptyEntryList() {
         MutableLiveData<List<CalendarEntry>> empty = new MutableLiveData<>();
         empty.setValue(Collections.emptyList());
         return empty;
     }
 
-    /** Recalcula el rango de hoy y re-dispara las queries. Llamar desde onResume (main thread). */
+    /**
+     * Recalcula [startOfToday, endOfToday] y sólo re-dispara las queries si el día cambió --
+     * la lista de hoy en sí ya se re-emite sola en cualquier inserción/actualización de
+     * calendarEntry (LiveData de Room, auto-invalidada). Llamar desde onResume (main thread).
+     */
     public void refreshToday() {
         long startOfToday = startOfTodayMillis();
-        long endOfToday = startOfToday + 24L * 60 * 60 * 1000 - 1;
+        long[] current = todayRange.getValue();
+        if (current != null && current[0] == startOfToday) {
+            return;
+        }
+        long endOfToday = startOfToday + DAY_MILLIS - 1;
         todayRange.setValue(new long[]{startOfToday, endOfToday});
+        // Ventana de 30 días CIVILES incluyendo hoy -> hoy cuenta como el día 30, no como el 31.
+        streakWindowStart.setValue(startOfToday - 29L * DAY_MILLIS);
         if (overdueBefore.getValue() != null) {
             overdueBefore.setValue(startOfToday);
         }
@@ -236,7 +274,7 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public void setTaskDone(CalendarEntry entry, boolean done) {
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             // Releer la fila en vez de mutar desde este hilo la instancia que el adapter
             // tiene bindeada en el main thread. No hace falta postValue: la LiveData de
             // Room re-emite sola al invalidarse la tabla.
@@ -263,10 +301,13 @@ public class HomeViewModel extends AndroidViewModel {
             builder.setEventRepetition(repetition.repetition)
                     .setEventRepetitionInterval(repetition.interval)
                     .setEventRepetitionDays(repetition.daysMask)
-                    .setEventIsTemplate(true);
+                    .setEventIsTemplate(true)
+                    // La plantilla lleva el flag; las ocurrencias lo heredan en el materializador
+                    // (spec recurrence-calendar-visibility).
+                    .setEventHiddenInCalendar(repetition.hidesFromCalendar());
         }
         CalendarEntry task = builder.build();
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             long rowId = calendarEntryDao.insert(task);
             if (repeats) {
                 new RecurrenceMaterializer(getApplication(), calendarEntryDao)
@@ -283,7 +324,7 @@ public class HomeViewModel extends AndroidViewModel {
     public void dismissSeries(CalendarEntry entry) {
         final int entryId = entry.getId();
         final int templateId = entry.getTemplateId();
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             if (templateId != 0) {
                 calendarEntryDao.dismissSeriesBefore(templateId, startOfTodayMillis());
             } else {
@@ -309,36 +350,13 @@ public class HomeViewModel extends AndroidViewModel {
         return todayTasksEnriched;
     }
 
-    // Rellena CalendarEntry.attributedMinutes (transitorio) para las tareas con objetivo, con una
-    // sola query agrupada, fuera del hilo principal. Las que no tienen objetivo se dejan en 0.
-    private void enrichWithAttributedMinutes(List<CalendarEntry> tasks) {
-        if (tasks == null || tasks.isEmpty()) {
-            todayTasksEnriched.setValue(tasks);
-            return;
-        }
-        executorService.execute(() -> {
-            List<AttributedMinutes> sums = focusEventDao.getAttributedMinutesByEntry();
-            Map<Integer, Integer> byId = new HashMap<>();
-            for (AttributedMinutes am : sums) {
-                byId.put(am.entryId, am.minutes);
-            }
-            for (CalendarEntry e : tasks) {
-                if (e.getTargetMinutes() > 0) {
-                    Integer m = byId.get(e.getId());
-                    e.setAttributedMinutes(m == null ? 0 : m);
-                }
-            }
-            todayTasksEnriched.postValue(tasks);
-        });
-    }
-
     public LiveData<List<CalendarEntry>> getOverdueTasks() {
         return overdueTasks;
     }
 
     //Cuando el usuario cierra la app a medio contador
     public void addFails(int boundEntryId) {
-        executorService.execute(new Runnable() {
+        dbWriteExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "View Model addFails()");
@@ -352,7 +370,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     //Cuando el temporizador llega a 0 se actualizan y guardan estadísticas
     public void completeTimer(int timerTime, int boundEntryId){
-        executorService.execute(new Runnable() {
+        dbWriteExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 Log.i(TAG, "View Model addTimeStudied( " + timerTime + " )");
@@ -360,29 +378,50 @@ public class HomeViewModel extends AndroidViewModel {
                 statsDao.addTasksDone();
                 logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime), boundEntryId);
                 if (boundEntryId != 0) {
-                    maybeAutoComplete(boundEntryId);
+                    focusAttributionRepository.maybeAutoComplete(boundEntryId);
                 }
+                maybeAnnounceFirstFocusOfDay();
                 String formattedTime = FormatHelper.formatTime(statsDao.getTodayTimeStudied(), "HH:mm");
                 todayTimeStudiedText.postValue(formattedTime);
             }
         });
     }
 
-    // Auto-completado (spec focus-attribution, decisión #7): sólo se evalúa AQUÍ, al terminar una
-    // sesión vinculada — nunca en un recálculo pasivo — para que un des-marcado manual no se vuelva
-    // a marcar solo. Marca isDone y emite el evento de feedback si se alcanza el objetivo.
-    // Corre dentro del executorService (fuera del hilo principal).
-    private void maybeAutoComplete(int entryId) {
-        CalendarEntry entry = calendarEntryDao.getEventById(entryId);
-        if (entry == null || entry.isDone() || entry.getTargetMinutes() <= 0) {
+    /**
+     * Se llama justo DESPUÉS de insertar el FocusEvent de la sesión, dentro del mismo executor:
+     * si el recuento de hoy es exactamente 1, esta sesión es la primera del día y hay algo que
+     * celebrar (spec focus-mode-and-streak). Contar filas en vez de guardar un "último día
+     * celebrado" evita un flag persistente y sale correcto solo tras un reinicio o un cambio de día.
+     */
+    private void maybeAnnounceFirstFocusOfDay() {
+        long startOfToday = startOfTodayMillis();
+        long endOfToday = startOfToday + DAY_MILLIS - 1;
+        if (focusEventDao.countFocusBetween(startOfToday, endOfToday) != 1) {
             return;
         }
-        int attributed = focusEventDao.sumAttributedMinutes(entryId);
-        if (attributed >= entry.getTargetMinutes()) {
-            entry.setDone(true);
-            calendarEntryDao.update(entry);
-            autoCompletedTaskTitle.postValue(entry.getTitle());
-        }
+        Calendar month = Calendar.getInstance();
+        month.set(Calendar.DAY_OF_MONTH, 1);
+        month.set(Calendar.HOUR_OF_DAY, 0);
+        month.set(Calendar.MINUTE, 0);
+        month.set(Calendar.SECOND, 0);
+        month.set(Calendar.MILLISECOND, 0);
+        int daysThisMonth = focusEventDao.countActiveDaysBetween(month.getTimeInMillis(), endOfToday);
+        firstFocusOfDay.postValue(daysThisMonth);
+    }
+
+    /** Días de los últimos 30 con al menos un pomodoro completado (la racha de la toolbar). */
+    public LiveData<Integer> getActiveDaysLast30() {
+        return activeDaysLast30;
+    }
+
+    /** Nº de días con pomodoro de este mes, emitido sólo al completar el primero del día. */
+    public LiveData<Integer> getFirstFocusOfDay() {
+        return firstFocusOfDay;
+    }
+
+    /** El fragment lo llama tras mostrar la celebración (evita re-disparo al volver a Home). */
+    public void clearFirstFocusOfDay() {
+        firstFocusOfDay.setValue(null);
     }
 
     // Registra un evento con timestamp para el histórico por horas de Progress.
@@ -397,12 +436,12 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public LiveData<String> getAutoCompletedTaskTitle() {
-        return autoCompletedTaskTitle;
+        return focusAttributionRepository.getAutoCompletedTaskTitle();
     }
 
     /** El fragment lo llama tras consumir el evento de auto-completado (evita re-disparo). */
     public void clearAutoCompletedTaskTitle() {
-        autoCompletedTaskTitle.setValue(null);
+        focusAttributionRepository.clearAutoCompletedTaskTitle();
     }
 
     public void setRestTimer(){
@@ -421,7 +460,7 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public void updateConfiguration(Configuration config){
-        executorService.execute(new Runnable() {
+        dbWriteExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 configManager.updateConfiguration(config);
@@ -443,11 +482,10 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
 
-    public LiveData<String> getCurrentStreakText() {return currentStreakText;}
     public LiveData<String> getTodayFailsText() {return todayFailsText;}
     public LiveData<String> getTodayTimeStudiedText() {return todayTimeStudiedText;}
     public LiveData<String> getTimerModeText() {return timerModeText;}
 
-    // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra
-    // aquí; onCleared() no tiene nada más que liberar.
+    // ioExecutor/dbWriteExecutor son los executors compartidos de la app (Hilt @Singleton) -- ya
+    // no se cierran aquí; onCleared() no tiene nada más que liberar.
 }

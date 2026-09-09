@@ -62,7 +62,7 @@ public class EventReminderReceiver extends BroadcastReceiver {
 
         NotificationSpec spec = new NotificationSpec.Builder(
                 NotificationChannels.CHANNEL_EVENT_REMINDERS,
-                eventNotificationId(entry.getId(), offsetIndex))
+                notificationIdFor(entry.getId(), offsetIndex))
                 .title(title)
                 .body(body)
                 .openMainActivity(context)
@@ -75,7 +75,9 @@ public class EventReminderReceiver extends BroadcastReceiver {
     // pre-materializan como filas propias con sus recordatorios (ver RecurrenceMaterializer),
     // así que el receiver sólo notifica.
 
-    private static int eventNotificationId(int entryId, int offsetIndex) {
+    // Público para que el test de particiones de ids compare contra la fórmula real y no una copia
+    // (spec project-deadlines-progress). Ver la tabla de rangos en notifications.md.
+    public static int notificationIdFor(int entryId, int offsetIndex) {
         return 100_000 + entryId * 10 + offsetIndex;
     }
 }

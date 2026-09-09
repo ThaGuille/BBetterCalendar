@@ -5,24 +5,21 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
-import com.example.bbettercalendar.database.IoExecutor;
+import com.example.bbettercalendar.database.DbWriteExecutor;
+import com.example.bbettercalendar.notifications.project.ProjectDeadlineScheduler;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
-import com.example.bbettercalendar.stats.AttributedMinutes;
-import com.example.bbettercalendar.stats.FocusEventDAO;
+import com.example.bbettercalendar.stats.FocusAttributionRepository;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -32,57 +29,37 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class ProjectDetailViewModel extends AndroidViewModel {
 
-    private final ExecutorService executorService;
+    private final ExecutorService dbWriteExecutor;
     private final ProjectDAO projectDao;
     private final CalendarEntryDAO calendarEntryDao;
-    private final FocusEventDAO focusEventDao;
+    private final ProjectDeadlineScheduler deadlineScheduler;
 
     private final MutableLiveData<Integer> projectIdLiveData = new MutableLiveData<>();
     private final LiveData<Project> project;
     private final LiveData<List<CalendarEntry>> items;
-    // Items enriquecidos con los minutos atribuidos por item (spec focus-attribution), calculados
-    // fuera del hilo principal. Es la que observa el fragment.
-    private final MediatorLiveData<List<CalendarEntry>> itemsEnriched = new MediatorLiveData<>();
+    // Items enriquecidos con los minutos atribuidos por item (spec focus-attribution), ahora
+    // observando también focus_event (spec repository-layer-consolidation). Es la que observa
+    // el fragment.
+    private final LiveData<List<CalendarEntry>> itemsEnriched;
     private final MutableLiveData<Boolean> projectDeleted = new MutableLiveData<>();
 
     @Inject
     public ProjectDetailViewModel(@NonNull Application application, ProjectDAO projectDao,
-                                   CalendarEntryDAO calendarEntryDao, FocusEventDAO focusEventDao,
-                                   @IoExecutor ExecutorService executorService) {
+                                   CalendarEntryDAO calendarEntryDao,
+                                   FocusAttributionRepository focusAttributionRepository,
+                                   ProjectDeadlineScheduler deadlineScheduler,
+                                   @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
-        this.executorService = executorService;
+        this.dbWriteExecutor = dbWriteExecutor;
         this.projectDao = projectDao;
         this.calendarEntryDao = calendarEntryDao;
-        this.focusEventDao = focusEventDao;
+        this.deadlineScheduler = deadlineScheduler;
 
         project = Transformations.switchMap(projectIdLiveData, id ->
                 id == null ? emptyProject() : projectDao.observeById(id));
         items = Transformations.switchMap(projectIdLiveData, id ->
                 id == null ? emptyEntryList() : calendarEntryDao.observeItemsByProject(id));
-        itemsEnriched.addSource(items, this::enrichWithAttributedMinutes);
-    }
-
-    // Rellena CalendarEntry.attributedMinutes (transitorio) para los items con objetivo, con una
-    // sola query agrupada, fuera del hilo principal.
-    private void enrichWithAttributedMinutes(List<CalendarEntry> entries) {
-        if (entries == null || entries.isEmpty()) {
-            itemsEnriched.setValue(entries);
-            return;
-        }
-        executorService.execute(() -> {
-            List<AttributedMinutes> sums = focusEventDao.getAttributedMinutesByEntry();
-            Map<Integer, Integer> byId = new HashMap<>();
-            for (AttributedMinutes am : sums) {
-                byId.put(am.entryId, am.minutes);
-            }
-            for (CalendarEntry e : entries) {
-                if (e.getTargetMinutes() > 0) {
-                    Integer m = byId.get(e.getId());
-                    e.setAttributedMinutes(m == null ? 0 : m);
-                }
-            }
-            itemsEnriched.postValue(entries);
-        });
+        itemsEnriched = focusAttributionRepository.enrich(items);
     }
 
     private static LiveData<Project> emptyProject() {
@@ -115,7 +92,7 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     }
 
     public void setItemDone(CalendarEntry entry, boolean done) {
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             CalendarEntry fresh = calendarEntryDao.getEventById(entry.getId());
             if (fresh == null) {
                 return;
@@ -138,12 +115,12 @@ public class ProjectDetailViewModel extends AndroidViewModel {
             builder.setEventStartDayAndHour(startDayAndHour);
         }
         CalendarEntry entry = builder.build();
-        executorService.execute(() -> calendarEntryDao.insert(entry));
+        dbWriteExecutor.execute(() -> calendarEntryDao.insert(entry));
     }
 
     public void updateHeader(String name, String notes) {
         int projectId = requireProjectId();
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             Project fresh = projectDao.getById(projectId);
             if (fresh == null) {
                 return;
@@ -156,20 +133,25 @@ public class ProjectDetailViewModel extends AndroidViewModel {
 
     public void updateDeadline(long softDeadlineMillis) {
         int projectId = requireProjectId();
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             Project fresh = projectDao.getById(projectId);
             if (fresh == null) {
                 return;
             }
             fresh.softDeadlineMillis = softDeadlineMillis;
             projectDao.update(fresh);
+            // Cancelar SIEMPRE antes de reprogramar: las alarmas del deadline anterior siguen
+            // armadas y dispararían fuera de sitio (o, si el deadline se borró, sin deadline).
+            // scheduleFor() no hace nada si softDeadlineMillis <= 0, así que borrar sólo cancela.
+            deadlineScheduler.cancelFor(projectId);
+            deadlineScheduler.scheduleFor(fresh);
         });
     }
 
     /** Transición de status (spec projects-mvp decisión #2) — nunca borra filas, sólo las retiene. */
     public void completeProject() {
         int projectId = requireProjectId();
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             Project fresh = projectDao.getById(projectId);
             if (fresh == null) {
                 return;
@@ -177,15 +159,20 @@ public class ProjectDetailViewModel extends AndroidViewModel {
             fresh.status = Project.STATUS_COMPLETED;
             fresh.completedAtMillis = System.currentTimeMillis();
             projectDao.update(fresh);
+            // Un proyecto ya terminado no debe seguir avisando de su deadline (decisión #11).
+            deadlineScheduler.cancelFor(projectId);
         });
     }
 
     /** Cascade manual (decisión #3) — único camino que borra items de verdad. */
     public void deleteProject() {
         int projectId = requireProjectId();
-        executorService.execute(() -> {
+        dbWriteExecutor.execute(() -> {
             calendarEntryDao.deleteItemsByProject(projectId);
             projectDao.deleteById(projectId);
+            // La fila ya no existe: sin esto el receiver recibiría la alarma y la descartaría, pero
+            // la PendingIntent seguiría viva en AlarmManager hasta su hora.
+            deadlineScheduler.cancelFor(projectId);
             projectDeleted.postValue(true);
         });
     }
@@ -195,6 +182,6 @@ public class ProjectDetailViewModel extends AndroidViewModel {
         return id == null ? 0 : id;
     }
 
-    // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra
-    // aquí; onCleared() no tiene nada más que liberar.
+    // dbWriteExecutor es el @DbWriteExecutor compartido de la app (Hilt @Singleton) -- ya no se
+    // cierra aquí; onCleared() no tiene nada más que liberar.
 }

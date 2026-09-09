@@ -12,9 +12,14 @@ public final class ChartBundle {
     public final int[] focusMinutesByHour;  // 24 buckets: minutos de concentración por hora del día
     public final int[] focusByHour;         // 24 buckets: sesiones completadas por hora del día
     public final int[] failByHour;          // 24 buckets: fallos por hora del día
+    // Minutos por proyecto dentro del rango, ya ordenados de más a menos. Alineados por índice
+    // entre sí; longitud 0 = no hubo concentración atribuida a ningún proyecto en el rango.
+    public final String[] projectLabels;
+    public final int[] projectMinutes;
 
     public ChartBundle(Granularity granularity, String[] dayLabels, int[] focusMinutes, int[] fails,
-                       int[] focusMinutesByHour, int[] focusByHour, int[] failByHour) {
+                       int[] focusMinutesByHour, int[] focusByHour, int[] failByHour,
+                       String[] projectLabels, int[] projectMinutes) {
         this.granularity = granularity;
         this.dayLabels = dayLabels;
         this.focusMinutes = focusMinutes;
@@ -22,5 +27,7 @@ public final class ChartBundle {
         this.focusMinutesByHour = focusMinutesByHour;
         this.focusByHour = focusByHour;
         this.failByHour = failByHour;
+        this.projectLabels = projectLabels;
+        this.projectMinutes = projectMinutes;
     }
 }

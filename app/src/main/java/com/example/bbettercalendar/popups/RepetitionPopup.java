@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
@@ -39,11 +40,16 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
     private int selected = RepetitionOptions.NONE;
     private int interval = 1;
     private int daysMask = 0;
+    // spec recurrence-calendar-visibility: una serie nueva nace oculta del calendario.
+    private boolean hiddenInCalendar = RepetitionSpec.DEFAULT_HIDDEN_IN_CALENDAR;
 
     private ToggleButton[] baseToggles = new ToggleButton[4];
     private ToggleButton[] weekdayToggles = new ToggleButton[7];
     private View dailyOptions;
     private View weeklyOptions;
+    private View hideRow;
+    private View hideDivider;
+    private CheckBox hideCheck;
     private android.widget.TextView intervalValue;
     private boolean updatingToggles = false;
 
@@ -53,6 +59,13 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
         this.selected = spec.repetition;
         this.interval = Math.max(MIN_INTERVAL, spec.interval);
         this.daysMask = spec.daysMask;
+        // RepetitionSpec.none() hardcodes hiddenInCalendar = false (meaningless when there's no
+        // series) — only adopt the seed when it actually describes a repeating spec, otherwise a
+        // fresh popup (seeded from none()) would silently override its own true default the
+        // moment the user picks a repetition.
+        if (spec.repeats()) {
+            this.hiddenInCalendar = spec.hiddenInCalendar;
+        }
     }
 
     @NonNull
@@ -104,6 +117,16 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
             weekdayToggles[i] = tb;
         }
 
+        hideRow = view.findViewById(R.id.repetition_popup_row_hide);
+        hideDivider = view.findViewById(R.id.repetition_popup_hide_divider);
+        hideCheck = view.findViewById(R.id.repetition_popup_hide_check);
+        // El CheckBox no es clicable por sí mismo (igual que los toggles de las filas base):
+        // el área de toque es la fila entera.
+        hideRow.setOnClickListener(v -> {
+            hiddenInCalendar = !hiddenInCalendar;
+            hideCheck.setChecked(hiddenInCalendar);
+        });
+
         view.findViewById(R.id.repetition_popup_confirm).setOnClickListener(v -> dismiss());
 
         renderSelection();
@@ -125,6 +148,11 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
         updatingToggles = false;
         dailyOptions.setVisibility(selected == RepetitionOptions.DAILY ? View.VISIBLE : View.GONE);
         weeklyOptions.setVisibility(selected == RepetitionOptions.WEEKLY ? View.VISIBLE : View.GONE);
+        // "Ocultar del calendario" sólo tiene sentido para una serie (spec recurrence-calendar-visibility).
+        int hideVisibility = selected == RepetitionOptions.NONE ? View.GONE : View.VISIBLE;
+        hideRow.setVisibility(hideVisibility);
+        hideDivider.setVisibility(hideVisibility);
+        hideCheck.setChecked(hiddenInCalendar);
     }
 
     private void toggleWeekday(int bit, boolean checked) {
@@ -168,7 +196,7 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
         super.onDismiss(dialog);
         if (listener != null) {
             listener.OnClosePopup(PopupHelper.REPETITION_POPUP,
-                    new RepetitionSpec(selected, interval, daysMask));
+                    new RepetitionSpec(selected, interval, daysMask, hiddenInCalendar));
         }
     }
 }

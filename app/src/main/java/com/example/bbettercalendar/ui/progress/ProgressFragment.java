@@ -9,8 +9,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
@@ -24,6 +26,7 @@ import com.example.bbettercalendar.usage.UsageAccess;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -34,6 +37,7 @@ public class ProgressFragment extends Fragment {
     private ProgressViewModel viewModel;
     private ChartCarouselAdapter adapter;
     private AppUsageAdapter usageAdapter;
+    private ProjectProgressAdapter projectAdapter;
 
     // Vistas de la tarjeta de estado (LOCKED / EMPTY) — están dentro del <include>, se resuelven
     // por findViewById para no depender del binding anidado del include.
@@ -49,15 +53,23 @@ public class ProgressFragment extends Fragment {
 
         adapter = new ChartCarouselAdapter();
         binding.chartPager.setAdapter(adapter);
-        // Indicador de puntos: TabLayout sincronizado con el ViewPager2 (sin texto de pestaña).
+        // Selector con el título de cada gráfico (no puntos ciegos): tocar un tab salta directo a esa
+        // página; el tab seleccionado sigue al swipe igual que antes. autoRefresh (por defecto true)
+        // vuelve a llamar este callback en cada notifyDataSetChanged, así que el remapeo de labels de
+        // DAY (menos páginas) se refleja solo al cambiar de granularidad.
         new TabLayoutMediator(binding.chartDots, binding.chartPager,
-                (tab, position) -> { }).attach();
+                (tab, position) -> tab.setText(adapter.pageTitle(requireContext(), position))).attach();
 
         binding.granularityDay.setOnClickListener(v -> viewModel.setGranularity(Granularity.DAY));
         binding.granularityWeek.setOnClickListener(v -> viewModel.setGranularity(Granularity.WEEK));
         binding.granularityMonth.setOnClickListener(v -> viewModel.setGranularity(Granularity.MONTH));
         binding.rangePrev.setOnClickListener(v -> viewModel.stepBack());
         binding.rangeNext.setOnClickListener(v -> viewModel.stepForward());
+
+        // --- banda 2: progreso por proyecto ---
+        projectAdapter = new ProjectProgressAdapter(this::openProjectDetail);
+        binding.projectsList.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.projectsList.setAdapter(projectAdapter);
 
         // --- banda 3: uso de apps ---
         usageAdapter = new AppUsageAdapter(requireContext(),
@@ -84,6 +96,7 @@ public class ProgressFragment extends Fragment {
 
         viewModel.getCharts().observe(getViewLifecycleOwner(), bundle -> adapter.setBundle(bundle));
         viewModel.getSelectedRange().observe(getViewLifecycleOwner(), this::renderRange);
+        viewModel.getProjectRows().observe(getViewLifecycleOwner(), this::renderProjectRows);
         viewModel.getApps().observe(getViewLifecycleOwner(), rows -> usageAdapter.submit(rows));
         viewModel.getScreenTimeMillis().observe(getViewLifecycleOwner(), millis ->
                 binding.usageScreenTime.setText(FormatHelper.formatDuration(millis)));
@@ -133,12 +146,18 @@ public class ProgressFragment extends Fragment {
     }
 
     // Interruptor maestro "hacer cumplir los límites": refleja el estado guardado (por defecto ON).
+    // El pill cambia de color (bb_primary ON / bb_on_surface_muted OFF), no sólo el texto, para que
+    // el estado se note de un vistazo — mismo patrón que highlightGranularity() con los segmentos.
     private void updateEnforceMaster() {
         if (binding == null) return;
         boolean enabled = BlockingSettings.isEnforcementEnabled(requireContext());
         binding.usageEnforceMaster.setText(enabled
                 ? R.string.progress_enforce_master_on
                 : R.string.progress_enforce_master_off);
+        binding.usageEnforceMaster.setBackgroundResource(enabled
+                ? R.drawable.bg_pill_outline_primary : R.drawable.bg_pill_outline_muted);
+        binding.usageEnforceMaster.setTextColor(ContextCompat.getColor(requireContext(),
+                enabled ? R.color.bb_primary : R.color.bb_on_surface_muted));
     }
 
     private void renderRange(TimeRange range) {
@@ -149,6 +168,22 @@ public class ProgressFragment extends Fragment {
         binding.rangeNext.setAlpha(canForward ? 1f : 0.3f);
 
         highlightGranularity(range.granularity);
+    }
+
+    // Banda 2: sin proyectos que mostrar se esconde entera (cabecera incluida). No hay estados como
+    // los de la banda de uso porque aquí no hay ningún permiso que pueda faltar.
+    private void renderProjectRows(List<ProjectProgressRow> rows) {
+        if (binding == null) return;
+        boolean empty = rows == null || rows.isEmpty();
+        binding.projectsBand.setVisibility(empty ? View.GONE : View.VISIBLE);
+        projectAdapter.submit(rows);
+    }
+
+    private void openProjectDetail(ProjectProgressRow row) {
+        Bundle args = new Bundle();
+        args.putInt("projectId", row.projectId);
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.action_global_project_detail, args);
     }
 
     // Banda 3: alterna lista / spinner / tarjeta de estado y configura la tarjeta según el estado.

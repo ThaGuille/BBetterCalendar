@@ -12,20 +12,27 @@
     android:paddingEnd="@dimen/spacing_md">
 
     <!-- Toggle "hacer cumplir el límite" (Phase 4a): estado (tint/alpha) y click los pone el adapter.
-         padding + minWidth/Height amplían el área táctil sin agrandar el icono. -->
-    <ImageView
-        android:id="@+id/usage_block_toggle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:clickable="true"
-        android:contentDescription="@string/progress_usage_block_toggle"
-        android:focusable="true"
-        android:minWidth="40dp"
-        android:minHeight="40dp"
-        android:padding="@dimen/spacing_sm"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_block_24" />
+         El chip circular (bg_icon_chip, retintado por el adapter) le da al icono un área de botón
+         visible en vez de flotar suelto sobre la fila; padding dentro del ImageView amplía el área
+         táctil sin agrandar el icono. -->
+    <FrameLayout
+        android:id="@+id/usage_block_toggle_chip"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_icon_chip">
+
+        <ImageView
+            android:id="@+id/usage_block_toggle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/progress_usage_block_toggle"
+            android:focusable="true"
+            android:padding="@dimen/spacing_sm"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_block_24" />
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/usage_app_icon"

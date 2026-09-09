@@ -2,6 +2,7 @@ package com.example.bbettercalendar.ui.progress;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,23 +94,32 @@ public class AppUsageAdapter extends RecyclerView.Adapter<AppUsageAdapter.VH> {
     // opaco) cuando enforce=on Y el servicio de Accesibilidad está activado (bloqueando de verdad);
     // PENDIENTE (bb_accent_reward ámbar) cuando enforce=on pero el servicio aún NO está activado —
     // armado, pero no bloqueará hasta que el usuario active el servicio en Ajustes. Así el toggle
-    // nunca se pinta "activo" sin el permiso concedido.
+    // nunca se pinta "activo" sin el permiso concedido. El chip (bg_icon_chip) detrás del icono se
+    // retinta con el mismo color a baja opacidad, para que el toggle se lea como un botón con área
+    // propia en vez de un icono suelto flotando sobre la fila.
     private void bindEnforceToggle(VH holder, AppUsageRow row) {
         int tint;
         float alpha;
+        int chipAlpha;
         if (!row.enforceAtLimit) {
             tint = R.color.bb_on_surface_muted;
             alpha = 0.35f;
+            chipAlpha = 20;
         } else if (accessibilityEnabled) {
             tint = R.color.bb_danger;
             alpha = 1f;
+            chipAlpha = 40;
         } else {
             tint = R.color.bb_accent_reward;
             alpha = 0.9f;
+            chipAlpha = 40;
         }
-        holder.enforceToggle.setImageTintList(ContextCompat.getColorStateList(
-                holder.enforceToggle.getContext(), tint));
+        ColorStateList tintList = ContextCompat.getColorStateList(holder.enforceToggle.getContext(), tint);
+        holder.enforceToggle.setImageTintList(tintList);
         holder.enforceToggle.setAlpha(alpha);
+        Drawable chipBackground = holder.enforceChip.getBackground().mutate();
+        chipBackground.setTintList(tintList);
+        chipBackground.setAlpha(chipAlpha);
         holder.enforceToggle.setOnClickListener(v ->
                 enforceToggleListener.onEnforceToggle(row.packageName, row.label,
                         row.dailyLimitMinutes, row.enforceAtLimit));
@@ -155,6 +165,7 @@ public class AppUsageAdapter extends RecyclerView.Adapter<AppUsageAdapter.VH> {
     }
 
     static class VH extends RecyclerView.ViewHolder {
+        final View enforceChip;
         final ImageView enforceToggle;
         final ImageView icon;
         final TextView label;
@@ -162,6 +173,7 @@ public class AppUsageAdapter extends RecyclerView.Adapter<AppUsageAdapter.VH> {
 
         VH(@NonNull View itemView) {
             super(itemView);
+            enforceChip = itemView.findViewById(R.id.usage_block_toggle_chip);
             enforceToggle = itemView.findViewById(R.id.usage_block_toggle);
             icon = itemView.findViewById(R.id.usage_app_icon);
             label = itemView.findViewById(R.id.usage_app_label);

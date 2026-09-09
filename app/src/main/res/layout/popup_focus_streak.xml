@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Calendario de rachas (spec focus-mode-and-streak): marca los días en los que el usuario
+     terminó un pomodoro. Se abre desde el contador de la toolbar de Home. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bb_surface_card"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingEnd="@dimen/spacing_md"
+    android:paddingTop="@dimen/spacing_md"
+    android:paddingBottom="@dimen/spacing_sm">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/home_streak_desc"
+            android:src="@drawable/ic_flame_v2_24"
+            app:tint="@color/bb_accent_reward" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_weight="1"
+            android:text="@string/focus_streak_popup_title"
+            android:textAppearance="@style/TextAppearance.BBetter.Title" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/streakSummaryText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+        android:textSize="@dimen/text_label"
+        tools:text="12 of the last 30 days with a completed pomodoro" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/streakPrevButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/month_view_prev"
+            android:src="@drawable/ic_arrow_back_24" />
+
+        <TextView
+            android:id="@+id/streakMonthTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.BBetter.Title"
+            android:textSize="@dimen/text_body"
+            tools:text="September 2026" />
+
+        <ImageButton
+            android:id="@+id/streakNextButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/month_view_next"
+            android:scaleX="-1"
+            android:src="@drawable/ic_arrow_back_24" />
+    </LinearLayout>
+
+    <include layout="@layout/view_calendar_header" />
+
+    <com.kizitonwose.calendar.view.CalendarView
+        android:id="@+id/streakCalendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cv_dayViewResource="@layout/cell_streak_day"
+        app:cv_daySize="square"
+        app:cv_orientation="horizontal"
+        app:cv_outDateStyle="endOfGrid"
+        app:cv_scrollPaged="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/bg_streak_day_marked" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_weight="1"
+            android:text="@string/focus_streak_legend"
+            android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+        <TextView
+            android:id="@+id/streakCloseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/spacing_sm"
+            android:text="@string/focus_streak_close"
+            android:textAppearance="@style/TextAppearance.BBetter.Title"
+            android:textColor="@color/bb_primary"
+            android:textSize="@dimen/text_body" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -30,11 +30,17 @@ public class EventReminderScheduler {
     public static final String EXTRA_ENTRY_ID = "entry_id";
     public static final String EXTRA_OFFSET_INDEX = "offset_index";
 
-    // Reproduces the original requestCode formula exactly (no behavior change). A future
-    // reminder flavor (e.g. project deadlines) picks its own disjoint namespace here instead of
-    // colliding with CalendarEntry ids in the same PendingIntent.getBroadcast() space.
+    // Reproduces the original requestCode formula exactly (no behavior change). The project-deadline
+    // flavor (spec project-deadlines-progress) picks its own disjoint namespace
+    // (ProjectDeadlineScheduler.requestCodeFor) instead of colliding with CalendarEntry ids in the
+    // same PendingIntent.getBroadcast() space. Public so the disjointness test can assert against
+    // the real formula rather than a copy of it.
+    public static int requestCodeFor(int entryId, int offsetIndex) {
+        return entryId * 10 + offsetIndex;
+    }
+
     private static final AlarmReminderCore.RequestCodeNamespace NAMESPACE =
-            (entityId, offsetIndex) -> entityId * 10 + offsetIndex;
+            EventReminderScheduler::requestCodeFor;
 
     private static final AlarmReminderCore.IntentPopulator EXTRAS =
             (intent, entityId, offsetIndex) -> {

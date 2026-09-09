@@ -53,34 +53,31 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 74bc6d7 (2026-07-17)
+**Branch:** `main`  |  **State as of commit:** 47eef83 (2026-08-29)
 
 ### 1. What we touched last (recent commits)
+- 47eef83 2026-08-29 Correct stale Next-focus section in STATUS.md
+- 515cd88 2026-08-29 Archive pomodoro-block-mode spec
+- 4d6f9a8 2026-08-29 Fix activityWindowCache race after T1 executor consolidation
 - 74bc6d7 2026-07-17 Merge T4: reminder generalization
 - 0100b9f 2026-07-17 Merge T1: DI + threading consolidation
-- c01a085 2026-07-17 DI + threading consolidation (refactor tranche T1)
-- a8bb6c3 2026-07-17 Generalize reminder scheduling into a reusable alarm core (T4)
-- 00f1567 2026-07-17 Archive focus-attribution spec; polish time targets and projects UI
 
 ### 2. In flight - active `/spec` changes
-| Change | Status | Tasks | Proposal |
-|---|---|---|---|
-| Pomodoro focus block mode ("🚫 Block mode 🚫") | verified | 16/16 | [proposal](.claude/specs/changes/pomodoro-block-mode/proposal.md) |
+_None active._
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer (moved)](.claude/specs/capabilities/home-pomodoro.md)
 - [Capability — Progress screen (moved)](.claude/specs/capabilities/progress-screen.md)
 
-**Archived changes:** `di-threading-consolidation`, `focus-attribution`, `persist-pomodoro-session-state`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`, `projects-mvp`, `reminder-generalization`, `tasks-home-today`, `tasks-recurrence`
+**Archived changes:** `di-threading-consolidation`, `focus-attribution`, `focus-mode-and-streak`, `persist-pomodoro-session-state`, `pomodoro-block-mode`, `progress-charts-mvp`, `progress-phase2-usage`, `progress-phase3-limits`, `progress-phase4a-blocking`, `progress-phase4b-play-release`, `progress-screen-visual-polish`, `project-deadlines-progress`, `projects-mvp`, `recurrence-calendar-visibility`, `reminder-generalization`, `repository-layer-consolidation`, `tasks-home-today`, `tasks-recurrence`
 
 ### 4. Plans (`.claude/plans`) - undone first
 | Plan | Status | File |
 |---|---|---|
 | Advanced AI Harness Roadmap | in progress | [ai-harness-roadmap.md](.claude/plans/ai-harness-roadmap.md) |
 | Agent-first system documentation layer (`.claude/docs/systems/`) | implemented | [ok-let-s-design-a-encapsulated-adleman.md](.claude/plans/ok-let-s-design-a-encapsulated-adleman.md) |
-| Architecture refactor roadmap — data/DI infrastructure consolidation | in progress — T1 (DI + threading consolidation) and T4 (reminder generalization) | [architecture-refactor-roadmap.md](.claude/plans/architecture-refactor-roadmap.md) |
+| Architecture refactor roadmap — data/DI infrastructure consolidation | in progress — T1 (DI + threading consolidation), T4 (reminder generalization), and T2 | [architecture-refactor-roadmap.md](.claude/plans/architecture-refactor-roadmap.md) |
 | Phase 0 — Persist Progress history (DailyStat + FocusEvent) | in progress (implemented + builds; runtime verification pending) | [phase-0-progress-history-tables.md](.claude/plans/phase-0-progress-history-tables.md) |
-| Projects & Tasks Roadmap | in progress (Phases 1 `tasks-home-today` + 2 `tasks-recurrence` archived; Phase 3 spec `projects-mvp` proposed) | [projects-tasks-roadmap.md](.claude/plans/projects-tasks-roadmap.md) |
 | Redesign `activity_create_event` (and matching task layout) | in progress | [improve_addEvent_layout.md](.claude/plans/improve_addEvent_layout.md) |
 | Calendar UI polish — month + week views | proposed | [now-let-s-improve-the-crystalline-sloth.md](.claude/plans/now-let-s-improve-the-crystalline-sloth.md) |
 | Plan: Screenshot-free, MCP-free ADB UI-testing system for BBetterCalendar | proposed | [forget-about-the-skills-ticklish-breeze.md](.claude/plans/forget-about-the-skills-ticklish-breeze.md) |
@@ -88,6 +85,7 @@ _Tables below are auto-generated from repo state by `.claude/hooks/update-status
 | Calendar UX polish: month-view redesign + week-view tuning | (none) | [the-month-and-week-wiggly-teapot.md](.claude/plans/the-month-and-week-wiggly-teapot.md) |
 | Home Screen Redesign + App-Wide Design Foundation | (none) | [i-like-everything-but-breezy-lemon.md](.claude/plans/i-like-everything-but-breezy-lemon.md) |
 | Layout Migration Plan — Unify on ConstraintLayout + Responsive Dimens | (none) | [greedy-spinning-hickey.md](.claude/plans/greedy-spinning-hickey.md) |
+| Projects & Tasks Roadmap | merged (all 5 phases archived: `tasks-home-today`, `tasks-recurrence`, `projects-mvp`, `focus-attribution`, `project-deadlines-progress`) | [projects-tasks-roadmap.md](.claude/plans/projects-tasks-roadmap.md) |
 | Redesign Pomodoro TimerPopup | merged | [redesign-timer-popup.md](.claude/plans/redesign-timer-popup.md) |
 <!-- AUTO:END -->
 

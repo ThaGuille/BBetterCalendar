@@ -1,5 +1,6 @@
 package com.example.bbettercalendar.ui.home;
 
+import android.app.Activity;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -51,6 +54,17 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     private RepetitionSpec repetitionSpec = RepetitionSpec.none();
     // 0 = alta normal desde Home; si no, el proyecto dueño del item (spec projects-mvp).
     private int projectId = 0;
+
+    // "More options" salta a AddEventActivity sin cerrar la hoja: si el usuario vuelve atrás
+    // (RESULT_CANCELED) encuentra intacto lo que había tecleado en vez de perderlo. Sólo se
+    // cierra cuando AddEventActivity confirmó el alta.
+    private final ActivityResultLauncher<Intent> moreOptionsLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    dismiss();
+                }
+            });
 
     /**
      * Alta de un item dentro de un proyecto (spec projects-mvp): oculta "Repeat" (decisión #4 —
@@ -200,13 +214,28 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     private void openMoreOptions() {
         Intent intent = new Intent(requireContext(), AddEventActivity.class);
         intent.putExtra("entry", AddEventActivity.TYPE_TASK);
-        intent.putExtra(AddEventActivity.EXTRA_PRESELECTED_DATE_MILLIS,
-                System.currentTimeMillis());
+        intent.putExtra(AddEventActivity.EXTRA_PRESELECTED_DATE_MILLIS, preselectedDateMillis());
         String typedTitle = titleInput.getText().toString().trim();
         if (!typedTitle.isEmpty()) {
             intent.putExtra(AddEventActivity.EXTRA_PREFILL_TITLE, typedTitle);
         }
-        startActivity(intent);
-        dismiss();
+        // Sin esto el item creado desde "More options" nacía fuera del proyecto (spec projects-mvp).
+        if (projectId != 0) {
+            intent.putExtra(AddEventActivity.EXTRA_PROJECT_ID, projectId);
+        }
+        moreOptionsLauncher.launch(intent);
+    }
+
+    // Hoy, con la hora elegida en la hoja si la hubo (AddEventActivity siembra su formulario
+    // con estos millis, hora incluida).
+    private long preselectedDateMillis() {
+        Calendar start = Calendar.getInstance();
+        if (selectedHour >= 0) {
+            start.set(Calendar.HOUR_OF_DAY, selectedHour);
+            start.set(Calendar.MINUTE, Math.max(selectedMinute, 0));
+            start.set(Calendar.SECOND, 0);
+            start.set(Calendar.MILLISECOND, 0);
+        }
+        return start.getTimeInMillis();
     }
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Anillo de "hoy" en el calendario de rachas: se dibuja SOBRE la marca, así que un día
+     marcado y a la vez hoy se lee como disco relleno con borde. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@android:color/transparent" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/bb_primary" />
+</shape>

@@ -1,11 +1,14 @@
 # Architecture refactor roadmap — data/DI infrastructure consolidation
 
-**Status:** in progress — T1 (DI + threading consolidation) and T4 (reminder generalization)
-both applied + verified + archived 2026-07-17 (`.claude/specs/archive/di-threading-consolidation/`,
-`.claude/specs/archive/reminder-generalization/`), implemented in parallel isolated worktrees.
-T3 merges into Phase 5's schema bump if one is needed; T2 next.
+**Status:** in progress — T1 (DI + threading consolidation), T4 (reminder generalization), and T2
+(repository layer) all applied + verified + archived (`.claude/specs/archive/di-threading-consolidation/`,
+`.claude/specs/archive/reminder-generalization/`, `.claude/specs/archive/repository-layer-consolidation/`).
+T2's on-device pass also corrected the F3 diagnosis: the three `refresh()` workarounds had three
+different root causes, not one bug copied three times — see that archive's proposal.md for the
+detail. T3 merges into Phase 5's schema bump if one is needed; Phase 5 (`project-deadlines-progress`)
+is next.
 **Created:** 2026-07-17
-**Last updated:** 2026-07-17
+**Last updated:** 2026-08-29
 
 Whole-app structural audit (112 files, ~11k lines, DB v13) done before proposing Phase 5
 (`project-deadlines-progress`). Goal: pay down the integration debt accumulated across the
@@ -112,7 +115,7 @@ un-injectable, untestable, and invisible to Hilt's object graph.
    compile-enforced "Hilt is the only door".
 - **Schema:** none. **Risk:** low. **Effort:** ~1 session.
 
-### T2 — Repository layer + kill the invalidation workaround at the root
+### T2 — Repository layer + kill the invalidation workaround at the root — DONE 2026-08-29
 1. `FocusAttributionRepository`: owns `enrichWithAttributedMinutes`, the sum queries, and
    `maybeAutoComplete` (de-dups the two ViewModels; natural home for the short-circuit perf
    fix from the verify follow-ups).
@@ -169,4 +172,10 @@ merge T3 into that same bump to keep one migration).
 - Each tranche: `/check` + `ui-tester` emulator pass (T1/T2 touch every screen's data path).
 - T3: seeded-upgrade test (v13 data → v14 install → data intact + backfill correct).
 - The three `refresh()` workarounds are the canary: T2 succeeds when they're deleted and the
-  screens still update after cross-screen inserts.
+  screens still update after cross-screen inserts. **Result (2026-08-29):** they had three
+  different root causes, not one bug — see `.claude/specs/archive/repository-layer-consolidation/proposal.md`.
+  `ProjectsViewModel.refresh()` was a real structural gap (fixed with a cross-table Room query,
+  deleted outright); `CalendarViewModel.refresh()` was folklore around a `switchMap`-trigger
+  dedupe, not an actual invalidation miss (deleted outright, proven on-device); `HomeViewModel.
+  refreshToday()`'s invalidation half was the same folklore, but its day-boundary recompute is a
+  genuine need (kept, guarded to only fire on an actual day change).

@@ -47,6 +47,17 @@ public interface CalendarEntryDAO {
             "(startMillis <= :startMillis AND endMillis >= :endMillis))")
     LiveData<List<CalendarEntry>> getEventsBetween(long startMillis, long endMillis);
 
+    // Igual que getEventsBetween pero además sin las filas marcadas "no pintar en el calendario"
+    // (spec recurrence-calendar-visibility). Es la query de la PANTALLA DE CALENDARIO; Home sigue
+    // usando getEventsBetween, porque ocultar es sólo visual y la tarea debe seguir siendo
+    // accionable en su lista.
+    @Query("SELECT * FROM CalendarEntry WHERE isTemplate = 0 AND isDismissed = 0 " +
+            "AND hiddenInCalendar = 0 AND (" +
+            "(startMillis BETWEEN :startMillis AND :endMillis) OR " +
+            "(endMillis BETWEEN :startMillis AND :endMillis) OR " +
+            "(startMillis <= :startMillis AND endMillis >= :endMillis))")
+    LiveData<List<CalendarEntry>> getVisibleEventsBetween(long startMillis, long endMillis);
+
     // Tareas (type = 2 = TYPE_TASK) sin completar anteriores a un instante — sección
     // "older uncompleted" de la lista de tareas de Home. startMillis > 0 excluye filas
     // legacy que nunca recibieron el espejo de fecha en millis. isTemplate = 0 excluye

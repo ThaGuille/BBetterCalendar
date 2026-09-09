@@ -1,8 +1,8 @@
 # Projects & Tasks Roadmap
 
-**Status:** in progress (Phases 1 `tasks-home-today` + 2 `tasks-recurrence` archived; Phase 3 spec `projects-mvp` proposed)
+**Status:** merged (all 5 phases archived: `tasks-home-today`, `tasks-recurrence`, `projects-mvp`, `focus-attribution`, `project-deadlines-progress`)
 **Created:** 2026-07-06
-**Last updated:** 2026-07-12
+**Last updated:** 2026-09-01
 
 ## Summary
 
@@ -164,14 +164,25 @@ tasks and project items are the same entity.
 5. Quick-add sheet and project-item editor gain the "target minutes" field; time progress shown on
    the task chip / item row.
 
-### Phase 5 — Deadlines & Progress integration (spec: `project-deadlines-progress`)
+### Phase 5 — Deadlines & Progress integration (spec: `project-deadlines-progress`) — **ARCHIVED 2026-09-01**
 
-No schema change expected.
+Shipped with no schema change (stays DB v13), as expected.
 
-1. Deadline-approaching notifications: new notifier under `notifications/` following the
-   per-feature pattern (`focus/`, `usage/`, `event/`); channel decision in the spec.
-2. Progress screen: time-per-project chart from attributed `FocusEvent` rows; possibly a
-   project-progress band. Reuses the existing chart pipeline (`progress-screen.md`).
+1. Deadline-approaching notifications: **done** — `notifications/project/` following the per-feature
+   pattern, alarm-scheduled at deadline-minus-N (`AlarmReminderCore`'s second client), two fixed
+   offsets `{3d, 1d}`, own `bb_project_deadlines` channel. The 3d offset is deliberately the same
+   threshold as `ProjectDeadlineState.APPROACHING_WINDOW_MILLIS`, so the notification fires exactly
+   when the list chip turns amber.
+2. Progress screen: **done, including the "possibly"** — a time-per-project chart page *and* a
+   project-progress band, both fed by one `FocusEventDAO.getMinutesByProject()` call.
+3. Beyond the original sketch: deadlines are also painted read-only on the Calendar (no mirror
+   `CalendarEntry` rows), and one global nav action `action_global_project_detail` serves the
+   notification deep link, the calendar marker tap and the band row tap.
+
+Carried forward as a follow-up (not a blocker): the project-deadline **notification** id space
+(`70_000`) has far less headroom than its request-code space (`500_000`) and would collide with the
+event-reminder range at `projectId >= 3_000`; guarded only by `ReminderNamespaceTest`, not at
+runtime. See `notifications.md`'s id-partition invariant.
 
 ### Backlog (post-roadmap, order undecided)
 
@@ -185,8 +196,10 @@ No schema change expected.
   window vs virtual occurrences), building on the existing half-done `repetition` field.
 - Does the Phase 4 target reuse `CalendarEntry.duration` or add a new `targetMinutes` column?
   (Depends on whether `duration` is already read anywhere — verify in the spec.)
-- Does `Project` get a color for its calendar deadline projection, or reuse
-  `calendar_item_*` colors?
+- ~~Does `Project` get a color for its calendar deadline projection, or reuse
+  `calendar_item_*` colors?~~ **Answered (Phase 5):** a new `calendar_item_deadline` entry that
+  aliases the amber `bb_accent_reward` — no new token invented, reusing the app-limits visual
+  language. A project's own `colorIndex` accent stays a Projects/Progress-list affordance.
 - Auto-complete feedback form: notification vs in-app animation vs both (Phase 4 spec).
 - Whether Phase 2 and 3 swap (recurrence vs projects first) once Phase 1 lands.
 
@@ -197,4 +210,6 @@ No schema change expected.
   duplicated editing surface (a task/deadline is editable in exactly one place), the Projects
   tab is no longer a stub, and no 5th tab exists.
 - This file's `Status:` moves to *in progress* when the Phase 1 spec is proposed, *merged*
-  when Phase 5 archives.
+  when Phase 5 archives. **Both done** — Phase 5 archived 2026-09-01, verified on-device by the
+  `ui-tester` pass recorded in its spec (4 chart pages, band renders, calendar marker taps through
+  to detail, deadline edit repaints the calendar with no manual refresh).

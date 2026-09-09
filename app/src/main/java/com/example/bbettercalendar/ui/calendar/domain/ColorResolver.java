@@ -16,6 +16,7 @@ public final class ColorResolver {
             case EVENT:    resId = R.color.calendar_item_event;    break;
             case TASK:     resId = R.color.calendar_item_task;     break;
             case REMINDER: resId = R.color.calendar_item_reminder; break;
+            case DEADLINE: resId = R.color.calendar_item_deadline; break;
             default:       resId = R.color.calendar_item_event;
         }
         return ContextCompat.getColor(ctx, resId);

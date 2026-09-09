@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill outline bb_primary: botones secundarios con más presencia que un TextView suelto
+     ("Add apps", interruptor maestro de enforce cuando está ON) sin competir con los
+     pills sólidos (bg_save_pill / bg_chip_primary) reservados para CTAs principales. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <stroke
+        android:width="1.5dp"
+        android:color="@color/bb_primary" />
+    <corners android:radius="100dp" />
+</shape>

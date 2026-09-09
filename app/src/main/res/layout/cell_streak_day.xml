@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/streakDayMark"
+        android:layout_width="@dimen/streak_day_marker_size"
+        android:layout_height="@dimen/streak_day_marker_size"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_streak_day_marked"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/streakDayToday"
+        android:layout_width="@dimen/streak_day_marker_size"
+        android:layout_height="@dimen/streak_day_marker_size"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_streak_day_today"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/streakDayText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        android:textColor="@color/bb_on_surface" />
+
+</FrameLayout>

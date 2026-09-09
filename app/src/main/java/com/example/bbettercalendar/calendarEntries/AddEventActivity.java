@@ -80,6 +80,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     public static final String EXTRA_PRESELECTED_DATE_MILLIS = "preselected_date_millis";
     // Título tecleado en el quick-add de Home antes de saltar a "More options" (spec tasks-home-today).
     public static final String EXTRA_PREFILL_TITLE = "prefill_title";
+    // Proyecto dueño del item cuando se llega aquí desde el "More options" del quick-add de un
+    // proyecto (spec projects-mvp): sin esto la tarea se guardaba suelta, fuera del proyecto.
+    public static final String EXTRA_PROJECT_ID = "project_id";
     private final String TAG = "AddEventActivityTag";
 
     private boolean[] createdNotificationLayouts = new boolean[7];
@@ -101,6 +104,8 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     private RepetitionPopup repetitionPopup = new RepetitionPopup();
     private DescriptionPopup descriptionPopup = new DescriptionPopup();
     private int layoutType;
+    // 0 = alta normal; si no, el proyecto al que pertenece la entrada creada.
+    private int projectId = 0;
 
     private EditText titleView;
     private TextView descriptionView;
@@ -169,6 +174,8 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                         .format(localCalendar.getTime()));
             }
         }
+
+        projectId = intent.getIntExtra(EXTRA_PROJECT_ID, 0);
 
         String prefillTitle = intent.getStringExtra(EXTRA_PREFILL_TITLE);
         if (prefillTitle != null && !prefillTitle.isEmpty() && titleView != null) {
@@ -350,6 +357,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
     private void saveAndQuit(){
         eventBuilder.setEventTitle(titleView.getText().toString());
+        if (projectId != 0) {
+            eventBuilder.setEventProjectId(projectId);
+        }
         //eventBuilder.setEventDescription(editDescription.getText().toString());
 
         // Si el usuario nunca abrió el date picker el builder no tiene fecha y startMillis
@@ -373,6 +383,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 eventBuilder.setEventRepetitionInterval(repetitionSpec.interval);
                 eventBuilder.setEventRepetitionDays(repetitionSpec.daysMask);
                 eventBuilder.setEventIsTemplate(true);
+                // La plantilla lleva el flag; las ocurrencias lo heredan en el materializador
+                // (spec recurrence-calendar-visibility).
+                eventBuilder.setEventHiddenInCalendar(repetitionSpec.hidesFromCalendar());
             }
         }
         /**Gson gson = new Gson();

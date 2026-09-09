@@ -199,6 +199,9 @@ public class RecurrenceMaterializer {
                 .setEventTargetMinutes(template.getTargetMinutes())
                 .setEventNotifications(notifications)
                 .setEventIsDone(false)
+                // La visibilidad en el calendario es de la SERIE: cada ocurrencia hereda el flag
+                // de su plantilla (spec recurrence-calendar-visibility).
+                .setEventHiddenInCalendar(template.isHiddenInCalendar())
                 .setEventTemplateId(template.getId())
                 .build();
 

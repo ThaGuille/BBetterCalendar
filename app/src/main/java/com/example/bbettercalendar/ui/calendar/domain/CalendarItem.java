@@ -5,7 +5,10 @@ import java.util.TimeZone;
 
 public class CalendarItem {
 
-    public enum Type { EVENT, TASK, REMINDER }
+    // DEADLINE (spec project-deadlines-progress) no viene de un CalendarEntry sino de un Project:
+    // se pinta de sólo lectura y su id va NEGADO (ver ProjectDeadlineItemMapper), así que nada
+    // puede confundirlo con una fila de calendarEntry.
+    public enum Type { EVENT, TASK, REMINDER, DEADLINE }
 
     private final int id;
     private final String title;

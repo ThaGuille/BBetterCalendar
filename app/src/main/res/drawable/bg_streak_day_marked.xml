@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Marca de "ese día completé un pomodoro" en el calendario de rachas (spec
+     focus-mode-and-streak). bb_accent_reward = el token de recompensa, el mismo de la llama. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bb_accent_reward" />
+</shape>

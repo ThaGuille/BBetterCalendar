@@ -57,4 +57,13 @@
             app:argType="integer" />
     </fragment>
 
+    <!-- Acción global (spec project-deadlines-progress): alcanzable desde cualquier destino, así
+         que las TRES entradas nuevas al detalle de proyecto (deep link de la notificación de
+         deadline, tap en el marcador del calendario, tap en una fila de la banda de Progress)
+         comparten una sola acción en vez de definir una por destino. La pestaña Projects conserva
+         su propia acción. -->
+    <action
+        android:id="@+id/action_global_project_detail"
+        app:destination="@id/navigation_project_detail" />
+
 </navigation>

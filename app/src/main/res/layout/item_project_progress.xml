@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fila de la banda de proyectos de Progress (spec project-deadlines-progress): mismo lenguaje
+     visual que item_project.xml (franja de acento + barra de % + chip de deadline) más los minutos
+     del rango seleccionado, que es lo que esta pantalla añade sobre la pestaña Projects. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/spacing_sm"
+    android:paddingBottom="@dimen/spacing_sm">
+
+    <View
+        android:id="@+id/projectProgressAccent"
+        android:layout_width="4dp"
+        android:layout_height="32dp"
+        android:background="@color/bb_primary" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/projectProgressName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.Body"
+                tools:text="Thesis" />
+
+            <TextView
+                android:id="@+id/projectProgressDeadlineChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:background="@drawable/bg_chip_secondary"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:textAppearance="@style/TextAppearance.BBetter.Chip"
+                android:visibility="gone"
+                tools:text="Due soon"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/projectProgressMinutes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:textAppearance="@style/TextAppearance.BBetter.Title"
+                tools:text="120m" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/projectProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:max="100"
+            android:progressBackgroundTint="@color/bb_surface_subtle"
+            android:progressTint="@color/bb_primary"
+            tools:progress="60" />
+
+        <TextView
+            android:id="@+id/projectProgressText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:textAppearance="@style/TextAppearance.BBetter.Label"
+            tools:text="3/5 done" />
+
+    </LinearLayout>
+</LinearLayout>

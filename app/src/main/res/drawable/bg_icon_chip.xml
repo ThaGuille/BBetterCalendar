@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo circular del toggle de bloqueo por app (item_app_usage_row): color base irrelevante,
+     AppUsageAdapter lo retinta (setTintList + alpha) con el mismo color del icono (muted/danger/
+     reward) para que el toggle se lea como un botón, no como un icono suelto flotando en la fila. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bb_on_surface_muted" />
+</shape>

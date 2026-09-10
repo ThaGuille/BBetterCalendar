@@ -134,6 +134,29 @@ Project-level skills (invokable with `/bb-build`, `/save-plan`, `/spec`, `/check
 | [`spec`](.claude/skills/spec/SKILL.md) | Spec-driven change lifecycle: propose → apply → archive under `.claude/specs/`. |
 | [`check`](.claude/skills/check/SKILL.md) | On-demand build/lint/test verification (manual — there is no gradle-on-stop hook). |
 
+### Design skills (vendored)
+
+**Full guide + routing table: [`.claude/skills/README.md`](.claude/skills/README.md).** Read it
+before reaching for one of these — the lanes are deliberate and were carved to stop them
+fighting each other.
+
+| Skill | Lane |
+|---|---|
+| [`impeccable`](.claude/skills/impeccable/SKILL.md) | **Design authority for this repo.** Default for any visual request. 23 verbs (`shape`, `critique`, `audit`, `polish`, `animate`, `layout`, `typeset`, `colorize`, `delight`, `onboard`, `harden`, `clarify`…). Decides and edits. |
+| [`ui-ux-pro-max`](.claude/skills/ui-ux-pro-max/SKILL.md) | **Lookup only.** Offline database of palettes, font pairings, styles, charts, icons, UX guidelines. Supplies values; never decides direction. |
+| [`material-3`](.claude/skills/material-3/SKILL.md) | **MD3 spec authority.** Colour roles, type scale, shape, elevation, motion tokens. Its code samples are Compose — translate, never paste. |
+| [`image-to-code`](.claude/skills/image-to-code/SKILL.md) | Fires when a **reference screenshot** is supplied. Extracts a system → `bb_*` tokens → XML. |
+| [`mobile-mockup`](.claude/skills/mobile-mockup/SKILL.md) | Generates **images** of Android screen concepts. No code. |
+| [`brandkit`](.claude/skills/brandkit/SKILL.md) | Generates **images** of logos / brand boards / app icons. No code. |
+
+Reference libraries (knowledge, not invokable) live in [`.claude/references/`](.claude/references/):
+`interaction-design/` (22 docs — motion, feedback, loading, gestures, state machines, UX laws),
+`visual-critique/` (7 critique lenses), `design-systems/` (74 real brand `DESIGN.md` files).
+
+> These are **vendored copies carrying local edits** — a PROJECT OVERRIDE block plus rewritten
+> `description` fields that make routing work. Re-cloning upstream destroys both. See the
+> Maintenance section of the skills README.
+
 ## Subagents — `.claude/agents/`
 
 The main session is the orchestrator: it auto-delegates to a subagent when the task matches that
@@ -178,6 +201,7 @@ with e.g. "use the code-reviewer subagent".
 | `.claude/docs/` | Knowledge base (see index above) |
 | `.claude/docs/systems/` | Per-runtime-subsystem living docs (see System docs table above) |
 | `.claude/plans/` | Saved design plans |
+| `.claude/references/` | Design knowledge libraries: `interaction-design/`, `visual-critique/`, `design-systems/` |
 | `.claude/skills/` | Project-level skills |
 | `.claude/specs/` | Spec-driven changes (`/spec`): `changes/`, `capabilities/`, `archive/` |
 | `.claude/agents/` | Subagent definitions (explorer, planner, code-reviewer, test-writer) |

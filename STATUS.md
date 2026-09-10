@@ -53,14 +53,14 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 47eef83 (2026-08-29)
+**Branch:** `main`  |  **State as of commit:** 75f0a87 (2026-09-10)
 
 ### 1. What we touched last (recent commits)
+- 75f0a87 2026-09-10 improvements in home and progress pages
 - 47eef83 2026-08-29 Correct stale Next-focus section in STATUS.md
 - 515cd88 2026-08-29 Archive pomodoro-block-mode spec
 - 4d6f9a8 2026-08-29 Fix activityWindowCache race after T1 executor consolidation
 - 74bc6d7 2026-07-17 Merge T4: reminder generalization
-- 0100b9f 2026-07-17 Merge T1: DI + threading consolidation
 
 ### 2. In flight - active `/spec` changes
 _None active._

@@ -10,12 +10,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.notifications.PermissionGate;
 import com.example.bbettercalendar.stats.StatsDAO;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.bbettercalendar.databinding.ActivityMainBinding;
@@ -41,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     private StatsDAO statsDao;
     private ExecutorService executorService;
     private NavController navController;
-    private AppBarConfiguration appBarConfiguration;
 
     @Inject PermissionGate permissionGate;
 
@@ -49,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.ThemeChatGPTBlue);
+        // Sin ActionBar (spec frontend-structure-cleanup): la bottom-nav ya dice en qué pantalla estás.
+        setTheme(R.style.ThemeChatGPTBlue_NoActionBar);
         super.onCreate(savedInstanceState);
 
         notificationPermissionLauncher = registerForActivityResult(
@@ -64,17 +62,12 @@ public class MainActivity extends AppCompatActivity {
             //InitialConfiguration.getInstance().initialize(this);
         }
 
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_progress, R.id.navigation_calendar_month, R.id.navigation_projects)
-                .build();
         // Con FragmentContainerView, obtener el NavController vía el NavHostFragment (no con
         // Navigation.findNavController(activity, id), que puede fallar en onCreate porque la vista
         // del fragment aún no tiene asignado el NavController en su tag).
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment_activity_main);
         navController = navHostFragment.getNavController();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         openProjectFromIntent(getIntent());
@@ -101,14 +94,6 @@ public class MainActivity extends AppCompatActivity {
         Bundle args = new Bundle();
         args.putInt("projectId", projectId);
         navController.navigate(R.id.action_global_project_detail, args);
-    }
-
-    // Sin esto la flecha "Up" de la ActionBar (destinos no top-level, p. ej. el detalle de proyecto)
-    // se muestra pero no navega. Delega en el NavController para volver a la lista de proyectos.
-    @Override
-    public boolean onSupportNavigateUp() {
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
     }
 
     @Override

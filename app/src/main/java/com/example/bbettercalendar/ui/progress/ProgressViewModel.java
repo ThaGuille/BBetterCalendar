@@ -230,7 +230,8 @@ public class ProgressViewModel extends AndroidViewModel {
 
             rows.add(new ProjectProgressRow(project.id, project.name, project.colorIndex,
                     pwc.doneCount, pwc.totalCount, minutesInRange,
-                    ProjectDeadlineState.from(project.softDeadlineMillis, now)));
+                    ProjectDeadlineState.from(project.softDeadlineMillis, now,
+                            ProjectDeadlineState.isFinished(project.status, pwc.doneCount, pwc.totalCount))));
         }
         Collections.sort(rows, (a, b) -> {
             int byMinutes = Integer.compare(b.minutesInRange, a.minutesInRange);

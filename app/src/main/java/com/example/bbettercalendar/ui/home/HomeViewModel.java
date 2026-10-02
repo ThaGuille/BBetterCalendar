@@ -171,7 +171,7 @@ public class HomeViewModel extends AndroidViewModel {
         todayFailsText.postValue(String.valueOf(initialStats.todayFails));
         String formattedTime = FormatHelper.formatTime(initialStats.todayTimeStudied, "HH:mm");
         todayTimeStudiedText.postValue(formattedTime);
-        timerModeText.postValue("-- Concentration --");
+        timerModeText.postValue(getApplication().getString(com.example.bbettercalendar.R.string.home_mode_concentration));
     }
 
     // ------------------------ "Today" task list (spec tasks-home-today) ------------------------
@@ -446,12 +446,12 @@ public class HomeViewModel extends AndroidViewModel {
 
     public void setRestTimer(){
         timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeRestTime(), "mm:ss"));
-        timerModeText.postValue("-- Rest --");
+        timerModeText.postValue(getApplication().getString(com.example.bbettercalendar.R.string.home_mode_rest));
     }
 
     public void resetTimer(){
         timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
-        timerModeText.postValue("-- Concentration --");
+        timerModeText.postValue(getApplication().getString(com.example.bbettercalendar.R.string.home_mode_concentration));
     }
 
     public void setConfigManager(ConfigurationManager configManager) {

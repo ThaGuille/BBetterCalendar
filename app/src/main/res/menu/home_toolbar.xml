@@ -37,12 +37,6 @@
             android:icon="@drawable/ic_settings_24"
             android:title="ajustes"
             app:showAsAction="always" />
-        <item
-            android:id="@+id/toolbarProgress"
-            android:icon="@drawable/ic_progress_24"
-            android:title="progress"
-            app:showAsAction="always"
-            />
 
         <!--<item
             android:id="@+id/salir"

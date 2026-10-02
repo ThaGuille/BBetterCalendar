@@ -53,17 +53,19 @@ mandatory, sideload/F-Droid fallback) · block style = **full-screen cover + bou
 <!-- AUTO:BEGIN -->
 _Tables below are auto-generated from repo state by `.claude/hooks/update-status.ps1`. Do not edit between the AUTO markers._
 
-**Branch:** `main`  |  **State as of commit:** 75f0a87 (2026-09-10)
+**Branch:** `main`  |  **State as of commit:** d7a5409 (2026-09-10)
 
 ### 1. What we touched last (recent commits)
+- d7a5409 2026-09-10 new frontend skillset
 - 75f0a87 2026-09-10 improvements in home and progress pages
 - 47eef83 2026-08-29 Correct stale Next-focus section in STATUS.md
 - 515cd88 2026-08-29 Archive pomodoro-block-mode spec
 - 4d6f9a8 2026-08-29 Fix activityWindowCache race after T1 executor consolidation
-- 74bc6d7 2026-07-17 Merge T4: reminder generalization
 
 ### 2. In flight - active `/spec` changes
-_None active._
+| Change | Status | Tasks | Proposal |
+|---|---|---|---|
+| Frontend structure cleanup (pre-styling) | applied | 11/11 | [proposal](.claude/specs/changes/frontend-structure-cleanup/proposal.md) |
 
 ### 3. Living capability docs (how the system behaves now)
 - [Capability — Home Pomodoro timer (moved)](.claude/specs/capabilities/home-pomodoro.md)
@@ -77,6 +79,7 @@ _None active._
 | Advanced AI Harness Roadmap | in progress | [ai-harness-roadmap.md](.claude/plans/ai-harness-roadmap.md) |
 | Agent-first system documentation layer (`.claude/docs/systems/`) | implemented | [ok-let-s-design-a-encapsulated-adleman.md](.claude/plans/ok-let-s-design-a-encapsulated-adleman.md) |
 | Architecture refactor roadmap — data/DI infrastructure consolidation | in progress — T1 (DI + threading consolidation), T4 (reminder generalization), and T2 | [architecture-refactor-roadmap.md](.claude/plans/architecture-refactor-roadmap.md) |
+| Frontend overhaul — hoja de ruta | in progress | [frontend-overhaul-roadmap.md](.claude/plans/frontend-overhaul-roadmap.md) |
 | Phase 0 — Persist Progress history (DailyStat + FocusEvent) | in progress (implemented + builds; runtime verification pending) | [phase-0-progress-history-tables.md](.claude/plans/phase-0-progress-history-tables.md) |
 | Redesign `activity_create_event` (and matching task layout) | in progress | [improve_addEvent_layout.md](.claude/plans/improve_addEvent_layout.md) |
 | Calendar UI polish — month + week views | proposed | [now-let-s-improve-the-crystalline-sloth.md](.claude/plans/now-let-s-improve-the-crystalline-sloth.md) |
@@ -85,6 +88,7 @@ _None active._
 | Calendar UX polish: month-view redesign + week-view tuning | (none) | [the-month-and-week-wiggly-teapot.md](.claude/plans/the-month-and-week-wiggly-teapot.md) |
 | Home Screen Redesign + App-Wide Design Foundation | (none) | [i-like-everything-but-breezy-lemon.md](.claude/plans/i-like-everything-but-breezy-lemon.md) |
 | Layout Migration Plan — Unify on ConstraintLayout + Responsive Dimens | (none) | [greedy-spinning-hickey.md](.claude/plans/greedy-spinning-hickey.md) |
+| Fase 0 — Línea base del frontend | merged | [frontend-fase-0-baseline.md](.claude/plans/frontend-fase-0-baseline.md) |
 | Projects & Tasks Roadmap | merged (all 5 phases archived: `tasks-home-today`, `tasks-recurrence`, `projects-mvp`, `focus-attribution`, `project-deadlines-progress`) | [projects-tasks-roadmap.md](.claude/plans/projects-tasks-roadmap.md) |
 | Redesign Pomodoro TimerPopup | merged | [redesign-timer-popup.md](.claude/plans/redesign-timer-popup.md) |
 <!-- AUTO:END -->

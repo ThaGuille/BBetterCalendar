@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -21,9 +20,6 @@ import androidx.navigation.Navigation;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.databinding.FragmentCalendarWeekBinding;
-import com.example.bbettercalendar.helpers.OnToolBarListener;
-import com.example.bbettercalendar.helpers.OnToolbarCalendarListener;
-import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.ui.calendar.binders.WeekViewItemAdapter;
 
 import java.text.SimpleDateFormat;
@@ -37,12 +33,10 @@ import java.util.Locale;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class CalendarFragmentWeek extends Fragment
-        implements View.OnClickListener, OnToolBarListener, OnToolbarCalendarListener {
+public class CalendarFragmentWeek extends Fragment implements View.OnClickListener {
 
     private FragmentCalendarWeekBinding binding;
     private CalendarViewModel viewModel;
-    private ToolbarHelper toolbarHelper;
     private WeekViewItemAdapter adapter;
     private final SimpleDateFormat monthYearFormat =
             new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
@@ -67,10 +61,10 @@ public class CalendarFragmentWeek extends Fragment
 
         viewModel = new ViewModelProvider(requireActivity()).get(CalendarViewModel.class);
 
-        toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.toolbar, true);
-        toolbarHelper.setOnToolbarListener(this);
-        toolbarHelper.setOnToolbarCalendarListener(this);
-        getActivity().addMenuProvider(toolbarHelper, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+        // Selector Mes/Semana en el contenido (antes: icono de la toolbar).
+        View root = binding.getRoot();
+        root.findViewById(R.id.calendarModeWeek).setSelected(true);
+        root.findViewById(R.id.calendarModeMonth).setOnClickListener(v -> switchToMonth());
 
         binding.calendarAddEventButton2.setOnClickListener(this);
 
@@ -130,12 +124,12 @@ public class CalendarFragmentWeek extends Fragment
         }
     }
 
-    @Override
-    public void onToolbarLoaded(int result) { }
-
-    @Override
-    public void switchFragment() {
+    private void switchToMonth() {
         NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment_activity_main);
-        navController.navigate(R.id.action_navigation_calendar_week_to_navigation_calendar_month);
+        // Normalmente se llega a semana DESDE mes: volver atrás en vez de apilar otro mes, o el
+        // botón atrás alternaría mes/semana indefinidamente.
+        if (!navController.popBackStack(R.id.navigation_calendar_month, false)) {
+            navController.navigate(R.id.action_navigation_calendar_week_to_navigation_calendar_month);
+        }
     }
 }

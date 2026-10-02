@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Selector Mes/Semana del calendario (spec frontend-structure-cleanup): sustituye al icono de la
+     toolbar, que no se entendía. Mismo segmented track que Día/Semana/Mes de Progress. Cada
+     fragment marca su opción con setSelected(true) (bg_segmented_item es un selector).
+     OJO: no poner android:id en el <include> — pisaría el id de la raíz. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:layout_marginStart="@dimen/spacing_md"
+    android:layout_marginTop="@dimen/spacing_sm"
+    android:layout_marginEnd="@dimen/spacing_md"
+    android:background="@drawable/bg_segmented_track"
+    android:orientation="horizontal"
+    android:padding="4dp">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/calendarModeMonth"
+        style="@style/BBetter.SegmentedTrack.Item"
+        android:background="@drawable/bg_segmented_item"
+        android:text="@string/calendar_mode_month" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/calendarModeWeek"
+        style="@style/BBetter.SegmentedTrack.Item"
+        android:background="@drawable/bg_segmented_item"
+        android:text="@string/calendar_mode_week" />
+</LinearLayout>

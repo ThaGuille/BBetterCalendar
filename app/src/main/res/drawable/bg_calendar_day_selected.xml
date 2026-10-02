@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Día seleccionado: relleno suave. El borde cuadrado queda reservado para "hoy"
+     (bg_calendar_day_today), así ambos se distinguen y pueden coincidir en la misma celda. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
         <shape android:shape="rectangle">
             <corners android:radius="6dp" />
-            <stroke android:width="2dp" android:color="@color/bb_primary" />
-            <solid android:color="@android:color/transparent" />
+            <solid android:color="@color/bb_surface_subtle" />
         </shape>
     </item>
     <item>

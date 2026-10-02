@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Marca de HOY en la celda del mes: cuadrado con borde (spec frontend-structure-cleanup). Antes
+     era un círculo y el cuadrado marcaba la selección; ahora el cuadrado es siempre "hoy" y la
+     selección es un relleno suave (bg_calendar_day_selected). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="@color/bb_surface_subtle" />
+    android:shape="rectangle">
+    <corners android:radius="6dp" />
+    <stroke android:width="2dp" android:color="@color/bb_primary" />
+    <solid android:color="@android:color/transparent" />
 </shape>

@@ -108,19 +108,9 @@
             android:paddingBottom="@dimen/spacing_lg">
 
             <!-- ============ (2) Chart carousel ============ -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/progress_charts_header"
-                android:textAppearance="@style/TextAppearance.BBetter.Label" />
-
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/chart_pager"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/progress_chart_height"
-                android:layout_marginTop="@dimen/spacing_sm" />
-
-            <!-- Selector con el título de cada gráfico (en vez de puntos ciegos): tabMode="fixed"
+            <!-- Pestañas ENCIMA del carrusel (spec frontend-structure-cleanup): primero se elige qué
+                 ver y luego se ve; abajo quedaban cortadas y la tarjeta repetía el título.
+                 Selector con el título de cada gráfico (en vez de puntos ciegos): tabMode="fixed"
                  muestra todos a la vez y tocar uno salta directo a esa página; TabLayoutMediator
                  (ProgressFragment) sincroniza en ambos sentidos y re-etiqueta si DAY quita la
                  página "by hour" (mismo remapeo que ya hace ChartCarouselAdapter#labelFor). -->
@@ -128,7 +118,6 @@
                 android:id="@+id/chart_dots"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
                 android:background="@android:color/transparent"
                 app:tabGravity="fill"
                 app:tabIndicatorColor="@color/bb_primary"
@@ -136,6 +125,12 @@
                 app:tabSelectedTextColor="@color/bb_primary"
                 app:tabTextAppearance="@style/TextAppearance.BBetter.Label"
                 app:tabTextColor="@color/bb_on_surface_muted" />
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/chart_pager"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/progress_chart_height"
+                android:layout_marginTop="@dimen/spacing_sm" />
 
             <!-- ============ (2b) Project-progress band (spec project-deadlines-progress) ============ -->
             <!-- Va entre el carrusel y la banda de uso a propósito: la pantalla se lee gráficas (cómo

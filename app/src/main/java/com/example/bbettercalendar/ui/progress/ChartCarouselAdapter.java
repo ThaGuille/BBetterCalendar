@@ -84,7 +84,7 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
     @Override
     public void onBindViewHolder(@NonNull CardVH h, int position) {
         Context ctx = h.itemView.getContext();
-        h.label.setText(labelFor(ctx, position));
+        // Sin título en la tarjeta: la pestaña de encima ya lo dice (spec frontend-structure-cleanup).
         h.container.removeAllViews();
         if (bundle == null) return;
 
@@ -311,12 +311,10 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
     }
 
     static class CardVH extends RecyclerView.ViewHolder {
-        final TextView label;
         final FrameLayout container;
 
         CardVH(@NonNull View v) {
             super(v);
-            label = v.findViewById(R.id.chart_card_label);
             container = v.findViewById(R.id.chart_container);
         }
     }

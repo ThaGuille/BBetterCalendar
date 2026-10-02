@@ -11,7 +11,15 @@ public enum ProjectDeadlineState {
     private static final long APPROACHING_WINDOW_MILLIS = 3L * 24 * 60 * 60 * 1000; // 3 días
 
     public static ProjectDeadlineState from(long softDeadlineMillis, long nowMillis) {
-        if (softDeadlineMillis <= 0L) {
+        return from(softDeadlineMillis, nowMillis, false);
+    }
+
+    /**
+     * Igual que {@link #from(long, long)}, pero un proyecto terminado no está ni "vencido" ni
+     * "por vencer" (spec frontend-structure-cleanup: "Test 1 sept" salía Overdue con 1/1 hecho).
+     */
+    public static ProjectDeadlineState from(long softDeadlineMillis, long nowMillis, boolean finished) {
+        if (finished || softDeadlineMillis <= 0L) {
             return NONE;
         }
         if (softDeadlineMillis < nowMillis) {
@@ -21,5 +29,10 @@ public enum ProjectDeadlineState {
             return APPROACHING;
         }
         return NONE;
+    }
+
+    /** Terminado = marcado como completado, o con items y todos hechos. */
+    public static boolean isFinished(int status, int doneCount, int totalCount) {
+        return status == Project.STATUS_COMPLETED || (totalCount > 0 && doneCount >= totalCount);
     }
 }

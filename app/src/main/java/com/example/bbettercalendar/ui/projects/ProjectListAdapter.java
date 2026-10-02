@@ -1,6 +1,7 @@
 package com.example.bbettercalendar.ui.projects;
 
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +16,11 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.ProjectViewHolder> {
 
@@ -75,11 +79,20 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         holder.colorAccent.setBackgroundColor(ContextCompat.getColor(context, accent));
 
         holder.progressBar.setProgress(item.percent());
-        holder.progressText.setText(item.totalCount == 0
+        String progress = item.totalCount == 0
                 ? context.getString(R.string.project_progress_empty)
-                : context.getString(R.string.project_progress_format, item.doneCount, item.totalCount));
+                : context.getString(R.string.project_progress_format, item.doneCount, item.totalCount);
+        // La fecha límite se ve en la tarjeta, no sólo el chip de estado (spec frontend-structure-cleanup).
+        if (project.softDeadlineMillis > 0L) {
+            String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "dMMM");
+            String date = new SimpleDateFormat(pattern, Locale.getDefault())
+                    .format(new Date(project.softDeadlineMillis));
+            progress = context.getString(R.string.project_progress_with_deadline,
+                    progress, context.getString(R.string.project_deadline_date_format, date));
+        }
+        holder.progressText.setText(progress);
 
-        bindDeadlineChip(holder, project, context);
+        bindDeadlineChip(holder, item, context);
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -88,8 +101,11 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         });
     }
 
-    private void bindDeadlineChip(ProjectViewHolder holder, Project project, Context context) {
-        ProjectDeadlineState state = ProjectDeadlineState.from(project.softDeadlineMillis, System.currentTimeMillis());
+    private void bindDeadlineChip(ProjectViewHolder holder, ProjectListItem item, Context context) {
+        Project project = item.project;
+        boolean finished = ProjectDeadlineState.isFinished(project.status, item.doneCount, item.totalCount);
+        ProjectDeadlineState state = ProjectDeadlineState.from(
+                project.softDeadlineMillis, System.currentTimeMillis(), finished);
         if (state == ProjectDeadlineState.NONE) {
             holder.deadlineChip.setVisibility(View.GONE);
             return;

@@ -13,6 +13,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <include layout="@layout/view_calendar_mode_toggle" />
+
         <!-- Header bar: prev arrow | month-year | next arrow -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -79,24 +81,30 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp">
 
+                <!-- Sin botón "Add for this day": el FAB ya crea en el día seleccionado
+                     (spec frontend-structure-cleanup). -->
                 <TextView
                     android:id="@+id/dayDetailTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:paddingTop="@dimen/spacing_sm"
+                    android:paddingBottom="@dimen/spacing_sm"
                     android:textAppearance="@style/TextAppearance.BBetter.Title"
                     android:textSize="14sp"
                     tools:text="Events for Jun 15, 2026" />
-
-                <Button
-                    android:id="@+id/dayDetailAddButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_for_this_day"
-                    android:textColor="@color/bb_primary"
-                    android:textSize="13sp" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/dayDetailEmptyText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingTop="@dimen/spacing_xs"
+                android:paddingEnd="12dp"
+                android:text="@string/no_events_today"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/dayDetailRecycler"
@@ -119,6 +127,7 @@
         android:background="@drawable/rounded_square"
         android:backgroundTint="@color/bb_primary"
         android:clickable="true"
+        android:contentDescription="@string/calendar_add_entry"
         android:elevation="5dp"
         android:focusable="true"
         android:src="@drawable/ic_add_24"

@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -19,6 +18,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.databinding.FragmentProjectDetailBinding;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
@@ -39,6 +39,11 @@ public class ProjectDetailFragment extends Fragment {
     private ProjectDetailViewModel viewModel;
     private ProjectItemAdapter itemAdapter;
     private boolean headerLoaded = false;
+    // Para el chip de deadline: un proyecto terminado (completado o todos sus items hechos) no
+    // está "vencido". Proyecto e items llegan por observers distintos, así que se recuerdan aquí.
+    @Nullable private Project currentProject;
+    private int doneItems;
+    private int totalItems;
 
     @Nullable
     @Override
@@ -73,8 +78,22 @@ public class ProjectDetailFragment extends Fragment {
         binding.projectDetailDeleteButton.setOnClickListener(v -> confirmDelete());
 
         viewModel.getProject().observe(getViewLifecycleOwner(), this::bindProject);
+        // Sin ActionBar (spec frontend-structure-cleanup): flecha atrás propia en el contenido.
+        binding.projectDetailBackButton.setOnClickListener(v ->
+                NavHostFragment.findNavController(this).navigateUp());
+
         viewModel.getItems().observe(getViewLifecycleOwner(), items -> {
             itemAdapter.submitList(items);
+            totalItems = items == null ? 0 : items.size();
+            doneItems = 0;
+            if (items != null) {
+                for (CalendarEntry entry : items) {
+                    if (entry.isDone()) doneItems++;
+                }
+            }
+            if (currentProject != null) {
+                bindDeadlineViews(currentProject);
+            }
             binding.projectDetailItemsEmptyText.setVisibility(
                     items == null || items.isEmpty() ? View.VISIBLE : View.GONE);
         });
@@ -94,17 +113,15 @@ public class ProjectDetailFragment extends Fragment {
             binding.projectDetailNotesInput.setText(project.notes);
             headerLoaded = true;
         }
-        if (getActivity() instanceof AppCompatActivity && ((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(project.name);
-        }
-
-        bindDeadlineViews(project.softDeadlineMillis);
+        currentProject = project;
+        bindDeadlineViews(project);
 
         boolean completed = project.status == Project.STATUS_COMPLETED;
         binding.projectDetailCompleteButton.setVisibility(completed ? View.GONE : View.VISIBLE);
     }
 
-    private void bindDeadlineViews(long softDeadlineMillis) {
+    private void bindDeadlineViews(Project project) {
+        long softDeadlineMillis = project.softDeadlineMillis;
         TextView chip = binding.projectDetailDeadlineChip;
         if (softDeadlineMillis <= 0L) {
             chip.setVisibility(View.GONE);
@@ -114,7 +131,9 @@ public class ProjectDetailFragment extends Fragment {
         binding.projectDetailDeadlineButton.setText(
                 DateFormat.getMediumDateFormat(requireContext()).format(new Date(softDeadlineMillis)));
 
-        ProjectDeadlineState state = ProjectDeadlineState.from(softDeadlineMillis, System.currentTimeMillis());
+        boolean finished = ProjectDeadlineState.isFinished(project.status, doneItems, totalItems);
+        ProjectDeadlineState state = ProjectDeadlineState.from(
+                softDeadlineMillis, System.currentTimeMillis(), finished);
         if (state == ProjectDeadlineState.NONE) {
             chip.setVisibility(View.GONE);
             return;

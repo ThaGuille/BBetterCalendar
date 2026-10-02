@@ -24,7 +24,8 @@ human-readable version of that.
 | "what palette suits a calm productivity app?", "give me a font pairing", "which chart for this data?" | **ui-ux-pro-max** | You need a *value*, not a decision. |
 | "what does MD3 say about elevation / type scale / colour roles?" | **material-3** | Spec authority. |
 | *(attaches a screenshot)* "make it look like this" | **image-to-code** | A reference image is present. |
-| "show me 3 directions for the timer screen" | **mobile-mockup** | You want to *look* at options first. Images only. |
+| "show me 3 directions for the timer screen" | **stitch-generate-design** (via Stitch MCP) | You want to *look* at options first. `mobile-mockup` is the intended skill but needs an image model the CLI lacks. |
+| "write the DESIGN.md for Stitch", "generate this screen in Stitch" | **stitch-taste-design** / **stitch-generate-design** | Visual references only; never produces app code. |
 | "design a logo", "app icon concepts", "brand board" | **brandkit** | Identity artefact, not app UI. |
 | "does the app still run?", "click through Progress" | **adb-ui-test** (via `ui-tester`) | Runtime verification. |
 | "build / lint / test" | **bb-build**, **check** | Gradle. |
@@ -149,6 +150,32 @@ success states, and multi-screen consistency. Android/Pixel framing enforced by 
 
 Generates **images only**: logo concepts and lockups, brand-guideline boards, colour and type
 specimen sheets, app-icon directions, identity decks, moodboards.
+
+> ⚠️ **`mobile-mockup` and `brandkit` need an image-generation model, which the Claude Code CLI
+> does not have.** They cannot run here today; use the Stitch flow below to get visual references.
+
+### `stitch-*` — Google Stitch as the image generator we lack
+*Apache-2.0 · [google-labs-code/stitch-skills](https://github.com/google-labs-code/stitch-skills) · commit `0337446` · vendored 2026-10-01*
+
+Stitch (free, Google Labs) generates Mobile-mode screens from a prompt plus reference images and a
+`DESIGN.md`. It is a **visual reference generator** — its HTML/Tailwind output is never shipped;
+code comes from `image-to-code` + `impeccable`. Needs the Stitch MCP: see
+[`.claude/docs/stitch-setup.md`](../docs/stitch-setup.md) (user-side API key, never in the repo).
+
+| Skill | Use |
+|---|---|
+| `stitch-taste-design` | Write the anti-generic `DESIGN.md` that steers Stitch (dials recalibrated for Android) |
+| `stitch-manage-design-system` | Upload/apply the `DESIGN.md` to a Stitch project |
+| `stitch-enhance-prompt` | Turn a rough idea into a layout/content prompt |
+| `stitch-generate-design` | Generate screens, edit, create variants (`MOBILE` only) |
+| `stitch-upload` | Upload screenshots/HTML/MD to a project (bypasses MCP token limits) |
+| `stitch-design-md` | Derive a `DESIGN.md` from an existing Stitch project |
+
+Not installed on purpose: `stitch-build` (React/shadcn/Remotion), `code-to-design`, `extract-*` —
+web-only.
+
+**Input for the whole flow:** reference screenshots in
+[`../references/inspiration/`](../references/inspiration/README.md) + a `refs.md` saying *why* each one.
 
 ---
 

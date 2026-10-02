@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Traducción al castellano (spec frontend-structure-cleanup). values/strings.xml (inglés) es el
+     idioma por defecto; Android usa este archivo cuando el móvil está en español. Cada string
+     traducible de values/ DEBE tener su entrada aquí (lint MissingTranslation). Los símbolos y
+     formatos neutros llevan translatable="false" en values/ y no se repiten. -->
+<resources>
+    <string name="title_home">Inicio</string>
+    <string name="title_progress">Progreso</string>
+    <string name="title_projects">Proyectos</string>
+    <string name="action_back">Atrás</string>
+    <string name="popup_ok">Aceptar</string>
+    <string name="popup_timer_failed">Temporizador fallido</string>
+    <string name="picker_selected_format">Seleccionado: %1$s</string>
+
+    <!-- Proyectos -->
+    <string name="projects_add">Añadir proyecto</string>
+    <string name="projects_empty">Aún no hay proyectos — crea uno para agrupar tus tareas</string>
+    <string name="create_project_title">Nuevo proyecto</string>
+    <string name="create_project_name_hint">Nombre del proyecto</string>
+    <string name="create_project_notes_hint">Notas (opcional)</string>
+    <string name="create_project_set_deadline">Fecha límite (opcional)</string>
+    <string name="create_project_cancel">Cancelar</string>
+    <string name="create_project_save">Crear</string>
+    <string name="create_project_name_required">Ponle un nombre</string>
+    <string name="project_progress_format">%1$d/%2$d hechas</string>
+    <string name="project_progress_empty">Aún no hay elementos</string>
+    <string name="project_deadline_date_format">vence el %1$s</string>
+    <string name="project_deadline_approaching">Vence pronto</string>
+    <string name="project_deadline_passed">Vencido</string>
+    <string name="project_detail_title">Proyecto</string>
+    <string name="project_detail_save">Guardar</string>
+    <string name="project_detail_items_title">Elementos</string>
+    <string name="project_detail_add_item">Añadir elemento</string>
+    <string name="project_detail_items_empty">Aún no hay elementos — añade uno</string>
+    <string name="project_detail_complete">Marcar como completado</string>
+    <string name="project_detail_delete">Eliminar proyecto</string>
+    <string name="project_detail_delete_confirm_title">¿Eliminar este proyecto?</string>
+    <string name="project_detail_delete_confirm_message">Se eliminarán el proyecto y todos sus elementos. No se puede deshacer.</string>
+    <string name="project_item_no_date">Sin fecha</string>
+    <string name="title_calendar">Calendario</string>
+    <string name="title">Título</string>
+    <string name="event">Evento</string>
+    <string name="task">Tarea</string>
+    <string name="notification">Notificación</string>
+
+    <string name="events_for">Eventos del %1$s</string>
+    <string name="month_view_prev">Mes anterior</string>
+    <string name="month_view_next">Mes siguiente</string>
+    <string name="no_events_today">No hay eventos este día</string>
+    <string name="calendar_mode_month">Mes</string>
+    <string name="calendar_mode_week">Semana</string>
+    <string name="calendar_add_entry">Añadir evento o tarea</string>
+    <string name="calendar_untitled">(sin título)</string>
+
+    <!-- Inicio -->
+    <string name="home_greeting">¡Hola!</string>
+    <string name="home_today_card_title">Hoy</string>
+    <string name="home_mode_concentration">Concentración</string>
+    <string name="home_mode_rest">Descanso</string>
+    <string name="home_skip_rest">Saltar descanso</string>
+    <string name="home_play">Iniciar temporizador</string>
+    <string name="home_pause">Pausar temporizador</string>
+    <string name="home_block_mode_off">Modo bloqueo: desactivado</string>
+    <string name="home_block_mode_on">Modo bloqueo: activado</string>
+    <string name="home_block_mode_pending">Modo bloqueo: falta permiso</string>
+    <string name="home_timer_settings">Ajustes del temporizador</string>
+    <string name="home_cycle_finished">Ciclo finalizado — has completado el ciclo de estudio</string>
+    <string name="home_stat_studied_label">Estudiado hoy</string>
+    <string name="home_stat_streak_label">Racha actual</string>
+    <string name="home_stat_fails_label">Sesiones fallidas</string>
+    <string name="home_stat_studied_format">%1$s hoy</string>
+    <string name="home_stat_streak_placeholder">0 días</string>
+
+    <!-- Inicio: tareas de hoy + alta rápida -->
+    <string name="home_tasks_card_title">Tareas</string>
+    <string name="home_tasks_add">Añadir tarea</string>
+    <string name="home_tasks_empty">Nada para hoy — añade una tarea</string>
+    <string name="home_tasks_show_overdue">Ver tareas pendientes anteriores</string>
+    <string name="home_tasks_hide_overdue">Ocultar tareas pendientes anteriores</string>
+    <string name="home_tasks_overdue_empty">No hay tareas pendientes anteriores</string>
+    <string name="quick_add_header">Nueva tarea para hoy</string>
+    <string name="quick_add_title_hint">Título de la tarea</string>
+    <string name="quick_add_title_required">Ponle un título</string>
+    <string name="quick_add_set_time">Hora (opcional)</string>
+    <string name="quick_add_save">Añadir tarea</string>
+    <string name="quick_add_more_options">Más opciones</string>
+
+    <!-- Popup del temporizador (pomodoro) -->
+    <string name="timer_popup_title">Temporizador pomodoro</string>
+    <string name="timer_popup_subtitle">Ajusta tu sesión de concentración</string>
+    <string name="timer_concentration_label">Concentración</string>
+    <string name="timer_rest_label">Descanso</string>
+    <string name="timer_minutes_unit">minutos</string>
+    <string name="timer_range_min">1 min</string>
+    <string name="timer_range_max">90 min</string>
+    <string name="timer_range_rest_max">30 min</string>
+    <string name="timer_cycles_label">Ciclos totales</string>
+    <string name="timer_infinite_label">Infinito</string>
+    <string name="timer_auto_cycle_label">Encadenar ciclos</string>
+    <string name="timer_auto_cycle_hint">Empieza la siguiente sesión automáticamente</string>
+    <string name="timer_btn_restore">Restaurar\nvalores</string>
+    <string name="timer_btn_cancel">Cancelar</string>
+    <string name="timer_btn_save">Guardar</string>
+    <string name="timer_error_range">El temporizador debe estar entre 1 y 90 minutos.</string>
+    <string name="timer_error_rest_range">El descanso debe estar entre 1 minuto y el tiempo de concentración.</string>
+    <string name="timer_error_cycles_range">Los ciclos deben estar entre 1 y 15.</string>
+
+    <!-- Crear evento / tarea -->
+    <string name="create_entry_headline_event">Nuevo evento</string>
+    <string name="create_entry_headline_task">Nueva tarea</string>
+    <string name="create_entry_segment_event">Evento</string>
+    <string name="create_entry_segment_task">Tarea</string>
+    <string name="create_entry_segment_reminder">Recordatorio</string>
+    <string name="create_entry_btn_save">Guardar</string>
+    <string name="create_entry_btn_close">Cerrar</string>
+    <string name="create_entry_starts">Empieza</string>
+    <string name="create_entry_ends">Termina</string>
+    <string name="create_entry_duration">Duración</string>
+    <string name="create_entry_repetition">Repetición</string>
+    <string name="create_entry_notification_hint">Añadir notificación</string>
+    <string name="create_entry_description_hint">Añadir descripción</string>
+    <string name="create_entry_title_hint">Título</string>
+    <string name="create_entry_date_placeholder">Fecha</string>
+
+    <!-- Popup de notificaciones -->
+    <string name="notifications_popup_title">Notificaciones</string>
+    <string name="notifications_offset_5min">5 minutos antes</string>
+    <string name="notifications_offset_10min">10 minutos antes</string>
+    <string name="notifications_offset_15min">15 minutos antes</string>
+    <string name="notifications_offset_30min">30 minutos antes</string>
+    <string name="notifications_offset_1h">1 hora antes</string>
+    <string name="notifications_offset_3h">3 horas antes</string>
+    <string name="notifications_offset_1d">1 día antes</string>
+
+    <!-- Canales de notificación -->
+    <string name="notif_channel_foreground_service_name">Servicio en segundo plano</string>
+    <string name="notif_channel_foreground_service_desc">Mantiene el temporizador de concentración activo mientras la app está abierta.</string>
+    <string name="notif_channel_event_reminders_name">Recordatorios de eventos</string>
+    <string name="notif_channel_event_reminders_desc">Recordatorios de próximos eventos y tareas.</string>
+    <string name="notif_channel_focus_alerts_name">Alertas de concentración</string>
+    <string name="notif_channel_focus_alerts_desc">Avisos cuando sales de la app durante una sesión de concentración.</string>
+    <string name="notif_channel_usage_limits_name">Avisos de límite de apps</string>
+    <string name="notif_channel_usage_limits_desc">Te avisa cuando estás cerca o has superado el límite diario de una app.</string>
+    <string name="notif_channel_project_deadlines_name">Fechas límite de proyectos</string>
+    <string name="notif_channel_project_deadlines_desc">Avisos cuando se acerca la fecha límite de un proyecto.</string>
+
+    <!-- Notificación del servicio en primer plano -->
+    <string name="notif_foreground_service_title">BBetter está en marcha</string>
+    <string name="notif_foreground_service_body">Mantiene activo tu temporizador de concentración</string>
+
+    <!-- Recordatorio de evento -->
+    <string name="notif_event_default_title">Próximo evento</string>
+    <string name="notif_event_body_format">Empieza %1$s</string>
+
+    <!-- Fecha límite de proyecto -->
+    <string name="notif_project_deadline_default_title">Fecha límite del proyecto</string>
+    <string name="notif_project_deadline_body_3d">Vence en 3 días</string>
+    <string name="notif_project_deadline_body_1d">Vence mañana</string>
+
+    <!-- Concentración rota -->
+    <string name="notif_focus_fail_title">Concentración interrumpida</string>
+    <string name="notif_focus_fail_body">Has salido de la app — se ha perdido tu sesión de concentración.</string>
+
+    <!-- Tarea completada por concentración -->
+    <string name="notif_focus_complete_title">¡Tarea completada!</string>
+    <string name="notif_focus_complete_body">%1$s ha alcanzado su objetivo de concentración.</string>
+
+    <!-- Límites de apps -->
+    <string name="notif_app_limit_warn_title">Casi en tu límite de %1$s</string>
+    <string name="notif_app_limit_warn_body">Te quedan unos %1$d min hoy.</string>
+    <string name="notif_app_limit_reached_title">Límite de %1$s alcanzado</string>
+    <string name="notif_app_limit_reached_body">Has llegado a tu límite de hoy.</string>
+
+    <!-- Progreso -->
+    <string name="progress_granularity_day">Día</string>
+    <string name="progress_granularity_week">Semana</string>
+    <string name="progress_granularity_month">Mes</string>
+    <string name="progress_range_prev">Rango anterior</string>
+    <string name="progress_range_next">Rango siguiente</string>
+    <string name="progress_range_today">Hoy</string>
+    <string name="progress_range_yesterday">Ayer</string>
+    <string name="progress_range_this_week">Esta semana</string>
+    <string name="progress_range_this_month">Este mes</string>
+    <string name="progress_chart_concent">Foco</string>
+    <string name="progress_chart_fails">Fallos</string>
+    <string name="progress_chart_when">Horas</string>
+    <string name="progress_chart_projects">Proyectos</string>
+
+    <!-- Progreso: banda de proyectos -->
+    <string name="progress_projects_header">Proyectos</string>
+
+    <!-- Progreso: uso del móvil y de apps -->
+    <string name="progress_usage_header">Tiempo de pantalla</string>
+    <string name="progress_usage_add_apps">Añadir apps</string>
+    <string name="progress_usage_block_toggle">Aplicar límite diario</string>
+    <string name="progress_enforce_master_on">Límites de apps activos · toca para pausar</string>
+    <string name="progress_enforce_master_off">Límites de apps en pausa · toca para reanudar</string>
+    <string name="progress_usage_locked_title">Mira tu uso de apps</string>
+    <string name="progress_usage_locked_body">Activa el acceso de uso para medir el tiempo que pasas en las apps que elijas. Tu uso se queda en este dispositivo.</string>
+    <string name="progress_usage_locked_cta">Activar acceso de uso</string>
+    <string name="progress_usage_empty_title">Aún no sigues ninguna app</string>
+    <string name="progress_usage_empty_body">Elige las apps que quieres vigilar y aparecerán aquí.</string>
+    <string name="progress_usage_empty_cta">Añadir apps</string>
+    <string name="progress_usage_no_limit">sin límite</string>
+
+    <!-- Diálogo de límite de app -->
+    <string name="app_limit_dialog_title">Límite diario</string>
+    <string name="app_limit_dialog_minutes_hint">Minutos al día</string>
+    <string name="app_limit_dialog_save">Guardar</string>
+    <string name="app_limit_dialog_clear">Quitar</string>
+    <string name="app_limit_dialog_cancel">Cancelar</string>
+    <string name="app_limit_dialog_invalid_minutes">Introduce un número de minutos mayor que 0</string>
+
+    <!-- Selector de apps -->
+    <string name="app_picker_title">Añadir apps</string>
+    <string name="app_picker_save">Guardar</string>
+    <string name="app_picker_close">Cerrar</string>
+    <string name="app_picker_empty">No se han encontrado apps</string>
+    <string name="app_picker_check">Seguir esta app</string>
+
+    <string name="privacy_policy_label">Política de privacidad</string>
+
+    <!-- Aviso de acceso de uso -->
+    <string name="usage_disclosure_title">Mide tu uso de apps</string>
+    <string name="usage_disclosure_body">Para mostrarte cuánto tiempo pasas en cada app, BBetter lee la información de uso de apps del dispositivo (qué apps se ejecutan en primer plano y durante cuánto tiempo) y la lista de apps instaladas.\n\nTodo se queda en tu dispositivo — nunca se sube, se comparte ni se usa para publicidad. Tú eliges qué apps seguir y puedes desactivarlo cuando quieras en Ajustes → Acceso de uso.</string>
+    <string name="usage_disclosure_continue">Continuar</string>
+    <string name="usage_disclosure_cancel">Ahora no</string>
+
+    <!-- Aviso de accesibilidad (bloqueo) -->
+    <string name="accessibility_disclosure_title">Aplicar límites de apps</string>
+    <string name="accessibility_disclosure_body">Para bloquear de verdad una app cuando llega a su límite diario, BBetter usa un servicio de accesibilidad. Solo detecta qué app está en primer plano y tapa las apps que <b>tú</b> has elegido limitar — nunca lee, graba ni envía el contenido de tu pantalla, y todo se queda en este dispositivo.\n\nPuedes desactivarlo cuando quieras en Ajustes → Accesibilidad, o pausar los límites desde la pantalla de Progreso.</string>
+    <string name="accessibility_disclosure_steps_title">Después de tocar Activar:</string>
+    <string name="accessibility_disclosure_steps">1. Busca <b>BBetter</b> en la lista de servicios\n2. Tócalo y activa el interruptor\n3. Acepta la confirmación del sistema\n4. Vuelve aquí — la app aparecerá como bloqueada</string>
+    <string name="accessibility_disclosure_continue">Activar</string>
+    <string name="accessibility_disclosure_cancel">Ahora no</string>
+
+    <!-- Descripción del servicio de accesibilidad -->
+    <string name="blocker_accessibility_description">Tapa las apps que has elegido limitar cuando superan su tiempo diario. Solo detecta la app en primer plano; nunca lee ni envía el contenido de la pantalla. Todo en el dispositivo.</string>
+
+    <!-- Pantalla de bloqueo -->
+    <string name="block_cover_title">Límite diario alcanzado</string>
+    <string name="block_cover_subtitle">%1$s usados hoy</string>
+    <string name="block_cover_close">Cerrar</string>
+    <string name="block_cover_focus_title">Modo concentración activo</string>
+    <string name="block_cover_focus_subtitle">Pausa o detén tu sesión pomodoro para usar esta app.</string>
+
+    <!-- Popup de repetición -->
+    <string name="repetition_popup_title">Repetición</string>
+    <string name="repetition_option_none">No se repite</string>
+    <string name="repetition_option_daily">Cada día</string>
+    <string name="repetition_option_weekly">Cada semana</string>
+    <string name="repetition_option_monthly">Cada mes</string>
+    <string name="repetition_popup_confirm">Hecho</string>
+    <string name="repetition_every_label">Cada</string>
+    <string name="repetition_interval_days_one">1 día</string>
+    <plurals name="repetition_interval_days">
+        <item quantity="one">%d día</item>
+        <item quantity="many">%d días</item>
+        <item quantity="other">%d días</item>
+    </plurals>
+    <string name="repetition_summary_every_n_days">Cada %1$d días</string>
+    <string name="repetition_summary_weekly_on">Cada semana · %1$s</string>
+    <string name="repetition_hide_in_calendar">Ocultar del calendario</string>
+    <string name="repetition_hide_in_calendar_hint">Sigue apareciendo en tus tareas de Inicio</string>
+    <!-- Iniciales de 1 letra: en castellano L M X J V S D no se confunden (X = miércoles). -->
+    <string-array name="weekday_initials">
+        <item>L</item>
+        <item>M</item>
+        <item>X</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+        <item>D</item>
+    </string-array>
+    <string-array name="weekday_names">
+        <item>Lunes</item>
+        <item>Martes</item>
+        <item>Miércoles</item>
+        <item>Jueves</item>
+        <item>Viernes</item>
+        <item>Sábado</item>
+        <item>Domingo</item>
+    </string-array>
+
+    <!-- Tareas recurrentes en Inicio -->
+    <string name="home_overdue_missed_count">perdida %1$d×</string>
+    <string name="home_overdue_remove_desc">Quitar tarea perdida</string>
+    <string name="quick_add_repeat_label">Repetir</string>
+
+    <!-- Objetivos de minutos + "concentrarse en esto" -->
+    <string name="quick_add_target_hint">Minutos objetivo (opcional)</string>
+    <string name="task_focus_this_desc">Concentrarse en esta tarea</string>
+    <string name="home_focus_banner">Concentrado en: %1$s</string>
+
+    <!-- Modo concentración + racha de 30 días -->
+    <string name="home_cancel_session">Cancelar sesión</string>
+    <string name="home_streak_title">Días de concentración</string>
+    <string name="home_streak_desc">Días con un pomodoro completado</string>
+    <string name="focus_streak_popup_title">Días de concentración</string>
+    <string name="focus_streak_summary">%1$d de los últimos 30 días con un pomodoro completado</string>
+    <string name="focus_streak_legend">Día en que terminaste un pomodoro</string>
+    <string name="focus_streak_close">Cerrar</string>
+    <string name="focus_streak_empty">Aún no has terminado ningún pomodoro — empieza uno y esto se irá llenando.</string>
+    <string name="first_focus_title">¡Enhorabuena!</string>
+    <string name="first_focus_message">Primer pomodoro del día, hecho.</string>
+    <string name="first_focus_button">Sigue así</string>
+    <plurals name="first_focus_days_this_month">
+        <item quantity="one">día con pomodoro este mes</item>
+        <item quantity="many">días con pomodoro este mes</item>
+        <item quantity="other">días con pomodoro este mes</item>
+    </plurals>
+
+</resources>

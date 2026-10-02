@@ -13,6 +13,8 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <include layout="@layout/view_calendar_mode_toggle" />
+
         <TextView
             android:id="@+id/weekMonthTitleText"
             android:layout_width="match_parent"
@@ -64,6 +66,7 @@
         android:background="@drawable/rounded_square"
         android:backgroundTint="@color/bb_primary"
         android:clickable="true"
+        android:contentDescription="@string/calendar_add_entry"
         android:elevation="5dp"
         android:focusable="true"
         android:src="@drawable/ic_add_24"

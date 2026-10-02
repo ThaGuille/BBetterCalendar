@@ -19,11 +19,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -40,9 +37,6 @@ import com.example.bbettercalendar.notifications.focus.FocusFailNotifier;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.helpers.FormatHelper;
-import com.example.bbettercalendar.helpers.OnToolBarListener;
-import com.example.bbettercalendar.helpers.OnToolbarHomeListener;
-import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.popups.AlertPopup;
 import com.example.bbettercalendar.popups.FirstFocusCelebrationPopup;
 import com.example.bbettercalendar.popups.FocusStreakPopup;
@@ -60,7 +54,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class HomeFragment extends Fragment implements View.OnClickListener, OnToolBarListener, OnToolbarHomeListener, OnPopupListener<Object>, AccessibilityDisclosureDialog.OnConsentGrantedListener {
+public class HomeFragment extends Fragment implements View.OnClickListener, OnPopupListener<Object>, AccessibilityDisclosureDialog.OnConsentGrantedListener {
 
     private final int TIMER_STOPPED = 0;
     private final int TIMER_RUNNING = 1;
@@ -85,7 +79,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private TimerPopup timerPopup = new TimerPopup();
     private MessagePopup messagePopup;
 
-    private ToolbarHelper toolbarHelper;
     private ImageButton playButton;
     private ImageButton cancelButton;
     private TextView skipRestButton;
@@ -154,11 +147,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         timerModeText = binding.homeTimerTypeText;
         timeLeftInMillis = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
 
-        toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.home_toolbar, true);
-        toolbarHelper.setOnToolbarListener(this);
-        toolbarHelper.setOnToolbarHomeListener(this);
-        //todo crear listener personalizado
-        // toolbarHelper.setOnToolbarCalendarListener(this);
+        // Racha y configuración del timer vivían en la toolbar; ahora están en el propio contenido
+        // (spec frontend-structure-cleanup).
+        binding.homeStreakButton.setOnClickListener(v -> showStreakPopup());
+        binding.homeTimerSettingsButton.setOnClickListener(v -> showTimerSettings());
 
         alertPopup.setOnPopupListener(this);
         timerPopup.setOnPopupListener(this);
@@ -176,13 +168,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             boolean any = fails != null && !fails.isEmpty() && !"0".equals(fails);
             binding.homeFailsChip.setVisibility(any ? View.VISIBLE : View.GONE);
         });
-        // Racha = días de los últimos 30 con un pomodoro completado; vive en la toolbar.
+        // Racha = días de los últimos 30 con un pomodoro completado; vive junto al saludo.
         homeViewModel.getActiveDaysLast30().observe(getViewLifecycleOwner(), days ->
-                toolbarHelper.setStreakCount(days == null ? 0 : days));
+                binding.homeStreakCount.setText(String.valueOf(days == null ? 0 : days)));
         // Primer pomodoro del día -> celebración.
         homeViewModel.getFirstFocusOfDay()
                 .observe(getViewLifecycleOwner(), this::maybeShowFirstFocusCelebration);
-        homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), todayTimeStudiedText::setText);
+        homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), time ->
+                todayTimeStudiedText.setText(getString(R.string.home_stat_studied_format, time)));
         homeViewModel.getTimerModeText().observe(getViewLifecycleOwner(), timerModeText::setText);
 
         // Auto-completado de una tarea al alcanzar su objetivo (spec focus-attribution): feedback
@@ -218,7 +211,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             root.post(this::renderRestoredState);
         }
 
-        setTopMenu();
         return root;
     }
 
@@ -373,7 +365,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             }
             else if(cyclesCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
             {
-                messagePopup.setText("Ciclo finalizado, Has completado el ciclo de estudio");
+                messagePopup.setText(getString(R.string.home_cycle_finished));
                 messagePopup.show(getParentFragmentManager(), "popup_tag");
                 resetTimerAndCycles();
             }
@@ -392,7 +384,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
             }
             else if(cyclesCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
             {   //si se han completado todos los ciclos, se muestra un mensaje y se resetea el contador
-                messagePopup.setText("Ciclo finalizado, Has completado el ciclo de estudio");
+                messagePopup.setText(getString(R.string.home_cycle_finished));
                 messagePopup.show(getParentFragmentManager(), "popup_tag");
                 cyclesCompleted = 0;
             }
@@ -630,6 +622,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
 
         binding.homeHeaderSection.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
         binding.homeTasksCard.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
+        binding.homeTimerSettingsButton.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
         cancelButton.setVisibility(focusModeActive ? View.VISIBLE : View.GONE);
         // El hueco sólo existe para compensar el botón de cancelar y mantener centrado el play.
         binding.homeControlsSpacer.setVisibility(focusModeActive ? View.VISIBLE : View.GONE);
@@ -672,7 +665,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     }
 
     /**
-     * Oculta/restaura la navegación inferior y la ActionBar de la Activity. En focus mode las
+     * Oculta/restaura la navegación inferior de la Activity (ya no hay ActionBar). En focus mode las
      * únicas acciones son pausar, cancelar y el modo bloqueo: dejar la bottom-nav a mano invitaría
      * a irse a otra pestaña con la sesión corriendo. Idempotente y siempre restaurado en
      * onDestroyView, así que ninguna otra pantalla puede heredar el chrome escondido.
@@ -690,16 +683,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         if (navDivider != null) {
             navDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
-        if (activity instanceof AppCompatActivity) {
-            ActionBar actionBar = ((AppCompatActivity) activity).getSupportActionBar();
-            if (actionBar != null) {
-                if (visible) {
-                    actionBar.show();
-                } else {
-                    actionBar.hide();
-                }
-            }
-        }
     }
 
     /**
@@ -715,18 +698,25 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     private void updateBlockModeButton() {
         if (binding == null || blockModeButton == null) return;
 
+        // El texto dice el estado (off / on / falta permiso): con sólo el color, "off" se leía
+        // como un botón deshabilitado (spec frontend-structure-cleanup).
         int tint;
         float alpha;
+        int label;
         if (!blockModeArmed) {
             tint = R.color.bb_on_surface_muted;
-            alpha = 0.35f;
+            alpha = 0.7f;
+            label = R.string.home_block_mode_off;
         } else if (AccessibilityAccess.isEnabled(requireContext())) {
             tint = R.color.bb_danger;
             alpha = 1f;
+            label = R.string.home_block_mode_on;
         } else {
             tint = R.color.bb_accent_reward;
             alpha = 0.9f;
+            label = R.string.home_block_mode_pending;
         }
+        blockModeButton.setText(label);
         blockModeButton.setBackgroundTintList(
                 ContextCompat.getColorStateList(requireContext(), tint));
         blockModeButton.setAlpha(alpha);
@@ -738,21 +728,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
     @Override
     public void onDestroyView() {
         // Antes de soltar el binding: si la vista muere en focus mode (rotación, proceso), la
-        // bottom-nav y la ActionBar son de la Activity y se quedarían ocultas para siempre.
+        // bottom-nav es de la Activity y se quedaría oculta para siempre.
         setAppChromeVisible(true);
         focusModeActive = false;
         super.onDestroyView();
         binding = null;
-    }
-
-    @Override
-    public void onToolbarLoaded(int result) {
-        switch (result){
-            case ToolbarHelper.FINISH:
-                break;
-            default:
-                break;
-        }
     }
 
     /** Sistema per detectar si l'aplicació està en primer pla o en segon pla */
@@ -941,20 +921,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnTo
         }
     }
 
-    @Override
-    public void onToolbarStreakClick() {
+    /** Tap en la racha del header (spec focus-mode-and-streak). */
+    private void showStreakPopup() {
         new FocusStreakPopup().show(getParentFragmentManager(), FocusStreakPopup.POPUP_TAG);
     }
 
-    @Override
-    public void onToolbarTimerClick(){
+    /** Tap en el engranaje de la tarjeta del timer: configuración del pomodoro. */
+    private void showTimerSettings() {
         timerPopup.setConfiguration(configurationManager.getConfiguration());
         timerPopup.show(getParentFragmentManager(), "popup_tag");
-    }
-
-
-    private void setTopMenu() {
-        getActivity().addMenuProvider(toolbarHelper, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
     }
     /** --------------------------------------------------------------------------- */
 }

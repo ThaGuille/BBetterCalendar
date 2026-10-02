@@ -1,5 +1,9 @@
 package com.example.bbettercalendar.ui.progress;
 
+import android.content.Context;
+
+import com.example.bbettercalendar.R;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -80,19 +84,19 @@ public final class TimeRange {
             DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault());
 
     // Etiqueta para el centro del stepper ("Today" / "This week" / "June 2026" ...).
-    public String label() {
+    public String label(Context ctx) {
         LocalDate today = LocalDate.now();
         switch (granularity) {
             case WEEK:
-                if (contains(today)) return "This week";
+                if (contains(today)) return ctx.getString(R.string.progress_range_this_week);
                 return startDay().format(SPAN_FMT) + " – " + endDay().format(SPAN_FMT);
             case MONTH:
-                if (contains(today)) return "This month";
+                if (contains(today)) return ctx.getString(R.string.progress_range_this_month);
                 return anchor.format(MONTH_FMT);
             case DAY:
             default:
-                if (anchor.equals(today)) return "Today";
-                if (anchor.equals(today.minusDays(1))) return "Yesterday";
+                if (anchor.equals(today)) return ctx.getString(R.string.progress_range_today);
+                if (anchor.equals(today.minusDays(1))) return ctx.getString(R.string.progress_range_yesterday);
                 return anchor.format(DAY_FMT);
         }
     }

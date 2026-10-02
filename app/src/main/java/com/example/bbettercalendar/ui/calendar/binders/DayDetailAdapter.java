@@ -49,7 +49,7 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
         CalendarItem item = items.get(position);
         holder.title.setText(item.getTitle() != null && !item.getTitle().isEmpty()
                 ? item.getTitle()
-                : "(untitled)");
+                : holder.itemView.getContext().getString(R.string.calendar_untitled));
         String description = item.getDescription();
         if (description != null && !description.trim().isEmpty()) {
             holder.description.setText(description);

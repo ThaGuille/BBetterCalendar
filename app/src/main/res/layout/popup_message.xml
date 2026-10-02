@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/spacing_md"
         android:minWidth="@dimen/dialog_min_width"
-        android:text="message"
+        tools:text="message"
         android:textColor="@color/black"
         android:textSize="@dimen/text_dialog"
         app:layout_constraintTop_toTopOf="parent"
@@ -26,7 +27,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_square"
         android:backgroundTint="@color/white"
-        android:text="OK"
+        android:text="@string/popup_ok"
         android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/popupMessageText"
         app:layout_constraintEnd_toEndOf="parent" />

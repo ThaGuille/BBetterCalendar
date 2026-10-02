@@ -161,7 +161,7 @@ public class ProgressFragment extends Fragment {
     }
 
     private void renderRange(TimeRange range) {
-        binding.rangeLabel.setText(range.label());
+        binding.rangeLabel.setText(range.label(requireContext()));
 
         boolean canForward = range.canStepForward(LocalDate.now());
         binding.rangeNext.setEnabled(canForward);

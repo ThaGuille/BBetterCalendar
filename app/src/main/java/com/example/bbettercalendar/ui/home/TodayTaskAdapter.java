@@ -136,7 +136,9 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
             holder.focus.setVisibility(View.VISIBLE);
             holder.focus.setOnClickListener(v -> focusListener.onTaskFocus(entry));
         } else {
-            holder.focus.setVisibility(View.GONE);
+            // En la sección de hoy la columna del botón se reserva (INVISIBLE) aunque esta fila no
+            // lo lleve: así las horas quedan alineadas entre filas (spec frontend-structure-cleanup).
+            holder.focus.setVisibility(showDate ? View.GONE : View.INVISIBLE);
             holder.focus.setOnClickListener(null);
         }
 

@@ -31,13 +31,55 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/text_home"
+            <!-- Saludo + racha (spec frontend-structure-cleanup): la racha vivía en la toolbar, que
+                 ya no existe. Tap = FocusStreakPopup, igual que antes. -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.BBetter.Headline"
-                android:textColor="@color/bb_primary_dark"
-                tools:text="Hi there" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_home"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.Headline"
+                    android:textColor="@color/bb_primary_dark"
+                    tools:text="Hi there" />
+
+                <LinearLayout
+                    android:id="@+id/homeStreakButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/home_streak_desc"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/spacing_sm"
+                    android:paddingEnd="@dimen/spacing_xs">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_flame_v2_24"
+                        app:tint="@color/bb_accent_reward" />
+
+                    <TextView
+                        android:id="@+id/homeStreakCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_xs"
+                        android:text="@string/home_streak_placeholder"
+                        android:textAppearance="@style/TextAppearance.BBetter.Title"
+                        android:textColor="@color/bb_on_surface" />
+                </LinearLayout>
+            </LinearLayout>
 
             <!-- Fecha a la izquierda + tiempo estudiado hoy a la derecha, en la misma linea
                  (spec focus-mode-and-streak): sustituye a la tarjeta de stats de 3 columnas.
@@ -123,6 +165,19 @@
             android:elevation="@dimen/elevation_card"
             android:padding="@dimen/home_card_padding">
 
+            <!-- Configuración del timer (antes: reloj de arena en la toolbar). Oculto en focus mode. -->
+            <ImageButton
+                android:id="@+id/homeTimerSettingsButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top|end"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/home_timer_settings"
+                android:padding="@dimen/spacing_sm"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings_24"
+                app:tint="@color/bb_on_surface_muted" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -200,7 +255,6 @@
                         android:background="@drawable/bg_play_button"
                         android:clickable="true"
                         android:contentDescription="@string/home_play"
-                        android:elevation="@dimen/elevation_floating"
                         android:focusable="true"
                         android:padding="16dp"
                         android:scaleType="fitCenter"
@@ -239,7 +293,7 @@
                     android:paddingEnd="18dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
-                    android:text="@string/home_block_mode"
+                    android:text="@string/home_block_mode_off"
                     android:textAppearance="@style/TextAppearance.BBetter.Chip"
                     android:textColor="@color/bb_on_primary" />
 

@@ -146,8 +146,9 @@ fighting each other.
 | [`ui-ux-pro-max`](.claude/skills/ui-ux-pro-max/SKILL.md) | **Lookup only.** Offline database of palettes, font pairings, styles, charts, icons, UX guidelines. Supplies values; never decides direction. |
 | [`material-3`](.claude/skills/material-3/SKILL.md) | **MD3 spec authority.** Colour roles, type scale, shape, elevation, motion tokens. Its code samples are Compose — translate, never paste. |
 | [`image-to-code`](.claude/skills/image-to-code/SKILL.md) | Fires when a **reference screenshot** is supplied. Extracts a system → `bb_*` tokens → XML. |
-| [`mobile-mockup`](.claude/skills/mobile-mockup/SKILL.md) | Generates **images** of Android screen concepts. No code. |
-| [`brandkit`](.claude/skills/brandkit/SKILL.md) | Generates **images** of logos / brand boards / app icons. No code. |
+| [`mobile-mockup`](.claude/skills/mobile-mockup/SKILL.md) | Generates **images** of Android screen concepts. No code. **Needs an image model the CLI lacks — not runnable here; use `stitch-*`.** |
+| [`brandkit`](.claude/skills/brandkit/SKILL.md) | Generates **images** of logos / brand boards / app icons. No code. Same image-model limit as `mobile-mockup`. |
+| `stitch-*` (6 skills: `taste-design`, `manage-design-system`, `enhance-prompt`, `generate-design`, `upload`, `design-md`) | **Visual-reference generator** via the Google Stitch MCP (`MOBILE` only). Output is never shipped as code. Setup: [`stitch-setup.md`](.claude/docs/stitch-setup.md). Inputs: [`.claude/references/inspiration/`](.claude/references/inspiration/README.md). |
 
 Reference libraries (knowledge, not invokable) live in [`.claude/references/`](.claude/references/):
 `interaction-design/` (22 docs — motion, feedback, loading, gestures, state machines, UX laws),

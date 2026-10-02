@@ -21,8 +21,8 @@ public class HomeForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Start the foreground service
         Notification notification = new NotificationCompat.Builder(this, "channelId")
-                .setContentTitle("Service is running")
-                .setContentText("Your application is active")
+                .setContentTitle(getString(R.string.notif_foreground_service_title))
+                .setContentText(getString(R.string.notif_foreground_service_body))
                 .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .build();

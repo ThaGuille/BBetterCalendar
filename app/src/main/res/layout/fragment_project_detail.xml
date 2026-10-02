@@ -20,6 +20,20 @@
         android:paddingTop="@dimen/spacing_md"
         android:paddingBottom="@dimen/spacing_lg">
 
+        <!-- Volver a la lista (spec frontend-structure-cleanup): sustituye a la flecha Up de la
+             ActionBar, que ya no existe. marginStart negativo: alinea el icono con el borde de la
+             tarjeta en vez de con el área táctil de 48dp. -->
+        <ImageButton
+            android:id="@+id/projectDetailBackButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="-12dp"
+            android:layout_marginBottom="@dimen/spacing_xs"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_back"
+            android:src="@drawable/ic_arrow_back_24"
+            app:tint="@color/bb_on_surface" />
+
         <!-- ============ Header card: name / notes / deadline ============ -->
         <LinearLayout
             android:layout_width="match_parent"

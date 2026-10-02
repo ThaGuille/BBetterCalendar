@@ -4,12 +4,11 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_calendar_day_selected">
 
+    <!-- Marca de hoy: cuadrado con borde que ocupa la celda entera. -->
     <View
         android:id="@+id/cellTodayIndicator"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="2dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@drawable/bg_calendar_day_today"
         android:visibility="gone" />
 

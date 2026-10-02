@@ -217,7 +217,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                     String[] displayedValues = numberPickerMinutesView.getDisplayedValues();
                     String selectedValue = displayedValues[newVal];
                     // Por ejemplo, puedes mostrar el valor seleccionado en un Toast
-                    Toast.makeText(getApplication(), "Selected: " + selectedValue, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplication(), getString(R.string.picker_selected_format, selectedValue), Toast.LENGTH_SHORT).show();
                 }
             };
 
@@ -232,7 +232,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 public void run() {
                     String[] displayedValues = numberPickerHoursView.getDisplayedValues();
                     String selectedValue = displayedValues[newVal];
-                    Toast.makeText(getApplication(), "Selected: " + selectedValue, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplication(), getString(R.string.picker_selected_format, selectedValue), Toast.LENGTH_SHORT).show();
                 }
             };
 

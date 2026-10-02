@@ -14,7 +14,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -23,9 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.databinding.FragmentCalendarMonthBinding;
-import com.example.bbettercalendar.helpers.OnToolBarListener;
-import com.example.bbettercalendar.helpers.OnToolbarCalendarListener;
-import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.ui.calendar.binders.DayDetailAdapter;
 import com.example.bbettercalendar.ui.calendar.binders.MonthDayBinder;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
@@ -51,12 +47,10 @@ import java.util.Map;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class CalendarFragmentMonth extends Fragment
-        implements OnToolBarListener, OnToolbarCalendarListener, View.OnClickListener {
+public class CalendarFragmentMonth extends Fragment implements View.OnClickListener {
 
     private FragmentCalendarMonthBinding binding;
     private CalendarViewModel viewModel;
-    private ToolbarHelper toolbarHelper;
     private MonthDayBinder dayBinder;
     private DayDetailAdapter dayDetailAdapter;
 
@@ -87,10 +81,10 @@ public class CalendarFragmentMonth extends Fragment
 
         viewModel = new ViewModelProvider(requireActivity()).get(CalendarViewModel.class);
 
-        toolbarHelper = new ToolbarHelper(getContext(), getActivity(), getActivity().getMenuInflater(), R.menu.toolbar, true);
-        toolbarHelper.setOnToolbarListener(this);
-        toolbarHelper.setOnToolbarCalendarListener(this);
-        getActivity().addMenuProvider(toolbarHelper, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+        // Selector Mes/Semana en el contenido (antes: icono de la toolbar).
+        View root = binding.getRoot();
+        root.findViewById(R.id.calendarModeMonth).setSelected(true);
+        root.findViewById(R.id.calendarModeWeek).setOnClickListener(v -> switchToWeek());
 
         binding.calendarAddEventButton.setOnClickListener(this);
 
@@ -160,7 +154,6 @@ public class CalendarFragmentMonth extends Fragment
         dayDetailAdapter.setOnItemClickListener(this::onDayDetailItemClick);
         binding.dayDetailRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.dayDetailRecycler.setAdapter(dayDetailAdapter);
-        binding.dayDetailAddButton.setOnClickListener(v -> launchAddEvent(selectedDate));
         refreshDayDetail();
     }
 
@@ -205,7 +198,9 @@ public class CalendarFragmentMonth extends Fragment
         if (binding == null) return;
         binding.dayDetailTitle.setText(getString(R.string.events_for, selectedDate.format(dayDetailFormatter)));
         List<CalendarItem> dayItems = currentItemsByDate.get(selectedDate);
-        dayDetailAdapter.submitList(dayItems != null ? dayItems : Collections.emptyList());
+        boolean empty = dayItems == null || dayItems.isEmpty();
+        dayDetailAdapter.submitList(empty ? Collections.emptyList() : dayItems);
+        binding.dayDetailEmptyText.setVisibility(empty ? View.VISIBLE : View.GONE);
     }
 
     private Map<LocalDate, List<CalendarItem>> groupByDate(List<CalendarItem> items) {
@@ -243,16 +238,13 @@ public class CalendarFragmentMonth extends Fragment
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.calendarAddEventButton) {
-            // FAB launches with no preselected date (defaults to today inside AddEventActivity).
-            launchAddEvent(null);
+            // El FAB crea en el día seleccionado (spec frontend-structure-cleanup): sustituye al
+            // botón "Add for this day". Sin tocar nada, el seleccionado es hoy.
+            launchAddEvent(selectedDate);
         }
     }
 
-    @Override
-    public void onToolbarLoaded(int result) { }
-
-    @Override
-    public void switchFragment() {
+    private void switchToWeek() {
         NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment_activity_main);
         navController.navigate(R.id.action_navigation_calendar_month_to_navigation_calendar_week);
     }

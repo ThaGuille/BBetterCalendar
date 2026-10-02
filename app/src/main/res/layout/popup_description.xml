@@ -12,7 +12,7 @@
         android:layout_height="@dimen/form_row_inner_height"
         android:layout_marginStart="@dimen/spacing_md"
         android:gravity="center|start"
-        android:hint="Description"
+        android:hint="@string/create_entry_description_hint"
         android:textColorHint="@color/black"
         android:textSize="@dimen/text_body"
         app:layout_constraintTop_toTopOf="parent"
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_square"
         android:backgroundTint="@color/white"
-        android:text="OK"
+        android:text="@string/popup_ok"
         android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/popup_description_edit_text"
         app:layout_constraintEnd_toEndOf="parent" />

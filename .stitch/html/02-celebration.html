@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BBetter - Cycle Complete</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            pine: {
+              950: '#060E0A',
+              900: '#091610',
+              850: '#0D1E16',
+              800: '#12221A',
+              700: '#1A2F24',
+              600: '#1E3427',
+              500: '#274433',
+            },
+            amber: {
+              glow: '#E5A93C',
+              light: '#F5BE58',
+              pale: '#FFE194',
+            },
+            sage: {
+              DEFAULT: '#7FB69A',
+              light: '#A2E6C4',
+              muted: '#A5B7AC',
+              dark: '#5B9377',
+            }
+          },
+          animation: {
+            'pulse-subtle': 'subtlePulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float-slow': 'floatPlant 4.5s ease-in-out infinite',
+            'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+          },
+          keyframes: {
+            subtlePulse: {
+              '0%, 100%': { transform: 'scale(1)', opacity: '0.22' },
+              '50%': { transform: 'scale(1.08)', opacity: '0.35' },
+            },
+            floatPlant: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Visual Styles -->
+<style data-purpose="custom-styling">
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #060E0A;
+      color: #F2F5F3;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Ambient background gradient overlay */
+    .hero-glow-layer {
+      background: radial-gradient(circle at 50% 28%, rgba(229, 169, 60, 0.16) 0%, rgba(127, 182, 154, 0.08) 38%, rgba(9, 22, 16, 0) 72%);
+    }
+
+    /* Subtle backdrop noise or micro-borders */
+    .card-sheen {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+    }
+  </style>
+<!-- END: Custom Visual Styles -->
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 select-none">
+<!-- BEGIN: MobileDeviceContainer -->
+<!-- Constrained mobile frame (390px class reference for iOS/Android portrait view) -->
+<main class="relative w-full max-w-[412px] min-h-screen sm:min-h-[844px] sm:max-h-[890px] sm:rounded-[44px] bg-[#091610] text-[#F2F5F3] overflow-hidden flex flex-col justify-between border-0 sm:border sm:border-pine-600/40 shadow-2xl">
+<!-- Ambient Halo Glow behind hero -->
+<div aria-hidden="true" class="absolute inset-0 hero-glow-layer pointer-events-none"></div>
+<!-- BEGIN: TopHeaderAndStatusBar -->
+<header class="relative z-10 w-full pt-3 px-6 pb-2" data-purpose="device-top-bar">
+<!-- Android / iOS mock status elements -->
+<div class="flex items-center justify-between text-xs font-semibold tracking-wider text-sage-muted/80 pt-1">
+<span>17:30</span>
+<!-- Status Bar Icons -->
+<div class="flex items-center gap-2">
+<!-- Signal Icon -->
+<svg aria-hidden="true" class="w-3.5 h-3.5 fill-current opacity-85" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z" opacity="0.3"></path>
+<path d="M12 4.5C8.42 4.5 5.5 7.42 5.5 11c0 1.63.6 3.12 1.6 4.28L12 18.35l4.9-3.07C17.9 14.12 18.5 12.63 18.5 11c0-3.58-2.92-6.5-6.5-6.5z"></path>
+</svg>
+<!-- Wifi Icon -->
+<svg aria-hidden="true" class="w-3.5 h-3.5 fill-current opacity-85" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.67 0 7 1.44 9.47 3.79L12 18.73 2.53 11.29C5 8.94 8.33 7.5 12 7.5z"></path>
+</svg>
+<!-- Battery Icon -->
+<div class="w-5 h-2.5 rounded-sm border border-sage-muted/70 p-0.5 flex items-center">
+<div class="h-full w-3/4 bg-sage-muted/90 rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- Dismiss Button (Discreet Top Right Pill) -->
+<div class="flex justify-end pt-3">
+<button aria-label="Dismiss screen" class="w-9 h-9 rounded-full bg-pine-800/80 border border-pine-600/60 backdrop-blur-md flex items-center justify-center text-sage-muted hover:text-white hover:bg-pine-700 transition active:scale-95" type="button">
+<svg class="w-4 h-4 stroke-current stroke-2" fill="none" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24">
+<line x1="18" x2="6" y1="6" y2="18"></line>
+<line x1="6" x2="18" y1="6" y2="18"></line>
+</svg>
+</button>
+</div>
+</header>
+<!-- END: TopHeaderAndStatusBar -->
+<!-- BEGIN: HeroAndHeadlineSection -->
+<section class="relative z-10 flex-1 flex flex-col items-center justify-center px-6 -mt-2" data-purpose="hero-celebration">
+<!-- Sapling Growth Hero Image with Ambient Halo -->
+<div class="relative flex items-center justify-center mb-3">
+<!-- Soft pulsating halo behind illustration -->
+<div class="absolute w-52 h-52 rounded-full bg-amber-glow/20 filter blur-2xl animate-pulse-subtle pointer-events-none"></div>
+<!-- Provided DataStore Sapling SVG Illustration -->
+<div class="relative w-48 h-48 sm:w-52 sm:h-52 animate-float-slow flex items-center justify-center">
+<svg class="drop-shadow-[0_12px_24px_rgba(0,0,0,0.5)]" height="100%" viewbox="0 0 280 280" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialgradient cx="50%" cy="50%" id="haloGlow" r="50%">
+<stop offset="0%" stop-color="#E5A93C" stop-opacity="0.32"></stop>
+<stop offset="55%" stop-color="#7FB69A" stop-opacity="0.14"></stop>
+<stop offset="100%" stop-color="#0E1B15" stop-opacity="0"></stop>
+</radialgradient>
+<lineargradient id="circleGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#1B2E24" stop-opacity="0.9"></stop>
+<stop offset="100%" stop-color="#13231A" stop-opacity="0.9"></stop>
+</lineargradient>
+<lineargradient id="stemGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#F5BE58"></stop>
+<stop offset="100%" stop-color="#9A7025"></stop>
+</lineargradient>
+<lineargradient id="leafGradLeft" x1="0%" x2="100%" y1="100%" y2="0%">
+<stop offset="0%" stop-color="#5B9377"></stop>
+<stop offset="100%" stop-color="#8FD3B2"></stop>
+</lineargradient>
+<lineargradient id="leafGradRight" x1="0%" x2="100%" y1="100%" y2="0%">
+<stop offset="0%" stop-color="#6AA789"></stop>
+<stop offset="100%" stop-color="#A2E6C4"></stop>
+</lineargradient>
+<lineargradient id="leafTop" x1="0%" x2="100%" y1="100%" y2="0%">
+<stop offset="0%" stop-color="#E5A93C"></stop>
+<stop offset="100%" stop-color="#FFE194"></stop>
+</lineargradient>
+<filter height="140%" id="softGlow" width="140%" x="-20%" y="-20%">
+<fegaussianblur result="blur" stddeviation="8"></fegaussianblur>
+<fecomposite in="SourceGraphic" in2="blur" operator="over"></fecomposite>
+</filter>
+</defs>
+<!-- Background radial glow -->
+<circle cx="140" cy="140" fill="url(#haloGlow)" r="130"></circle>
+<!-- Inner circular badge -->
+<circle cx="140" cy="140" fill="url(#circleGrad)" r="88" stroke="#7FB69A" stroke-opacity="0.22" stroke-width="2"></circle>
+<circle cx="140" cy="140" fill="none" r="80" stroke="#E5A93C" stroke-dasharray="4 4" stroke-opacity="0.18" stroke-width="1.5"></circle>
+<!-- Earth soil mound -->
+<ellipse cx="140" cy="186" fill="#0A150F" rx="42" ry="8"></ellipse>
+<path d="M106 186 C 120 178, 160 178, 174 186 Z" fill="#1A2F24"></path>
+<!-- Tree trunk / sapling stalk -->
+<path d="M138.5 186 C138.5 158, 137.5 135, 140 108 C142.5 135, 141.5 158, 141.5 186 Z" fill="url(#stemGrad)"></path>
+<!-- Left Lower Leaf -->
+<path d="M139 152 C116 150, 96 138, 92 122 C112 120, 134 136, 139 152 Z" fill="url(#leafGradLeft)"></path>
+<path d="M139 152 C122 142, 108 132, 92 122" fill="none" stroke="#406E56" stroke-linecap="round" stroke-width="1.2"></path>
+<!-- Right Lower Leaf -->
+<path d="M141 146 C164 144, 184 132, 188 116 C168 114, 146 130, 141 146 Z" fill="url(#leafGradRight)"></path>
+<path d="M141 146 C158 136, 172 126, 188 116" fill="none" stroke="#4B7E64" stroke-linecap="round" stroke-width="1.2"></path>
+<!-- Left Upper Leaf -->
+<path d="M139 126 C124 116, 114 100, 112 88 C128 88, 138 104, 139 126 Z" fill="url(#leafGradLeft)"></path>
+<!-- Right Upper Leaf -->
+<path d="M141 122 C156 112, 166 96, 168 84 C152 84, 142 100, 141 122 Z" fill="url(#leafGradRight)"></path>
+<!-- Crown Sprout Leaf / Golden Bud -->
+<path d="M140 108 C132 94, 134 78, 140 68 C146 78, 148 94, 140 108 Z" fill="url(#leafTop)" filter="url(#softGlow)"></path>
+<!-- Subtle golden sparkles around -->
+<g transform="translate(196, 72) scale(0.85)">
+<path d="M0 -10 Q0 0 10 0 Q0 0 0 10 Q0 0 -10 0 Q0 0 0 -10 Z" fill="#FFE194"></path>
+<circle cx="0" cy="0" fill="#FFF" r="2.5"></circle>
+</g>
+<g transform="translate(78, 92) scale(0.65)">
+<path d="M0 -10 Q0 0 10 0 Q0 0 0 10 Q0 0 -10 0 Q0 0 0 -10 Z" fill="#F5BE58"></path>
+</g>
+<circle cx="214" cy="142" fill="#E5A93C" opacity="0.8" r="3"></circle>
+<circle cx="66" cy="154" fill="#7FB69A" opacity="0.75" r="2.5"></circle>
+<circle cx="120" cy="88" fill="#FFE194" opacity="0.9" r="1.8"></circle>
+<circle cx="162" cy="98" fill="#FFE194" opacity="0.85" r="1.6"></circle>
+<circle cx="140" cy="54" fill="#FFE194" opacity="0.95" r="2.2"></circle>
+</svg>
+</div>
+</div>
+<!-- Main Headline -->
+<h1 class="text-3xl font-extrabold tracking-tight text-amber-glow text-center drop-shadow-sm">
+        Cycle complete!
+      </h1>
+<!-- Subtitle Context Statement -->
+<p class="mt-2 text-center text-sage-muted text-[15px] leading-relaxed max-w-[320px]">
+        You finished <span class="text-white font-medium">4 Pomodoros</span> on
+        <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-pine-800/90 text-sage-light text-xs font-semibold border border-pine-600/70 tracking-wide">
+          Final thesis: chapter 3
+        </span>
+</p>
+</section>
+<!-- END: HeroAndHeadlineSection -->
+<!-- BEGIN: PerformanceStatCards -->
+<section class="relative z-10 px-5 my-2" data-purpose="stat-metrics">
+<div class="grid grid-cols-3 gap-2.5">
+<!-- Card 1: Focus Duration -->
+<div class="relative bg-pine-850/90 border border-pine-600/60 rounded-2xl p-3 flex flex-col justify-between overflow-hidden shadow-md card-sheen">
+<!-- Top Accent Line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-sage"></div>
+<div class="flex items-center gap-1.5 pt-1 text-sage">
+<!-- Timer Clock Icon -->
+<svg class="w-3.5 h-3.5 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<polyline points="12 7 12 12 15 15"></polyline>
+</svg>
+<span class="text-[10px] font-bold uppercase tracking-wider text-sage-muted">Focus</span>
+</div>
+<div class="mt-2.5">
+<span class="text-lg font-bold text-white tracking-tight">1h 40m</span>
+<span class="block text-[11px] text-sage-muted/75 font-normal -mt-0.5">unbroken</span>
+</div>
+</div>
+<!-- Card 2: Habit Streak -->
+<div class="relative bg-pine-850/90 border border-pine-600/60 rounded-2xl p-3 flex flex-col justify-between overflow-hidden shadow-md card-sheen">
+<!-- Top Accent Line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-amber-glow"></div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-1.5 text-amber-glow">
+<!-- Flame Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+<path d="M12 23c-4.97 0-9-3.95-9-8.81C3 9.4 7.2 4.19 10.37 1.05c.42-.42 1.13-.3 1.39.26.85 1.83 2.1 4.09 3.4 5.3 1.95-1.95 2.5-3.8 2.5-3.8.31-.47.97-.56 1.4-.2 1.48 1.25 3.94 4.12 3.94 8.58C23 18.05 18.97 23 12 23zm-.4-7.5c-1.38 0-2.5 1.12-2.5 2.5 0 1.1.9 2 2 2 1.66 0 3-1.34 3-3 0-1.1-.9-1.5-2.5-1.5z"></path>
+</svg>
+<span class="text-[10px] font-bold uppercase tracking-wider text-sage-muted">Streak</span>
+</div>
+<!-- Increment badge -->
+<span class="text-[10px] font-extrabold px-1.5 py-0.2 rounded-full bg-amber-glow/20 text-amber-light border border-amber-glow/40">+1</span>
+</div>
+<div class="mt-2.5">
+<span class="text-lg font-bold text-white tracking-tight">13 days</span>
+<span class="block text-[11px] text-amber-light/80 font-medium -mt-0.5">Personal best</span>
+</div>
+</div>
+<!-- Card 3: Study Leaderboard Rank -->
+<div class="relative bg-pine-850/90 border border-pine-600/60 rounded-2xl p-3 flex flex-col justify-between overflow-hidden shadow-md card-sheen">
+<!-- Top Accent Line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-amber-light"></div>
+<div class="flex items-center gap-1.5 pt-1 text-amber-light">
+<!-- Trophy Icon -->
+<svg class="w-3.5 h-3.5 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+<path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+<path d="M4 22h16"></path>
+<path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"></path>
+<path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
+</svg>
+<span class="text-[10px] font-bold uppercase tracking-wider text-sage-muted">Best</span>
+</div>
+<div class="mt-2.5">
+<span class="text-lg font-bold text-white tracking-tight">2nd</span>
+<span class="block text-[11px] text-sage-muted/75 font-normal truncate -mt-0.5">among friends</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: PerformanceStatCards -->
+<!-- BEGIN: SocialStudyCircleNudge -->
+<section class="relative z-10 px-6 my-2" data-purpose="social-proof-indicator">
+<div class="w-full bg-pine-800/50 border border-pine-700/60 rounded-full py-2 px-3.5 flex items-center justify-between shadow-inner">
+<!-- Friends mini avatars group -->
+<div class="flex items-center gap-2.5">
+<div class="flex -space-x-2 overflow-hidden items-center">
+<!-- Avatar 1 -->
+<div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-dark text-[10px] font-bold text-white ring-2 ring-pine-900">
+              L
+            </div>
+<!-- Avatar 2 -->
+<div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700 text-[10px] font-bold text-white ring-2 ring-pine-900">
+              M
+            </div>
+<!-- Avatar 3 -->
+<div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pine-600 text-[10px] font-bold text-sage-light ring-2 ring-pine-900">
+              J
+            </div>
+</div>
+<!-- Nudge Text -->
+<p class="text-xs text-sage-muted font-normal">
+<span class="text-white font-medium">Laia</span> and 3 others still studying
+          </p>
+</div>
+<!-- Live green indicator dot -->
+<div class="flex items-center gap-1.5 pl-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-sage opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-sage"></span>
+</span>
+<span class="text-[10px] font-semibold text-sage">Live</span>
+</div>
+</div>
+</section>
+<!-- END: SocialStudyCircleNudge -->
+<!-- BEGIN: BottomActionArea -->
+<footer class="relative z-10 w-full px-6 pt-3 pb-8 flex flex-col gap-2.5" data-purpose="action-controls">
+<!-- Primary Affirmative Action Button -->
+<button class="w-full py-4 px-6 rounded-full bg-amber-glow hover:bg-amber-light active:scale-[0.98] transition-all duration-200 text-pine-950 font-bold text-base tracking-wide shadow-lg shadow-amber-950/50 flex items-center justify-center gap-2" type="button">
+<span>Continue</span>
+<svg class="w-4 h-4 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</button>
+<!-- Secondary Share Progress Action -->
+<button class="py-2 text-sm font-medium text-sage-muted hover:text-amber-light active:opacity-75 transition-colors flex items-center justify-center gap-1.5" type="button">
+<svg class="w-4 h-4 stroke-current stroke-2 fill-none" viewbox="0 0 24 24">
+<circle cx="18" cy="5" r="3"></circle>
+<circle cx="6" cy="12" r="3"></circle>
+<circle cx="18" cy="19" r="3"></circle>
+<line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
+<line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
+</svg>
+<span>Share my progress</span>
+</button>
+</footer>
+<!-- END: BottomActionArea -->
+</main>
+<!-- END: MobileDeviceContainer -->
+<!-- BEGIN: Interactive Feedback Handler -->
+<script data-purpose="simple-interactions">
+    // Optional gentle interactive haptic/audio simulation on action buttons
+    document.querySelectorAll('button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        // Safe interactive click state animation
+        btn.classList.add('brightness-110');
+        setTimeout(() => btn.classList.remove('brightness-110'), 150);
+      });
+    });
+  </script>
+<!-- END: Interactive Feedback Handler -->
+</body></html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BBetter - Study Companion</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed-dim": "#fabc4a",
+            "surface": "#081612",
+            "on-tertiary": "#422c00",
+            "on-secondary": "#153631",
+            "surface-container-low": "#101e1a",
+            "surface-container-highest": "#293833",
+            "on-error-container": "#ffdad6",
+            "surface-dim": "#081612",
+            "surface-container-high": "#1f2d28",
+            "primary": "#9bd3b5",
+            "on-background": "#d6e6df",
+            "tertiary": "#fabc4a",
+            "secondary-fixed-dim": "#abcec7",
+            "primary-fixed": "#b6efd1",
+            "on-primary-fixed": "#002114",
+            "on-primary": "#003825",
+            "background": "#081612",
+            "surface-container": "#14221e",
+            "outline": "#8a938c",
+            "inverse-surface": "#d6e6df",
+            "surface-bright": "#2e3c38",
+            "on-surface": "#d6e6df",
+            "surface-variant": "#293833",
+            "secondary-fixed": "#c6eae3",
+            "on-primary-container": "#0e4832",
+            "inverse-on-surface": "#25332f",
+            "on-secondary-container": "#9abcb5",
+            "on-error": "#690005",
+            "primary-container": "#7fb69a",
+            "surface-tint": "#9bd3b5",
+            "surface-container-lowest": "#04110d",
+            "on-secondary-fixed": "#00201c",
+            "on-tertiary-fixed": "#271900",
+            "on-tertiary-container": "#553a00",
+            "secondary": "#abcec7",
+            "tertiary-fixed": "#ffdeab",
+            "error": "#ffb4ab",
+            "secondary-container": "#2c4c47",
+            "outline-variant": "#404943",
+            "on-primary-fixed-variant": "#18503a",
+            "on-secondary-fixed-variant": "#2c4c47",
+            "primary-fixed-dim": "#9bd3b5",
+            "on-tertiary-fixed-variant": "#5f4100",
+            "on-surface-variant": "#c0c9c2",
+            "error-container": "#93000a",
+            "tertiary-container": "#daa030",
+            "inverse-primary": "#336850"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "display": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Plus Jakarta Sans", "sans-serif"],
+            "label": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-feature-settings: 'tnum' on, 'lnum' on;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary selection:text-surface">
+<div class="w-full max-w-md min-h-screen flex flex-col relative pb-28">
+<!-- Top Area (TopAppBar adhering to Shared Components JSON) -->
+<header class="flex justify-between items-center w-full px-4 pt-4 pb-2 bg-background">
+<div class="flex items-center gap-3">
+<div class="relative w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold text-base ring-1 ring-outline-variant">
+<span>G</span>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-primary ring-2 ring-background"></span>
+</div>
+<div>
+<h1 class="font-headline font-bold text-xl text-on-surface leading-tight">Hi, Guille</h1>
+<p class="font-label font-medium text-xs text-on-surface-variant">Saturday, Oct 3</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button aria-label="Notifications" class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-tertiary"></span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-4 flex flex-col gap-4 mt-2">
+<!-- Hero Timer Card -->
+<section class="relative bg-surface-container rounded-[20px] p-5 flex flex-col items-center overflow-hidden border border-outline-variant/30">
+<!-- Subtle Pine Ambient Glow Background -->
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-16 -left-16 w-52 h-52 bg-secondary-container/40 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Mode Badge -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-primary-fixed font-label text-xs font-semibold tracking-wider mb-4 border border-primary/10">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          CONCENTRATION
+        </div>
+<!-- Big Hero Timer Display -->
+<div class="text-7xl font-bold font-display text-on-surface tracking-tight my-1 tabular-nums">
+          25:00
+        </div>
+<!-- Primary Play Button (72px Sage Circle) -->
+<div class="my-5 flex items-center justify-center">
+<button aria-label="Start concentration session" class="w-[72px] h-[72px] rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg active:scale-95 hover:bg-primary transition-all duration-200" id="playBtn">
+<span class="material-symbols-outlined fill text-4xl" data-icon="play_arrow">play_arrow</span>
+</button>
+</div>
+<!-- Project Selector Chip -->
+<button class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-bright active:scale-95 transition-all text-xs font-medium border border-outline-variant/40 max-w-full">
+<span class="truncate">Cycle 0 of 4 · Next: Final thesis: chapter 3</span>
+<span class="material-symbols-outlined text-sm text-on-surface-variant flex-shrink-0" data-icon="expand_more">expand_more</span>
+</button>
+</section>
+<!-- Compact Streak and Social Activity Row -->
+<section class="grid grid-cols-2 gap-3">
+<!-- Streak Card -->
+<div class="bg-surface-container rounded-[20px] p-3.5 flex flex-col justify-between border border-outline-variant/30">
+<div class="flex items-center gap-1.5 text-tertiary font-bold text-sm">
+<span class="material-symbols-outlined fill text-lg" data-icon="local_fire_department">local_fire_department</span>
+<span>12-day streak</span>
+</div>
+<div class="flex items-center justify-between mt-3 px-0.5">
+<!-- Day Dots: M T W T F S S -->
+<div class="flex flex-col items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-tertiary flex items-center justify-center text-[9px] text-on-tertiary font-bold">✓</span>
+<span class="text-[10px] text-outline font-medium">M</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-tertiary flex items-center justify-center text-[9px] text-on-tertiary font-bold">✓</span>
+<span class="text-[10px] text-outline font-medium">T</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-tertiary flex items-center justify-center text-[9px] text-on-tertiary font-bold">✓</span>
+<span class="text-[10px] text-outline font-medium">W</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-tertiary flex items-center justify-center text-[9px] text-on-tertiary font-bold">✓</span>
+<span class="text-[10px] text-outline font-medium">T</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-primary flex items-center justify-center text-[9px] text-surface font-bold">✓</span>
+<span class="text-[10px] text-outline font-medium">F</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-surface-container-high border border-outline-variant/60"></span>
+<span class="text-[10px] text-on-surface-variant font-bold">S</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-surface-container-high border border-outline-variant/60"></span>
+<span class="text-[10px] text-outline font-medium">S</span>
+</div>
+</div>
+</div>
+<!-- Social Activity Card -->
+<div class="bg-surface-container rounded-[20px] p-3.5 flex flex-col justify-between border border-outline-variant/30">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-on-surface">3 friends studying now</span>
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="flex items-center -space-x-2 mt-3">
+<div class="relative w-8 h-8 rounded-full ring-2 ring-primary bg-secondary-container flex items-center justify-center text-xs font-bold text-primary">
+              M
+              <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-primary ring-1 ring-surface"></span>
+</div>
+<div class="relative w-8 h-8 rounded-full ring-2 ring-primary bg-surface-container-high flex items-center justify-center text-xs font-bold text-on-surface">
+              A
+              <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-primary ring-1 ring-surface"></span>
+</div>
+<div class="relative w-8 h-8 rounded-full ring-2 ring-primary bg-secondary-container flex items-center justify-center text-xs font-bold text-secondary-fixed">
+              L
+              <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-primary ring-1 ring-surface"></span>
+</div>
+<div class="pl-4 text-[11px] font-medium text-on-surface-variant truncate">
+              Maya, Alex, Leo
+            </div>
+</div>
+</div>
+</section>
+<!-- Tasks Card -->
+<section class="bg-surface-container rounded-[20px] p-4 border border-outline-variant/30">
+<div class="flex justify-between items-center mb-3">
+<h2 class="font-headline font-bold text-base text-on-surface">Tasks</h2>
+<button aria-label="Add task" class="w-7 h-7 rounded-full bg-surface-container-high hover:bg-surface-bright flex items-center justify-center text-primary active:scale-95 transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+</button>
+</div>
+<div class="flex flex-col divide-y divide-outline-variant/20">
+<!-- Row 1 -->
+<div class="py-2.5 flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<button aria-label="Mark task done" class="w-5 h-5 rounded-full border-2 border-outline-variant hover:border-primary flex items-center justify-center transition-colors"></button>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary-fixed transition-colors">Write 3.1 Methods</span>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-primary/15 text-primary text-[11px] font-semibold tracking-wide">Thesis</span>
+</div>
+<!-- Row 2 -->
+<div class="py-2.5 flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<button aria-label="Mark task done" class="w-5 h-5 rounded-full border-2 border-outline-variant hover:border-tertiary flex items-center justify-center transition-colors"></button>
+<span class="text-sm font-medium text-on-surface group-hover:text-tertiary transition-colors">Physics problem set 4</span>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-tertiary/15 text-tertiary text-[11px] font-semibold tracking-wide">Physics</span>
+</div>
+<!-- Row 3 -->
+<div class="py-2.5 flex items-center justify-between opacity-60">
+<div class="flex items-center gap-3">
+<div class="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center text-primary text-xs">
+<span class="material-symbols-outlined text-sm font-bold" data-icon="check">check</span>
+</div>
+<span class="text-sm font-medium text-on-surface-variant line-through">Reply to tutor email</span>
+</div>
+<span class="text-[11px] text-outline">Done</span>
+</div>
+</div>
+<!-- Older Tasks Link -->
+<button class="w-full pt-3 mt-1 flex items-center justify-center gap-1 text-xs font-medium text-on-surface-variant hover:text-primary transition-colors">
+<span>Show older uncompleted tasks</span>
+<span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+</button>
+</section>
+<!-- Next Up Card -->
+<section class="bg-surface-container rounded-[20px] p-3.5 flex items-center justify-between border border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-secondary-container/60 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-xl" data-icon="calendar_today">calendar_today</span>
+</div>
+<div>
+<div class="text-[11px] font-medium text-outline uppercase tracking-wider">Next up</div>
+<div class="text-sm font-semibold text-on-surface">17:30 Study group · Library</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-lg" data-icon="chevron_right">chevron_right</span>
+</section>
+</main>
+<!-- Bottom Navigation Bar (BottomNavBar verbatim to Shared Components JSON) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface-container-low max-w-md mx-auto right-0">
+<!-- Tab: Home (ACTIVE) -->
+<a aria-label="Home" class="flex flex-col items-center justify-center bg-secondary-container text-primary-fixed rounded-full px-5 py-1 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined fill text-xl" data-icon="timer">timer</span>
+<span class="font-label font-medium text-xs mt-0.5">Home</span>
+</a>
+<!-- Tab: Progress -->
+<a aria-label="Progress" class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="monitoring">monitoring</span>
+<span class="font-label font-medium text-xs mt-0.5">Progress</span>
+</a>
+<!-- Tab: Calendar -->
+<a aria-label="Calendar" class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="calendar_today">calendar_today</span>
+<span class="font-label font-medium text-xs mt-0.5">Calendar</span>
+</a>
+<!-- Tab: Projects -->
+<a aria-label="Projects" class="flex flex-col items-center justify-center text-outline px-4 py-1 hover:text-on-surface transition-colors duration-200 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="folder">folder</span>
+<span class="font-label font-medium text-xs mt-0.5">Projects</span>
+</a>
+</nav>
+</div>
+<script>
+    // Micro-interaction for Play button state toggling
+    const playBtn = document.getElementById('playBtn');
+    if (playBtn) {
+      let isPlaying = false;
+      playBtn.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        const icon = playBtn.querySelector('.material-symbols-outlined');
+        if (isPlaying) {
+          icon.textContent = 'pause';
+          playBtn.classList.remove('bg-primary-container');
+          playBtn.classList.add('bg-tertiary', 'text-on-tertiary');
+        } else {
+          icon.textContent = 'play_arrow';
+          playBtn.classList.add('bg-primary-container');
+          playBtn.classList.remove('bg-tertiary', 'text-on-tertiary');
+        }
+      });
+    }
+  </script>
+</body></html>

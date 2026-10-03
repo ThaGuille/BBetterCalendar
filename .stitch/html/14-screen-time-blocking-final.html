@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Screen time &amp; blocking - BBetter</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "outline-variant": "#404943",
+            "on-primary-fixed-variant": "#18503a",
+            "on-primary": "#003825",
+            "surface-variant": "#293833",
+            "surface-container": "#14221e",
+            "on-surface": "#d6e6df",
+            "primary-container": "#7fb69a",
+            "surface-container-high": "#1f2d28",
+            "on-surface-variant": "#c0c9c2",
+            "surface-container-highest": "#293833",
+            "surface": "#081612",
+            "primary-fixed-dim": "#9bd3b5",
+            "on-primary-container": "#0e4832",
+            "inverse-on-surface": "#25332f",
+            "tertiary-fixed": "#ffdeab",
+            "surface-tint": "#9bd3b5",
+            "tertiary": "#fabc4a",
+            "on-error": "#690005",
+            "surface-bright": "#2e3c38",
+            "on-tertiary-fixed": "#271900",
+            "primary-fixed": "#b6efd1",
+            "inverse-surface": "#d6e6df",
+            "tertiary-fixed-dim": "#fabc4a",
+            "on-tertiary-fixed-variant": "#5f4100",
+            "on-primary-fixed": "#002114",
+            "surface-container-low": "#101e1a",
+            "primary": "#9bd3b5",
+            "on-secondary-fixed-variant": "#2c4c47",
+            "secondary-container": "#2c4c47",
+            "secondary-fixed": "#c6eae3",
+            "error-container": "#93000a",
+            "surface-dim": "#081612",
+            "background": "#081612",
+            "secondary": "#abcec7",
+            "on-error-container": "#ffdad6",
+            "on-tertiary-container": "#553a00",
+            "outline": "#8a938c",
+            "on-secondary-fixed": "#00201c",
+            "on-secondary-container": "#9abcb5",
+            "tertiary-container": "#daa030",
+            "secondary-fixed-dim": "#abcec7",
+            "on-secondary": "#153631",
+            "on-background": "#d6e6df",
+            "on-tertiary": "#422c00",
+            "error": "#ffb4ab",
+            "surface-container-lowest": "#04110d",
+            "inverse-primary": "#336850"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Plus Jakarta Sans", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            body: ["Plus Jakarta Sans", "sans-serif"],
+            label: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-feature-settings: 'tnum' on, 'lnum' on;
+    }
+    /* Hide scrollbars cleanly */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary selection:text-on-primary">
+<!-- Mobile Viewport Shell (390px canonical container) -->
+<main class="w-full max-w-[412px] min-h-screen bg-background flex flex-col relative pb-10">
+<!-- Android Status Bar Placeholder -->
+<header class="w-full pt-3 px-6 flex justify-between items-center text-xs font-semibold text-on-surface-variant select-none tracking-tight">
+<span>09:41</span>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] fill-icon">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined text-[15px] fill-icon">wifi</span>
+<span class="material-symbols-outlined text-[16px] rotate-90 fill-icon">battery_full</span>
+</div>
+</header>
+<!-- Shared Component: TopAppBar -->
+<nav class="bg-surface dark:bg-surface border-b border-surface-variant/40 dark:border-surface-variant/40 sticky top-0 z-30">
+<div class="flex justify-between items-center w-full px-4 h-16 max-w-md mx-auto">
+<button aria-label="Go back" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="font-headline text-[20px] font-bold text-on-surface leading-tight tracking-tight">
+          Screen time &amp; blocking
+        </h1>
+<button aria-label="More options" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined text-2xl">more_vert</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Stream (Single Column of Cards, No Bottom Nav) -->
+<div class="px-4 pt-4 flex flex-col gap-4">
+<!-- 1. Hero Blocking Banner Card -->
+<!-- 2. Segmented Time Control & Date Navigation -->
+<!-- 3. Compact Stats Metric Row -->
+<section class="grid grid-cols-3 gap-2.5">
+<!-- Metric 1 -->
+<div class="bg-surface-container rounded-[20px] p-3.5 flex flex-col justify-between">
+<span class="text-[12px] font-medium text-on-surface-variant truncate">Tracked apps</span>
+<div class="my-1.5">
+<span class="text-[20px] font-bold text-on-surface tracking-tight">1h 18m</span>
+</div>
+<div class="flex items-center gap-1 text-[11px] font-bold text-primary">
+<span class="text-[10px]">▼</span>
+<span>22% vs avg</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container rounded-[20px] p-3.5 flex flex-col justify-between">
+<span class="text-[12px] font-medium text-on-surface-variant truncate">Daily limit</span>
+<div class="my-1.5">
+<span class="text-[20px] font-bold text-on-surface tracking-tight">1h 30m</span>
+</div>
+<div class="w-full">
+<div class="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 87%; background-color: #7FB69A;"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium mt-1 block">87% reached</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container rounded-[20px] p-3.5 flex flex-col justify-between">
+<span class="text-[11px] font-medium text-on-surface-variant leading-tight block">Opens blocked</span>
+<div class="my-1.5 flex items-baseline gap-1">
+<span class="text-[20px] font-bold text-tertiary tracking-tight">23</span>
+<span class="material-symbols-outlined text-sm text-tertiary fill-icon">shield</span>
+</div>
+<span class="text-[11px] text-on-surface-variant">this week</span>
+</div>
+</section><section class="bg-surface-container rounded-[20px] p-4 flex flex-col gap-2" id="today-by-hour-section">
+<div class="flex items-start justify-between">
+<div>
+<h3 class="font-headline font-bold text-[17px] text-on-surface">Today by hour</h3>
+<p class="text-xs text-on-surface-variant">App usage drops flat during deep focus</p>
+</div>
+<!-- Legend -->
+<div class="flex items-center gap-3 text-[11px] font-medium shrink-0 pt-0.5">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full" style="background-color: #8FA8D8;"></span>
+<span class="text-on-surface-variant">Usage</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="text-on-surface-variant">Focus</span>
+</div>
+</div>
+</div>
+<!-- SVG Rhythm Chart with Focus Bands -->
+<div class="w-full mt-2 relative">
+<svg class="w-full h-28 overflow-visible" preserveaspectratio="none" viewbox="0 0 340 120">
+<defs>
+<!-- Dusk Blue Area Gradient -->
+<lineargradient id="usageGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#8FA8D8" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#8FA8D8" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Focus Band 1: 09:00 - 11:30 (approx x=125 to x=165) -->
+<rect fill="#7FB69A" fill-opacity="0.12" height="96" rx="4" width="40" x="125" y="6"></rect>
+<text fill="#9bd3b5" font-size="8" font-weight="700" letter-spacing="0.5" text-anchor="middle" x="145" y="16">FOCUS</text>
+<!-- Focus Band 2: 15:00 - 17:00 (approx x=210 to x=242) -->
+<rect fill="#7FB69A" fill-opacity="0.12" height="96" rx="4" width="32" x="210" y="6"></rect>
+<text fill="#9bd3b5" font-size="8" font-weight="700" letter-spacing="0.5" text-anchor="middle" x="226" y="16">FOCUS</text>
+<!-- Faint Hairline Gridlines -->
+<line stroke="#2E453B" stroke-dasharray="2,2" stroke-width="0.75" x1="0" x2="340" y1="25" y2="25"></line>
+<line stroke="#2E453B" stroke-dasharray="2,2" stroke-width="0.75" x1="0" x2="340" y1="65" y2="65"></line>
+<line stroke="#2E453B" stroke-width="1" x1="0" x2="340" y1="102" y2="102"></line>
+<!-- Area Path Under Usage Curve -->
+<path d="M 0 102 
+                     L 0 98 
+                     C 30 96, 50 82, 80 78
+                     C 105 75, 115 101, 125 102
+                     L 165 102
+                     C 175 102, 185 45, 195 40
+                     C 202 36, 206 98, 210 102
+                     L 242 102
+                     C 255 102, 270 52, 290 55
+                     C 310 58, 325 80, 340 82
+                     L 340 102 Z" fill="url(#usageGradient)"></path>
+<!-- Usage Line (Dusk Blue #8FA8D8) -->
+<path d="M 0 98 
+                     C 30 96, 50 82, 80 78
+                     C 105 75, 115 101, 125 102
+                     L 165 102
+                     C 175 102, 185 45, 195 40
+                     C 202 36, 206 98, 210 102
+                     L 242 102
+                     C 255 102, 270 52, 290 55
+                     C 310 58, 325 80, 340 82" fill="none" stroke="#8FA8D8" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Data Point Marker (Current Peak) -->
+<circle cx="195" cy="40" fill="#fabc4a" r="3.5" stroke="#14221e" stroke-width="1.5"></circle>
+<circle cx="195" cy="40" fill="none" r="7" stroke="#fabc4a" stroke-opacity="0.3" stroke-width="1"></circle>
+</svg>
+<!-- X-Axis Labels -->
+<div class="flex justify-between items-center text-[10px] font-semibold text-on-surface-variant pt-1 px-1">
+<span>00:00</span>
+<span>06:00</span>
+<span>12:00</span>
+<span>18:00</span>
+<span>24:00</span>
+</div>
+</div>
+</section>
+<!-- 4. Focus Shield Card -->
+<!-- 5. "Manage your apps" List Section -->
+<section class="bg-surface-container rounded-[20px] p-4 flex flex-col gap-3.5">
+<!-- Merged Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[19px] fill-icon">lock</span>
+<h3 class="font-headline font-bold text-[17px] text-on-surface">Manage your apps</h3>
+<span class="bg-tertiary text-on-tertiary text-[10px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider">NEW</span>
+</div>
+<div class="flex items-center gap-1 text-[11px] font-semibold text-primary">
+<span class="material-symbols-outlined text-xs fill-icon">verified_user</span>
+<span>3 apps protected</span>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant -mt-1 leading-relaxed">
+Set a daily limit. When time's up, BBetter covers the app until midnight.
+</p>
+<!-- Block a new app sage pill button -->
+<button class="w-full h-11 bg-primary text-on-primary font-bold text-[14px] rounded-full flex items-center justify-center gap-2 hover:brightness-105 active:scale-95 transition shadow-sm" type="button">
+<span class="material-symbols-outlined text-[19px]">add</span>
+<span>Block a new app</span>
+</button>
+<!-- App Row 1: Instagram -->
+<article class="p-3 bg-surface-container-high rounded-[16px] flex items-center justify-between gap-3 mt-1">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-600 to-rose-500 flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-2xl">photo_camera</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<h4 class="font-bold text-sm text-on-surface truncate">Instagram</h4>
+<span class="bg-tertiary/15 text-tertiary border border-tertiary/30 text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0">
+                  Almost at limit
+                </span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs text-on-surface-variant font-medium">42m of 45m</span>
+<div class="w-20 bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-tertiary h-full rounded-full" style="width: 93%;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 shrink-0">
+<!-- Inline Lock Switch: ON -->
+<button aria-label="Instagram blocking enabled" class="w-12 h-7 bg-primary rounded-full relative p-0.5 transition-colors" type="button">
+<div class="w-6 h-6 rounded-full bg-on-primary flex items-center justify-center text-primary ml-auto shadow-sm">
+<span class="material-symbols-outlined text-[13px] fill-icon">lock</span>
+</div>
+</button>
+<span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+</div>
+</article>
+<!-- App Row 2: TikTok -->
+<article class="p-3 bg-surface-container-high rounded-[16px] flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-11 h-11 rounded-2xl bg-surface-container-lowest border border-surface-variant flex items-center justify-center text-on-surface shrink-0">
+<span class="material-symbols-outlined text-2xl">music_note</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<h4 class="font-bold text-sm text-on-surface truncate">TikTok</h4>
+<span class="bg-error/15 text-error border border-error/30 text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px] fill-icon">lock</span>
+                  Blocked · 00:00
+                </span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs text-error font-medium">1h of 1h reached</span>
+<div class="w-16 bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 shrink-0">
+<!-- Inline Lock Switch: ON -->
+<button aria-label="TikTok blocking enabled" class="w-12 h-7 bg-primary rounded-full relative p-0.5 transition-colors" type="button">
+<div class="w-6 h-6 rounded-full bg-on-primary flex items-center justify-center text-primary ml-auto shadow-sm">
+<span class="material-symbols-outlined text-[13px] fill-icon">lock</span>
+</div>
+</button>
+<span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+</div>
+</article>
+<!-- App Row 3: YouTube -->
+<article class="p-3 bg-surface-container-high rounded-[16px] flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-11 h-11 rounded-2xl bg-red-950/80 border border-red-800/40 flex items-center justify-center text-error shrink-0">
+<span class="material-symbols-outlined text-2xl fill-icon">play_arrow</span>
+</div>
+<div class="min-w-0">
+<h4 class="font-bold text-sm text-on-surface truncate">YouTube</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-xs text-on-surface-variant font-medium">25m of 1h</span>
+<div class="w-20 bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 41%;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 shrink-0">
+<!-- Inline Lock Switch: ON -->
+<button aria-label="YouTube blocking enabled" class="w-12 h-7 bg-primary rounded-full relative p-0.5 transition-colors" type="button">
+<div class="w-6 h-6 rounded-full bg-on-primary flex items-center justify-center text-primary ml-auto shadow-sm">
+<span class="material-symbols-outlined text-[13px] fill-icon">lock</span>
+</div>
+</button>
+<span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+</div>
+</article>
+<!-- App Row 4: Discord -->
+<article class="p-3 bg-surface-container-high rounded-[16px] flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-11 h-11 rounded-2xl bg-slate-800 border border-slate-700/60 flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-2xl fill-icon">chat_bubble</span>
+</div>
+<div class="min-w-0">
+<h4 class="font-bold text-sm text-on-surface truncate">Discord</h4>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs text-on-surface-variant">10m · no limit</span>
+<button class="text-xs font-bold text-primary hover:underline" type="button">Set limit</button>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 shrink-0">
+<!-- Inline Lock Switch: OFF -->
+<button aria-label="Discord blocking disabled" class="w-12 h-7 bg-surface-variant rounded-full relative p-0.5 transition-colors" type="button">
+<div class="w-6 h-6 rounded-full bg-on-surface-variant flex items-center justify-center text-surface shadow-sm">
+<span class="material-symbols-outlined text-[13px]">lock_open</span>
+</div>
+</button>
+<span class="material-symbols-outlined text-on-surface-variant text-lg">chevron_right</span>
+</div>
+</article>
+</section><section class="bg-surface-container rounded-[20px] p-4 flex items-center justify-between gap-3" id="focus-shield-section">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-xl fill-icon">do_not_disturb_on</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-[15px] text-on-surface">Focus shield</h3>
+<p class="text-xs text-on-surface-variant">During a Pomodoro, all apps are blocked</p>
+</div>
+</div>
+<!-- Active Lock Toggle Switch -->
+<button aria-checked="true" class="w-12 h-7 bg-primary rounded-full relative p-0.5 transition-colors duration-200 shrink-0" role="switch" type="button">
+<div class="w-6 h-6 rounded-full bg-on-primary flex items-center justify-center text-primary ml-auto transition-all">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+</button>
+</section>
+<!-- 6. "Today by hour" Rhythm Chart Card -->
+<!-- 7. Security / Accessibility State Badge Footer -->
+<footer class="mt-2 py-3 px-4 bg-surface-container-lowest/80 rounded-[16px] border border-surface-variant/40 flex items-center justify-center gap-2 text-center select-none">
+<span class="material-symbols-outlined text-primary text-base fill-icon">verified</span>
+<span class="text-[11px] text-on-surface-variant font-medium">
+          Usage access granted · Accessibility service active
+        </span>
+</footer>
+</div>
+<!-- Android Home Indicator Gesture Bar -->
+<div class="w-full flex justify-center py-4 mt-auto">
+<div class="w-32 h-1 bg-surface-variant rounded-full"></div>
+</div>
+</main>
+<script>
+    // Lightweight micro-interaction for toggle switches
+    document.querySelectorAll('[role="switch"]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const isChecked = toggle.getAttribute('aria-checked') === 'true';
+        toggle.setAttribute('aria-checked', String(!isChecked));
+        if (isChecked) {
+          toggle.classList.remove('bg-primary');
+          toggle.classList.add('bg-surface-variant');
+          const thumb = toggle.querySelector('div');
+          if (thumb) {
+            thumb.classList.remove('ml-auto', 'bg-on-primary', 'text-primary');
+            thumb.classList.add('bg-on-surface-variant', 'text-surface');
+            const icon = thumb.querySelector('.material-symbols-outlined');
+            if (icon) icon.textContent = 'close';
+          }
+        } else {
+          toggle.classList.remove('bg-surface-variant');
+          toggle.classList.add('bg-primary');
+          const thumb = toggle.querySelector('div');
+          if (thumb) {
+            thumb.classList.add('ml-auto', 'bg-on-primary', 'text-primary');
+            thumb.classList.remove('bg-on-surface-variant', 'text-surface');
+            const icon = thumb.querySelector('.material-symbols-outlined');
+            if (icon) icon.textContent = 'check';
+          }
+        }
+      });
+    });
+  </script>
+</body></html>

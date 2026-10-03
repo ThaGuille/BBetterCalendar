@@ -48,13 +48,25 @@ La clave de API es tuya; **no la pegues en el chat ni en ningún fichero del rep
   → /impeccable shape + image-to-code → XML sobre bb_* → ui-tester
 ```
 
-## Comportamiento real del MCP (verificado 2026-10-03)
+## Timeout del MCP — causa y arreglo (diagnosticado 2026-10-03)
 
-- `generate_screen_from_text` **siempre** devuelve `The operation timed out` en el cliente, pero
-  la generación **sigue en el servidor** y termina (≈2–5 min). **No reintentar**: duplica pantallas.
-- `list_screens` / `get_project.screenInstances` pueden quedar **vacíos** durante mucho rato aunque
-  la pantalla exista. Prueba fiable: `get_project` → descargar `thumbnailScreenshot.downloadUrl` y
-  mirarlo, o abrir el proyecto en la web de Stitch.
+**Síntoma:** cada `generate_screen_from_text` devolvía `The operation timed out`; unas pantallas
+aparecían tarde, otras nunca (y una quedó a medias: `Progress` de 390px sin captura).
+
+**Causa:** Stitch es un servidor MCP **HTTP**. Para HTTP, Claude Code corta cada petición si no
+llega el primer byte de respuesta en `max(60 s, timeout del servidor, MCP_TIMEOUT)` — sin
+`timeout` configurado eso son **60 s**. Generar una pantalla tarda 2–10 min, así que el cliente
+cortaba la conexión y que el servidor terminara o no era cuestión de suerte.
+([docs MCP de Claude Code](https://code.claude.com/docs/en/mcp), [issue #47076](https://github.com/anthropics/claude-code/issues/47076))
+
+**Arreglo:** campo `"timeout": 900000` (15 min) en la entrada `stitch` de `~/.claude.json`
+(scope user). Sube el timer por petición y además actúa de suelo del idle timeout (5 min por
+defecto en HTTP; requiere Claude Code ≥ 2.1.203). **Hay que reiniciar Claude Code** para que se
+aplique. Backup previo: `~/.claude.json.bak-stitch-timeout`. **Verificado tras reiniciar:** 3
+generaciones seguidas devolvieron la pantalla completa (`status: COMPLETE`) sin timeout.
+
+- Si aun así una llamada falla, **no reintentar a ciegas**: mirar el proyecto en la web de Stitch
+  o con `list_screens` antes, para no duplicar pantallas.
 - Tras `create_design_system`, llamar `update_design_system` (lo pide la herramienta).
 
 ## Cuidado

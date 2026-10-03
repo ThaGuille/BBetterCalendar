@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BBetter - Projects</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary": "#153631",
+            "primary": "#9bd3b5",
+            "on-primary-fixed-variant": "#18503a",
+            "primary-container": "#7fb69a",
+            "on-secondary-fixed": "#00201c",
+            "surface-tint": "#9bd3b5",
+            "on-secondary-fixed-variant": "#2c4c47",
+            "error-container": "#93000a",
+            "surface-container-highest": "#293833",
+            "secondary-fixed": "#c6eae3",
+            "on-secondary-container": "#9abcb5",
+            "on-error": "#690005",
+            "on-tertiary-fixed": "#271900",
+            "inverse-surface": "#d6e6df",
+            "outline": "#8a938c",
+            "primary-fixed-dim": "#9bd3b5",
+            "on-surface-variant": "#c0c9c2",
+            "error": "#ffb4ab",
+            "on-primary-fixed": "#002114",
+            "on-background": "#d6e6df",
+            "surface-container-lowest": "#04110d",
+            "background": "#081612",
+            "on-primary-container": "#0e4832",
+            "inverse-primary": "#336850",
+            "surface-bright": "#2e3c38",
+            "on-error-container": "#ffdad6",
+            "surface-variant": "#293833",
+            "secondary": "#abcec7",
+            "surface-dim": "#081612",
+            "tertiary-container": "#daa030",
+            "tertiary-fixed-dim": "#fabc4a",
+            "on-surface": "#d6e6df",
+            "on-tertiary-fixed-variant": "#5f4100",
+            "tertiary-fixed": "#ffdeab",
+            "on-tertiary": "#422c00",
+            "on-primary": "#003825",
+            "primary-fixed": "#b6efd1",
+            "inverse-on-surface": "#25332f",
+            "surface-container": "#14221e",
+            "surface-container-high": "#1f2d28",
+            "surface": "#081612",
+            "secondary-container": "#2c4c47",
+            "secondary-fixed-dim": "#abcec7",
+            "outline-variant": "#404943",
+            "tertiary": "#fabc4a",
+            "on-tertiary-container": "#553a00",
+            "surface-container-low": "#101e1a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "display": ["Plus Jakarta Sans"],
+            "body": ["Plus Jakarta Sans"],
+            "label": ["Plus Jakarta Sans"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #081612;
+      color: #d6e6df;
+      -webkit-font-smoothing: antialiased;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col justify-between selection:bg-primary-container selection:text-on-primary-container">
+<!-- Mobile Shell Wrapper (max-w-md matching Android screen form-factor) -->
+<div class="w-full max-w-md mx-auto min-h-screen flex flex-col relative pb-24">
+<!-- TopAppBar Component (from Shared Components JSON) -->
+<header class="bg-background dark:bg-background flex justify-between items-center w-full px-4 h-16 max-w-md mx-auto sticky top-0 z-40 select-none">
+<div class="flex items-center gap-2">
+<button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container dark:hover:bg-surface-container transition-colors duration-200 active:scale-95 transition-transform duration-150 text-on-surface">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-[22px] leading-tight text-on-surface dark:text-on-surface tracking-tight">Projects</h1>
+</div>
+<div class="flex items-center">
+<button aria-label="Filter projects" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container dark:hover:bg-surface-container transition-colors duration-200 active:scale-95 transition-transform duration-150 text-on-surface">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 px-4 pt-1 space-y-4">
+<!-- Summary Counter Subheader -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-label text-[13px] font-medium tracking-wide">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>4 active</span>
+<span class="text-outline-variant font-bold">·</span>
+<span>2 due this week</span>
+</div>
+<div class="flex items-center gap-1 text-[12px] font-semibold text-tertiary bg-surface-container-high px-2.5 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px] fill text-tertiary">local_fire_department</span>
+<span>5d streak</span>
+</div>
+</div>
+<!-- Bento-style Project Cards Container -->
+<section aria-label="Projects List" class="space-y-3">
+<!-- CARD 1: EXPANDED ACCORDION -->
+<article class="bg-surface-container rounded-[20px] p-4 transition-all duration-200 border border-outline-variant/30 hover:border-outline-variant/60">
+<!-- Accordion Header -->
+<div class="flex items-start justify-between gap-3 cursor-pointer">
+<div class="flex items-start gap-3 flex-1 min-w-0">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container mt-1.5 shrink-0 ring-4 ring-primary-container/20"></span>
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-2 flex-wrap mb-1">
+<h2 class="font-headline font-bold text-[17px] text-on-surface truncate">Final thesis: chapter 3</h2>
+<span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary-container text-secondary">Due Fri</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium">
+<span>2 / 5 tasks</span>
+<span class="text-outline-variant">•</span>
+<span class="text-primary font-medium">40% completed</span>
+</div>
+</div>
+</div>
+<button aria-label="Collapse project" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">keyboard_arrow_up</span>
+</button>
+</div>
+<!-- Progress Bar & Pomodoro Meta -->
+<div class="mt-3.5 space-y-2">
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full transition-all duration-500" style="width: 40%"></div>
+</div>
+<div class="flex items-center justify-between text-xs text-on-surface-variant pt-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-tertiary fill">timer</span>
+<span class="font-medium text-tertiary">3 Pomodoros today</span>
+</div>
+<span class="text-[11px] text-on-surface-variant/80">Est. 4h remaining</span>
+</div>
+</div>
+<!-- Expanded Accordion Body: Subtasks -->
+<div class="mt-4 pt-3.5 border-t border-outline-variant/30 space-y-2.5">
+<!-- Checked Item 1 -->
+<label class="flex items-center gap-3 group cursor-pointer select-none py-0.5">
+<div class="w-5 h-5 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container shrink-0 transition-transform active:scale-90">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+<span class="text-[14px] font-body text-on-surface-variant/60 line-through truncate flex-1">Read Smith 2021</span>
+<span class="text-[11px] text-on-surface-variant/50 font-medium">25m</span>
+</label>
+<!-- Checked Item 2 -->
+<label class="flex items-center gap-3 group cursor-pointer select-none py-0.5">
+<div class="w-5 h-5 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container shrink-0 transition-transform active:scale-90">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+<span class="text-[14px] font-body text-on-surface-variant/60 line-through truncate flex-1">Outline sections</span>
+<span class="text-[11px] text-on-surface-variant/50 font-medium">50m</span>
+</label>
+<!-- Unchecked Item 1 -->
+<label class="flex items-center gap-3 group cursor-pointer select-none py-0.5">
+<div class="w-5 h-5 rounded-full border-2 border-outline hover:border-primary shrink-0 transition-colors flex items-center justify-center"></div>
+<span class="text-[14px] font-body text-on-surface font-medium truncate flex-1 group-hover:text-primary transition-colors">Write 3.1 Methods</span>
+<span class="text-[11px] text-on-surface-variant font-medium">2 Pomodoros</span>
+</label>
+<!-- Unchecked Item 2 -->
+<label class="flex items-center gap-3 group cursor-pointer select-none py-0.5">
+<div class="w-5 h-5 rounded-full border-2 border-outline hover:border-primary shrink-0 transition-colors flex items-center justify-center"></div>
+<span class="text-[14px] font-body text-on-surface font-medium truncate flex-1 group-hover:text-primary transition-colors">Write 3.2 Results</span>
+<span class="text-[11px] text-on-surface-variant font-medium">3 Pomodoros</span>
+</label>
+<!-- Unchecked Item 3 -->
+<label class="flex items-center gap-3 group cursor-pointer select-none py-0.5">
+<div class="w-5 h-5 rounded-full border-2 border-outline hover:border-primary shrink-0 transition-colors flex items-center justify-center"></div>
+<span class="text-[14px] font-body text-on-surface font-medium truncate flex-1 group-hover:text-primary transition-colors">Make figures</span>
+<span class="text-[11px] text-on-surface-variant font-medium">1 Pomodoro</span>
+</label>
+<!-- Add Subtask Action Button -->
+<button class="w-full mt-2 py-2 px-3 flex items-center justify-center gap-2 rounded-xl border border-dashed border-outline-variant/60 hover:border-primary hover:bg-surface-container-high text-on-surface-variant hover:text-primary text-xs font-semibold tracking-wide transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Add subtask</span>
+</button>
+</div>
+</article>
+<!-- CARD 2: COLLAPSED - Physics exam prep -->
+<article class="bg-surface-container rounded-[20px] p-4 transition-all duration-200 border border-transparent hover:border-outline-variant/30 cursor-pointer active:scale-[0.99]">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-start gap-3 flex-1 min-w-0">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-fixed-dim mt-1.5 shrink-0 ring-4 ring-tertiary-fixed-dim/20"></span>
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-2 flex-wrap mb-1">
+<h2 class="font-headline font-bold text-[17px] text-on-surface truncate">Physics exam prep</h2>
+<span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-container-high text-tertiary">Due Mon</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium">
+<span>4 / 12 tasks</span>
+<span class="text-outline-variant">•</span>
+<span>33% completed</span>
+</div>
+</div>
+</div>
+<button aria-label="Expand Physics exam prep" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">keyboard_arrow_down</span>
+</button>
+</div>
+<!-- Thin Progress Bar (33% filled) -->
+<div class="mt-3 w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary-fixed-dim h-full rounded-full" style="width: 33%"></div>
+</div>
+</article>
+<!-- CARD 3: COLLAPSED - Portfolio website -->
+<article class="bg-surface-container rounded-[20px] p-4 transition-all duration-200 border border-transparent hover:border-outline-variant/30 cursor-pointer active:scale-[0.99]">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-start gap-3 flex-1 min-w-0">
+<span class="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0 ring-4 ring-primary/20"></span>
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-2 flex-wrap mb-1">
+<h2 class="font-headline font-bold text-[17px] text-on-surface truncate">Portfolio website</h2>
+<span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-container-high text-primary">Due tomorrow</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium">
+<span>9 / 10 tasks</span>
+<span class="text-outline-variant">•</span>
+<span class="text-primary">90% completed</span>
+</div>
+</div>
+</div>
+<button aria-label="Expand Portfolio website" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">keyboard_arrow_down</span>
+</button>
+</div>
+<!-- Thin Progress Bar (90% filled) -->
+<div class="mt-3 w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 90%"></div>
+</div>
+</article>
+<!-- CARD 4: COLLAPSED - English essay -->
+<article class="bg-surface-container rounded-[20px] p-4 transition-all duration-200 border border-transparent hover:border-outline-variant/30 cursor-pointer active:scale-[0.99]">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-start gap-3 flex-1 min-w-0">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary mt-1.5 shrink-0 ring-4 ring-secondary/20"></span>
+<div class="min-w-0 flex-1">
+<div class="flex items-center gap-2 flex-wrap mb-1">
+<h2 class="font-headline font-bold text-[17px] text-on-surface truncate">English essay</h2>
+<span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">Due Oct 28</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-on-surface-variant font-medium">
+<span>0 / 5 tasks</span>
+<span class="text-outline-variant">•</span>
+<span>Not started</span>
+</div>
+</div>
+</div>
+<button aria-label="Expand English essay" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">keyboard_arrow_down</span>
+</button>
+</div>
+<!-- Thin Progress Bar (0% empty track) -->
+<div class="mt-3 w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 0%"></div>
+</div>
+</article>
+</section>
+<!-- Light Context Insight Card (Calm focus design) -->
+<div class="bg-surface-container-low rounded-[20px] p-4 flex items-center justify-between border border-outline-variant/20 mt-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">self_improvement</span>
+</div>
+<div>
+<p class="text-[13px] font-semibold text-on-surface">Weekly rhythm is on track</p>
+<p class="text-[12px] text-on-surface-variant">Best study block: 09:00 - 11:30 AM</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+</div>
+</main>
+<!-- Floating Action Button (FAB) -->
+<!-- Positioned anchored directly above the bottom navigation bar -->
+<div class="fixed bottom-24 right-4 z-40 max-w-md pointer-events-auto">
+<button aria-label="Create new project" class="w-14 h-14 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg hover:brightness-105 active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[28px] font-bold text-on-primary-container">add</span>
+</button>
+</div>
+<!-- BottomNavBar Component (from Shared Components JSON) -->
+<!-- Active State: 'Projects' is strictly mapped and highlighted using style_active_navigation -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 h-20 max-w-md mx-auto bg-surface-container dark:bg-surface-container select-none">
+<!-- Destination 1: Home (Inactive) -->
+<a class="flex flex-col items-center justify-center gap-1 text-on-surface-variant dark:text-on-surface-variant py-1.5 px-3 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]">timer</span>
+<span class="font-label text-[13px] font-medium leading-none">Home</span>
+</a>
+<!-- Destination 2: Progress (Inactive) -->
+<a class="flex flex-col items-center justify-center gap-1 text-on-surface-variant dark:text-on-surface-variant py-1.5 px-3 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]">bar_chart</span>
+<span class="font-label text-[13px] font-medium leading-none">Progress</span>
+</a>
+<!-- Destination 3: Calendar (Inactive) -->
+<a class="flex flex-col items-center justify-center gap-1 text-on-surface-variant dark:text-on-surface-variant py-1.5 px-3 hover:text-primary dark:hover:text-primary transition-colors duration-200 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]">calendar_today</span>
+<span class="font-label text-[13px] font-medium leading-none">Calendar</span>
+</a>
+<!-- Destination 4: Projects (ACTIVE MATCH) -->
+<a class="flex flex-col items-center justify-center gap-1 text-on-surface dark:text-on-surface font-semibold py-1.5 px-3 rounded-full bg-surface-container-high dark:bg-surface-container-high text-primary dark:text-primary active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[22px] fill">folder</span>
+<span class="font-label text-[13px] font-medium leading-none text-primary">Projects</span>
+</a>
+</nav>
+</div>
+</body></html>

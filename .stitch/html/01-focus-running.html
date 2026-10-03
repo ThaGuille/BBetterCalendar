@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Focus Session · BBetter</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            background: "#12201C",
+            surface: "#1B2D27",
+            "surface-raised": "#24392F",
+            "hairline-moss": "#2E453B",
+            primary: "#7FB69A",
+            "on-primary": "#12201C",
+            "forest-deep": "#2F4F4A",
+            amber: {
+              reward: "#F2B544"
+            },
+            mist: "#EAF2EC",
+            lichen: "#9DB3A8",
+            "ember-red": "#E8796B"
+          },
+          fontFamily: {
+            headline: ["Plus Jakarta Sans", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            body: ["Plus Jakarta Sans", "sans-serif"],
+            label: ["Plus Jakarta Sans", "sans-serif"]
+          },
+          borderRadius: {
+            'card': '20px',
+            'full': '9999px'
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Tabular figures for distance legibility */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Ambient gentle breathing effect for timer ring */
+    @keyframes subtle-glow {
+      0%, 100% { opacity: 0.92; filter: drop-shadow(0 0 6px rgba(127, 182, 154, 0.25)); }
+      50% { opacity: 1; filter: drop-shadow(0 0 14px rgba(127, 182, 154, 0.45)); }
+    }
+    .timer-ring-glow {
+      animation: subtle-glow 4s ease-in-out infinite;
+    }
+    /* Active friend pulse */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.98); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(0.98); opacity: 0.8; }
+    }
+    .active-halo {
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-mist font-body antialiased min-h-screen select-none flex flex-col justify-between items-center pb-8 overflow-x-hidden">
+<!-- Outer Safe Layout Container -->
+<div class="w-full max-w-md flex flex-col min-h-screen px-4 justify-between">
+<!-- 1. Top App Bar (From Shared Components Authority) -->
+<header class="flex justify-between items-center w-full h-16 pt-2">
+<!-- Back button (Minimizes session) -->
+<button aria-label="Minimize focus session" class="w-12 h-12 flex items-center justify-center rounded-full text-lichen hover:text-mist hover:bg-surface-raised active:scale-95 transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<!-- Center Headline -->
+<h1 class="font-headline text-[22px] font-bold tracking-tight text-mist">
+        Focus
+      </h1>
+<!-- Right Trailing Icon (DND Active State) -->
+<div aria-label="Do not disturb active" class="w-12 h-12 flex items-center justify-center rounded-full text-primary" title="Do Not Disturb enabled">
+<span class="material-symbols-outlined filled text-[22px]">do_not_disturb_on</span>
+</div>
+</header>
+<!-- Main Active Focus Canvas -->
+<main class="flex-1 flex flex-col items-center justify-start pt-2 pb-4 space-y-6">
+<!-- 2. Session Pill & Cycle Progress -->
+<div class="flex flex-col items-center gap-2.5">
+<!-- Capsule Pill Badge -->
+<div class="inline-flex items-center px-3.5 py-1 rounded-full bg-surface border border-hairline-moss/60 text-lichen text-[11px] font-semibold tracking-wider uppercase">
+<span>CONCENTRATION · 2 of 4</span>
+</div>
+<!-- 4 Cycle Progress Dots -->
+<div class="flex items-center gap-2">
+<!-- Dot 1: Completed -->
+<div aria-label="Cycle 1 completed" class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+<!-- Dot 2: In-progress / current -->
+<div aria-label="Cycle 2 current" class="w-2.5 h-2.5 rounded-full bg-primary ring-2 ring-primary/30"></div>
+<!-- Dot 3: Remaining -->
+<div aria-label="Cycle 3 pending" class="w-2.5 h-2.5 rounded-full border border-hairline-moss bg-surface"></div>
+<!-- Dot 4: Remaining -->
+<div aria-label="Cycle 4 pending" class="w-2.5 h-2.5 rounded-full border border-hairline-moss bg-surface"></div>
+</div>
+</div>
+<!-- 3. Hero Timer (Legible from 1+ meter away) -->
+<div class="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center my-1">
+<!-- Circular Progress Ring SVG (~60% progress) -->
+<svg class="w-full h-full transform -rotate-90 timer-ring-glow" viewbox="0 0 280 280">
+<!-- Background Track -->
+<circle cx="140" cy="140" fill="transparent" r="126" stroke="#1B2D27" stroke-width="7"></circle>
+<!-- Progress Arc (Circumference ~791.68; 60% remaining -> stroke-dashoffset ~316.6) -->
+<circle cx="140" cy="140" fill="transparent" r="126" stroke="#7FB69A" stroke-dasharray="791.68" stroke-dashoffset="316.6" stroke-linecap="round" stroke-width="7"></circle>
+</svg>
+<!-- Timer Center Data Core -->
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+<!-- Huge Numeric Timer -->
+<span class="font-headline font-bold text-[74px] sm:text-[84px] tracking-tight text-mist tabular-nums leading-none">
+            18:42
+          </span>
+<!-- Estimated Finish Target -->
+<div class="flex items-center gap-1.5 mt-3 text-lichen text-sm font-medium">
+<span class="material-symbols-outlined text-[16px] text-lichen">schedule</span>
+<span>Ends at 17:30</span>
+</div>
+</div>
+</div>
+<!-- 4. Controls Row (Material 3 Ergonomics) -->
+<div class="flex items-center justify-center gap-6 pt-1 w-full">
+<!-- Left: Stop Button (Safety Outline) -->
+<button aria-label="Stop focus session" class="w-14 h-14 rounded-full flex items-center justify-center bg-surface border border-hairline-moss text-lichen hover:text-ember-red hover:border-ember-red/40 active:scale-95 transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-[24px]">stop</span>
+</button>
+<!-- Center: Prominent Play/Pause Button (72px Sage circle) -->
+<button aria-label="Pause focus timer" class="w-[72px] h-[72px] rounded-full flex items-center justify-center bg-primary text-on-primary hover:bg-[#8ec2a8] active:scale-90 transition-all duration-150" type="button">
+<span class="material-symbols-outlined filled text-[34px]">pause</span>
+</button>
+<!-- Right: Skip Break / Fast Forward Button -->
+<button aria-label="Skip to break" class="w-14 h-14 rounded-full flex items-center justify-center bg-surface border border-hairline-moss text-lichen hover:text-mist hover:border-primary/40 active:scale-95 transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-[24px]">skip_next</span>
+</button>
+</div>
+<!-- 5. Today & Streak Compact Strip (Pine Card 20px radius) -->
+<div class="w-full bg-surface rounded-card p-4 border border-hairline-moss/40 flex items-center justify-between divide-x divide-hairline-moss">
+<!-- Left: Today Total -->
+<div class="flex-1 flex flex-col items-center justify-center pr-3">
+<span class="text-[13px] font-medium text-lichen tracking-wide">Today</span>
+<span class="text-[22px] font-bold text-mist tabular-nums tracking-tight mt-0.5">2h 14m</span>
+</div>
+<!-- Right: Streak with Warm Honey Amber Accent -->
+<div class="flex-1 flex flex-col items-center justify-center pl-3">
+<span class="text-[13px] font-medium text-lichen tracking-wide">Streak</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[22px] font-bold text-mist tabular-nums tracking-tight">12 days</span>
+<span class="material-symbols-outlined filled text-amber-reward text-[20px]" title="Streak active">local_fire_department</span>
+</div>
+</div>
+</div>
+<!-- 6. Friends Studying Now (Social Layer) -->
+<div class="w-full flex flex-col space-y-3 pt-1">
+<!-- Section Header with Muted Counter Pill -->
+<div class="flex items-center justify-between px-1">
+<span class="text-[15px] font-bold text-mist tracking-tight">Studying now</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface text-lichen text-xs font-semibold tracking-wide border border-hairline-moss/60">
+            5 / 8
+          </span>
+</div>
+<!-- 4-Column Friend Grid (8 items total) -->
+<div class="grid grid-cols-4 gap-y-3.5 gap-x-2 w-full pt-1">
+<!-- Friend 1: Laia (Active + Crown Badge) -->
+<div class="flex flex-col items-center text-center group">
+<div class="relative mb-1">
+<!-- Halo Ring -->
+<div class="w-11 h-11 rounded-full p-[2px] bg-forest-deep ring-2 ring-primary flex items-center justify-center">
+<div class="w-full h-full rounded-full bg-surface-raised flex items-center justify-center text-xs font-bold text-mist">
+                  LM
+                </div>
+</div>
+<!-- Golden Crown Top Earner Badge -->
+<div class="absolute -top-1.5 -right-1 w-4 h-4 rounded-full bg-amber-reward text-background flex items-center justify-center" title="Today's top study record">
+<span class="material-symbols-outlined filled text-[11px] font-bold">crown</span>
+</div>
+</div>
+<span class="text-xs font-medium text-mist truncate w-full">Laia</span>
+<span class="text-[11px] font-medium text-primary tabular-nums">3:12:05</span>
+</div>
+<!-- Friend 2: Marc (Active) -->
+<div class="flex flex-col items-center text-center">
+<div class="relative mb-1">
+<div class="w-11 h-11 rounded-full p-[2px] ring-2 ring-primary flex items-center justify-center">
+<div class="w-full h-full rounded-full bg-surface-raised flex items-center justify-center text-xs font-bold text-mist">
+                  MS
+                </div>
+</div>
+</div>
+<span class="text-xs font-medium text-mist truncate w-full">Marc</span>
+<span class="text-[11px] font-medium text-primary tabular-nums">1:48:30</span>
+</div>
+<!-- Friend 3: Pau (Active) -->
+<div class="flex flex-col items-center text-center">
+<div class="relative mb-1">
+<div class="w-11 h-11 rounded-full p-[2px] ring-2 ring-primary flex items-center justify-center">
+<div class="w-full h-full rounded-full bg-surface-raised flex items-center justify-center text-xs font-bold text-mist">
+                  PK
+                </div>
+</div>
+</div>
+<span class="text-xs font-medium text-mist truncate w-full">Pau</span>
+<span class="text-[11px] font-medium text-primary tabular-nums">2:05:44</span>
+</div>
+<!-- Friend 4: Júlia (Active) -->
+<div class="flex flex-col items-center text-center">
+<div class="relative mb-1">
+<div class="w-11 h-11 rounded-full p-[2px] ring-2 ring-primary flex items-center justify-center">
+<div class="w-full h-full rounded-full bg-surface-raised flex items-center justify-center text-xs font-bold text-mist">
+                  JB
+                </div>
+</div>
+</div>
+<span class="text-xs font-medium text-mist truncate w-full">Júlia</span>
+<span class="text-[11px] font-medium text-primary tabular-nums">1:10:02</span>
+</div>
+<!-- Friend 5: Noa (Active) -->
+<div class="flex flex-col items-center text-center">
+<div class="relative mb-1">
+<div class="w-11 h-11 rounded-full p-[2px] ring-2 ring-primary flex items-center justify-center">
+<div class="w-full h-full rounded-full bg-surface-raised flex items-center justify-center text-xs font-bold text-mist">
+                  NJ
+                </div>
+</div>
+</div>
+<span class="text-xs font-medium text-mist truncate w-full">Noa</span>
+<span class="text-[11px] font-medium text-primary tabular-nums">0:52:10</span>
+</div>
+<!-- Friend 6: Oriol (Away / Dimmed 40%) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-11 h-11 rounded-full mb-1 border border-hairline-moss bg-surface flex items-center justify-center text-xs font-medium text-lichen">
+              OG
+            </div>
+<span class="text-xs font-normal text-lichen truncate w-full">Oriol</span>
+<span class="text-[11px] text-lichen/80">away</span>
+</div>
+<!-- Friend 7: Elena (Away / Dimmed 40%) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-11 h-11 rounded-full mb-1 border border-hairline-moss bg-surface flex items-center justify-center text-xs font-medium text-lichen">
+              ET
+            </div>
+<span class="text-xs font-normal text-lichen truncate w-full">Elena</span>
+<span class="text-[11px] text-lichen/80">away</span>
+</div>
+<!-- Friend 8: Alex (Away / Dimmed 40%) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-11 h-11 rounded-full mb-1 border border-hairline-moss bg-surface flex items-center justify-center text-xs font-medium text-lichen">
+              AR
+            </div>
+<span class="text-xs font-normal text-lichen truncate w-full">Alex</span>
+<span class="text-[11px] text-lichen/80">away</span>
+</div>
+</div>
+</div>
+</main>
+<!-- 7. Bottom Action (No navigation shell during active focus journey) -->
+<footer class="w-full flex justify-center items-center pt-2">
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-lichen hover:text-mist hover:bg-surface-raised active:scale-95 transition-all duration-150 text-[13px] font-medium" type="button">
+<span class="material-symbols-outlined text-[18px]">group_add</span>
+<span>Invite friends to study together</span>
+</button>
+</footer>
+</div>
+</body></html>

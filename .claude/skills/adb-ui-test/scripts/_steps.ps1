@@ -25,7 +25,7 @@ function Invoke-BBStep {
     param(
         [Parameter(Mandatory)] [string]$Step,
         [string]$Serial   = '',
-        [string]$Pkg      = 'com.example.bbettercalendar',
+        [string]$Pkg      = 'io.github.thaguille.bbettercalendar',
         [string]$ScriptDir = $PSScriptRoot
     )
 
@@ -41,7 +41,9 @@ function Invoke-BBStep {
 
     switch ($verb) {
         'START' {
-            & adb -s $Serial shell am start -n "$Pkg/$rest" | Out-Null
+            # applicationId (-n prefix) != namespace (class names): expand ".foo.Bar" against the namespace.
+            $cls = if ($rest.StartsWith('.')) { "com.example.bbettercalendar$rest" } else { $rest }
+            & adb -s $Serial shell am start -n "$Pkg/$cls" | Out-Null
             return @{ ok = $true; info = "started $rest" }
         }
         'GRANT' {

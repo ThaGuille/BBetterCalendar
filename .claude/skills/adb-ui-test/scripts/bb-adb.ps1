@@ -51,7 +51,7 @@ param(
     [string]$Expect,
     [string]$Shot,
     [string]$Serial = '',
-    [string]$Pkg    = 'com.example.bbettercalendar'
+    [string]$Pkg    = 'io.github.thaguille.bbettercalendar'
 )
 
 $ErrorActionPreference = 'Stop'

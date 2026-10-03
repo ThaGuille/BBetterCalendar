@@ -21,7 +21,7 @@ param(
     [int]$MinSettle  = 400,
     [int]$MaxSettle  = 4000,
     [string]$Serial  = '',
-    [string]$Pkg     = 'com.example.bbettercalendar'
+    [string]$Pkg     = 'io.github.thaguille.bbettercalendar'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,7 +34,9 @@ if (-not (Test-Path $log)) { Write-Output "No recording: $log"; exit 2 }
 
 function Test-Crash {
     $crash = (& adb -s $Serial logcat -d -b crash) -join "`n"
-    return ($crash -match 'FATAL EXCEPTION')
+    # Only the app's own crashes: the uiautomator shell process can also log a FATAL EXCEPTION
+    # (UiAutomation connect timeout) with no "Process: <pkg>" line, which is a harness flake.
+    return ($crash -match "FATAL EXCEPTION[\s\S]{0,200}?Process: $([regex]::Escape($Pkg))")
 }
 
 # Parse: skip comments/blanks; each line is "<epochMs>\t<STEP>".

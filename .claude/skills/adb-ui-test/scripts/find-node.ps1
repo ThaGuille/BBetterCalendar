@@ -42,7 +42,8 @@ param(
     [switch]$Tap,
     [switch]$List,
     [string]$Serial = '',
-    [string]$DumpPath = '/sdcard/bb_dump.xml'
+    # /data/local/tmp is always shell-owned; on API 37 a stale /sdcard dump owned by an app uid is unreadable ("Permission denied").
+    [string]$DumpPath = '/data/local/tmp/bb_dump.xml'
 )
 
 $ErrorActionPreference = 'Stop'

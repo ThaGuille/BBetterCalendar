@@ -71,9 +71,9 @@ These tools live under the Android SDK; on most setups that's `%LOCALAPPDATA%\An
 |---|---|
 | List devices | `adb devices` |
 | Install the debug APK | `adb install -r app\build\outputs\apk\debug\app-debug.apk` |
-| Uninstall | `adb uninstall com.example.bbettercalendar` |
-| Clear app data | `adb shell pm clear com.example.bbettercalendar` |
-| Launch app | `adb shell am start -n com.example.bbettercalendar/.configuration.SplashActivity` |
+| Uninstall | `adb uninstall io.github.thaguille.bbettercalendar` |
+| Clear app data | `adb shell pm clear io.github.thaguille.bbettercalendar` |
+| Launch app | `adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.configuration.SplashActivity` |
 | Logcat (project tag) | `adb logcat -s BBetterCalendar:V AndroidRuntime:E` |
 | Take a screenshot | `adb exec-out screencap -p > screen.png` |
 | Pump a deep link | `adb shell am start -W -a android.intent.action.VIEW -d "<url>"` |

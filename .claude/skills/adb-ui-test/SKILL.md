@@ -42,8 +42,8 @@ re-derive ids.
 
 2. **Grant the runtime permission** (no on-screen tap needed) and **launch**:
    ```powershell
-   adb -s emulator-5554 shell pm grant com.example.bbettercalendar android.permission.POST_NOTIFICATIONS
-   adb -s emulator-5554 shell am start -n com.example.bbettercalendar/.configuration.SplashActivity
+   adb -s emulator-5554 shell pm grant io.github.thaguille.bbettercalendar android.permission.POST_NOTIFICATIONS
+   adb -s emulator-5554 shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.configuration.SplashActivity
    ```
 
 3. **Navigate by id** with the locator (resolves id → center → tap; never dumps raw XML
@@ -74,7 +74,7 @@ re-derive ids.
 
 6. **Reset** between scenarios (hermetic):
    ```powershell
-   adb -s emulator-5554 shell pm clear com.example.bbettercalendar
+   adb -s emulator-5554 shell pm clear io.github.thaguille.bbettercalendar
    ```
 
 ## Record once, replay cheap

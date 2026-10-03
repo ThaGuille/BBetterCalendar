@@ -11,7 +11,7 @@ Step-by-step recipes for the common changes in this codebase. Each one ends with
 ```powershell
 .\gradlew.bat assembleDebug
 adb install -r app\build\outputs\apk\debug\app-debug.apk
-adb shell am start -n com.example.bbettercalendar/.configuration.SplashActivity
+adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.configuration.SplashActivity
 ```
 
 If a build hangs: `.\gradlew.bat --stop` then retry. Full table of commands in [`windows_commands.md`](windows_commands.md).
@@ -93,7 +93,7 @@ By default `AppDatabase` uses `fallbackToDestructiveMigration()`. If user data m
 2. Bump `@Database(version = N+1)`.
 3. Write a `Migration(N, N+1)` (use the existing migration stubs in `DBMigration` as templates).
 4. Add the migration via `.addMigrations(MIGRATION_N_TO_NPLUS1)`.
-5. Bench the migration on a populated DB (export `/data/data/com.example.bbettercalendar/databases/...` via `adb` first).
+5. Bench the migration on a populated DB (export `/data/data/io.github.thaguille.bbettercalendar/databases/...` via `adb` first).
 
 **Don't** flip the migration mode "just for this PR" — either you commit to real migrations going forward, or you keep destructive and accept the wipe.
 

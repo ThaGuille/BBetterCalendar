@@ -23,7 +23,7 @@ User asks for any of: build, assemble, install, test, lint, clean. On Windows th
 | Clean | `.\gradlew.bat clean` |
 | Stop daemons | `.\gradlew.bat --stop` |
 | No-daemon build (CI / locked daemon) | `.\gradlew.bat assembleDebug --no-daemon` |
-| Install + launch | `adb install -r app\build\outputs\apk\debug\app-debug.apk && adb shell am start -n com.example.bbettercalendar/.configuration.SplashActivity` (note: PS5 has no `&&`; chain with `; if ($?) { … }`) |
+| Install + launch | `adb install -r app\build\outputs\apk\debug\app-debug.apk && adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.configuration.SplashActivity` (note: PS5 has no `&&`; chain with `; if ($?) { … }`) |
 
 Run gradle commands via the **Bash tool** (the project already allow-lists `Bash(./gradlew.bat *)`) or the **PowerShell tool**. Use `run_in_background: true` for long builds and stream progress with the `Monitor` tool.
 

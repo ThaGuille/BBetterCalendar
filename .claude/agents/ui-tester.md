@@ -22,7 +22,7 @@ How to work:
    `find-node.ps1 -Id <suffix>` (check returned text) and scan
    `adb -s emulator-5554 logcat -d -b crash` for `FATAL EXCEPTION`.
 4. For a repeatable flow, record with `scripts\bb-adb.ps1` and verify with `scripts\replay.ps1`.
-5. `pm clear com.example.bbettercalendar` to reset between scenarios.
+5. `pm clear io.github.thaguille.bbettercalendar` to reset between scenarios.
 
 What to return (keep it tight, ~1k tokens):
 - **PASS / FAIL** per scenario, with the deciding signal (assertion text, or the logcat

@@ -24,9 +24,8 @@
 <!-- bullets — each must be something an agent would plausibly break without knowing it -->
 
 ## History
-| Date | Change | Spec |
+| Date | Change | Ref |
 |---|---|---|
-<!-- links into .claude/specs/archive/<slug>/proposal.md -->
 
 ---
 

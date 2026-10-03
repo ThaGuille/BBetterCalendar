@@ -3,7 +3,7 @@
 **Last updated:** 2026-06-07
 
 This is the single reference for the Claude Code "harness" built into this repo: the skills,
-subagents, hooks, code-intelligence index, and the spec loop — plus the reusable plugin that
+subagents, hooks, and code-intelligence index — plus the reusable plugin that
 ports all of it to your next app. If you only read one section, read
 [Daily usage](#daily-usage--what-to-type) and the [Cheat sheet](#cheat-sheet).
 
@@ -19,7 +19,7 @@ the only non-free piece; everything else is free and local.
 
 ```
 DISTRIBUTION   claude-harness plugin + marketplace   -> reuse across N apps
-WORKFLOW       /spec  (propose -> apply -> verify -> archive)   -> .claude/specs/
+WORKFLOW       direct prompts + planner / /save-plan for bigger changes
 CAPABILITIES   skills + 4 subagents + (a few MCP servers)
 KNOWLEDGE      CLAUDE.md + .claude/docs + CodeGraph index (just-in-time)
 GUARDRAILS     hooks + /check verification + file memory
@@ -27,7 +27,7 @@ GUARDRAILS     hooks + /check verification + file memory
 
 **How a turn actually flows:** the main chat session is the **orchestrator**. It pulls knowledge
 just-in-time (CodeGraph, docs), delegates verbose work to **subagents** (which return ~1–2k-token
-summaries, keeping your context clean), runs changes through the **/spec** loop, and **hooks**
+summaries, keeping your context clean), and **hooks**
 enforce/inject context deterministically around tool calls and session start.
 
 ---
@@ -38,7 +38,6 @@ enforce/inject context deterministically around tool calls and session start.
 
 | Skill | Run it when | Scope |
 |---|---|---|
-| **`/spec`** | Starting/working a non-trivial change: `propose` → `apply` → `archive` | generic |
 | **`/save-plan`** | You produced a plan you want to survive the conversation | generic |
 | **`/check`** | You want to verify the current change compiles + lints (on demand) | **Android-specific** |
 | **`/bb-build`** | "build / assemble / test / lint / clean" via the right `gradlew.bat` invocation | **Android-specific** |
@@ -57,7 +56,7 @@ They run in their own context window and **do not nest**.
 | Subagent | Use for | Model | Writes? |
 |---|---|---|---|
 | **explorer** | "where / how does X work", trace a feature, map an area before editing | sonnet | read-only |
-| **planner** | turn a goal into a step plan or `/spec` proposal | opus | read-only |
+| **planner** | turn a goal into a step plan | opus | read-only |
 | **code-reviewer** | review the current local diff vs `CLAUDE.md` rules | sonnet | read-only |
 | **test-writer** | add/extend JUnit + Espresso tests, run the test task | sonnet | test sources only |
 
@@ -72,7 +71,7 @@ Configured in [`.claude/settings.local.json`](../settings.local.json), scripts i
 
 | Event | Script | What it does |
 |---|---|---|
-| **SessionStart** | `session-context.ps1` | Injects active `/spec` changes + the 4 key rule reminders at the top of every session |
+| **SessionStart** | `session-context.ps1` | Injects the 4 key rule reminders at the top of every session |
 | **PostToolUse** (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**: if an edit adds a legacy palette token (`azul`, `verde`, `purple_500`…) to a `.java`/`.xml`, prints a notice. The edit is kept (rule #2). |
 
 There is deliberately **no gradle-on-stop hook** — too slow to run every turn. That role is the
@@ -90,30 +89,17 @@ manual `/check` skill instead.
 
 ## 3. Daily usage — what to type
 
-### Starting a non-trivial change (the main loop)
+### Starting a non-trivial change
 
-```
-/spec propose <one-line description of the change>
-```
+Describe it in a direct prompt. For anything big, ask for a plan first (**planner** subagent or
+Plan mode) and `/save-plan` it if it should outlive the conversation. Then implement, and run
+`/check` to verify it builds/lints.
 
-Claude grounds it in the codebase (often via the **explorer**/**planner** subagents), writes
-`.claude/specs/changes/<slug>/proposal.md` + `tasks.md`, and **stops for your approval** —
-no production code yet. Then:
-
-```
-/spec apply <slug>      # implement, ticking off tasks, honoring CLAUDE.md rules
-/check                  # verify it builds/lints (apply calls this for you)
-/spec verify <slug>     # completeness/scope/coherence pass (code-reviewer) before closing out
-/spec archive <slug>    # move to archive/, fold lasting behavior into capabilities/
-```
-
-You'll see the in-flight change echoed at the top of every new session (SessionStart hook).
-
-### Smaller / exploratory work — no command needed
+### Smaller / exploratory work
 
 - "How does the Pomodoro timer work?" → Claude auto-delegates to **explorer**; you get a
   `file:line` map, not a wall of code.
-- "Plan how to add X" → **planner** returns a step plan you can promote to `/spec`.
+- "Plan how to add X" → **planner** returns a step plan.
 - Just exploring, not sure it'll ship → `/save-plan` to park it in `.claude/plans/`.
 
 ### Building / testing
@@ -131,7 +117,7 @@ You'll see the in-flight change echoed at the top of every new session (SessionS
 
 ### Things that happen automatically (don't type anything)
 
-- Session start → active specs + rule reminders injected.
+- Session start → rule reminders injected.
 - Any edit → legacy-palette warn check.
 - Any architecture/trace question → CodeGraph is consulted before grep.
 
@@ -145,7 +131,7 @@ starts at ~80% instead of zero. It lives in this repo at
 *marketplace* containing one *plugin*).
 
 **What the plugin ships** (project-agnostic — defers to the host app's `CLAUDE.md`):
-`/spec` + `/save-plan` skills, the four subagents, and the SessionStart context hook.
+`/save-plan` skill, the four subagents, and the SessionStart context hook.
 
 **What it deliberately omits** (too project-specific): `/bb-build`, `/check`, and the
 legacy-palette hook — each new project adds its own equivalents.
@@ -190,10 +176,9 @@ The marketplace currently lives inside BBetter. To use it on another machine, co
 
 | I want to… | Do this |
 |---|---|
-| Start a real change | `/spec propose <desc>` → `/spec apply <slug>` → `/spec verify <slug>` → `/spec archive <slug>` |
-| See what changes are in flight | look at the SessionStart banner, or `.claude/specs/changes/` |
+| Start a real change | direct prompt (ask the **planner** first if it's big) |
 | Understand how some code works | just ask — **explorer** + CodeGraph answer with `file:line` |
-| Plan before coding | ask for a plan (**planner**), then `/save-plan` or `/spec propose` |
+| Plan before coding | ask for a plan (**planner**), then `/save-plan` |
 | Park an idea that may not ship | `/save-plan` |
 | Build / test | `/bb-build` or `/check` |
 | Review my diff | ask "review my changes" (**code-reviewer**) or `/code-review [high\|ultra]` |
@@ -212,11 +197,10 @@ The marketplace currently lives inside BBetter. To use it on another machine, co
 
 | Path | What |
 |---|---|
-| [`.claude/skills/`](../skills/) | `spec`, `save-plan`, `check`, `bb-build` |
+| [`.claude/skills/`](../skills/) | `save-plan`, `check`, `bb-build` |
 | [`.claude/agents/`](../agents/) | explorer, planner, code-reviewer, test-writer |
 | [`.claude/hooks/`](../hooks/) | `session-context.ps1`, `check-legacy-palette.ps1` |
 | [`.claude/settings.local.json`](../settings.local.json) | hook wiring + permission allow-list (machine-local) |
-| [`.claude/specs/`](../specs/) | the `/spec` loop: `changes/`, `capabilities/`, `archive/` |
 | [`.claude/plans/`](../plans/) | saved plans (incl. the harness roadmap) |
 | [`.claude/docs/`](.) | knowledge base (this file included); [`systems/`](systems/) holds the per-runtime-subsystem living docs — `capabilities/` is retired in favor of these |
 | [`.claude/harness-marketplace/`](../harness-marketplace/) | the reusable plugin + marketplace (Phase 4) |

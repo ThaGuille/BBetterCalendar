@@ -4,8 +4,8 @@
 >
 > This folder began as a **deep feasibility study** for the second bottom-nav screen, **Progress**
 > (statistics + digital-wellbeing). As of 2026-06-28 the key product decisions are **made** (see
-> banner below), so it's now research **+ a committed direction**. Phases 0–1 have shipped; turn
-> each next slice into a `/spec` proposal before building.
+> banner below), so it's now research **+ a committed direction**. Phases 0–1 have shipped; plan
+> each next slice before building.
 
 ## Decisions locked (2026-06-28)
 

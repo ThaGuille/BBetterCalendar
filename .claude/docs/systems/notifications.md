@@ -46,8 +46,8 @@ permission gating with a backoff schedule. The four feature notifiers (`focus`, 
 
 ## History
 
-| Date | Change | Spec |
+| Date | Change | Ref |
 |---|---|---|
-| 2026-07-04 | `CHANNEL_USAGE_LIMITS` added for Phase 3 warn/reached notifications | `.claude/specs/archive/progress-phase3-limits/proposal.md` |
-| 2026-07-17 | Alarm-scheduling mechanics extracted into reusable `AlarmReminderCore` (receiver + disjoint request-code namespace + offsets, parameterized); `EventReminderScheduler` is now a thin client reproducing the original `entityId * 10 + offsetIndex` request-code formula exactly (zero behavior change). `NotificationOffsets` moved `popups/` → `notifications/` (dependency-smell fix, roadmap finding F7); no wrapper kept, single UI caller (`AddEventActivity`) repointed. | `.claude/specs/archive/reminder-generalization/proposal.md` |
-| 2026-09-01 | Project deadlines become `AlarmReminderCore`'s second client: new `CHANNEL_PROJECT_DEADLINES` (5th channel), new `70_000`/`500_000` id partitions, and `NotificationSpec.Builder.openProjectDetail()` — the first notification in the app that deep-links to a specific destination rather than just opening `MainActivity`. | `.claude/specs/archive/project-deadlines-progress/proposal.md` |
+| 2026-07-04 | `CHANNEL_USAGE_LIMITS` added for Phase 3 warn/reached notifications | — |
+| 2026-07-17 | Alarm-scheduling mechanics extracted into reusable `AlarmReminderCore` (receiver + disjoint request-code namespace + offsets, parameterized); `EventReminderScheduler` is now a thin client reproducing the original `entityId * 10 + offsetIndex` request-code formula exactly (zero behavior change). `NotificationOffsets` moved `popups/` → `notifications/` (dependency-smell fix, roadmap finding F7); no wrapper kept, single UI caller (`AddEventActivity`) repointed. | — |
+| 2026-09-01 | Project deadlines become `AlarmReminderCore`'s second client: new `CHANNEL_PROJECT_DEADLINES` (5th channel), new `70_000`/`500_000` id partitions, and `NotificationSpec.Builder.openProjectDetail()` — the first notification in the app that deep-links to a specific destination rather than just opening `MainActivity`. | — |

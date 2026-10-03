@@ -60,12 +60,12 @@ the `Project` entity itself lives in `projects.md`.
 
 ## History
 
-| Date | Change | Spec |
+| Date | Change | Ref |
 |---|---|---|
-| 2026-06-28 | Phase 1 — charts MVP (carousel, Day/Week/Month stepper) | `.claude/specs/archive/progress-charts-mvp/proposal.md` |
-| 2026-06-29 | Phase 2 — usage band, app picker, disclosure/consent | `.claude/specs/archive/progress-phase2-usage/proposal.md` |
-| 2026-07-04 | Phase 3 — `AppLimitDialog`, limit/progress row rendering | `.claude/specs/archive/progress-phase3-limits/proposal.md` |
-| 2026-07-04 | Phase 4a — enforce toggle (3-state), accessibility disclosure | `.claude/specs/archive/progress-phase4a-blocking/proposal.md` |
-| 2026-07-05 | Phase 4b — Play release readiness (no screen-behavior change) | `.claude/specs/archive/progress-phase4b-play-release/proposal.md` |
-| 2026-09-01 | Phase 5 — time-per-project chart page (4th, 3rd in DAY) + a third band (project progress) between the carousel and the usage band; new `FocusEventDAO.getMinutesByProject()` + `ProjectMinutes` projection feed both. Rows deep-link to project detail via `action_global_project_detail`. No schema change. | `.claude/specs/archive/project-deadlines-progress/proposal.md` |
-| 2026-09-10 | Visual polish — Day/Week/Month + range stepper moved into a fixed header above the scrolling content; chart carousel's dot indicator replaced with a titled, fixed-mode `TabLayout` (tap-to-jump); projects/usage bands wrapped in card surfaces; "Add apps", the block-toggle chip, and the enforce-master toggle restyled as visible buttons. No schema/logic change. | `.claude/specs/archive/progress-screen-visual-polish/proposal.md` |
+| 2026-06-28 | Phase 1 — charts MVP (carousel, Day/Week/Month stepper) | — |
+| 2026-06-29 | Phase 2 — usage band, app picker, disclosure/consent | — |
+| 2026-07-04 | Phase 3 — `AppLimitDialog`, limit/progress row rendering | — |
+| 2026-07-04 | Phase 4a — enforce toggle (3-state), accessibility disclosure | — |
+| 2026-07-05 | Phase 4b — Play release readiness (no screen-behavior change) | — |
+| 2026-09-01 | Phase 5 — time-per-project chart page (4th, 3rd in DAY) + a third band (project progress) between the carousel and the usage band; new `FocusEventDAO.getMinutesByProject()` + `ProjectMinutes` projection feed both. Rows deep-link to project detail via `action_global_project_detail`. No schema change. | — |
+| 2026-09-10 | Visual polish — Day/Week/Month + range stepper moved into a fixed header above the scrolling content; chart carousel's dot indicator replaced with a titled, fixed-mode `TabLayout` (tap-to-jump); projects/usage bands wrapped in card surfaces; "Add apps", the block-toggle chip, and the enforce-master toggle restyled as visible buttons. No schema/logic change. | — |

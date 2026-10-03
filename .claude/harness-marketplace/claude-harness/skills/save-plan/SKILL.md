@@ -57,6 +57,3 @@ Start the file with:
 - Don't strip the status header even on update.
 - Don't write the plan inline into `CLAUDE.md` or the README — `.claude/plans/` is the home.
 
-## Cross-refs
-
-- `/spec` — for changes you actually intend to implement (proposal → apply → archive).

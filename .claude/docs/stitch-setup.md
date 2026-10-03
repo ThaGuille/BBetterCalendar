@@ -48,6 +48,15 @@ La clave de API es tuya; **no la pegues en el chat ni en ningún fichero del rep
   → /impeccable shape + image-to-code → XML sobre bb_* → ui-tester
 ```
 
+## Comportamiento real del MCP (verificado 2026-10-03)
+
+- `generate_screen_from_text` **siempre** devuelve `The operation timed out` en el cliente, pero
+  la generación **sigue en el servidor** y termina (≈2–5 min). **No reintentar**: duplica pantallas.
+- `list_screens` / `get_project.screenInstances` pueden quedar **vacíos** durante mucho rato aunque
+  la pantalla exista. Prueba fiable: `get_project` → descargar `thumbnailScreenshot.downloadUrl` y
+  mirarlo, o abrir el proyecto en la web de Stitch.
+- Tras `create_design_system`, llamar `update_design_system` (lo pide la herramienta).
+
 ## Cuidado
 
 - Stitch genera HTML/Tailwind: es **intención visual**, no código reutilizable.

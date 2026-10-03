@@ -62,9 +62,9 @@ screen list/dialogs) is a separate doc — see `progress-screen.md`.
 
 ## History
 
-| Date | Change | Spec |
+| Date | Change | Ref |
 |---|---|---|
-| 2026-06-29 | Phase 2 — usage measurement + user-curated tracked-app picker | `.claude/specs/archive/progress-phase2-usage/proposal.md` |
-| 2026-07-04 | Phase 3 — per-app daily limit + warn-only alarm poll + two notifications | `.claude/specs/archive/progress-phase3-limits/proposal.md` |
-| 2026-07-04 | Phase 4a — soft blocking (accessibility service, cover overlay, enforce toggle) | `.claude/specs/archive/progress-phase4a-blocking/proposal.md` |
-| 2026-07-05 | Pomodoro "focus block mode" — `FocusBlockState` pre-empts `decide()` to cover every app but the launcher/assistant while a concentration run is active; kill-trap reset on service reconnect | `.claude/specs/archive/pomodoro-block-mode/proposal.md` |
+| 2026-06-29 | Phase 2 — usage measurement + user-curated tracked-app picker | — |
+| 2026-07-04 | Phase 3 — per-app daily limit + warn-only alarm poll + two notifications | — |
+| 2026-07-04 | Phase 4a — soft blocking (accessibility service, cover overlay, enforce toggle) | — |
+| 2026-07-05 | Pomodoro "focus block mode" — `FocusBlockState` pre-empts `decide()` to cover every app but the launcher/assistant while a concentration run is active; kill-trap reset on service reconnect | — |

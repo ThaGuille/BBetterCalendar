@@ -1,6 +1,6 @@
 ---
 name: check
-description: Verify the current changes compile and pass lint, on demand. Use when the user says "/check", "verify my changes build", or as the verification step of `/spec apply`. Replaces an auto-run-gradle-on-stop hook (gradle is too slow to run every turn). Runs lint/compile via gradlew.bat and reports.
+description: Verify the current changes compile and pass lint, on demand. Use when the user says "/check", "verify my changes build". Replaces an auto-run-gradle-on-stop hook (gradle is too slow to run every turn). Runs lint/compile via gradlew.bat and reports.
 ---
 
 # check — on-demand build/lint verification
@@ -36,4 +36,3 @@ failure recovery (stuck daemon → `.\gradlew.bat --stop` then retry; OneDrive f
 ## Cross-refs
 
 - [`bb-build`](../bb-build/SKILL.md) — underlying gradle invocation conventions.
-- [`spec`](../spec/SKILL.md) — `/spec apply` calls `/check` as its verify step.

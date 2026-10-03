@@ -8,10 +8,9 @@ harness developed in BBetterCalendar — so a new app starts at ~80% instead of 
 
 | Layer | Component |
 |---|---|
-| Workflow | `/spec` skill — proposal → apply → archive under `.claude/specs/` |
 | Workflow | `/save-plan` skill — persist a design plan to `.claude/plans/<slug>.md` |
 | Capabilities | `explorer`, `planner`, `code-reviewer`, `test-writer` subagents (read-only except test-writer; codegraph-first) |
-| Guardrails | SessionStart hook that lists in-flight `/spec` changes |
+| Guardrails | SessionStart context hook |
 
 Project-specific pieces (the Android `bb-build`/`check` skills and the legacy-palette hook)
 are intentionally **left out** — each project adds its own on top via its local `.claude/`

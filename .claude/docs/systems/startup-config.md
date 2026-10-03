@@ -45,6 +45,6 @@ singleton that caches `Configuration` in memory.
 
 ## History
 
-| Date | Change | Spec |
+| Date | Change | Ref |
 |---|---|---|
-| 2026-06-28 | `SplashActivity`/`InitialConfiguration` both gained `persistDailyStat()` before daily reset | `.claude/specs/archive/progress-charts-mvp/proposal.md` |
+| 2026-06-28 | `SplashActivity`/`InitialConfiguration` both gained `persistDailyStat()` before daily reset | — |

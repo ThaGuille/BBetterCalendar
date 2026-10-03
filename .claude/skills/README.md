@@ -29,7 +29,6 @@ human-readable version of that.
 | "design a logo", "app icon concepts", "brand board" | **brandkit** | Identity artefact, not app UI. |
 | "does the app still run?", "click through Progress" | **adb-ui-test** (via `ui-tester`) | Runtime verification. |
 | "build / lint / test" | **bb-build**, **check** | Gradle. |
-| "propose a spec", "apply the spec" | **spec** | Change lifecycle. |
 | "save this plan" | **save-plan** | Persistence. |
 
 **Precedence when two could fire:**
@@ -223,7 +222,6 @@ depth/elevation, do's and don'ts, responsive behaviour, agent prompt guide.
 | **adb-ui-test** | Drive the emulator over adb — navigate by resource-id via uiautomator XML, scan `logcat -b crash` for `FATAL EXCEPTION`, record/replay flows, `capture-screen.ps1` for a real PNG when a visual judgement is needed. Reach it through the **`ui-tester` subagent**, not inline. |
 | **bb-build** | `gradlew.bat` on Windows: assemble, test, lint, clean; handles stuck daemon and OneDrive lock. |
 | **check** | On-demand build + lint verification. |
-| **spec** | Change lifecycle: propose → apply → verify → archive under `.claude/specs/`. |
 | **save-plan** | Persist a design/implementation plan to `.claude/plans/<slug>.md`. |
 
 ---

@@ -83,10 +83,10 @@ recreation and a background-fail grace period that treats "left the app mid-sess
 
 ## History
 
-| Date | Change | Spec |
+| Date | Change | Ref |
 |---|---|---|
-| 2026-06-28 | Session state persists across fragment recreation (rotation, back-stack, short process death) | `.claude/specs/archive/persist-pomodoro-session-state/proposal.md` |
-| 2026-07-17 | Focus attribution: bound timer via `FocusTarget`, `completeTimer`/`logFocusEvent` thread `entryId`, `maybeAutoComplete`, `FocusCompleteNotifier`; bound countdown = entry `targetMinutes` | `.claude/specs/archive/focus-attribution/proposal.md` |
-| 2026-07-05 | Pomodoro "focus block mode": 🚫 toggle on Home arms `FocusBlockState` (see `app-limits.md`) for the current concentration run; grace timer skipped while armed | `.claude/specs/archive/pomodoro-block-mode/proposal.md` |
-| 2026-09-09 | Focus mode (tarjeta a pantalla completa + chrome oculto), botón cancelar sin penalización, 🚫 editable mid-run; racha redefinida como "días de los últimos 30 con pomodoro completado" y movida a la toolbar; `FocusStreakPopup` y `FirstFocusCelebrationPopup` | `.claude/specs/archive/focus-mode-and-streak/proposal.md` |
-| 2026-08-29 | Repository layer: `maybeAutoComplete` moved from `HomeViewModel` into `FocusAttributionRepository` (cohesion — it's the write side of the same attribution rule `enrich()` reads, not a de-duplication); `completeTimer`'s write block moved from `@IoExecutor` to `@DbWriteExecutor`. No behavior change to the timer state machine itself. | `.claude/specs/archive/repository-layer-consolidation/proposal.md` |
+| 2026-06-28 | Session state persists across fragment recreation (rotation, back-stack, short process death) | — |
+| 2026-07-17 | Focus attribution: bound timer via `FocusTarget`, `completeTimer`/`logFocusEvent` thread `entryId`, `maybeAutoComplete`, `FocusCompleteNotifier`; bound countdown = entry `targetMinutes` | — |
+| 2026-07-05 | Pomodoro "focus block mode": 🚫 toggle on Home arms `FocusBlockState` (see `app-limits.md`) for the current concentration run; grace timer skipped while armed | — |
+| 2026-09-09 | Focus mode (tarjeta a pantalla completa + chrome oculto), botón cancelar sin penalización, 🚫 editable mid-run; racha redefinida como "días de los últimos 30 con pomodoro completado" y movida a la toolbar; `FocusStreakPopup` y `FirstFocusCelebrationPopup` | — |
+| 2026-08-29 | Repository layer: `maybeAutoComplete` moved from `HomeViewModel` into `FocusAttributionRepository` (cohesion — it's the write side of the same attribution rule `enrich()` reads, not a de-duplication); `completeTimer`'s write block moved from `@IoExecutor` to `@DbWriteExecutor`. No behavior change to the timer state machine itself. | — |

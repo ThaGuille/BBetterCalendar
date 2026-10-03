@@ -4,11 +4,11 @@ Reusable Claude Code harness, extracted generic from BBetterCalendar.
 
 Bundles:
 
-- **Skills** — `/spec` (spec-driven change lifecycle) and `/save-plan` (persist a plan).
+- **Skills** — `/save-plan` (persist a plan).
 - **Subagents** — `explorer`, `planner`, `code-reviewer` (read-only) and `test-writer`
   (writes test sources). All prefer the [CodeGraph](https://github.com/colbymchenry/codegraph)
   index and fall back to Grep/Read if it's absent.
-- **Hook** — a SessionStart context injector that lists in-flight `/spec` changes.
+- **Hook** — a SessionStart context injector.
 
 These are deliberately **project-agnostic**: they defer to the host project's `CLAUDE.md`
 for concrete rules (style tokens, threading, schema policy, build/test commands) rather than

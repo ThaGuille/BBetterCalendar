@@ -52,7 +52,6 @@ Any design or implementation plan you produce (an `ExitPlanMode` payload, a writ
 - File header has `Status:` (proposed / in progress / merged / abandoned), `Created:`, `Last updated:`.
 - Don't delete old plans — update the status line instead.
 - Don't write plans inline into CLAUDE.md or PR descriptions; link to the file.
-- For changes you intend to **implement**, prefer the [`spec`](.claude/skills/spec/SKILL.md) lifecycle (`.claude/specs/`, proposal → apply → archive) over a loose plan; keep `save-plan` for exploration that may not ship.
 
 ### 2. Style tokens are mandatory for new UI
 
@@ -76,7 +75,7 @@ Spanish, Catalan, and English comments coexist on purpose. Don't auto-translate 
 
 ### 7. Verify big runtime changes on the emulator
 
-After a **substantial** change to UI or runtime behaviour (a plan- or `/spec`-driven
+After a **substantial** change to UI or runtime behaviour (a plan-driven
 implementation — *not* a small bug fix), verify the app actually runs before declaring it
 done. **Don't trust the compiler alone.** Delegate to the [`ui-tester`](.claude/agents/ui-tester.md)
 subagent, which drives the running emulator via the [`adb-ui-test`](.claude/skills/adb-ui-test/SKILL.md)
@@ -104,7 +103,7 @@ Open the file that matches the task before guessing:
 | [`common_errors.md`](.claude/docs/common_errors.md) | Symptom → root cause → fix tables (build, Room, Hilt, popups, calendar, timer) |
 | [`windows_commands.md`](.claude/docs/windows_commands.md) | PowerShell, `gradlew.bat`, `adb`, AVD reference |
 | [`android_studio.md`](.claude/docs/android_studio.md) | IDE-specific tips: sync, run, logcat, database inspector, AVD |
-| [`harness.md`](.claude/docs/harness.md) | **Operating manual** for the AI harness: skills, subagents, hooks, the `/spec` loop, and the reusable `claude-harness` plugin — what to type, what's automatic |
+| [`harness.md`](.claude/docs/harness.md) | **Operating manual** for the AI harness: skills, subagents, hooks, and the reusable `claude-harness` plugin — what to type, what's automatic |
 
 ### System docs — `.claude/docs/systems/`
 
@@ -125,13 +124,12 @@ Excluded (owned elsewhere): `popups`/`helpers`/`feedback` (see `architectural_pa
 
 ## Skills — `.claude/skills/`
 
-Project-level skills (invokable with `/bb-build`, `/save-plan`, `/spec`, `/check`):
+Project-level skills (invokable with `/bb-build`, `/save-plan`, `/check`):
 
 | Skill | Purpose |
 |---|---|
 | [`bb-build`](.claude/skills/bb-build/SKILL.md) | Run gradle on Windows correctly. Handles common build failures. |
 | [`save-plan`](.claude/skills/save-plan/SKILL.md) | Persist a plan to `.claude/plans/<slug>.md` with the right header. |
-| [`spec`](.claude/skills/spec/SKILL.md) | Spec-driven change lifecycle: propose → apply → archive under `.claude/specs/`. |
 | [`check`](.claude/skills/check/SKILL.md) | On-demand build/lint/test verification (manual — there is no gradle-on-stop hook). |
 
 ### Design skills (vendored)
@@ -168,7 +166,7 @@ with e.g. "use the code-reviewer subagent".
 | Agent | Role |
 |---|---|
 | [`explorer`](.claude/agents/explorer.md) | Read-only code search/trace; codegraph-first; returns `file:line` summaries. |
-| [`planner`](.claude/agents/planner.md) | Read-only; turns a goal into a step plan / `/spec` proposal (opus). |
+| [`planner`](.claude/agents/planner.md) | Read-only; turns a goal into a step plan (opus). |
 | [`code-reviewer`](.claude/agents/code-reviewer.md) | Read-only diff review vs CLAUDE.md rules (local; cloud review = `/code-review`). |
 | [`test-writer`](.claude/agents/test-writer.md) | Writes JUnit/Espresso tests; may edit test sources + run `test`. |
 
@@ -177,7 +175,7 @@ with e.g. "use the code-reviewer subagent".
 | Event | Script | Behavior |
 |---|---|---|
 | PostToolUse (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**, non-blocking: flags a legacy palette token added to a `.java`/`.xml` edit (rule #2). |
-| SessionStart | `session-context.ps1` | Injects active `/spec` changes + key rule reminders into the session. |
+| SessionStart | `session-context.ps1` | Injects key rule reminders into the session. |
 | Stop | `verify-ui-reminder.ps1` | **Blocking-once**: when the uncommitted runtime diff is *big* (not a small fix) and an emulator is attached, blocks the stop with an instruction to verify via the `ui-tester` subagent (rule #7). Silent on small/clean/no-device; re-arms after commit. |
 
 > Hook commands use absolute Windows paths in `settings.local.json` (a machine-local file). Generalize them to `$CLAUDE_PROJECT_DIR` when extracting the reusable plugin (roadmap Phase 4).
@@ -204,7 +202,6 @@ with e.g. "use the code-reviewer subagent".
 | `.claude/plans/` | Saved design plans |
 | `.claude/references/` | Design knowledge libraries: `interaction-design/`, `visual-critique/`, `design-systems/` |
 | `.claude/skills/` | Project-level skills |
-| `.claude/specs/` | Spec-driven changes (`/spec`): `changes/`, `capabilities/`, `archive/` |
 | `.claude/agents/` | Subagent definitions (explorer, planner, code-reviewer, test-writer) |
 | `.claude/hooks/` | PowerShell hook scripts referenced by `settings.local.json` |
 | `.claude/harness-marketplace/` | Reusable `claude-harness` plugin + marketplace (Phase 4) — install in new apps |

@@ -81,9 +81,9 @@ que un subagente en worktree **sí** llega al MCP de Stitch y al emulador.
 - Los 11 colores de la paleta de u4 aparecen todos en el HTML exportado: no hay discrepancias.
 
 **Pendiente**
-- `recordings/progress-smoke.log` sigue fallando tras `pm clear`: el toque en Progress se registra pero
-  luego `range_label` da «null root node». A mano (sin `pm clear`) funciona. Hay que ver si es
-  temporización o un estado de primer arranque de Progress.
+- ✅ (2026-10-05) `recordings/progress-smoke.log` era intermitente tras `pm clear`: el primer volcado
+  tras arrancar a veces no contenía el nodo. `_steps.ps1` ahora reintenta `TAP`/`ASSERT` hasta 4 veces
+  (1,5 s) mientras falte el nodo; 5 de 5 pasadas PASS.
 - Corregir el mismo applicationId en `.claude/plans/forget-about-the-skills-ticklish-breeze.md` (plan
   antiguo; se dejó tal cual a propósito).
 - Sin probar: agentes internos de big-task ejecutando los `.ps1` por Bash con sus reglas «sin cd, sin

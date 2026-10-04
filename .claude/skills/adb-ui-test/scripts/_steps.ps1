@@ -74,10 +74,19 @@ function Invoke-BBStep {
         }
         'TAP' {
             if ($rest -match '^id=(.+)$') {
-                $out = & $finder -Id $Matches[1] -Tap -Serial $Serial
+                # Retry only while the node is missing (right after launch the dump can be of the splash/old window).
+                for ($n = 0; $n -lt 4; $n++) {
+                    $out = & $finder -Id $Matches[1] -Tap -Serial $Serial
+                    if ($LASTEXITCODE -eq 0) { break }
+                    Start-Sleep -Milliseconds 1500
+                }
                 return @{ ok = ($LASTEXITCODE -eq 0); info = ($out -join '; ') }
             } elseif ($rest -match '^text=(.+)$') {
-                $out = & $finder -Text $Matches[1] -Tap -Serial $Serial
+                for ($n = 0; $n -lt 4; $n++) {
+                    $out = & $finder -Text $Matches[1] -Tap -Serial $Serial
+                    if ($LASTEXITCODE -eq 0) { break }
+                    Start-Sleep -Milliseconds 1500
+                }
                 return @{ ok = ($LASTEXITCODE -eq 0); info = ($out -join '; ') }
             }
             return @{ ok = $false; info = "bad TAP target: $rest" }
@@ -86,7 +95,11 @@ function Invoke-BBStep {
             if ($rest -match '^id=(\S+)(\s+expect~=(.*))?$') {
                 $idSuffix = $Matches[1]
                 $expect   = if ($Matches[3]) { $Matches[3].Trim() } else { '' }
-                $out = & $finder -Id $idSuffix -Serial $Serial
+                for ($n = 0; $n -lt 4; $n++) {
+                    $out = & $finder -Id $idSuffix -Serial $Serial
+                    if ($LASTEXITCODE -eq 0) { break }
+                    Start-Sleep -Milliseconds 1500
+                }
                 if ($LASTEXITCODE -ne 0) {
                     return @{ ok = $false; info = "ASSERT failed: id=$idSuffix not found" }
                 }

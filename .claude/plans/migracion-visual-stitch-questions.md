@@ -3,6 +3,21 @@
 Decisiones que las unidades tomaron por su cuenta mientras el usuario estaba ausente, y preguntas
 abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo cambiarlo).
 
+**Este es el documento de revisión final:** el usuario lo repasa al terminar la migración y hace ahí
+los ajustes. Ninguna unidad se detiene por una pregunta. u24 lo reorganiza por pantalla
+(ver la continuación).
+
+## Decisiones del usuario (2026-10-07)
+
+- **Colores = `.stitch/DESIGN.md`** (los 11 primitivos de `palette.xml`, que ya coinciden), no el
+  esquema M3 que Stitch generó dentro de algunos HTML. Resuelve la pregunta de u4 sobre la paleta.
+- **Los diseños de Stitch (PNG + HTML) son la verdad de base** en composición, textos, espaciados,
+  formas y pesos. No se admiten desviaciones por criterio propio (contraste, coherencia…), solo por
+  imposibilidad técnica, y se anotan aquí. La unidad nueva **u13b** deshace las desviaciones ya
+  tomadas: chips delta (u9), barras rectas (u10), datos sociales unificados (u11) y saludo de Home
+  (u13).
+- **Las preguntas se anotan, no bloquean**, y se revisan al final.
+
 
 ## u1
 
@@ -14,12 +29,12 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
 
 ## u4
 
-- **Q:** Los HTML `03`, `04`, `10`, `13` y `14` pintan con un esquema M3 que Stitch derivó de la
+- ✅ **Resuelta por el usuario (2026-10-07): manda `DESIGN.md`.** ~~**Q:** Los HTML `03`, `04`, `10`, `13` y `14` pintan con un esquema M3 que Stitch derivó de la
   semilla (fondo `#081612`, tarjeta `#14221E`, primario `#9BD3B5`, ámbar `#FABC4A`, texto
   `#D6E6DF`/`#C0C9C2`), distinto de la paleta de `DESIGN.md` (`#12201C`, `#1B2D27`, `#7FB69A`,
   `#F2B544`, `#EAF2EC`/`#9DB3A8`), que solo usa `01-focus-running.html` y los SVG a mano. ¿Cuál
   manda? — **Assumed:** la de `DESIGN.md` (la del plan). Para seguir los PNG al píxel, cambiar solo
-  los hex de `res/values/palette.xml`; ningún otro fichero se toca.
+  los hex de `res/values/palette.xml`; ningún otro fichero se toca.~~
 - **Q:** Colores de proyecto `bb_project_1..4`. — **Assumed:** los cuatro puntos de
   `03-projects.html` en su orden: sage `#7FB69A`, ámbar `#F2B544`, sage claro `#9BD3B5`, espuma
   `#ABCEC7`. Choca con «el ámbar solo para logros» y el 1 y el 3 se distinguen poco. Alternativa:
@@ -108,10 +123,10 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   y dejar `textStyle bold` (700 en vez de 600); (b) familias de un peso `bb_font_medium`/`bb_font_semibold` en
   `res/font/`, referenciadas solo desde `styles_typography.xml`; (c) investigar `AppCompatTextHelper` con la
   familia XML. Natural en u24, o antes de u13 si se quiere fidelidad de pesos.~~
-- **Q:** Los chips delta («▲ 14%») van en una píldora oscura (`bb_surface`) y no forest como en html 13/10,
+- ➡️ **Se alinea con Stitch en u13b** (píldora forest como el HTML; queda la nota de contraste). ~~**Q:** Los chips delta («▲ 14%») van en una píldora oscura (`bb_surface`) y no forest como en html 13/10,
   porque salvia/ember sobre forest no llegan a 4,5:1. — **Assumed:** píldora oscura. Para el aspecto del html:
   cambiar `bg_widget_inset_pill` a `bb_primary_container` y aceptar el contraste bajo (o aclarar forest en
-  `palette.xml`).
+  `palette.xml`).~~
 
 ## u9b
 - **Q:** Chip (estado, mayúsculas) y ChipLabel pasan de 700 (negrita de recurso) a su 600 real de DESIGN.md
@@ -120,15 +135,15 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   `android:textStyle=bold`.
 
 ## u11
-- **Q:** Home (html 04) muestra «3 friends studying now · Maya, Alex, Leo», pero Focus/Cycle complete usan
+- ➡️ **Se alinea con Stitch en u13b** (cada pantalla con los textos de su diseño). ~~**Q:** Home (html 04) muestra «3 friends studying now · Maya, Alex, Leo», pero Focus/Cycle complete usan
   otro grupo (Laia, Marc, Pau…). — **Assumed:** un único conjunto de datos falsos en todas las pantallas
   (8 amigos, 5 estudiando, Laia arriba, usuario 2.º de 9), así que Home dirá «5 friends studying now». Para
-  cambiarlo: editar `MockSocialRepository.buildSnapshot()` (y los asserts de `MockSocialRepositoryTest`).
+  cambiarlo: editar `MockSocialRepository.buildSnapshot()` (y los asserts de `MockSocialRepositoryTest`).~~
 
 ## u10
-- **Q:** MPAndroidChart 3.1.0 no redondea las barras ni las bandas FOCUS (html 10/14 sí). — **Assumed:**
+- ➡️ **Se alinea con Stitch en u13b** (renderer de barras redondeadas). ~~**Q:** MPAndroidChart 3.1.0 no redondea las barras ni las bandas FOCUS (html 10/14 sí). — **Assumed:**
   barras rectas. Si se quieren redondeadas: un `BarChartRenderer` propio en `ui/common/chart/` enganchado
-  desde `ChartStyler` (`chart.setRenderer(...)`).
+  desde `ChartStyler` (`chart.setRenderer(...)`).~~
 - **Q:** El emulador conserva datos sembrados (2 proyectos «Final thesis»/«Physics exam», ~40 días de
   sesiones). — **Assumed:** se dejan para las capturas de u17–u20. Para quitarlos: `adb shell pm clear
   io.github.thaguille.bbettercalendar` (y volver a conceder `POST_NOTIFICATIONS`).
@@ -141,9 +156,9 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   aceptable de forma transitoria (u13/u14 mueven la sesión a la pantalla Focus, sin barra).
 
 ## u13
-- **Q:** Home no guarda nombre de usuario: ¿qué mostrar en el saludo/avatar? — **Assumed:** «Hi there» + inicial
+- ➡️ **Se alinea con Stitch en u13b** (saludo y avatar como html 04, con el nombre del diseño como placeholder). ~~**Q:** Home no guarda nombre de usuario: ¿qué mostrar en el saludo/avatar? — **Assumed:** «Hi there» + inicial
   fija «B» (placeholder `home-user-name`). Para cambiarlo: un campo de nombre (Configuration o prefs) y en
-  `HomeFragment` `homeAvatar.setName(...)` + un `home_greeting` con formato.
+  `HomeFragment` `homeAvatar.setName(...)` + un `home_greeting` con formato.~~
 - **Q:** El engranaje de ajustes del temporizador desaparece (el diseño no lo tiene). — **Assumed:** la píldora
   «Cycle x of N · Next: …» (con su ⌄) abre los ajustes del temporizador. Si se prefiere otro sitio (Focus o un
   menú), mover `showTimerSettings()`.

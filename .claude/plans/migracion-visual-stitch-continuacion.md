@@ -1,4 +1,4 @@
-# Migración visual Stitch — continuación con big-task (u14–u25)
+# Migración visual Stitch — continuación con big-task (u13b–u25)
 
 **Status:** proposed
 **Created:** 2026-10-07
@@ -13,7 +13,7 @@
 Lanzar desde la rama `feature/migracion-visual-stitch` (big-task usa la rama actual como base):
 
 ```
-/big-task "Ejecuta .claude/plans/migracion-visual-stitch-continuacion.md respetando su columna Tier: sonnet en todas las unidades salvo u14 (opus)"
+/big-task "Ejecuta .claude/plans/migracion-visual-stitch-continuacion.md respetando su columna Tier (sonnet en todas salvo u14, opus) y su sección Fuente de verdad (diseños de Stitch como verdad de base, colores de DESIGN.md, preguntas anotadas sin bloquear)"
 ```
 
 ## Estado al 2026-10-07
@@ -40,6 +40,31 @@ Hecho y commiteado en `feature/migracion-visual-stitch` (ejecución con subagent
 
 Las APIs que exponen u2, u3, u9, u10, u11, u12 y u13 están en `migracion-visual-stitch-impl.md`, en la
 sección de cada unidad. **Cada unidad debe leerla antes de empezar.**
+
+## Fuente de verdad (decisión del usuario, 2026-10-07)
+
+- **Los diseños de Stitch son la verdad de base.** Los PNG de `.stitch/designs/` (canónicos según su
+  README) y su HTML en `.stitch/html/` mandan en composición, jerarquía, textos, espaciados, radios,
+  tamaños, pesos tipográficos, iconos y formas de los gráficos. Se copian, no se reinterpretan.
+- **Los colores son los de `.stitch/DESIGN.md`**, es decir, los 11 primitivos de `palette.xml`
+  mapeados a `bb_*`, que ya coinciden.
+  - Algunos HTML (`03`, `04`, `10`, `13`, `14`) pintan con un esquema M3 que Stitch derivó de esa
+    semilla (#081612, #14221E, #9BD3B5, #FABC4A, #D6E6DF, …). Ahí se usa el token `bb_*` de **ese
+    mismo rol** de DESIGN.md: fondo → `bb_surface`, tarjeta → `bb_surface_card`, primario →
+    `bb_primary`, ámbar → `bb_accent_reward`, texto → `bb_on_surface` / `bb_on_surface_muted`.
+  - **No se añaden primitivos.**
+- **Ninguna unidad se desvía del diseño por criterio propio**, ni por contraste WCAG, ni por
+  «queda mejor», ni por coherencia entre pantallas.
+  - Si algo del diseño parece problemático, se implementa como está y se anota como pregunta.
+  - Solo se admiten desviaciones por **imposibilidad técnica** (MDC 1.9.0, MPAndroidChart 3.1.0,
+    minSdk 21), con la alternativa más cercana y una pregunta anotada.
+- **Las preguntas nunca paran el trabajo.** Ninguna unidad devuelve `blocked` por una duda de diseño
+  o de producto: asume, implementa y anota en sus notas (regla 3 de abajo). u24 consolida todo en
+  [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md). Ese es **el
+  documento que el usuario revisará al terminar la migración** para hacer los ajustes, así que cada
+  entrada dice qué se asumió y qué fichero o valor cambiar para revertirlo.
+  - `blocked` queda solo para fallos técnicos que la unidad no puede resolver (la build no compila
+    por algo externo, no hay emulador…).
 
 ## Reglas de paralelismo (nuevas; obligatorias para u14–u25)
 
@@ -103,6 +128,7 @@ código antes de editar.
 
 | Id | Título | Depende de | Área (ficheros propios) | Verif. | Tier |
 |---|---|---|---|---|---|
+| u13b | Alinear lo ya hecho con Stitch | u14 | `ui/common/widget/` (chips delta), `ui/common/chart/` (renderer de barras), `social/MockSocialRepository` + test, Home (`fragment_home.xml`, `HomeFragment`, sus strings) | imagen | sonnet |
 | u14 | Focus (terminar WIP) | — | `ui/focus/` salvo CycleComplete, `FocusSessionViewModel`, `MainActivity`, `SplashActivity` | imagen | **opus** |
 | u16 | Projects | — | `ui/projects/`, `item_project*`, `fragment_projects*` | imagen | sonnet |
 | u17 | Progress | — | `ui/progress/ProgressFragment` + VM, `fragment_progress.xml`, `Granularity` | imagen | sonnet |
@@ -113,12 +139,12 @@ código antes de editar.
 | u21 | Compat.: popups y diálogos | u14 | `popups/`, `popup_*.xml`, `FirstFocusCelebrationPopup`, `TimerPopup`, `FocusStreakPopup` | imagen | sonnet |
 | u20 | Detalle por app | u19 | `ui/screentime/AppDetail*` | imagen | sonnet |
 | u23 | Compat.: splash, AppPicker, overlay | u19 | `SplashActivity` (solo layout y tema), `AppPickerActivity`, `item_app_pick`, `view_block_cover` | imagen | sonnet |
-| u24 | Limpieza y documentación + consolidación | u14–u23 | legado, docs, ficheros compartidos | local | sonnet |
+| u24 | Limpieza y documentación + consolidación | u13b, u14–u23 | legado, docs, ficheros compartidos | local | sonnet |
 | u25 | Verificación final | u24 | — | imagen | sonnet |
 
 Olas naturales:
 1. u14, u16, u17, u19 y u22;
-2. u15, u18, u21, u20 y u23;
+2. u13b, u15, u18, u21, u20 y u23;
 3. u24;
 4. u25.
 
@@ -126,6 +152,30 @@ Con 2 emuladores, lo que limita es la verificación, no la implementación. Por 
 de 3 unidades a la vez.
 
 ### Ajustes respecto al plan maestro
+
+**u13b · Alinear lo ya hecho con Stitch (unidad nueva).** Deshace las desviaciones de diseño que
+tomaron u9–u13 y que contradicen la regla de fuente de verdad. Las preguntas de origen están en
+`migracion-visual-stitch-questions.md`.
+- **Chips de delta y de estado (u9):** píldora con el fondo del HTML 13/10 (`bb_primary_container`,
+  forest), no la oscura. El aviso de contraste se queda como pregunta.
+- **Barras redondeadas (u10):** el HTML 10/14 redondea las barras y las bandas FOCUS. Hay que hacer un
+  `BarChartRenderer` propio en `ui/common/chart/`, enganchado desde `ChartStyler` y aplicado a todas
+  sus variantes de barras.
+- **Textos sociales por pantalla (u11):** cada pantalla muestra lo que muestra su diseño.
+  - Home (html 04): «3 friends studying now · Maya, Alex, Leo».
+  - Focus y Cycle complete: el grupo de html 01/02.
+  - Basta con que `MockSocialRepository` exponga el conjunto que pide cada pantalla, o un conjunto
+    cuyos subconjuntos reproduzcan cada diseño. Actualiza `MockSocialRepositoryTest`.
+- **Home (u13):** el saludo, la fecha y el avatar copian html 04 (formato y texto), con el nombre del
+  diseño como placeholder registrado. Repasa Home contra `04-home.png` y corrige cualquier otra
+  diferencia que u13 dejara anotada en impl.md § u13. Va después de u14, que también toca
+  `HomeFragment`: parte de lo que u14 dejó en él.
+- **No rompas APIs que ya consumen otras unidades:** `SocialRepository`, `ChartStyler` y los
+  widgets se amplían, no se renombran. Los chips y las barras se arreglan en el drawable, el estilo o
+  el styler compartido, así que alcanzan solos a las pantallas de u17, u19 y u20.
+- **Pesos de chip (u9b):** comprueba el peso del chip en el HTML (`font-semibold` = 600,
+  `font-bold` = 700) y ajusta `styles_typography.xml` a lo que diga.
+- **Capturas:** `mig-u13b-home`, galería de chips y barras (`DebugGalleryActivity`).
 
 **u14 · Focus (terminar el WIP `be03abf`).**
 - Empieza con `git show --stat be03abf` y `git diff c52c967 be03abf`. Ya existen:
@@ -208,6 +258,15 @@ de ui-tester van a tus notas.
   actualizarlos.
 - Valorar si los `strings_<area>.xml` se quedan (recomendado: sí, por pantalla) y documentarlo en
   `style_guide.md`.
+- **Documento de revisión del usuario.** Deja `migracion-visual-stitch-questions.md` listo para que el
+  usuario lo revise al final de la migración y haga los ajustes:
+  - las preguntas en una sección por pantalla o área (Global/tema, Home, Focus, Cycle complete,
+    Projects, Progress, All progress, Screen time, Detalle de app, Popups, Calendario, Splash/otros),
+    sin agruparlas por unidad;
+  - cada entrada con qué se asumió, una captura de referencia si la hay (`mig-*.png`) y qué fichero o
+    valor cambiar para revertirlo;
+  - las ya resueltas por el usuario o por u13b, tachadas en una sección final «Resueltas»;
+  - arriba, un resumen con el número de preguntas abiertas por área.
 - Marcar `migracion-visual-stitch.md` y este fichero como `merged`.
 
 **u25 · Verificación final.**

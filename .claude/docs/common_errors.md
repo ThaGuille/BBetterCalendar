@@ -104,8 +104,8 @@ Symptom → root cause → fix table for the failure modes that keep coming up i
 ## Pomodoro timer
 
 ### Timer "fails" as soon as the user swipes away
-- **Cause**: Working as designed — backgrounding for >4s triggers `failTimer()`. See `HomeFragment` background-detection block.
-- **Fix**: If you're trying to test the success path, keep the app foregrounded. If you want to relax the rule, change the 4 s grace window in `HomeFragment`.
+- **Cause**: Working as designed — `MainActivity` stopping for >4s mid-concentration triggers `FocusTimerStateMachine.fail()` via `FocusSessionViewModel`'s grace period (fed by `FocusBackgroundObserver`).
+- **Fix**: If you're trying to test the success path, keep the app foregrounded (or arm block mode). If you want to relax the rule, change `FocusSessionConstants.FAIL_GRACE_MILLIS`.
 
 ### Notification doesn't appear / foreground service dies
 - **Cause**: Channel not created (Android O+) or `startForegroundService` not called before `startForeground` inside the service.

@@ -121,7 +121,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
         // modo bloqueo total armado, no queda ningún timer vivo para desarmarlo -> "kill-trap" que
         // dejaría el teléfono bloqueado. El sistema reconecta este servicio al reiniciar el proceso,
         // así que limpiar aquí es el punto de auto-sanación. Una sesión en curso lo vuelve a activar
-        // DESPUÉS de esta línea (HomeFragment sólo llama a FocusBlockState.setActive mientras el
+        // DESPUÉS de esta línea (FocusSessionViewModel sólo lo pone a true mientras el
         // timer corre, con el servicio ya conectado), así que esto nunca corta un bloqueo real.
         FocusBlockState.setActive(this, false);
 

@@ -54,9 +54,10 @@ or a DAO through Hilt injection — the compiler enforces "Hilt is the only door
   (DAOs + `@IoExecutor`); still `AndroidViewModel` where they need `Application` — Hilt injects it
   directly (no qualifier needed). Their fragments are `@AndroidEntryPoint` so
   `new ViewModelProvider(this)` resolves the Hilt factory automatically.
-- `HomeFragment.java:82-83` — `@Inject ConfigurationManager configManager` then passed to
-  `HomeViewModel` via `setConfigManager()` (kept for compatibility; same singleton either way —
-  `HomeViewModel`'s own constructor also receives `ConfigurationManager` directly).
+- Activity-scoped ViewModel: `FocusSessionViewModel` (`ui/focus/`) is shared by every screen of
+  `MainActivity` via `new ViewModelProvider(requireActivity())` and takes a `SavedStateHandle`
+  (Hilt supplies it). `HomeViewModel` receives `ConfigurationManager` in its constructor
+  (the old `setConfigManager()` hand-off is gone).
 - `@HiltViewModel` requires `androidx.hilt:hilt-navigation-fragment` (implementation) +
   `androidx.hilt:hilt-compiler` (annotationProcessor) in `app/build.gradle` on top of
   `hilt-android` — without them the annotation doesn't compile.

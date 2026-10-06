@@ -22,10 +22,8 @@ import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.example.bbettercalendar.stats.FocusAttributionRepository;
-import com.example.bbettercalendar.stats.FocusEvent;
 import com.example.bbettercalendar.stats.FocusEventDAO;
-import com.example.bbettercalendar.stats.Stats;
-import com.example.bbettercalendar.stats.StatsDAO;
+import com.example.bbettercalendar.stats.FocusSessionRepository;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -47,14 +45,14 @@ public class HomeViewModel extends AndroidViewModel {
 
     private final String TAG = "HomeFragmentTag";
     private final MutableLiveData<String> mText;
-    private final MutableLiveData<String> timerText;
-    private final MutableLiveData<String> todayFailsText;
-    private final MutableLiveData<String> todayTimeStudiedText;
-    private final MutableLiveData<String> timerModeText;
+    // Los contadores de hoy viven en FocusSessionRepository (singleton): los escribe la sesión de
+    // pomodoro (FocusSessionViewModel, ámbito de actividad) aunque Home no esté en pantalla.
+    private final LiveData<String> todayFailsText;
+    private final LiveData<String> todayTimeStudiedText;
     private ExecutorService ioExecutor;
     private ExecutorService dbWriteExecutor;
-    private StatsDAO statsDao;
     private FocusEventDAO focusEventDao;
+    private final FocusSessionRepository focusSessionRepository;
     private CalendarEntryDAO calendarEntryDao;
     private FocusAttributionRepository focusAttributionRepository;
     public ConfigurationManager configManager;
@@ -80,36 +78,32 @@ public class HomeViewModel extends AndroidViewModel {
     // abierta, igual que hace con todayRange.
     private final MutableLiveData<Long> streakWindowStart = new MutableLiveData<>();
     private final LiveData<Integer> activeDaysLast30;
-    // Evento de un solo disparo: nº de días con pomodoro de ESTE MES, emitido sólo cuando la
-    // sesión recién completada es la primera del día. null = nada pendiente que celebrar.
-    private final MutableLiveData<Integer> firstFocusOfDay = new MutableLiveData<>();
 
     @Inject
-    public HomeViewModel(@NonNull Application application, StatsDAO statsDao, FocusEventDAO focusEventDao,
+    public HomeViewModel(@NonNull Application application, FocusEventDAO focusEventDao,
                          CalendarEntryDAO calendarEntryDao, ConfigurationManager configManager,
                          FocusAttributionRepository focusAttributionRepository,
+                         FocusSessionRepository focusSessionRepository,
                          @IoExecutor ExecutorService ioExecutor,
                          @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
         mText = new MutableLiveData<>();
-        timerText = new MutableLiveData<>();
-        todayFailsText = new MutableLiveData<>();
-        todayTimeStudiedText = new MutableLiveData<>();
-        timerModeText = new MutableLiveData<>();
         // R.string.home_greeting ("Hi there") ya existía sin usar; el literal anterior era un
         // placeholder de plantilla que se estaba mostrando en producción.
         mText.setValue(application.getString(com.example.bbettercalendar.R.string.home_greeting));
-        timerText.setValue("20:00");
-        this.statsDao = statsDao;
         this.focusEventDao = focusEventDao;
         this.calendarEntryDao = calendarEntryDao;
         this.focusAttributionRepository = focusAttributionRepository;
+        this.focusSessionRepository = focusSessionRepository;
         this.ioExecutor = ioExecutor;
         this.dbWriteExecutor = dbWriteExecutor;
-        // HomeFragment inyecta su propio ConfigurationManager y lo vuelve a fijar vía
-        // setConfigManager() (mismo Singleton de Hilt) -- se mantiene por compatibilidad, ver ese
-        // método más abajo.
         this.configManager = configManager;
+        // Valores "pelados" (sin frase): la fila compacta de stats ya pinta su label al lado
+        // (spec tasks-home-today) y la frase completa duplicaba esa etiqueta.
+        todayFailsText = Transformations.map(focusSessionRepository.getTodayFails(),
+                fails -> String.valueOf(fails));
+        todayTimeStudiedText = Transformations.map(focusSessionRepository.getTodayTimeStudiedMillis(),
+                millis -> FormatHelper.formatTime(millis, "HH:mm"));
 
         todayTasks = Transformations.switchMap(todayRange, range -> {
             if (range == null) {
@@ -157,21 +151,9 @@ public class HomeViewModel extends AndroidViewModel {
             }
         };
         InitialConfiguration.getInstance().getInitializationStatus().observeForever(initializationObserver);*/
-        ioExecutor.execute(() -> {
-            Stats initialStats = statsDao.getStats();
-            setInitialTexts(initialStats);
-        });
+        // Antes setInitialTexts(): relee Stats en el executor y publica con postValue.
+        focusSessionRepository.refreshToday();
 
-    }
-
-    private void setInitialTexts(Stats initialStats){
-        Log.i(TAG, "View Model setInitialTexts()");
-        // Valores "pelados" (sin frase): la fila compacta de stats ya pinta su label al lado
-        // (spec tasks-home-today) y la frase completa duplicaba esa etiqueta.
-        todayFailsText.postValue(String.valueOf(initialStats.todayFails));
-        String formattedTime = FormatHelper.formatTime(initialStats.todayTimeStudied, "HH:mm");
-        todayTimeStudiedText.postValue(formattedTime);
-        timerModeText.postValue(getApplication().getString(com.example.bbettercalendar.R.string.home_mode_concentration));
     }
 
     // ------------------------ "Today" task list (spec tasks-home-today) ------------------------
@@ -354,61 +336,6 @@ public class HomeViewModel extends AndroidViewModel {
         return overdueTasks;
     }
 
-    //Cuando el usuario cierra la app a medio contador
-    public void addFails(int boundEntryId) {
-        dbWriteExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(TAG, "View Model addFails()");
-                statsDao.addFails();
-                // El fallo registra la tarea vinculada pero con 0 minutos: no avanza el objetivo.
-                logFocusEvent(FocusEvent.TYPE_FAIL, 0, boundEntryId);
-                todayFailsText.postValue(String.valueOf(statsDao.getTodayFails()));
-            }
-        });
-    }
-
-    //Cuando el temporizador llega a 0 se actualizan y guardan estadísticas
-    public void completeTimer(int timerTime, int boundEntryId){
-        dbWriteExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.i(TAG, "View Model addTimeStudied( " + timerTime + " )");
-                statsDao.addTimeStudied(timerTime);
-                statsDao.addTasksDone();
-                logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime), boundEntryId);
-                if (boundEntryId != 0) {
-                    focusAttributionRepository.maybeAutoComplete(boundEntryId);
-                }
-                maybeAnnounceFirstFocusOfDay();
-                String formattedTime = FormatHelper.formatTime(statsDao.getTodayTimeStudied(), "HH:mm");
-                todayTimeStudiedText.postValue(formattedTime);
-            }
-        });
-    }
-
-    /**
-     * Se llama justo DESPUÉS de insertar el FocusEvent de la sesión, dentro del mismo executor:
-     * si el recuento de hoy es exactamente 1, esta sesión es la primera del día y hay algo que
-     * celebrar (spec focus-mode-and-streak). Contar filas en vez de guardar un "último día
-     * celebrado" evita un flag persistente y sale correcto solo tras un reinicio o un cambio de día.
-     */
-    private void maybeAnnounceFirstFocusOfDay() {
-        long startOfToday = startOfTodayMillis();
-        long endOfToday = startOfToday + DAY_MILLIS - 1;
-        if (focusEventDao.countFocusBetween(startOfToday, endOfToday) != 1) {
-            return;
-        }
-        Calendar month = Calendar.getInstance();
-        month.set(Calendar.DAY_OF_MONTH, 1);
-        month.set(Calendar.HOUR_OF_DAY, 0);
-        month.set(Calendar.MINUTE, 0);
-        month.set(Calendar.SECOND, 0);
-        month.set(Calendar.MILLISECOND, 0);
-        int daysThisMonth = focusEventDao.countActiveDaysBetween(month.getTimeInMillis(), endOfToday);
-        firstFocusOfDay.postValue(daysThisMonth);
-    }
-
     /** Días de los últimos 30 con al menos un pomodoro completado (la racha de la toolbar). */
     public LiveData<Integer> getActiveDaysLast30() {
         return activeDaysLast30;
@@ -416,23 +343,12 @@ public class HomeViewModel extends AndroidViewModel {
 
     /** Nº de días con pomodoro de este mes, emitido sólo al completar el primero del día. */
     public LiveData<Integer> getFirstFocusOfDay() {
-        return firstFocusOfDay;
+        return focusSessionRepository.getFirstFocusOfDay();
     }
 
     /** El fragment lo llama tras mostrar la celebración (evita re-disparo al volver a Home). */
     public void clearFirstFocusOfDay() {
-        firstFocusOfDay.setValue(null);
-    }
-
-    // Registra un evento con timestamp para el histórico por horas de Progress.
-    // Se llama desde dentro del executorService, así que ya está fuera del hilo principal.
-    private void logFocusEvent(int type, int durationMin, int entryId){
-        FocusEvent ev = new FocusEvent();
-        ev.timestamp = System.currentTimeMillis();
-        ev.type = type;
-        ev.durationMin = durationMin;
-        ev.entryId = entryId;
-        focusEventDao.insert(ev);
+        focusSessionRepository.clearFirstFocusOfDay();
     }
 
     public LiveData<String> getAutoCompletedTaskTitle() {
@@ -444,47 +360,20 @@ public class HomeViewModel extends AndroidViewModel {
         focusAttributionRepository.clearAutoCompletedTaskTitle();
     }
 
-    public void setRestTimer(){
-        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeRestTime(), "mm:ss"));
-        timerModeText.postValue(getApplication().getString(com.example.bbettercalendar.R.string.home_mode_rest));
-    }
+    // El texto del temporizador y el modo (concentración/descanso) ya no viven aquí: los pinta
+    // HomeFragment desde FocusSessionViewModel.getUiState() (migración visual, u2).
 
-    public void resetTimer(){
-        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
-        timerModeText.postValue(getApplication().getString(com.example.bbettercalendar.R.string.home_mode_concentration));
-    }
-
-    public void setConfigManager(ConfigurationManager configManager) {
-        this.configManager = configManager;
-        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
-    }
-
+    /** Persiste la configuración del pomodoro (el popup ya mutó la instancia en memoria). */
     public void updateConfiguration(Configuration config){
-        dbWriteExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                configManager.updateConfiguration(config);
-                updateConfigurationUIValues();
-            }
-        });
-    }
-
-    private void updateConfigurationUIValues(){
-        timerText.postValue(FormatHelper.formatTime(configManager.getConfiguration().getHomeTimerTime(), "mm:ss"));
-        //todo update other values
+        dbWriteExecutor.execute(() -> configManager.updateConfiguration(config));
     }
 
     public LiveData<String> getText() {
         return mText;
     }
-    public LiveData<String> getTimerText() {
-        return timerText;
-    }
-
 
     public LiveData<String> getTodayFailsText() {return todayFailsText;}
     public LiveData<String> getTodayTimeStudiedText() {return todayTimeStudiedText;}
-    public LiveData<String> getTimerModeText() {return timerModeText;}
 
     // ioExecutor/dbWriteExecutor son los executors compartidos de la app (Hilt @Singleton) -- ya
     // no se cierran aquí; onCleared() no tiene nada más que liberar.

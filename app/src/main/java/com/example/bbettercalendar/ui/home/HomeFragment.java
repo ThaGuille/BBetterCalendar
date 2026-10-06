@@ -1,14 +1,8 @@
 package com.example.bbettercalendar.ui.home;
 
 import android.app.Activity;
-import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Debug;
-import android.os.Handler;
-import android.os.Looper;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.util.Log;
@@ -27,13 +21,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
-import com.example.bbettercalendar.blocking.FocusBlockState;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
 import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
-import com.example.bbettercalendar.notifications.focus.FocusFailNotifier;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.helpers.FormatHelper;
@@ -44,6 +36,9 @@ import com.example.bbettercalendar.popups.MessagePopup;
 import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.TimerPopup;
+import com.example.bbettercalendar.ui.common.SingleEvent;
+import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
+import com.example.bbettercalendar.ui.focus.FocusUiState;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,25 +51,14 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class HomeFragment extends Fragment implements View.OnClickListener, OnPopupListener<Object>, AccessibilityDisclosureDialog.OnConsentGrantedListener {
 
-    private final int TIMER_STOPPED = 0;
-    private final int TIMER_RUNNING = 1;
-    private final int TIMER_PAUSED = 3;
-    private final int TIMER_STOPPED_REST = 4;
-    private final int TIMER_RUNNING_REST = 5;
-    private final int TIMER_PAUSED_REST = 6;
-
-    // Saved-instance keys: keep the live Pomodoro state across fragment recreation
-    // (rotation, back-stack return, short-lived process death).
-    private static final String KEY_TIMER_STATE = "bb_home_timer_state";
-    private static final String KEY_TIME_LEFT = "bb_home_time_left_millis";
-    private static final String KEY_LAST_TIMER_TIME = "bb_home_last_timer_time";
-    private static final String KEY_CYCLES_COMPLETED = "bb_home_cycles_completed";
-    private static final String KEY_BLOCK_MODE_ARMED = "bb_home_block_mode_armed";
-
-
     private final String TAG = "HomeFragmentTag";
     private FragmentHomeBinding binding;
     HomeViewModel homeViewModel;
+    // El pomodoro (máquina de estados, ticker, gracia por segundo plano, guardado) vive en este
+    // ViewModel de ÁMBITO DE ACTIVIDAD (migración visual, u2): Home sólo observa y delega.
+    private FocusSessionViewModel focusSession;
+    // Último estado pintado: sólo se re-pintan los controles cuando cambia algo más que el texto.
+    private FocusUiState lastRenderedState;
     private AlertPopup alertPopup = new AlertPopup();
     private TimerPopup timerPopup = new TimerPopup();
     private MessagePopup messagePopup;
@@ -88,20 +72,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     private TextView todayFailsText;
     private TextView todayTimeStudiedText;
     private TextView timerModeText;
-    private Application.ActivityLifecycleCallbacks activityLifecycleCallbacks;
-    private int timer_state = TIMER_STOPPED;
-    private int lastTimerTime =10000;
-
-    private CountDownTimer countDownTimer = null;
-    private long timeLeftInMillis = 10000; // 20 minutos --> 60000 * 20
-    private boolean isBackground = false;
-    private boolean isTimerFailed = false;
-
-    private int cyclesCompleted = 0;
-    private boolean blockModeArmed = false;
     // Focus mode (spec focus-mode-and-streak): con el timer en marcha la tarjeta del pomodoro
-    // ocupa la pantalla y desaparece todo lo demás. Es un estado DERIVADO de timer_state, no una
-    // preferencia: por eso no se guarda en onSaveInstanceState -- se recalcula al re-renderizar.
+    // ocupa la pantalla y desaparece todo lo demás. Es un estado DERIVADO del estado de la sesión
+    // (FocusUiState.isSessionActive()), no una preferencia: se recalcula al re-renderizar.
     private boolean focusModeActive = false;
 
     // "Today" task list (spec tasks-home-today)
@@ -113,19 +86,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     ConfigurationManager configurationManager;
 
     @Inject
-    FocusFailNotifier focusFailNotifier;
-
-    @Inject
     FocusCompleteNotifier focusCompleteNotifier;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        focusSession = new ViewModelProvider(requireActivity()).get(FocusSessionViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        homeViewModel.setConfigManager(configurationManager);
         final TextView textView = binding.textHome;
         playButton = binding.homePlayButton;
         playButton.setOnClickListener(this);
@@ -145,7 +115,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         todayFailsText = binding.homeToadyFailsText;
         todayTimeStudiedText = binding.homeTodayTimeText;
         timerModeText = binding.homeTimerTypeText;
-        timeLeftInMillis = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
 
         // Racha y configuración del timer vivían en la toolbar; ahora están en el propio contenido
         // (spec frontend-structure-cleanup).
@@ -160,7 +129,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
 
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-        homeViewModel.getTimerText().observe(getViewLifecycleOwner(), timerText::setText);
+        // Texto, modo, controles y focus mode salen del estado de la sesión (antes: timerText /
+        // timerModeText de HomeViewModel + escrituras directas desde el contador del fragment).
+        lastRenderedState = null;
+        focusSession.getUiState().observe(getViewLifecycleOwner(), this::renderTimer);
+        focusSession.getCycleCompletedEvents()
+                .observe(getViewLifecycleOwner(), this::maybeShowCycleFinished);
+        focusSession.getSessionFailedEvents()
+                .observe(getViewLifecycleOwner(), this::maybeShowSessionFailed);
         // Los fallos ya no tienen tarjeta propia: acompañan a la fecha y sólo si los hay
         // (spec focus-mode-and-streak).
         homeViewModel.getTodayFailsText().observe(getViewLifecycleOwner(), fails -> {
@@ -176,7 +152,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 .observe(getViewLifecycleOwner(), this::maybeShowFirstFocusCelebration);
         homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), time ->
                 todayTimeStudiedText.setText(getString(R.string.home_stat_studied_format, time)));
-        homeViewModel.getTimerModeText().observe(getViewLifecycleOwner(), timerModeText::setText);
 
         // Auto-completado de una tarea al alcanzar su objetivo (spec focus-attribution): feedback
         // in-app (háptico + sonido) + notificación de fallback, y se desvincula el timer.
@@ -199,29 +174,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
         SoundFeedback.get(requireContext()); // warm singleton so first tap is silent-fast
 
-        if (savedInstanceState != null) {
-            timer_state = savedInstanceState.getInt(KEY_TIMER_STATE, timer_state);
-            timeLeftInMillis = savedInstanceState.getLong(KEY_TIME_LEFT, timeLeftInMillis);
-            lastTimerTime = savedInstanceState.getInt(KEY_LAST_TIMER_TIME, lastTimerTime);
-            cyclesCompleted = savedInstanceState.getInt(KEY_CYCLES_COMPLETED, cyclesCompleted);
-            blockModeArmed = savedInstanceState.getBoolean(KEY_BLOCK_MODE_ARMED, blockModeArmed);
-            // Defer the render: setConfigManager() above posts the default configured time
-            // to the timerText LiveData, which would otherwise clobber the restored countdown.
-            // Posting to the view queue runs after that pending LiveData delivery.
-            root.post(this::renderRestoredState);
-        }
-
+        // Sin restauración manual: la sesión sobrevive a la rotación en el ViewModel de actividad
+        // y a la muerte del proceso en su SavedStateHandle (instante de fin, no ticks).
         return root;
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(KEY_TIMER_STATE, timer_state);
-        outState.putLong(KEY_TIME_LEFT, timeLeftInMillis);
-        outState.putInt(KEY_LAST_TIMER_TIME, lastTimerTime);
-        outState.putInt(KEY_CYCLES_COMPLETED, cyclesCompleted);
-        outState.putBoolean(KEY_BLOCK_MODE_ARMED, blockModeArmed);
     }
 
     /**
@@ -291,28 +246,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     }
 
     /**
-     * Re-render the timer UI from restored instance fields and, if it was running,
-     * resume the countdown from the saved remaining time. Paused/stopped states are
-     * only re-rendered, never auto-started.
+     * Pinta el estado de la sesión. El texto se actualiza en cada tick; chip, modo, controles y
+     * focus mode sólo cuando cambia algo más que el tiempo restante.
      */
-    private void renderRestoredState() {
-        if (binding == null) return;
-
-        boolean isRest = timer_state == TIMER_RUNNING_REST
-                || timer_state == TIMER_PAUSED_REST
-                || timer_state == TIMER_STOPPED_REST;
-        updateModeChip(isRest);
-        timerText.setText(FormatHelper.formatTime((int) timeLeftInMillis, "mm:ss"));
-
-        if (timer_state == TIMER_RUNNING) {
-            // startTimer() flips PAUSED -> RUNNING; pretend we were paused so it resumes cleanly.
-            timer_state = TIMER_PAUSED;
-            startTimer(timeLeftInMillis);
-        } else if (timer_state == TIMER_RUNNING_REST) {
-            timer_state = TIMER_PAUSED_REST;
-            startTimer(timeLeftInMillis);
+    private void renderTimer(FocusUiState state) {
+        if (binding == null || state == null) return;
+        timerText.setText(FormatHelper.formatTime((int) state.getRemainingMillis(), "mm:ss"));
+        if (!state.controlsDifferFrom(lastRenderedState)) {
+            lastRenderedState = state;
+            return;
         }
-        // PAUSED* / STOPPED* : text + chip restored above, do not auto-start.
+        lastRenderedState = state;
+        timerModeText.setText(state.isRest()
+                ? R.string.home_mode_rest : R.string.home_mode_concentration);
+        updateModeChip(state.isRest());
         updateTimerControls();
     }
 
@@ -322,102 +269,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 isRest ? R.drawable.bg_chip_secondary : R.drawable.bg_chip_energy);
     }
 
-    private void startTimer(long time){
-
-        countDownTimer = new CountDownTimer(time, 1000) { // 60000 milisegundos = 60 segundos, con intervalo de 1000 milisegundos = 1 segundo
-
-            public void onTick(long millisUntilFinished) {
-                timeLeftInMillis = millisUntilFinished;
-                timerText.setText(FormatHelper.formatTime((int)millisUntilFinished, "mm:ss"));
-            }
-
-            public void onFinish() {
-                //reproducir sonido, resetear timer y anotar resultado
-                if(timer_state == TIMER_RUNNING)
-                    completeTimer();
-                else
-                    completeRest();
-            }
-        }.start();
-        if(timer_state == TIMER_STOPPED || timer_state == TIMER_PAUSED)
-            timer_state = TIMER_RUNNING;
-        else if(timer_state == TIMER_STOPPED_REST || timer_state == TIMER_PAUSED_REST)
-            timer_state = TIMER_RUNNING_REST;
-        else
-            Log.e(TAG, "Error en el estado del timer");
-        updateTimerControls();
-    }
-
-    //Cuando el timer logra llegar a 0
-    private void completeTimer(){
-        timer_state = TIMER_STOPPED;
-        //reproducir sonido indicador
-        // Atribuye la sesión a la tarea vinculada (0 = genérica). El auto-completado, si procede,
-        // lo evalúa el ViewModel y avisa por getAutoCompletedTaskTitle() (spec focus-attribution).
-        homeViewModel.completeTimer(lastTimerTime, FocusTarget.getEntryId());
-        //Si el descanso está activado, y no se ha llegado al límite de descansos predefinidos, se activa el descanso
-        if(configurationManager.getConfiguration().isHomeIsRestEnabled() )
-        {
-            if(cyclesCompleted < configurationManager.getConfiguration().getHomeNumberOfCycles()
-                    || configurationManager.getConfiguration().isHomeIsInfiniteCycleEnabled())
-            {
-                setRestTimer();
-            }
-            else if(cyclesCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
-            {
-                messagePopup.setText(getString(R.string.home_cycle_finished));
-                messagePopup.show(getParentFragmentManager(), "popup_tag");
-                resetTimerAndCycles();
-            }
-        }else{ resetTimer();}
-    }
-
-    private void completeRest(){
-        timer_state = TIMER_STOPPED;
-        cyclesCompleted++;
-        resetTimer();
-        if(configurationManager.getConfiguration().isHomeIsAutoCycle()){
-            if(cyclesCompleted < configurationManager.getConfiguration().getHomeNumberOfCycles()
-                    || configurationManager.getConfiguration().isHomeIsInfiniteCycleEnabled())
-            {   //si aun quedan ciclos por realizar, se inicia el siguiente ciclo
-                startTimer(configurationManager.getConfiguration().getHomeTimerTime());
-            }
-            else if(cyclesCompleted >= configurationManager.getConfiguration().getHomeNumberOfCycles())
-            {   //si se han completado todos los ciclos, se muestra un mensaje y se resetea el contador
-                messagePopup.setText(getString(R.string.home_cycle_finished));
-                messagePopup.show(getParentFragmentManager(), "popup_tag");
-                cyclesCompleted = 0;
-            }
+    /** Todos los ciclos configurados completados (antes MessagePopup desde completeTimer/Rest). */
+    private void maybeShowCycleFinished(SingleEvent<Integer> event) {
+        if (event == null || event.isHandled() || isStateSaved()) {
+            return;
         }
+        event.consume();
+        messagePopup.setText(getString(R.string.home_cycle_finished));
+        messagePopup.show(getParentFragmentManager(), "popup_tag");
     }
 
-    private void setRestTimer(){
-        timer_state = TIMER_STOPPED_REST;
-        int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
-        homeViewModel.setRestTimer();
-        timeLeftInMillis = actualTime;
-        updateModeChip(true);
-        //todo se puede implementar una función para que solo se inicicie el descanso automático si el usuario lo desea
-        startTimer(actualTime);
-    }
-
-    private void resetTimerAndCycles(){
-        cyclesCompleted = 0;
-        resetTimer();
-    }
-
-    private void resetTimer(){
-        timeLeftInMillis =  configurationManager.getConfiguration().getHomeTimerTime();
-        homeViewModel.resetTimer();
-        updateModeChip(false);
-        updateTimerControls();
-    }
-
-    //Se pulsa el timer para pausarlo
-    private void pauseTimer(boolean isRest){
-        countDownTimer.cancel();
-        timer_state = isRest ? TIMER_PAUSED_REST : TIMER_PAUSED;
-        updateTimerControls();
+    /** La sesión falló por quedarse en segundo plano (antes onActivityResumed + isTimerFailed). */
+    private void maybeShowSessionFailed(SingleEvent<Boolean> event) {
+        if (event == null || event.isHandled() || isStateSaved()) {
+            return;
+        }
+        event.consume();
+        alertPopup.selectView(PopupHelper.ALERT_POPUP);
+        alertPopup.show(getParentFragmentManager(), "popup_tag");
     }
 
     /**
@@ -435,20 +304,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
     /** Arranca una sesión de concentración sólo si el timer está parado (no pisa una en curso). */
     private void startBoundConcentrationIfIdle() {
-        if (timer_state != TIMER_STOPPED) {
-            return;
-        }
         // Si el item vinculado trae objetivo de minutos, el pomodoro arranca con esa duración
         // (lo que el usuario eligió en el item); si no, la duración por defecto del timer.
-        int targetMinutes = FocusTarget.getTargetMinutes();
-        int actualTime = targetMinutes > 0
-                ? FormatHelper.minutesToMillis(targetMinutes)
-                : homeViewModel.configManager.getConfiguration().getHomeTimerTime();
-        lastTimerTime = actualTime;
-        timeLeftInMillis = actualTime;
-        startTimer(actualTime);
-        SoundFeedback.get(requireContext()).playStart();
-        updateTimerControls();
+        if (focusSession.startBoundFocusIfIdle()) {
+            SoundFeedback.get(requireContext()).playStart();
+        }
     }
 
     /** Muestra/oculta el banner "Focusing: <tarea>" según el estado de FocusTarget. */
@@ -471,32 +331,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         if (id == R.id.homePlayButton) {
             Log.i(TAG, "Timer started");
             SoundFeedback feedback = SoundFeedback.get(requireContext());
-            if(timer_state == TIMER_STOPPED){
-                int actualTime = homeViewModel.configManager.getConfiguration().getHomeTimerTime();
-                lastTimerTime = actualTime;
-                timeLeftInMillis = actualTime;
-                startTimer(actualTime);
+            if (focusSession.toggle()) {
                 feedback.playStart();
-            } else if( timer_state == TIMER_PAUSED || timer_state == TIMER_PAUSED_REST){
-                startTimer(timeLeftInMillis);
-                feedback.playStart();
-            }else if(timer_state == TIMER_RUNNING){
-                pauseTimer(false);
+            } else {
                 feedback.playStop();
-            } else if (timer_state == TIMER_RUNNING_REST) {
-                pauseTimer(true);
-                feedback.playStop();
-            }else if(timer_state == TIMER_STOPPED_REST){
-                int actualTime = homeViewModel.configManager.getConfiguration().getHomeRestTime();
-                timeLeftInMillis = actualTime;
-                startTimer(actualTime);
-                feedback.playStart();
             }
-            updateTimerControls();
         } else if (id == R.id.homeCancelButton) {
             cancelSession();
         } else if (id == R.id.homeSkipRestButton) {
-            cancelRest();
+            focusSession.skipRest();
             SoundFeedback.get(requireContext()).playStop();
         } else if (id == R.id.homeBlockModeButton) {
             handleBlockModeToggle();
@@ -518,14 +361,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
      * desarmar devuelve el móvil al usuario, que si no quedaría atrapado hasta acabar el ciclo.
      */
     private void handleBlockModeToggle() {
-        if (blockModeArmed) {
-            blockModeArmed = false;
-            updateTimerControls();
+        if (focusSession.isBlockModeArmed()) {
+            focusSession.setBlockModeArmed(false);
             return;
         }
         if (AccessibilityAccess.isEnabled(requireContext())) {
-            blockModeArmed = true;
-            updateTimerControls();
+            focusSession.setBlockModeArmed(true);
         } else {
             AccessibilityDisclosureDialog.newInstance()
                     .show(getChildFragmentManager(), "accessibility_disclosure");
@@ -534,8 +375,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
     @Override
     public void onAccessibilityConsentGranted() {
-        blockModeArmed = true;
-        updateTimerControls();
+        focusSession.setBlockModeArmed(true);
     }
 
     /**
@@ -545,67 +385,39 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
      * única salida "barata" fuese aguantar mirando la pantalla.
      */
     private void cancelSession() {
-        if (timer_state == TIMER_STOPPED) {
+        // La sesión también desvincula FocusTarget: dejar el banner "Focusing: X" colgado sin
+        // sesión viva confunde sobre si la siguiente cuenta atrás se atribuiría sola a esa tarea.
+        if (!focusSession.cancelSession()) {
             return;
         }
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
-        timer_state = TIMER_STOPPED;
-        // Desvincular: dejar el banner "Focusing: X" colgado sin sesión viva confunde sobre si la
-        // siguiente cuenta atrás se atribuiría sola a esa tarea.
-        FocusTarget.clear();
         updateFocusBanner();
-        resetTimerAndCycles();
         SoundFeedback.get(requireContext()).playStop();
     }
 
-    /**
-     * Cancel the rest period (running, paused or pending) and return to a stopped
-     * concentration state so the user can start working again immediately.
-     * The focus cycle that triggered this rest still counts as completed.
-     */
-    private void cancelRest() {
-        if (timer_state != TIMER_RUNNING_REST
-                && timer_state != TIMER_PAUSED_REST
-                && timer_state != TIMER_STOPPED_REST) {
-            return;
-        }
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
-        cyclesCompleted++;
-        timer_state = TIMER_STOPPED;
-        resetTimer();
-        updateTimerControls();
-    }
-
-    /** Keep the play/pause icon and the skip-rest button in sync with timer_state. */
+    /** Keep the play/pause icon and the skip-rest button in sync with the session state. */
     private void updateTimerControls() {
-        if (binding == null) return;
+        if (binding == null || lastRenderedState == null) return;
+        FocusUiState state = lastRenderedState;
 
-        boolean isRunning = timer_state == TIMER_RUNNING || timer_state == TIMER_RUNNING_REST;
+        boolean isRunning = state.isRunning();
         playButton.setImageResource(
                 isRunning ? R.drawable.ic_pause_v2_filled_24 : R.drawable.ic_play_v2_filled_24);
         playButton.setContentDescription(
                 getString(isRunning ? R.string.home_pause : R.string.home_play));
 
-        boolean isRest = timer_state == TIMER_RUNNING_REST
-                || timer_state == TIMER_PAUSED_REST
-                || timer_state == TIMER_STOPPED_REST;
-        skipRestButton.setVisibility(isRest ? View.VISIBLE : View.GONE);
+        skipRestButton.setVisibility(state.canSkipRest() ? View.VISIBLE : View.GONE);
 
         updateBlockModeButton();
         updateFocusMode();
     }
 
     /**
-     * Focus mode (spec focus-mode-and-streak): el estado se DERIVA de timer_state, no de un flag
-     * propio, así que cualquier salida del temporizador (fin de ciclo, cancelación, fallo por
-     * background, cambio de configuración) devuelve Home a la normalidad sin ruta especial.
+     * Focus mode (spec focus-mode-and-streak): el estado se DERIVA del estado de la sesión, no de
+     * un flag propio, así que cualquier salida del temporizador (fin de ciclo, cancelación, fallo
+     * por background, cambio de configuración) devuelve Home a la normalidad sin ruta especial.
      */
     private void updateFocusMode() {
-        boolean shouldBeActive = timer_state != TIMER_STOPPED;
+        boolean shouldBeActive = lastRenderedState != null && lastRenderedState.isSessionActive();
         if (binding == null || shouldBeActive == focusModeActive) {
             return;
         }
@@ -687,16 +499,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
     /**
      * Render the 🚫 block-mode toggle's 3 states (muted off / bb_danger active / bb_accent_reward
-     * pending-permission — same visual language as the Progress enforce toggle) and push the actual
-     * live-blocking flag. Se puede armar y desarmar en cualquier momento, también a mitad de
-     * sesión (spec focus-mode-and-streak): como el flag se recalcula aquí en cada
-     * updateTimerControls(), armarlo con el timer corriendo bloquea al instante.
-     * FocusBlockState is only ever true here, exactly while a concentration run
-     * (not rest) is running AND armed — this is the single writer for that state (see
-     * blocking/FocusBlockState.java for the kill-trap mitigation this depends on).
+     * pending-permission — same visual language as the Progress enforce toggle). Se puede armar y
+     * desarmar en cualquier momento, también a mitad de sesión (spec focus-mode-and-streak). El
+     * flag vivo FocusBlockState ya NO se escribe aquí: su único escritor es FocusSessionViewModel,
+     * que lo recalcula en cada transición (armado Y concentración corriendo).
      */
     private void updateBlockModeButton() {
         if (binding == null || blockModeButton == null) return;
+        boolean blockModeArmed = focusSession.isBlockModeArmed();
 
         // El texto dice el estado (off / on / falta permiso): con sólo el color, "off" se leía
         // como un botón deshabilitado (spec frontend-structure-cleanup).
@@ -720,8 +530,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         blockModeButton.setBackgroundTintList(
                 ContextCompat.getColorStateList(requireContext(), tint));
         blockModeButton.setAlpha(alpha);
-
-        FocusBlockState.setActive(requireContext(), blockModeArmed && timer_state == TIMER_RUNNING);
     }
 
 
@@ -731,115 +539,22 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         // bottom-nav es de la Activity y se quedaría oculta para siempre.
         setAppChromeVisible(true);
         focusModeActive = false;
+        lastRenderedState = null;
         super.onDestroyView();
         binding = null;
     }
 
-    /** Sistema per detectar si l'aplicació està en primer pla o en segon pla */
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        activityLifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
-            private int numStarted = 1;
-
-            @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
-
-            //Esto se activa cuando se vuelve a la app después de haberla minimizado
-            @Override
-            public void onActivityStarted(Activity activity) {
-                if (numStarted == 0) {
-                    // App enters foreground
-                    Log.d(TAG, "App enters foreground");
-                    isBackground = false;
-                }
-                numStarted++;
-            }
-
-            //Detectamos cuando se vuelve a la app despu´se de joder el timer
-            @Override
-            public void onActivityResumed(Activity activity) {
-                if(isTimerFailed){
-                    isTimerFailed = false;
-                    alertPopup.selectView(PopupHelper.ALERT_POPUP);
-                    alertPopup.show(getParentFragmentManager(), "popup_tag");
-                }
-            }
-
-            @Override
-            public void onActivityPaused(Activity activity) {}
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-                numStarted--;
-                if (numStarted == 0) {
-                    // App enters background
-                    Log.i(TAG, "App enters background");
-                    // En modo bloqueo total (blockModeArmed), FocusBlockState ya cubre cualquier
-                    // otra app con la portada -- el usuario no puede realmente "irse" a usar otra
-                    // cosa, así que salir a segundo plano no debe fallar la sesión como en el modo
-                    // normal (ver blocking/FocusBlockState.java y el proposal de pomodoro-block-mode).
-                    if(timer_state == TIMER_RUNNING && !blockModeArmed){
-                        isBackground = true;
-
-                        // Crea una instancia de Handler
-                        Handler handler = new Handler(Looper.getMainLooper());
-
-                        // Ejecuta un Runnable después de un retraso de X milisegundos
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Código a ejecutar después del retraso
-                                failTimer();
-                            }
-                        }, FocusSessionConstants.FAIL_GRACE_MILLIS);
-                    }
-                }
-            }
-
-            private void failTimer(){
-                if(isBackground){
-                    // Resetear el timer, mostrar notificación de fallo y guardar el error en la base de datos
-                    Log.i(TAG, "fragment, Timer failed");
-                    countDownTimer.cancel();
-                    timer_state = TIMER_STOPPED;
-                    homeViewModel.addFails(FocusTarget.getEntryId());
-                    focusFailNotifier.fire();
-                    isTimerFailed=true;
-                    isBackground=false;
-                    updateTimerControls();
-                }
-            }
-
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {}
-        };
-
-        Application application = (Application) context.getApplicationContext();
-        application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
-    }
-
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        Application application = (Application) getContext().getApplicationContext();
-        application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks);
-    }
-
+    // La detección de primer/segundo plano y el periodo de gracia (FAIL_GRACE_MILLIS) viven en
+    // FocusSessionViewModel + FocusBackgroundObserver, registrado por MainActivity.
 
     @Override
     public void onResume() {
         super.onResume();
         // No callback from Settings -> Accessibility (same caveat as ProgressFragment): re-check
-        // and re-render in case the user granted/revoked the service while away.
+        // and re-render in case the user granted/revoked the service while away, and re-assert
+        // the live block flag (the accessibility service clears it when it reconnects).
         updateBlockModeButton();
+        focusSession.syncBlockState();
         // Recalcula [startOfToday, endOfToday]: sólo re-dispara la query si el día cambió con
         // la app abierta -- volver de AddEventActivity no lo necesita, la lista de hoy ya se
         // re-emite sola (LiveData de Room, ver repository-layer-consolidation T2).
@@ -853,6 +568,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         // Red de seguridad: si el premio llegó mientras el estado estaba guardado, el observador
         // no pudo abrirlo y el valor sigue sin limpiar. Aquí ya es seguro comitear.
         maybeShowFirstFocusCelebration(homeViewModel.getFirstFocusOfDay().getValue());
+        // Misma red para los avisos de la sesión que llegaran con el estado guardado.
+        maybeShowCycleFinished(focusSession.getCycleCompletedEvents().getValue());
+        maybeShowSessionFailed(focusSession.getSessionFailedEvents().getValue());
     }
 
     @Override
@@ -878,41 +596,21 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     @Override
     public void OnClosePopup(int popupType) {
         if (popupType==PopupHelper.ALERT_POPUP){
-            resetTimer();
+            focusSession.resetIdleDisplay();
         }
     }
-
-    private void checkConfigChanges(Configuration config){
-
-        if(!config.isHomeIsRestEnabled()) {
-            if (timer_state == TIMER_STOPPED_REST) {
-                timer_state = TIMER_STOPPED;
-                resetTimerAndCycles();
-            }
-            if (timer_state == TIMER_RUNNING_REST || timer_state == TIMER_PAUSED_REST) {
-                countDownTimer.cancel();
-                timer_state = TIMER_STOPPED;
-                resetTimerAndCycles();
-            }
-        }
-        if(!config.isHomeIsAutoCycle()){
-            cyclesCompleted = 0;
-        }
-
-
-        //todo mirar otras cosas como el autoCycle y eso
-    }
-
 
     //Método genérico llamado al cerrar los diferentes popups
     @Override
     public void OnClosePopup(int popupType, Object result) {
         try {
             if (popupType == PopupHelper.ALERT_POPUP) {
-                resetTimer();
+                focusSession.resetIdleDisplay();
             } else if (popupType == PopupHelper.TIMER_POPUP) {
                 Configuration config = (Configuration) result;
-                checkConfigChanges(config);
+                // Antes checkConfigChanges(): descanso desactivado corta el descanso en curso,
+                // auto-ciclo desactivado reinicia el contador de ciclos.
+                focusSession.onConfigurationChanged(config);
                 homeViewModel.updateConfiguration(config);
                 Log.i(TAG, "Configuration received: ");
             }

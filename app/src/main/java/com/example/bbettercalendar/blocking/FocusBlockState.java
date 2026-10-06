@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 // CUALQUIER app que no sea la nuestra ni el launcher (ver focusExemptPackages), no sólo las que
 // tienen un AppRule con límite. Vive en SharedPreferences, igual que BlockingSettings (no es
 // por-app, no justifica columna nueva, regla #6). El escritor durante operación normal es
-// HomeFragment: engancha este flag a updateTimerControls(), así que queda activo exactamente
+// FocusSessionViewModel (ui/focus, u2): lo recalcula en cada transición, así que queda activo exactamente
 // mientras hay un ciclo de
 // concentración corriendo (TIMER_RUNNING) Y el usuario lo armó con el botón 🚫.
 //

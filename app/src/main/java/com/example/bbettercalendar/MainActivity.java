@@ -17,6 +17,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.bbettercalendar.databinding.ActivityMainBinding;
+import com.example.bbettercalendar.ui.focus.FocusBackgroundObserver;
 
 import java.util.concurrent.ExecutorService;
 
@@ -53,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
         notificationPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 granted -> { /* result captured by PermissionGate via Configuration state */ });
+
+        // Sesión de pomodoro compartida por toda la Activity (FocusSessionViewModel, Home y, más
+        // adelante, Focus): su periodo de gracia por segundo plano se alimenta del ciclo de vida
+        // de ESTA Activity. El observer resuelve el ViewModel en perezoso (ver su javadoc).
+        getLifecycle().addObserver(new FocusBackgroundObserver(this));
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

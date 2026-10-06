@@ -2,12 +2,16 @@ package com.example.bbettercalendar.debug;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.TextViewCompat;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.helpers.FontHelper;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.widget.AppUsageRowView;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
@@ -36,6 +40,7 @@ public class DebugGalleryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug_gallery);
 
+        bindFontWeights();
         bindStreaks();
         bindAppRows();
         bindPeriod();
@@ -50,6 +55,18 @@ public class DebugGalleryActivity extends AppCompatActivity {
         stepper.setOnValueChangeListener((v, value) -> v.setCaption(value >= 60
                 ? "Target session limit · " + (value / 60) + "h " + (value % 60) + "m"
                 : "Target session limit"));
+    }
+
+    /** u9b: FontHelper.appTypeface(ctx, weight) for the five bundled weights. */
+    private void bindFontWeights() {
+        LinearLayout box = findViewById(R.id.galleryFontWeights);
+        for (int weight = 400; weight <= 800; weight += 100) {
+            TextView tv = new TextView(this);
+            TextViewCompat.setTextAppearance(tv, R.style.TextAppearance_BBetter_Body);
+            tv.setTypeface(FontHelper.appTypeface(this, weight));
+            tv.setText("FontHelper " + weight + " · Focus 5h 52m");
+            box.addView(tv);
+        }
     }
 
     private void bindStreaks() {

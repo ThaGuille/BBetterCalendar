@@ -697,3 +697,47 @@ coinciden; residuos: pesos 500/600 (ver hallazgo), chip «NEW» a 12sp (html 10s
 
 **Para u13–u20:** no rehacer a mano lo que ya cubre una vista; si falta un estado, añadirlo a la vista (y a la
 galería) en vez de copiar su layout. La galería es la referencia rápida de estados.
+
+## u9b · Pesos tipográficos reales
+
+**Hecho.** Causa raíz doble, confirmada en el emulador (API 37):
+1. `android:textFontWeight` en un TextAppearance se pierde: `AppCompatTextHelper` relee los atributos
+   propios de la vista y pone el peso a «ninguno» si la vista no lo trae.
+2. El `fontFamily` del **tema** es el último respaldo de los atributos propios de cada TextView y pisa la
+   familia del TextAppearance (la misma trampa que `android:textColor` en u6). Experimento: sin el arreglo
+   de abajo, `Caption.Semibold` y `ChipLabel` con su familia semibold salían en 400.
+
+Arreglo:
+- **`res/font/bb_font_medium.xml` y `bb_font_semibold.xml`**: familias de un peso; la cara 500/600 ocupa
+  el hueco 400 y la **Bold** el hueco 700 → un `textStyle="bold"` encima da la 700 real, nunca negrita
+  sintética. No hay `bb_font_bold`/`bb_font_extrabold`: 700 sigue siendo `bb_font` + `textStyle bold`
+  (elige la cara 700 real en todas las API y funciona aunque el tema pise la familia, p. ej. en botones);
+  800 no lo usa ningún TextAppearance (si una pantalla lo necesita, p. ej. u15 celebración: crear
+  `bb_font_extrabold.xml` con el mismo patrón).
+- `styles_typography.xml`: Label/Caption/Micro → `bb_font_medium`; Chip/ChipLabel/Caption.Semibold →
+  `bb_font_semibold` (Chip/ChipLabel pierden `textStyle bold`: 600 real, antes 700); sin ningún
+  `textFontWeight`. `Micro.Bold` y `Caption.Semibold` vuelven a ser hijos de Micro/Caption.
+- **`fontFamily=@null`** (ambos atributos) en `Widget.BBetter.TextView` (theme `textViewStyle`) y en
+  `Widget.BBetter.SegmentedControl.Item`: `@null` corta la búsqueda antes del tema y se lee como «sin
+  valor», así manda la familia del appearance. Los TextView sin appearance siguen en `bb_font` vía
+  `TextAppearance.BBetter.Default`. **Regla para u10+:** un estilo de widget nuevo (Button, RadioButton…)
+  cuyo `android:textAppearance` sea de 500/600 debe llevar ese mismo `@null` (documentado en
+  `style_guide.md` §2). Los appearances aplicados en runtime (`setTextAppearance`, Toolbar, BottomNav,
+  Chip) no se ven afectados.
+- **`FontHelper.appTypeface(ctx, weight)`** (400–800): `Typeface.create(bb_font, weight, false)` en API 28+
+  (exacto, comprobado en la galería), regular/bold por debajo. **u10:** ejes de MPAndroidChart =
+  `appTypeface(ctx, 500)`; corregida la línea del plan que decía `R.font.bb_font` en ChartStyler.
+- Galería: tarjeta nueva «Type scale · weights (u9b)» arriba del todo (cada appearance con su peso,
+  Label/Title + `textStyle bold`, y FontHelper 400–800).
+- «Cambiar la fuente en un sitio» pasa a ser «los ficheros `res/font/bb_font*.xml`» (tabla de la arquitectura
+  del plan y `style_guide.md` actualizados). La auditoría de tokens no necesitó cambios: los `@font/` están
+  sólo en `res/font/` y `styles_typography.xml`; los estilos de componente usan `@null`, no `@font/`.
+- `textStyle="bold"` en layouts: `item_day_event` (Body + bold) y `fragment_calendar_week_simple` /
+  `CalendarLegendDay` (sin appearance) → `bb_font` 700 real, sin doble negrita. Spans `StyleSpan(BOLD)` de
+  WeekView y `Typeface.create(…, BOLD)` de StreakWeekView/AvatarView eligen la cara 700 de su familia.
+
+**Verificación (emulator-5554).** `assembleDebug` OK; auditoría 50 (sin cambios); `logcat -b crash` vacío.
+Capturas: `mig-u9b-gallery-weights` (escala completa: 400/500/600/700 claramente distintos; FontHelper 400→800
+progresivo; Label + bold = 700), `mig-u9b-gallery-segmented` (segmentos en 600), `mig-u9b-home` (saludo y
+«Tasks» 700, cuerpo 400, fecha 500, chip CONCENTRATION 600). Residuo: en la galería «CHIP 600» se ve casi
+invisible porque Chip es `bb_on_primary` y la demo no le pone fondo de acento (sólo galería).

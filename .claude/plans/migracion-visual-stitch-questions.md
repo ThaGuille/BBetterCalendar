@@ -76,10 +76,10 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   `!isTaskRoot()` y el intent es `MAIN`/`LAUNCHER`, `finish()` y `return` (patrón estándar); o
   `launchMode="singleTop"` + `FLAG_ACTIVITY_CLEAR_TOP` al lanzar `MainActivity`. Ojo: Splash hace el
   reseteo diario de stats, que habría que mover (p. ej. a `MainActivity.onStart`) si se salta.
-- **Q:** Los pesos 500/600 (Label, Chip, Caption) sólo se ven en API 28+ (`android:textFontWeight`); en
+- ✅ **Resuelta en u9b** (familias de un peso, ahora iguales en API 21+; ver impl u9b). ~~**Q:** Los pesos 500/600 (Label, Chip, Caption) sólo se ven en API 28+ (`android:textFontWeight`); en
   API 21–27 Label/Caption salen en 400 y Chip en 700. — **Assumed:** aceptable (minSdk 21; el diseño se
   verifica en API 37). Alternativa: familias de un solo peso `bb_font_medium` / `bb_font_semibold`, a
-  costa de que cambiar la fuente toque 3 ficheros.
+  costa de que cambiar la fuente toque 3 ficheros.~~
 
 ## u7
 - **Q:** La barra inferior pasa a mostrar **etiquetas** (antes `unlabeled`) con una píldora forest detrás del
@@ -98,14 +98,23 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   sin `android:tint`).
 
 ## u9
-- **Q:** En el emulador, `android:textFontWeight` dentro de un TextAppearance no surte efecto (un 700 salía
+- ✅ **Resuelta en u9b** con la opción (b): `bb_font_medium` / `bb_font_semibold` en `res/font/`, sin
+  `textFontWeight`, y `fontFamily=@null` en `Widget.BBetter.TextView` / `SegmentedControl.Item` porque el
+  `fontFamily` del tema pisaba la familia del appearance. Pesos verificados en captura (`mig-u9b-*`).
+  Pregunta original: ~~En el emulador, `android:textFontWeight` dentro de un TextAppearance no surte efecto (un 700 salía
   regular), así que Label/Caption/Chip/ChipLabel (500/600, u6/u7) probablemente se ven en 400 y el texto del
   segmentado seleccionado no sale en negrita. ¿Lo arreglamos globalmente? — **Assumed:** no se tocó fuera de
   u9 (mis estilos bold usan solo `textStyle="bold"`). Opciones: (a) quitar `textFontWeight` de ChipLabel/Chip
   y dejar `textStyle bold` (700 en vez de 600); (b) familias de un peso `bb_font_medium`/`bb_font_semibold` en
   `res/font/`, referenciadas solo desde `styles_typography.xml`; (c) investigar `AppCompatTextHelper` con la
-  familia XML. Natural en u24, o antes de u13 si se quiere fidelidad de pesos.
+  familia XML. Natural en u24, o antes de u13 si se quiere fidelidad de pesos.~~
 - **Q:** Los chips delta («▲ 14%») van en una píldora oscura (`bb_surface`) y no forest como en html 13/10,
   porque salvia/ember sobre forest no llegan a 4,5:1. — **Assumed:** píldora oscura. Para el aspecto del html:
   cambiar `bg_widget_inset_pill` a `bb_primary_container` y aceptar el contraste bajo (o aclarar forest en
   `palette.xml`).
+
+## u9b
+- **Q:** Chip (estado, mayúsculas) y ChipLabel pasan de 700 (negrita de recurso) a su 600 real de DESIGN.md
+  (el chip CONCENTRATION de Home se ve algo más ligero). — **Assumed:** 600, como dice DESIGN §3. Para
+  volver a 700: en `styles_typography.xml` cambiar su `fontFamily` a `@font/bb_font` y añadir
+  `android:textStyle=bold`.

@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <!-- ============================================================ -->
     <!-- BBetter typography scale (plan migracion-visual-stitch, u6;   -->
     <!-- .stitch/DESIGN.md §3). ONE family: Plus Jakarta Sans, bundled -->
     <!-- as @font/bb_font (res/font/bb_font.xml). No serif.            -->
     <!-- Sizes live in dimens.xml (text_*); this file only maps them.  -->
-    <!-- Weights: 700 = textStyle bold (every API). 500/600 =          -->
-    <!-- android:textFontWeight (API 28+); below 28 they fall back to  -->
-    <!-- 400 (Label/Caption) or 700 (Chip, textStyle bold).            -->
+    <!-- Weights (u9b), every API: 400 = @font/bb_font; 700 = bb_font  -->
+    <!-- + textStyle bold (real 700 face); 500 = @font/bb_font_medium;  -->
+    <!-- 600 = @font/bb_font_semibold. NEVER android:textFontWeight:    -->
+    <!-- AppCompatTextHelper drops it when it re-reads the view attrs.  -->
+    <!-- A textStyle="bold" on a 500/600 view selects the real 700 face  -->
+    <!-- (bold slot of those families), never synthetic bold.           -->
     <!-- Numbers (Display, Stat) use tabular figures: "tnum".          -->
     <!-- ============================================================ -->
 
@@ -66,15 +69,16 @@
     <!-- Small label above a number ("Focus time", "Your streak"): 13sp, 500, muted. -->
     <style name="TextAppearance.BBetter.Label">
         <item name="android:textSize">@dimen/text_label</item>
-        <item name="android:textFontWeight" tools:targetApi="p">500</item>
+        <item name="android:fontFamily">@font/bb_font_medium</item>
+        <item name="fontFamily">@font/bb_font_medium</item>
         <item name="android:textColor">@color/bb_on_surface_muted</item>
     </style>
 
     <!-- Tiny status chip: 12sp, 600, uppercase. Colour = text on an accent fill. -->
     <style name="TextAppearance.BBetter.Chip">
         <item name="android:textSize">@dimen/text_chip</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textFontWeight" tools:targetApi="p">600</item>
+        <item name="android:fontFamily">@font/bb_font_semibold</item>
+        <item name="fontFamily">@font/bb_font_semibold</item>
         <item name="android:letterSpacing">0.06</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/bb_on_primary</item>
@@ -84,8 +88,8 @@
          (html text-xs font-semibold). Colour comes from the widget's state list. -->
     <style name="TextAppearance.BBetter.ChipLabel" parent="TextAppearance.BBetter">
         <item name="android:textSize">@dimen/text_chip</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textFontWeight" tools:targetApi="p">600</item>
+        <item name="android:fontFamily">@font/bb_font_semibold</item>
+        <item name="fontFamily">@font/bb_font_semibold</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/bb_on_surface</item>
     </style>
@@ -105,7 +109,8 @@
     <!-- Caption / meta (axis labels, "Ends at", list meta): 12sp, 500, muted. -->
     <style name="TextAppearance.BBetter.Caption">
         <item name="android:textSize">@dimen/text_caption</item>
-        <item name="android:textFontWeight" tools:targetApi="p">500</item>
+        <item name="android:fontFamily">@font/bb_font_medium</item>
+        <item name="fontFamily">@font/bb_font_medium</item>
         <item name="android:textColor">@color/bb_on_surface_muted</item>
     </style>
 
@@ -122,27 +127,22 @@
     <!-- u9: tiny meta (weekday letters, delta chips, "87% reached"): 11sp, 500, muted, tabular. -->
     <style name="TextAppearance.BBetter.Micro">
         <item name="android:textSize">@dimen/text_micro</item>
-        <item name="android:textFontWeight" tools:targetApi="p">500</item>
+        <item name="android:fontFamily">@font/bb_font_medium</item>
+        <item name="fontFamily">@font/bb_font_medium</item>
         <item name="android:fontFeatureSettings">tnum</item>
         <item name="android:textColor">@color/bb_on_surface_muted</item>
     </style>
 
-    <!-- u9: bold variants. NOT children of Micro / Caption on purpose: an inherited
-         android:textFontWeight (500) wins over textStyle="bold" and, on the emulator (API 37,
-         AppCompat 1.6.1 + bundled font family), a textFontWeight even of 700 rendered regular.
-         textStyle="bold" alone does select the 700 face (same as Title / Stat). Never put
-         textStyle="bold" on a view whose appearance has textFontWeight. -->
-    <style name="TextAppearance.BBetter.Micro.Bold" parent="TextAppearance.BBetter">
-        <item name="android:textSize">@dimen/text_micro</item>
+    <!-- u9 bold variants (u9b: plain children again, the weight lives in the family).
+         Micro.Bold = Micro's medium family + textStyle bold -> its real 700 slot.
+         Caption.Semibold = real 600 (it was 700 in u9 as a stop-gap). -->
+    <style name="TextAppearance.BBetter.Micro.Bold">
         <item name="android:textStyle">bold</item>
-        <item name="android:fontFeatureSettings">tnum</item>
-        <item name="android:textColor">@color/bb_on_surface_muted</item>
     </style>
 
-    <style name="TextAppearance.BBetter.Caption.Semibold" parent="TextAppearance.BBetter">
-        <item name="android:textSize">@dimen/text_caption</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    <style name="TextAppearance.BBetter.Caption.Semibold">
+        <item name="android:fontFamily">@font/bb_font_semibold</item>
+        <item name="fontFamily">@font/bb_font_semibold</item>
     </style>
 
     <!-- Default for TextViews that set no textAppearance (theme android:textViewStyle). Keeps
@@ -155,8 +155,16 @@
         <item name="android:textColor">@color/bb_on_surface</item>
     </style>
 
+    <!-- u9b: fontFamily @null on purpose. The theme's fontFamily (bb_font) is the LAST fallback of
+         every TextView's own attributes (same trap as android:textColor, u6), so it overrode the
+         family of every TextAppearance set in XML: Label/Caption/Chip came out in bb_font 400.
+         @null (unlike leaving it unset) stops the lookup before the theme and reads as "no value",
+         so the appearance's family wins. Plain TextViews still get bb_font from the Default
+         appearance above. Same @null in Widget.BBetter.SegmentedControl.Item (a Button). -->
     <style name="Widget.BBetter.TextView" parent="android:Widget.Material.TextView">
         <item name="android:textAppearance">@style/TextAppearance.BBetter.Default</item>
+        <item name="android:fontFamily">@null</item>
+        <item name="fontFamily">@null</item>
     </style>
 
     <!-- u7: component styles (Widget.BBetter.Card & co.) live in styles_components.xml. -->

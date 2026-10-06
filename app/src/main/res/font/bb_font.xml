@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- La ÚNICA familia tipográfica de la app (plan migracion-visual-stitch, u6): Plus Jakarta Sans
-     empaquetada (OFL, licencia en .stitch/assets/fonts/OFL.txt). Para cambiar la fuente se
-     cambian los ficheros de este font-family; tema y TextAppearance.BBetter.* apuntan aquí.
-     android: = API 26+ framework, app: = AndroidX/AppCompat (API 21-25). Los pesos 500/600/800
-     se eligen con android:textFontWeight (API 28+); por debajo, textStyle normal/bold -> 400/700. -->
+<!-- La familia por defecto de la app (plan migracion-visual-stitch, u6): Plus Jakarta Sans
+     empaquetada (OFL, licencia en .stitch/assets/fonts/OFL.txt). Tema y TextAppearance.BBetter.*
+     de 400/700 apuntan aquí; 700 = textStyle="bold" (elige la cara 700 real, todas las API).
+     u9b: los pesos 500/600 viven en familias propias (bb_font_medium.xml / bb_font_semibold.xml),
+     porque AppCompat ignora android:textFontWeight dentro de un TextAppearance. Para cambiar la
+     fuente se cambian los ficheros de res/font/bb_font*.xml (y nada más).
+     android: = API 26+ framework, app: = AndroidX/AppCompat (API 21-25). Las caras 500/600/800 de
+     esta familia sólo las usa Java (FontHelper.appTypeface(ctx, weight), API 28+). -->
 <font-family xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <font

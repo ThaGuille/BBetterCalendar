@@ -108,7 +108,7 @@ palette.xml (primitivos)  →  colors.xml (bb_* semánticos)  →  Theme.BBetter
 |---|---|
 | Un color o la paleta | `res/values/palette.xml` (y el mapeo en `colors.xml`) |
 | Añadir un tema claro | `res/values-notnight/colors.xml` y quitar el modo noche forzado |
-| La fuente | `res/font/bb_font.xml`, la familia a la que apuntan todos los `TextAppearance` y el tema |
+| La fuente | los ficheros `res/font/bb_font*.xml` (`bb_font` = 400/700 del tema y de los `TextAppearance`; `bb_font_medium` / `bb_font_semibold` = pesos 500/600, u9b) |
 | La escala tipográfica | `styles_typography.xml` y los `text_*` de `dimens.xml` |
 | Forma o aspecto de los paneles | `ShapeAppearance.BBetter.*` y `Widget.BBetter.Card` |
 | Botones, chips, switches, barras de progreso, barra inferior | Su `Widget.BBetter.*`, enlazado desde el tema (`materialButtonStyle`, …) |
@@ -395,7 +395,7 @@ PNG de Stitch, más ui-tester sin `FATAL EXCEPTION`.
   fuera de los tokens o atributos.
 
 ### u10 · ChartStyler
-- `ui/common/chart/ChartStyler.java` lee los tokens y `R.font.bb_font`. Lo aplican todos los
+- `ui/common/chart/ChartStyler.java` lee los tokens y la fuente con `FontHelper.appTypeface(ctx, 500)` (sin `R.font`, que cuenta en la auditoría; u9b). Lo aplican todos los
   gráficos:
   - **Línea héroe:** sage de 2,5dp con relleno degradado (`bg_chart_fill_primary`), marcadores
     huecos y el último punto en ámbar con halo (icono por `Entry`, `setDrawIcons`).

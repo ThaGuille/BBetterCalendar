@@ -62,15 +62,20 @@ Text on them is `bb_on_primary`. These are resolved by [`ColorResolver`](../../a
 ## 2. Typography ([`styles_typography.xml`](../../app/src/main/res/values/styles_typography.xml))
 
 One family: **Plus Jakarta Sans**, bundled as TTF (400/500/600/700/800) in `res/font/` and exposed
-only as the family **`@font/bb_font`** (`res/font/bb_font.xml`). No serif, no downloadable fonts
+as the family **`@font/bb_font`** (`res/font/bb_font.xml`, the default, 400/700) plus two
+single-weight families for 500/600: **`@font/bb_font_medium`** and **`@font/bb_font_semibold`** (u9b). No serif, no downloadable fonts
 (Fraunces and the Google Fonts provider were removed in u6). `Theme.BBetter` sets `fontFamily` /
 `android:fontFamily` = `bb_font`, so dialogs, buttons, snackbars and framework text use it too.
-Changing the font = swapping the files listed in `bb_font.xml`; nothing else names a font
+Changing the font = swapping the files listed in the `res/font/bb_font*.xml` files; nothing else names a font
 (the token audit counts `@font/` / `R.font.` outside `styles_typography.xml` / `themes.xml`).
-Views that draw text with a `Paint` (WeekView, charts) get it via `FontHelper.appTypeface(ctx)`.
+Views that draw text with a `Paint` (WeekView, charts) get it via `FontHelper.appTypeface(ctx)`, or
+at a given weight via `FontHelper.appTypeface(ctx, weight)` (400–800; exact on API 28+, nearest of
+regular/bold below — e.g. chart axes = 500, the Caption weight).
 
-Weights: 700 = `textStyle="bold"` (all APIs). 500/600 = `android:textFontWeight` (API 28+; below 28
-they fall back to 400, or 700 where the style also sets bold). Numbers use tabular figures
+Weights (u9b, identical on every API ≥ 21): 400 = `bb_font`; 700 = `bb_font` + `textStyle="bold"` (picks
+the real 700 face of the family); 500 = `fontFamily` `bb_font_medium`; 600 = `bb_font_semibold`. The
+single-weight families declare their face as the 400 slot and the **Bold TTF as the 700 slot**, so a
+`textStyle="bold"` on top of Label/Caption/Chip gives the real 700, never synthetic bolding. Numbers use tabular figures
 (`android:fontFeatureSettings="tnum"`; Jakarta ships `tnum`, its default digits are proportional).
 
 | Style | Weight | Size | Use |
@@ -88,7 +93,7 @@ they fall back to 400, or 700 where the style also sets bold). Numbers use tabul
 | `TextAppearance.BBetter.Stat.Tile` | 700, `tnum` | `text_stat_tile` (22sp) | Number inside a stat tile / compact strip (u9) |
 | `TextAppearance.BBetter.BodyStrong` | 700 | `text_body` (15sp) | List-row title, emphasised value (u9) |
 | `TextAppearance.BBetter.Micro` / `.Micro.Bold` | 500 / 700, muted, `tnum` | `text_micro` (11sp) | Weekday letters, delta chips, "87% reached" (u9) |
-| `TextAppearance.BBetter.Caption.Semibold` | 700 (bold), muted | `text_caption` (12sp) | Header meta ("8h 15m logged") (u9) |
+| `TextAppearance.BBetter.Caption.Semibold` | 600, muted | `text_caption` (12sp) | Header meta ("8h 15m logged") (u9) |
 | `TextAppearance.BBetter.Default` | 400, `bb_on_surface` | 14sp (framework Small) | Implicit default of every TextView without a `textAppearance` (theme `android:textViewStyle` → `Widget.BBetter.TextView`) |
 
 **Colour comes from the TextAppearance.** The theme deliberately has **no** `android:textColor`:
@@ -96,11 +101,19 @@ a theme-level `android:textColor` is the last fallback of every TextView attribu
 overrode every TextAppearance colour (muted labels rendered white). Set `android:textColor` on a
 view only when it really differs from its appearance.
 
-**Bold = `textStyle="bold"`, never via `textFontWeight` (u9 finding).** On the emulator (API 37) a
-`textFontWeight` inside a TextAppearance did not change the rendered face (700 rendered regular), and an
-inherited `textFontWeight` also beats `textStyle="bold"` set on the view. So: don't put `textStyle="bold"`
-on a view whose appearance has `textFontWeight` (Label, Caption, Micro, Chip, ChipLabel) — use a bold
-appearance (`BodyStrong`, `Micro.Bold`, `Caption.Semibold`) instead.
+**Never `android:textFontWeight` (u9 finding, fixed in u9b).** AppCompatTextHelper re-reads the
+view's own attributes after the TextAppearance and resets the weight to "none" (so 500/600/700 rendered
+400). Weight lives in the **family** instead (above).
+
+**The theme's `fontFamily` overrides a TextAppearance's family — same trap as `android:textColor`.**
+The theme value is the last fallback of every TextView's own attributes, so a `bb_font_medium` in
+the appearance lost to the theme's `bb_font` (verified in u9b: without the fix, Caption.Semibold and
+ChipLabel rendered 400). Fix: `Widget.BBetter.TextView` (the theme `android:textViewStyle`) and
+`Widget.BBetter.SegmentedControl.Item` set `android:fontFamily` / `fontFamily` = **`@null`**, which stops
+the lookup before the theme and reads as "no value". Any new **widget style** (Button, CheckBox,
+RadioButton…) whose `android:textAppearance` uses a 500/600 appearance must do the same; 400/700
+appearances don't need it (they use `bb_font`, like the theme). Appearances applied at runtime
+(`setTextAppearance`, Toolbar, BottomNav, Chip) are not affected.
 
 Always set typography via `android:textAppearance="@style/TextAppearance.BBetter.Foo"` rather than `android:fontFamily` + `android:textSize` separately, so future scale changes propagate.
 
@@ -238,7 +251,7 @@ Dark-only since the Stitch migration (u5). One theme tree, no runtime `setTheme(
   Carries all colour roles (`colorSecondary`/`colorAccent` = `bb_primary`, not dusk),
   `colorControlNormal/Activated`, `elevationOverlayEnabled=false`, status bar = `bb_surface`,
   nav bar = `bb_surface_card`, light bars off, `android:textColorPrimary/Secondary/Hint*` (never
-  `android:textColor`, see §2), `fontFamily` = `@font/bb_font`, `android:textViewStyle`, and the dialog hooks below.
+  `android:textColor`, see §2), `fontFamily` = `@font/bb_font` (overrides an appearance's family unless the widget style sets `fontFamily=@null`, see §2), `android:textViewStyle`, and the dialog hooks below.
 - `Theme.BBetter.NoActionBar` — every activity in the manifest (and the `<application>` default).
   `SplashTheme` derives from it and only swaps the window background.
 - Dialog hooks wired from `Theme.BBetter`: `alertDialogTheme` / `android:alertDialogTheme` →

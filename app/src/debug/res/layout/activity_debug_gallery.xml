@@ -31,6 +31,116 @@
             android:text="ui/common/widget · u9"
             android:textAppearance="@style/TextAppearance.BBetter.Caption" />
 
+        <!-- ===================== Type scale (u9b) ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="Type scale · weights (u9b)" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25:00"
+                android:textAppearance="@style/TextAppearance.BBetter.Display" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stat 700 · 5h 52m"
+                android:textAppearance="@style/TextAppearance.BBetter.Stat" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Headline 700"
+                android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Title 700"
+                android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BodyStrong 700"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Body 400 · the quick brown fox"
+                android:textAppearance="@style/TextAppearance.BBetter.Body" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Label 500 · Focus time"
+                android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Caption.Semibold 600"
+                android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Caption 500 · Ends at 18:30"
+                android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ChipLabel 600 · Week"
+                android:textAppearance="@style/TextAppearance.BBetter.ChipLabel" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chip 600"
+                android:textAppearance="@style/TextAppearance.BBetter.Chip" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Micro.Bold 700"
+                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Micro 500 · 87% reached"
+                android:textAppearance="@style/TextAppearance.BBetter.Micro" />
+
+            <!-- textStyle="bold" on top: 500/600 families -> real 700; bb_font 700 stays 700. -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="Label + textStyle bold (700)"
+                android:textAppearance="@style/TextAppearance.BBetter.Label"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Title + textStyle bold (700)"
+                android:textAppearance="@style/TextAppearance.BBetter.Title"
+                android:textStyle="bold" />
+
+            <!-- FontHelper.appTypeface(ctx, weight), filled in DebugGalleryActivity. -->
+            <LinearLayout
+                android:id="@+id/galleryFontWeights"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:orientation="vertical" />
+        </LinearLayout>
+
         <!-- ===================== SectionHeaderView ===================== -->
         <TextView
             style="@style/GalleryLabel"

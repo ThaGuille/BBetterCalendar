@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u9b: Plus Jakarta Sans SEMIBOLD as a family of its own, for TextAppearance.BBetter.* that need
+     that weight (styles_typography.xml). Weight lives in the family, not in textFontWeight
+     (AppCompat drops a TextAppearance's textFontWeight; see style_guide.md §2). The semibold face is
+     declared as the 400 slot and the BOLD face as the 700 slot, so a textStyle="bold" on top
+     selects the real 700 file instead of synthetic bolding. Change the font = change the files
+     of bb_font.xml and of every bb_font_*.xml. -->
+<font-family xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <font
+        android:font="@font/plus_jakarta_sans_semibold"
+        android:fontStyle="normal"
+        android:fontWeight="400"
+        app:font="@font/plus_jakarta_sans_semibold"
+        app:fontStyle="normal"
+        app:fontWeight="400" />
+    <font
+        android:font="@font/plus_jakarta_sans_bold"
+        android:fontStyle="normal"
+        android:fontWeight="700"
+        app:font="@font/plus_jakarta_sans_bold"
+        app:fontStyle="normal"
+        app:fontWeight="700" />
+</font-family>

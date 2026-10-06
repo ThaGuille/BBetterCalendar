@@ -150,6 +150,10 @@
         <item name="android:background">@drawable/bg_segmented_item</item>
         <item name="android:button">@null</item>
         <item name="android:textAppearance">@style/TextAppearance.BBetter.ChipLabel</item>
+        <!-- u9b: blocks the theme fontFamily so ChipLabel's semibold family wins (see
+             Widget.BBetter.TextView in styles_typography.xml). -->
+        <item name="android:fontFamily">@null</item>
+        <item name="fontFamily">@null</item>
         <item name="android:textColor">@color/bb_segmented_item_text</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:minWidth">0dp</item>

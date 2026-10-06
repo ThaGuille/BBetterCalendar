@@ -2,7 +2,7 @@
 
 Proyecto Stitch: «BBetter — Calm Focus redesign» (`projects/9271857544033674332`).
 Plan que los consume: [`migracion-visual-stitch.md`](../../.claude/plans/migracion-visual-stitch.md).
-Dirección artística y tokens: [`../DESIGN.md`](../DESIGN.md). Fuentes: [`../assets/fonts/`](../assets/fonts/).
+Dirección artística y tokens: [`../DESIGN.md`](../DESIGN.md). Fuentes: `app/src/main/res/font/` (licencia en [`../assets/fonts/OFL.txt`](../assets/fonts/OFL.txt)).
 
 **Reglas de uso:** el HTML manda para hex, dp y pesos; el PNG manda para la composición.
 Los PNG están a 390 px de ancho (1x); Stitch guarda las capturas a 780 px (2x).

@@ -23,15 +23,21 @@
     <dimen name="segmented_button_height">36dp</dimen>
     <dimen name="toggle_button_size">30dp</dimen>
 
-    <!-- Text scale -->
-    <dimen name="text_display">56sp</dimen>
+    <!-- Text scale (u6, .stitch/DESIGN.md §3) — mapped by TextAppearance.BBetter.* in
+         styles_typography.xml. -->
+    <dimen name="text_display">80sp</dimen>
     <!-- Contador del pomodoro compactado para que el timer + lista de tareas de hoy
          quepan sin scroll pesado (spec tasks-home-today). -->
     <dimen name="text_display_compact">44sp</dimen>
-    <dimen name="text_headline">24sp</dimen>
-    <dimen name="text_title">18sp</dimen>
-    <dimen name="text_body">16sp</dimen>
+    <dimen name="text_stat">28sp</dimen>
+    <dimen name="text_headline">22sp</dimen>
+    <dimen name="text_title">17sp</dimen>
+    <dimen name="text_body">15sp</dimen>
+    <!-- 15sp x 1.45 -->
+    <dimen name="text_body_line_height">22sp</dimen>
     <dimen name="text_label">13sp</dimen>
+    <dimen name="text_chip">12sp</dimen>
+    <dimen name="text_caption">12sp</dimen>
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_dialog">18sp</dimen>
 

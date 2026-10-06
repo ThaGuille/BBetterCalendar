@@ -1,67 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ============================================================ -->
-    <!-- BBetter typography scale                                       -->
-    <!-- Body / UI: Plus Jakarta Sans (humanist sans).                  -->
-    <!-- Display: Fraunces (soft modern serif, for big numbers).        -->
-    <!-- All TextAppearances inherit from MaterialComponents so they    -->
-    <!-- gracefully fall back to system sans if downloadable fonts are  -->
-    <!-- not yet available.                                             -->
+    <!-- BBetter typography scale (plan migracion-visual-stitch, u6;   -->
+    <!-- .stitch/DESIGN.md §3). ONE family: Plus Jakarta Sans, bundled -->
+    <!-- as @font/bb_font (res/font/bb_font.xml). No serif.            -->
+    <!-- Sizes live in dimens.xml (text_*); this file only maps them.  -->
+    <!-- Weights: 700 = textStyle bold (every API). 500/600 =          -->
+    <!-- android:textFontWeight (API 28+); below 28 they fall back to  -->
+    <!-- 400 (Label/Caption) or 700 (Chip, textStyle bold).            -->
+    <!-- Numbers (Display, Stat) use tabular figures: "tnum".          -->
     <!-- ============================================================ -->
 
     <style name="TextAppearance.BBetter" parent="TextAppearance.MaterialComponents.Body1">
-        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:fontFamily">@font/bb_font</item>
+        <item name="fontFamily">@font/bb_font</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:letterSpacing">0</item>
         <item name="android:textColor">@color/bb_on_surface</item>
     </style>
 
+    <!-- Timer / hero number: 80sp, 700, -1% tracking, tabular figures. -->
     <style name="TextAppearance.BBetter.Display">
-        <item name="android:fontFamily">@font/fraunces</item>
         <item name="android:textSize">@dimen/text_display</item>
-        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:fontFeatureSettings">tnum</item>
         <item name="android:textColor">@color/bb_on_surface</item>
     </style>
 
+    <!-- Big stat numbers ("5h 52m", "26 weeks"): 28sp, 700, tabular figures. -->
+    <style name="TextAppearance.BBetter.Stat">
+        <item name="android:textSize">@dimen/text_stat</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <!-- Screen title: 22sp, 700. -->
     <style name="TextAppearance.BBetter.Headline">
-        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
-        <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/text_headline</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/bb_on_surface</item>
     </style>
 
+    <!-- Section / card title: 17sp, 700. -->
     <style name="TextAppearance.BBetter.Title">
-        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
-        <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/text_title</item>
-        <item name="android:textColor">@color/bb_on_surface</item>
-    </style>
-
-    <style name="TextAppearance.BBetter.Body">
-        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
-        <item name="android:textSize">@dimen/text_body</item>
-        <item name="android:textColor">@color/bb_on_surface</item>
-    </style>
-
-    <style name="TextAppearance.BBetter.BodyMuted">
-        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
-        <item name="android:textSize">@dimen/text_body</item>
-        <item name="android:textColor">@color/bb_on_surface_muted</item>
-    </style>
-
-    <style name="TextAppearance.BBetter.Label">
-        <item name="android:fontFamily">@font/plus_jakarta_sans_medium</item>
-        <item name="android:textSize">@dimen/text_label</item>
-        <item name="android:letterSpacing">0.04</item>
-        <item name="android:textColor">@color/bb_on_surface_muted</item>
-    </style>
-
-    <style name="TextAppearance.BBetter.Chip">
-        <item name="android:fontFamily">@font/plus_jakarta_sans_semibold</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <!-- Body: 15sp, 400, line height 1.45 (lineHeight is read from the TextAppearance by
+         MaterialTextView, i.e. every TextView inflated under Theme.BBetter). -->
+    <style name="TextAppearance.BBetter.Body">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="lineHeight">@dimen/text_body_line_height</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.BodyMuted" parent="TextAppearance.BBetter.Body">
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <!-- Small label above a number ("Focus time", "Your streak"): 13sp, 500, muted. -->
+    <style name="TextAppearance.BBetter.Label">
         <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:textFontWeight" tools:targetApi="p">500</item>
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <!-- Tiny status chip: 12sp, 600, uppercase. Colour = text on an accent fill. -->
+    <style name="TextAppearance.BBetter.Chip">
+        <item name="android:textSize">@dimen/text_chip</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textFontWeight" tools:targetApi="p">600</item>
         <item name="android:letterSpacing">0.06</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/bb_on_primary</item>
+    </style>
+
+    <!-- Caption / meta (axis labels, "Ends at", list meta): 12sp, 500, muted. -->
+    <style name="TextAppearance.BBetter.Caption">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textFontWeight" tools:targetApi="p">500</item>
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <!-- Default for TextViews that set no textAppearance (theme android:textViewStyle). Keeps
+         the framework's 14sp "Small" size so legacy screens do not reflow, but in the app font
+         and bb_on_surface (the framework default is textColorTertiary). New UI sets a
+         TextAppearance.BBetter.* explicitly. -->
+    <style name="TextAppearance.BBetter.Default" parent="TextAppearance.AppCompat.Small">
+        <item name="android:fontFamily">@font/bb_font</item>
+        <item name="fontFamily">@font/bb_font</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <style name="Widget.BBetter.TextView" parent="android:Widget.Material.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Default</item>
     </style>
 
     <!-- ============================================================ -->

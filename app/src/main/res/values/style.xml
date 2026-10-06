@@ -38,7 +38,8 @@
         <item name="colorControlActivated">@color/bb_primary</item>
         <item name="elevationOverlayEnabled">false</item>
         <item name="android:colorBackground">@color/bb_surface_card</item>
-        <item name="android:textColor">@color/bb_on_surface</item>
+        <!-- u6: sin android:textColor (pisaba el color de los TextAppearance); ver Theme.BBetter. -->
+        <item name="android:textViewStyle">@style/Widget.BBetter.TextView</item>
         <item name="android:textColorPrimary">@color/bb_on_surface</item>
         <item name="android:textColorSecondary">@color/bb_on_surface_muted</item>
         <item name="android:textColorHint">@color/bb_on_surface_muted</item>

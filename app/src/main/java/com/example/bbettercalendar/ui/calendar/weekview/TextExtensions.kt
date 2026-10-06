@@ -1,13 +1,14 @@
 package com.example.bbettercalendar.ui.calendar.weekview
 
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Build
 import android.text.Layout
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.StaticLayout
 import android.text.TextPaint
-import android.text.style.TypefaceSpan
+import android.text.style.StyleSpan
 import com.example.bbettercalendar.ui.calendar.weekview.base.TextProcessors
 
 internal val CharSequence.processed: CharSequence
@@ -37,8 +38,10 @@ internal val StaticLayout.maxLineLength: Float
 
 internal fun SpannableStringBuilder.build(): SpannableString = SpannableString.valueOf(this)
 
+// BBetter (u6): antes TypefaceSpan("sans-serif-medium"), que forzaba Roboto en el título del
+// evento. StyleSpan(BOLD) conserva la familia del Paint (WeekView.typeface = bb_font).
 internal fun CharSequence.semibold() = SpannableString(this).apply {
-    setSpan(TypefaceSpan("sans-serif-medium"), 0, length, 0)
+    setSpan(StyleSpan(Typeface.BOLD), 0, length, 0)
 }
 
 internal fun ViewState.getTextPaint(event: ResolvedWeekViewEntity): TextPaint {

@@ -119,9 +119,11 @@ Symptom → root cause → fix table for the failure modes that keep coming up i
 
 ## Resources / themes
 
-### Layout preview is broken in Android Studio but app runs fine
-- **Cause**: Downloadable fonts (Plus Jakarta Sans / Fraunces) not cached locally yet.
-- **Fix**: Sync project; preview falls back to system sans. No code change needed.
+### TextAppearance colour ignored (muted label renders white)
+- **Cause**: `android:textColor` set in a theme (`Theme.BBetter`, a dialog theme) or in a widget
+  style: it is the TextView's own attribute, so it beats the colour of `android:textAppearance`.
+- **Fix**: keep colour in the `TextAppearance.BBetter.*`; themes only set `android:textColorPrimary`
+  etc. and `android:textViewStyle` (u6).
 
 ### TextView appears with default Roboto instead of project font
 - **Cause**: `android:fontFamily` was set explicitly, overriding the `textAppearance` style.

@@ -7,8 +7,8 @@
     "legacy_color": 30,
     "java_color_const": 5,
     "textsize_literal_sp": 10,
-    "font_ref_outside_typography": 4,
-    "fraunces": 4,
+    "font_ref_outside_typography": 0,
+    "fraunces": 0,
     "set_theme_java": 0,
     "palette_primitive_ref": 0
   }

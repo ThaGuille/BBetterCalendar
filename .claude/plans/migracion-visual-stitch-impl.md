@@ -388,3 +388,82 @@ auditoría de tokens omitida (u1 en paralelo; esta unidad no toca layouts, drawa
 Docs: `pomodoro-timer.md` (Last verified 2026-10-06), `data-model.md`, `architectural_patterns.md`,
 `common_errors.md`. **Pendiente:** verificación en emulador del flujo del timer (rotar a mitad,
 pausa/reanudar, fallo por segundo plano, saltar descanso) en la primera unidad de imagen que toque Home (u13).
+
+## u6 · Tipografía empaquetada
+
+**Hecho.**
+- TTF movidos (no copiados) de `.stitch/assets/fonts/` a `res/font/plus_jakarta_sans_{regular,medium,
+  semibold,bold,extrabold}.ttf`; `OFL.txt` se queda en `.stitch/assets/fonts/` (enlace actualizado en
+  `.stitch/designs/README.md`). **`res/font/bb_font.xml`**: `<font-family>` de 5 pesos con `android:` y
+  `app:` (`font`, `fontWeight`, `fontStyle`). Borrados `fraunces.xml`, `plus_jakarta_sans*.xml`
+  (descargables), `values/font_certs.xml`, `values/preloaded_fonts.xml` (no había `<meta-data>` en el manifest).
+- `Theme.BBetter`: `fontFamily` + `android:fontFamily` = `@font/bb_font`; `Theme.BBetter.PickerDialog`
+  (tema de framework, no hereda) también lleva `android:fontFamily`. Diálogos, EditText, botones y
+  TabLayout salen en Jakarta (captura).
+- `styles_typography.xml` según la tabla del plan: Display 80sp/700/−0,01/`tnum`, **Stat** (nuevo)
+  28sp/700/`tnum`, Headline 22/700, Title 17/700, Body 15 + `lineHeight` 22sp (1,45; lo aplica
+  MaterialTextView desde el TextAppearance), BodyMuted (ahora hereda de Body), Label 13/500 muted,
+  Chip 12/600 mayúsculas, **Caption** (nuevo) 12/500 muted (el HTML usa sobre todo `font-medium` a
+  12px). Pesos: 700 = `textStyle bold`; 500/600 = `android:textFontWeight` (API 28+; por debajo caen
+  a 400, o a 700 en Chip). El tracking de Label (0,04) desaparece (DESIGN no lo pide).
+- `dimens.xml`: `text_display` 80, `text_stat` 28, `text_headline` 22, `text_title` 17, `text_body` 15,
+  `text_body_line_height` 22, `text_chip` 12, `text_caption` 12 (se quedan `text_small`, `text_dialog`
+  y `text_display_compact` 44sp, que sigue usando el contador de Home hasta u13).
+  `values-sw600dp`: `text_display` 96, `text_body` 17 (antes 24, mayor que los títulos), line height 25.
+- **`tnum`:** comprobado con fontTools (python de anaconda; el `python` del PATH no lo tiene): los 5
+  TTF traen la feature `tnum` (y `pnum`); sus dígitos por defecto son proporcionales (anchos 371–732),
+  así que `fontFeatureSettings="tnum"` sí hace falta y funciona (el contador no baila en captura).
+- **WeekView:** el setter `WeekView.typeface` no hacía nada (sólo guardaba el valor; ningún `Paint` lo
+  leía). Ahora lo propaga a todos los `Paint` de texto (cabecera en peso 500 en API 28+).
+  `TextExtensions.semibold()` usaba `TypefaceSpan("sans-serif-medium")` (Roboto en los títulos de
+  evento) → `StyleSpan(BOLD)`, que conserva la familia del Paint. `CalendarFragmentWeek` llama a
+  `weekView.setTypeface(FontHelper.appTypefaceOrDefault(ctx))`.
+- **Nuevo `helpers/FontHelper`**: `appTypeface(ctx)` / `appTypefaceOrDefault(ctx)` resuelven el
+  `fontFamily` del tema → `Typeface`, sin nombrar `R.font` en Java. **u10 (ChartStyler)**: usarlo para
+  el `Typeface` de MPAndroidChart (los ejes siguen en Roboto, visto en `mig-u6-progress`).
+- **u7:** los `textAppearance*` de MaterialComponents (`textAppearanceButton`, etc.) no están mapeados
+  a `TextAppearance.BBetter.*`; heredan `bb_font` del tema, pero el peso/tamaño de botones y chips
+  Material lo deben fijar los `Widget.BBetter.*` de u7.
+- **Desviación (fuera de la tabla, pero bloqueaba la escala): quitado `android:textColor` del tema**
+  (`Theme.BBetter` y `Base.Theme.BBetter.Dialog`). Un `android:textColor` de tema es el último
+  respaldo de los atributos propios de cada TextView y pisaba el color de TODOS los TextAppearance:
+  Label/BodyMuted salían blancos y el texto de los chips (`bb_on_primary`) blanco sobre salvia. En su
+  lugar, `android:textViewStyle` → `Widget.BBetter.TextView` → **`TextAppearance.BBetter.Default`**
+  (14sp «Small» del framework, para no reflujar pantallas legadas, en `bb_on_surface` + bb_font). Los
+  TextView sin `textAppearance` ni `textColor` siguen en `bb_on_surface`; los que tienen appearance
+  muestran ya su color diseñado (fecha de Home y textos vacíos en muted). Docs: `style_guide.md`
+  §2/§3/§6 y `common_errors.md`.
+- Auditoría: `font_ref_outside_typography` 4→0, `fraunces` 4→0; base actualizada (total 150→142).
+
+**Tamaño del APK.** El número de u1 (10 419 584 B) era un build **incremental**: zipflinger deja
+huecos al reemplazar entradas y el tamaño del fichero no es comparable (un `clean assembleDebug`
+de u6 da **9 656 780 B**). Delta real medido entrada a entrada entre `HEAD` (4148249) y u6, ambos
+debug: **+287 204 B comprimidos (+280 KiB)** — los 5 TTF suman +288 762 B (≈57 KiB cada uno; 645 KiB
+sin comprimir), los XML descargables −1 191 B, `resources.arsc` −2 092 B, dex +~0,9 KB. u25: comparar
+con `clean assembleDebug` (base limpia u6 = 9 656 780 B).
+
+**Verificación (emulator-5554).** `assembleDebug` OK, `testDebugUnitTest` 96/96, `logcat -b crash`
+vacío durante toda la sesión. Capturas en `.claude/skills/adb-ui-test/captures/`: `mig-u6-home`
+(contador «20:00» en Jakarta 700 tabular, saludo Headline, fecha muted), `mig-u6-home-running`
+(focus mode), `mig-u6-progress` (cuerpo con interlineado 1,45, pestañas y botones en Jakarta),
+`mig-u6-projects`, `mig-u6-dialog-create-project` (título, hints y botones en Jakarta),
+`mig-u6-calendar-week` (horas y cabecera de WeekView en Jakarta).
+
+**Prueba de humo del temporizador de u2 (pedida por el orquestador).**
+- Iniciar → la cuenta baja (19:55 → 19:47 → 19:43). Pausa → congelado (19:31 en dos lecturas a 4 s);
+  reanudar → sigue bajando. Cancelar → vuelve a 20:00 y desaparece el botón cancelar. **OK.**
+- Segundo plano dentro de la gracia: Home y volver por **Recientes** en ~2 s (`wm_on_stop` →
+  `wm_on_start` de la misma `MainActivity`) → sigue corriendo, sin fallo. **OK.**
+- Rotación: `MainActivity` está bloqueada en `portrait` en el manifest, así que `user_rotation 1` no
+  recrea nada (la cuenta siguió). Para ejercitar el mismo camino (`isChangingConfigurations`) forcé
+  dos cambios de configuración con `settings put system font_scale 1.15` / `1.0`: dos
+  `wm_relaunch_resume_activity` + `onDestroy/onCreate`; el restante sobrevive y sigue bajando
+  (19:06 → 18:57 → 18:45), sin fallo. **OK.**
+- **Hallazgo (no es un bug del refactor; no corregido):** volver **pulsando el icono del launcher**
+  (probado con `monkey` y con `am start -f 0x10200000`, el intent del launcher) crea una **nueva**
+  `SplashActivity` y una **segunda** `MainActivity` encima de la antigua: Home sale en reposo (20:00)
+  y la sesión de la instancia antigua (parada) **cuenta un fallo** al agotar la gracia
+  (`homeToadyFailsText` pasó a 2). Causa previa a u2: Splash es la actividad launcher, se `finish()`ea
+  y lanza `MainActivity` en modo `standard`. Antes de u2 la pantalla también salía en reposo (estado
+  en el fragment viejo); lo nuevo es que ahora además cuenta como fallo. Arreglo propuesto en
+  preguntas (no es pequeño y seguro: Splash también hace el reseteo diario de stats).

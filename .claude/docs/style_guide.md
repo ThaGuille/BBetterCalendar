@@ -61,21 +61,36 @@ Text on them is `bb_on_primary`. These are resolved by [`ColorResolver`](../../a
 
 ## 2. Typography ([`styles_typography.xml`](../../app/src/main/res/values/styles_typography.xml))
 
-Two families, both loaded as downloadable fonts with system sans fallback:
+One family: **Plus Jakarta Sans**, bundled as TTF (400/500/600/700/800) in `res/font/` and exposed
+only as the family **`@font/bb_font`** (`res/font/bb_font.xml`). No serif, no downloadable fonts
+(Fraunces and the Google Fonts provider were removed in u6). `Theme.BBetter` sets `fontFamily` /
+`android:fontFamily` = `bb_font`, so dialogs, buttons, snackbars and framework text use it too.
+Changing the font = swapping the files listed in `bb_font.xml`; nothing else names a font
+(the token audit counts `@font/` / `R.font.` outside `styles_typography.xml` / `themes.xml`).
+Views that draw text with a `Paint` (WeekView, charts) get it via `FontHelper.appTypeface(ctx)`.
 
-- **Plus Jakarta Sans** — body / UI
-- **Fraunces** — display (large numbers, e.g. the Pomodoro countdown)
+Weights: 700 = `textStyle="bold"` (all APIs). 500/600 = `android:textFontWeight` (API 28+; below 28
+they fall back to 400, or 700 where the style also sets bold). Numbers use tabular figures
+(`android:fontFeatureSettings="tnum"`; Jakarta ships `tnum`, its default digits are proportional).
 
-| Style | Family / weight | Size | Use |
+| Style | Weight | Size | Use |
 |---|---|---|---|
-| `TextAppearance.BBetter` | Jakarta regular | body | Generic base — rarely applied directly |
-| `TextAppearance.BBetter.Display` | Fraunces | `text_display` (56sp) | Countdown, hero numbers |
-| `TextAppearance.BBetter.Headline` | Jakarta semibold | `text_headline` (24sp) | Screen header ("Hi there") |
-| `TextAppearance.BBetter.Title` | Jakarta semibold | `text_title` (18sp) | Card titles |
-| `TextAppearance.BBetter.Body` | Jakarta regular | `text_body` (16sp) | Standard body text |
-| `TextAppearance.BBetter.BodyMuted` | Jakarta regular | `text_body` (16sp) | Secondary copy (muted colour) |
-| `TextAppearance.BBetter.Label` | Jakarta medium | `text_label` (13sp), letter-spacing `0.04` | Form labels, subtitles |
-| `TextAppearance.BBetter.Chip` | Jakarta semibold ALL CAPS | `text_label` (13sp), letter-spacing `0.06` | Chips ("CONCENTRATION") |
+| `TextAppearance.BBetter` | 400 | — | Base (family + colour); rarely applied directly |
+| `TextAppearance.BBetter.Display` | 700, tracking −0.01, `tnum` | `text_display` (80sp; 96sp sw600dp) | Countdown, hero number |
+| `TextAppearance.BBetter.Stat` | 700, `tnum` | `text_stat` (28sp) | Big stat numbers ("5h 52m") |
+| `TextAppearance.BBetter.Headline` | 700 | `text_headline` (22sp) | Screen title |
+| `TextAppearance.BBetter.Title` | 700 | `text_title` (17sp) | Section / card title |
+| `TextAppearance.BBetter.Body` | 400, line height `text_body_line_height` (22sp = 1.45) | `text_body` (15sp) | Body text |
+| `TextAppearance.BBetter.BodyMuted` | as Body, muted colour | `text_body` (15sp) | Secondary copy |
+| `TextAppearance.BBetter.Label` | 500, muted | `text_label` (13sp) | Small label above a number |
+| `TextAppearance.BBetter.Chip` | 600, ALL CAPS, tracking 0.06, `bb_on_primary` | `text_chip` (12sp) | Tiny status chips on an accent fill |
+| `TextAppearance.BBetter.Caption` | 500, muted | `text_caption` (12sp) | Meta, axis-ish captions |
+| `TextAppearance.BBetter.Default` | 400, `bb_on_surface` | 14sp (framework Small) | Implicit default of every TextView without a `textAppearance` (theme `android:textViewStyle` → `Widget.BBetter.TextView`) |
+
+**Colour comes from the TextAppearance.** The theme deliberately has **no** `android:textColor`:
+a theme-level `android:textColor` is the last fallback of every TextView attribute and silently
+overrode every TextAppearance colour (muted labels rendered white). Set `android:textColor` on a
+view only when it really differs from its appearance.
 
 Always set typography via `android:textAppearance="@style/TextAppearance.BBetter.Foo"` rather than `android:fontFamily` + `android:textSize` separately, so future scale changes propagate.
 
@@ -94,7 +109,7 @@ Always set typography via `android:textAppearance="@style/TextAppearance.BBetter
 | `icon_button_size` | 56 dp | Square icon buttons |
 | `primary_button_size` | 128 dp | Big primary action |
 | `form_row_height / icon / arrow / inner` | 70 / 45 / 20 / 45 dp | Form rows in AddEventActivity |
-| `text_display / headline / title / body / label / small / dialog` | 56 / 24 / 18 / 16 / 13 / 12 / 18 sp | Type scale (see above) |
+| `text_display / stat / headline / title / body / label / chip / caption / small / dialog` | 80 / 28 / 22 / 17 / 15 / 13 / 12 / 12 / 12 / 18 sp | Type scale (see above); `text_display_compact` 44sp = Home countdown until u13 |
 | `dialog_min_width` | 240 dp | Minimum popup width |
 
 **Rule**: any new layout uses tokens. If a value is missing from the scale, add a token rather than hard-coding the dp/sp.
@@ -162,7 +177,8 @@ Dark-only since the Stitch migration (u5). One theme tree, no runtime `setTheme(
   theme = `values-notnight/colors.xml` + dropping the forced mode. There is no `values-night/`.
   Carries all colour roles (`colorSecondary`/`colorAccent` = `bb_primary`, not dusk),
   `colorControlNormal/Activated`, `elevationOverlayEnabled=false`, status bar = `bb_surface`,
-  nav bar = `bb_surface_card`, light bars off, `android:textColor*`, and the dialog hooks below.
+  nav bar = `bb_surface_card`, light bars off, `android:textColorPrimary/Secondary/Hint*` (never
+  `android:textColor`, see §2), `fontFamily` = `@font/bb_font`, `android:textViewStyle`, and the dialog hooks below.
 - `Theme.BBetter.NoActionBar` — every activity in the manifest (and the `<application>` default).
   `SplashTheme` derives from it and only swaps the window background.
 - Dialog hooks wired from `Theme.BBetter`: `alertDialogTheme` / `android:alertDialogTheme` →

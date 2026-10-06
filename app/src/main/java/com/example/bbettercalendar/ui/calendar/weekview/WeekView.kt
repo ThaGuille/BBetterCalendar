@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -1355,12 +1356,26 @@ class WeekView @JvmOverloads constructor(
 
     /**
      * Returns the typeface used for events, time labels and date labels.
+     * BBetter (u6): el setter original sólo guardaba el valor y ningún Paint lo leía; ahora lo
+     * aplica a todos los Paint de texto (cabecera en peso 500 si el sistema lo permite).
      */
     @PublicApi
     var typeface: Typeface
         get() = viewState.typeface
         set(value) {
             viewState.typeface = value
+            val headerTypeface = if (Build.VERSION.SDK_INT >= 28) {
+                Typeface.create(value, 500, false)
+            } else {
+                Typeface.create(value, Typeface.NORMAL)
+            }
+            viewState.timeColumnTextPaint.typeface = value
+            viewState.headerTextPaint.typeface = headerTypeface
+            viewState.todayHeaderTextPaint.typeface = headerTypeface
+            viewState.weekendHeaderTextPaint.typeface = headerTypeface
+            viewState.eventTextPaint.typeface = value
+            viewState.allDayEventTextPaint.typeface = value
+            viewState.weekNumberTextPaint.typeface = value
             invalidate()
         }
 

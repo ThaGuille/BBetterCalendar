@@ -20,6 +20,7 @@ import androidx.navigation.Navigation;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.databinding.FragmentCalendarWeekBinding;
+import com.example.bbettercalendar.helpers.FontHelper;
 import com.example.bbettercalendar.ui.calendar.binders.WeekViewItemAdapter;
 
 import java.text.SimpleDateFormat;
@@ -70,6 +71,8 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
         adapter = new WeekViewItemAdapter();
         adapter.setOnRangeChangedListener(this::updateMonthTitle);
         binding.weekView.setAdapter(adapter);
+        // WeekView pinta con Paint: su atributo fontFamily no acepta @font/ (u6).
+        binding.weekView.setTypeface(FontHelper.appTypefaceOrDefault(requireContext()));
         binding.weekMonthTitleText.setText(monthYearFormat.format(new Date()));
 
         // Cover ~3 months around now so scrolling forward/back stays inside the queried window.

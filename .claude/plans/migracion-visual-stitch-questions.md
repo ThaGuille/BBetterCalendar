@@ -61,3 +61,22 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   salir de la app. ¿Es lo que quieres? — **Assumed:** sí por ahora (hoy es inalcanzable con el focus
   mode). Si u14 lo hace alcanzable, cambiar `FocusBackgroundObserver` por un contador de actividades
   iniciadas o `ProcessLifecycleOwner` (dependencia `lifecycle-process`).
+
+## u6
+- **Q:** Quité `android:textColor` de `Theme.BBetter` y de `Base.Theme.BBetter.Dialog` porque pisaba el
+  color de todos los `TextAppearance` (labels muted y texto de chips salían blancos). Los TextView sin
+  appearance siguen en `bb_on_surface` vía `android:textViewStyle`. Algún texto legado que antes salía
+  blanco por accidente ahora sale con el color de su appearance (muted). — **Assumed:** es lo correcto
+  (es lo que dice la escala). Para revertir: volver a poner
+  `<item name="android:textColor">@color/bb_on_surface</item>` en ambos temas.
+- **Q:** Volver a la app pulsando el **icono del launcher** con una concentración en marcha apila una
+  nueva Splash + una segunda `MainActivity`: Home sale en reposo y la sesión vieja cuenta como fallo
+  (desde u2; antes sólo salía en reposo). ¿Lo arreglamos? — **Assumed:** no se toca en u6 (lo natural
+  es u14, que mueve la sesión a Focus). Arreglo propuesto: en `SplashActivity.onCreate`, si
+  `!isTaskRoot()` y el intent es `MAIN`/`LAUNCHER`, `finish()` y `return` (patrón estándar); o
+  `launchMode="singleTop"` + `FLAG_ACTIVITY_CLEAR_TOP` al lanzar `MainActivity`. Ojo: Splash hace el
+  reseteo diario de stats, que habría que mover (p. ej. a `MainActivity.onStart`) si se salta.
+- **Q:** Los pesos 500/600 (Label, Chip, Caption) sólo se ven en API 28+ (`android:textFontWeight`); en
+  API 21–27 Label/Caption salen en 400 y Chip en 700. — **Assumed:** aceptable (minSdk 21; el diseño se
+  verifica en API 37). Alternativa: familias de un solo peso `bb_font_medium` / `bb_font_semibold`, a
+  costa de que cambiar la fuente toque 3 ficheros.

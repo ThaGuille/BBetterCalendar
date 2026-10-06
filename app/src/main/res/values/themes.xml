@@ -40,8 +40,16 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
 
-        <!-- Text -->
-        <item name="android:textColor">@color/bb_on_surface</item>
+        <!-- Font (u6): the bundled family for every TextView, button, dialog, snackbar and
+             framework text that does not set its own. android: = API 26+, app = AppCompat. -->
+        <item name="android:fontFamily">@font/bb_font</item>
+        <item name="fontFamily">@font/bb_font</item>
+
+        <!-- Text. NO android:textColor here (u6): a theme-level android:textColor is the last
+             fallback of every TextView's own attributes, so it overrode the colour of EVERY
+             TextAppearance (muted labels came out white, chip text white on sage). Plain
+             TextViews get bb_on_surface from textViewStyle -> TextAppearance.BBetter.Default. -->
+        <item name="android:textViewStyle">@style/Widget.BBetter.TextView</item>
         <item name="android:textColorPrimary">@color/bb_on_surface</item>
         <item name="android:textColorSecondary">@color/bb_on_surface_muted</item>
         <item name="android:textColorTertiary">@color/bb_on_surface_muted</item>
@@ -102,6 +110,7 @@
         <item name="android:colorControlActivated">@color/bb_primary</item>
         <item name="android:colorControlNormal">@color/bb_on_surface_muted</item>
         <item name="android:colorBackground">@color/bb_surface_card</item>
+        <item name="android:fontFamily">@font/bb_font</item>
         <item name="android:textColorPrimary">@color/bb_on_surface</item>
         <item name="android:textColorSecondary">@color/bb_on_surface_muted</item>
         <item name="android:textColorPrimaryInverse">@color/bb_on_primary</item>

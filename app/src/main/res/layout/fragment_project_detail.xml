@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Detalle de proyecto (spec projects-mvp): header editable (nombre/notas/deadline), lista de
+<!-- Detalle de proyecto (spec projects-mvp; u16: tarjetas bg_project_card + Widget.BBetter.Button.*): header editable (nombre/notas/deadline), lista de
      items y acciones de completar/borrar. Mismo patrón de scroll que fragment_home.xml. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -38,8 +38,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_card"
-            android:elevation="@dimen/elevation_card"
+            android:background="@drawable/bg_project_card"
             android:orientation="vertical"
             android:padding="@dimen/home_card_padding">
 
@@ -93,12 +92,15 @@
                     android:id="@+id/projectDetailDeadlineChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_secondary"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:textAppearance="@style/TextAppearance.BBetter.Chip"
+                    android:background="@drawable/bg_project_due_chip"
+                    android:letterSpacing="0.05"
+                    android:paddingStart="@dimen/project_chip_padding_h"
+                    android:paddingTop="@dimen/project_chip_padding_v"
+                    android:paddingEnd="@dimen/project_chip_padding_h"
+                    android:paddingBottom="@dimen/project_chip_padding_v"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                    android:textSize="@dimen/project_chip_text"
                     android:visibility="gone" />
             </LinearLayout>
 
@@ -109,8 +111,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_md"
-            android:background="@drawable/bg_card"
-            android:elevation="@dimen/elevation_card"
+            android:background="@drawable/bg_project_card"
             android:orientation="vertical"
             android:padding="@dimen/home_card_padding">
 
@@ -165,33 +166,21 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/projectDetailCompleteButton"
+                style="@style/Widget.BBetter.Button.Primary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_chip_energy"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:text="@string/project_detail_complete"
-                android:textAppearance="@style/TextAppearance.BBetter.Chip"
-                android:textColor="@color/bb_on_primary" />
+                android:text="@string/project_detail_complete" />
 
-            <TextView
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/projectDetailDeleteButton"
+                style="@style/Widget.BBetter.Button.Danger"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_md"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="@dimen/spacing_sm"
-                android:text="@string/project_detail_delete"
-                android:textAppearance="@style/TextAppearance.BBetter.Label"
-                android:textColor="@color/bb_danger" />
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:text="@string/project_detail_delete" />
 
         </LinearLayout>
 

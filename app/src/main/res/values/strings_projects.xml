@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u16 · Projects (html 03). Strings of the expandable list; the older project_* strings of the
+     create dialog / detail screen stay in strings.xml. -->
+<resources>
+    <string name="projects_title">Projects</string>
+    <string name="projects_summary_active">%1$d active</string>
+    <string name="projects_summary_due">%1$d due this week</string>
+    <string name="projects_summary_separator" translatable="false">·</string>
+    <string name="projects_streak_chip">%1$dd streak</string>
+
+    <string name="project_tasks_count">%1$d / %2$d tasks</string>
+    <string name="project_percent_completed">%1$d%% completed</string>
+    <string name="project_not_started">Not started</string>
+    <string name="project_meta_separator" translatable="false">•</string>
+
+    <plurals name="project_pomodoros_today">
+        <item quantity="one">%1$d Pomodoro today</item>
+        <item quantity="other">%1$d Pomodoros today</item>
+    </plurals>
+    <string name="project_est_remaining">Est. %1$s remaining</string>
+    <string name="project_duration_h" translatable="false">%1$dh</string>
+    <string name="project_duration_m" translatable="false">%1$dm</string>
+    <string name="project_duration_hm" translatable="false">%1$dh %2$dm</string>
+
+    <plurals name="project_subtask_pomodoros">
+        <item quantity="one">%1$d Pomodoro</item>
+        <item quantity="other">%1$d Pomodoros</item>
+    </plurals>
+    <string name="project_subtask_minutes" translatable="false">%1$dm</string>
+
+    <string name="project_due_today">Due today</string>
+    <string name="project_due_tomorrow">Due tomorrow</string>
+    <string name="project_due_on">Due %1$s</string>
+
+    <string name="project_add_subtask">Add subtask</string>
+    <string name="project_open_detail">Open project</string>
+    <string name="project_expand_desc">Expand %1$s</string>
+    <string name="project_collapse_desc">Collapse %1$s</string>
+    <string name="project_item_done_desc">Mark %1$s as done</string>
+
+    <!-- PLACEHOLDER(ui-placeholders#projects-weekly-rhythm): static copy, no rhythm analysis yet. -->
+    <string name="projects_rhythm_title">Weekly rhythm is on track</string>
+    <string name="projects_rhythm_subtitle">Best study block: 09:00 - 11:30 AM</string>
+</resources>

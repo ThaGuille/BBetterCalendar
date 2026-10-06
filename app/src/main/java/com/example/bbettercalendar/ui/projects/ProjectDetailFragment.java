@@ -140,7 +140,7 @@ public class ProjectDetailFragment extends Fragment {
         }
         chip.setVisibility(View.VISIBLE);
         int tint = state == ProjectDeadlineState.PASSED ? R.color.bb_danger : R.color.bb_accent_reward;
-        chip.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), tint));
+        chip.setTextColor(ContextCompat.getColor(requireContext(), tint));
         chip.setText(state == ProjectDeadlineState.PASSED
                 ? R.string.project_deadline_passed
                 : R.string.project_deadline_approaching);

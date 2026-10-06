@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u16 · Projects (html 03). -->
+<resources>
+    <dimen name="project_card_gap">12dp</dimen>             <!-- space-y-3 -->
+    <dimen name="project_card_padding">16dp</dimen>         <!-- p-4 -->
+    <dimen name="project_dot_size">10dp</dimen>             <!-- w-2.5 -->
+    <dimen name="project_dot_ring_size">18dp</dimen>        <!-- dot + ring-4 -->
+    <dimen name="project_dot_margin_top">3dp</dimen>        <!-- mt-1.5 inside the ring box -->
+    <dimen name="project_chip_text">11sp</dimen>            <!-- text-[11px] font-bold -->
+    <dimen name="project_chip_padding_h">8dp</dimen>        <!-- px-2 -->
+    <dimen name="project_chip_padding_v">2dp</dimen>        <!-- py-0.5 -->
+    <dimen name="project_subtask_text">14sp</dimen>         <!-- text-[14px] -->
+    <dimen name="project_subtask_row_gap">10dp</dimen>      <!-- space-y-2.5 -->
+    <dimen name="project_expand_button">32dp</dimen>        <!-- w-8 h-8 -->
+    <dimen name="project_insight_icon">40dp</dimen>         <!-- w-10 h-10 -->
+    <dimen name="project_bar_height">6dp</dimen>            <!-- h-1.5 -->
+</resources>

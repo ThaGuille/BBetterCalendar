@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="projects_title">Proyectos</string>
+    <string name="projects_summary_active">%1$d activos</string>
+    <string name="projects_summary_due">%1$d vencen esta semana</string>
+    <string name="projects_streak_chip">Racha de %1$dd</string>
+
+    <string name="project_tasks_count">%1$d / %2$d tareas</string>
+    <string name="project_percent_completed">%1$d%% completado</string>
+    <string name="project_not_started">Sin empezar</string>
+
+    <plurals name="project_pomodoros_today">
+        <item quantity="one">%1$d Pomodoro hoy</item>
+        <item quantity="other">%1$d Pomodoros hoy</item>
+    </plurals>
+    <string name="project_est_remaining">Quedan ~%1$s</string>
+
+    <plurals name="project_subtask_pomodoros">
+        <item quantity="one">%1$d Pomodoro</item>
+        <item quantity="other">%1$d Pomodoros</item>
+    </plurals>
+
+    <string name="project_due_today">Vence hoy</string>
+    <string name="project_due_tomorrow">Vence mañana</string>
+    <string name="project_due_on">Vence %1$s</string>
+
+    <string name="project_add_subtask">Añadir subtarea</string>
+    <string name="project_open_detail">Abrir proyecto</string>
+    <string name="project_expand_desc">Desplegar %1$s</string>
+    <string name="project_collapse_desc">Plegar %1$s</string>
+    <string name="project_item_done_desc">Marcar %1$s como hecha</string>
+
+    <string name="projects_rhythm_title">Tu ritmo semanal va bien</string>
+    <string name="projects_rhythm_subtitle">Mejor bloque de estudio: 09:00 - 11:30</string>
+</resources>

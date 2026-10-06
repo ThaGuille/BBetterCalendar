@@ -81,4 +81,16 @@ public interface FocusEventDAO {
             + "GROUP BY project.id, project.name "
             + "ORDER BY minutes DESC, project.name ASC")
     List<ProjectMinutes> getMinutesByProject(long start, long end);
+
+    // u16: igual que getMinutesByProject pero reactivo (LiveData de Room) para "x Pomodoros today"
+    // en las tarjetas de Projects: se reemite al insertar un FocusEvent.
+    @Query("SELECT project.id AS projectId, project.name AS projectName, "
+            + "COALESCE(SUM(focus_event.durationMin), 0) AS minutes "
+            + "FROM focus_event "
+            + "INNER JOIN calendarEntry ON calendarEntry.id = focus_event.entryId "
+            + "INNER JOIN project ON project.id = calendarEntry.projectId "
+            + "WHERE focus_event.type = 0 AND focus_event.entryId != 0 "
+            + "AND focus_event.timestamp BETWEEN :start AND :end "
+            + "GROUP BY project.id, project.name")
+    LiveData<List<ProjectMinutes>> observeMinutesByProject(long start, long end);
 }

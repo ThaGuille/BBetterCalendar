@@ -1,74 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fila de la lista de proyectos (spec projects-mvp): nombre, barra de % (recuento de items,
-     decisión #6 del roadmap), chip de estado del deadline (ámbar/rojo, lenguaje visual de
-     app-limits) y una franja de color de acento que cicla la paleta bb_*. -->
+<!-- u16 · Fila de la lista de proyectos = tarjeta desplegable (html 03). Cabecera: punto de acento
+     con aro, nombre + chip "DUE ..." (Flow: el chip baja de linea si no cabe, como en el HTML),
+     "x / y tasks • z% completed" y chevron. Debajo: barra de progreso y, desplegada, "x Pomodoros
+     today" / "Est. Nh remaining", subtareas, "Add subtask". Los ids de la barra y el meta son
+     projectCard* para no chocar con item_project_progress.xml (banda de Progress). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/projectCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/spacing_sm"
-    android:background="@drawable/bg_card"
-    android:elevation="@dimen/elevation_card"
-    android:orientation="horizontal"
-    android:padding="@dimen/spacing_md">
-
-    <View
-        android:id="@+id/projectColorAccent"
-        android:layout_width="4dp"
-        android:layout_height="match_parent"
-        android:background="@color/bb_primary" />
+    android:layout_marginBottom="@dimen/project_card_gap"
+    android:background="@drawable/bg_project_card"
+    android:orientation="vertical"
+    android:padding="@dimen/project_card_padding">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/projectHeader"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="@dimen/project_dot_ring_size"
+            android:layout_height="@dimen/project_dot_ring_size"
+            android:layout_marginTop="@dimen/project_dot_margin_top"
+            android:importantForAccessibility="no">
+
+            <View
+                android:id="@+id/projectDotRing"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.2"
+                android:background="@drawable/bg_project_dot" />
+
+            <View
+                android:id="@+id/projectColorAccent"
+                android:layout_width="@dimen/project_dot_size"
+                android:layout_height="@dimen/project_dot_size"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_project_dot" />
+        </FrameLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_marginStart="@dimen/spacing_card_gap"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/projectNameText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.BBetter.Title" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/projectDeadlineChip"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/projectNameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.Title"
+                    tools:text="Final thesis: chapter 3" />
+
+                <TextView
+                    android:id="@+id/projectDeadlineChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_project_due_chip"
+                    android:letterSpacing="0.05"
+                    android:paddingStart="@dimen/project_chip_padding_h"
+                    android:paddingTop="@dimen/project_chip_padding_v"
+                    android:paddingEnd="@dimen/project_chip_padding_h"
+                    android:paddingBottom="@dimen/project_chip_padding_v"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                    android:textSize="@dimen/project_chip_text"
+                    tools:text="Due Fri" />
+
+                <androidx.constraintlayout.helper.widget.Flow
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="projectNameText,projectDeadlineChip"
+                    app:flow_horizontalBias="0"
+                    app:flow_horizontalGap="@dimen/spacing_sm"
+                    app:flow_horizontalStyle="packed"
+                    app:flow_verticalGap="@dimen/spacing_xs"
+                    app:flow_wrapMode="chain"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_sm"
-                android:background="@drawable/bg_chip_secondary"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:textAppearance="@style/TextAppearance.BBetter.Chip"
-                android:visibility="gone" />
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/projectTasksText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                    tools:text="2 / 5 tasks" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:layout_marginEnd="@dimen/spacing_sm"
+                    android:importantForAccessibility="no"
+                    android:text="@string/project_meta_separator"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+                <TextView
+                    android:id="@+id/projectPercentText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                    tools:text="40% completed" />
+            </LinearLayout>
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/projectProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="@dimen/spacing_xs"
-            android:max="100"
-            android:progressBackgroundTint="@color/bb_surface_subtle"
-            android:progressTint="@color/bb_primary" />
+        <ImageView
+            android:id="@+id/projectExpandIcon"
+            android:layout_width="@dimen/project_expand_button"
+            android:layout_height="@dimen/project_expand_button"
+            android:importantForAccessibility="no"
+            android:padding="@dimen/spacing_xs"
+            android:src="@drawable/ic_expand_more_24"
+            app:tint="@color/bb_on_surface_muted" />
+    </LinearLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/projectCardProgress"
+        style="@style/Widget.BBetter.LinearProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_card_gap"
+        android:max="100"
+        tools:progress="40" />
+
+    <LinearLayout
+        android:id="@+id/projectPomodoroRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_timer_24"
+            app:tint="@color/bb_accent_reward" />
 
         <TextView
-            android:id="@+id/projectProgressText"
+            android:id="@+id/projectPomodorosToday"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            android:textColor="@color/bb_accent_reward"
+            tools:text="3 Pomodoros today" />
+
+        <TextView
+            android:id="@+id/projectEstRemaining"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
-            android:textAppearance="@style/TextAppearance.BBetter.Label" />
+            android:textAppearance="@style/TextAppearance.BBetter.Micro"
+            tools:text="Est. 4h remaining" />
+    </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/projectExpandedBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/widget_hairline"
+            android:background="@color/bb_divider" />
+
+        <LinearLayout
+            android:id="@+id/projectSubtasksContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_card_gap"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/projectAddSubtask"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:background="@drawable/bg_project_add_subtask"
+            android:clickable="true"
+            android:drawableStart="@drawable/ic_add_24"
+            android:drawablePadding="@dimen/spacing_sm"
+            android:drawableTint="@color/bb_on_surface_muted"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingStart="@dimen/spacing_card_gap"
+            android:paddingEnd="@dimen/spacing_card_gap"
+            android:text="@string/project_add_subtask"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold" />
+
+        <TextView
+            android:id="@+id/projectOpenDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_gravity="end"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingStart="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_sm"
+            android:text="@string/project_open_detail"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+            android:textColor="@color/bb_primary" />
     </LinearLayout>
 </LinearLayout>

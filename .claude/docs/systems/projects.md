@@ -1,6 +1,6 @@
 # System — Projects (`projects/` + `ui/projects/`)
 
-**Last verified:** 2026-10-06 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-07 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Projects bottom-nav tab: a `Project` entity that groups existing `CalendarEntry` (type
 task) rows via a nullable `projectId` — there is no separate "project item" table. Progress is
@@ -33,7 +33,7 @@ the project's attributed focus minutes surface on Progress.
 | `ProjectWithCounts` | `projects/ProjectWithCounts.java` | Room projection: `@Embedded Project` + `doneCount`/`totalCount`, populated by `observeAllWithCounts()`'s join query |
 | `ProjectsViewModel` | `ui/projects/ProjectsViewModel.java` | `@HiltViewModel`: `Transformations.map` over `ProjectsRepository.observeAllWithCounts()` → `ProjectListItem`s; `createProject()` delegates to the repository |
 | `ProjectListItem` | `ui/projects/ProjectListItem.java` | Non-entity UI composition: `Project` + `doneCount`/`totalCount` + `percent()` |
-| `ProjectListAdapter` | `ui/projects/ProjectListAdapter.java` | RecyclerView rows: name, % bar, deadline chip, color accent. Owns the accent palette: `ACCENT_COLORS` (= `bb_project_1..4` since u4) + `accentColorResFor(int)` (public — the Progress band reuses it so the palette cycling, negative-modulo included, lives in one place) |
+| `ProjectListAdapter` | `ui/projects/ProjectListAdapter.java` | u16: expandable cards (html 03): accent dot, "DUE ..." chip, x/y tasks, % bar, expanded body with "x Pomodoros today", "Est. Nh remaining", subtasks (tap toggles done), "Add subtask" (`QuickAddTaskSheet.forProject`); long-press / "Open project" -> detail. `ProjectsViewModel` composes projects + `CalendarEntryDAO.observeAllProjectItems()` + `FocusEventDAO.observeMinutesByProject(today)` + configured pomodoro length; `ProjectListItem` holds the pure derivations. Owns the accent palette: `ACCENT_COLORS` (= `bb_project_1..4` since u4) + `accentColorResFor(int)` (public — the Progress band reuses it so the palette cycling, negative-modulo included, lives in one place) |
 | `CreateProjectDialog` | `ui/projects/CreateProjectDialog.java` | Name + optional notes/deadline; same `AlertDialog.Builder` pattern as `AppLimitDialog` |
 | `ProjectDetailFragment` | `ui/projects/ProjectDetailFragment.java` | Header (name/notes edit — **auto-persisted on `onPause`**, no Save button; deadline picker + chip), item list, add-item, complete, delete (confirm dialog), focus-this → Home |
 | `ProjectDetailViewModel` | `ui/projects/ProjectDetailViewModel.java` | `Transformations.switchMap` on `projectId` over `ProjectDAO.observeById` + `CalendarEntryDAO.observeItemsByProject`, items enriched via `FocusAttributionRepository.enrich()` (shared with `HomeViewModel`, see `data-model.md`); `addItem`, `updateHeader`, `updateDeadline`, `completeProject`, `deleteProject` (cascade), all on `@DbWriteExecutor` |

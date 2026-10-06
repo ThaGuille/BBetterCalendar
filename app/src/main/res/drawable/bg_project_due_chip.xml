@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u16: "DUE FRI" pill of a project card (html 03: surface-container-high). Text colour is set per
+     deadline state by ProjectListAdapter. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_raised" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

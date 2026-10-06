@@ -95,6 +95,12 @@ public interface CalendarEntryDAO {
             "AND isTemplate = 0 AND isDismissed = 0 ORDER BY startMillis ASC")
     LiveData<List<CalendarEntry>> observeItemsByProject(int projectId);
 
+    // u16: items de TODOS los proyectos en una sola fuente reactiva, para las tarjetas desplegables
+    // de la lista de Projects (agrupa por projectId en el ViewModel). Mismos filtros que arriba.
+    @Query("SELECT * FROM CalendarEntry WHERE projectId != 0 " +
+            "AND isTemplate = 0 AND isDismissed = 0 ORDER BY startMillis ASC")
+    LiveData<List<CalendarEntry>> observeAllProjectItems();
+
     // Cascade manual del borrado de proyecto (decisión #3 del proposal — sin Room FK onDelete).
     @Query("DELETE FROM CalendarEntry WHERE projectId = :projectId")
     void deleteItemsByProject(int projectId);

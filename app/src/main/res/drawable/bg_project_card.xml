@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u16: collapsed project card (html 03: surface-container, rounded-[20px], transparent border). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_card" />
+    <corners android:radius="@dimen/radius_card" />
+</shape>

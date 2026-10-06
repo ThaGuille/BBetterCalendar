@@ -18,7 +18,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.bbettercalendar.databinding.ActivityMainBinding;
-import com.example.bbettercalendar.ui.focus.FocusBackgroundObserver;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,10 +85,10 @@ public class MainActivity extends AppCompatActivity {
                 new ActivityResultContracts.RequestPermission(),
                 granted -> { /* result captured by PermissionGate via Configuration state */ });
 
-        // Sesión de pomodoro compartida por toda la Activity (FocusSessionViewModel, Home y, más
-        // adelante, Focus): su periodo de gracia por segundo plano se alimenta del ciclo de vida
-        // de ESTA Activity. El observer resuelve el ViewModel en perezoso (ver su javadoc).
-        getLifecycle().addObserver(new FocusBackgroundObserver(this));
+        // Sesión de pomodoro: FocusSessionViewModel (ámbito de esta Activity, compartido por Home y
+        // Focus). Desde u14 su periodo de gracia por segundo plano lo alimenta un observer a nivel
+        // de PROCESO (FocusBackgroundObserver + ProcessLifecycleOwner) que registra el propio
+        // ViewModel: abrir otra Activity de la app ya no cuenta como salir de ella.
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

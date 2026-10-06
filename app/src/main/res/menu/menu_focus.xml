@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u14 · Focus top bar: the 🚫 block-mode toggle (html 01 "do_not_disturb_on" trailing icon).
+     Icon, tint and description are set by FocusFragment.renderBlockMode (3 states). -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/focusBlockModeButton"
+        android:icon="@drawable/ic_do_not_disturb_24"
+        android:title="@string/home_block_mode_off"
+        app:showAsAction="always" />
+</menu>

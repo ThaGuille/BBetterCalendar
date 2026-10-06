@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u14 · Focus: completed cycle dot (html 01 bg-primary). Same 14dp box as the current dot
+     (2dp inset) so the row stays aligned. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="@dimen/focus_cycle_dot_inset"
+        android:left="@dimen/focus_cycle_dot_inset"
+        android:right="@dimen/focus_cycle_dot_inset"
+        android:top="@dimen/focus_cycle_dot_inset">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_primary" />
+        </shape>
+    </item>
+</layer-list>

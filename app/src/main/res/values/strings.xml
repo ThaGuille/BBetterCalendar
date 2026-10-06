@@ -398,4 +398,33 @@
     <string name="home_next_up_desc">Open calendar</string>
     <string name="home_task_done">Done</string>
 
+
+    <!-- u14 · Focus (html 01) -->
+    <string name="focus_mode_chip_format">%1$s · %2$d of %3$d</string>
+    <string name="focus_mode_chip_infinite_format">%1$s · cycle %2$d</string>
+    <string name="focus_ends_at">Ends at %1$s</string>
+    <string name="focus_idle_line">Ready when you are</string>
+    <string name="focus_start">Start focus</string>
+    <string name="focus_pause">Pause focus timer</string>
+    <string name="focus_resume">Resume focus timer</string>
+    <string name="focus_stop">Stop focus session</string>
+    <string name="focus_skip_rest">Skip rest</string>
+    <string name="focus_skip_rest_unavailable">Skip rest (only during a rest)</string>
+    <string name="focus_today">Today</string>
+    <string name="focus_streak">Streak</string>
+    <plurals name="focus_streak_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="focus_fails_today">
+        <item quantity="one">%d missed session</item>
+        <item quantity="other">%d missed sessions</item>
+    </plurals>
+    <string name="focus_studying_now">Studying now</string>
+    <string name="focus_friends_meta" translatable="false">%1$d / %2$d</string>
+    <string name="focus_friend_away">away</string>
+    <string name="focus_invite_friends">Invite friends to study together</string>
+    <string name="focus_invite_soon">Inviting friends is coming soon</string>
+    <string name="focus_cycles_desc">Cycle %1$d of %2$d</string>
+
 </resources>

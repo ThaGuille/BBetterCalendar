@@ -29,19 +29,15 @@ import com.example.bbettercalendar.databinding.FragmentHomeBinding;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.helpers.FormatHelper;
-import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
-import com.example.bbettercalendar.popups.AlertPopup;
-import com.example.bbettercalendar.popups.FirstFocusCelebrationPopup;
 import com.example.bbettercalendar.popups.FocusStreakPopup;
-import com.example.bbettercalendar.popups.MessagePopup;
 import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.TimerPopup;
 import com.example.bbettercalendar.social.Friend;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialSnapshot;
-import com.example.bbettercalendar.ui.common.SingleEvent;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
+import com.example.bbettercalendar.ui.focus.FocusSessionEventPresenter;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -77,9 +73,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     private FocusSessionViewModel focusSession;
     // Último estado pintado: sólo se re-pintan los controles cuando cambia algo más que el texto.
     private FocusUiState lastRenderedState;
-    private final AlertPopup alertPopup = new AlertPopup();
     private final TimerPopup timerPopup = new TimerPopup();
-    private MessagePopup messagePopup;
+    private FocusSessionEventPresenter sessionEvents;
 
     // "Today" task list (spec tasks-home-today)
     private TodayTaskAdapter todayTaskAdapter;
@@ -90,9 +85,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
     @Inject
     ConfigurationManager configurationManager;
-
-    @Inject
-    FocusCompleteNotifier focusCompleteNotifier;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -109,10 +101,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         // Racha: tap = FocusStreakPopup (spec focus-mode-and-streak).
         binding.homeStreakButton.setOnClickListener(v -> showStreakPopup());
 
-        alertPopup.setOnPopupListener(this);
         timerPopup.setOnPopupListener(this);
-        messagePopup = new MessagePopup();
-        messagePopup.setOnPopupListener(this);
 
         // Header. PLACEHOLDER(ui-placeholders#home-user-name): no hay nombre de usuario guardado,
         // el saludo es genérico y el avatar lleva una inicial fija.
@@ -124,10 +113,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         // Tarjeta del temporizador: texto, modo y ciclo salen del estado de la sesión.
         lastRenderedState = null;
         focusSession.getUiState().observe(getViewLifecycleOwner(), this::renderTimer);
-        focusSession.getCycleCompletedEvents()
-                .observe(getViewLifecycleOwner(), this::maybeShowCycleFinished);
-        focusSession.getSessionFailedEvents()
-                .observe(getViewLifecycleOwner(), this::maybeShowSessionFailed);
+        // Resultados de un solo uso de la sesión (ciclos completados → Cycle complete, fallo,
+        // primer pomodoro del día, tarea auto-completada): los pinta el presentador compartido con
+        // Focus (u14); el primero de los dos que esté visible los consume.
+        sessionEvents = new FocusSessionEventPresenter(this, focusSession, this::renderCycleLine);
+        sessionEvents.observe(getViewLifecycleOwner());
 
         // Racha real (StreakCalculator, u3): días seguidos + semana L→D.
         homeViewModel.getStreak().observe(getViewLifecycleOwner(), binding.homeStreakWeek::setStreak);
@@ -137,24 +127,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         if (SocialFeature.isEnabled()) {
             homeViewModel.getSocialSnapshot().observe(getViewLifecycleOwner(), this::renderFriends);
         }
-
-        // Primer pomodoro del día -> celebración.
-        homeViewModel.getFirstFocusOfDay()
-                .observe(getViewLifecycleOwner(), this::maybeShowFirstFocusCelebration);
-
-        // Auto-completado de una tarea al alcanzar su objetivo (spec focus-attribution): feedback
-        // in-app (háptico + sonido) + notificación de fallback, y se desvincula el timer.
-        homeViewModel.getAutoCompletedTaskTitle().observe(getViewLifecycleOwner(), title -> {
-            if (title == null) {
-                return;
-            }
-            HapticFeedback.confirm(binding.homeTimerCard);
-            SoundFeedback.get(requireContext()).playSuccess();
-            focusCompleteNotifier.fire(title);
-            FocusTarget.clear();
-            renderCycleLine();
-            homeViewModel.clearAutoCompletedTaskTitle();
-        });
 
         homeViewModel.getNextUp().observe(getViewLifecycleOwner(), this::renderNextUp);
 
@@ -225,25 +197,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             }
         }
         return null;
-    }
-
-    /**
-     * Muestra la celebración del primer pomodoro del día si hay una pendiente.
-     *
-     * <p>La guarda es {@code isStateSaved()} y NO {@code isResumed()}: un observador de LiveData
-     * se activa en STARTED y el valor retenido se entrega ANTES de onResume, así que exigir
-     * RESUMED aquí descartaba el premio en la propia entrega — y como LiveData sólo reentrega al
-     * pasar de inactivo a activo, nadie volvía a intentarlo y la celebración se perdía del todo.
-     * Lo único que hay que evitar de verdad es el commit posterior a onSaveInstanceState; de ese
-     * caso se recupera onResume() releyendo el valor, que sigue sin limpiar.
-     */
-    private void maybeShowFirstFocusCelebration(Integer daysThisMonth) {
-        if (daysThisMonth == null || isStateSaved()) {
-            return;
-        }
-        FirstFocusCelebrationPopup.newInstance(daysThisMonth)
-                .show(getParentFragmentManager(), FirstFocusCelebrationPopup.POPUP_TAG);
-        homeViewModel.clearFirstFocusOfDay();
     }
 
     private void toggleOverdueSection() {
@@ -328,26 +281,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         }
         binding.homeCycleText.setText(line);
         binding.homeCycleChip.setContentDescription(getString(R.string.home_cycle_chip_desc, line));
-    }
-
-    /** Todos los ciclos configurados completados (antes MessagePopup desde completeTimer/Rest). */
-    private void maybeShowCycleFinished(SingleEvent<Integer> event) {
-        if (event == null || event.isHandled() || isStateSaved()) {
-            return;
-        }
-        event.consume();
-        messagePopup.setText(getString(R.string.home_cycle_finished));
-        messagePopup.show(getParentFragmentManager(), "popup_tag");
-    }
-
-    /** La sesión falló por quedarse en segundo plano (antes onActivityResumed + isTimerFailed). */
-    private void maybeShowSessionFailed(SingleEvent<Boolean> event) {
-        if (event == null || event.isHandled() || isStateSaved()) {
-            return;
-        }
-        event.consume();
-        alertPopup.selectView(PopupHelper.ALERT_POPUP);
-        alertPopup.show(getParentFragmentManager(), "popup_tag");
     }
 
     /**
@@ -509,28 +442,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             return;
         }
         renderCycleLine();
-        // Red de seguridad: si el premio llegó mientras el estado estaba guardado, el observador
-        // no pudo abrirlo y el valor sigue sin limpiar. Aquí ya es seguro comitear.
-        maybeShowFirstFocusCelebration(homeViewModel.getFirstFocusOfDay().getValue());
-        // Misma red para los avisos de la sesión que llegaran con el estado guardado.
-        maybeShowCycleFinished(focusSession.getCycleCompletedEvents().getValue());
-        maybeShowSessionFailed(focusSession.getSessionFailedEvents().getValue());
+        // Red de seguridad: un resultado de la sesión (premio, fallo, ciclos…) que llegara con el
+        // estado guardado sigue pendiente; aquí ya es seguro comitear.
+        sessionEvents.recheck();
     }
 
     @Override
     public void OnClosePopup(int popupType) {
-        if (popupType == PopupHelper.ALERT_POPUP) {
-            focusSession.resetIdleDisplay();
-        }
     }
 
     //Método genérico llamado al cerrar los diferentes popups
     @Override
     public void OnClosePopup(int popupType, Object result) {
         try {
-            if (popupType == PopupHelper.ALERT_POPUP) {
-                focusSession.resetIdleDisplay();
-            } else if (popupType == PopupHelper.TIMER_POPUP) {
+            if (popupType == PopupHelper.TIMER_POPUP) {
                 Configuration config = (Configuration) result;
                 // Antes checkConfigChanges(): descanso desactivado corta el descanso en curso,
                 // auto-ciclo desactivado reinicia el contador de ciclos.

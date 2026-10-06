@@ -18,7 +18,9 @@ import com.example.bbettercalendar.blocking.FocusBlockState;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
 import com.example.bbettercalendar.notifications.focus.FocusFailNotifier;
+import com.example.bbettercalendar.stats.FocusAttributionRepository;
 import com.example.bbettercalendar.stats.FocusSessionRepository;
 import com.example.bbettercalendar.ui.common.SingleEvent;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.Settings;
@@ -40,11 +42,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  * the 🚫 block-mode flag, the background-fail grace period and the {@link SavedStateHandle}
  * persistence (end instant, not ticks). All public methods: main thread only.
  *
- * <p>The grace period is fed by {@link FocusBackgroundObserver}, which {@code MainActivity}
- * registers on its own lifecycle.
+ * <p>The grace period ({@link BackgroundGrace}) is fed by {@link FocusBackgroundObserver}, a
+ * <b>process-level</b> observer (u14): only the whole app going to background counts, never
+ * in-app navigation or opening another of the app's activities.
  */
 @HiltViewModel
-public class FocusSessionViewModel extends ViewModel implements FocusTimerStateMachine.Listener {
+public class FocusSessionViewModel extends ViewModel implements FocusTimerStateMachine.Listener,
+        FocusBackgroundObserver.Listener {
 
     private static final String TAG = "FocusSessionViewModel";
     private static final long TICK_MILLIS = 1000L;
@@ -63,6 +67,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private final ConfigurationManager configurationManager;
     private final FocusSessionRepository repository;
     private final FocusFailNotifier focusFailNotifier;
+    private final FocusAttributionRepository focusAttributionRepository;
+    private final FocusCompleteNotifier focusCompleteNotifier;
     private final Context appContext;
     private final FocusTimerStateMachine machine;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -73,32 +79,49 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private final MutableLiveData<SingleEvent<Boolean>> sessionFailed = new MutableLiveData<>();
 
     private boolean blockModeArmed;
-    // Old HomeFragment.isBackground: true between "app went to background with a running,
-    // unarmed concentration" and either the return to foreground or the grace expiring.
-    private boolean graceArmed;
+    private final BackgroundGrace grace;
+    private final FocusBackgroundObserver backgroundObserver;
     // u13: el servicio en primer plano sigue a la SESIÓN (≠ STOPPED), no a la pantalla visible.
     // Antes lo arrancaba/paraba HomeFragment en onStart/onStop; Home ya no está a la vista
     // mientras corre la sesión (Play navega a Focus).
     private boolean foregroundServiceOn;
 
     private final Runnable tick = this::onTick;
-    private final Runnable graceExpired = this::onGraceExpired;
 
     @Inject
     public FocusSessionViewModel(SavedStateHandle savedState,
                                  ConfigurationManager configurationManager,
                                  FocusSessionRepository repository,
                                  FocusFailNotifier focusFailNotifier,
+                                 FocusAttributionRepository focusAttributionRepository,
+                                 FocusCompleteNotifier focusCompleteNotifier,
                                  @ApplicationContext Context appContext) {
         this.savedState = savedState;
         this.configurationManager = configurationManager;
         this.repository = repository;
         this.focusFailNotifier = focusFailNotifier;
+        this.focusAttributionRepository = focusAttributionRepository;
+        this.focusCompleteNotifier = focusCompleteNotifier;
         this.appContext = appContext;
         this.machine = new FocusTimerStateMachine(
                 SystemClock::elapsedRealtime, this::currentSettings, this);
+        this.grace = new BackgroundGrace(new BackgroundGrace.Scheduler() {
+            @Override
+            public void postDelayed(@NonNull Runnable task, long delayMillis) {
+                handler.postDelayed(task, delayMillis);
+            }
+
+            @Override
+            public void cancel(@NonNull Runnable task) {
+                handler.removeCallbacks(task);
+            }
+        }, FocusSessionConstants.FAIL_GRACE_MILLIS, this::onGraceExpired);
         repository.refreshToday();
         restoreFromSavedState();
+        // u14: gracia a nivel de PROCESO (ver FocusBackgroundObserver): sólo cuenta que la app
+        // entera pase a segundo plano, no navegar dentro de ella ni abrir otra de sus Activities.
+        backgroundObserver = FocusBackgroundObserver.get();
+        backgroundObserver.addListener(this);
     }
 
     // ============================================================================ public API
@@ -123,9 +146,40 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         return sessionFailed;
     }
 
-    /** Today's fail count (shared with Home's fails chip). */
+    /** Today's fail count (Focus screen). */
     public LiveData<Integer> getTodayFails() {
         return repository.getTodayFails();
+    }
+
+    /** Today's studied time in millis (Focus "Today" strip); null until the first read. */
+    public LiveData<Integer> getTodayTimeStudiedMillis() {
+        return repository.getTodayTimeStudiedMillis();
+    }
+
+    /** Days with a pomodoro this month, emitted only when today's first one completes. */
+    public LiveData<Integer> getFirstFocusOfDay() {
+        return repository.getFirstFocusOfDay();
+    }
+
+    /** Main thread: after showing the first-focus celebration. */
+    public void clearFirstFocusOfDay() {
+        repository.clearFirstFocusOfDay();
+    }
+
+    /** Title of a bound task that just reached its target (null when nothing is pending). */
+    public LiveData<String> getAutoCompletedTaskTitle() {
+        return focusAttributionRepository.getAutoCompletedTaskTitle();
+    }
+
+    /**
+     * The screen gave the in-app feedback for an auto-completed task: fire the fallback
+     * notification, unbind {@link FocusTarget} and clear the pending title (the body of the old
+     * HomeFragment observer).
+     */
+    public void onAutoCompletedTaskShown(@NonNull String title) {
+        focusCompleteNotifier.fire(title);
+        FocusTarget.clear();
+        focusAttributionRepository.clearAutoCompletedTaskTitle();
     }
 
     /** Play/pause button. @return true if running afterwards (play the start sound), else paused. */
@@ -230,30 +284,24 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     // ===================================================== background grace (FocusBackgroundObserver)
 
     /**
-     * The host activity stopped for real (not a configuration change). Mirrors the old
+     * The whole APP went to background (process ON_STOP, u14). Mirrors the old
      * {@code onActivityStopped}: only a running concentration without block mode arms the grace
      * period — with block mode on the accessibility cover already keeps the user from leaving.
      */
-    void onAppBackgrounded() {
-        if (machine.shouldArmBackgroundGrace(blockModeArmed)) {
+    @Override
+    public void onAppBackgrounded() {
+        if (grace.onBackgrounded(machine.shouldArmBackgroundGrace(blockModeArmed))) {
             Log.i(TAG, "App enters background: grace period armed");
-            graceArmed = true;
-            handler.removeCallbacks(graceExpired);
-            handler.postDelayed(graceExpired, FocusSessionConstants.FAIL_GRACE_MILLIS);
         }
     }
 
-    /** The host activity started again: disarm a pending grace period. */
-    void onAppForegrounded() {
-        graceArmed = false;
-        handler.removeCallbacks(graceExpired);
+    /** The app is visible again: disarm a pending grace period. */
+    @Override
+    public void onAppForegrounded() {
+        grace.onForegrounded();
     }
 
     private void onGraceExpired() {
-        if (!graceArmed) {
-            return;
-        }
-        graceArmed = false;
         if (machine.fail()) {
             onTransition();
         }
@@ -414,8 +462,14 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
 
     @Override
     protected void onCleared() {
-        // The ticker dies with the ViewModel, but a pending grace period is left to fire: leaving
-        // the app with back mid-session (activity finishing) still counts as a fail, as before.
+        backgroundObserver.removeListener(this);
+        // The ticker dies with the ViewModel, but leaving the app with back mid-session (activity
+        // finishing) still counts as a fail, as before. The process ON_STOP arrives ~700 ms AFTER
+        // this (and nobody listens any more), so the grace is armed here with the same rule; one
+        // that was already pending is simply left to fire.
+        if (!grace.isArmed()) {
+            grace.onBackgrounded(machine.shouldArmBackgroundGrace(blockModeArmed));
+        }
         handler.removeCallbacks(tick);
         if (foregroundServiceOn) {
             appContext.stopService(new Intent(appContext, HomeForegroundService.class));

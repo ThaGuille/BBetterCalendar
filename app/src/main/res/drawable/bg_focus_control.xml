@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u14 · Focus: secondary round control (stop / skip; html 01 w-14 rounded-full bg-surface
+     border-hairline). -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/bb_ripple_primary">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_surface_card" />
+            <stroke android:width="@dimen/widget_hairline" android:color="@color/bb_outline" />
+        </shape>
+    </item>
+</ripple>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u14 · Focus: pending cycle dot (html 01 border-hairline bg-surface). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="@dimen/focus_cycle_dot_inset"
+        android:left="@dimen/focus_cycle_dot_inset"
+        android:right="@dimen/focus_cycle_dot_inset"
+        android:top="@dimen/focus_cycle_dot_inset">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_surface_card" />
+            <stroke android:width="@dimen/widget_hairline" android:color="@color/bb_outline" />
+        </shape>
+    </item>
+</layer-list>

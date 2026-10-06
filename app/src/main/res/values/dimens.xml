@@ -138,6 +138,16 @@
     <dimen name="home_friend_avatar_size">32dp</dimen>  <!-- w-8 overlapped avatars -->
     <dimen name="home_friend_avatar_overlap">-8dp</dimen> <!-- -space-x-2 -->
     <dimen name="home_next_up_icon_tile">36dp</dimen>   <!-- w-9 rounded-xl -->
+    <!-- u14 · Focus (html 01) -->
+    <dimen name="focus_timer_text">74sp</dimen>          <!-- text-[74px] countdown -->
+    <dimen name="focus_ring_size">264dp</dimen>          <!-- w-72 box, r=126/140 + 7dp stroke -->
+    <dimen name="focus_control_size">56dp</dimen>        <!-- w-14 stop / skip -->
+    <dimen name="focus_control_gap">24dp</dimen>         <!-- gap-6 -->
+    <dimen name="focus_cycle_dot_box">14dp</dimen>       <!-- w-2.5 dot + 2dp ring each side -->
+    <dimen name="focus_cycle_dot_inset">2dp</dimen>
+    <dimen name="focus_cycle_dot_gap">4dp</dimen>        <!-- gap-2 minus the ring boxes -->
+    <dimen name="focus_friend_avatar_size">44dp</dimen>  <!-- w-11 -->
+    <dimen name="focus_icon_button">48dp</dimen>         <!-- w-12 top-bar action -->
     <!-- Celda del calendario de rachas dentro del popup -->
     <dimen name="streak_day_marker_size">30dp</dimen>
 

@@ -44,7 +44,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            // u11 (migración visual): bloques sociales con datos falsos (MockSocialRepository).
+            // Solo debug; en release los bloques sociales desaparecen (SocialFeature.isEnabled()).
+            buildConfigField "boolean", "FEATURE_SOCIAL_MOCK", "true"
+        }
         release {
+            buildConfigField "boolean", "FEATURE_SOCIAL_MOCK", "false"
             // minifyEnabled se queda en false para la 1ª release: Hilt/Room/Gson usan reflexión y las
             // reglas ProGuard no están probadas. Revisar más adelante para reducir el tamaño del APK.
             minifyEnabled false
@@ -65,6 +71,8 @@ android {
     }
     buildFeatures {
         viewBinding true
+        // AGP 8 ya no genera BuildConfig por defecto; hace falta para FEATURE_SOCIAL_MOCK (u11).
+        buildConfig true
     }
     viewBinding {
         enabled = true

@@ -119,6 +119,7 @@ Per-runtime-subsystem living docs (intent, async/manifest wiring, invariants, co
 | Notifications | [`notifications.md`](.claude/docs/systems/notifications.md) | Channels, `BBetterNotifier`, permission gate |
 | Startup & config | [`startup-config.md`](.claude/docs/systems/startup-config.md) | `SplashActivity` boot sequence, `ConfigurationManager` |
 | Projects | [`projects.md`](.claude/docs/systems/projects.md) | `Project` entity, `projectId` on `CalendarEntry`, Projects tab + detail screen |
+| UI placeholders | [`ui-placeholders.md`](.claude/docs/systems/ui-placeholders.md) | Ledger of designed UI that shows mock/approximate data (`PLACEHOLDER(ui-placeholders#id)` markers); social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK` (`social/`) |
 
 Excluded (owned elsewhere): `popups`/`helpers`/`feedback` (see `architectural_patterns.md`). **Code wins on conflict** — if a doc drifts, fix it and bump its `Last verified:` date.
 
@@ -192,6 +193,7 @@ with e.g. "use the code-reviewer subagent".
 | `app/src/main/java/.../usage/` | Usage measurement (`UsageStatsRepository`) + `limits/` (alarm-based warn pipeline) |
 | `app/src/main/java/.../blocking/` | Accessibility-service enforcement (cover overlay / bounce-to-home) |
 | `app/src/main/java/.../notifications/` | Channels, `BBetterNotifier`, permission gate + per-feature notifiers (`focus/`, `usage/`, `event/`) |
+| `app/src/main/java/.../social/` | Social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK`: `SocialFeature`, `SocialRepository` (mock / empty), Hilt `SocialModule` |
 | `app/src/main/java/.../helpers/` | `FormatHelper`, `ScreenHelper`, `ToolbarHelper`, toolbar listener interfaces |
 | `app/src/main/java/.../popups/` | `PopupHelper` base + 6 concrete dialog fragments |
 | `app/src/main/java/.../feedback/` | `HapticFeedback`, `SoundFeedback` |

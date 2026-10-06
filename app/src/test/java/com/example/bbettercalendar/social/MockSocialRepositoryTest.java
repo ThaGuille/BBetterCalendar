@@ -1,0 +1,88 @@
+package com.example.bbettercalendar.social;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import java.util.List;
+
+public class MockSocialRepositoryTest {
+
+    private final SocialSnapshot mock = new MockSocialRepository().getSnapshot().getValue();
+
+    @Test
+    public void mock_matchesStitchCounts() {
+        assertNotNull(mock);
+        // html 01: "Studying now 5 / 8"
+        assertEquals(8, mock.getFriendCount());
+        assertEquals(5, mock.getStudyingCount());
+        assertFalse(mock.isEmpty());
+    }
+
+    @Test
+    public void mock_topFriendIsLaia() {
+        // html 01 crown, html 02 "Laia and 3 others still studying"
+        Friend top = mock.getTopFriend();
+        assertNotNull(top);
+        assertEquals("Laia", top.getName());
+        assertEquals(192, top.getMinutesToday()); // 3:12:05
+    }
+
+    @Test
+    public void mock_userRankIsSecondOfNine() {
+        SocialRank rank = mock.getUserRank();
+        assertNotNull(rank);
+        assertEquals(2, rank.getPosition());
+        assertEquals(9, rank.getGroupSize());
+        assertFalse(rank.isFirst());
+    }
+
+    @Test
+    public void friends_areOrderedStudyingFirstThenByTime() {
+        List<Friend> friends = mock.getFriends();
+        boolean seenAway = false;
+        for (int i = 0; i < friends.size(); i++) {
+            Friend f = friends.get(i);
+            if (!f.isStudying()) seenAway = true;
+            assertFalse("studying after away at " + i, seenAway && f.isStudying());
+            assertFalse(f.getInitials().isEmpty());
+            if (i > 0 && friends.get(i - 1).isStudying() == f.isStudying()) {
+                assertTrue(friends.get(i - 1).getFocusSecondsToday() >= f.getFocusSecondsToday());
+            }
+        }
+        assertEquals("Laia", friends.get(0).getName());
+        assertEquals("Pau", friends.get(1).getName());
+    }
+
+    @Test
+    public void studying_containsOnlyStudying() {
+        for (Friend f : mock.getStudying()) {
+            assertTrue(f.isStudying());
+        }
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void friends_areImmutable() {
+        mock.getFriends().clear();
+    }
+
+    @Test
+    public void empty_repositoryHasNoData() {
+        SocialSnapshot empty = new EmptySocialRepository().getSnapshot().getValue();
+        assertSame(SocialSnapshot.EMPTY, empty);
+        assertTrue(empty.isEmpty());
+        assertEquals(0, empty.getStudyingCount());
+        assertNull(empty.getTopFriend());
+        assertNull(empty.getUserRank());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void rank_rejectsPositionOutsideGroup() {
+        new SocialRank(3, 2);
+    }
+}

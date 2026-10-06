@@ -118,3 +118,9 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   (el chip CONCENTRATION de Home se ve algo más ligero). — **Assumed:** 600, como dice DESIGN §3. Para
   volver a 700: en `styles_typography.xml` cambiar su `fontFamily` a `@font/bb_font` y añadir
   `android:textStyle=bold`.
+
+## u11
+- **Q:** Home (html 04) muestra «3 friends studying now · Maya, Alex, Leo», pero Focus/Cycle complete usan
+  otro grupo (Laia, Marc, Pau…). — **Assumed:** un único conjunto de datos falsos en todas las pantallas
+  (8 amigos, 5 estudiando, Laia arriba, usuario 2.º de 9), así que Home dirá «5 friends studying now». Para
+  cambiarlo: editar `MockSocialRepository.buildSnapshot()` (y los asserts de `MockSocialRepositoryTest`).

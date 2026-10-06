@@ -39,5 +39,12 @@
     <color name="mist_50_a38">#61EAF2EC</color>  <!-- 38 %: disabled content (MD3) -->
     <color name="pine_950_a60">#9912201C</color> <!-- 60 %: scrim (never pure black) -->
     <color name="pine_950_a20">#3312201C</color> <!-- 20 %: ripple on accent fills (u7) -->
+    <!-- Chart washes (u10, html 13 / 14): gradient ends + translucent bands / halo. -->
+    <color name="sage_300_a32">#527FB69A</color> <!-- 32 %: hero line area top -->
+    <color name="sage_300_a12">#1F7FB69A</color> <!-- 12 %: FOCUS bands -->
+    <color name="sage_300_a00">#007FB69A</color> <!-- 0 %: gradient end (same hue, no grey fringe) -->
+    <color name="dusk_300_a35">#598FA8D8</color> <!-- 35 %: usage line area top -->
+    <color name="dusk_300_a00">#008FA8D8</color> <!-- 0 %: gradient end -->
+    <color name="honey_300_a25">#40F2B544</color> <!-- 25 %: halo of the latest point -->
 
 </resources>

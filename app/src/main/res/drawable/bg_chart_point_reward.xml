@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u10: latest data point of the hero line (html 13): honey dot ringed in the card colour,
+     inside a 25 % honey halo. Drawn as the Entry icon (DataSet.setDrawIcons), centred on the point.
+     Insets instead of per-item width/height so it works on API 21. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_chart_halo" />
+            <size
+                android:width="@dimen/chart_point_halo"
+                android:height="@dimen/chart_point_halo" />
+        </shape>
+    </item>
+    <item
+        android:bottom="@dimen/chart_point_inset"
+        android:left="@dimen/chart_point_inset"
+        android:right="@dimen/chart_point_inset"
+        android:top="@dimen/chart_point_inset">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_accent_reward" />
+            <stroke
+                android:width="@dimen/chart_point_ring"
+                android:color="@color/bb_surface_card" />
+        </shape>
+    </item>
+</layer-list>

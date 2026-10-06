@@ -192,6 +192,10 @@
     <string name="progress_chart_fails">Fails</string>
     <string name="progress_chart_when">Hours</string>
     <string name="progress_chart_projects">Projects</string>
+    <!-- u10 ChartStyler -->
+    <string name="chart_no_data">No data for this period yet</string>
+    <string name="chart_band_focus">FOCUS</string>
+    <string name="chart_limit_label">Limit %1$s</string>
 
     <!-- Progress screen — project-progress band (spec project-deadlines-progress) -->
     <string name="progress_projects_header">Projects</string>

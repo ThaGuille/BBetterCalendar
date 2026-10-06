@@ -185,6 +185,10 @@
     <string name="progress_chart_fails">Fallos</string>
     <string name="progress_chart_when">Horas</string>
     <string name="progress_chart_projects">Proyectos</string>
+    <!-- u10 ChartStyler -->
+    <string name="chart_no_data">Aún no hay datos en este periodo</string>
+    <string name="chart_band_focus">FOCO</string>
+    <string name="chart_limit_label">Límite %1$s</string>
 
     <!-- Progreso: banda de proyectos -->
     <string name="progress_projects_header">Proyectos</string>

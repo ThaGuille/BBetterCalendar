@@ -784,3 +784,66 @@ Poner el id real de la vista en la columna *View* de `ui-placeholders.md` y el m
 `testDebugUnitTest` (104 tests, 0 fallos; 8 nuevos), `assembleDebug` y `assembleRelease` OK (release sale
 `app-release-unsigned.apk`, sin keystore; `BuildConfig` release con `FEATURE_SOCIAL_MOCK = false`).
 Auditoría de tokens sin cambios (50). Sin emulador (unidad local).
+
+## u10 · ChartStyler
+
+**Hecho.** `ui/common/chart/ChartStyler.java` (MPAndroidChart **v3.1.0**, APIs comprobadas con `javap`
+sobre el AAR). Es la única clase Java que lee colores de gráfico; `ChartCarouselAdapter` ya no tiene
+`ContextCompat.getColor` y solo convierte `ChartBundle` → series.
+
+### API (instancia por contexto: `ChartStyler s = new ChartStyler(ctx)`)
+Orden: estilar los data sets → `chart.setData(...)` → `styleChart` → `fitYAxis` (→ `addLimitLine`).
+- **Gráfico:** `styleChart(BarLineChartBase, String[] xLabels|null)` — eje derecho con 3 etiquetas
+  (0/mitad/tope), rejilla discontinua `bb_outline` 0,8dp, línea base sólida, sin eje izquierdo, sin
+  leyenda, sin zoom/highlight, fuente `FontHelper.appTypeface(ctx, 500)` a `text_micro`, estado vacío.
+  `styleEmptyState(Chart)` (texto `chart_no_data` muted). `fitYAxis(chart, dataMax)` → tope
+  `niceMax` (2 × {1,2,3,4,5,6,8}·10ⁿ, etiquetas enteras). `setYAxisFormatter(chart, f)` +
+  `ChartStyler.unitFormatter("h"|"m")`. `styleLegend(chart)` (solo si no hay leyenda en la cabecera).
+  `color(Tone)` para el punto de leyenda que pinte la pantalla. `Tone {PRIMARY, COMPARE, DANGER, REWARD}`.
+- **Líneas:** `styleHeroLine(set[, latestIndex])` (salvia 2,5dp HORIZONTAL_BEZIER, `bg_chart_fill_primary`,
+  marcadores huecos si ≤ 12 puntos, punto actual = `bg_chart_point_reward` como icono de `Entry`;
+  `latestIndex -1` = sin marcador); `styleLine(set, Tone)`; `styleCompareLine(set)` (dusk 1,8dp
+  discontinua, sin relleno ni marcadores); `styleUsageLine(set)` (dusk + `bg_chart_fill_compare`);
+  `markLatest(set)`, `markEntry(entry)` (+ `set.setDrawIcons(true)`).
+- **Barras:** `styleBars(set, Tone)`, `ChartStyler.barWidth()` (0,6); `styleLimitBars(set)` (apiladas
+  dusk/ember) con `new BarEntry(x, ChartStyler.splitAtLimit(v, limit))`; `addLimitLine(chart, limit,
+  "45m")` (discontinua muted + «Limit 45m» arriba a la izquierda; sube el tope si el límite no cabe).
+- **Línea + bandas FOCUS:** `CombinedChart` + `styleBandsChart(chart)` (barras detrás, valor dentro) +
+  `CombinedData` con `LineData(styleUsageLine(...))` y `focusBandsData(boolean[24] inFocus, top)`
+  (barras contiguas `bb_chart_band`, «FOCUS» una vez por tramo); `top = ChartStyler.niceMax(max)` y el
+  mismo valor a `fitYAxis`.
+- Ejemplo de las tres variantes que aún no usa ninguna pantalla: `DebugGalleryActivity.bindCharts()`
+  (tarjeta «Charts · ChartStyler (u10)», arriba de la galería).
+
+### Recursos nuevos
+`palette.xml`: `sage_300_a32/_a12/_a00`, `dusk_300_a35/_a00`, `honey_300_a25`. `colors.xml`:
+`bb_chart_fill_primary_start/_end`, `bb_chart_fill_compare_start/_end`, `bb_chart_band`, `bb_chart_halo`
+(solo para ChartStyler y los `bg_chart_*`). Drawables `bg_chart_fill_primary`, `bg_chart_fill_compare`,
+`bg_chart_point_reward` (capas con insets, API 21). Dimens `chart_point_halo/_inset/_ring`. Strings EN+ES
+`chart_no_data`, `chart_band_focus`, `chart_limit_label`.
+
+### Desviaciones / decisiones
+- Carrusel: el punto ámbar va en el **último día con datos** (`lastNonZero`), no en el último del rango:
+  en la semana/mes en curso los días finales son futuros (0) y el ámbar caía en un día que no ha llegado.
+- «Fails» = línea simple ember (sin degradado ni ámbar: el ámbar es solo para logros). «Hours» (barras
+  agrupadas focus/fails) conserva una leyenda dentro del gráfico (`styleLegend`), única excepción al
+  «sin leyenda», porque la tarjeta del carrusel no tiene cabecera donde ponerla. Proyectos = barras salvia
+  (sin color por proyecto: `ChartBundle` no trae `colorIndex`; u18 puede añadirlo).
+- MPAndroidChart 3.1.0 no redondea esquinas de barra: las barras son rectas (html 10 tiene `rounded-t`) y
+  las bandas FOCUS no tienen el `rx=4`. Residuo aceptado; requeriría un renderer propio.
+- El tamaño de texto del eje sale de `text_micro` (sp → dp) para respetar la escala de fuente.
+
+### Datos de prueba
+El emulador no tenía datos. `.claude/scripts/seed_progress_db.py` (nuevo; instrucciones dentro) siembra
+2 proyectos, 2 tareas ocultas y ~40 días de FocusEvent/DailyStat sobre una copia sacada con `run-as` y la
+vuelve a subir. Sin tocar el esquema. **El emulator-5554 se queda con esos datos** (útiles para u17–u20).
+
+### Verificación (emulator-5554)
+`assembleDebug` OK; auditoría 50 (sin cambios); `logcat -b crash` vacío. Capturas
+`.claude/skills/adb-ui-test/captures/`: `mig-u10-week-focus` (héroe: salvia + degradado + marcadores huecos
++ ámbar con halo, eje derecho 0/80/160 — casa con html 13), `-week-fails`, `-week-hours`, `-week-projects`,
+`-month-focus` (30 puntos, sin marcadores), `-day-focus` (barras por hora), `-empty-projects` (estado vacío),
+`-concent-week` (semana en curso, antes del arreglo `lastNonZero`), `-gallery-charts` (héroe + comparativa
+discontinua, barras apiladas con límite 45m, uso + bandas FOCUS con pico ámbar — casan con html 13/10/14).
+Residuos: esquinas rectas; la etiqueta «Limit 45m» puede solaparse con una barra alta (html le pone fondo;
+`LimitLine` no lo admite).

@@ -46,6 +46,14 @@
     <color name="bb_danger">@color/ember_300</color>
     <color name="bb_data_compare">@color/dusk_300</color>
 
+    <!-- Chart washes (u10). Only ChartStyler + the bg_chart_* drawables use them. -->
+    <color name="bb_chart_fill_primary_start">@color/sage_300_a32</color>
+    <color name="bb_chart_fill_primary_end">@color/sage_300_a00</color>
+    <color name="bb_chart_fill_compare_start">@color/dusk_300_a35</color>
+    <color name="bb_chart_fill_compare_end">@color/dusk_300_a00</color>
+    <color name="bb_chart_band">@color/sage_300_a12</color>
+    <color name="bb_chart_halo">@color/honey_300_a25</color>
+
     <!-- Project accents (ProjectListAdapter.ACCENT_COLORS cycles them by colorIndex).
          Order and hues follow the four project dots of .stitch/html/03-projects.html. -->
     <color name="bb_project_1">@color/sage_300</color>

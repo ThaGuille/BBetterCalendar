@@ -13,12 +13,24 @@ import androidx.core.widget.TextViewCompat;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.helpers.FontHelper;
 import com.example.bbettercalendar.stats.StreakCalculator;
+import com.example.bbettercalendar.ui.common.chart.ChartStyler;
 import com.example.bbettercalendar.ui.common.widget.AppUsageRowView;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.SectionHeaderView;
 import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.example.bbettercalendar.ui.common.widget.StepperView;
 import com.example.bbettercalendar.ui.common.widget.StreakWeekView;
+
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,6 +52,7 @@ public class DebugGalleryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug_gallery);
 
+        bindCharts();
         bindFontWeights();
         bindStreaks();
         bindAppRows();
@@ -55,6 +68,76 @@ public class DebugGalleryActivity extends AppCompatActivity {
         stepper.setOnValueChangeListener((v, value) -> v.setCaption(value >= 60
                 ? "Target session limit · " + (value / 60) + "h " + (value % 60) + "m"
                 : "Target session limit"));
+    }
+
+    /**
+     * u10: the ChartStyler looks the Progress carousel does not use yet (u17-u20): hero line +
+     * dashed comparison (html 13), stacked within/over-limit bars with a limit line (html 10),
+     * usage line + FOCUS bands (html 14).
+     */
+    private void bindCharts() {
+        LinearLayout box = findViewById(R.id.galleryCharts);
+        ChartStyler styler = new ChartStyler(this);
+        int height = (int) (180 * getResources().getDisplayMetrics().density);
+
+        // Hero + comparativa: 12 semanas, horas.
+        float[] now = {6, 8, 7, 10, 12, 11, 13, 15, 14, 16, 17, 19};
+        float[] prev = {4, 5, 5, 6, 7, 6, 8, 8, 9, 9, 10, 11};
+        List<Entry> a = new ArrayList<>();
+        List<Entry> b = new ArrayList<>();
+        for (int i = 0; i < now.length; i++) {
+            a.add(new Entry(i, now[i]));
+            b.add(new Entry(i, prev[i]));
+        }
+        LineChart hero = new LineChart(this);
+        hero.setData(new LineData(styler.styleCompareLine(new LineDataSet(b, "prev")),
+                styler.styleHeroLine(new LineDataSet(a, "now"))));
+        styler.styleChart(hero, null);
+        styler.fitYAxis(hero, 19);
+        styler.setYAxisFormatter(hero, ChartStyler.unitFormatter("h"));
+        box.addView(hero, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height));
+
+        // Barras apiladas con límite de 45 min (html 10).
+        float[] usage = {38, 54, 25, 62, 48, 35, 42};
+        List<BarEntry> bars = new ArrayList<>();
+        for (int i = 0; i < usage.length; i++) {
+            bars.add(new BarEntry(i, ChartStyler.splitAtLimit(usage[i], 45)));
+        }
+        BarChart limit = new BarChart(this);
+        BarData barData = new BarData(styler.styleLimitBars(new BarDataSet(bars, "")));
+        barData.setBarWidth(ChartStyler.barWidth());
+        limit.setData(barData);
+        styler.styleChart(limit, new String[]{"M", "T", "W", "T", "F", "S", "S"});
+        styler.fitYAxis(limit, 62);
+        styler.setYAxisFormatter(limit, ChartStyler.unitFormatter("m"));
+        styler.addLimitLine(limit, 45, "45m");
+        box.addView(limit, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height));
+
+        // Uso por hora + bandas FOCUS (html 14).
+        float[] perHour = {2, 1, 0, 0, 0, 0, 1, 6, 9, 0, 0, 3, 14, 18, 4, 0, 0, 8, 12, 15, 10, 7, 5, 3};
+        boolean[] focus = new boolean[24];
+        focus[9] = focus[10] = focus[15] = focus[16] = true;
+        List<Entry> line = new ArrayList<>();
+        int peak = 0;
+        for (int h = 0; h < perHour.length; h++) {
+            line.add(new Entry(h, perHour[h]));
+            if (perHour[h] > perHour[peak]) peak = h;
+        }
+        LineDataSet usageSet = styler.styleUsageLine(new LineDataSet(line, "usage"));
+        styler.markEntry(usageSet.getEntryForIndex(peak));
+        usageSet.setDrawIcons(true);
+        float top = ChartStyler.niceMax(perHour[peak]);
+        CombinedData combined = new CombinedData();
+        combined.setData(new LineData(usageSet));
+        combined.setData(styler.focusBandsData(focus, top));
+        CombinedChart bands = new CombinedChart(this);
+        styler.styleBandsChart(bands);
+        bands.setData(combined);
+        styler.styleChart(bands, null);
+        styler.fitYAxis(bands, top);
+        bands.getXAxis().setAxisMinimum(-0.5f);
+        bands.getXAxis().setAxisMaximum(23.5f);
+        box.addView(bands, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height));
     }
 
     /** u9b: FontHelper.appTypeface(ctx, weight) for the five bundled weights. */

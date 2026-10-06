@@ -31,6 +31,15 @@
             android:text="ui/common/widget · u9"
             android:textAppearance="@style/TextAppearance.BBetter.Caption" />
 
+        <!-- ===================== Charts (u10 ChartStyler) ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="Charts · ChartStyler (u10)" />
+
+        <LinearLayout
+            android:id="@+id/galleryCharts"
+            style="@style/GalleryCard" />
+
         <!-- ===================== Type scale (u9b) ===================== -->
         <TextView
             style="@style/GalleryLabel"

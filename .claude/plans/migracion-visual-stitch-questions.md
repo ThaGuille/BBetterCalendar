@@ -124,3 +124,11 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   otro grupo (Laia, Marc, Pau…). — **Assumed:** un único conjunto de datos falsos en todas las pantallas
   (8 amigos, 5 estudiando, Laia arriba, usuario 2.º de 9), así que Home dirá «5 friends studying now». Para
   cambiarlo: editar `MockSocialRepository.buildSnapshot()` (y los asserts de `MockSocialRepositoryTest`).
+
+## u10
+- **Q:** MPAndroidChart 3.1.0 no redondea las barras ni las bandas FOCUS (html 10/14 sí). — **Assumed:**
+  barras rectas. Si se quieren redondeadas: un `BarChartRenderer` propio en `ui/common/chart/` enganchado
+  desde `ChartStyler` (`chart.setRenderer(...)`).
+- **Q:** El emulador conserva datos sembrados (2 proyectos «Final thesis»/«Physics exam», ~40 días de
+  sesiones). — **Assumed:** se dejan para las capturas de u17–u20. Para quitarlos: `adb shell pm clear
+  io.github.thaguille.bbettercalendar` (y volver a conceder `POST_NOTIFICATIONS`).

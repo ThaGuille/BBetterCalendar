@@ -5,33 +5,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.chart.ChartStyler;
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 // Carrusel (ViewPager2) de los gráficos de Progress. Convierte el ChartBundle plano del ViewModel
-// en LineChart/BarChart de MPAndroidChart, estilados con el palette bb_*. Cada página tiene su
-// propio viewType para que el gráfico se cree una sola vez por posición.
+// en LineChart/BarChart de MPAndroidChart; el estilo (colores bb_*, fuente, ejes, rejilla) lo pone
+// ui/common/chart/ChartStyler (u10). Cada página tiene su propio viewType para que el gráfico se
+// cree una sola vez por posición.
 public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdapter.CardVH> {
 
     private static final int PAGE_CONCENT = 0;
@@ -88,43 +85,41 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         h.container.removeAllViews();
         if (bundle == null) return;
 
-        int primary = ContextCompat.getColor(ctx, R.color.bb_primary);
-        int danger = ContextCompat.getColor(ctx, R.color.bb_danger);
-        int axis = ContextCompat.getColor(ctx, R.color.bb_on_surface_muted);
-        int grid = ContextCompat.getColor(ctx, R.color.bb_divider);
+        // Colores, fuente y geometría viven en ChartStyler (u10); aquí sólo datos -> series.
+        ChartStyler styler = new ChartStyler(ctx);
 
         Chart<?> chart;
         if (isDay()) {
             // DAY: concentración y fallos son barras por hora del día (no hay tendencia con un
             // solo día); la de proyectos se comporta igual en los dos modos.
             if (position == PAGE_CONCENT) {
-                chart = buildHourlyBarChart(ctx, bundle.focusMinutesByHour, primary, axis, grid);
+                chart = buildHourlyBarChart(ctx, styler, bundle.focusMinutesByHour, ChartStyler.Tone.PRIMARY);
             } else if (position == PAGE_FAILS) {
-                chart = buildHourlyBarChart(ctx, bundle.failByHour, danger, axis, grid);
+                chart = buildHourlyBarChart(ctx, styler, bundle.failByHour, ChartStyler.Tone.DANGER);
             } else {
-                chart = buildProjectChart(ctx, primary, axis, grid);
+                chart = buildProjectChart(ctx, styler);
             }
         } else {
             switch (position) {
                 case PAGE_CONCENT:
-                    chart = buildLineChart(ctx, bundle.dayLabels, bundle.focusMinutes, primary, axis, grid);
+                    chart = buildLineChart(ctx, styler, bundle.dayLabels, bundle.focusMinutes, true);
                     break;
                 case PAGE_FAILS:
-                    chart = buildLineChart(ctx, bundle.dayLabels, bundle.fails, danger, axis, grid);
+                    chart = buildLineChart(ctx, styler, bundle.dayLabels, bundle.fails, false);
                     break;
                 case PAGE_HOURLY:
-                    chart = buildHourlyChart(ctx, bundle.focusByHour, bundle.failByHour, primary, danger, axis, grid);
+                    chart = buildHourlyChart(ctx, styler, bundle.focusByHour, bundle.failByHour);
                     break;
                 case PAGE_PROJECTS:
                 default:
-                    chart = buildProjectChart(ctx, primary, axis, grid);
+                    chart = buildProjectChart(ctx, styler);
                     break;
             }
         }
         h.container.addView(chart);
 
         // Dentro de ViewPager2 (RecyclerView) el chart se añade durante el bind, antes de que la
-        // vista tenga tamaño: el invalidate() de styleCommon dibuja un viewport vacío y no se vuelve
+        // vista tenga tamaño: el invalidate() dibuja un viewport vacío y no se vuelve
         // a pintar hasta un swipe. Forzamos un repintado tras el layout para que aparezca a la primera.
         final Chart<?> bound = chart;
         bound.post(() -> {
@@ -152,34 +147,30 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         }
     }
 
-    private LineChart buildLineChart(Context ctx, String[] labels, int[] values,
-                                     int color, int axisColor, int gridColor) {
+    // Concentración = línea héroe (salvia con degradado y último punto en ámbar, html 13);
+    // fallos = línea simple en ember. En rangos largos (mes) el styler omite los marcadores.
+    private LineChart buildLineChart(Context ctx, ChartStyler styler, String[] labels, int[] values,
+                                     boolean hero) {
         LineChart chart = new LineChart(ctx);
         List<Entry> entries = new ArrayList<>();
         for (int i = 0; i < values.length; i++) {
             entries.add(new Entry(i, values[i]));
         }
         LineDataSet set = new LineDataSet(entries, "");
-        set.setColor(color);
-        set.setCircleColor(color);
-        set.setCircleHoleColor(color);
-        set.setLineWidth(2f);
-        set.setCircleRadius(3f);
-        set.setDrawValues(false);
-        set.setDrawFilled(true);
-        set.setFillColor(color);
-        set.setFillAlpha(40);
-        // En rangos largos (mes) dibujar un círculo por día satura el eje 0 de puntos:
-        // mostramos los marcadores sólo cuando hay pocos (día/semana). La línea + relleno
-        // siguen marcando los picos en cualquier caso.
-        set.setDrawCircles(values.length <= 10);
+        if (hero) {
+            // El punto «actual» es el último día con datos: en la semana/mes en curso los días
+            // finales aún no han llegado (valen 0) y no deben llevar el marcador ámbar.
+            styler.styleHeroLine(set, lastNonZero(values));
+        } else {
+            styler.styleLine(set, ChartStyler.Tone.DANGER);
+        }
         chart.setData(new LineData(set));
-        styleCommon(chart, labels, axisColor, gridColor);
+        styler.styleChart(chart, labels);
+        styler.fitYAxis(chart, max(values));
         return chart;
     }
 
-    private BarChart buildHourlyChart(Context ctx, int[] focus, int[] fail,
-                                      int focusColor, int failColor, int axisColor, int gridColor) {
+    private BarChart buildHourlyChart(Context ctx, ChartStyler styler, int[] focus, int[] fail) {
         BarChart chart = new BarChart(ctx);
         List<BarEntry> focusEntries = new ArrayList<>();
         List<BarEntry> failEntries = new ArrayList<>();
@@ -189,12 +180,12 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
             failEntries.add(new BarEntry(hr, fail[hr]));
             hourLabels[hr] = String.valueOf(hr);
         }
-        BarDataSet focusSet = new BarDataSet(focusEntries, ctx.getString(R.string.progress_chart_concent));
-        focusSet.setColor(focusColor);
-        focusSet.setDrawValues(false);
-        BarDataSet failSet = new BarDataSet(failEntries, ctx.getString(R.string.progress_chart_fails));
-        failSet.setColor(failColor);
-        failSet.setDrawValues(false);
+        BarDataSet focusSet = styler.styleBars(
+                new BarDataSet(focusEntries, ctx.getString(R.string.progress_chart_concent)),
+                ChartStyler.Tone.PRIMARY);
+        BarDataSet failSet = styler.styleBars(
+                new BarDataSet(failEntries, ctx.getString(R.string.progress_chart_fails)),
+                ChartStyler.Tone.DANGER);
 
         BarData data = new BarData(focusSet, failSet);
         // (barWidth + barSpace) * 2 + groupSpace = 1.0  -> un grupo por hora
@@ -204,21 +195,22 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         data.setBarWidth(barWidth);
         chart.setData(data);
 
-        styleCommon(chart, hourLabels, axisColor, gridColor);
+        styler.styleChart(chart, hourLabels);
+        styler.fitYAxis(chart, Math.max(max(focus), max(fail)));
         XAxis x = chart.getXAxis();
         x.setCenterAxisLabels(true);
         x.setAxisMinimum(0f);
         x.setAxisMaximum(0f + data.getGroupWidth(groupSpace, barSpace) * 24);
         chart.groupBars(0f, groupSpace, barSpace);
-        chart.getLegend().setEnabled(true);
-        chart.getLegend().setTextColor(axisColor);
+        // Dos series y sin leyenda en la cabecera de la tarjeta: aquí sí hace falta la leyenda.
+        styler.styleLegend(chart);
         return chart;
     }
 
     // Barra única por hora del día (0–23). Usado en vista DAY para concentración (minutos) y
     // fallos (conteo), donde la serie diaria sería un solo punto.
-    private BarChart buildHourlyBarChart(Context ctx, int[] values,
-                                         int color, int axisColor, int gridColor) {
+    private BarChart buildHourlyBarChart(Context ctx, ChartStyler styler, int[] values,
+                                         ChartStyler.Tone tone) {
         BarChart chart = new BarChart(ctx);
         List<BarEntry> entries = new ArrayList<>();
         String[] hourLabels = new String[24];
@@ -226,14 +218,13 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
             entries.add(new BarEntry(hr, values[hr]));
             hourLabels[hr] = String.valueOf(hr);
         }
-        BarDataSet set = new BarDataSet(entries, "");
-        set.setColor(color);
-        set.setDrawValues(false);
+        BarDataSet set = styler.styleBars(new BarDataSet(entries, ""), tone);
         BarData data = new BarData(set);
-        data.setBarWidth(0.6f);
+        data.setBarWidth(ChartStyler.barWidth());
         chart.setData(data);
 
-        styleCommon(chart, hourLabels, axisColor, gridColor);
+        styler.styleChart(chart, hourLabels);
+        styler.fitYAxis(chart, max(values));
         XAxis x = chart.getXAxis();
         // Una etiqueta cada pocas horas: 24 etiquetas pegadas se solapan en un eje estrecho.
         x.setLabelCount(7, false);
@@ -244,15 +235,14 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
 
     // Minutos de concentración atribuidos por proyecto dentro del rango (spec
     // project-deadlines-progress). Deliberadamente básica: una barra por proyecto, sin filtros ni
-    // métricas seleccionables — eso llega más adelante. Rango sin datos -> el estado "sin datos"
-    // propio de MPAndroidChart, sin vista vacía a medida.
-    private BarChart buildProjectChart(Context ctx, int color, int axisColor, int gridColor) {
+    // métricas seleccionables — eso llega más adelante. Rango sin datos -> estado vacío estilado
+    // por ChartStyler (texto «sin datos»), sin vista vacía a medida.
+    private BarChart buildProjectChart(Context ctx, ChartStyler styler) {
         BarChart chart = new BarChart(ctx);
         String[] labels = bundle.projectLabels;
         int[] values = bundle.projectMinutes;
         if (labels == null || values == null || values.length == 0) {
-            chart.getDescription().setEnabled(false);
-            chart.setNoDataTextColor(axisColor);
+            styler.styleEmptyState(chart);
             return chart;
         }
 
@@ -260,14 +250,13 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         for (int i = 0; i < values.length; i++) {
             entries.add(new BarEntry(i, values[i]));
         }
-        BarDataSet set = new BarDataSet(entries, "");
-        set.setColor(color);
-        set.setDrawValues(false);
+        BarDataSet set = styler.styleBars(new BarDataSet(entries, ""), ChartStyler.Tone.PRIMARY);
         BarData data = new BarData(set);
         data.setBarWidth(0.5f);
         chart.setData(data);
 
-        styleCommon(chart, labels, axisColor, gridColor);
+        styler.styleChart(chart, labels);
+        styler.fitYAxis(chart, max(values));
         XAxis x = chart.getXAxis();
         // Un nombre de proyecto es mucho más ancho que "12" o "3/5": con muchos proyectos las
         // etiquetas se solaparían, así que se limita cuántas se dibujan.
@@ -277,37 +266,19 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         return chart;
     }
 
-    private void styleCommon(BarLineChartBase<?> chart, String[] labels, int axisColor, int gridColor) {
-        chart.getDescription().setEnabled(false);
-        chart.setDrawGridBackground(false);
-        chart.setScaleEnabled(false);
-        chart.setDoubleTapToZoomEnabled(false);
-        chart.setPinchZoom(false);
-        // Son gráficos de sólo lectura: sin resaltado al tocar/arrastrar (evita la línea
-        // vertical de highlight que aparecía al deslizar el carrusel).
-        chart.setHighlightPerTapEnabled(false);
-        chart.setHighlightPerDragEnabled(false);
-        chart.getAxisRight().setEnabled(false);
-        chart.setExtraBottomOffset(4f);
+    private static int lastNonZero(int[] values) {
+        for (int i = values.length - 1; i >= 0; i--) {
+            if (values[i] > 0) return i;
+        }
+        return -1;
+    }
 
-        XAxis x = chart.getXAxis();
-        x.setPosition(XAxis.XAxisPosition.BOTTOM);
-        x.setDrawGridLines(false);
-        x.setTextColor(axisColor);
-        x.setGranularity(1f);
-        x.setValueFormatter(new IndexAxisValueFormatter(labels));
-
-        YAxis y = chart.getAxisLeft();
-        y.setTextColor(axisColor);
-        y.setGridColor(gridColor);
-        y.setAxisMinimum(0f);
-        // Los valores son cuentas/minutos enteros: pasos de 1 como mínimo para no mostrar
-        // etiquetas fraccionarias sin sentido (p.ej. "0,4 fails").
-        y.setGranularity(1f);
-        y.setGranularityEnabled(true);
-
-        chart.getLegend().setEnabled(false);
-        chart.invalidate();
+    private static int max(int[] values) {
+        int m = 0;
+        if (values != null) {
+            for (int v : values) m = Math.max(m, v);
+        }
+        return m;
     }
 
     static class CardVH extends RecyclerView.ViewHolder {

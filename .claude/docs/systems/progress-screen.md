@@ -1,6 +1,6 @@
 # System — Progress screen (`ui/progress/` + `ui/progress/apppicker/`)
 
-**Last verified:** 2026-09-10 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-06 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Progress tab: a fixed Day/Week/Month + range-stepper header pinned under the toolbar, then
 three stacked, scrolling bands below it. A charts carousel (always renders, no permission needed,
@@ -25,6 +25,7 @@ the `Project` entity itself lives in `projects.md`.
 | `ProgressViewModel` | `ui/progress/ProgressViewModel.java` | Owns `TimeRange`, `ChartBundle`, usage band state, app list, project-progress rows — all DB work off `ExecutorService`, published via `postValue` |
 | `TimeRange` / `Granularity` | `ui/progress/TimeRange.java`, `Granularity.java` | Immutable `(anchor day, DAY/WEEK/MONTH)`; `stepped(±1)`, `canStepForward(today)`, `label()` — single source of truth driving both bands |
 | `ChartBundle` | `ui/progress/ChartBundle.java` | Plain aggregated-series holder, no MPAndroidChart types (keeps the VM chart-library-agnostic) |
+| `ChartStyler` | `ui/common/chart/ChartStyler.java` | The only Java place that knows chart colours/fonts/axes (u10): hero line, comparison line, bars, stacked limit bars + `LimitLine`, usage line + FOCUS bands. API in `.claude/plans/migracion-visual-stitch-impl.md` §u10 |
 | `ChartCarouselAdapter` | `ui/progress/ChartCarouselAdapter.java` | `ViewPager2` adapter, 4 chart pages (concent / fails / by-hour / time-per-project); 3 in DAY mode, which drops by-hour. Page indices are positional and remapped per mode. `pageTitle()` exposes the same label the `chart_dots` `TabLayout` shows per tab |
 | `UsageBandState` | `ui/progress/UsageBandState.java` | `LOCKED` / `LOADING` / `EMPTY_NO_APPS` / `READY` — charts band never gates on this |
 | `ProjectProgressRow` | `ui/progress/ProjectProgressRow.java` | Plain row data (projectId, name, colorIndex, done/total + `percent()`, minutes-in-range, `ProjectDeadlineState`) — no entity types, mirroring `AppUsageRow` |
@@ -69,3 +70,4 @@ the `Project` entity itself lives in `projects.md`.
 | 2026-07-05 | Phase 4b — Play release readiness (no screen-behavior change) | — |
 | 2026-09-01 | Phase 5 — time-per-project chart page (4th, 3rd in DAY) + a third band (project progress) between the carousel and the usage band; new `FocusEventDAO.getMinutesByProject()` + `ProjectMinutes` projection feed both. Rows deep-link to project detail via `action_global_project_detail`. No schema change. | — |
 | 2026-09-10 | Visual polish — Day/Week/Month + range stepper moved into a fixed header above the scrolling content; chart carousel's dot indicator replaced with a titled, fixed-mode `TabLayout` (tap-to-jump); projects/usage bands wrapped in card surfaces; "Add apps", the block-toggle chip, and the enforce-master toggle restyled as visible buttons. No schema/logic change. | — |
+| 2026-10-06 | Stitch migration u10 — charts restyled through `ChartStyler` (right axis, dashed hairline grid, sage hero line with gradient + honey latest point, styled empty state). No schema/logic change. | plan `migracion-visual-stitch` |

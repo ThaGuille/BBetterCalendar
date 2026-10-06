@@ -141,6 +141,10 @@
     <!-- Carrusel algo más bajo (era 300dp) para dejar sitio a la banda de uso de Phase 2; la
          pantalla scrollea entera, así que en pantallas pequeñas no se recorta nada. -->
     <dimen name="progress_chart_height">240dp</dimen>
+    <!-- u10 ChartStyler: latest-point marker (bg_chart_point_reward): 16dp halo, 10dp dot, 2dp ring. -->
+    <dimen name="chart_point_halo">16dp</dimen>
+    <dimen name="chart_point_inset">3dp</dimen>
+    <dimen name="chart_point_ring">2dp</dimen>
     <!-- Altura mínima del área de la banda de uso (tarjeta LOCKED/EMPTY o lista) para que no quede
          aplastada cuando hay pocas apps. -->
     <dimen name="progress_usage_band_min_height">180dp</dimen>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u14 · Focus: "Invite friends" footer pill (html 01 rounded-full, hover:bg-surface-raised →
+     ripple only; no resting fill). -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/bb_ripple_primary">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_surface_raised" />
+            <corners android:radius="@dimen/radius_pill" />
+        </shape>
+    </item>
+</ripple>

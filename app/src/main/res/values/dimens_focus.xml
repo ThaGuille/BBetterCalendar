@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u14 · Focus (html 01): dimens added after the WIP be03abf (the WIP focus_* ones stay in
+     dimens.xml). -->
+<resources>
+    <dimen name="focus_chip_text">11sp</dimen>             <!-- text-[11px] font-semibold -->
+    <dimen name="focus_chip_padding_h">14dp</dimen>        <!-- px-3.5 -->
+    <dimen name="focus_dots_margin_top">8dp</dimen>        <!-- gap-2.5 minus the dot ring box -->
+    <dimen name="focus_ends_at_icon_gap">6dp</dimen>       <!-- gap-1.5 -->
+    <dimen name="focus_play_icon_padding">19dp</dimen>     <!-- 72dp button, 34dp glyph -->
+    <dimen name="focus_stat_value_gap">2dp</dimen>         <!-- mt-0.5 -->
+    <dimen name="focus_streak_flame_size">20dp</dimen>     <!-- text-[20px] icon -->
+    <dimen name="focus_friend_row_gap">14dp</dimen>        <!-- gap-y-3.5 -->
+    <dimen name="focus_friend_col_gap">8dp</dimen>         <!-- gap-x-2 -->
+</resources>

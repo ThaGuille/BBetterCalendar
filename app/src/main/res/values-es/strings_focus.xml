@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u14 · Focus (ES). -->
+<resources>
+    <string name="focus_paused_line">En pausa</string>
+    <string name="focus_block_mode_desc_off">Activar el modo bloqueo</string>
+    <string name="focus_block_mode_desc_on">Desactivar el modo bloqueo</string>
+    <string name="focus_block_mode_desc_pending">El modo bloqueo necesita el permiso de accesibilidad</string>
+</resources>

@@ -40,6 +40,17 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // u14 (pregunta u6): el icono del launcher con la app ya viva. Si la tarea no se abrió
+        // desde el launcher (notificación, adb, IDE...), su intent base no coincide y el sistema
+        // apila ESTA Splash encima de la MainActivity viva: antes arrancaba una segunda
+        // MainActivity (Home en reposo, una segunda sesión, y la primera contaba un fallo).
+        // Sin ser raíz de la tarea y con un intent MAIN/LAUNCHER, basta con cerrarse: queda
+        // delante la MainActivity existente con su sesión intacta.
+        if (isRelaunchFromLauncher()) {
+            Log.i(TAG, "Launcher tap on a live task: resuming the existing MainActivity");
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_splash);
 
         Calendar today = Calendar.getInstance();
@@ -75,6 +86,17 @@ public class SplashActivity extends AppCompatActivity {
         executorService.execute(() ->
                 new RecurrenceMaterializer(getApplicationContext(), calendarEntryDao).materializeAll());
 
+    }
+
+    /** Launcher intent delivered to a task that already has activities below this one. */
+    private boolean isRelaunchFromLauncher() {
+        if (isTaskRoot()) {
+            return false;
+        }
+        Intent intent = getIntent();
+        return intent != null
+                && Intent.ACTION_MAIN.equals(intent.getAction())
+                && intent.hasCategory(Intent.CATEGORY_LAUNCHER);
     }
 
     private void resetDailyStats(Calendar today, Calendar yesterday){

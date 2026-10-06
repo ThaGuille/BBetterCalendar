@@ -423,7 +423,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     }
 
     // La detección de primer/segundo plano y el periodo de gracia (FAIL_GRACE_MILLIS) viven en
-    // FocusSessionViewModel + FocusBackgroundObserver, registrado por MainActivity. El servicio en
+    // FocusSessionViewModel + FocusBackgroundObserver (a nivel de proceso, u14). El servicio en
     // primer plano lo arranca/para FocusSessionViewModel según el estado de la sesión (u13).
 
     @Override

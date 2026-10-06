@@ -29,6 +29,7 @@ MAIN = os.path.join(REPO_ROOT, "app", "src", "main")
 RES = os.path.join(MAIN, "res")
 JAVA = os.path.join(MAIN, "java")
 COLORS_XML = os.path.join(RES, "values", "colors.xml")
+PALETTE_XML = os.path.join(RES, "values", "palette.xml")
 
 # Fallback if colors.xml can't be parsed. Derived from the legacy section of
 # values/colors.xml and .claude/hooks/check-legacy-palette.ps1 (keep in sync).
@@ -54,6 +55,9 @@ CATEGORIES = [
     ("font_ref_outside_typography", "@font/ or R.font. outside styles_typography/themes/res/font"),
     ("fraunces", "'fraunces' mentions (text + file names)"),
     ("set_theme_java", "setTheme( in Java"),
+    # Added in u4: primitives (names defined in values/palette.xml) may only be referenced from
+    # palette.xml and values*/colors.xml; everything else goes through the bb_* tokens.
+    ("palette_primitive_ref", "palette.xml primitive referenced outside palette.xml/colors.xml"),
 ]
 
 HEX_RE = re.compile(r"(?<![\w&])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?![0-9a-zA-Z_])")
@@ -137,6 +141,15 @@ def legacy_color_names():
     return names
 
 
+def palette_primitive_names():
+    """Colour names defined in values/palette.xml (u4). Empty if the file is missing."""
+    try:
+        text = strip_xml_comments(read_text(PALETTE_XML))
+    except OSError:
+        return []
+    return re.findall(r"<color\s+name\s*=\s*\"([^\"]+)\"", text)
+
+
 def iter_files(root, exts):
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames.sort()
@@ -159,6 +172,12 @@ def audit():
     alt = "|".join(re.escape(n) for n in sorted(legacy, key=len, reverse=True))
     legacy_xml_re = re.compile(r"@color/(?:%s)(?![\w])" % alt)
     legacy_java_re = re.compile(r"\bR\.color\.(?:%s)(?![\w])" % alt)
+    primitives = palette_primitive_names()
+    prim_xml_re = prim_java_re = None
+    if primitives:
+        palt = "|".join(re.escape(n) for n in sorted(primitives, key=len, reverse=True))
+        prim_xml_re = re.compile(r"@color/(?:%s)(?![\w])" % palt)
+        prim_java_re = re.compile(r"\bR\.color\.(?:%s)(?![\w])" % palt)
 
     def add(key, path, text, regex):
         for m in regex.finditer(text):
@@ -185,6 +204,9 @@ def audit():
         if not font_allowed:
             add("font_ref_outside_typography", path, text, FONT_XML_RE)
         add("fraunces", path, text, FRAUNCES_RE)
+        prim_allowed = res_type == "values" and fname in ("palette.xml", "colors.xml")
+        if prim_xml_re is not None and not prim_allowed:
+            add("palette_primitive_ref", path, text, prim_xml_re)
 
     # file names mentioning fraunces (fonts, ttf, xml)
     for root in (RES, JAVA):
@@ -204,6 +226,8 @@ def audit():
         add("font_ref_outside_typography", path, text, FONT_JAVA_RE)
         add("fraunces", path, text, FRAUNCES_RE)
         add("set_theme_java", path, text, SET_THEME_RE)
+        if prim_java_re is not None:
+            add("palette_primitive_ref", path, text, prim_java_re)
 
     return hits
 

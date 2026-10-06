@@ -50,6 +50,11 @@ $checks = [ordered]@{}
 $checks['legacy colour (@color/ or R.color.)'] = "(@color/|R\.color\.)($legacy)(?!\w)"
 $checks['@android:color/white|black'] = '@android:color/(white|black)\b|\bandroid\.R\.color\.(white|black)\b'
 $checks['fraunces (font is being removed)'] = '(?i)fraunces'
+# Palette primitives (values/palette.xml, u4) are only allowed in palette.xml and colors.xml.
+# Families kept in sync with palette.xml; token_audit.py reads the names from the file itself.
+if ($file -ne 'palette.xml' -and $file -ne 'colors.xml') {
+    $checks['palette primitive (use a bb_* token)'] = '(@color/|R\.color\.)(pine|forest|sage|seafoam|honey|mist|lichen|dusk|ember)_\d+(_a\d+)?(?!\w)'
+}
 
 if ($isCode) {
     $checks['Color.WHITE/BLACK/LTGRAY/parseColor'] = '\bColor\s*\.\s*(WHITE|BLACK|LTGRAY|parseColor)\b'

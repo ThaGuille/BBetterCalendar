@@ -31,8 +31,9 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     // Franjas de acento de la lista: cicla la paleta bb_* por colorIndex (spec projects-mvp).
     // Público desde project-deadlines-progress: la banda de proyectos de Progress pinta el mismo
     // acento para el mismo proyecto, así que la paleta y el ciclado viven en un único sitio.
+    // Desde u4 (migración Stitch) cicla los tokens dedicados bb_project_1..4.
     public static final int[] ACCENT_COLORS = {
-            R.color.bb_primary, R.color.bb_secondary, R.color.bb_accent_energy, R.color.bb_accent_reward
+            R.color.bb_project_1, R.color.bb_project_2, R.color.bb_project_3, R.color.bb_project_4
     };
 
     /** Color de acento de un colorIndex, tolerando índices negativos (% en Java no lo es). */

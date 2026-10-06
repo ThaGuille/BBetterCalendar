@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    BBetter palette PRIMITIVES (plan migracion-visual-stitch, u4).
+
+    Raw colour values only. Nothing outside this file and values*/colors.xml may reference these
+    names: layouts, drawables, themes and Java use the bb_* semantic tokens in colors.xml, which
+    alias the primitives below. Enforced by .claude/scripts/token_audit.py (palette_primitive_ref).
+
+    Source: .stitch/DESIGN.md §2, cross-checked against .stitch/html/*.html (every opaque hex below
+    appears verbatim in the exported HTML; the _aNN variants are derived). Naming: <family>_<tone>, lower tone = lighter;
+    _aNN suffix = same colour at NN % opacity.
+-->
+<resources>
+
+    <!-- Foundation (dark-first) -->
+    <color name="pine_950">#FF12201C</color>   <!-- Deep Pine Night: app background -->
+    <color name="pine_900">#FF1B2D27</color>   <!-- Pine Card: cards, sheets, bottom nav -->
+    <color name="pine_800">#FF24392F</color>   <!-- Raised Moss: raised/selected surfaces, inputs -->
+    <color name="pine_700">#FF2E453B</color>   <!-- Hairline Moss: dividers, gridlines, outlines -->
+
+    <!-- Brand & interactive -->
+    <color name="forest_600">#FF2F4F4A</color> <!-- Forest Deep: tinted containers -->
+    <color name="sage_300">#FF7FB69A</color>   <!-- Sage Leaf: primary -->
+    <color name="sage_200">#FF9BD3B5</color>   <!-- light sage: 3rd project accent (03-projects.html) -->
+    <color name="seafoam_200">#FFABCEC7</color> <!-- seafoam: 4th project accent (03-projects.html) -->
+
+    <!-- Reward (use sparingly) -->
+    <color name="honey_300">#FFF2B544</color>  <!-- Honey Amber: earned moments only -->
+
+    <!-- Text -->
+    <color name="mist_50">#FFEAF2EC</color>    <!-- Mist White: primary text, big numbers -->
+    <color name="lichen_300">#FF9DB3A8</color> <!-- Lichen Grey: secondary labels -->
+
+    <!-- Data & state -->
+    <color name="dusk_300">#FF8FA8D8</color>   <!-- Dusk Blue: comparison series -->
+    <color name="ember_300">#FFE8796B</color>  <!-- Ember Red: destructive / errors -->
+
+    <!-- Alpha variants -->
+    <color name="mist_50_a38">#61EAF2EC</color>  <!-- 38 %: disabled content (MD3) -->
+    <color name="pine_950_a60">#9912201C</color> <!-- 60 %: scrim (never pure black) -->
+
+</resources>

@@ -1,6 +1,6 @@
 # System — Calendar (`ui/calendar/` + `calendarEntries/` + `notifications/event/`)
 
-**Last verified:** 2026-09-10 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-06 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Month and week views over a single unified entity (`CalendarEntry`) that represents events,
 tasks, and reminders via an int `type` field. Includes creation (`AddEventActivity`) and the
@@ -34,7 +34,7 @@ or get alarms.
 | `CalendarViewModel` | `ui/calendar/CalendarViewModel.java` | Holds a `DateRange`; `Transformations.switchMap` on range change merges **two** Room `LiveData`s through a `MediatorLiveData` — `CalendarEntryDAO.getVisibleEventsBetween` (via `CalendarItemMapper`) and `ProjectDAO.observeDeadlinesBetween` (via `ProjectDeadlineItemMapper`) — sorted by `startMillis` |
 | `domain/CalendarItem` | `ui/calendar/domain/CalendarItem.java` | UI-side model (id, title, start/end millis, color, `Type` enum: EVENT/TASK/REMINDER/**DEADLINE**) |
 | `domain/CalendarItemMapper` | `ui/calendar/domain/CalendarItemMapper.java` | `CalendarEntry` → `CalendarItem`; falls back to the JSON `Calendar` fields if the long mirrors are unpopulated (legacy pre-migration rows) |
-| `domain/ColorResolver` | `ui/calendar/domain/ColorResolver.java` | `Type` → `bb_*`-adjacent palette color (`calendar_item_event/task/reminder/deadline`; `calendar_item_deadline` aliases the amber `bb_accent_reward`, reusing the app-limits visual language rather than inventing a token) |
+| `domain/ColorResolver` | `ui/calendar/domain/ColorResolver.java` | `Type` → `bb_*`-adjacent palette color (`calendar_item_event/task/reminder/deadline`; since the u4 dark palette all four alias `palette.xml` primitives: event=dusk, task=sage, reminder=honey, deadline=ember; text on them is `bb_on_primary`) |
 | `binders/MonthDayBinder` | `ui/calendar/binders/MonthDayBinder.java` | Kizitonwose `MonthDayBinder` — day cell rendering, up to 3 event-color bars, selection/today state |
 | `binders/DayDetailAdapter` | `ui/calendar/binders/DayDetailAdapter.java` | RecyclerView adapter for the selected-day list |
 | `binders/WeekViewItemAdapter` | `ui/calendar/binders/WeekViewItemAdapter.java` | Adapts `CalendarItem` → vendored `WeekViewEntity` |

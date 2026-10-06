@@ -6,40 +6,55 @@ When touching any UI, prefer the `bb_*` semantic tokens and `TextAppearance.BBet
 
 ---
 
-## 1. Colour palette ([`res/values/colors.xml`](../../app/src/main/res/values/colors.xml))
+## 1. Colour palette ([`palette.xml`](../../app/src/main/res/values/palette.xml) → [`colors.xml`](../../app/src/main/res/values/colors.xml))
+
+> **Dark-first since u4 of [`migracion-visual-stitch`](../plans/migracion-visual-stitch.md)** (Stitch «Calm Focus», [`.stitch/DESIGN.md`](../../.stitch/DESIGN.md)). Full rewrite of this guide is u24; until then the tables below are the source of truth for colour.
+> Two layers: `palette.xml` holds raw **primitives** (`pine_950`, `sage_300`, …); `colors.xml` holds the `bb_*` **semantic tokens**, which only alias primitives. Layouts, drawables, themes and Java reference `bb_*` only — a primitive outside `palette.xml`/`colors.xml` is counted by `token_audit.py` (`palette_primitive_ref`, ratchet at 0). A future light theme = `values-notnight/colors.xml` redefining the `bb_*` names.
 
 ### Semantic tokens — use these
 
-| Token | Hex | Use for |
+| Token | → Primitive (hex) | Use for |
 |---|---|---|
-| `bb_surface` | `#F6F1E8` | Window background ("sand") |
-| `bb_surface_card` | `#FFFFFF` | Card / dialog surface |
-| `bb_surface_subtle` | `#E8EFE8` | Subtle sage tint (nav indicator pill, hover) |
-| `bb_primary` | `#5F8A78` | Brand sage — primary actions, FAB |
-| `bb_primary_dark` | `#2F4F4A` | Status bar, dark sage emphasis |
-| `bb_secondary` | `#3F4E8C` | Indigo — secondary actions, info chips |
-| `bb_accent_energy` | `#E07A5F` | Coral — Pomodoro "concentration" / play button |
-| `bb_accent_reward` | `#D9A441` | Amber — streaks, rewards |
-| `bb_on_surface` | `#1F2A2A` | Body text |
-| `bb_on_surface_muted` | `#6F7772` | Secondary text, hints |
-| `bb_on_primary` | `#FFFFFF` | Text on sage/indigo/coral backgrounds |
-| `bb_danger` | `#B5524A` | Errors, destructive actions |
-| `bb_divider` | `#22000000` | Subtle dividers (13% black) |
+| `bb_surface` | `pine_950` (`#12201C`) | Window background |
+| `bb_surface_card` | `pine_900` (`#1B2D27`) | Cards, sheets, dialogs, bottom nav |
+| `bb_surface_subtle` / `bb_surface_raised` | `pine_800` (`#24392F`) | Raised / selected surfaces, active chip, inputs |
+| `bb_primary` | `sage_300` (`#7FB69A`) | Primary actions, active nav, progress, chart hero line |
+| `bb_on_primary` | `pine_950` | Text/icons on sage (and on any accent fill) |
+| `bb_primary_dark` / `bb_primary_container` | `forest_600` (`#2F4F4A`) | Tinted containers |
+| `bb_on_primary_container` | `mist_50` | Text on `bb_primary_container` |
+| `bb_secondary` / `bb_data_compare` | `dusk_300` (`#8FA8D8`) | Chart comparison series. Never a primary action |
+| `bb_accent_reward` | `honey_300` (`#F2B544`) | Earned moments only (streak, best point, celebration) |
+| `bb_on_reward` | `pine_950` | Text on honey |
+| `bb_on_surface` | `mist_50` (`#EAF2EC`) | Primary text, big numbers |
+| `bb_on_surface_muted` | `lichen_300` (`#9DB3A8`) | Secondary labels, hints, timestamps |
+| `bb_disabled` | `mist_50_a38` | Disabled content (38 %) |
+| `bb_divider` / `bb_outline` | `pine_700` (`#2E453B`) | Dividers, gridlines, unselected outlines |
+| `bb_danger` | `ember_300` (`#E8796B`) | Destructive actions, errors |
+| `bb_scrim` | `pine_950_a60` | Scrims / dim overlays (never pure black) |
+| `bb_project_1..4` | sage_300, honey_300, sage_200, seafoam_200 | Project accents (`ProjectListAdapter.ACCENT_COLORS`) |
+| ~~`bb_accent_energy`~~ | alias of `bb_primary` | Obsolete, removed in u24 |
+| ~~`bb_surface_energy_subtle`~~ | alias of `bb_primary_container` | Obsolete, removed in u24 |
 
-### Calendar categoricals
+Contrast (WCAG, computed): every text token ≥ 4.5:1 on `bb_surface` and `bb_surface_card`. On
+`bb_primary_container` use only `bb_on_primary_container`/`bb_on_surface`/`bb_accent_reward`;
+`bb_danger` text goes on `bb_surface`/`bb_surface_card`, not on `bb_surface_raised`. Table in
+[`migracion-visual-stitch-impl.md`](../plans/migracion-visual-stitch-impl.md) (u4).
+
+### Calendar categoricals (provisional until the calendar is designed)
 
 | Token | Maps to | Use |
 |---|---|---|
-| `calendar_item_event` | indigo (`bb_secondary`) | Type 1 — events |
-| `calendar_item_task` | sage (`bb_primary`) | Type 2 — tasks |
-| `calendar_item_reminder` | coral (`bb_accent_energy`) | Type 3 — reminders |
+| `calendar_item_event` | `dusk_300` | Events |
+| `calendar_item_task` | `sage_300` | Tasks |
+| `calendar_item_reminder` | `honey_300` | Reminders |
+| `calendar_item_deadline` | `ember_300` | Project deadlines |
 
-These are resolved by [`ColorResolver`](../../app/src/main/java/com/example/bbettercalendar/ui/calendar/domain/ColorResolver.java); if you add a new entry type, add the colour here and the resolver branch together.
+Text on them is `bb_on_primary`. These are resolved by [`ColorResolver`](../../app/src/main/java/com/example/bbettercalendar/ui/calendar/domain/ColorResolver.java); if you add a new entry type, add the colour here and the resolver branch together.
 
 ### What not to do
 
 - Don't reach for `purple_500`, `teal_700`, `azul`, `verde`, etc. for new UI. They exist for backwards compatibility.
-- Don't introduce raw `#RRGGBB` literals in layouts — promote to a `bb_*` token first.
+- Don't introduce raw `#RRGGBB` literals or palette primitives (`sage_300`…) in layouts/Java — use a `bb_*` token (add one in `colors.xml` aliasing a primitive if needed).
 - Don't override `colorPrimary` in a new theme just to recolour one screen — use a `bg_*` drawable or a tint instead.
 
 ---

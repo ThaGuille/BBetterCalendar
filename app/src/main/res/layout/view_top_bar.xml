@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u12: shared top bar for the secondary (non-tab) destinations: back arrow + title (+ optional
+     subtitle / menu). Include it WITHOUT android:id (an include id shadows this root id) and bind
+     it with ui/common/TopBarHelper.bind(fragment, view, title) (finds R.id.topBar itself).
+     Style: Widget.BBetter.Toolbar.Secondary (Headline title, bb_on_surface arrow, 64dp). -->
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/topBar"
+    style="@style/Widget.BBetter.Toolbar.Secondary"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />

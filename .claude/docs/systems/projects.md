@@ -13,7 +13,7 @@ the project's attributed focus minutes surface on Progress.
 | Kind | Entry |
 |---|---|
 | Fragment | `ProjectsFragment` — bottom-nav destination (`navigation_projects`), list + create affordance |
-| Fragment | `ProjectDetailFragment` — nav-graph destination (`navigation_project_detail`), reached via `action_navigation_projects_to_navigation_project_detail` carrying a `projectId` int arg |
+| Fragment | `ProjectDetailFragment` — nav-graph destination (`navigation_project_detail`), reached via `action_navigation_projects_to_navigation_project_detail` carrying a `projectId` int arg. Secondary destination: no bottom nav since u12 (MainActivity hides it) |
 | Dialog | `CreateProjectDialog` — `DialogFragment`, shares `ProjectsViewModel` with its parent fragment |
 | Nav action | `action_global_project_detail` — **root-level/global** action to `navigation_project_detail`; one action serves all three Phase-5 entry points (deadline notification deep link, calendar marker tap, Progress band row tap). The Projects tab keeps its own `action_navigation_projects_to_navigation_project_detail` |
 | Receiver | `.notifications.project.ProjectDeadlineReceiver` (`exported=false`) — deadline alarms |

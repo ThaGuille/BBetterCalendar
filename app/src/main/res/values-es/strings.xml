@@ -8,6 +8,13 @@
     <string name="title_progress">Progreso</string>
     <string name="title_projects">Proyectos</string>
     <string name="action_back">Atrás</string>
+    <!-- u12: destinos secundarios (títulos de la barra superior) -->
+    <string name="title_focus">Concentración</string>
+    <string name="title_cycle_complete">Ciclo completado</string>
+    <string name="title_all_progress">Todo tu progreso</string>
+    <string name="title_screen_time">Tiempo de pantalla y bloqueo</string>
+    <string name="title_app_detail">Detalle de la app</string>
+    <string name="screen_placeholder_message">Esta pantalla está en camino.</string>
     <string name="popup_ok">Aceptar</string>
     <string name="popup_timer_failed">Temporizador fallido</string>
     <string name="picker_selected_format">Seleccionado: %1$s</string>

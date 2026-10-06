@@ -4,6 +4,13 @@
     <string name="title_progress">Progress</string>
     <string name="title_projects">Projects</string>
     <string name="action_back">Back</string>
+    <!-- u12: secondary destinations (top bar titles) -->
+    <string name="title_focus">Focus</string>
+    <string name="title_cycle_complete">Cycle complete</string>
+    <string name="title_all_progress">All progress</string>
+    <string name="title_screen_time">Screen time &amp; blocking</string>
+    <string name="title_app_detail">App details</string>
+    <string name="screen_placeholder_message">This screen is on its way.</string>
     <string name="popup_ok">OK</string>
     <string name="popup_timer_failed">Timer failed</string>
     <string name="picker_selected_format">Selected: %1$s</string>

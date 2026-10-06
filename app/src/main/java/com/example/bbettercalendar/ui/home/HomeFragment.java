@@ -1,6 +1,5 @@
 package com.example.bbettercalendar.ui.home;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.transition.AutoTransition;
@@ -453,8 +452,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         // leerse como "una tarjeta estirada" y pasa a ser la pantalla. Con el marco puesto se veía
         // el fondo beige alrededor y delataba que seguíamos en Home.
         applyFocusModeChrome();
-
-        setAppChromeVisible(!focusModeActive);
+        // u12: la barra inferior ya no se toca desde aquí; MainActivity la muestra/oculta por
+        // destino (addOnDestinationChangedListener). Home es de primer nivel → siempre visible.
     }
 
     /** Quita/restaura el marco de tarjeta del timer según el focus mode. */
@@ -469,27 +468,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         // setBackgroundResource pisa el padding del propio card: hay que reponerlo siempre.
         int cardPadding = getResources().getDimensionPixelSize(R.dimen.home_card_padding);
         binding.homeTimerCard.setPadding(cardPadding, cardPadding, cardPadding, cardPadding);
-    }
-
-    /**
-     * Oculta/restaura la navegación inferior de la Activity (ya no hay ActionBar). En focus mode las
-     * únicas acciones son pausar, cancelar y el modo bloqueo: dejar la bottom-nav a mano invitaría
-     * a irse a otra pestaña con la sesión corriendo. Idempotente y siempre restaurado en
-     * onDestroyView, así que ninguna otra pantalla puede heredar el chrome escondido.
-     */
-    private void setAppChromeVisible(boolean visible) {
-        Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        View navView = activity.findViewById(R.id.nav_view);
-        View navDivider = activity.findViewById(R.id.nav_divider);
-        if (navView != null) {
-            navView.setVisibility(visible ? View.VISIBLE : View.GONE);
-        }
-        if (navDivider != null) {
-            navDivider.setVisibility(visible ? View.VISIBLE : View.GONE);
-        }
     }
 
     /**
@@ -530,9 +508,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
     @Override
     public void onDestroyView() {
-        // Antes de soltar el binding: si la vista muere en focus mode (rotación, proceso), la
-        // bottom-nav es de la Activity y se quedaría oculta para siempre.
-        setAppChromeVisible(true);
         focusModeActive = false;
         lastRenderedState = null;
         super.onDestroyView();

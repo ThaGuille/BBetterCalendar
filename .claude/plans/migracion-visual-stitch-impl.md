@@ -847,3 +847,48 @@ vuelve a subir. Sin tocar el esquema. **El emulator-5554 se queda con esos datos
 discontinua, barras apiladas con límite 45m, uso + bandas FOCUS con pico ámbar — casan con html 13/10/14).
 Residuos: esquinas rectas; la etiqueta «Limit 45m» puede solaparse con una barra alta (html le pone fondo;
 `LimitLine` no lo admite).
+
+## u12 · Navegación: destinos nuevos y chrome por destino
+
+**Hecho.**
+- `mobile_navigation.xml`: `navigation_focus`, `navigation_cycle_complete` (paquete `ui/focus/`),
+  `navigation_all_progress` (`ui/progress/`), `navigation_screen_time`, `navigation_app_detail`
+  (arg `packageName: string`, constante `AppDetailFragment.ARG_PACKAGE_NAME`) (`ui/screentime/`, nuevo).
+  Fragments `FocusFragment`, `CycleCompleteFragment`, `AllProgressFragment`, `ScreenTimeFragment`,
+  `AppDetailFragment` = cascarón: barra superior + `EmptyStateView` (título + «This screen is on its way»,
+  string `screen_placeholder_message`). Raíces: `focusScreen`, `cycleCompleteScreen`, `allProgressScreen`,
+  `screenTimeScreen`, `appDetailScreen`. Sin acciones: se navega por id de destino. Sin `@AndroidEntryPoint`
+  (añadidlo al meter ViewModel Hilt).
+- **Barra superior reutilizable (u14–u20):** `@layout/view_top_bar` (`MaterialToolbar` id **`topBar`**,
+  estilo nuevo **`Widget.BBetter.Toolbar.Secondary`**: flecha `ic_arrow_back_24` en `bb_on_surface`,
+  content-desc `action_back`, Headline 22sp, alto `@dimen/top_bar_height` 64dp) +
+  **`ui/common/TopBarHelper.bind(fragment, view, title)`** → devuelve el toolbar (subtítulo/menú/
+  `setTitleCentered(true)` para Focus y Screen time, cuyo html centra el título). La flecha hace
+  `navigateUp()`. `<include layout="@layout/view_top_bar" />` sin id.
+- `MainActivity`: `TOP_LEVEL_DESTINATIONS` (home, progress, calendar_month, **calendar_week**, projects)
+  + `addOnDestinationChangedListener` que pone `nav_view` y `nav_divider` en VISIBLE/GONE.
+  `setAppChromeVisible` eliminado de HomeFragment (solo tocaba `nav_view` y `nav_divider`; la ActionBar
+  ya no existía). Strings EN/ES `title_focus|cycle_complete|all_progress|screen_time|app_detail`.
+- **Entrada debug (u25 puede reutilizarla):** `SplashActivity` reenvía sus extras a MainActivity solo si
+  `BuildConfig.DEBUG`; `MainActivity.handleDebugNav` lee `bb_debug_nav`
+  (`focus|cycle_complete|all_progress|screen_time|app_detail`), `bb_debug_from`
+  (`home|progress|calendar|projects`, se selecciona esa pestaña antes) y `bb_debug_pkg`. Comando completo
+  en `bbetter-selectors.md`. Hacer `am force-stop` antes (quirk u6 de la 2.ª MainActivity).
+
+### Desviaciones / decisiones
+- **Home focus mode deja la barra inferior visible** hasta u13/u14 (antes la ocultaba). Es lo que pide
+  el plan (el listener sustituye a `setAppChromeVisible`); la sesión es de Activity y la gracia solo cuenta
+  en segundo plano, así que cambiar de pestaña no rompe nada. u13/u14 llevan la sesión a `navigation_focus`.
+- **Project detail ya no muestra la barra inferior** (es secundario). Conserva su `projectDetailBackButton`;
+  u16 puede pasarlo a `view_top_bar`.
+- Docs: `architecture.md` (grafo + chrome + entrada debug), `bbetter-selectors.md`, `pomodoro-timer.md`
+  (punto del chrome), `projects.md`.
+
+### Verificación (emulator-5554)
+`assembleDebug` OK; auditoría sin cambios (50). Para los 5 destinos (desde home/progress/projects): raíz
+encontrada, `topBar` presente, `nav_view` ausente; system back → vuelve a la pestaña de origen con `nav_view`.
+Flecha de la barra → vuelve a Projects (captura). Reselección/cambio de pestañas OK; project detail sin barra
+y back la recupera. Sin `FATAL EXCEPTION`. Capturas en `.claude/skills/adb-ui-test/captures/`:
+`mig-u12-{focus,cycle-complete,all-progress,screen-time,app-detail}`, `mig-u12-tab-projects`,
+`mig-u12-tab-projects-after-back`. Residuo: el `EmptyStateView` del cascarón queda arriba, no centrado
+vertical (irrelevante: lo sustituye cada unidad de pantalla).

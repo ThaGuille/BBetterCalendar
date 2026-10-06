@@ -25,6 +25,36 @@ Resource-ids below are the **suffix** after `:id/` — pass them bare to
 
 Tab labels (for `-Text` fallback): Home · Progress · Calendar · Projects.
 
+`nav_view` (and `nav_divider`) is **only present on top-level destinations** (the 4 tabs +
+Calendar week). On every secondary destination it is GONE → `find-node -Id nav_view` exits 1.
+
+## Secondary destinations (u12)
+
+| Destination id | Screen root id | Layout |
+|---|---|---|
+| `navigation_focus` | `focusScreen` | `fragment_focus.xml` |
+| `navigation_cycle_complete` | `cycleCompleteScreen` | `fragment_cycle_complete.xml` |
+| `navigation_all_progress` | `allProgressScreen` | `fragment_all_progress.xml` |
+| `navigation_screen_time` | `screenTimeScreen` | `fragment_screen_time.xml` |
+| `navigation_app_detail` (arg `packageName`) | `appDetailScreen` | `fragment_app_detail.xml` |
+| `navigation_project_detail` (arg `projectId`) | — (`projectDetailBackButton`) | `fragment_project_detail.xml` |
+
+Top bar of the secondary screens: `topBar` (MaterialToolbar); its back arrow has no id → tap it
+with `find-node.ps1 -Text "Back"` (content-desc; "Atrás" in Spanish). System back (`input keyevent 4`)
+does the same.
+
+**Debug-only jump (debug APK):** open a secondary destination straight from adb, optionally
+from a given tab so back has somewhere to go:
+
+```
+adb -s emulator-5554 shell am force-stop io.github.thaguille.bbettercalendar
+adb -s emulator-5554 shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.configuration.SplashActivity --es bb_debug_nav app_detail --es bb_debug_from progress --es bb_debug_pkg com.android.chrome
+```
+
+`bb_debug_nav` = `focus|cycle_complete|all_progress|screen_time|app_detail`; `bb_debug_from` =
+`home|progress|calendar|projects`. Force-stop first: with the app alive, the Splash launch stacks a
+second MainActivity (known u6 quirk).
+
 ## Progress screen (`fragment_progress.xml`)
 
 | id suffix | What | Readable from dump? |

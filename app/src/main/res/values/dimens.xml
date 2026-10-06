@@ -46,6 +46,8 @@
     <dimen name="bottom_nav_height">72dp</dimen>
     <dimen name="bottom_nav_item_padding_top">12dp</dimen>
     <dimen name="bottom_nav_item_padding_bottom">12dp</dimen>
+    <!-- Secondary top bar (u12): html h-14..h-16 → 64dp. -->
+    <dimen name="top_bar_height">64dp</dimen>
     <!-- Switch (html 14-screen-time: 48x28 track, 24dp thumb, 2dp inset). -->
     <dimen name="switch_thumb_size">24dp</dimen>
     <dimen name="switch_thumb_size_off">16dp</dimen>

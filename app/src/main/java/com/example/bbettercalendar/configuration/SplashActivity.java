@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.bbettercalendar.BuildConfig;
 import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
@@ -59,6 +60,11 @@ public class SplashActivity extends AppCompatActivity {
             // Una vez que las tareas de inicialización están completas, iniciar MainActivity en el hilo principal
             runOnUiThread(() -> {
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                // Solo debug (u12): reenvía los extras bb_debug_* de MainActivity.handleDebugNav,
+                // para abrir un destino secundario con adb am start.
+                if (BuildConfig.DEBUG && getIntent().getExtras() != null) {
+                    intent.putExtras(getIntent().getExtras());
+                }
                 startActivity(intent);
                 finish();
             });

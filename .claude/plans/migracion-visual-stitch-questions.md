@@ -132,3 +132,10 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
 - **Q:** El emulador conserva datos sembrados (2 proyectos «Final thesis»/«Physics exam», ~40 días de
   sesiones). — **Assumed:** se dejan para las capturas de u17–u20. Para quitarlos: `adb shell pm clear
   io.github.thaguille.bbettercalendar` (y volver a conceder `POST_NOTIFICATIONS`).
+
+## u12
+- **Q:** ¿La barra inferior debe ocultarse en el detalle de proyecto? — **Assumed:** sí, es destino
+  secundario (el plan dice «solo en los 4 destinos de primer nivel»). Para mostrarla, añadir
+  `R.id.navigation_project_detail` a `MainActivity.TOP_LEVEL_DESTINATIONS`.
+- **Q:** Entre u12 y u14, el focus mode in-place de Home ya no oculta la barra inferior. — **Assumed:**
+  aceptable de forma transitoria (u13/u14 mueven la sesión a la pantalla Focus, sin barra).

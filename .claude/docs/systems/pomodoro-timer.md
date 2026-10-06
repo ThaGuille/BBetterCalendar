@@ -73,10 +73,9 @@ the same ViewModel. "Left the app mid-session" still counts as a failure.
   `FocusUiState.isSessionActive()` (cualquier estado distinto de `STOPPED`). Por eso *ninguna* ruta de salida (cancelar, fallo por background, fin de
   ciclo, cambio de configuración) necesita código para salir del modo: ya pasan todas por
   `updateTimerControls()`. No se guarda en `onSaveInstanceState` a propósito — se recalcula.
-- **El focus mode oculta chrome que pertenece a la Activity** (`nav_view`, `nav_divider` y la
-  `ActionBar` de `MainActivity`), así que `onDestroyView()` llama a `setAppChromeVisible(true)`
-  incondicionalmente. Si tocas ese camino, verifica que rotar a mitad de sesión no deja otra
-  pantalla sin bottom-nav.
+- **La bottom-nav ya no la toca Home (u12).** `MainActivity` la muestra solo en destinos de
+  primer nivel (`addOnDestinationChangedListener`), así que el focus mode in-place de Home la deja
+  visible hasta que u13/u14 lleven la sesión en curso a `navigation_focus` (destino sin barra).
 - **La expansión a pantalla completa no usa otro Fragment**: `homeTimerCard` pasa a
   `MATCH_PARENT` y, como el `NestedScrollView` tiene `fillViewport="true"` y su hijo directo
   (`homeContent`) es `wrap_content`, el ScrollView re-mide ese hijo a la altura del viewport. Si

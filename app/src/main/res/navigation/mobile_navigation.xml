@@ -66,4 +66,42 @@
         android:id="@+id/action_global_project_detail"
         app:destination="@id/navigation_project_detail" />
 
+    <!-- ===== u12: destinos secundarios (sin barra inferior; MainActivity.TOP_LEVEL_DESTINATIONS).
+         Se navega a ellos por id de destino (navController.navigate(R.id.navigation_focus)), desde
+         cualquier pestaña; system back / la flecha de la barra superior vuelven al origen. ===== -->
+    <fragment
+        android:id="@+id/navigation_focus"
+        android:name="com.example.bbettercalendar.ui.focus.FocusFragment"
+        android:label="@string/title_focus"
+        tools:layout="@layout/fragment_focus" />
+
+    <fragment
+        android:id="@+id/navigation_cycle_complete"
+        android:name="com.example.bbettercalendar.ui.focus.CycleCompleteFragment"
+        android:label="@string/title_cycle_complete"
+        tools:layout="@layout/fragment_cycle_complete" />
+
+    <fragment
+        android:id="@+id/navigation_all_progress"
+        android:name="com.example.bbettercalendar.ui.progress.AllProgressFragment"
+        android:label="@string/title_all_progress"
+        tools:layout="@layout/fragment_all_progress" />
+
+    <fragment
+        android:id="@+id/navigation_screen_time"
+        android:name="com.example.bbettercalendar.ui.screentime.ScreenTimeFragment"
+        android:label="@string/title_screen_time"
+        tools:layout="@layout/fragment_screen_time" />
+
+    <fragment
+        android:id="@+id/navigation_app_detail"
+        android:name="com.example.bbettercalendar.ui.screentime.AppDetailFragment"
+        android:label="@string/title_app_detail"
+        tools:layout="@layout/fragment_app_detail" >
+        <!-- AppDetailFragment.ARG_PACKAGE_NAME -->
+        <argument
+            android:name="packageName"
+            app:argType="string" />
+    </fragment>
+
 </navigation>

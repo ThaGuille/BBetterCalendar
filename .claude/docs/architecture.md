@@ -142,14 +142,39 @@ Declared exclusions from the system docs (owned elsewhere): `ui/projects` (genui
 
 ```mermaid
 graph LR
-    BottomNav["Bottom Navigation"]
+    BottomNav["Bottom Navigation (top level)"]
     BottomNav --> Home["HomeFragment"]
     BottomNav --> Progress["ProgressFragment"]
     BottomNav --> CalMonth["CalendarFragmentMonth"]
-    BottomNav --> Projects["ProjectsFragment (stub)"]
+    BottomNav --> Projects["ProjectsFragment"]
     CalMonth -->|"toolbar switch"| CalWeek["CalendarFragmentWeek"]
     CalWeek  -->|"toolbar switch"| CalMonth
+    Projects --> ProjectDetail["ProjectDetailFragment (projectId: int)"]
+    Home -.-> Focus["FocusFragment (u14)"]
+    Focus -.-> CycleComplete["CycleCompleteFragment (u15)"]
+    Progress -.-> AllProgress["AllProgressFragment (u18)"]
+    Progress -.-> ScreenTime["ScreenTimeFragment (u19)"]
+    ScreenTime -.-> AppDetail["AppDetailFragment (packageName: string, u20)"]
 ```
+
+Destination ids (`res/navigation/mobile_navigation.xml`): top level `navigation_home`,
+`navigation_progress`, `navigation_calendar_month`, `navigation_calendar_week`,
+`navigation_projects`; secondary `navigation_project_detail` (global action
+`action_global_project_detail`), `navigation_focus`, `navigation_cycle_complete`,
+`navigation_all_progress`, `navigation_screen_time`, `navigation_app_detail`. Dotted edges are
+the entry points the screen units (u13–u20) add; until then the secondary screens are shells.
+
+**Chrome per destination (u12):** `MainActivity` hides `nav_view` + `nav_divider` from an
+`addOnDestinationChangedListener` unless the destination is in `TOP_LEVEL_DESTINATIONS` (the 5
+top-level ids above). Fragments never toggle the bottom nav themselves. Secondary screens get
+their back arrow + title from `@layout/view_top_bar` (`MaterialToolbar` id `topBar`, style
+`Widget.BBetter.Toolbar.Secondary`) bound with `ui/common/TopBarHelper.bind(fragment, view, title)`;
+arrow and system back both pop to wherever you came from.
+
+**Debug entry (debug builds only):** `SplashActivity` forwards its extras to `MainActivity`, which
+handles `bb_debug_nav` = `focus|cycle_complete|all_progress|screen_time|app_detail`, optional
+`bb_debug_from` = `home|progress|calendar|projects` (tab opened first, so back lands there) and
+`bb_debug_pkg` (for `app_detail`). See `bbetter-selectors.md`.
 
 Start destination: `SplashActivity` (real `LAUNCHER` activity) → `MainActivity` → `HomeFragment`.
 

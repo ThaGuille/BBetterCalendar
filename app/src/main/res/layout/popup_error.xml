@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="@id/alertMessage"
         app:layout_constraintBottom_toBottomOf="@id/alertMessage"
         app:layout_constraintStart_toStartOf="parent"
-        app:tint="#FF0000" />
+        app:tint="@color/bb_danger" />
 
     <TextView
         android:id="@+id/alertMessage"

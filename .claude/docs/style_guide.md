@@ -182,7 +182,9 @@ Selected drawables you should know about (all under [`res/drawable/`](../../app/
 - `bg_mode_toggle.xml` — Background for the concentration/rest toggle.
 - `bg_calendar_day_selected.xml` — Selected-day highlight in the month grid.
 - `bottom_nav_indicator.xml` — Pill behind the active bottom-nav item.
-- `ic_*_v2_24.xml` — The current visual icon set (24dp). Older `ic_*_24.xml` variants exist for backwards compatibility.
+- `ic_*_24.xml` — **Icon contract (u8):** every in-app vector carries `android:tint="?attr/colorControlNormal"` on the root (= `bb_on_surface_muted`) and paints its paths with `@color/bb_on_surface` (irrelevant under the `src_in` tint; no hex / `@android:color/white`). Override per use with `app:tint` / `app:drawableTint` / `setImageTintList` (e.g. `bb_on_primary` on the sage play button, `bb_on_surface` for nav chevrons); BottomNav / FAB tint through their `Widget.BBetter.*` style. New icons = Material Symbols **Outlined**, weight 400, 24dp, converted from the official SVG (viewport 960 + `<group android:translateY="960">`): `ic_shield/lock/share/eco(leaf)/skip_next/stop/chevron_left/chevron_right/expand_more/more_vert/info/timer/trophy/person_add/group_add/check_24`. Reused rather than duplicated: bell = `ic_notifications_empty_24`, add = `ic_add_24`, flame = `ic_flame_v2_24`.
+- `ic_stat_bbetter.xml` — Notification small icon (leaf). **No theme-attr tint on purpose:** SystemUI can't resolve `?attr` and only uses alpha. The accent comes from `setColor(bb_primary)`.
+- `ic_*_v2_24.xml` — Older custom stroke set (home/calendar/flame/clock/cross/play/pause), same tint contract.
 - `rounded_square.xml` — `bb_surface_card` + `radius_lg` (24dp). Window background of `RoundedDialog`; also still used by a few legacy stepper / segmented buttons.
 
 ### Naming rule

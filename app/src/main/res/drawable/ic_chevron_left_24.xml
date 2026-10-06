@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols Outlined "chevron_left" (weight 400, grade 0, optical size 24). El tinte de la raíz lo pisa app:tint / setImageTintList. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960"
+    android:autoMirrored="true"
+    android:tint="?attr/colorControlNormal">
+    <group android:translateY="960">
+        <path
+            android:fillColor="@color/bb_on_surface"
+            android:pathData="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z" />
+    </group>
+</vector>

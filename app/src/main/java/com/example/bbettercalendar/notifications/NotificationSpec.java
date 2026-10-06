@@ -35,7 +35,7 @@ public final class NotificationSpec {
         private final int notificationId;
         private String title = "";
         private String body = "";
-        @DrawableRes private int smallIconRes = R.drawable.ic_notifications_black_24dp;
+        @DrawableRes private int smallIconRes = R.drawable.ic_stat_bbetter;
         private PendingIntent contentIntent;
         private boolean autoCancel = true;
 

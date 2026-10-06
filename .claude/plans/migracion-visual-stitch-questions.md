@@ -91,3 +91,8 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
 - **Q:** El segmentado no usa `MaterialButtonToggleGroup` (en MDC 1.9.0 no permite una píldora por segmento).
   — **Assumed:** `LinearLayout`/`RadioGroup` + `Widget.BBetter.SegmentedControl.Item`. Sólo cambiaría si se
   sube Material (el plan lo prohíbe).
+
+## u8
+- **Q:** Icono pequeño de notificación: hoja (`eco` de Material Symbols, por la «Sage Leaf» de DESIGN.md). —
+  **Assumed:** hoja. Para cambiarlo, sustituir el `pathData` de `res/drawable/ic_stat_bbetter.xml` (mantener
+  sin `android:tint`).

@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.IBinder;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.bbettercalendar.R;
 
@@ -23,7 +24,8 @@ public class HomeForegroundService extends Service {
         Notification notification = new NotificationCompat.Builder(this, "channelId")
                 .setContentTitle(getString(R.string.notif_foreground_service_title))
                 .setContentText(getString(R.string.notif_foreground_service_body))
-                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                .setSmallIcon(R.drawable.ic_stat_bbetter)
+                .setColor(ContextCompat.getColor(this, R.color.bb_primary))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .build();
 

@@ -10,6 +10,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.bbettercalendar.R;
+
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 import javax.inject.Inject;
@@ -33,6 +35,8 @@ public class BBetterNotifier {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext, spec.channelId)
                 .setSmallIcon(spec.smallIconRes)
+                // Acento de marca (círculo del icono / nombre de la app en la cabecera de la notificación).
+                .setColor(ContextCompat.getColor(appContext, R.color.bb_primary))
                 .setContentTitle(spec.title)
                 .setContentText(spec.body)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(spec.body))

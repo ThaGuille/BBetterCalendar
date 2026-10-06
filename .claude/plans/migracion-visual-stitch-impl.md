@@ -553,3 +553,49 @@ AddEvent y Calendar Week. Capturas en `.claude/skills/adb-ui-test/captures/`: `m
 inferior con etiquetas y píldora forest), `mig-u7-calendar` (FAB circular), `mig-u7-projects`,
 `mig-u7-dialog-create-project` (botones Jakarta bold), `mig-u7-dialog-timer` + `mig-u7-switch-off` (switch
 nuevo), `mig-u7-quickadd-sheet` (esquinas de 24dp), `mig-u7-addevent`, `mig-u7-calendar-week`.
+
+## u8 · Iconos con tinte + acento de notificaciones
+
+**Hecho.**
+- **Contrato de icono:** los 39 vectores `ic_*` de la app (sin `ic_launcher*`) llevan
+  `android:tint="?attr/colorControlNormal"` en la raíz (= `bb_on_surface_muted`) y pintan con
+  `@color/bb_on_surface` (da igual bajo el `src_in` del tinte; así no hay hex ni `@android:color/white`).
+  Los `*_v2` de trazo pierden `fillColor="#00000000"` (el valor por defecto ya es transparente) y su
+  `#1F2A2A`; play/pause v2 su `#FFFFFF`; `ic_circle_blue_24` (radio marcado) pasa a
+  `?attr/colorControlActivated`. Los usos con `app:tint` / `drawableTint` / `setImageTintList`
+  (AppUsageAdapter) / estilo (FAB `tint`, BottomNav `itemIconTint`) siguen mandando — comprobado en captura.
+- **Usos sin tinte revisados:** `homePlayButton` → `app:tint="@color/bb_on_primary"` (icono pino sobre salvia,
+  DESIGN §4); flechas del mes de Calendar y del popup de racha → **`ic_chevron_left/right_24` + `app:tint
+  bb_on_surface`** (fuera el `scaleX="-1"`; los chevrons son `autoMirrored`); `popup_error` `#FF0000` →
+  `bb_danger`. Los menús `home_toolbar`/`toolbar`/`close_or_save` no se inflan en ningún sitio (heredan el
+  tinte muted si alguien los usa).
+- **Iconos nuevos** (Material Symbols Outlined 400, 24dp, SVG oficial de google/material-design-icons
+  convertido: viewport 960 + `<group android:translateY="960">`): `ic_shield_24`, `ic_lock_24`,
+  `ic_share_24`, `ic_eco_24` (= hoja/leaf), `ic_skip_next_24`, `ic_stop_24`, `ic_chevron_left_24`,
+  `ic_chevron_right_24`, `ic_expand_more_24`, `ic_more_vert_24`, `ic_info_24`, `ic_timer_24`,
+  `ic_trophy_24`, `ic_person_add_24`, `ic_group_add_24` (el html 01 usa `group_add`), `ic_check_24`.
+  **Reutilizados:** campana = `ic_notifications_empty_24`, add = `ic_add_24`, llama = `ic_flame_v2_24`
+  (los iconos que el HTML pide y no están en la lista — `crown`, `do_not_disturb_on`, `schedule`,
+  `calendar_today`, `folder`, `bar_chart`, `monitoring`, `filter_list`, `block`, `remove`, `photo_camera`,
+  `verified_user`, `lock_open`… — los añade la unidad de pantalla que los necesite, con el mismo método).
+- **Notificaciones:** icono pequeño propio **`ic_stat_bbetter`** (hoja `eco`, SIN tinte de tema: la SystemUI
+  no resuelve `?attr` y solo usa alfa). `NotificationSpec` lo usa por defecto; `BBetterNotifier` y
+  `HomeForegroundService` añaden `setColor(bb_primary)`. Borrado `ic_notifications_black_24dp`.
+- Docs: `style_guide.md` §5 (contrato de icono + lista), `systems/notifications.md` (icono/acento; Last verified).
+
+**Auditoría:** `hex_layout_drawable` 60→3, `android_white_black` 36→2; total 141→50. Base actualizada.
+Quedan: `divider_horizontal` `#D3D3D3`, `popup_error`/`popup_message` `#FFFFFF` (u21) y
+`round_background` ×2 (`@android:color/white`).
+
+**Verificación (emulator-5554, API 37).** `assembleDebug` OK; `logcat -b crash` vacío (limpiado antes) tras
+recorrer los 4 tabs, iniciar/cancelar una sesión y pasar de mes. Capturas en
+`.claude/skills/adb-ui-test/captures/`: `mig-u8-home` (play pino sobre salvia; ajustes muted; llama ámbar),
+`mig-u8-progress`, `mig-u8-calendar` + `mig-u8-calendar-month-header` (chevrons claros, ya no negros),
+`mig-u8-projects`, `mig-u8-notification-shade`. Ningún icono negro sobre fondo oscuro.
+- **Notificación:** `dumpsys notification` → `color=0xff7fb69a` (bb_primary) e `icon=0x7f0800f0` =
+  `ic_stat_bbetter` (R.txt). En API 37 la fila del panel muestra el **icono del launcher** (robot por
+  defecto) en lugar del icono pequeño, y el canal del servicio es silencioso (no sale en la barra de estado),
+  así que la hoja no se ve en la captura: el icono de launcher es de u23.
+
+**Para unidades siguientes.** Un icono nuevo = SVG oficial convertido igual (o copiar uno de los nuevos y
+cambiar `pathData`); nunca tinte de tema en iconos de notificación/RemoteViews.

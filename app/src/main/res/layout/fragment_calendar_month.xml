@@ -30,7 +30,8 @@
                 android:layout_height="40dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/month_view_prev"
-                android:src="@drawable/ic_arrow_back_24" />
+                android:src="@drawable/ic_chevron_left_24"
+                app:tint="@color/bb_on_surface" />
 
             <TextView
                 android:id="@+id/monthTitleText"
@@ -47,8 +48,8 @@
                 android:layout_height="40dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/month_view_next"
-                android:scaleX="-1"
-                android:src="@drawable/ic_arrow_back_24" />
+                android:src="@drawable/ic_chevron_right_24"
+                app:tint="@color/bb_on_surface" />
         </LinearLayout>
 
         <include layout="@layout/view_calendar_header" />

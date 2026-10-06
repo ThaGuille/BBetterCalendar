@@ -1,6 +1,6 @@
 # System — Notifications infra (`notifications/`)
 
-**Last verified:** 2026-09-01 · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-06 · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Shared notification plumbing every feature-specific notifier builds on: channel definitions, the
 actual `NotificationManagerCompat` wrapper, a spec builder, and `POST_NOTIFICATIONS` runtime
@@ -42,6 +42,7 @@ permission gating with a backoff schedule. The four feature notifiers (`focus`, 
 - **A `RequestCodeNamespace` is a *separate* id space from the notification id.** Both are derived per (entity, offset), but the request code identifies the `PendingIntent` (get it wrong and cancelling one feature's alarm kills another's) while the notification id identifies the posted notification (get it wrong and one notification overwrites another). `ProjectDeadlineScheduler` keeps both formulas side by side for exactly this reason.
 - **`requiresRuntimePostNotificationsPermission()` returning false below API 33 doesn't mean notifications always show** — `PermissionHelper.notificationsGranted()` still checks `NotificationManagerCompat.areNotificationsEnabled()` on those versions (user can disable notifications app-wide pre-33 too).
 - **The foreground-service channel ID is a legacy string literal (`"channelId"`)**, not a `NotificationChannels` constant reference, in `HomeForegroundService` — if you rename that channel here, update the literal in `ui/home/HomeForegroundService.java` too (see `pomodoro-timer.md`).
+- **Small icon + accent (u8):** `NotificationSpec` defaults to `R.drawable.ic_stat_bbetter` and `BBetterNotifier` / `HomeForegroundService` both call `setColor(bb_primary)`. The small icon must stay a plain vector **without** `android:tint="?attr/..."` (SystemUI inflates it without the app theme; only alpha is used). On recent Android (seen on the API 37 emulator) the shade shows the launcher icon in the row header instead of the small icon, so verify the small icon via `dumpsys notification` (`icon=` / `color=`) or the status bar.
 - **`PermissionGate.maybeRequest()` is a no-op if `ConfigurationManager.getConfiguration()` returns null** (async load not yet complete) — it silently skips the ask rather than deferring it, so a very early call (before config loads) can miss an ask opportunity.
 
 ## History

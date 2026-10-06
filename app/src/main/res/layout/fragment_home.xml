@@ -258,7 +258,8 @@
                         android:focusable="true"
                         android:padding="16dp"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_play_v2_filled_24" />
+                        android:src="@drawable/ic_play_v2_filled_24"
+                        app:tint="@color/bb_on_primary" />
 
                     <ImageButton
                         android:id="@+id/homeCancelButton"

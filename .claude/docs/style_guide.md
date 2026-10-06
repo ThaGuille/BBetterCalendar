@@ -113,8 +113,10 @@ Always set typography via `android:textAppearance="@style/TextAppearance.BBetter
 | `ToggleRow` / `ToggleRowButton` / `ToggleRowText` | Toggle list rows (notifications popup, repetition popup) |
 | `TimerRow` / `TimerRowLabel` / `StepperButton` / `StepperValue` / `StepperToggle` | Timer-popup steppers |
 | `DialogText` | Default dialog text style |
-| `CalendarLegendDay` / `AppTheme.WeekDays` / `AppTheme.CalendarHours` | Calendar legend & headers |
-| `RoundedDialog` | 90% width rounded-corner dialog theme |
+| `CalendarLegendDay` | Calendar legend header |
+| `Base.Theme.BBetter.Dialog` | DayNight dialog theme carrying the `bb_*` colour roles — parent of the two below |
+| `RoundedDialog` | 90% width dialog on `rounded_square` (`bb_surface_card`, radius 24) — pass to `AlertDialog.Builder(ctx, R.style.RoundedDialog)` |
+| `RewardDialog` | Transparent floating window for the reward card (`FirstFocusCelebrationPopup`) |
 | `fab_3_rounded` | FAB shape — 50% rounded corners |
 | `Widget.BBetter.BottomNav.ActiveIndicator` / `ShapeAppearance.BBetter.NavIndicator` | Bottom-nav active-item pill |
 
@@ -140,7 +142,7 @@ Selected drawables you should know about (all under [`res/drawable/`](../../app/
 - `bg_calendar_day_selected.xml` — Selected-day highlight in the month grid.
 - `bottom_nav_indicator.xml` — Pill behind the active bottom-nav item.
 - `ic_*_v2_24.xml` — The current visual icon set (24dp). Older `ic_*_24.xml` variants exist for backwards compatibility.
-- `rounded_square.xml` — Generic rounded background for stepper / segmented buttons.
+- `rounded_square.xml` — `bb_surface_card` + `radius_lg` (24dp). Window background of `RoundedDialog`; also still used by a few legacy stepper / segmented buttons.
 
 ### Naming rule
 
@@ -152,16 +154,35 @@ Selected drawables you should know about (all under [`res/drawable/`](../../app/
 
 ## 6. Themes ([`themes.xml`](../../app/src/main/res/values/themes.xml))
 
-- `Theme.BBetter` is the canonical app theme — sage primary, indigo secondary, coral accent. Used as the parent for everything in active development.
-- `Theme.BBetter.NoActionBar` for activities that supply their own `Toolbar`.
-- `Theme.BBetterCalendar` is the alias the manifest uses.
-- `ThemeChatGPTBlue` / `ThemeColorBlue` / `ThemeColorGreen` / `ThemeColorPurple` / `ThemeColorNavyBlue` / `ThemeColorEvenTalk` / `FakeTheme` — legacy themes kept so old references compile. Several inherit from `Theme.BBetter` now, so most screens get the new palette transparently. Don't introduce new references to these.
-- `ThemeChatGPTBlue_AndroidPopups` is the dialog-alert theme — extend it (don't replace) if you need a new dialog look.
-- `SplashTheme` uses `blue_oval` as window background for the splash screen.
+Dark-only since the Stitch migration (u5). One theme tree, no runtime `setTheme()`:
+
+- `Theme.BBetter` — parent `Theme.MaterialComponents.DayNight`; night mode is **forced** with
+  `AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)` in `DBMigration.onCreate` (before any
+  activity exists, so no recreation). The dark tokens live in `values/colors.xml`; a future light
+  theme = `values-notnight/colors.xml` + dropping the forced mode. There is no `values-night/`.
+  Carries all colour roles (`colorSecondary`/`colorAccent` = `bb_primary`, not dusk),
+  `colorControlNormal/Activated`, `elevationOverlayEnabled=false`, status bar = `bb_surface`,
+  nav bar = `bb_surface_card`, light bars off, `android:textColor*`, and the dialog hooks below.
+- `Theme.BBetter.NoActionBar` — every activity in the manifest (and the `<application>` default).
+  `SplashTheme` derives from it and only swaps the window background.
+- Dialog hooks wired from `Theme.BBetter`: `alertDialogTheme` / `android:alertDialogTheme` →
+  `ThemeOverlay.BBetter.Dialog.Alert`; `materialAlertDialogTheme` →
+  `ThemeOverlay.BBetter.MaterialAlertDialog`; `bottomSheetDialogTheme` →
+  `ThemeOverlay.BBetter.BottomSheetDialog` (sheet `backgroundTint` = `bb_surface_card`);
+  `android:datePickerDialogTheme` / `android:timePickerDialogTheme` → `Theme.BBetter.PickerDialog`.
+- `Theme.BBetter.PickerDialog` — framework pickers (`android.app.DatePickerDialog` /
+  `TimePickerDialog`). Must stay on a **framework** parent (`@android:style/Theme.Material.Dialog`):
+  under MaterialComponents the framework OK/Cancel buttons render invisible. Sage accent and
+  buttons (`Widget.BBetter.PickerDialogButton`), `bb_surface_card` background, headers / clock face
+  on `bb_surface_raised` (`Widget.BBetter.DatePicker` / `Widget.BBetter.TimePicker`). Pass it
+  explicitly: `new DatePickerDialog(ctx, R.style.Theme_BBetter_PickerDialog, …)`.
+- Custom dialogs: `RoundedDialog` / `RewardDialog` (see §4), both on `Base.Theme.BBetter.Dialog`.
 
 ### Rule of thumb
 
-If adding a new screen: parent your theme on `Theme.BBetter` or `Theme.BBetter.NoActionBar`. Don't parent on `Theme.MaterialComponents.*` directly — you lose the palette overrides.
+New activity → `Theme.BBetter.NoActionBar` in the manifest. New dialog → `RoundedDialog`; new picker
+→ `Theme.BBetter.PickerDialog`. Never `setTheme()` at runtime, never parent on
+`Theme.MaterialComponents.Light*` (the token audit counts `setTheme(`).
 
 ---
 
@@ -182,7 +203,7 @@ Common patterns you'll see across `res/layout/`:
 
 - [ ] No new raw hex colours, dp/sp, or font-family declarations — all via tokens.
 - [ ] No new references to legacy palette names (`azul`, `verde`, `purple_500`, …).
-- [ ] Themes parent on `Theme.BBetter*` (or extend `RoundedDialog` / `ThemeChatGPTBlue_AndroidPopups` for dialogs).
+- [ ] Themes parent on `Theme.BBetter*` (or `RoundedDialog` / `Theme.BBetter.PickerDialog` for dialogs). No `setTheme()`.
 - [ ] If a value isn't in `dimens.xml` / `colors.xml` / `styles_typography.xml`, add it there before referencing.
 - [ ] `tools:text` previews stay in sync with `@string/*` (don't leave stale placeholders).
 - [ ] Strings live in `strings.xml`, not inline.

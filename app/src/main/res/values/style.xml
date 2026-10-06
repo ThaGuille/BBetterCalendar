@@ -1,28 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Personaliza tu tema aquí -->
-    </style>
     <style name="fab_3_rounded">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
-    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Personaliza tu tema aquí -->
-    </style>
 
-    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- Splash (u5: re-parented onto the app theme so the whole tree is DayNight + forced night;
+         the splash visuals themselves are u23). -->
+    <style name="SplashTheme" parent="Theme.BBetter.NoActionBar">
         <item name="android:windowBackground">@drawable/blue_oval</item>
     </style>
-
-    <!--
-   <style name="ThemeChatGPTBlueParent" parent="Theme.MaterialComponents.Light">
-       <item name="colorPrimary">@color/c_azul_claro</item>
-       <item name="colorSecondary">@color/c_verde_claro</item>
-       <item name="colorAccent">@color/c_azul_oscuro</item>
-       <item name="colorOnPrimary">@color/c_verde_oscuro</item>
-   </style>
--->
 
    <style name="CalendarLegendDay">
        <item name="android:layout_width">0dp</item>
@@ -34,32 +21,34 @@
        <item name="android:textStyle">bold</item>
    </style>
 
-   <style name="AppTheme.WeekDays" parent="Theme.MaterialComponents.Light.NoActionBar" >
-       <item name="android:textColor">@color/black</item>
-       <item name="android:textSize">15sp</item>
-       <item name="android:textStyle">bold</item>
-       <item name="android:background">@color/white</item>
-       <item name="android:gravity">center</item>
-       <item name="android:layout_weight">1</item>
-       <item name="android:layout_alignParentTop">true</item>
-       <item name="android:layout_marginEnd">1dp</item>
+    <!-- Base of the app's custom dialog themes (u5): DayNight dialog + the bb_* colour roles,
+         so a dialog looks right even where it is not overlaid on Theme.BBetter. Used with
+         android.app.AlertDialog.Builder(ctx, R.style.RoundedDialog) and DialogFragment.setStyle. -->
+    <style name="Base.Theme.BBetter.Dialog" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="colorPrimary">@color/bb_primary</item>
+        <item name="colorPrimaryVariant">@color/bb_primary_dark</item>
+        <item name="colorOnPrimary">@color/bb_on_primary</item>
+        <item name="colorSecondary">@color/bb_primary</item>
+        <item name="colorOnSecondary">@color/bb_on_primary</item>
+        <item name="colorAccent">@color/bb_primary</item>
+        <item name="colorSurface">@color/bb_surface_card</item>
+        <item name="colorOnSurface">@color/bb_on_surface</item>
+        <item name="colorError">@color/bb_danger</item>
+        <item name="colorControlNormal">@color/bb_on_surface_muted</item>
+        <item name="colorControlActivated">@color/bb_primary</item>
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="android:colorBackground">@color/bb_surface_card</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+        <item name="android:textColorPrimary">@color/bb_on_surface</item>
+        <item name="android:textColorSecondary">@color/bb_on_surface_muted</item>
+        <item name="android:textColorHint">@color/bb_on_surface_muted</item>
+        <item name="android:textColorPrimaryInverse">@color/bb_on_primary</item>
+        <item name="android:datePickerDialogTheme">@style/Theme.BBetter.PickerDialog</item>
+        <item name="android:timePickerDialogTheme">@style/Theme.BBetter.PickerDialog</item>
+    </style>
 
-       <item name="android:layout_width">0dp</item>
-       <item name="android:layout_height">25dp</item>
-   </style>
-
-   <style name="AppTheme.CalendarHours" parent="Theme.MaterialComponents.Light.NoActionBar" >
-       <item name="android:textColor">@color/black</item>
-       <item name="android:textSize">10sp</item>
-       <item name="android:textStyle">bold</item>
-       <item name="android:background">@color/white</item>
-       <item name="android:gravity">center</item>
-       <item name="android:layout_height">70dp</item>
-       <item name="android:layout_alignParentTop">true</item>
-   </style>
-
-    <style name="RoundedDialog" parent="Theme.MaterialComponents.Dialog">
-        <!-- Personaliza el fondo del diálogo para tener bordes redondeados -->
+    <style name="RoundedDialog" parent="Base.Theme.BBetter.Dialog">
+        <!-- Fondo del diálogo con bordes redondeados (rounded_square = bb_surface_card, radio 24). -->
         <item name="android:windowBackground">@drawable/rounded_square</item>
         <!-- Configuraciones opcionales para el padding del diálogo -->
         <item name="android:windowMinWidthMajor">90%</item>
@@ -270,7 +259,7 @@
 
     <!-- Diálogo de recompensa (spec focus-mode-and-streak): ventana transparente para que la
          tarjeta pueda entrar con escala + overshoot sin que se vea el rectángulo del diálogo. -->
-    <style name="RewardDialog" parent="Theme.MaterialComponents.Dialog">
+    <style name="RewardDialog" parent="Base.Theme.BBetter.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimAmount">0.55</item>

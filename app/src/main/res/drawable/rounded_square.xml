@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo de los diálogos (RoundedDialog) y de algunos botones/paneles heredados.
+     u5: tarjeta oscura bb_surface_card con radio 24 (radius_lg). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/white"/> <!-- Color de fondo -->
-    <corners android:radius="20dp"/> <!-- Radio de las esquinas redondeadas -->
+    <solid android:color="@color/bb_surface_card"/> <!-- Color de fondo -->
+    <corners android:radius="@dimen/radius_lg"/> <!-- Radio de las esquinas redondeadas -->
 </shape>

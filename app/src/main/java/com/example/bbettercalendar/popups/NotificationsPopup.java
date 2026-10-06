@@ -29,7 +29,7 @@ public class NotificationsPopup extends DialogFragment implements CompoundButton
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.RoundedDialog);
 
         // Inflar y establecer el layout para el dialog
         LayoutInflater inflater = requireActivity().getLayoutInflater();

@@ -236,3 +236,63 @@ es de u17; `PeriodComparison.Period.YEAR` ya existe para su tile.
 Auditoría de tokens no ejecutada (no existía en el worktree; esta unidad no toca res/ ni UI).
 Docs: `data-model.md` (filas nuevas + historial). El worktree se creó desde `dc9a129`; se hizo
 fast-forward a `feature/migracion-visual-stitch` (`b45f89c`) antes de empezar.
+
+## u5 · Árbol de temas DayNight forzado + diálogos + pickers
+
+**Hecho.**
+- `Theme.BBetter` → padre `Theme.MaterialComponents.DayNight`; `DBMigration.onCreate` llama a
+  `AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)` (antes de cualquier actividad → sin
+  recreación). Roles: `colorSecondary`/`colorAccent` = `bb_primary` (+ `colorOnSecondary`/`colorOnError`
+  = `bb_on_primary`), `colorOnBackground`, `colorControlNormal` = muted, `colorControlActivated` =
+  primary, `elevationOverlayEnabled=false`, status bar = `bb_surface`, nav bar = `bb_surface_card`,
+  barras claras off, `android:textColor*` (incl. `textColorPrimaryInverse` = `bb_on_primary`).
+- Ganchos de diálogo en el tema: `alertDialogTheme` + `android:alertDialogTheme` →
+  `ThemeOverlay.BBetter.Dialog.Alert`; `materialAlertDialogTheme` → `ThemeOverlay.BBetter.MaterialAlertDialog`;
+  `bottomSheetDialogTheme` → `ThemeOverlay.BBetter.BottomSheetDialog` (+ `Widget.BBetter.BottomSheet.Modal`,
+  `backgroundTint` = surface_card); `android:date/timePickerDialogTheme` → `Theme.BBetter.PickerDialog`.
+- **Pickers:** `ThemeChatGPTBlue_AndroidPopups` renombrado a **`Theme.BBetter.PickerDialog`**
+  (`R.style.Theme_BBetter_PickerDialog`), padre `@android:style/Theme.Material.Dialog`; botones
+  `Widget.BBetter.PickerDialogButton` (sage); fondo vía `android:colorBackground` = surface_card
+  (conserva la ventana redondeada del framework); cabeceras y esfera del reloj en `bb_surface_raised`
+  con `Widget.BBetter.DatePicker` / `Widget.BBetter.TimePicker` (el gris por defecto desentonaba).
+  5 usos actualizados (AddEventActivity ×2, QuickAddTaskSheet, CreateProjectDialog, ProjectDetailFragment).
+- **Diálogos:** nuevo `Base.Theme.BBetter.Dialog` (padre `Theme.MaterialComponents.DayNight.Dialog`
+  con los roles `bb_*`); `RoundedDialog` y `RewardDialog` heredan de él. `rounded_square` =
+  `bb_surface_card` + `@dimen/radius_lg` (24). `NotificationsPopup` recibe `RoundedDialog`.
+- **Sin `setTheme(`:** quitados en MainActivity, AddEventActivity, CalendarFragmentMonth/Week.
+  Manifest: `<application>` y las 3 actividades (Main, AddEvent, AppPicker) en
+  `Theme.BBetter.NoActionBar`; `SplashTheme` re-emparentado a `Theme.BBetter.NoActionBar` (solo
+  cambia el fondo de ventana; el diseño del splash es de u23).
+- **Borrado:** `values-night/themes.xml`, `Theme.BBetterCalendar`, `ThemeColor*`, `ThemeChatGPTBlue*`,
+  `ThemeColorEvenTalk`, `FakeTheme`, `AppTheme`, `AppTheme.NoActionBar` y los estilos sin uso
+  `AppTheme.WeekDays` / `AppTheme.CalendarHours` (padres claros + `black`/`white`).
+- `ToolbarHelper`: pasaba un color a `resolveAttribute` (fallaba → fondo 0/transparente). Ahora
+  `MaterialColors.getColor(toolbar, android.R.attr.colorBackground)` (= `bb_surface`, lo mismo que
+  declara `toolbar_close_or_save.xml`).
+- **Fuera de alcance, mínimo para legibilidad:** el saludo de Home (`fragment_home.xml` `text_home`)
+  y el título de `popup_first_focus.xml` usaban `bb_primary_dark` (forest) como color de texto →
+  ilegible sobre pino. Pasan a `bb_on_surface`. **No** se tocó `HomeFragment.java` ni `HomeViewModel`.
+- Docs: `style_guide.md` §4/§5/§6/§8 reescritos (árbol de temas), `common_errors.md` (diálogo con tema
+  equivocado).
+
+**Auditoría:** baja y base actualizada: `legacy_color` 74→30, `textsize_literal_sp` 12→10,
+`set_theme_java` 4→0; total 200→150. Resto igual.
+
+**Verificación (emulator-5554, API 37):** `assembleDebug` OK. Arranque en frío Splash → Main: un
+`wm_on_create_called` por actividad, sin relaunch (sin bucle de recreación). `logcat -b crash` vacío
+durante toda la sesión. Capturas (en `.claude/skills/adb-ui-test/captures/`, ignoradas por git):
+`mig-u5-home`, `mig-u5-progress`, `mig-u5-calendar`, `mig-u5-projects`, `mig-u5-popup-create-project`,
+`mig-u5-datepicker`, `mig-u5-quickadd-sheet`, `mig-u5-timepicker`, `mig-u5-addevent` — todas oscuras y
+legibles.
+
+**Residuos para unidades siguientes (vistos en captura):**
+- u7: texto blanco sobre el segmento sage seleccionado (Progress Day/Week/Month, Calendar
+  Month/Week, AddEvent Event/Task/Reminder) → debe ser `bb_on_primary`; «BLOCK MODE: OFF» en gris
+  neutro; la hoja rápida tiene esquinas superiores rectas (forma de u7).
+- u8: flechas ‹ › del mes en Calendar se pintan negras (casi invisibles); icono play de Home blanco.
+- u23: la pantalla de arranque del sistema (API 31+) sale ya en pine_950 con el icono por defecto
+  (captura `mig-u5-splash`); el layout propio `activity_splash.xml` sigue con fondo
+  `?attr/colorPrimary` (ahora sage) y `blue_oval` en pine_950 — apenas se ve, lo rediseña u23.
+- Los diálogos del framework (pickers) tienen esquinas casi rectas: es la forma del tema
+  `Theme.Material.Dialog`; si se quieren 24 dp hay que darles `android:windowBackground` propio
+  (inset + radio), no se hizo para no romper los márgenes del picker.

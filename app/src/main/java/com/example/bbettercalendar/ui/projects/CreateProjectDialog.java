@@ -59,7 +59,7 @@ public class CreateProjectDialog extends DialogFragment {
 
     private void showDeadlinePicker(TextView deadlineButton) {
         Calendar now = Calendar.getInstance();
-        new DatePickerDialog(requireContext(), R.style.ThemeChatGPTBlue_AndroidPopups,
+        new DatePickerDialog(requireContext(), R.style.Theme_BBetter_PickerDialog,
                 (picker, year, month, dayOfMonth) -> {
             Calendar deadline = Calendar.getInstance();
             deadline.set(year, month, dayOfMonth, 23, 59, 59);

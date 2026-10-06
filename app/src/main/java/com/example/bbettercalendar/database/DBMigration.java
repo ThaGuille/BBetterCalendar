@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.Application;
 import android.content.Context;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.room.Room;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
@@ -30,6 +31,10 @@ public class DBMigration extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        // App solo oscura (plan migracion-visual-stitch, u5): los tokens oscuros viven en values/ y
+        // Theme.BBetter hereda de DayNight. Forzarlo aquí, antes de crear cualquier actividad, hace
+        // que AppCompat aplique el modo noche al adjuntar la actividad (sin recrearla).
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         NotificationChannels.createAll(this);
         armUsageLimitScheduler();
     }

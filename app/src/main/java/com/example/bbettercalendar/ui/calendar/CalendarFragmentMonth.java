@@ -76,7 +76,6 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        getActivity().setTheme(R.style.ThemeChatGPTBlue);
         binding = FragmentCalendarMonthBinding.inflate(inflater, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(CalendarViewModel.class);

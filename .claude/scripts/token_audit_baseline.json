@@ -4,12 +4,12 @@
   "counts": {
     "hex_layout_drawable": 61,
     "android_white_black": 36,
-    "legacy_color": 74,
+    "legacy_color": 30,
     "java_color_const": 5,
-    "textsize_literal_sp": 12,
+    "textsize_literal_sp": 10,
     "font_ref_outside_typography": 4,
     "fraunces": 4,
-    "set_theme_java": 4,
+    "set_theme_java": 0,
     "palette_primitive_ref": 0
   }
 }

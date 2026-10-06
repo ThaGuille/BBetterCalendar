@@ -45,7 +45,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.BBetter"
+        android:theme="@style/Theme.BBetter.NoActionBar"
         tools:targetApi="33">
 
         <activity
@@ -61,17 +61,18 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.BBetter.NoActionBar"/>
         <activity
             android:name=".calendarEntries.AddEventActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/Theme.BBetter.NoActionBar"/>
         <activity
             android:name=".ui.progress.apppicker.AppPickerActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/Theme.BBetter.NoActionBar"/>
 
         <service
             android:name=".ui.home.HomeForegroundService"

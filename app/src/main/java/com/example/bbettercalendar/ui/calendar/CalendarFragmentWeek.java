@@ -56,7 +56,6 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        getActivity().setTheme(R.style.ThemeColorGreen);
         binding = FragmentCalendarWeekBinding.inflate(inflater, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(CalendarViewModel.class);

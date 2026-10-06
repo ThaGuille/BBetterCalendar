@@ -40,3 +40,10 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
 - **Q:** ¿El tile «Focus time» compara la semana en curso entera con la anterior entera? —
   **Assumed:** la API ofrece las dos variantes; se recomienda a u17 `toDate=true` (mismos días de
   la semana anterior) para no mostrar siempre una caída a principio de semana.
+
+## u5
+
+- **Q:** `SplashTheme` pasa a heredar del tema de la app; la pantalla del sistema ya sale oscura, pero
+  el layout propio del splash pinta `?attr/colorPrimary` (ahora sage) un instante. — **Assumed:**
+  aceptable hasta u23, que lo rediseña. (Para dejarlo oscuro ya: `android:background="@color/bb_surface"`
+  en `activity_splash.xml`.)

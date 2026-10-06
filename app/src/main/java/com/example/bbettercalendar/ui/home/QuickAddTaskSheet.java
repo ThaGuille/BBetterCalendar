@@ -128,7 +128,7 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
         int minute = selectedMinute >= 0 ? selectedMinute : now.get(Calendar.MINUTE);
         // Tema explícito (igual que AddEventActivity): sin él los botones OK/Cancel del reloj
         // quedan del color del fondo y no se ven.
-        new TimePickerDialog(requireContext(), R.style.ThemeChatGPTBlue_AndroidPopups,
+        new TimePickerDialog(requireContext(), R.style.Theme_BBetter_PickerDialog,
                 (picker, pickedHour, pickedMinute) -> {
             selectedHour = pickedHour;
             selectedMinute = pickedMinute;

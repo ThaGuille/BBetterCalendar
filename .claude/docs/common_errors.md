@@ -85,7 +85,7 @@ Symptom → root cause → fix table for the failure modes that keep coming up i
 
 ### Dialog appears with the wrong theme (corners not rounded, button colours wrong)
 - **Cause**: Using a stock `AlertDialog.Builder` without passing the project dialog theme.
-- **Fix**: Use `ThemeChatGPTBlue_AndroidPopups` (alert-style) or wrap the layout in `RoundedDialog` for full custom dialogs.
+- **Fix**: Pass `R.style.RoundedDialog` to `AlertDialog.Builder` for custom dialogs, and `R.style.Theme_BBetter_PickerDialog` to framework `DatePickerDialog` / `TimePickerDialog` (it must stay on a framework parent or OK/Cancel turn invisible).
 
 ---
 

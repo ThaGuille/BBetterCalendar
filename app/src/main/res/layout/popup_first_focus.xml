@@ -35,7 +35,7 @@
             android:gravity="center"
             android:text="@string/first_focus_title"
             android:textAppearance="@style/TextAppearance.BBetter.Headline"
-            android:textColor="@color/bb_primary_dark" />
+            android:textColor="@color/bb_on_surface" />
 
         <TextView
             android:layout_width="match_parent"

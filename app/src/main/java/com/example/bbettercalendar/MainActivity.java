@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Sin ActionBar (spec frontend-structure-cleanup): la bottom-nav ya dice en qué pantalla estás.
-        setTheme(R.style.ThemeChatGPTBlue_NoActionBar);
+        // El tema (Theme.BBetter.NoActionBar) viene del manifest; sin setTheme en ejecución (u5).
         super.onCreate(savedInstanceState);
 
         notificationPermissionLauncher = registerForActivityResult(

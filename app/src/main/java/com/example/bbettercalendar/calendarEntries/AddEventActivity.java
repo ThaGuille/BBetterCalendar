@@ -129,7 +129,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        setTheme(R.style.ThemeChatGPTBlue_NoActionBar);
+        // Tema Theme.BBetter.NoActionBar desde el manifest (u5: sin setTheme en ejecución).
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
@@ -465,7 +465,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
 
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, R.style.ThemeChatGPTBlue_AndroidPopups,
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, R.style.Theme_BBetter_PickerDialog,
                 new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -485,7 +485,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, R.style.ThemeChatGPTBlue_AndroidPopups,
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, R.style.Theme_BBetter_PickerDialog,
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {

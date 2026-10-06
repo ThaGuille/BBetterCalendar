@@ -1,130 +1,136 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ============================================================ -->
-    <!-- Theme.BBetter — new design-system theme.                       -->
-    <!-- Sage primary on sand surface, indigo secondary, coral accent. -->
+    <!-- Theme.BBetter — the ONE app theme (plan migracion-visual-stitch, u5).                -->
+    <!-- DayNight parent + night mode forced in DBMigration.onCreate (MODE_NIGHT_YES): the    -->
+    <!-- dark tokens live in values/colors.xml. A future light theme = values-notnight/       -->
+    <!-- colors.xml + dropping the forced mode; nothing here changes.                         -->
+    <!-- Every colour is a bb_* token (never a primitive / hex). No runtime setTheme().       -->
     <!-- ============================================================ -->
-    <style name="Theme.BBetter" parent="Theme.MaterialComponents.Light">
+    <style name="Theme.BBetter" parent="Theme.MaterialComponents.DayNight">
+        <!-- Colour roles (MaterialComponents). colorSecondary tints FAB / switches / checkbox /
+             radio / slider: it stays sage, because bb_secondary (dusk) is never the main action
+             (u4 notes). Text on every accent fill is bb_on_primary (pine_950). -->
         <item name="colorPrimary">@color/bb_primary</item>
         <item name="colorPrimaryVariant">@color/bb_primary_dark</item>
         <item name="colorOnPrimary">@color/bb_on_primary</item>
-        <item name="colorSecondary">@color/bb_secondary</item>
-        <item name="colorSecondaryVariant">@color/bb_secondary</item>
+        <item name="colorSecondary">@color/bb_primary</item>
+        <item name="colorSecondaryVariant">@color/bb_primary_dark</item>
         <item name="colorOnSecondary">@color/bb_on_primary</item>
-        <item name="colorAccent">@color/bb_accent_energy</item>
+        <item name="colorAccent">@color/bb_primary</item>
         <item name="colorSurface">@color/bb_surface_card</item>
         <item name="colorOnSurface">@color/bb_on_surface</item>
+        <item name="colorOnBackground">@color/bb_on_surface</item>
         <item name="colorError">@color/bb_danger</item>
+        <item name="colorOnError">@color/bb_on_primary</item>
 
+        <!-- Controls (checkbox/radio/switch/EditText underline, framework widgets). -->
+        <item name="colorControlNormal">@color/bb_on_surface_muted</item>
+        <item name="colorControlActivated">@color/bb_primary</item>
+
+        <!-- Tonal surfaces come from the tokens, not from MDC's dark elevation overlay
+             (which would lighten every elevated card with white). -->
+        <item name="elevationOverlayEnabled">false</item>
+
+        <!-- Window & system bars -->
         <item name="android:windowBackground">@color/bb_surface</item>
         <item name="android:colorBackground">@color/bb_surface</item>
-        <item name="android:statusBarColor" tools:targetApi="l">@color/bb_primary_dark</item>
-        <item name="android:navigationBarColor" tools:targetApi="l">@color/bb_surface_card</item>
+        <item name="android:statusBarColor">@color/bb_surface</item>
+        <item name="android:navigationBarColor">@color/bb_surface_card</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
 
+        <!-- Text -->
         <item name="android:textColor">@color/bb_on_surface</item>
         <item name="android:textColorPrimary">@color/bb_on_surface</item>
         <item name="android:textColorSecondary">@color/bb_on_surface_muted</item>
+        <item name="android:textColorTertiary">@color/bb_on_surface_muted</item>
         <item name="android:textColorHint">@color/bb_on_surface_muted</item>
+        <item name="android:textColorPrimaryInverse">@color/bb_on_primary</item>
+
+        <!-- Dialogs, sheets and pickers -->
+        <item name="alertDialogTheme">@style/ThemeOverlay.BBetter.Dialog.Alert</item>
+        <item name="android:alertDialogTheme">@style/ThemeOverlay.BBetter.Dialog.Alert</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.BBetter.MaterialAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.BBetter.BottomSheetDialog</item>
+        <item name="android:datePickerDialogTheme">@style/Theme.BBetter.PickerDialog</item>
+        <item name="android:timePickerDialogTheme">@style/Theme.BBetter.PickerDialog</item>
     </style>
 
-    <!-- No-action-bar variant for activities that supply their own Toolbar. -->
+    <!-- Every activity in the manifest: they supply their own Toolbar (or none). -->
     <style name="Theme.BBetter.NoActionBar" parent="Theme.BBetter">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <!-- Base application theme. -->
-    <style name="Theme.BBetterCalendar" parent="Theme.BBetter" />
-
-    <style name="ThemeColorBlue" parent="Theme.BBetterCalendar">
-        <item name="colorPrimary">@color/azul</item>
-        <item name="colorSecondary">@color/gris</item>
-        <item name="colorAccent">@color/naranja</item>
-        <item name="colorOnPrimary">@color/blanco</item>
+    <!-- ============================================================ -->
+    <!-- Dialog overlays (applied on top of Theme.BBetter, so they only set dialog specifics). -->
+    <!-- ============================================================ -->
+    <style name="ThemeOverlay.BBetter.Dialog.Alert" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="colorSurface">@color/bb_surface_card</item>
+        <item name="android:colorBackground">@color/bb_surface_card</item>
+        <item name="colorPrimary">@color/bb_primary</item>
+        <item name="colorAccent">@color/bb_primary</item>
     </style>
 
-    <style name="ThemeColorGreen" parent="Theme.BBetterCalendar">
-        <item name="colorPrimary">@color/verde</item>
-        <item name="colorSecondary">@color/amarillo</item>
-        <item name="colorAccent">@color/beige</item>
-        <item name="colorOnPrimary">@color/marron_claro</item>
+    <style name="ThemeOverlay.BBetter.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/bb_surface_card</item>
+        <item name="colorPrimary">@color/bb_primary</item>
+        <item name="colorOnSurface">@color/bb_on_surface</item>
     </style>
 
-    <!-- Legacy alias — kept so existing references keep compiling.
-         Now inherits the new BBetter palette so all screens get the
-         refreshed look without per-layout edits. -->
-    <style name="ThemeChatGPTBlue" parent="Theme.BBetter" />
+    <style name="ThemeOverlay.BBetter.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BBetter.BottomSheet.Modal</item>
+        <item name="android:navigationBarColor">@color/bb_surface_card</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+    </style>
 
-    <style name="ThemeChatGPTBlue_NoActionBar" parent="Theme.BBetter.NoActionBar" />
+    <style name="Widget.BBetter.BottomSheet.Modal" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/bb_surface_card</item>
+    </style>
 
-    <!-- Tema de los diálogos de sistema (framework android.app) de reloj/calendario: los pickers
-         android.app.TimePickerDialog / DatePickerDialog. DEBE heredar de un tema FRAMEWORK
-         (android:Theme.Material), no de MaterialComponents: esos diálogos usan botones del framework
-         y con un tema MaterialComponents el texto OK/Cancel salía blanco sobre fondo blanco (botones
-         invisibles). android:colorAccent pinta los botones y el resaltado del picker. -->
-    <style name="ThemeChatGPTBlue_AndroidPopups" parent="@android:style/Theme.Material.Light.Dialog">
+    <!-- Framework pickers (android.app.TimePickerDialog / DatePickerDialog). MUST inherit from a
+         FRAMEWORK theme (android:Theme.Material), not MaterialComponents: these dialogs use
+         framework buttons and under a MaterialComponents theme the OK/Cancel text came out the
+         colour of the background (invisible). Dark: sage accent and buttons, surface_card
+         background (via android:colorBackground, so the framework keeps its rounded inset
+         window). Antes ThemeChatGPTBlue_AndroidPopups (renombrado en u5). Also wired as
+         android:datePickerDialogTheme / android:timePickerDialogTheme in Theme.BBetter. -->
+    <style name="Theme.BBetter.PickerDialog" parent="@android:style/Theme.Material.Dialog">
         <item name="android:colorAccent">@color/bb_primary</item>
+        <item name="android:colorPrimary">@color/bb_primary</item>
+        <item name="android:colorControlActivated">@color/bb_primary</item>
+        <item name="android:colorControlNormal">@color/bb_on_surface_muted</item>
+        <item name="android:colorBackground">@color/bb_surface_card</item>
         <item name="android:textColorPrimary">@color/bb_on_surface</item>
-        <item name="android:windowBackground">@color/bb_surface_card</item>
-        <!-- colorAccent llega al reloj/calendario pero NO al texto de los botones OK/Cancel, que
-             salía blanco sobre fondo blanco. Forzamos el color del texto del button bar de forma
-             explícita para que sean visibles pase lo que pase. -->
-        <item name="android:buttonBarButtonStyle">@style/BBetterPickerDialogButton</item>
-        <item name="android:buttonBarPositiveButtonStyle">@style/BBetterPickerDialogButton</item>
-        <item name="android:buttonBarNegativeButtonStyle">@style/BBetterPickerDialogButton</item>
-        <item name="android:buttonBarNeutralButtonStyle">@style/BBetterPickerDialogButton</item>
+        <item name="android:textColorSecondary">@color/bb_on_surface_muted</item>
+        <item name="android:textColorPrimaryInverse">@color/bb_on_primary</item>
+        <item name="android:textColorSecondaryInverse">@color/bb_on_primary</item>
+        <!-- Cabecera de fecha/hora: el gris por defecto del Material oscuro desentona; pasa a la
+             superficie elevada (texto claro encima, como el resto de superficies). -->
+        <item name="android:datePickerStyle">@style/Widget.BBetter.DatePicker</item>
+        <item name="android:timePickerStyle">@style/Widget.BBetter.TimePicker</item>
+        <!-- colorAccent llega al reloj/calendario pero NO siempre al texto de los botones
+             OK/Cancel; lo forzamos con un estilo explícito para que se vean pase lo que pase. -->
+        <item name="android:buttonBarButtonStyle">@style/Widget.BBetter.PickerDialogButton</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.BBetter.PickerDialogButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.BBetter.PickerDialogButton</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/Widget.BBetter.PickerDialogButton</item>
     </style>
 
-    <style name="BBetterPickerDialogButton" parent="@android:style/Widget.Material.Light.Button.Borderless.Colored">
+    <style name="Widget.BBetter.DatePicker" parent="@android:style/Widget.Material.DatePicker">
+        <item name="android:headerBackground">@color/bb_surface_raised</item>
+    </style>
+
+    <style name="Widget.BBetter.TimePicker" parent="@android:style/Widget.Material.TimePicker">
+        <item name="android:headerBackground">@color/bb_surface_raised</item>
+        <!-- Esfera del reloj: gris neutro por defecto -> superficie elevada; selector sage. -->
+        <item name="android:numbersBackgroundColor">@color/bb_surface_raised</item>
+        <item name="android:numbersSelectorColor">@color/bb_primary</item>
+    </style>
+
+    <style name="Widget.BBetter.PickerDialogButton" parent="@android:style/Widget.Material.Button.Borderless.Colored">
         <item name="android:textColor">@color/bb_primary</item>
-    </style>
-
-    <!--Theme.AppCompat.DayNight.NoActionBar-->
-    <style name="ThemeColorEvenTalk" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/eventalkAzul</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorSecondary">@color/eventalkAzulSecundario</item>
-        <item name="colorAccent">@color/eventalkNaranja</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorOnSecondary">@color/black</item>
-    </style>
-
-    <style name="ThemeChatGPTBlue.actionBar" parent="Theme.MaterialComponents.Light.DarkActionBar">
-        <item name="colorPrimary">@color/c_verde_claro</item>
-        <item name="colorSecondary">@color/c_azul_claro</item>
-        <item name="colorAccent">@color/c_azul_oscuro</item>
-        <item name="colorOnPrimary">@color/c_verde_oscuro</item>
-    </style>
-
-    <style name="ThemeColorNavyBlue" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/azul_marino</item>
-        <item name="colorSecondary">@color/teal</item>
-        <item name="colorAccent">@color/plata</item>
-        <item name="colorOnPrimary">@color/blanco</item>
-    </style>
-
-    <style name="ThemeColorPurple" parent="Theme.BBetterCalendar">
-        <item name="colorPrimary">@color/purpura</item>
-        <item name="colorSecondary">@color/gris_oscuro</item>
-        <item name="colorAccent">@color/magenta</item>
-        <item name="colorOnPrimary">@color/blanco</item>
-    </style>
-
-
-
-    <style name="FakeTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
     </style>
 
 </resources>

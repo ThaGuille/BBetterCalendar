@@ -3,7 +3,6 @@ package com.example.bbettercalendar.helpers;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,11 +46,11 @@ public class ToolbarHelper implements MenuProvider, View.OnClickListener{
                 this.isMenuResFile = isMenuResFile;
                 toolbar = activity.findViewById(menuRes);
                 if(toolbar!=null){
-                        TypedValue typedValue = new TypedValue();
-                        int colorSecondary = MaterialColors.getColor(toolbar, com.google.android.material.R.attr.colorSecondary);
-                        context.getTheme().resolveAttribute(colorSecondary, typedValue, true);
-                        int color = typedValue.data;
-                        toolbar.setBackgroundColor(color);
+                        // u5: antes se pasaba un COLOR (colorSecondary ya resuelto) a resolveAttribute,
+                        // que espera un id de atributo -> fallaba y pintaba 0 (transparente). La barra
+                        // va sobre el fondo de la ventana: android:colorBackground (= bb_surface).
+                        toolbar.setBackgroundColor(
+                                MaterialColors.getColor(toolbar, android.R.attr.colorBackground));
                 }
         }
 

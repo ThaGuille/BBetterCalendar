@@ -174,7 +174,7 @@ with e.g. "use the code-reviewer subagent".
 
 | Event | Script | Behavior |
 |---|---|---|
-| PostToolUse (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**, non-blocking: flags a legacy palette token added to a `.java`/`.xml` edit (rule #2). |
+| PostToolUse (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**, non-blocking: flags design-token violations added to a `.java`/`.kt`/`.xml` edit (legacy palette, hex in layout/drawable, white/black, literal sp, `@font/`, `fraunces`, `setTheme(`; same categories as `.claude/scripts/token_audit.py`) (rule #2). |
 | SessionStart | `session-context.ps1` | Injects key rule reminders into the session. |
 | Stop | `verify-ui-reminder.ps1` | **Blocking-once**: when the uncommitted runtime diff is *big* (not a small fix) and an emulator is attached, blocks the stop with an instruction to verify via the `ui-tester` subagent (rule #7). Silent on small/clean/no-device; re-arms after commit. |
 

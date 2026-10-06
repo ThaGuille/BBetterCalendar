@@ -1,7 +1,10 @@
-# PostToolUse guardrail — WARN ONLY (non-blocking).
-# Flags legacy palette tokens added to a .java/.xml edit. CLAUDE.md rule #2:
-# new UI must use the bb_* semantic palette. The edit is kept; this only warns.
-# Reads the tool-call JSON from stdin (Claude Code hook contract).
+# PostToolUse guardrail - WARN ONLY (non-blocking).
+# Flags design-token violations ADDED by a .java/.kt/.xml edit. CLAUDE.md rule #2:
+# new UI must use the bb_* semantic palette + TextAppearance.BBetter.*. The edit is kept;
+# this only warns. Reads the tool-call JSON from stdin (Claude Code hook contract).
+#
+# Same categories as .claude/scripts/token_audit.py (visual-migration ratchet, plan u1):
+# keep the legacy colour list and patterns in sync with that script.
 
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -12,7 +15,7 @@ try { $data = $raw | ConvertFrom-Json } catch { exit 0 }
 
 $path = $data.tool_input.file_path
 if (-not $path) { exit 0 }
-if ($path -notmatch '\.(java|xml)$') { exit 0 }
+if ($path -notmatch '\.(java|kt|xml)$') { exit 0 }
 
 # Collect only the text this edit ADDED (so we warn on introductions, not pre-existing refs).
 $added = @()
@@ -26,18 +29,60 @@ if ($data.tool_input.edits) {
 $text = ($added -join "`n")
 if ([string]::IsNullOrWhiteSpace($text)) { exit 0 }
 
-# Legacy color tokens kept only for old screens (see .claude/docs/style_guide.md).
-$legacy  = 'azul|verde|purple_500|purple_700|teal_200|teal_700'
-$pattern = "(@color/|R\.color\.)($legacy)\b"
-
-$found = [regex]::Matches($text, $pattern)
-if ($found.Count -eq 0) { exit 0 }
-
-$tokens = ($found | ForEach-Object { $_.Value } | Select-Object -Unique) -join ', '
+$norm   = $path -replace '\\', '/'
 $file   = Split-Path $path -Leaf
+$isCode = $path -match '\.(java|kt)$'
+$isXml  = -not $isCode
 
-[Console]::Error.WriteLine("[bb-palette] Legacy palette token(s) added to ${file}: $tokens")
-[Console]::Error.WriteLine("CLAUDE.md rule #2: new UI must use the bb_* semantic palette + TextAppearance.BBetter.*.")
-[Console]::Error.WriteLine("If you are editing a pre-existing legacy screen this is fine - leave it. If this is NEW UI, switch to the bb_* equivalent. (warning only; the edit was kept)")
+# Legacy colour names (everything in values/colors.xml that is not bb_* / calendar_item_*).
+# Longest first so e.g. teal_200 wins over teal.
+$legacyNames = @(
+    'eventalkAzulSecundario', 'eventalkNaranja', 'eventalkAzul',
+    'c_azul_claro', 'c_verde_claro', 'c_azul_oscuro', 'c_verde_oscuro',
+    'marron_claro', 'azul_marino', 'gris_oscuro', 'gris_claro',
+    'purple_200', 'purple_500', 'purple_700', 'teal_200', 'teal_700',
+    'transparent', 'amarillo', 'naranja', 'magenta', 'purpura',
+    'blanco', 'black', 'white', 'beige', 'plata', 'verde', 'azul', 'gris', 'rojo', 'teal'
+)
+$legacy = $legacyNames -join '|'
+
+$checks = [ordered]@{}
+$checks['legacy colour (@color/ or R.color.)'] = "(@color/|R\.color\.)($legacy)(?!\w)"
+$checks['@android:color/white|black'] = '@android:color/(white|black)\b|\bandroid\.R\.color\.(white|black)\b'
+$checks['fraunces (font is being removed)'] = '(?i)fraunces'
+
+if ($isCode) {
+    $checks['Color.WHITE/BLACK/LTGRAY/parseColor'] = '\bColor\s*\.\s*(WHITE|BLACK|LTGRAY|parseColor)\b'
+    $checks['setTextSize(<literal>)'] = '\bsetTextSize\s*\(\s*(TypedValue\s*\.\s*COMPLEX_UNIT_SP\s*,\s*)?-?\d'
+    $checks['R.font. (use TextAppearance)'] = '\bR\.font\.'
+    $checks['setTheme( (theme is static)'] = '\bsetTheme\s*\('
+}
+
+if ($isXml) {
+    $isLayoutOrDrawable = $norm -match '/res/(layout|drawable)[^/]*/' -and $file -notlike 'ic_launcher*'
+    if ($isLayoutOrDrawable) {
+        $checks['hex literal in layout/drawable'] = '(?<![\w&])#([0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?![0-9a-zA-Z_])'
+    }
+    $checks['textSize as literal sp (use @dimen/text_* or a TextAppearance)'] = 'textSize\s*=\s*"\s*-?\d+(\.\d+)?\s*sp\s*"|<item\s+name\s*=\s*"(android:)?textSize"\s*>\s*-?\d+(\.\d+)?\s*sp\s*<'
+    $fontAllowed = ($norm -match '/res/font[^/]*/') -or ($file -eq 'styles_typography.xml') -or ($file -eq 'themes.xml')
+    if (-not $fontAllowed) {
+        $checks['@font/ outside styles_typography/themes'] = '@font/'
+    }
+}
+
+$lines = @()
+foreach ($label in $checks.Keys) {
+    $found = [regex]::Matches($text, $checks[$label])
+    if ($found.Count -gt 0) {
+        $tokens = ($found | ForEach-Object { $_.Value.Trim() } | Select-Object -Unique | Select-Object -First 6) -join ', '
+        $lines += "  - ${label}: $tokens"
+    }
+}
+if ($lines.Count -eq 0) { exit 0 }
+
+[Console]::Error.WriteLine("[bb-tokens] Design-token violation(s) added to ${file}:")
+foreach ($l in $lines) { [Console]::Error.WriteLine($l) }
+[Console]::Error.WriteLine("CLAUDE.md rule #2: new UI must use bb_* colours + TextAppearance.BBetter.* (no hex, primitives, white/black, @font/, setTheme).")
+[Console]::Error.WriteLine("If you are editing a pre-existing legacy screen this is fine - leave it. If this is NEW UI, switch to the token. Ratchet: python .claude/scripts/token_audit.py --baseline .claude/scripts/token_audit_baseline.json (warning only; the edit was kept)")
 # Exit 2 surfaces stderr back to Claude as feedback without undoing the edit.
 exit 2

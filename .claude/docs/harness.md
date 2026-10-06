@@ -72,7 +72,7 @@ Configured in [`.claude/settings.local.json`](../settings.local.json), scripts i
 | Event | Script | What it does |
 |---|---|---|
 | **SessionStart** | `session-context.ps1` | Injects the 4 key rule reminders at the top of every session |
-| **PostToolUse** (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**: if an edit adds a legacy palette token (`azul`, `verde`, `purple_500`…) to a `.java`/`.xml`, prints a notice. The edit is kept (rule #2). |
+| **PostToolUse** (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**: if an edit adds a design-token violation to a `.java`/`.kt`/`.xml` (legacy palette `azul`/`verde`/`white`…, hex in layout/drawable, `@android:color/white|black`, `Color.WHITE`, literal `sp`, `@font/`, `fraunces`, `setTheme(`), prints a notice. The edit is kept (rule #2). Same categories as the ratchet script `.claude/scripts/token_audit.py`. |
 
 There is deliberately **no gradle-on-stop hook** — too slow to run every turn. That role is the
 manual `/check` skill instead.

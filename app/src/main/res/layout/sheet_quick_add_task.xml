@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Bottom sheet de alta rápida de tareas desde Home (spec tasks-home-today).
-     Título + hora opcional; "More options" abre AddEventActivity precargada. -->
+     Título + hora opcional; "More options" abre AddEventActivity precargada.
+     u7: sin android:background en la raíz — lo pinta Widget.BBetter.BottomSheet (surface_card,
+     esquinas superiores de 24dp); un fondo aquí taparía las esquinas redondeadas. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/bb_surface_card"
     android:orientation="vertical"
     android:paddingStart="@dimen/spacing_md"
     android:paddingEnd="@dimen/spacing_md"

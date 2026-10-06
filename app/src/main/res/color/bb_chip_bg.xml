@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget.BBetter.Chip fill (u7, DESIGN §4): selected = sage, unselected = none (outline). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/bb_primary" android:state_checked="true" />
+    <item android:color="@android:color/transparent" />
+</selector>

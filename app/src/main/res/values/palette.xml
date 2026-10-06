@@ -38,5 +38,6 @@
     <!-- Alpha variants -->
     <color name="mist_50_a38">#61EAF2EC</color>  <!-- 38 %: disabled content (MD3) -->
     <color name="pine_950_a60">#9912201C</color> <!-- 60 %: scrim (never pure black) -->
+    <color name="pine_950_a20">#3312201C</color> <!-- 20 %: ripple on accent fills (u7) -->
 
 </resources>

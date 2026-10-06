@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ============================================================ -->
+    <!-- BBetter shapes and component styles (plan migracion-visual-stitch, u7;  -->
+    <!-- .stitch/DESIGN.md §4, exact values from .stitch/html).                   -->
+    <!-- MaterialComponents 1.9.0 only: no Material3 parents / attrs.             -->
+    <!-- Default styles are wired from Theme.BBetter AND Base.Theme.BBetter.Dialog -->
+    <!-- (materialButtonStyle, chipStyle, switchStyle, ...), so a widget picks    -->
+    <!-- them up without a style="" in the layout. Change a component HERE.       -->
+    <!-- Colours: bb_* tokens / res/color state lists only.                       -->
+    <!-- ============================================================ -->
+
+    <!-- ===== Shapes ===== -->
+
+    <!-- Cards and medium components (dialogs): 20dp (html rounded-[20px]). -->
+    <style name="ShapeAppearance.BBetter.Card" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/radius_card</item>
+    </style>
+
+    <!-- Buttons, chips, segmented items, FAB, nav indicator: fully rounded. -->
+    <style name="ShapeAppearance.BBetter.Pill" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- Bottom sheets: 24dp on top, square at the screen edge. -->
+    <style name="ShapeAppearance.BBetter.Sheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/radius_sheet</item>
+        <item name="cornerSizeTopRight">@dimen/radius_sheet</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- ===== Card (MaterialCardView; theme materialCardViewStyle) ===== -->
+    <!-- Pine Card fill, 20dp, no shadow, no border (tonal step only), 16dp padding (html p-4). -->
+    <style name="Widget.BBetter.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/bb_surface_card</item>
+        <item name="cardElevation">@dimen/elevation_card</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Card</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="contentPadding">@dimen/spacing_md</item>
+        <item name="rippleColor">@color/bb_ripple_primary</item>
+    </style>
+
+    <!-- ===== Buttons (MaterialButton; theme materialButtonStyle = Primary) ===== -->
+    <!-- Base: full pill, 52dp, no insets (the 52dp IS the visible height), no elevation. -->
+    <style name="Widget.BBetter.Button" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">@dimen/button_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/button_padding_horizontal</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/bb_button_primary_bg</item>
+        <item name="android:textColor">@color/bb_button_primary_text</item>
+        <item name="iconTint">@color/bb_button_primary_text</item>
+        <item name="rippleColor">@color/bb_ripple_on_primary</item>
+    </style>
+
+    <!-- Sage pill, pine text. -->
+    <style name="Widget.BBetter.Button.Primary" parent="Widget.BBetter.Button" />
+
+    <!-- Honey pill, pine text: celebration / earned moments only. -->
+    <style name="Widget.BBetter.Button.Reward" parent="Widget.BBetter.Button">
+        <item name="backgroundTint">@color/bb_button_reward_bg</item>
+        <item name="android:textColor">@color/bb_button_reward_text</item>
+        <item name="iconTint">@color/bb_button_reward_text</item>
+    </style>
+
+    <!-- Hairline-outlined pill, Mist text (theme materialButtonOutlinedStyle). -->
+    <style name="Widget.BBetter.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">@dimen/button_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/button_padding_horizontal</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="strokeColor">@color/bb_outline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/bb_button_secondary_text</item>
+        <item name="iconTint">@color/bb_button_secondary_text</item>
+        <item name="rippleColor">@color/bb_ripple_primary</item>
+    </style>
+
+    <!-- Text-only, sage label; 48dp touch target. -->
+    <style name="Widget.BBetter.Button.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="android:minHeight">@dimen/button_text_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">@dimen/spacing_md</item>
+        <item name="android:paddingEnd">@dimen/spacing_md</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/bb_button_text_primary</item>
+        <item name="iconTint">@color/bb_button_text_primary</item>
+        <item name="rippleColor">@color/bb_ripple_primary</item>
+    </style>
+
+    <!-- Destructive: text-only in Ember (html 10-app-detail "Remove limit"). -->
+    <style name="Widget.BBetter.Button.Danger" parent="Widget.BBetter.Button.Text">
+        <item name="android:textColor">@color/bb_button_text_danger</item>
+        <item name="iconTint">@color/bb_button_text_danger</item>
+        <item name="rippleColor">@color/bb_ripple_danger</item>
+    </style>
+
+    <!-- ===== FAB (theme floatingActionButtonStyle) ===== -->
+    <!-- Sage circle, pine icon (html 03 "Create new project"), soft shadow token. -->
+    <style name="Widget.BBetter.FAB" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">@color/bb_primary</item>
+        <item name="tint">@color/bb_on_primary</item>
+        <item name="rippleColor">@color/bb_ripple_on_primary</item>
+        <item name="borderWidth">0dp</item>
+        <item name="elevation">@dimen/elevation_fab</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+    </style>
+
+    <!-- ===== Segmented control ===== -->
+    <!-- NOT MaterialButtonToggleGroup (u7 deviation): in MDC 1.9.0 the group forces the inner
+         corners of its buttons to 0 (no pill per item) and throws if a child has a custom
+         background. Pills in a pill track (html 13 / 10) = a horizontal LinearLayout or
+         RadioGroup with this style + Item children (AppCompatButton with setSelected, or
+         RadioButton with checked). -->
+    <style name="Widget.BBetter.SegmentedControl" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/segmented_track_height</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">@drawable/bg_segmented_track</item>
+        <item name="android:padding">@dimen/segmented_track_padding</item>
+    </style>
+
+    <style name="Widget.BBetter.SegmentedControl.Item" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/bg_segmented_item</item>
+        <item name="android:button">@null</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.ChipLabel</item>
+        <item name="android:textColor">@color/bb_segmented_item_text</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <!-- ===== Chips (theme chipStyle) ===== -->
+    <!-- Selectable pill: unselected = hairline outline + Mist text, selected = sage + pine text. -->
+    <style name="Widget.BBetter.Chip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="chipBackgroundColor">@color/bb_chip_bg</item>
+        <item name="chipStrokeColor">@color/bb_chip_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipMinHeight">@dimen/chip_min_height</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.ChipLabel</item>
+        <item name="android:textColor">@color/bb_chip_text</item>
+        <item name="chipIconTint">@color/bb_chip_text</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="rippleColor">@color/bb_ripple_primary</item>
+    </style>
+
+    <!-- Tiny status tag ("NEW RECORD", "CONCENTRATION"): tinted container, uppercase, not
+         interactive. -->
+    <style name="Widget.BBetter.Chip.Status" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="chipBackgroundColor">@color/bb_primary_container</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipMinHeight">@dimen/chip_status_min_height</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Chip</item>
+        <item name="android:textColor">@color/bb_on_primary_container</item>
+        <item name="chipIconTint">@color/bb_on_primary_container</item>
+        <item name="android:checkable">false</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="rippleColor">@android:color/transparent</item>
+    </style>
+
+    <!-- ===== Switch (SwitchMaterial; theme switchStyle) ===== -->
+    <!-- MD3-looking pill drawn with our own thumb/track (html 14: 48x28 sage track, pine thumb);
+         useMaterialThemeColors off so MDC does not re-tint them. Layouts must not set
+         thumbTint / trackTint. -->
+    <style name="Widget.BBetter.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
+        <item name="useMaterialThemeColors">false</item>
+        <item name="android:thumb">@drawable/bb_switch_thumb</item>
+        <item name="track">@drawable/bb_switch_track</item>
+        <item name="thumbTint">@null</item>
+        <item name="trackTint">@null</item>
+        <item name="switchMinWidth">0dp</item>
+        <item name="showText">false</item>
+    </style>
+
+    <!-- ===== Progress (theme linear/circularProgressIndicatorStyle) ===== -->
+    <!-- 6dp sage bar on a raised track, rounded ends (corner radius is capped at thickness/2). -->
+    <style name="Widget.BBetter.LinearProgress" parent="Widget.MaterialComponents.LinearProgressIndicator">
+        <item name="indicatorColor">@color/bb_primary</item>
+        <item name="trackColor">@color/bb_surface_raised</item>
+        <item name="trackThickness">@dimen/progress_linear_thickness</item>
+        <item name="trackCornerRadius">@dimen/radius_pill</item>
+    </style>
+
+    <!-- Focus ring: 7dp sage arc with round caps on a Pine Card track (html 01). -->
+    <style name="Widget.BBetter.CircularProgress" parent="Widget.MaterialComponents.CircularProgressIndicator">
+        <item name="indicatorColor">@color/bb_primary</item>
+        <item name="trackColor">@color/bb_surface_card</item>
+        <item name="trackThickness">@dimen/progress_ring_thickness</item>
+        <item name="trackCornerRadius">@dimen/radius_pill</item>
+    </style>
+
+    <!-- ===== Bottom navigation (theme bottomNavigationStyle) ===== -->
+    <!-- Pine Card bar, labels on, sage active icon/label over a Forest pill, muted inactive
+         (html 04 nav: secondary-container pill, primary icon, text-xs font-medium labels). -->
+    <style name="Widget.BBetter.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/bb_surface_card</item>
+        <item name="backgroundTint">@color/bb_surface_card</item>
+        <item name="elevation">0dp</item>
+        <item name="android:minHeight">@dimen/bottom_nav_height</item>
+        <item name="itemPaddingTop">@dimen/bottom_nav_item_padding_top</item>
+        <item name="itemPaddingBottom">@dimen/bottom_nav_item_padding_bottom</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemIconTint">@color/bottom_nav_item_tint</item>
+        <item name="itemTextColor">@color/bottom_nav_item_tint</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.BBetter.Caption</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.BBetter.Caption</item>
+        <item name="itemRippleColor">@color/bb_ripple_primary</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.BBetter.BottomNav.ActiveIndicator</item>
+    </style>
+
+    <style name="Widget.BBetter.BottomNav.ActiveIndicator" parent="">
+        <item name="android:color">@color/bb_primary_container</item>
+        <item name="android:width">@dimen/bottom_nav_indicator_width</item>
+        <item name="android:height">@dimen/bottom_nav_indicator_height</item>
+        <item name="marginHorizontal">@dimen/spacing_xs</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+    </style>
+
+    <!-- ===== Toolbar (theme toolbarStyle) ===== -->
+    <style name="Widget.BBetter.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">@color/bb_surface</item>
+        <item name="titleTextAppearance">@style/TextAppearance.BBetter.Headline</item>
+        <item name="subtitleTextAppearance">@style/TextAppearance.BBetter.Label</item>
+        <item name="titleTextColor">@color/bb_on_surface</item>
+        <item name="subtitleTextColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <!-- ===== Bottom sheet (ThemeOverlay.BBetter.BottomSheetDialog bottomSheetStyle) ===== -->
+    <!-- Pine Card, 24dp top corners. The sheet's root layout must NOT set its own background
+         (it would paint a square over the rounded MaterialShapeDrawable). Corners stay rounded
+         when the sheet expands to full height. -->
+    <style name="Widget.BBetter.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/bb_surface_card</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Sheet</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="shouldRemoveExpandedCorners">false</item>
+    </style>
+
+</resources>

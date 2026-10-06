@@ -56,6 +56,24 @@
         <item name="android:textColorHint">@color/bb_on_surface_muted</item>
         <item name="android:textColorPrimaryInverse">@color/bb_on_primary</item>
 
+        <!-- Shapes and default component styles (u7, values/styles_components.xml). Keep this
+             block identical in Base.Theme.BBetter.Dialog (style.xml): a dialog theme's
+             MaterialComponents parent would otherwise reset these to the stock widgets. -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.BBetter.Card</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.BBetter.Sheet</item>
+        <item name="textAppearanceButton">@style/TextAppearance.BBetter.Button</item>
+        <item name="materialButtonStyle">@style/Widget.BBetter.Button.Primary</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.BBetter.Button.Secondary</item>
+        <item name="materialCardViewStyle">@style/Widget.BBetter.Card</item>
+        <item name="floatingActionButtonStyle">@style/Widget.BBetter.FAB</item>
+        <item name="chipStyle">@style/Widget.BBetter.Chip</item>
+        <item name="switchStyle">@style/Widget.BBetter.Switch</item>
+        <item name="linearProgressIndicatorStyle">@style/Widget.BBetter.LinearProgress</item>
+        <item name="circularProgressIndicatorStyle">@style/Widget.BBetter.CircularProgress</item>
+        <item name="bottomNavigationStyle">@style/Widget.BBetter.BottomNav</item>
+        <item name="toolbarStyle">@style/Widget.BBetter.Toolbar</item>
+
         <!-- Dialogs, sheets and pickers -->
         <item name="alertDialogTheme">@style/ThemeOverlay.BBetter.Dialog.Alert</item>
         <item name="android:alertDialogTheme">@style/ThemeOverlay.BBetter.Dialog.Alert</item>
@@ -88,13 +106,10 @@
     </style>
 
     <style name="ThemeOverlay.BBetter.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/Widget.BBetter.BottomSheet.Modal</item>
+        <!-- u7: Widget.BBetter.BottomSheet (styles_components.xml) = 24dp top corners. -->
+        <item name="bottomSheetStyle">@style/Widget.BBetter.BottomSheet</item>
         <item name="android:navigationBarColor">@color/bb_surface_card</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
-    </style>
-
-    <style name="Widget.BBetter.BottomSheet.Modal" parent="Widget.MaterialComponents.BottomSheet.Modal">
-        <item name="backgroundTint">@color/bb_surface_card</item>
     </style>
 
     <!-- Framework pickers (android.app.TimePickerDialog / DatePickerDialog). MUST inherit from a

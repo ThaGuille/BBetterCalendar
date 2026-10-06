@@ -159,9 +159,7 @@
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_rest_enabled"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:thumbTint="@color/bb_surface_card"
-                    app:trackTint="@color/bb_primary" />
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <LinearLayout
@@ -339,9 +337,7 @@
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switch_auto_cycle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:thumbTint="@color/bb_surface_card"
-                app:trackTint="@color/bb_primary" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <View

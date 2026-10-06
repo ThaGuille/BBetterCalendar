@@ -125,7 +125,7 @@
         android:background="@drawable/rounded_square"
         android:backgroundTint="@color/white"
         android:clickable="true"
-        android:elevation="5dp"
+        android:elevation="@dimen/elevation_fab"
         android:focusable="true"
         android:src="@drawable/ic_add_24" />
 

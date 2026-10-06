@@ -2,7 +2,7 @@
   "description": "token_audit.py ratchet baseline. Counters may only go down; re-run with --update when they do and commit this file.",
   "updated": "2026-10-06",
   "counts": {
-    "hex_layout_drawable": 61,
+    "hex_layout_drawable": 60,
     "android_white_black": 36,
     "legacy_color": 30,
     "java_color_const": 5,

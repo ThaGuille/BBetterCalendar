@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget.BBetter.Switch thumb (u7): on = 24dp pine dot (html 14 bg-on-primary), off = 16dp
+     lichen dot (MD3 unselected thumb), both centred in a 24x28 box. No <inset>: SwitchCompat reads
+     an InsetDrawable's insets as thumb padding and the switch came out too narrow (thumb clipped).
+     Layer-list item width/height/gravity need API 23; on 21-22 the dot fills the box. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <layer-list>
+            <!-- Fixed 24x28 box: same width in every state (SwitchCompat sizes the switch from
+                 the thumb measured at layout time). -->
+            <item>
+                <shape android:shape="rectangle">
+                    <size android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_track_height" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:width="@dimen/switch_thumb_size_off" android:height="@dimen/switch_thumb_size_off" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_disabled" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_checked="true">
+        <layer-list>
+            <!-- Fixed 24x28 box: same width in every state (SwitchCompat sizes the switch from
+                 the thumb measured at layout time). -->
+            <item>
+                <shape android:shape="rectangle">
+                    <size android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_track_height" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_thumb_size" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_on_primary" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <!-- Fixed 24x28 box: same width in every state (SwitchCompat sizes the switch from
+                 the thumb measured at layout time). -->
+            <item>
+                <shape android:shape="rectangle">
+                    <size android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_track_height" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:width="@dimen/switch_thumb_size_off" android:height="@dimen/switch_thumb_size_off" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_on_surface_muted" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

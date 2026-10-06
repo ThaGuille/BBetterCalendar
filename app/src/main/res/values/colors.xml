@@ -16,6 +16,9 @@
     <color name="bb_surface_subtle">@color/pine_800</color>
     <color name="bb_surface_raised">@color/pine_800</color>
     <color name="bb_scrim">@color/pine_950_a60</color>
+    <!-- u7: pressed wash on sage/honey fills (pre-multiplied alpha, so it also works in
+         framework <ripple> on API 21-22, where a color-state-list android:alpha is ignored). -->
+    <color name="bb_ripple_dark">@color/pine_950_a20</color>
 
     <!-- Brand -->
     <color name="bb_primary">@color/sage_300</color>

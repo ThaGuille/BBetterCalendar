@@ -4,7 +4,7 @@
      selección es un relleno suave (bg_calendar_day_selected). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <corners android:radius="6dp" />
+    <corners android:radius="@dimen/radius_sm" />
     <stroke android:width="2dp" android:color="@color/bb_primary" />
     <solid android:color="@android:color/transparent" />
 </shape>

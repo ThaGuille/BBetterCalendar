@@ -100,11 +100,17 @@ Always set typography via `android:textAppearance="@style/TextAppearance.BBetter
 
 | Token | Value | Use |
 |---|---|---|
-| `spacing_xs / sm / md / lg` | 4 / 8 / 16 / 25 dp | 4-step spacing scale |
-| `radius_sm / md / lg` | 8 / 14 / 24 dp | Corner radii |
-| `elevation_card / floating` | 2 / 8 dp | Elevations |
+| `spacing_xs / sm / card_gap / md / lg / xl` | 4 / 8 / 12 / 16 / 24 / 36 dp | 4/8 grid spacing scale (u7: `lg` was 25) |
+| `radius_sm / md / inner / card / lg / sheet / pill` | 8 / 12 / 16 / 20 / 24 / 24 / 999 dp | Corner radii (u7, from `.stitch/html`). Cards = `radius_card`; dialogs = `radius_lg`; sheets = `radius_sheet` (top only); any pill `<shape>` = `radius_pill` |
+| `elevation_card / floating / fab` | 0 / 8 / 6 dp | Tonal design: cards are flat (u7). Only the one FAB per screen keeps a shadow |
+| `button_height / button_text_height / button_padding_horizontal` | 52 / 48 / 24 dp | `Widget.BBetter.Button.*` |
+| `play_button_size` (`home_play_button_size` aliases it) | 72 dp | Play / pause circle |
+| `segmented_track_height / _padding` | 40 / 4 dp | Segmented control |
+| `chip_min_height / chip_status_min_height` | 32 / 24 dp | Chips |
+| `progress_linear_thickness / progress_ring_thickness` | 6 / 7 dp | Progress indicators |
+| `bottom_nav_height / _item_padding_top / _bottom`, `bottom_nav_indicator_width / height` | 72 / 12 / 12, 64 / 32 dp | Bottom navigation |
+| `switch_thumb_size / _off / switch_track_height` | 24 / 16 / 28 dp | Switch drawables |
 | `home_card_padding` | 20 dp | Padding inside home cards |
-| `home_play_button_size` | 88 dp | Pomodoro play button |
 | `home_stat_icon_size` | 28 dp | Stat icons in the today card |
 | `icon_button_size` | 56 dp | Square icon buttons |
 | `primary_button_size` | 128 dp | Big primary action |
@@ -117,6 +123,33 @@ Always set typography via `android:textAppearance="@style/TextAppearance.BBetter
 ---
 
 ## 4. Reusable component styles
+
+### Shapes & components — [`styles_components.xml`](../../app/src/main/res/values/styles_components.xml) (u7)
+
+Default styles are wired from `Theme.BBetter` **and** `Base.Theme.BBetter.Dialog` (keep both
+blocks identical — a MaterialComponents dialog parent would otherwise reset them), so a plain
+`<Button>` / `MaterialCardView` / `Chip` / `SwitchMaterial` / `FloatingActionButton` /
+`BottomNavigationView` / progress indicator already looks right without `style=""`.
+
+| Style | Theme attr | What |
+|---|---|---|
+| `ShapeAppearance.BBetter.Card / .Pill / .Sheet` | `shapeAppearanceMedium/Small/LargeComponent` | 20dp · 50% · 24dp top only |
+| `Widget.BBetter.Card` | `materialCardViewStyle` | `MaterialCardView`: surface_card, 20dp, no elevation/stroke, 16dp padding |
+| `Widget.BBetter.Button.Primary` | `materialButtonStyle` | Sage pill, pine text, 52dp |
+| `Widget.BBetter.Button.Secondary` | `materialButtonOutlinedStyle` | Hairline (`bb_outline`) outlined pill, Mist text |
+| `Widget.BBetter.Button.Reward` | — | Honey pill (celebration only) |
+| `Widget.BBetter.Button.Text` / `.Danger` | — | Text-only, sage / ember, 48dp |
+| `Widget.BBetter.FAB` | `floatingActionButtonStyle` | Sage circle, pine icon, `elevation_fab` |
+| `Widget.BBetter.SegmentedControl` + `.Item` | — | Pill track + pill items; selection via `setSelected` (or `checked` on a RadioButton). Text/background are selectors (`bb_segmented_item_text`, `bg_segmented_item`). Not `MaterialButtonToggleGroup`: MDC 1.9.0 squares the inner corners and throws on custom backgrounds |
+| `Widget.BBetter.Chip` / `.Chip.Status` | `chipStyle` | Choice chip (outline → sage when checked) / uppercase status tag on `bb_primary_container` |
+| `Widget.BBetter.Switch` | `switchStyle` | `SwitchMaterial` with MD3-like drawables `bb_switch_track` / `bb_switch_thumb`. Don't set `thumbTint` / `trackTint` in layouts |
+| `Widget.BBetter.LinearProgress` / `.CircularProgress` | `linear/circularProgressIndicatorStyle` | 6dp sage bar on raised track / 7dp ring on surface_card |
+| `Widget.BBetter.BottomNav` (+ `.ActiveIndicator`) | `bottomNavigationStyle` | Pine Card bar, labels on, sage active icon over a Forest pill |
+| `Widget.BBetter.Toolbar` | `toolbarStyle` | surface background, Headline title |
+| `Widget.BBetter.BottomSheet` | `bottomSheetStyle` (in `ThemeOverlay.BBetter.BottomSheetDialog`) | surface_card, 24dp top corners. The sheet layout's root must not set a background |
+
+Button / chip label appearances: `TextAppearance.BBetter.Button` (theme `textAppearanceButton`,
+15sp 700 sentence case) and `TextAppearance.BBetter.ChipLabel` (12sp 600 sentence case).
 
 ### From [`style.xml`](../../app/src/main/res/values/style.xml)
 
@@ -132,14 +165,7 @@ Always set typography via `android:textAppearance="@style/TextAppearance.BBetter
 | `Base.Theme.BBetter.Dialog` | DayNight dialog theme carrying the `bb_*` colour roles — parent of the two below |
 | `RoundedDialog` | 90% width dialog on `rounded_square` (`bb_surface_card`, radius 24) — pass to `AlertDialog.Builder(ctx, R.style.RoundedDialog)` |
 | `RewardDialog` | Transparent floating window for the reward card (`FirstFocusCelebrationPopup`) |
-| `fab_3_rounded` | FAB shape — 50% rounded corners |
-| `Widget.BBetter.BottomNav.ActiveIndicator` / `ShapeAppearance.BBetter.NavIndicator` | Bottom-nav active-item pill |
-
-### From [`styles_typography.xml`](../../app/src/main/res/values/styles_typography.xml)
-
-| Style | Purpose |
-|---|---|
-| `Widget.BBetter.Card` | Card surface: `bg_card` + `elevation_card` + `home_card_padding` |
+| `fab_3_rounded` | FAB shape — 50% rounded corners (unused; prefer `ShapeAppearance.BBetter.Pill`) |
 
 When adding a new visual primitive, look here first — there's usually a style to extend.
 
@@ -149,7 +175,7 @@ When adding a new visual primitive, look here first — there's usually a style 
 
 Selected drawables you should know about (all under [`res/drawable/`](../../app/src/main/res/drawable/)):
 
-- `bg_card.xml` — `bb_surface_card` rectangle with `radius_lg`. The standard card surface.
+- `bg_card.xml` — `bb_surface_card` rectangle with `radius_card` (20dp). The standard card surface for non-`MaterialCardView` containers.
 - `bg_chip_energy.xml` — Coral pill (used as the "Concentration" chip).
 - `bg_chip_secondary.xml` — Indigo pill.
 - `bg_play_button.xml` — Round button background for the play button.
@@ -207,7 +233,7 @@ New activity → `Theme.BBetter.NoActionBar` in the manifest. New dialog → `Ro
 Common patterns you'll see across `res/layout/`:
 
 - **Vertical `LinearLayout` inside a `ScrollView`** for any screen with a column of cards (see [`fragment_home.xml`](../../app/src/main/res/layout/fragment_home.xml)). Use `android:fillViewport="true"` and `android:scrollbars="none"`.
-- **Card surface** = `FrameLayout` (or `LinearLayout`) with `android:background="@drawable/bg_card"`, `android:elevation="@dimen/elevation_card"`, `android:padding="@dimen/home_card_padding"`. Equivalent to applying `Widget.BBetter.Card`.
+- **Card surface** = `MaterialCardView` (gets `Widget.BBetter.Card` from the theme), or a `FrameLayout` / `LinearLayout` with `android:background="@drawable/bg_card"` + padding. No elevation (tonal design; `elevation_card` = 0dp).
 - **Form row** = `LinearLayout style="@style/FormRow"` containing an icon, a label/`EditText`, and a trailing arrow. See `activity_create_event.xml`.
 - **Toolbar overlay** = `toolbar_close_or_save.xml` is reused by activities that need a close + save toolbar (AddEventActivity).
 - **Stepper** = `TimerRow` + `StepperButton`(`−`) + `StepperValue` + `StepperButton`(`+`) (see `popup_home_timer_configuration.xml`).

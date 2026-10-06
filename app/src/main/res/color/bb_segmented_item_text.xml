@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget.BBetter.SegmentedControl.Item label (u7): dark on the selected sage pill (u5 left it
+     white), muted otherwise. Covers state_selected (AppCompatButton + setSelected) and
+     state_checked (RadioButton / checkable). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/bb_disabled" android:state_enabled="false" />
+    <item android:color="@color/bb_on_primary" android:state_selected="true" />
+    <item android:color="@color/bb_on_primary" android:state_checked="true" />
+    <item android:color="@color/bb_on_surface_muted" />
+</selector>

@@ -4,11 +4,13 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="cuarenta_y_ocho">56dp</dimen>
 
-    <!-- Spacing scale -->
+    <!-- Spacing scale (u7): 4/8 grid (.stitch/DESIGN.md §5). spacing_lg was 25dp. -->
     <dimen name="spacing_xs">4dp</dimen>
     <dimen name="spacing_sm">8dp</dimen>
+    <!-- Gap between stacked cards (DESIGN: 12-16dp between cards). -->
+    <dimen name="spacing_card_gap">12dp</dimen>
     <dimen name="spacing_md">16dp</dimen>
-    <dimen name="spacing_lg">25dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
     <dimen name="spacing_xl">36dp</dimen>
 
     <!-- Form rows -->
@@ -22,6 +24,32 @@
     <dimen name="primary_button_size">128dp</dimen>
     <dimen name="segmented_button_height">36dp</dimen>
     <dimen name="toggle_button_size">30dp</dimen>
+    <!-- u7 component sizes (.stitch/DESIGN.md §4 + .stitch/html). -->
+    <!-- Full-width pill buttons (Widget.BBetter.Button.*). -->
+    <dimen name="button_height">52dp</dimen>
+    <!-- Text / danger buttons: touch target only (DESIGN §5: >= 48dp). -->
+    <dimen name="button_text_height">48dp</dimen>
+    <dimen name="button_padding_horizontal">24dp</dimen>
+    <!-- Play / pause circle. -->
+    <dimen name="play_button_size">72dp</dimen>
+    <!-- Segmented control: track 40dp = 4dp padding + 32dp item (html p-1 / py-2 text-xs). -->
+    <dimen name="segmented_track_height">40dp</dimen>
+    <dimen name="segmented_track_padding">4dp</dimen>
+    <dimen name="chip_min_height">32dp</dimen>
+    <dimen name="chip_status_min_height">24dp</dimen>
+    <!-- Progress indicators: linear 6dp (html h-1.5), focus ring 7dp (01-focus-running svg). -->
+    <dimen name="progress_linear_thickness">6dp</dimen>
+    <dimen name="progress_ring_thickness">7dp</dimen>
+    <!-- Bottom nav active pill (MD3 indicator 64x32; html px-5 py-1 around a 20px icon). -->
+    <dimen name="bottom_nav_indicator_width">64dp</dimen>
+    <dimen name="bottom_nav_indicator_height">32dp</dimen>
+    <dimen name="bottom_nav_height">72dp</dimen>
+    <dimen name="bottom_nav_item_padding_top">12dp</dimen>
+    <dimen name="bottom_nav_item_padding_bottom">12dp</dimen>
+    <!-- Switch (html 14-screen-time: 48x28 track, 24dp thumb, 2dp inset). -->
+    <dimen name="switch_thumb_size">24dp</dimen>
+    <dimen name="switch_thumb_size_off">16dp</dimen>
+    <dimen name="switch_track_height">28dp</dimen>
 
     <!-- Text scale (u6, .stitch/DESIGN.md §3) — mapped by TextAppearance.BBetter.* in
          styles_typography.xml. -->
@@ -41,18 +69,31 @@
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_dialog">18sp</dimen>
 
-    <!-- Corner radii -->
+    <!-- Corner radii (u7). Tailwind in .stitch/html: rounded-lg 8px, rounded-xl 12px,
+         rounded-[16px], rounded-[20px] = cards, rounded-full = pills. -->
     <dimen name="radius_sm">8dp</dimen>
-    <dimen name="radius_md">14dp</dimen>
+    <!-- Was 14dp: inner rows/fields (html rounded-xl = 12px). -->
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_inner">16dp</dimen>
+    <!-- Cards (html rounded-[20px] / 01 'card': 20px). -->
+    <dimen name="radius_card">20dp</dimen>
+    <!-- Dialog windows (rounded_square). -->
     <dimen name="radius_lg">24dp</dimen>
+    <!-- Bottom sheets, top corners only. -->
+    <dimen name="radius_sheet">24dp</dimen>
+    <!-- Any radius >= half the height draws a pill in a <shape>; for MDC shapes use
+         ShapeAppearance.BBetter.Pill (50%) instead. -->
+    <dimen name="radius_pill">999dp</dimen>
 
-    <!-- Elevations -->
-    <dimen name="elevation_card">2dp</dimen>
+    <!-- Elevations (u7): tonal design, no drop shadows on cards (DESIGN §4). -->
+    <dimen name="elevation_card">0dp</dimen>
     <dimen name="elevation_floating">8dp</dimen>
+    <!-- The one floating action button per screen keeps a soft shadow (html shadow-lg). -->
+    <dimen name="elevation_fab">6dp</dimen>
 
     <!-- Home screen -->
     <dimen name="home_card_padding">20dp</dimen>
-    <dimen name="home_play_button_size">72dp</dimen>
+    <dimen name="home_play_button_size">@dimen/play_button_size</dimen>
     <dimen name="home_stat_icon_size">28dp</dimen>
     <!-- Iconos del par fecha / tiempo estudiado del header (spec focus-mode-and-streak) -->
     <dimen name="home_inline_stat_icon_size">16dp</dimen>

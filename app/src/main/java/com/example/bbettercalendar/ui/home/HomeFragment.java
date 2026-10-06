@@ -463,14 +463,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         int bottom = focusModeActive ? 0 : getResources().getDimensionPixelSize(R.dimen.spacing_lg);
         binding.homeContent.setPadding(side, side, side, bottom);
 
-        if (focusModeActive) {
-            binding.homeTimerCard.setBackgroundResource(R.color.bb_surface_card);
-            binding.homeTimerCard.setElevation(0f);
-        } else {
-            binding.homeTimerCard.setBackgroundResource(R.drawable.bg_card);
-            binding.homeTimerCard.setElevation(
-                    getResources().getDimensionPixelSize(R.dimen.elevation_card));
-        }
+        // u7: sin setElevation — las tarjetas son tonales (elevation_card = 0dp, sin sombra).
+        binding.homeTimerCard.setBackgroundResource(focusModeActive
+                ? R.color.bb_surface_card : R.drawable.bg_card);
         // setBackgroundResource pisa el padding del propio card: hay que reponerlo siempre.
         int cardPadding = getResources().getDimensionPixelSize(R.dimen.home_card_padding);
         binding.homeTimerCard.setPadding(cardPadding, cardPadding, cardPadding, cardPadding);

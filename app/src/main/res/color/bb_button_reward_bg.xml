@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget.BBetter.Button.Reward fill (u7): honey amber, celebration screens only. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/bb_surface_raised" android:state_enabled="false" />
+    <item android:color="@color/bb_accent_reward" />
+</selector>

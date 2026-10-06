@@ -46,6 +46,21 @@
         <item name="android:textColorPrimaryInverse">@color/bb_on_primary</item>
         <item name="android:datePickerDialogTheme">@style/Theme.BBetter.PickerDialog</item>
         <item name="android:timePickerDialogTheme">@style/Theme.BBetter.PickerDialog</item>
+        <!-- u7: same shape + component block as Theme.BBetter (keep both in sync). -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.BBetter.Card</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.BBetter.Sheet</item>
+        <item name="textAppearanceButton">@style/TextAppearance.BBetter.Button</item>
+        <item name="materialButtonStyle">@style/Widget.BBetter.Button.Primary</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.BBetter.Button.Secondary</item>
+        <item name="materialCardViewStyle">@style/Widget.BBetter.Card</item>
+        <item name="floatingActionButtonStyle">@style/Widget.BBetter.FAB</item>
+        <item name="chipStyle">@style/Widget.BBetter.Chip</item>
+        <item name="switchStyle">@style/Widget.BBetter.Switch</item>
+        <item name="linearProgressIndicatorStyle">@style/Widget.BBetter.LinearProgress</item>
+        <item name="circularProgressIndicatorStyle">@style/Widget.BBetter.CircularProgress</item>
+        <item name="bottomNavigationStyle">@style/Widget.BBetter.BottomNav</item>
+        <item name="toolbarStyle">@style/Widget.BBetter.Toolbar</item>
     </style>
 
     <style name="RoundedDialog" parent="Base.Theme.BBetter.Dialog">
@@ -182,36 +197,10 @@
         <item name="android:textOn"></item>
     </style>
 
-    <!-- Bottom nav active item pill (subtle sage-tinted background) -->
-    <style name="Widget.BBetter.BottomNav.ActiveIndicator" parent="">
-        <item name="android:color">@color/bb_surface_subtle</item>
-        <item name="android:width">56dp</item>
-        <item name="android:height">32dp</item>
-        <item name="marginHorizontal">8dp</item>
-        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.NavIndicator</item>
-    </style>
+    <!-- u7: bottom nav indicator moved to styles_components.xml (Widget.BBetter.BottomNav.*). -->
 
-    <style name="ShapeAppearance.BBetter.NavIndicator" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">16dp</item>
-    </style>
-
-    <!-- Create entry screen: redesigned segmented control + card form rows -->
-    <style name="BBetter.SegmentedTrack.Item" parent="">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textAppearance">@style/TextAppearance.BBetter.Label</item>
-        <item name="android:textColor">@color/bb_on_surface</item>
-        <item name="android:minWidth">0dp</item>
-        <item name="android:minHeight">0dp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:elevation">0dp</item>
-        <item name="android:stateListAnimator">@null</item>
-    </style>
-
+    <!-- Create entry screen: card form rows. (u7: BBetter.SegmentedTrack.Item replaced by
+         Widget.BBetter.SegmentedControl.Item in styles_components.xml.) -->
     <style name="BBetter.CardFormRow" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">56dp</item>

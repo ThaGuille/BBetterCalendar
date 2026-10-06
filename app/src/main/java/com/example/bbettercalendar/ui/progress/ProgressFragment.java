@@ -251,14 +251,12 @@ public class ProgressFragment extends Fragment {
     }
 
     // Selección del segmented Day/Week/Month gestionada a mano (igual que el control de
-    // activity_create_event): el seleccionado usa bg_segmented_item_selected.
+    // activity_create_event): Widget.BBetter.SegmentedControl.Item pinta fondo y texto según
+    // state_selected (u7; antes se cambiaba el fondo y el texto quedaba blanco sobre salvia).
     private void highlightGranularity(Granularity g) {
-        binding.granularityDay.setBackgroundResource(g == Granularity.DAY
-                ? R.drawable.bg_segmented_item_selected : R.drawable.bg_segmented_item);
-        binding.granularityWeek.setBackgroundResource(g == Granularity.WEEK
-                ? R.drawable.bg_segmented_item_selected : R.drawable.bg_segmented_item);
-        binding.granularityMonth.setBackgroundResource(g == Granularity.MONTH
-                ? R.drawable.bg_segmented_item_selected : R.drawable.bg_segmented_item);
+        binding.granularityDay.setSelected(g == Granularity.DAY);
+        binding.granularityWeek.setSelected(g == Granularity.WEEK);
+        binding.granularityMonth.setSelected(g == Granularity.MONTH);
     }
 
     @Override

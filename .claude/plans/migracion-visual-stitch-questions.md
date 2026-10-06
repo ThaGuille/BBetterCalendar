@@ -80,3 +80,14 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   API 21–27 Label/Caption salen en 400 y Chip en 700. — **Assumed:** aceptable (minSdk 21; el diseño se
   verifica en API 37). Alternativa: familias de un solo peso `bb_font_medium` / `bb_font_semibold`, a
   costa de que cambiar la fuente toque 3 ficheros.
+
+## u7
+- **Q:** La barra inferior pasa a mostrar **etiquetas** (antes `unlabeled`) con una píldora forest detrás del
+  icono activo, como DESIGN §4 / html 04; la barra crece a 72dp. — **Assumed:** sí. Para volver a solo
+  iconos: `labelVisibilityMode` = `unlabeled` en `Widget.BBetter.BottomNav` (`styles_components.xml`) y
+  `bottom_nav_height` = 56dp en `dimens.xml`.
+- **Q:** El FAB conserva una sombra suave (`elevation_fab` 6dp, como el `shadow-lg` del html 03) aunque las
+  tarjetas sean planas. — **Assumed:** sí. Para aplanarlo: `elevation_fab` = 0dp.
+- **Q:** El segmentado no usa `MaterialButtonToggleGroup` (en MDC 1.9.0 no permite una píldora por segmento).
+  — **Assumed:** `LinearLayout`/`RadioGroup` + `Widget.BBetter.SegmentedControl.Item`. Sólo cambiaría si se
+  sube Material (el plan lo prohíbe).

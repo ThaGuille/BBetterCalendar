@@ -80,6 +80,28 @@
         <item name="android:textColor">@color/bb_on_primary</item>
     </style>
 
+    <!-- u7: label of selectable chips and segmented-control items: 12sp, 600, sentence case
+         (html text-xs font-semibold). Colour comes from the widget's state list. -->
+    <style name="TextAppearance.BBetter.ChipLabel" parent="TextAppearance.BBetter">
+        <item name="android:textSize">@dimen/text_chip</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textFontWeight" tools:targetApi="p">600</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
+    <!-- u7: MaterialButton label (theme textAppearanceButton + Widget.BBetter.Button.*): body
+         size, 700, sentence case, no tracking. Colour comes from the button's state list. -->
+    <style name="TextAppearance.BBetter.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/bb_font</item>
+        <item name="fontFamily">@font/bb_font</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
     <!-- Caption / meta (axis labels, "Ends at", list meta): 12sp, 500, muted. -->
     <style name="TextAppearance.BBetter.Caption">
         <item name="android:textSize">@dimen/text_caption</item>
@@ -101,14 +123,6 @@
         <item name="android:textAppearance">@style/TextAppearance.BBetter.Default</item>
     </style>
 
-    <!-- ============================================================ -->
-    <!-- Reusable component backgrounds                                 -->
-    <!-- ============================================================ -->
-
-    <style name="Widget.BBetter.Card" parent="">
-        <item name="android:background">@drawable/bg_card</item>
-        <item name="android:elevation">@dimen/elevation_card</item>
-        <item name="android:padding">@dimen/home_card_padding</item>
-    </style>
+    <!-- u7: component styles (Widget.BBetter.Card & co.) live in styles_components.xml. -->
 
 </resources>

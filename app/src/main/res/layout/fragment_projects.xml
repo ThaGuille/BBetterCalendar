@@ -37,18 +37,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/projectsAddButton"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_marginBottom="12dp"
-        android:background="@drawable/rounded_square"
-        android:backgroundTint="@color/bb_primary"
         android:contentDescription="@string/projects_add"
-        android:elevation="5dp"
-        android:src="@drawable/ic_add_24"
+        app:srcCompat="@drawable/ic_add_24"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@color/bb_on_primary" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

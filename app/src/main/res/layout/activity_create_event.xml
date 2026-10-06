@@ -46,30 +46,22 @@
             <!-- 2. Segmented track -->
             <LinearLayout
                 android:id="@+id/task_type_layout"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_segmented_track"
-                android:orientation="horizontal"
-                android:padding="4dp">
+                style="@style/Widget.BBetter.SegmentedControl"
+                android:layout_marginTop="@dimen/spacing_md">
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/switch_to_event_button"
-                    style="@style/BBetter.SegmentedTrack.Item"
-                    android:background="@drawable/bg_segmented_item"
+                    style="@style/Widget.BBetter.SegmentedControl.Item"
                     android:text="@string/create_entry_segment_event" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/switch_to_task_button"
-                    style="@style/BBetter.SegmentedTrack.Item"
-                    android:background="@drawable/bg_segmented_item"
+                    style="@style/Widget.BBetter.SegmentedControl.Item"
                     android:text="@string/create_entry_segment_task" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/notificationsButton"
-                    style="@style/BBetter.SegmentedTrack.Item"
-                    android:alpha="0.35"
-                    android:background="@drawable/bg_segmented_item_disabled"
+                    style="@style/Widget.BBetter.SegmentedControl.Item"
                     android:enabled="false"
                     android:text="@string/create_entry_segment_reminder" />
             </LinearLayout>

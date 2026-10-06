@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ripple on accent fills (sage / honey): dark pine wash (u7). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/bb_ripple_dark" />
+</selector>

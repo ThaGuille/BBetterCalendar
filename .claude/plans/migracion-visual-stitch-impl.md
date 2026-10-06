@@ -467,3 +467,89 @@ vacío durante toda la sesión. Capturas en `.claude/skills/adb-ui-test/captures
   y lanza `MainActivity` en modo `standard`. Antes de u2 la pantalla también salía en reposo (estado
   en el fragment viejo); lo nuevo es que ahora además cuenta como fallo. Arreglo propuesto en
   preguntas (no es pequeño y seguro: Splash también hace el reseteo diario de stats).
+
+## u7 · Formas y estilos de componente
+
+**Hecho.**
+- **Nuevo `res/values/styles_components.xml`**: `ShapeAppearance.BBetter.Card` (20dp) / `.Pill` (50 %) /
+  `.Sheet` (24dp arriba, 0 abajo); `Widget.BBetter.Card` (`MaterialCardView`; sustituye al antiguo
+  `Widget.BBetter.Card` de fondo, que no usaba nadie), `Widget.BBetter.Button` + `.Primary` / `.Reward` /
+  `.Secondary` (contorno `bb_outline`) / `.Text` / `.Danger` (texto ember), `Widget.BBetter.FAB`,
+  `Widget.BBetter.SegmentedControl` + `.Item`, `Widget.BBetter.Chip` (choice) + `.Chip.Status`,
+  `Widget.BBetter.Switch`, `Widget.BBetter.LinearProgress` / `.CircularProgress`,
+  `Widget.BBetter.BottomNav` (+ `.ActiveIndicator`, movido desde `style.xml`), `Widget.BBetter.Toolbar`,
+  `Widget.BBetter.BottomSheet` (sustituye a `Widget.BBetter.BottomSheet.Modal` de `themes.xml`).
+- **Enlazados desde el tema**, en `Theme.BBetter` **y** en `Base.Theme.BBetter.Dialog` (bloque duplicado a
+  propósito: el padre `Theme.MaterialComponents.DayNight.Dialog` reinicia `materialButtonStyle` y compañía):
+  `shapeAppearanceSmall/Medium/LargeComponent` = Pill/Card/Sheet, `textAppearanceButton`,
+  `materialButtonStyle` (Primary), `materialButtonOutlinedStyle` (Secondary), `materialCardViewStyle`,
+  `floatingActionButtonStyle`, `chipStyle`, `switchStyle`, `linear/circularProgressIndicatorStyle`,
+  `bottomNavigationStyle`, `toolbarStyle`. Todos los atributos y padres comprobados contra el `values.xml`
+  del AAR 1.9.0 (`switchStyle`/`toolbarStyle` son de AppCompat).
+- Tipografía: `TextAppearance.BBetter.Button` (15sp 700, sin mayúsculas) y `TextAppearance.BBetter.ChipLabel`
+  (12sp 600, sin mayúsculas). Los botones de los diálogos salen ya en Jakarta bold sin mayúsculas.
+- **Color state lists nuevas** (`res/color/`): `bb_button_{primary_bg,primary_text,reward_bg,reward_text,
+  secondary_text,text_primary,text_danger}`, `bb_ripple_{on_primary,primary,danger}`,
+  `bb_segmented_item_text`, `bb_chip_{bg,stroke,text}`. Primitivo nuevo `pine_950_a20` → alias
+  `bb_ripple_dark` (ripple oscuro con alfa premultiplicado, para que el `<ripple>` de framework funcione en
+  API 21–22, donde el `android:alpha` de un CSL se ignora). `bg_play_button` pierde su `#33FFFFFF`.
+- **`dimens.xml`:** `spacing_lg` 25→24, nuevo `spacing_card_gap` 12; `radius_md` 14→12 (html `rounded-xl`),
+  nuevos `radius_inner` 16, `radius_card` 20, `radius_sheet` 24, `radius_pill` 999; **`elevation_card` 0dp**;
+  `elevation_fab` 6dp; `button_height` 52, `button_text_height` 48, `button_padding_horizontal` 24,
+  `play_button_size` 72 (`home_play_button_size` lo referencia), segmentado 40/4, chips 32/24, progreso 6/7,
+  barra inferior 72 + padding 12/12 + indicador 64×32, switch 24/16/28.
+- **Drawables `bg_*`:** `bg_card`, `bg_tile_*` → `radius_card`; segmentados, `bg_save_pill` y todos los
+  `100dp`/`999dp` → `radius_pill`; `bg_calendar_day_*` 6dp → `radius_sm`; `bg_segmented_track` → píldora sobre
+  `bb_surface_card` (html `surface-container-low`, un escalón tonal sobre el fondo); `bg_segmented_item`
+  acepta también `state_checked`.
+- **Pantallas (mínimo):** los 4 segmentados (Progress, Calendar, AddEvent en sus 2 layouts) usan
+  `Widget.BBetter.SegmentedControl(.Item)` → **texto `bb_on_primary` sobre el segmento salvia** (residuo de
+  u5). `ProgressFragment.highlightGranularity` usa `setSelected` en vez de cambiar el fondo. El «Reminder»
+  deshabilitado pierde su `alpha 0.35` (el selector ya pinta `bb_disabled`). Los 3 FAB `ImageButton`
+  (`calendarAddEventButton`, `calendarAddEventButton2`, `projectsAddButton`; mismos ids) pasan a
+  `FloatingActionButton` con el estilo del tema (círculo, sin `5dp` literal). `activity_main.xml`: la
+  `BottomNavigationView` ya no lleva atributos propios (todo en `Widget.BBetter.BottomNav`) y **ahora muestra
+  etiquetas** (DESIGN §4 «outline icons with labels»). `sheet_quick_add_task.xml`: fuera el fondo de la raíz →
+  **esquinas superiores de 24dp** (residuo de u5). Los 2 `SwitchMaterial` del popup del temporizador pierden
+  sus `thumbTint`/`trackTint` en línea. `HomeFragment.applyFocusModeChrome`: sin `setElevation`.
+  `fragment_calendar_week_simple.xml` (huérfano): `5dp` → `@dimen/elevation_fab`.
+- Docs: `style_guide.md` §3/§4/§5/§7.
+
+**Desviaciones (manda el HTML / la librería).**
+- **SegmentedControl NO es `MaterialButtonToggleGroup`:** en MDC 1.9.0 el grupo fuerza a 0 las esquinas
+  interiores de sus botones (no hay píldora por segmento como en html 13/10) y lanza `IllegalStateException`
+  si un hijo tiene fondo propio. Es un `LinearLayout`/`RadioGroup` con estilo + ítems con selectores
+  (`state_selected` o `state_checked`).
+- **Switch:** el plan decía «SwitchMaterial con tintes»; con solo tintes sale la geometría antigua (pista fina,
+  pulgar mayor que la pista). Para parecerse a html 14 (pista 48×28 salvia, pulgar 24 pino) uso drawables
+  propios `bb_switch_track` / `bb_switch_thumb` (sale 52×28 porque SwitchCompat mide 2×pulgar + padding).
+  Gotcha: **no usar `<inset>` en el pulgar**: SwitchCompat lee los insets como padding del pulgar y el switch
+  salía estrecho y recortado; ahora es un `layer-list` de caja fija 24×28 con el punto centrado
+  (`width/height/gravity` de item = API 23+; en 21–22 el punto ocupa la caja).
+- Radios del HTML: tarjetas 20 (= plan), `rounded-xl` 12 (el plan no lo fijaba; `radius_md` era 14),
+  `rounded-[16px]` de 14 → `radius_inner`. Barra de progreso 6dp (`h-1.5`) y anillo 7dp (svg de 01).
+  Indicador de la barra inferior = `secondary-container` del HTML ≈ forest_600 = `bb_primary_container`.
+- FAB con sombra (`elevation_fab` 6dp): html 03 lleva `shadow-lg`; las tarjetas sí son planas.
+
+**Para unidades siguientes.**
+- Cualquier `<Button>` es ya una píldora salvia de 52dp (MaterialComponentsViewInflater + `materialButtonStyle`).
+  Los `<Button>` de `popup_description/error/message` tienen `android:background` propio (legado, blanco) y
+  siguen igual salvo la altura mínima de 52dp: **u21**. `popup_home_timer_configuration` `btn_save` fuerza
+  `cornerRadius radius_md` y `bb_accent_energy` → u21 debería quitarlos.
+- Hoja rápida: `quickAddSaveButton` es un `TextView` con `bg_chip_energy` (mayúsculas) → u22 puede pasarlo a
+  `Widget.BBetter.Button.Primary`.
+- «BLOCK MODE: OFF» sigue en gris (lichen al 70 %): lo pinta `HomeFragment.updateBlockModeButton` en Java
+  (tinte + alpha) → lo natural es u13 (Home), con `Widget.BBetter.Chip.Status` o un estado raised + muted.
+- `nav_divider` de `activity_main.xml` (hairline sobre la barra) se deja: chrome de u12.
+- `Widget.BBetter.Card` aplica `contentPadding` 16dp; los contenedores con `bg_card` siguen usando
+  `home_card_padding` (20).
+
+**Auditoría:** `hex_layout_drawable` 61→60 (`bg_play_button`); base actualizada (total 142→141).
+
+**Verificación (emulator-5554, API 37).** `assembleDebug` OK. `logcat -b crash` vacío (limpiado antes) tras
+recorrer las 4 pestañas, el diálogo «New project», el popup del temporizador (switch on/off), la hoja rápida,
+AddEvent y Calendar Week. Capturas en `.claude/skills/adb-ui-test/captures/`: `mig-u7-home`,
+`mig-u7-progress` (segmento Week con texto pino sobre salvia, «Turn on usage access» en píldora de 52dp, barra
+inferior con etiquetas y píldora forest), `mig-u7-calendar` (FAB circular), `mig-u7-projects`,
+`mig-u7-dialog-create-project` (botones Jakarta bold), `mig-u7-dialog-timer` + `mig-u7-switch-off` (switch
+nuevo), `mig-u7-quickadd-sheet` (esquinas de 24dp), `mig-u7-addevent`, `mig-u7-calendar-week`.

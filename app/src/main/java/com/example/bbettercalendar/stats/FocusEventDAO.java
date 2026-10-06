@@ -36,6 +36,11 @@ public interface FocusEventDAO {
             + "WHERE type = 0 AND timestamp >= :since ORDER BY day")
     List<String> getActiveDaysSince(long since);
 
+    /** Todos los días (ISO) con >= 1 sesión completada, reactiva: alimenta StreakCalculator (racha actual + mejor racha). */
+    @Query("SELECT DISTINCT date(timestamp / 1000, 'unixepoch', 'localtime') AS day FROM focus_event "
+            + "WHERE type = 0 ORDER BY day")
+    LiveData<List<String>> observeAllActiveDays();
+
     /** Días distintos con sesión completada dentro del rango (se usa para "este mes"). Síncrona. */
     @Query("SELECT COUNT(DISTINCT date(timestamp / 1000, 'unixepoch', 'localtime')) FROM focus_event "
             + "WHERE type = 0 AND timestamp BETWEEN :start AND :end")

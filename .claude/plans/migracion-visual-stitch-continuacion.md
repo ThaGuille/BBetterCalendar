@@ -13,7 +13,7 @@
 Lanzar desde la rama `feature/migracion-visual-stitch` (big-task usa la rama actual como base):
 
 ```
-/big-task "Ejecuta .claude/plans/migracion-visual-stitch-continuacion.md"
+/big-task "Ejecuta .claude/plans/migracion-visual-stitch-continuacion.md respetando su columna Tier: sonnet en todas las unidades salvo u14 (opus)"
 ```
 
 ## Estado al 2026-10-07
@@ -88,23 +88,33 @@ El plan maestro obligaba a una sola cadena por compartir un emulador y ficheros.
 
 ## Unidades restantes
 
-Spec de cada unidad: **su sección en el plan maestro**, más los ajustes de abajo. «Modelo» es una
-recomendación de coste: Opus para integración y estado, Sonnet para trabajo de layout o mecánico.
+Spec de cada unidad: **su sección en el plan maestro**, más los ajustes de abajo.
 
-| Id | Título | Depende de | Área (ficheros propios) | Verif. | Modelo |
+**Tier de modelo (restricción para el planificador de big-task).** El `tier` de cada unidad en
+`plan.json` es **exactamente** el de la columna «Tier». **Sonnet es el valor por defecto**: estas
+unidades montan pantallas sobre piezas que ya existen (widgets u9, estilos u7, `ChartStyler` u10, APIs
+u2/u3/u11/u12 documentadas en impl.md) y la spec dice qué hacer. Ninguna es haiku: todas exigen leer
+código antes de editar.
+- **Opus solo en u14**, por el estado del temporizador repartido en varias clases, el WIP a revisar, la
+  gracia a nivel de proceso y el bug del launcher.
+- No subas ninguna otra unidad a opus al planificar. La subida automática del workflow en la última
+  ronda de arreglo (`TIER_UP`) sí está permitida.
+- El usuario pidió este reparto para ahorrar uso: dos ventanas diarias se agotaron con todo en Opus.
+
+| Id | Título | Depende de | Área (ficheros propios) | Verif. | Tier |
 |---|---|---|---|---|---|
-| u14 | Focus (terminar WIP) | — | `ui/focus/` salvo CycleComplete, `FocusSessionViewModel`, `MainActivity`, `SplashActivity` | imagen | Opus |
-| u16 | Projects | — | `ui/projects/`, `item_project*`, `fragment_projects*` | imagen | Sonnet |
-| u17 | Progress | — | `ui/progress/ProgressFragment` + VM, `fragment_progress.xml`, `Granularity` | imagen | Opus |
-| u19 | Screen time & blocking | — | `ui/screentime/ScreenTimeFragment` + VM, `UsageStatsRepository` (métodos nuevos) | imagen | Opus |
-| u22 | Compat.: calendario, formularios, hoja rápida | — | `ui/calendar/`, `calendarEntries/` (UI), `QuickAddTaskSheet`, WeekView adapters | imagen | Sonnet |
-| u15 | Cycle complete | u14 | `ui/focus/CycleComplete*`, `fragment_cycle_complete.xml` | imagen | Sonnet |
-| u18 | All progress | u17 | `ui/progress/AllProgress*`, `ChartCarouselAdapter`; quita carrusel y controles de la banda de uso de Progress | imagen | Sonnet |
-| u21 | Compat.: popups y diálogos | u14 | `popups/`, `popup_*.xml`, `FirstFocusCelebrationPopup`, `TimerPopup`, `FocusStreakPopup` | imagen | Sonnet |
-| u20 | Detalle por app | u19 | `ui/screentime/AppDetail*` | imagen | Sonnet |
-| u23 | Compat.: splash, AppPicker, overlay | u19 | `SplashActivity` (solo layout y tema), `AppPickerActivity`, `item_app_pick`, `view_block_cover` | imagen | Sonnet |
-| u24 | Limpieza y documentación + consolidación | u14–u23 | legado, docs, ficheros compartidos | local | Sonnet |
-| u25 | Verificación final | u24 | — | imagen | Sonnet |
+| u14 | Focus (terminar WIP) | — | `ui/focus/` salvo CycleComplete, `FocusSessionViewModel`, `MainActivity`, `SplashActivity` | imagen | **opus** |
+| u16 | Projects | — | `ui/projects/`, `item_project*`, `fragment_projects*` | imagen | sonnet |
+| u17 | Progress | — | `ui/progress/ProgressFragment` + VM, `fragment_progress.xml`, `Granularity` | imagen | sonnet |
+| u19 | Screen time & blocking | — | `ui/screentime/ScreenTimeFragment` + VM, `UsageStatsRepository` (métodos nuevos) | imagen | sonnet |
+| u22 | Compat.: calendario, formularios, hoja rápida | — | `ui/calendar/`, `calendarEntries/` (UI), `QuickAddTaskSheet`, WeekView adapters | imagen | sonnet |
+| u15 | Cycle complete | u14 | `ui/focus/CycleComplete*`, `fragment_cycle_complete.xml` | imagen | sonnet |
+| u18 | All progress | u17 | `ui/progress/AllProgress*`, `ChartCarouselAdapter`; quita carrusel y controles de la banda de uso de Progress | imagen | sonnet |
+| u21 | Compat.: popups y diálogos | u14 | `popups/`, `popup_*.xml`, `FirstFocusCelebrationPopup`, `TimerPopup`, `FocusStreakPopup` | imagen | sonnet |
+| u20 | Detalle por app | u19 | `ui/screentime/AppDetail*` | imagen | sonnet |
+| u23 | Compat.: splash, AppPicker, overlay | u19 | `SplashActivity` (solo layout y tema), `AppPickerActivity`, `item_app_pick`, `view_block_cover` | imagen | sonnet |
+| u24 | Limpieza y documentación + consolidación | u14–u23 | legado, docs, ficheros compartidos | local | sonnet |
+| u25 | Verificación final | u24 | — | imagen | sonnet |
 
 Olas naturales:
 1. u14, u16, u17, u19 y u22;

@@ -1,8 +1,8 @@
 # Migración visual al diseño de Stitch (dark-first) — plan maestro
 
-**Status:** proposed (preparación casi lista; ver «Estado de preparación»)
+**Status:** in progress — u1–u13 hechas; u14 WIP. Resto: [`migracion-visual-stitch-continuacion.md`](migracion-visual-stitch-continuacion.md)
 **Created:** 2026-10-03
-**Last updated:** 2026-10-03
+**Last updated:** 2026-10-07
 
 > Sustituye a las fases 2–6 de [`frontend-overhaul-roadmap.md`](frontend-overhaul-roadmap.md); la fase 1
 > (dirección artística) quedó cerrada con [`.stitch/DESIGN.md`](../../.stitch/DESIGN.md). Hallazgos de

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- StreakWeekView content (u9). Root = vertical LinearLayout.
+     html 04 streak card: flame + "12-day streak" line, then 7 dots with weekday letters;
+     DESIGN §4 variant: tall flame pill at the end of the row. Day cells: view_streak_day. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/streakWeekLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:drawablePadding="6dp"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+        android:textColor="@color/bb_accent_reward"
+        app:drawableStartCompat="@drawable/ic_flame_v2_24"
+        app:drawableTint="@color/bb_accent_reward"
+        tools:text="12-day streak" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/streakWeekDays"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:id="@+id/streakWeekPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_streak_pill"
+            android:gravity="center"
+            android:minWidth="@dimen/widget_streak_pill_width"
+            android:orientation="vertical"
+            android:paddingStart="8dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="10dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_flame_v2_24"
+                app:tint="@color/bb_accent_reward" />
+
+            <TextView
+                android:id="@+id/streakWeekPillCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFeatureSettings="tnum"
+                android:textAppearance="@style/TextAppearance.BBetter.Title"
+                android:textColor="@color/bb_accent_reward"
+                tools:text="12" />
+        </LinearLayout>
+    </LinearLayout>
+</merge>

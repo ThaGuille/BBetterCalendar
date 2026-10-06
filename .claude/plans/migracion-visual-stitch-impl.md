@@ -599,3 +599,101 @@ recorrer los 4 tabs, iniciar/cancelar una sesión y pasar de mes. Capturas en
 
 **Para unidades siguientes.** Un icono nuevo = SVG oficial convertido igual (o copiar uno de los nuevos y
 cambiar `pathData`); nunca tinte de tema en iconos de notificación/RemoteViews.
+
+## u9 · Componentes reutilizables + galería debug
+
+**Hecho.** 10 vistas en `app/src/main/java/.../ui/common/widget/` (paquete
+`com.example.bbettercalendar.ui.common.widget`), cada una con su `view_*.xml` (`<merge>`; la vista es la
+raíz `LinearLayout`) y atributos en **`res/values/attrs_widgets.xml`** (todos con prefijo por vista para no
+chocar con AppCompat/Material: `tile*`, `header*`, `streak*`, `row*`, `app*`, `period*`, `segment*`,
+`avatar*`, `stepper*`, `empty*`). Apoyo: `WidgetTone` (enum NORMAL/MUTED/PRIMARY/REWARD/DANGER → token
+`bb_*`; los enums `*Tone` del XML usan el mismo ordinal) y `WidgetUtils` (package-private).
+Galería: `app/src/debug/AndroidManifest.xml` + `debug/DebugGalleryActivity` +
+`src/debug/res/layout/activity_debug_gallery.xml` (+ `values/gallery.xml`: estilos `GalleryLabel`/`GalleryCard`
+y arrays `translatable="false"`; texto de demo literal con `tools:ignore="HardcodedText"`, nunca sale en
+release). `exported="true"` solo en el manifest de debug, sin intent-filter.
+
+### API (una línea por vista; los setters reflejan los atributos XML)
+- **`StatTileView`** — `setLabel(cs)`, `setLabelAllCaps(b)` (def. true), `setValue(cs)` / `setValue(cs, unit)`,
+  `setValueTone(WidgetTone)`, `setSub(cs)`, `setSubTone(tone)` (def. MUTED), `setIcon(@DrawableRes, atEnd)`,
+  `setIconTint(@ColorInt)`, `setDelta(cs, StatTileView.Trend{NONE,UP,DOWN}, tone)` / `clearDelta()`,
+  `setDeltaChip(b)` (píldora inset vs texto en línea, html 14), `setProgress(0..100 | <0 oculta)`,
+  `setProgressColor(@ColorInt)`, `setCardStyle(b)` (def. true = `bg_card` + 14dp; false = desnudo para varias
+  en una tarjeta, html 13; los separadores verticales los pone la pantalla).
+- **`SectionHeaderView`** — `setTitle`, `setTitleAppearance(@StyleRes)` (p. ej. `BodyStrong` para «Studying
+  now»), `setSubtitle`, `setIcon(@DrawableRes)` (salvia 20dp), `setBadge(cs)` (píldora miel, mayúsculas),
+  `setMeta(cs, pill)`, `setActionText(cs)` + `setOnActionClickListener(OnActionClickListener)`.
+- **`StreakWeekView`** — `setStreak(StreakCalculator.Result)` (cuenta = `currentStreak`, círculos = `week`;
+  null = semana vacía), `setWeek(List<WeekDay>)`, `setStreakCount(int)`,
+  `setFlamePosition(FLAME_TOP|FLAME_END|FLAME_NONE)`, `setShowDates(b)`, `setDotSize(px)`. XML `streakFlame`,
+  `streakShowDates`, `streakDotSize` (16dp por defecto; `@dimen/widget_streak_dot_size_large` 28dp con fechas).
+  Estados: DONE miel + check (salvia si es hoy), PENDING disco raised con anillo salvia, MISSED raised +
+  hairline, FUTURE solo hairline; letra de hoy en negrita clara. Letras `R.array.widget_streak_letters`
+  (EN «M T W…», ES «L M X…»); contentDescription por día.
+- **`ProgressRowView`** — `setTitle`, `setValue`, `setProgress(int[, animate])`, `setIndicatorColor(@ColorInt)`,
+  `setIndicatorColorRes(@ColorRes)` (proyectos: `bb_project_N`).
+- **`AppUsageRowView`** — `setAppName(cs)`, `setAppIcon(Drawable|@DrawableRes)`, `setUsage(cs, percent)`,
+  `setStatus(AppUsageRowView.Status{NONE,WARNING,BLOCKED}, label|null)` (chip + color de barra),
+  `setNoLimit(b)` (sin barra, acción «Set limit»), `setLocked(b)` (silencioso), `isLocked()`,
+  `setLockVisible(b)`, `setOnLockChangeListener((row, locked) -> …)` (solo toques del usuario),
+  `setOnRowClickListener(row -> …)` (fila/chevrón = abrir detalle), `setOnSetLimitClickListener(row -> …)`.
+- **`PeriodNavigatorView`** — `setTitle`, `setSubtitle` (se pinta «· x»), `setPreviousEnabled(b)`,
+  `setNextEnabled(b)`, `setOnPeriodNavigateListener(OnPeriodNavigateListener{onPrevious, onNext})`.
+- **`SegmentedControlView`** — `setItems(List|CharSequence...|@ArrayRes)`, `setSelectedIndex(i)` (silencioso),
+  `getSelectedIndex()`, `setItemEnabled(i, b)`, `setOnSegmentSelectedListener((view, index) -> …)` (solo
+  toques que cambian). XML `segmentEntries` / `segmentSelected`. Altura fija 40dp salvo altura exacta.
+- **`AvatarView`** — `setName(cs)` (iniciales de las 2 primeras palabras + contentDescription),
+  `setInitials(s)`, `setStatus(AvatarView.Status{NONE,STUDYING,AWAY})` (AWAY pone `alpha` 0,4 a la vista),
+  `setShowPresenceDot(b)`, `setBadgeIcon(@DrawableRes|0)` (círculo miel), `setCutoutColor(@ColorInt)` (= fondo
+  detrás; def. `bb_surface_card`). XML `avatarSize` (def. 40dp; html 01 usa 44dp, html 04 32dp).
+- **`StepperView`** — `setRange(min, max, step)`, `setValue(int)` (silencioso), `getValue()`, `setUnit(cs)`,
+  `setCaption(cs)`, `setValueFormatter(v -> cs)`, `setOnValueChangeListener((view, value) -> …)` (solo − / +).
+- **`EmptyStateView`** — `setIcon(@DrawableRes|0)`, `setTitle`, `setMessage`, `setAction(cs, OnClickListener)`,
+  `setOnActionClickListener(l)`.
+
+### Recursos nuevos
+- `styles_typography.xml`: `TextAppearance.BBetter.Stat.Tile` (22sp), `.BodyStrong` (15sp 700), `.Micro`
+  (11sp 500 muted tnum), `.Micro.Bold`, `.Caption.Semibold`. `dimens.xml`: `text_stat_tile`, `text_micro` y
+  `widget_*`.
+- `styles_components.xml`: **`Widget.BBetter.Switch.Lock`** (pulgar `bb_switch_thumb_lock`: candado cerrado
+  salvia / abierto pino; glifos `bb_switch_lock_glyph_{closed,open}` sin tinte de tema).
+- Iconos (Material Symbols, método de u8): `ic_remove_24`, `ic_arrow_drop_up_24`, `ic_arrow_drop_down_24`,
+  `ic_lock_open_24`. Drawables `bg_streak_dot_{done,done_today,pending,missed,future}`, `bg_streak_pill`,
+  `bg_widget_inset_pill`, `bg_badge_reward`, `bg_meta_pill`, `bg_app_row`, `bg_stepper_{track,button}`,
+  `bg_empty_icon`; CSL `bb_icon_button_tint(_strong)`.
+- Strings EN+ES `widget_*` (plural `widget_streak_days`, array `widget_streak_letters`, descripciones).
+
+### Desviaciones / decisiones
+- **Hallazgo tipográfico (afecta a u6/u7; NO corregido fuera de mis estilos):** en el emulador (API 37) un
+  `android:textFontWeight` dentro de un TextAppearance no cambia la cara: `Micro.Bold` con 700 salía regular,
+  y el 500 heredado gana a un `textStyle="bold"` puesto en la vista. Solo `textStyle="bold"` sin
+  `textFontWeight` da la 700. Mis variantes bold (`Micro.Bold`, `Caption.Semibold`) no heredan de
+  Micro/Caption. Consecuencia probable: Label/Caption/Chip/ChipLabel (500/600) se ven en 400, y el texto del
+  segmentado seleccionado no sale en negrita como en html 13. Documentado en `style_guide.md` §2; pregunta.
+- **Contraste:** el chip delta usa una píldora **inset** `bb_surface` (no el forest del html): sobre forest,
+  salvia daría 3,87:1 y ember 3,16:1 (pares prohibidos en u4). El chip de estado de `AppUsageRowView` va
+  también sobre `bb_surface` con borde del tono; el texto «1h of 1h» de una app bloqueada se queda muted
+  (ember sobre raised = 4,34:1 < AA): el rojo lo llevan el chip y la barra.
+- `AvatarView` es una `View` dibujada en canvas (sin `view_*.xml`, el plan pedía layout por vista): anillo +
+  hueco + punto + insignia sin anidar 4 vistas en cada celda de la rejilla de 8 amigos.
+- Usuario (NONE): disco forest con iniciales Mist (el html las pone salvia sobre forest = par prohibido).
+- La insignia (corona del html 01) se dibuja dentro del cuadrado del avatar (el html la saca fuera). No hay
+  icono `crown`: la galería usa `ic_trophy_24`; u14 puede añadir `crown` (método u8) y pasarlo a `setBadgeIcon`.
+- `StreakWeekView`: además de la variante del html 04 (llama arriba) implementa la píldora alta de DESIGN §4
+  (`streakFlame="end"`) y fechas dentro de los círculos. Con racha 0 muestra «0-day streak» (la pantalla
+  decide si ocultarlo).
+- Segmentado seleccionado = salvia (u7), no forest (el html 10 usa forest en el detalle de app).
+
+### Verificación (emulator-5554, API 37)
+`assembleDebug` OK. Auditoría de tokens **sin cambios** (50; base intacta; la galería está en `src/debug`, que
+la auditoría no escanea, y aun así solo usa tokens). `logcat -b crash` vacío (limpiado antes) tras abrir la
+galería con `am start` y probar: stepper + ×4 (45→65, el listener reescribe el caption), segmentado → Year
+(el navegador pasa a «· 2026»), ‹ (activa ›), candado de Discord (toast «Locked»). Capturas en
+`.claude/skills/adb-ui-test/captures/`: `mig-u9-gallery-1` (cabeceras + tiles), `-2` (rachas + filas de
+progreso), `-3` (filas de apps + segmentados + navegador + avatares), `-4` (steppers + estados vacíos),
+`mig-u9-gallery-lock-toggled`. Comparado con html/PNG 13/14/10/04/01/02: estructura, jerarquía y colores
+coinciden; residuos: pesos 500/600 (ver hallazgo), chip «NEW» a 12sp (html 10sp), llama de trazo
+(`ic_flame_v2_24`) en lugar de la rellena del html.
+
+**Para u13–u20:** no rehacer a mano lo que ya cubre una vista; si falta un estado, añadirlo a la vista (y a la
+galería) en vez de copiar su layout. La galería es la referencia rápida de estados.

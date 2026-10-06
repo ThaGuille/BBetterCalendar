@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One item of SegmentedControlView (u9): selection = setSelected (selector of u7). -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.BBetter.SegmentedControl.Item"
+    android:clickable="true"
+    android:focusable="true"
+    android:maxLines="1"
+    tools:text="Week" />

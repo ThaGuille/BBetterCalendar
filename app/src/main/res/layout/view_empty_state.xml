@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EmptyStateView content (u9): icon disc · title · message · [secondary pill action]. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <FrameLayout
+        android:id="@+id/emptyStateIconDisc"
+        android:layout_width="@dimen/widget_empty_icon_container"
+        android:layout_height="@dimen/widget_empty_icon_container"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_empty_icon">
+
+        <ImageView
+            android:id="@+id/emptyStateIcon"
+            android:layout_width="@dimen/widget_empty_icon_size"
+            android:layout_height="@dimen/widget_empty_icon_size"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            app:tint="@color/bb_primary" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/emptyStateTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.Title"
+        tools:text="No projects yet" />
+
+    <TextView
+        android:id="@+id/emptyStateMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+        android:visibility="gone"
+        tools:text="Group your tasks into a project to track focus per goal."
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/emptyStateAction"
+        style="@style/Widget.BBetter.Button.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:visibility="gone"
+        tools:text="Create project"
+        tools:visibility="visible" />
+</merge>

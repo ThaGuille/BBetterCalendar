@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget.BBetter.Switch.Lock thumb (u9, AppUsageRowView "lock at limit"): html 14 inline lock
+     switch. On = 24dp pine dot with a sage lock; off = 24dp lichen dot with a pine open lock.
+     Same 24x28 box and no-<inset> rule as bb_switch_thumb (u7). Item width/height/gravity need
+     API 23; on 21-22 the dot and glyph fill the box. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <size android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_track_height" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_thumb_size" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_disabled" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_checked="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <size android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_track_height" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_thumb_size" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_on_primary" />
+                </shape>
+            </item>
+            <item android:drawable="@drawable/bb_switch_lock_glyph_closed" android:gravity="center" />
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <size android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_track_height" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:width="@dimen/switch_thumb_size" android:height="@dimen/switch_thumb_size" android:gravity="center">
+                <shape android:shape="oval">
+                    <solid android:color="@color/bb_on_surface_muted" />
+                </shape>
+            </item>
+            <item android:drawable="@drawable/bb_switch_lock_glyph_open" android:gravity="center" />
+        </layer-list>
+    </item>
+</selector>

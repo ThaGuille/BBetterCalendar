@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u9 AppUsageRowView: raised row inside a card (html 14 surface-container-high, rounded-[16px]). -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_surface_raised" />
+            <corners android:radius="@dimen/radius_inner" />
+        </shape>
+    </item>
+</ripple>

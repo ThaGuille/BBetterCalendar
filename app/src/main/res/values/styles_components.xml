@@ -209,6 +209,12 @@
         <item name="showText">false</item>
     </style>
 
+    <!-- u9: per-app "lock at limit" switch (AppUsageRowView, html 14): same track, the thumb
+         carries a lock / open-lock glyph. -->
+    <style name="Widget.BBetter.Switch.Lock">
+        <item name="android:thumb">@drawable/bb_switch_thumb_lock</item>
+    </style>
+
     <!-- ===== Progress (theme linear/circularProgressIndicatorStyle) ===== -->
     <!-- 6dp sage bar on a raised track, rounded ends (corner radius is capped at thickness/2). -->
     <style name="Widget.BBetter.LinearProgress" parent="Widget.MaterialComponents.LinearProgressIndicator">

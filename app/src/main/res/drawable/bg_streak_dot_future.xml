@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u9 StreakWeekView: day still to come: outline only. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@android:color/transparent" />
+    <stroke android:width="@dimen/widget_hairline" android:color="@color/bb_outline" />
+</shape>

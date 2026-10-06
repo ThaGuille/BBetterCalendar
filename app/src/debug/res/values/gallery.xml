@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only resources of DebugGalleryActivity (u9). Not shipped, not translated. -->
+<resources>
+
+    <style name="GalleryLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/spacing_lg</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_sm</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Micro.Bold</item>
+        <item name="android:textColor">@color/bb_primary</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="GalleryCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:padding">@dimen/spacing_md</item>
+    </style>
+
+    <string-array name="gallery_periods" translatable="false">
+        <item>Week</item>
+        <item>Month</item>
+        <item>Year</item>
+    </string-array>
+
+    <string-array name="gallery_week_month" translatable="false">
+        <item>Week</item>
+        <item>Month</item>
+    </string-array>
+
+    <string-array name="gallery_entry_kinds" translatable="false">
+        <item>Event</item>
+        <item>Task</item>
+        <item>Reminder</item>
+    </string-array>
+</resources>

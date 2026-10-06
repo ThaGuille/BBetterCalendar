@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u9 StreakWeekView: past day without a session (html 04 surface-container-high + border). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bb_surface_raised" />
+    <stroke android:width="@dimen/widget_hairline" android:color="@color/bb_outline" />
+</shape>

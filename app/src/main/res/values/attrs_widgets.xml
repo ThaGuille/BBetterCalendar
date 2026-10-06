@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ============================================================ -->
+    <!-- XML attributes of the reusable widgets in ui/common/widget/   -->
+    <!-- (plan migracion-visual-stitch, u9). Every name is prefixed    -->
+    <!-- per widget so it never clashes with AppCompat / Material      -->
+    <!-- attrs (title, icon, value…). Java setters mirror each attr.   -->
+    <!-- ============================================================ -->
+
+    <!-- *Tone enums map 1:1 to WidgetTone (normal 0, muted 1, primary 2, reward 3, danger 4). -->
+
+    <declare-styleable name="StatTileView">
+        <attr name="tileLabel" format="string" />
+        <attr name="tileValue" format="string" />
+        <attr name="tileUnit" format="string" />
+        <attr name="tileSub" format="string" />
+        <attr name="tileIcon" format="reference" />
+        <attr name="tileIconPosition" format="enum">
+            <enum name="start" value="0" />
+            <enum name="end" value="1" />
+        </attr>
+        <attr name="tileIconTint" format="color" />
+        <attr name="tileValueTone" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="muted" value="1" />
+            <enum name="primary" value="2" />
+            <enum name="reward" value="3" />
+            <enum name="danger" value="4" />
+        </attr>
+        <attr name="tileSubTone" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="muted" value="1" />
+            <enum name="primary" value="2" />
+            <enum name="reward" value="3" />
+            <enum name="danger" value="4" />
+        </attr>
+        <attr name="tileDelta" format="string" />
+        <attr name="tileDeltaTrend" format="enum">
+            <enum name="none" value="0" />
+            <enum name="up" value="1" />
+            <enum name="down" value="2" />
+        </attr>
+        <attr name="tileDeltaTone" format="enum">
+            <enum name="normal" value="0" />
+            <enum name="muted" value="1" />
+            <enum name="primary" value="2" />
+            <enum name="reward" value="3" />
+            <enum name="danger" value="4" />
+        </attr>
+        <!-- true (default): delta inside an inset pill; false: inline bold text (html 14). -->
+        <attr name="tileDeltaChip" format="boolean" />
+        <!-- 0..100; absent / negative = no bar. -->
+        <attr name="tileProgress" format="integer" />
+        <!-- true (default): label in uppercase with tracking (html 13 / 10). -->
+        <attr name="tileLabelAllCaps" format="boolean" />
+        <!-- true (default): the tile draws its own Pine Card (20dp) + 14dp padding. false: bare
+             content, for several tiles inside one card (html 13). -->
+        <attr name="tileCard" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="SectionHeaderView">
+        <attr name="headerTitle" format="string" />
+        <attr name="headerSubtitle" format="string" />
+        <attr name="headerIcon" format="reference" />
+        <attr name="headerBadge" format="string" />
+        <attr name="headerMeta" format="string" />
+        <!-- Meta inside a hairline pill ("5 / 8", html 01) instead of plain text. -->
+        <attr name="headerMetaPill" format="boolean" />
+        <attr name="headerActionText" format="string" />
+        <!-- Override of the title TextAppearance (default TextAppearance.BBetter.Title). -->
+        <attr name="headerTitleAppearance" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="StreakWeekView">
+        <attr name="streakFlame" format="enum">
+            <!-- "12-day streak" line with the flame above the dots (html 04). -->
+            <enum name="top" value="0" />
+            <!-- Tall honey pill with flame + count at the end of the row (DESIGN §4). -->
+            <enum name="end" value="1" />
+            <enum name="none" value="2" />
+        </attr>
+        <!-- Draw the day-of-month inside not-done circles (bigger dots, DESIGN §4). -->
+        <attr name="streakShowDates" format="boolean" />
+        <attr name="streakDotSize" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="ProgressRowView">
+        <attr name="rowTitle" format="string" />
+        <attr name="rowValue" format="string" />
+        <attr name="rowProgress" format="integer" />
+        <attr name="rowIndicatorColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="AppUsageRowView">
+        <attr name="appName" format="string" />
+        <attr name="appIcon" format="reference" />
+        <attr name="appUsage" format="string" />
+        <attr name="appProgress" format="integer" />
+        <attr name="appStatus" format="enum">
+            <enum name="none" value="0" />
+            <enum name="warning" value="1" />
+            <enum name="blocked" value="2" />
+        </attr>
+        <attr name="appLocked" format="boolean" />
+        <!-- No limit set: hides the bar and shows the "Set limit" action. -->
+        <attr name="appNoLimit" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="PeriodNavigatorView">
+        <attr name="periodTitle" format="string" />
+        <attr name="periodSubtitle" format="string" />
+        <attr name="periodNextEnabled" format="boolean" />
+        <attr name="periodPreviousEnabled" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="SegmentedControlView">
+        <attr name="segmentEntries" format="reference" />
+        <attr name="segmentSelected" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="AvatarView">
+        <attr name="avatarName" format="string" />
+        <attr name="avatarInitials" format="string" />
+        <attr name="avatarStatus" format="enum">
+            <enum name="none" value="0" />
+            <enum name="studying" value="1" />
+            <enum name="away" value="2" />
+        </attr>
+        <attr name="avatarSize" format="dimension" />
+        <attr name="avatarPresenceDot" format="boolean" />
+        <attr name="avatarBadgeIcon" format="reference" />
+        <!-- Colour of the cut-out around the presence dot = the background the avatar sits on
+             (default bb_surface_card). -->
+        <attr name="avatarCutoutColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="StepperView">
+        <attr name="stepperMin" format="integer" />
+        <attr name="stepperMax" format="integer" />
+        <attr name="stepperStep" format="integer" />
+        <attr name="stepperValue" format="integer" />
+        <attr name="stepperUnit" format="string" />
+        <attr name="stepperCaption" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="EmptyStateView">
+        <attr name="emptyIcon" format="reference" />
+        <attr name="emptyTitle" format="string" />
+        <attr name="emptyMessage" format="string" />
+        <attr name="emptyActionText" format="string" />
+    </declare-styleable>
+
+</resources>

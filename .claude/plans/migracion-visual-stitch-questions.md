@@ -96,3 +96,16 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
 - **Q:** Icono pequeño de notificación: hoja (`eco` de Material Symbols, por la «Sage Leaf» de DESIGN.md). —
   **Assumed:** hoja. Para cambiarlo, sustituir el `pathData` de `res/drawable/ic_stat_bbetter.xml` (mantener
   sin `android:tint`).
+
+## u9
+- **Q:** En el emulador, `android:textFontWeight` dentro de un TextAppearance no surte efecto (un 700 salía
+  regular), así que Label/Caption/Chip/ChipLabel (500/600, u6/u7) probablemente se ven en 400 y el texto del
+  segmentado seleccionado no sale en negrita. ¿Lo arreglamos globalmente? — **Assumed:** no se tocó fuera de
+  u9 (mis estilos bold usan solo `textStyle="bold"`). Opciones: (a) quitar `textFontWeight` de ChipLabel/Chip
+  y dejar `textStyle bold` (700 en vez de 600); (b) familias de un peso `bb_font_medium`/`bb_font_semibold` en
+  `res/font/`, referenciadas solo desde `styles_typography.xml`; (c) investigar `AppCompatTextHelper` con la
+  familia XML. Natural en u24, o antes de u13 si se quiere fidelidad de pesos.
+- **Q:** Los chips delta («▲ 14%») van en una píldora oscura (`bb_surface`) y no forest como en html 13/10,
+  porque salvia/ember sobre forest no llegan a 4,5:1. — **Assumed:** píldora oscura. Para el aspecto del html:
+  cambiar `bg_widget_inset_pill` a `bb_primary_container` y aceptar el contraste bajo (o aclarar forest en
+  `palette.xml`).

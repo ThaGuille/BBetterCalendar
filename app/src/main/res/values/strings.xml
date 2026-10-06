@@ -335,4 +335,35 @@
         <item quantity="other">days with a pomodoro this month</item>
     </plurals>
 
+    <!-- Componentes reutilizables ui/common/widget (migración visual u9) -->
+    <plurals name="widget_streak_days">
+        <item quantity="one">%d-day streak</item>
+        <item quantity="other">%d-day streak</item>
+    </plurals>
+    <!-- Single letters under the streak dots (html 04: M T W T F S S), Monday first. -->
+    <string-array name="widget_streak_letters">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
+    <string name="widget_streak_day_done">%1$s: focused</string>
+    <string name="widget_streak_day_missed">%1$s: no session</string>
+    <string name="widget_streak_day_pending">%1$s: today, no session yet</string>
+    <string name="widget_streak_day_future">%1$s: upcoming</string>
+    <string name="widget_period_previous">Previous period</string>
+    <string name="widget_period_next">Next period</string>
+    <string name="widget_stepper_decrease">Decrease</string>
+    <string name="widget_stepper_increase">Increase</string>
+    <string name="widget_app_status_warning">Almost at limit</string>
+    <string name="widget_app_status_blocked">Blocked</string>
+    <string name="widget_app_set_limit">Set limit</string>
+    <string name="widget_app_lock_cd">Block %1$s when the limit is reached</string>
+    <string name="widget_app_open_cd">%1$s details</string>
+    <string name="widget_avatar_studying">%1$s, studying now</string>
+    <string name="widget_avatar_away">%1$s, away</string>
+
 </resources>

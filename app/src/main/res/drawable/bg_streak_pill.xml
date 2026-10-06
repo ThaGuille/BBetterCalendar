@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u9 StreakWeekView end pill (DESIGN 4: a tall pill on the right, flame + count in Honey Amber). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_raised" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

@@ -109,6 +109,42 @@
         <item name="android:textColor">@color/bb_on_surface_muted</item>
     </style>
 
+    <!-- u9: number inside a stat tile / compact strip (html text-[20-24px] bold, tabular). -->
+    <style name="TextAppearance.BBetter.Stat.Tile">
+        <item name="android:textSize">@dimen/text_stat_tile</item>
+    </style>
+
+    <!-- u9: list-row title / emphasised body (html text-sm font-bold): body size, 700. -->
+    <style name="TextAppearance.BBetter.BodyStrong" parent="TextAppearance.BBetter.Body">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- u9: tiny meta (weekday letters, delta chips, "87% reached"): 11sp, 500, muted, tabular. -->
+    <style name="TextAppearance.BBetter.Micro">
+        <item name="android:textSize">@dimen/text_micro</item>
+        <item name="android:textFontWeight" tools:targetApi="p">500</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <!-- u9: bold variants. NOT children of Micro / Caption on purpose: an inherited
+         android:textFontWeight (500) wins over textStyle="bold" and, on the emulator (API 37,
+         AppCompat 1.6.1 + bundled font family), a textFontWeight even of 700 rendered regular.
+         textStyle="bold" alone does select the 700 face (same as Title / Stat). Never put
+         textStyle="bold" on a view whose appearance has textFontWeight. -->
+    <style name="TextAppearance.BBetter.Micro.Bold" parent="TextAppearance.BBetter">
+        <item name="android:textSize">@dimen/text_micro</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.Caption.Semibold" parent="TextAppearance.BBetter">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
     <!-- Default for TextViews that set no textAppearance (theme android:textViewStyle). Keeps
          the framework's 14sp "Small" size so legacy screens do not reflow, but in the app font
          and bb_on_surface (the framework default is textColorTertiary). New UI sets a

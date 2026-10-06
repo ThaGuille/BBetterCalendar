@@ -310,4 +310,35 @@
         <item quantity="other">días con pomodoro este mes</item>
     </plurals>
 
+    <!-- Componentes reutilizables ui/common/widget (migración visual u9) -->
+    <plurals name="widget_streak_days">
+        <item quantity="one">Racha de %d día</item>
+        <item quantity="many">Racha de %d días</item>
+        <item quantity="other">Racha de %d días</item>
+    </plurals>
+    <string-array name="widget_streak_letters">
+        <item>L</item>
+        <item>M</item>
+        <item>X</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+        <item>D</item>
+    </string-array>
+    <string name="widget_streak_day_done">%1$s: con sesión</string>
+    <string name="widget_streak_day_missed">%1$s: sin sesión</string>
+    <string name="widget_streak_day_pending">%1$s: hoy, aún sin sesión</string>
+    <string name="widget_streak_day_future">%1$s: por llegar</string>
+    <string name="widget_period_previous">Periodo anterior</string>
+    <string name="widget_period_next">Periodo siguiente</string>
+    <string name="widget_stepper_decrease">Reducir</string>
+    <string name="widget_stepper_increase">Aumentar</string>
+    <string name="widget_app_status_warning">Casi en el límite</string>
+    <string name="widget_app_status_blocked">Bloqueada</string>
+    <string name="widget_app_set_limit">Poner límite</string>
+    <string name="widget_app_lock_cd">Bloquear %1$s al llegar al límite</string>
+    <string name="widget_app_open_cd">Detalle de %1$s</string>
+    <string name="widget_avatar_studying">%1$s, estudiando ahora</string>
+    <string name="widget_avatar_away">%1$s, ausente</string>
+
 </resources>

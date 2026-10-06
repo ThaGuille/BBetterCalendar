@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- StepperView content (u9, html 10 "Daily limit"): ( − )   45 min / caption   ( + ) -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="horizontal"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <ImageButton
+        android:id="@+id/stepperMinus"
+        android:layout_width="@dimen/widget_stepper_button_size"
+        android:layout_height="@dimen/widget_stepper_button_size"
+        android:background="@drawable/bg_stepper_button"
+        android:contentDescription="@string/widget_stepper_decrease"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_remove_24"
+        app:tint="@color/bb_icon_button_tint_strong" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/stepperValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.Stat"
+                tools:text="45" />
+
+            <TextView
+                android:id="@+id/stepperUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                android:visibility="gone"
+                tools:text="min"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/stepperCaption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.BBetter.Micro"
+            android:visibility="gone"
+            tools:text="Target session limit"
+            tools:visibility="visible" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/stepperPlus"
+        android:layout_width="@dimen/widget_stepper_button_size"
+        android:layout_height="@dimen/widget_stepper_button_size"
+        android:background="@drawable/bg_stepper_button"
+        android:contentDescription="@string/widget_stepper_increase"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_add_24"
+        app:tint="@color/bb_icon_button_tint_strong" />
+</merge>

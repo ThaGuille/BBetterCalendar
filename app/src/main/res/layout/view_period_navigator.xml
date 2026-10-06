@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PeriodNavigatorView content (u9, html 13): "This week · Mon – Sun" ......... ‹ › -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="horizontal"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/periodNavTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+        tools:text="This week" />
+
+    <TextView
+        android:id="@+id/periodNavSubtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+        tools:text="· Mon – Sun" />
+
+    <ImageButton
+        android:id="@+id/periodNavPrevious"
+        android:layout_width="@dimen/widget_icon_button_size"
+        android:layout_height="@dimen/widget_icon_button_size"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/widget_period_previous"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_chevron_left_24"
+        app:tint="@color/bb_icon_button_tint" />
+
+    <ImageButton
+        android:id="@+id/periodNavNext"
+        android:layout_width="@dimen/widget_icon_button_size"
+        android:layout_height="@dimen/widget_icon_button_size"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/widget_period_next"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_chevron_right_24"
+        app:tint="@color/bb_icon_button_tint" />
+</merge>

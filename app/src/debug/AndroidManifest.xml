@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only additions, merged into the debug variant (never in release). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- u9 component gallery. exported=true ONLY here (debug manifest) so it can be opened with
+             adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugGalleryActivity
+             No intent filter: it never shows in the launcher. -->
+        <activity
+            android:name="com.example.bbettercalendar.debug.DebugGalleryActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.BBetter.NoActionBar" />
+    </application>
+</manifest>

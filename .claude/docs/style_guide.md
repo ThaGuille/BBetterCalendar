@@ -85,12 +85,22 @@ they fall back to 400, or 700 where the style also sets bold). Numbers use tabul
 | `TextAppearance.BBetter.Label` | 500, muted | `text_label` (13sp) | Small label above a number |
 | `TextAppearance.BBetter.Chip` | 600, ALL CAPS, tracking 0.06, `bb_on_primary` | `text_chip` (12sp) | Tiny status chips on an accent fill |
 | `TextAppearance.BBetter.Caption` | 500, muted | `text_caption` (12sp) | Meta, axis-ish captions |
+| `TextAppearance.BBetter.Stat.Tile` | 700, `tnum` | `text_stat_tile` (22sp) | Number inside a stat tile / compact strip (u9) |
+| `TextAppearance.BBetter.BodyStrong` | 700 | `text_body` (15sp) | List-row title, emphasised value (u9) |
+| `TextAppearance.BBetter.Micro` / `.Micro.Bold` | 500 / 700, muted, `tnum` | `text_micro` (11sp) | Weekday letters, delta chips, "87% reached" (u9) |
+| `TextAppearance.BBetter.Caption.Semibold` | 700 (bold), muted | `text_caption` (12sp) | Header meta ("8h 15m logged") (u9) |
 | `TextAppearance.BBetter.Default` | 400, `bb_on_surface` | 14sp (framework Small) | Implicit default of every TextView without a `textAppearance` (theme `android:textViewStyle` → `Widget.BBetter.TextView`) |
 
 **Colour comes from the TextAppearance.** The theme deliberately has **no** `android:textColor`:
 a theme-level `android:textColor` is the last fallback of every TextView attribute and silently
 overrode every TextAppearance colour (muted labels rendered white). Set `android:textColor` on a
 view only when it really differs from its appearance.
+
+**Bold = `textStyle="bold"`, never via `textFontWeight` (u9 finding).** On the emulator (API 37) a
+`textFontWeight` inside a TextAppearance did not change the rendered face (700 rendered regular), and an
+inherited `textFontWeight` also beats `textStyle="bold"` set on the view. So: don't put `textStyle="bold"`
+on a view whose appearance has `textFontWeight` (Label, Caption, Micro, Chip, ChipLabel) — use a bold
+appearance (`BodyStrong`, `Micro.Bold`, `Caption.Semibold`) instead.
 
 Always set typography via `android:textAppearance="@style/TextAppearance.BBetter.Foo"` rather than `android:fontFamily` + `android:textSize` separately, so future scale changes propagate.
 
@@ -150,6 +160,28 @@ blocks identical — a MaterialComponents dialog parent would otherwise reset th
 
 Button / chip label appearances: `TextAppearance.BBetter.Button` (theme `textAppearanceButton`,
 15sp 700 sentence case) and `TextAppearance.BBetter.ChipLabel` (12sp 600 sentence case).
+
+### Reusable widgets — `ui/common/widget/` (u9)
+
+Compound views with their own `view_*.xml` and `declare-styleable` attrs
+([`attrs_widgets.xml`](../../app/src/main/res/values/attrs_widgets.xml), every attr prefixed per widget).
+Screens (u13–u20) compose these instead of re-building the panel. All states are visible in the
+debug-only `DebugGalleryActivity` (`app/src/debug/`):
+`adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugGalleryActivity`.
+The one-line Java API of each view is in `.claude/plans/migracion-visual-stitch-impl.md` § u9.
+
+| View | Panel |
+|---|---|
+| `StatTileView` | label · number (+unit) · [bar] · [delta chip] · [sub]; own card or bare (`tileCard`) |
+| `SectionHeaderView` | [icon] title [NEW badge] / subtitle · meta (text or pill) / text action |
+| `StreakWeekView` | 7 day dots from `StreakCalculator.Result` + flame label (top) or honey pill (end) |
+| `ProgressRowView` | title · value / 6dp bar (colour per project) |
+| `AppUsageRowView` | app icon · name [status chip] / usage + bar or "Set limit" · lock switch · chevron |
+| `PeriodNavigatorView` | "This week · Mon – Sun" · ‹ › |
+| `SegmentedControlView` | Pill segmented control (wraps `Widget.BBetter.SegmentedControl(.Item)`) |
+| `AvatarView` | Canvas-drawn initials avatar: none / studying (sage ring) / away (40 %), dot, badge |
+| `StepperView` | − value unit / caption + on a dark track, min/max/step |
+| `EmptyStateView` | icon disc · title · message · [secondary action] |
 
 ### From [`style.xml`](../../app/src/main/res/values/style.xml)
 

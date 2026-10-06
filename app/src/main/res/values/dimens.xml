@@ -51,6 +51,31 @@
     <dimen name="switch_thumb_size_off">16dp</dimen>
     <dimen name="switch_track_height">28dp</dimen>
 
+    <!-- u9 reusable widgets (ui/common/widget/*View). Values from .stitch/html. -->
+    <!-- StatTileView: html p-3.5 / gap-1.5. -->
+    <dimen name="widget_tile_padding">14dp</dimen>
+    <dimen name="widget_tile_icon_size">16dp</dimen>
+    <dimen name="widget_delta_icon_size">16dp</dimen>
+    <!-- Small circular icon buttons (period navigator chevrons): 40dp touch. -->
+    <dimen name="widget_icon_button_size">40dp</dimen>
+    <!-- StreakWeekView: compact dots (html 04 w-4) and the date-number variant. -->
+    <dimen name="widget_streak_dot_size">16dp</dimen>
+    <dimen name="widget_streak_dot_size_large">28dp</dimen>
+    <dimen name="widget_streak_pill_width">48dp</dimen>
+    <!-- AvatarView: DESIGN §4 40dp; ring 2dp + 2dp forest gap (html 01 ring-2 p-[2px]). -->
+    <dimen name="widget_avatar_size">40dp</dimen>
+    <dimen name="widget_avatar_ring">2dp</dimen>
+    <dimen name="widget_hairline">1dp</dimen>
+    <!-- AppUsageRowView: html 14 w-11 icon, w-20 bar, rounded-[16px] row. -->
+    <dimen name="widget_app_icon_size">44dp</dimen>
+    <dimen name="widget_app_bar_width">80dp</dimen>
+    <dimen name="widget_row_padding">12dp</dimen>
+    <!-- StepperView: html 10 w-11 buttons. -->
+    <dimen name="widget_stepper_button_size">44dp</dimen>
+    <!-- EmptyStateView icon disc. -->
+    <dimen name="widget_empty_icon_container">56dp</dimen>
+    <dimen name="widget_empty_icon_size">28dp</dimen>
+
     <!-- Text scale (u6, .stitch/DESIGN.md §3) — mapped by TextAppearance.BBetter.* in
          styles_typography.xml. -->
     <dimen name="text_display">80sp</dimen>
@@ -66,6 +91,9 @@
     <dimen name="text_label">13sp</dimen>
     <dimen name="text_chip">12sp</dimen>
     <dimen name="text_caption">12sp</dimen>
+    <!-- u9: number inside a stat tile (html text-[22px] / text-2xl) and tiny meta (html 10-11px). -->
+    <dimen name="text_stat_tile">22sp</dimen>
+    <dimen name="text_micro">11sp</dimen>
     <dimen name="text_small">12sp</dimen>
     <dimen name="text_dialog">18sp</dimen>
 

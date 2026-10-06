@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AppUsageRowView content (u9, html 14 "Manage your apps" row). Root = horizontal
+     LinearLayout on bg_app_row. icon · name [status] / usage + bar | Set limit · lock · chevron -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="horizontal"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <ImageView
+        android:id="@+id/appUsageIcon"
+        android:layout_width="@dimen/widget_app_icon_size"
+        android:layout_height="@dimen/widget_app_icon_size"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/appUsageName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@id/appUsageStatus"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Instagram" />
+
+        <TextView
+            android:id="@+id/appUsageStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:drawablePadding="2dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="2dp"
+            android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+            android:visibility="gone"
+            app:layout_constraintBaseline_toBaselineOf="@id/appUsageName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/appUsageName"
+            tools:text="Almost at limit"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/appUsageText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/appUsageName"
+            tools:text="42m of 45m" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/appUsageBar"
+            style="@style/Widget.BBetter.LinearProgress"
+            android:layout_width="@dimen/widget_app_bar_width"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:max="100"
+            app:layout_constraintBottom_toBottomOf="@id/appUsageText"
+            app:layout_constraintStart_toEndOf="@id/appUsageText"
+            app:layout_constraintTop_toTopOf="@id/appUsageText"
+            app:trackColor="@color/bb_outline" />
+
+        <TextView
+            android:id="@+id/appUsageSetLimit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:maxLines="1"
+            android:text="@string/widget_app_set_limit"
+            android:textAppearance="@style/TextAppearance.BBetter.ChipLabel"
+            android:textColor="@color/bb_primary"
+            android:visibility="gone"
+            app:layout_constraintBaseline_toBaselineOf="@id/appUsageText"
+            app:layout_constraintStart_toEndOf="@id/appUsageText" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/appUsageLock"
+        style="@style/Widget.BBetter.Switch.Lock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp" />
+
+    <ImageView
+        android:id="@+id/appUsageChevron"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="4dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right_24"
+        app:tint="@color/bb_on_surface_muted" />
+</merge>

@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only component gallery (plan migracion-visual-stitch u9). Demo copy is hard-coded on
+     purpose: this screen never ships (src/debug) and is not translated. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/galleryScroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface"
+    tools:ignore="HardcodedText">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_xl">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Component gallery"
+            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ui/common/widget · u9"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+        <!-- ===================== SectionHeaderView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="SectionHeaderView" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <com.example.bbettercalendar.ui.common.widget.SectionHeaderView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:headerMeta="prev 12 wks"
+                app:headerSubtitle="Weekly focus volume"
+                app:headerTitle="Past 12 weeks" />
+
+            <com.example.bbettercalendar.ui.common.widget.SectionHeaderView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                app:headerBadge="New"
+                app:headerIcon="@drawable/ic_lock_24"
+                app:headerMeta="3 protected"
+                app:headerTitle="Manage your apps" />
+
+            <com.example.bbettercalendar.ui.common.widget.SectionHeaderView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                app:headerMeta="5 / 8"
+                app:headerMetaPill="true"
+                app:headerTitle="Studying now"
+                app:headerTitleAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+
+            <com.example.bbettercalendar.ui.common.widget.SectionHeaderView
+                android:id="@+id/galleryHeaderAction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                app:headerActionText="See all"
+                app:headerTitle="Tasks" />
+        </LinearLayout>
+
+        <!-- ===================== StatTileView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="StatTileView · own card (html 14)" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:tileDelta="22% vs avg"
+                app:tileDeltaChip="false"
+                app:tileDeltaTrend="down"
+                app:tileLabel="Tracked apps"
+                app:tileLabelAllCaps="false"
+                app:tileValue="1h 18m" />
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                app:tileLabel="Daily limit"
+                app:tileLabelAllCaps="false"
+                app:tileProgress="87"
+                app:tileSub="87% reached"
+                app:tileValue="1h 30m" />
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                app:tileIcon="@drawable/ic_shield_24"
+                app:tileIconPosition="end"
+                app:tileIconTint="@color/bb_accent_reward"
+                app:tileLabel="Opens blocked"
+                app:tileLabelAllCaps="false"
+                app:tileSub="this week"
+                app:tileValue="23"
+                app:tileValueTone="reward" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="StatTileView · bare, shared card (html 13)" />
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:tileCard="false"
+                app:tileDelta="14%"
+                app:tileDeltaTrend="up"
+                app:tileLabel="Focus time"
+                app:tileValue="12h 40m" />
+
+            <View
+                android:layout_width="@dimen/widget_hairline"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp"
+                android:background="@color/bb_divider" />
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:tileCard="false"
+                app:tileLabel="Sessions"
+                app:tileSub="4.4 / day avg"
+                app:tileValue="31" />
+
+            <View
+                android:layout_width="@dimen/widget_hairline"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp"
+                android:background="@color/bb_divider" />
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:tileCard="false"
+                app:tileDelta="9%"
+                app:tileDeltaTone="danger"
+                app:tileDeltaTrend="down"
+                app:tileLabel="Tasks done"
+                app:tileValue="18" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="StatTileView · unit, icon start, reward sub (html 10 / 02)" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:tileLabel="Daily avg"
+                app:tileUnit="m"
+                app:tileDelta="9%"
+                app:tileDeltaTrend="down"
+                app:tileValue="51" />
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                app:tileIcon="@drawable/ic_flame_v2_24"
+                app:tileIconTint="@color/bb_accent_reward"
+                app:tileLabel="Streak"
+                app:tileSub="Personal best"
+                app:tileSubTone="reward"
+                app:tileValue="13 days" />
+
+            <com.example.bbettercalendar.ui.common.widget.StatTileView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                app:tileIcon="@drawable/ic_trophy_24"
+                app:tileIconTint="@color/bb_accent_reward"
+                app:tileLabel="Best"
+                app:tileSub="among friends"
+                app:tileValue="2nd" />
+        </LinearLayout>
+
+        <!-- ===================== StreakWeekView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="StreakWeekView · flame top / end pill + dates / empty" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <com.example.bbettercalendar.ui.common.widget.StreakWeekView
+                android:id="@+id/galleryStreakTop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:layout_marginTop="@dimen/spacing_card_gap">
+
+            <com.example.bbettercalendar.ui.common.widget.StreakWeekView
+                android:id="@+id/galleryStreakEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:streakDotSize="@dimen/widget_streak_dot_size_large"
+                app:streakFlame="end"
+                app:streakShowDates="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:layout_marginTop="@dimen/spacing_card_gap">
+
+            <com.example.bbettercalendar.ui.common.widget.StreakWeekView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- ===================== ProgressRowView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="ProgressRowView" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <com.example.bbettercalendar.ui.common.widget.ProgressRowView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:rowProgress="63"
+                app:rowTitle="Final thesis"
+                app:rowValue="5h 10m" />
+
+            <com.example.bbettercalendar.ui.common.widget.ProgressRowView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:rowIndicatorColor="@color/bb_data_compare"
+                app:rowProgress="37"
+                app:rowTitle="Physics exam"
+                app:rowValue="3h 05m" />
+
+            <com.example.bbettercalendar.ui.common.widget.ProgressRowView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:rowIndicatorColor="@color/bb_project_2"
+                app:rowProgress="0"
+                app:rowTitle="English essay"
+                app:rowValue="0m" />
+        </LinearLayout>
+
+        <!-- ===================== AppUsageRowView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="AppUsageRowView · warning / blocked / ok / no limit" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <com.example.bbettercalendar.ui.common.widget.AppUsageRowView
+                android:id="@+id/galleryAppWarning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:appLocked="true"
+                app:appName="Instagram"
+                app:appProgress="93"
+                app:appStatus="warning"
+                app:appUsage="42m of 45m" />
+
+            <com.example.bbettercalendar.ui.common.widget.AppUsageRowView
+                android:id="@+id/galleryAppBlocked"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_card_gap"
+                app:appLocked="true"
+                app:appName="TikTok"
+                app:appProgress="100"
+                app:appStatus="blocked"
+                app:appUsage="1h of 1h" />
+
+            <com.example.bbettercalendar.ui.common.widget.AppUsageRowView
+                android:id="@+id/galleryAppOk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_card_gap"
+                app:appLocked="true"
+                app:appName="YouTube"
+                app:appProgress="41"
+                app:appUsage="25m of 1h" />
+
+            <com.example.bbettercalendar.ui.common.widget.AppUsageRowView
+                android:id="@+id/galleryAppNoLimit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_card_gap"
+                app:appName="Discord"
+                app:appNoLimit="true"
+                app:appUsage="10m · no limit" />
+        </LinearLayout>
+
+        <!-- ===================== PeriodNavigatorView + SegmentedControlView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="SegmentedControlView + PeriodNavigatorView" />
+
+        <com.example.bbettercalendar.ui.common.widget.SegmentedControlView
+            android:id="@+id/gallerySegmented"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:segmentEntries="@array/gallery_periods" />
+
+        <com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView
+            android:id="@+id/galleryPeriod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            app:periodNextEnabled="false"
+            app:periodSubtitle="Mon – Sun"
+            app:periodTitle="This week" />
+
+        <com.example.bbettercalendar.ui.common.widget.SegmentedControlView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            app:segmentEntries="@array/gallery_week_month"
+            app:segmentSelected="1" />
+
+        <com.example.bbettercalendar.ui.common.widget.SegmentedControlView
+            android:id="@+id/gallerySegmentedDisabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            app:segmentEntries="@array/gallery_entry_kinds" />
+
+        <!-- ===================== AvatarView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="AvatarView · user+dot / studying+badge / studying / away / 32dp" />
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.example.bbettercalendar.ui.common.widget.AvatarView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:avatarName="Guille"
+                app:avatarPresenceDot="true" />
+
+            <com.example.bbettercalendar.ui.common.widget.AvatarView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_md"
+                app:avatarBadgeIcon="@drawable/ic_trophy_24"
+                app:avatarName="Laia Mas"
+                app:avatarSize="44dp"
+                app:avatarStatus="studying" />
+
+            <com.example.bbettercalendar.ui.common.widget.AvatarView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_md"
+                app:avatarName="Marc Sala"
+                app:avatarSize="44dp"
+                app:avatarStatus="studying" />
+
+            <com.example.bbettercalendar.ui.common.widget.AvatarView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_md"
+                app:avatarName="Oriol Gil"
+                app:avatarSize="44dp"
+                app:avatarStatus="away" />
+
+            <com.example.bbettercalendar.ui.common.widget.AvatarView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_md"
+                app:avatarName="Alex"
+                app:avatarPresenceDot="true"
+                app:avatarSize="32dp"
+                app:avatarStatus="studying" />
+        </LinearLayout>
+
+        <!-- ===================== StepperView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="StepperView · 45 min / at min bound" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <com.example.bbettercalendar.ui.common.widget.StepperView
+                android:id="@+id/galleryStepper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:stepperCaption="Target session limit"
+                app:stepperMax="240"
+                app:stepperMin="5"
+                app:stepperStep="5"
+                app:stepperUnit="min"
+                app:stepperValue="45" />
+
+            <com.example.bbettercalendar.ui.common.widget.StepperView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_card_gap"
+                app:stepperMax="10"
+                app:stepperMin="1"
+                app:stepperUnit="cycles"
+                app:stepperValue="1" />
+        </LinearLayout>
+
+        <!-- ===================== EmptyStateView ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="EmptyStateView · with / without action" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <com.example.bbettercalendar.ui.common.widget.EmptyStateView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:emptyActionText="Create project"
+                app:emptyIcon="@drawable/ic_eco_24"
+                app:emptyMessage="Group your tasks into a project to see focus time per goal."
+                app:emptyTitle="No projects yet" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:layout_marginTop="@dimen/spacing_card_gap">
+
+            <com.example.bbettercalendar.ui.common.widget.EmptyStateView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:emptyIcon="@drawable/ic_timer_24"
+                app:emptyMessage="Finish a pomodoro and your week fills up here."
+                app:emptyTitle="No sessions this week" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

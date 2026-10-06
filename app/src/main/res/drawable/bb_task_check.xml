@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u13: CheckBox button of the Home task rows (round, html 04). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_task_check_on" android:state_checked="true" />
+    <item android:drawable="@drawable/bg_task_check_off" />
+</selector>

@@ -377,4 +377,25 @@
     <string name="widget_avatar_studying">%1$s, studying now</string>
     <string name="widget_avatar_away">%1$s, away</string>
 
+    <!-- u13 · Home (html 04) -->
+    <!-- PLACEHOLDER(ui-placeholders#home-user-name): no user name is stored yet. -->
+    <string name="home_avatar_placeholder_initial" translatable="false">B</string>
+    <string name="home_notifications">Notifications</string>
+    <string name="home_notifications_soon">Notification centre is coming soon</string>
+    <string name="home_mode_paused">Paused</string>
+    <string name="home_cycle_format">Cycle %1$d of %2$d</string>
+    <string name="home_cycle_infinite_format">Cycle %1$d</string>
+    <string name="home_cycle_next_format">%1$s · Next: %2$s</string>
+    <string name="home_cycle_focusing_format">%1$s · Focusing: %2$s</string>
+    <string name="home_cycle_chip_desc">Timer settings: %1$s</string>
+    <string name="home_open_focus">Open focus session</string>
+    <plurals name="home_friends_studying">
+        <item quantity="one">%d friend studying now</item>
+        <item quantity="other">%d friends studying now</item>
+    </plurals>
+    <string name="home_next_up">Next up</string>
+    <string name="home_next_up_empty">Nothing scheduled this week</string>
+    <string name="home_next_up_desc">Open calendar</string>
+    <string name="home_task_done">Done</string>
+
 </resources>

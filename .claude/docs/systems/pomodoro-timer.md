@@ -1,19 +1,20 @@
 # System — Pomodoro timer (`ui/home/` + `notifications/focus/`)
 
-**Last verified:** 2026-10-06 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-06 (DB v14, u13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The focus timer — the app's core feature. A pure 6-state machine (stopped/running/paused ×
 normal/rest, `ui/focus/FocusTimerStateMachine`) owned by an **activity-scoped**
 `FocusSessionViewModel` (ticker, `SavedStateHandle` persistence, background-fail grace period).
-`HomeFragment` only observes `FocusUiState` and delegates; a separate Focus screen (u14) will share
-the same ViewModel. "Left the app mid-session" still counts as a failure.
+`HomeFragment` only shows the idle/running card and *starts* sessions (Play → `toggle()` + navigate
+to `navigation_focus`); the Focus screen (u14) owns the running UI on the same ViewModel. "Left the app mid-session" still counts as a failure.
 
 ## Surface (manifest + entry points)
 | Kind | Entry |
 |---|---|
-| Fragment | `HomeFragment` — bottom-nav start destination; renders the session, never owns it |
+| Fragment | `HomeFragment` — bottom-nav start destination; idle card + Play, running card = remaining time + tap → Focus (u13) |
+| Fragment | `FocusFragment` (`navigation_focus`) — running-session UI (u14) |
 | Activity observer | `FocusBackgroundObserver` — registered by `MainActivity.onCreate` on its own lifecycle; feeds the grace period |
-| Service | `.ui.home.HomeForegroundService` (`foregroundServiceType="specialUse"`) — sticky notification to keep the process alive while the timer runs |
+| Service | `.ui.home.HomeForegroundService` (`foregroundServiceType="specialUse"`) — sticky notification to keep the process alive while the timer runs. **Started/stopped by `FocusSessionViewModel.syncForegroundService()`** on every transition: on while the state ≠ `STOPPED`, off otherwise and in `onCleared()` (u13; before it followed `HomeFragment.onStart/onStop`) |
 | Notification channel | `channelId` (legacy literal, not in `NotificationChannels`) for the foreground service; `CHANNEL_FOCUS_ALERTS` for fail alerts — see `notifications.md` |
 
 ## Files
@@ -63,23 +64,15 @@ the same ViewModel. "Left the app mid-session" still counts as a failure.
 
 - **6 states as an enum** `FocusTimerStateMachine.State` (`STOPPED`/`RUNNING`/`PAUSED` × normal/rest). `STOPPED_REST` is transient in normal flow (a rest starts immediately) but reachable through restore; play starts the configured rest from it.
 - **All timer methods are main-thread only.** The machine is not thread-safe and the VM publishes with `setValue`.
-- **Background detection is `MainActivity`'s ON_START/ON_STOP**, not app-wide activity counting. In-app fragment navigation never arms it; rotation is ignored. Opening ANOTHER activity of the app (e.g. `AddEventActivity`) while a concentration runs *would* arm it — unreachable today because focus mode hides everything but the timer; a future Focus screen that launches activities must account for this.
+- **Background detection is `MainActivity`'s ON_START/ON_STOP**, not app-wide activity counting. In-app fragment navigation never arms it; rotation is ignored. Opening ANOTHER activity of the app (e.g. `AddEventActivity`) while a concentration runs *would* arm it — since u13 Home stays usable during a session (e.g. quick-add, AddEventActivity from Calendar), so this IS reachable: a running, unarmed concentration fails if another app activity stays in front > grace. Revisit in u14.
 - **Cycle semantics (unchanged quirks):** `cyclesCompleted` increments when a REST ends (or is skipped), so "cycle x of N" = `cyclesCompleted + 1` for both a focus and the rest after it. With rest disabled, cycles never advance. Without auto-cycle, the "all cycles finished" signal fires on the concentration *after* the N-th rest. The auto-cycle restart does not update the recorded session length (old `lastTimerTime`) — see `migracion-visual-stitch-questions.md` (u2).
 - **A fail leaves the remaining time frozen on screen** (cycles not reset) until the fail alert closes → `resetIdleDisplay()`.
 - **The background-fail grace timer doesn't arm when focus block mode is active** (`shouldArmBackgroundGrace(blockModeArmed)`) — with block mode on, the accessibility cover (see `app-limits.md`) physically prevents leaving to another app, so a background transition can't mean "the user left," and shouldn't cost the session.
-- **The 🚫 block-mode toggle drives `FocusBlockState`, not the timer state machine itself.** `blockModeArmed` lives in `FocusSessionViewModel` (not one of the 6 timer states; saved in `SavedStateHandle`), set by Home's button (gated on `AccessibilityAccess.isEnabled`, else shows `AccessibilityDisclosureDialog`). The **single** writer is `FocusSessionViewModel.syncBlockState()`: `FocusBlockState.setActive(ctx, blockModeArmed && state == RUNNING)`, run on every transition (not per tick) and from Home's `onResume`, so pause/stop/cancel/complete/fail/rest all clear the block with no per-path edits. `onCleared()` forces it to false (no live timer could clear it afterwards). See `app-limits.md` for the enforcement side (`BlockDecisionEngine`/`BlockerAccessibilityService`).
-- **El "focus mode" es estado DERIVADO de la sesión, no un flag propio.** `updateFocusMode()`
-  (llamado desde `updateTimerControls()`) activa la pantalla dedicada con
-  `FocusUiState.isSessionActive()` (cualquier estado distinto de `STOPPED`). Por eso *ninguna* ruta de salida (cancelar, fallo por background, fin de
-  ciclo, cambio de configuración) necesita código para salir del modo: ya pasan todas por
-  `updateTimerControls()`. No se guarda en `onSaveInstanceState` a propósito — se recalcula.
-- **La bottom-nav ya no la toca Home (u12).** `MainActivity` la muestra solo en destinos de
-  primer nivel (`addOnDestinationChangedListener`), así que el focus mode in-place de Home la deja
-  visible hasta que u13/u14 lleven la sesión en curso a `navigation_focus` (destino sin barra).
-- **La expansión a pantalla completa no usa otro Fragment**: `homeTimerCard` pasa a
-  `MATCH_PARENT` y, como el `NestedScrollView` tiene `fillViewport="true"` y su hijo directo
-  (`homeContent`) es `wrap_content`, el ScrollView re-mide ese hijo a la altura del viewport. Si
-  alguien pone `homeContent` a `match_parent` o quita `fillViewport`, la tarjeta deja de expandirse.
+- **The 🚫 block-mode toggle drives `FocusBlockState`, not the timer state machine itself.** `blockModeArmed` lives in `FocusSessionViewModel` (not one of the 6 timer states; saved in `SavedStateHandle`), set by the 🚫 button (Home until u12; **no UI between u13 and u14** — u14 rewires it on Focus; gated on `AccessibilityAccess.isEnabled`, else shows `AccessibilityDisclosureDialog`). The **single** writer is `FocusSessionViewModel.syncBlockState()`: `FocusBlockState.setActive(ctx, blockModeArmed && state == RUNNING)`, run on every transition (not per tick) and from Home's `onResume`, so pause/stop/cancel/complete/fail/rest all clear the block with no per-path edits. `onCleared()` forces it to false (no live timer could clear it afterwards). See `app-limits.md` for the enforcement side (`BlockDecisionEngine`/`BlockerAccessibilityService`).
+- **No hay "focus mode" in-place desde u13.** Home ya no se expande a pantalla completa: Play
+  arranca la sesión y navega a `navigation_focus` (sin barra inferior); con la sesión viva
+  (`FocusUiState.isSessionActive()`) la tarjeta de Home muestra el restante, el botón pasa a "abrir
+  Focus" y tocar la tarjeta abre Focus. Pausa/stop/saltar descanso/🚫/fallos de hoy viven en Focus (u14).
 - **Cancelar NO registra un fallo.** `FocusSessionViewModel.cancelSession()` corta el contador, resetea ciclos y limpia
   `FocusTarget`, pero no llama a `addFails()`: un fallo significa "se fue de la app a mitad de
   sesión". Penalizar también la cancelación explícita dejaría como única salida barata aguantar
@@ -101,3 +94,4 @@ the same ViewModel. "Left the app mid-session" still counts as a failure.
 | 2026-09-09 | Focus mode (tarjeta a pantalla completa + chrome oculto), botón cancelar sin penalización, 🚫 editable mid-run; racha redefinida como "días de los últimos 30 con pomodoro completado" y movida a la toolbar; `FocusStreakPopup` y `FirstFocusCelebrationPopup` | — |
 | 2026-10-06 | u2 (migración visual): state machine extracted to `ui/focus/FocusTimerStateMachine` (pure, JUnit-tested); activity-scoped `FocusSessionViewModel` owns ticker + `SavedStateHandle` (end instant) + grace period (`FocusBackgroundObserver` on `MainActivity`); persistence moved to `stats/FocusSessionRepository`; `HomeFragment` no longer contains a `CountDownTimer`. Deliberate deltas: see `migracion-visual-stitch-impl.md` § u2 | `.claude/plans/migracion-visual-stitch.md` |
 | 2026-08-29 | Repository layer: `maybeAutoComplete` moved from `HomeViewModel` into `FocusAttributionRepository` (cohesion — it's the write side of the same attribution rule `enrich()` reads, not a de-duplication); `completeTimer`'s write block moved from `@IoExecutor` to `@DbWriteExecutor`. No behavior change to the timer state machine itself. | — |
+| 2026-10-06 | u13: Home rediseñada (html 04); sin focus mode in-place — Play arranca y navega a Focus; el servicio en primer plano lo maneja `FocusSessionViewModel` según el estado de la sesión | `.claude/plans/migracion-visual-stitch-impl.md` § u13 |

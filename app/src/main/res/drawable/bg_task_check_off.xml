@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u13: unchecked task circle (html 04 w-5 h-5 rounded-full border-2 outline-variant). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <size android:width="@dimen/home_task_check_size" android:height="@dimen/home_task_check_size" />
+    <solid android:color="@android:color/transparent" />
+    <stroke android:width="2dp" android:color="@color/bb_on_surface_muted" />
+</shape>

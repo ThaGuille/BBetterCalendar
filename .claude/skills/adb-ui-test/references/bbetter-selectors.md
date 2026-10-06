@@ -28,6 +28,24 @@ Tab labels (for `-Text` fallback): Home · Progress · Calendar · Projects.
 `nav_view` (and `nav_divider`) is **only present on top-level destinations** (the 4 tabs +
 Calendar week). On every secondary destination it is GONE → `find-node -Id nav_view` exits 1.
 
+## Home (u13, `fragment_home.xml`)
+
+| Id | What |
+|---|---|
+| `homePlayButton` | Idle: start session + open Focus (desc "Start timer"). Session alive: opens Focus (desc "Open focus session") |
+| `homeTimerCard` | Clickable only while a session is alive → Focus |
+| `homeTimerText` / `homeTimerTypeText` | Countdown / mode chip text |
+| `homeCycleChip` (`homeCycleText`) | "Cycle x of N · Next: …" → timer settings popup |
+| `homeStreakButton` (`homeStreakWeek`) | Streak card → `FocusStreakPopup` |
+| `homeFriendsCard` | Social mock block (debug only) |
+| `homeAddTaskButton`, `homeTodayTaskList`, `homeShowOverdueButton`, `homeOverdueTaskList` | Tasks card |
+| row ids: `taskDoneCheckbox`, `taskTitleText`, `taskProjectChip`, `taskTimeText`, `taskFocusButton`, `taskRemoveButton` | Task rows |
+| `homeNextUpCard` (`homeNextUpText`) | Next event → Calendar tab |
+| `homeBellButton` | Placeholder (toast) |
+
+Removed in u13 (move to Focus in u14): `homeCancelButton`, `homeSkipRestButton`, `homeBlockModeButton`,
+`homeFailsChip`, `homeTimerSettingsButton`, `homeFocusBanner`, `homeStreakCount`, `homeTodayTimeText`.
+
 ## Secondary destinations (u12)
 
 | Destination id | Screen root id | Layout |

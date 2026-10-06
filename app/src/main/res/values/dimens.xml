@@ -129,6 +129,15 @@
     <dimen name="home_inline_stat_icon_size">16dp</dimen>
     <!-- Botón "cancelar sesión" del focus mode: satélite del play, deliberadamente menor -->
     <dimen name="home_secondary_button_size">48dp</dimen>
+    <!-- u13 · Home (html 04) -->
+    <dimen name="home_timer_text">72sp</dimen>          <!-- text-7xl hero countdown -->
+    <dimen name="home_mode_dot_size">6dp</dimen>        <!-- w-1.5 dot in the mode chip -->
+    <dimen name="home_header_icon_button">40dp</dimen>  <!-- bell -->
+    <dimen name="home_add_task_button">28dp</dimen>     <!-- w-7 "+" next to Tasks -->
+    <dimen name="home_task_check_size">20dp</dimen>     <!-- w-5 round task checkbox -->
+    <dimen name="home_friend_avatar_size">32dp</dimen>  <!-- w-8 overlapped avatars -->
+    <dimen name="home_friend_avatar_overlap">-8dp</dimen> <!-- -space-x-2 -->
+    <dimen name="home_next_up_icon_tile">36dp</dimen>   <!-- w-9 rounded-xl -->
     <!-- Celda del calendario de rachas dentro del popup -->
     <dimen name="streak_day_marker_size">30dp</dimen>
 

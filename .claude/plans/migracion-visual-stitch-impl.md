@@ -892,3 +892,87 @@ y back la recupera. Sin `FATAL EXCEPTION`. Capturas en `.claude/skills/adb-ui-te
 `mig-u12-{focus,cycle-complete,all-progress,screen-time,app-detail}`, `mig-u12-tab-projects`,
 `mig-u12-tab-projects-after-back`. Residuo: el `EmptyStateView` del cascarón queda arriba, no centrado
 vertical (irrelevante: lo sustituye cada unidad de pantalla).
+
+## u13 · Home
+
+**Hecho.** `fragment_home.xml` reescrito según html 04: header (`AvatarView` + saludo Headline + fecha
+Caption + campana), tarjeta del temporizador (chip de modo forest con punto salvia, 72sp, play 72dp,
+píldora «Cycle x of N · Next: <tarea>» → abre `TimerPopup`), fila racha (`StreakWeekView` llama arriba,
+datos reales de `FocusInsightsRepository.observeStreak()`) + amigos (`homeFriendsCard`, 3 `AvatarView`
+32dp solapados, `SocialFeature.applyVisibility`), Tasks (filas nuevas `item_today_task`: círculo
+`bb_task_check`, hairline entre filas, chip de proyecto, «Done» + alpha 0,6 en hechas) y «Next up».
+- **Chip de proyecto:** `HomeViewModel.getProjects()` (= `ProjectDAO.observeAll()`) →
+  `TodayTaskAdapter.setProjects(list)`; join en memoria por `projectId`, color
+  `ProjectListAdapter.accentColorResFor(colorIndex)` (texto) + el mismo al 15 % de relleno
+  (`bg_project_chip` + `setBackgroundTintList`). Sin esquema nuevo. Oculto en tareas hechas.
+- **Next up:** `HomeViewModel.getNextUp()` = `getEventsBetween(now, now+7d)` → primer evento/recordatorio
+  (no tareas) con inicio ≥ ahora (`pickNextUp`, package-private). Se re-ancla en `refreshToday()`
+  (onResume). «HH:mm Título» hoy, «EEE HH:mm Título» si no; vacío = «Nothing scheduled this week». Tap →
+  pestaña Calendar (`nav_view.setSelectedItemId`). `CalendarEntry` no tiene ubicación (el «· Library»
+  del diseño no se pinta).
+- **Racha:** `HomeViewModel.getStreak()` (switchMap sobre el día → se re-suscribe al cambiar de día). Se
+  eliminaron `activeDaysLast30`/`getActiveDaysLast30` (u3 lo pedía); `FocusEventDAO.observeActiveDaysSince`
+  queda sin uso (u24).
+- **Play / sesión:** idle → `focusSession.toggle()` + navegar a `navigation_focus`; con sesión viva
+  (`isSessionActive()`) el play muestra `ic_arrow_forward_24` («Open focus session») y la tarjeta entera es
+  clicable → Focus. «Focus this» (fila de tarea y el auto-start pendiente de project detail en `onResume`)
+  también abre Focus. `openFocus()` sólo navega si el destino actual es `navigation_home` (doble toque).
+  Chip de modo: PAUSED / REST / CONCENTRATION. Ciclo: en reposo `cyclesCompleted` («Cycle 0 of 4» como el
+  diseño), en marcha `getCurrentCycle()`; infinito = «Cycle N». Sufijo «· Focusing: X» si `FocusTarget`
+  está puesto, si no «· Next: <primera tarea pendiente de hoy>».
+- **Focus mode in-place eliminado** (`applyFocusMode*`, padding de `homeContent`, `MATCH_PARENT` de la tarjeta).
+- **Servicio en primer plano:** ya no en `HomeFragment.onStart/onStop`. `FocusSessionViewModel.syncForegroundService()`
+  (en `onTransition`) lo arranca cuando el estado ≠ STOPPED y lo para al volver a STOPPED y en `onCleared()`;
+  el arranque va en try/catch (`ForegroundServiceStartNotAllowedException` es RuntimeException). Cambio de
+  semántica: antes corría siempre que Home estuviera visible (aun en reposo) y se paraba al ir a segundo
+  plano; ahora corre exactamente mientras hay sesión, también en segundo plano.
+
+### Para u14 (Focus): lo que salió de Home y qué llamar
+Quitados del layout: `homeCancelButton`, `homeSkipRestButton`, `homeBlockModeButton`, `homeFailsChip`
+(+ `homeToadyFailsText`), `homeTodayTimeText`, `homeTimerSettingsButton`, `homeFocusBanner`, `homeStreakCount`.
+HomeFragment ya no implementa `AccessibilityDisclosureDialog.OnConsentGrantedListener`.
+- Pausa/reanudar: `focusSession.toggle()` (true = en marcha → `SoundFeedback.playStart()`, false → `playStop()`).
+- Stop: `focusSession.cancelSession()` (false = nada que cancelar; desvincula `FocusTarget`; no es fallo) → `playStop()`.
+- Saltar descanso: visible si `state.canSkipRest()`; `focusSession.skipRest()` → `playStop()`.
+- 🚫 Modo bloqueo: armado → `setBlockModeArmed(false)`; si no, `AccessibilityAccess.isEnabled(ctx)` ?
+  `setBlockModeArmed(true)` : `AccessibilityDisclosureDialog.newInstance().show(getChildFragmentManager(), …)`
+  y el fragment implementa `OnConsentGrantedListener.onAccessibilityConsentGranted()` → `setBlockModeArmed(true)`.
+  Tres estados visuales (off muted / on `bb_danger` / falta permiso `bb_accent_reward`); en `onResume`
+  re-pintar y `focusSession.syncBlockState()`. Versión anterior: `git show 93cb20c:app/src/main/java/com/example/bbettercalendar/ui/home/HomeFragment.java`
+  (`handleBlockModeToggle`, `updateBlockModeButton`).
+- Fallos de hoy: `focusSession.getTodayFails()` (LiveData<Integer>); tiempo de hoy:
+  `HomeViewModel.getTodayTimeStudiedText()` sigue existiendo (o `FocusSessionRepository.getTodayTimeStudiedMillis()`).
+- Eventos: Home sigue consumiendo `getCycleCompletedEvents()` / `getSessionFailedEvents()` (MessagePopup /
+  AlertPopup) y `getAutoCompletedTaskTitle()`; con Focus en pantalla Home no tiene vista → u14 debe
+  observarlos también (patrón `SingleEvent`: el primero que consume gana); u15 sustituye el MessagePopup.
+- Desvincular `FocusTarget` (antes: tap en el banner «Focusing: X»): sin UI ahora; u14 puede ofrecerlo.
+- Gracia por segundo plano: ahora Home es navegable durante una sesión → abrir otra Activity de la app
+  (AddEventActivity, AppPicker…) con una concentración sin 🚫 la falla a los 4 s (u2, desviación 3).
+
+### Recursos nuevos
+Drawables `bg_home_mode_chip`, `bg_home_cycle_chip`, `bg_dot_primary`, `bg_home_icon_tile`, `bg_project_chip`,
+`bg_task_check_{off,on}`, `bb_task_check`, `ic_task_check_mark` (12dp, sin tinte de tema: un layer-list
+toma el mayor tamaño de sus items y con 24dp estiraba el círculo). Dimens `home_timer_text` (72sp) y `home_*`
+de html 04. Strings EN+ES `home_*` (plural `home_friends_studying`). `bg_task_item`, `bg_close_circle`,
+`bg_block_mode_button` quedan posiblemente sin uso (u14/u24).
+
+### Desviaciones / residuos
+- Saludo «Hi there» + inicial «B» (placeholder `home-user-name`); campana sin punto ámbar de no leídas
+  (`home-notification-centre`, toast).
+- Sin el resplandor ambiental ni el borde `outline-variant/30` de las tarjetas (u7: tonal plano).
+- Play salvia con icono pino (como el PNG; el html dice `primary-container`).
+- El chip de proyecto no queda pegado al borde: la columna del botón «focus this» se reserva (INVISIBLE)
+  en la sección de hoy para alinear filas (comportamiento previo conservado).
+- La marca ✓ del círculo de tarea hecha apenas se ve (12dp + fila al 60 %).
+- Títulos de tarea en Body 15sp/400 (html 14/500).
+
+**Verificación (emulator-5554).** `assembleDebug` OK; `testDebugUnitTest` 104/104; auditoría 50 (sin
+cambios). Datos: además de la siembra de u10, añadí al emulador 3 tareas de hoy (2 con proyecto, 1 hecha) y
+un evento a las 22:30 (script de scratchpad, no versionado). Flujo: Home → Play → `focusScreen` sin
+`nav_view` y `HomeForegroundService` en marcha (dumpsys) → back → Home en marcha (19:46, flecha, «Cycle 1 of 3»)
+→ tap tarjeta → Focus → back → chip de ciclo (popup) → Next up → Calendar → Home → marcar tarea → desplegar
+atrasadas. `logcat -b crash` sin `FATAL EXCEPTION`. Capturas `.claude/skills/adb-ui-test/captures/`:
+`mig-u13-home`, `mig-u13-home-running`, `mig-u13-home-tasks-toggled`. Comparado con 04-home.png: estructura,
+jerarquía, colores y tipografía coinciden (residuos arriba). La sesión de prueba se cortó con `am force-stop`
+(Home ya no tiene stop). Lo pendiente de u2 (rotar a mitad, pausa, fallo por segundo plano, saltar descanso)
+pasa a u14, que tiene los controles.

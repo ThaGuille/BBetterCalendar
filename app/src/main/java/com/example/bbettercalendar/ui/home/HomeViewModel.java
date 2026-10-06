@@ -21,9 +21,15 @@ import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.popups.RepetitionSpec;
+import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.projects.ProjectDAO;
+import com.example.bbettercalendar.social.SocialRepository;
+import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.stats.FocusAttributionRepository;
 import com.example.bbettercalendar.stats.FocusEventDAO;
+import com.example.bbettercalendar.stats.FocusInsightsRepository;
 import com.example.bbettercalendar.stats.FocusSessionRepository;
+import com.example.bbettercalendar.stats.StreakCalculator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,18 +78,26 @@ public class HomeViewModel extends AndroidViewModel {
     private final LiveData<List<CalendarEntry>> todayTasksEnriched;
     private final LiveData<List<CalendarEntry>> overdueTasks;
 
-    // --- Racha "días con pomodoro" (spec focus-mode-and-streak) ---
-    // Inicio de la ventana de 30 días (00:00 de hace 29 días). Es una LiveData y no una constante
-    // porque la ventana se desliza: refreshToday() la reajusta cuando el día cambia con la app
-    // abierta, igual que hace con todayRange.
-    private final MutableLiveData<Long> streakWindowStart = new MutableLiveData<>();
-    private final LiveData<Integer> activeDaysLast30;
+    // --- u13 (migración visual): racha real, chip de proyecto, "Next up" y amigos (maqueta) ---
+    // Racha consecutiva + fila de la semana (StreakCalculator vía FocusInsightsRepository);
+    // sustituye a los "días activos en 30" que pintaba el saludo.
+    private final FocusInsightsRepository focusInsightsRepository;
+    private final LiveData<StreakCalculator.Result> streak;
+    private final LiveData<List<Project>> projects;
+    private final SocialRepository socialRepository;
+    // [ahora, ahora + 7 días]: se re-ancla en refreshToday() (onResume) para que "Next up" no se
+    // quede en un evento que ya empezó.
+    private final MutableLiveData<long[]> nextUpRange = new MutableLiveData<>();
+    private final LiveData<CalendarEntry> nextUp;
 
     @Inject
     public HomeViewModel(@NonNull Application application, FocusEventDAO focusEventDao,
                          CalendarEntryDAO calendarEntryDao, ConfigurationManager configManager,
                          FocusAttributionRepository focusAttributionRepository,
                          FocusSessionRepository focusSessionRepository,
+                         FocusInsightsRepository focusInsightsRepository,
+                         ProjectDAO projectDao,
+                         SocialRepository socialRepository,
                          @IoExecutor ExecutorService ioExecutor,
                          @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
@@ -95,6 +109,13 @@ public class HomeViewModel extends AndroidViewModel {
         this.calendarEntryDao = calendarEntryDao;
         this.focusAttributionRepository = focusAttributionRepository;
         this.focusSessionRepository = focusSessionRepository;
+        this.focusInsightsRepository = focusInsightsRepository;
+        this.socialRepository = socialRepository;
+        this.projects = projectDao.observeAll();
+        // Se re-suscribe sólo cuando todayRange cambia (cambio de día): "hoy" de la racha se
+        // evalúa en cada emisión del repositorio (u3).
+        this.streak = Transformations.switchMap(todayRange,
+                range -> focusInsightsRepository.observeStreak());
         this.ioExecutor = ioExecutor;
         this.dbWriteExecutor = dbWriteExecutor;
         this.configManager = configManager;
@@ -122,13 +143,13 @@ public class HomeViewModel extends AndroidViewModel {
                     calendarEntryDao.getUndoneTasksBefore(before),
                     HomeViewModel::collapseOverdue);
         });
-        // La query sólo se re-suscribe cuando la ventana se mueve (cambio de día); dentro de la
-        // misma ventana la LiveData de Room ya se reemite sola al insertar un FocusEvent.
-        activeDaysLast30 = Transformations.switchMap(streakWindowStart, since -> {
-            if (since == null) {
-                return zeroLive();
+        nextUp = Transformations.switchMap(nextUpRange, range -> {
+            if (range == null) {
+                return new MutableLiveData<>();
             }
-            return focusEventDao.observeActiveDaysSince(since);
+            return Transformations.map(
+                    calendarEntryDao.getEventsBetween(range[0], range[1]),
+                    entries -> pickNextUp(entries, range[0]));
         });
         refreshToday();
 
@@ -213,10 +234,24 @@ public class HomeViewModel extends AndroidViewModel {
         return result;
     }
 
-    private static LiveData<Integer> zeroLive() {
-        MutableLiveData<Integer> zero = new MutableLiveData<>();
-        zero.setValue(0);
-        return zero;
+    /**
+     * "Next up" (u13): el evento o recordatorio (no tareas: ya tienen su tarjeta) que empieza antes
+     * a partir de {@code now}. null = nada en la ventana. Package-private para tests JVM.
+     */
+    static CalendarEntry pickNextUp(List<CalendarEntry> entries, long now) {
+        CalendarEntry best = null;
+        if (entries == null) {
+            return null;
+        }
+        for (CalendarEntry entry : entries) {
+            if (entry.getType() == AddEventActivity.TYPE_TASK || entry.getStartMillis() < now) {
+                continue;
+            }
+            if (best == null || entry.getStartMillis() < best.getStartMillis()) {
+                best = entry;
+            }
+        }
+        return best;
     }
 
     private static LiveData<List<CalendarEntry>> emptyEntryList() {
@@ -231,6 +266,8 @@ public class HomeViewModel extends AndroidViewModel {
      * calendarEntry (LiveData de Room, auto-invalidada). Llamar desde onResume (main thread).
      */
     public void refreshToday() {
+        long now = System.currentTimeMillis();
+        nextUpRange.setValue(new long[]{now, now + 7 * DAY_MILLIS});
         long startOfToday = startOfTodayMillis();
         long[] current = todayRange.getValue();
         if (current != null && current[0] == startOfToday) {
@@ -238,8 +275,6 @@ public class HomeViewModel extends AndroidViewModel {
         }
         long endOfToday = startOfToday + DAY_MILLIS - 1;
         todayRange.setValue(new long[]{startOfToday, endOfToday});
-        // Ventana de 30 días CIVILES incluyendo hoy -> hoy cuenta como el día 30, no como el 31.
-        streakWindowStart.setValue(startOfToday - 29L * DAY_MILLIS);
         if (overdueBefore.getValue() != null) {
             overdueBefore.setValue(startOfToday);
         }
@@ -336,9 +371,24 @@ public class HomeViewModel extends AndroidViewModel {
         return overdueTasks;
     }
 
-    /** Días de los últimos 30 con al menos un pomodoro completado (la racha de la toolbar). */
-    public LiveData<Integer> getActiveDaysLast30() {
-        return activeDaysLast30;
+    /** Racha consecutiva + semana (u13); se re-suscribe sola al cambiar de día. */
+    public LiveData<StreakCalculator.Result> getStreak() {
+        return streak;
+    }
+
+    /** Proyectos no archivados, para el chip de proyecto de las filas de tareas (u13). */
+    public LiveData<List<Project>> getProjects() {
+        return projects;
+    }
+
+    /** Siguiente evento/recordatorio de los próximos 7 días; null si no hay (u13). */
+    public LiveData<CalendarEntry> getNextUp() {
+        return nextUp;
+    }
+
+    // PLACEHOLDER(ui-placeholders#social-home-friends): maqueta tras FEATURE_SOCIAL_MOCK.
+    public LiveData<SocialSnapshot> getSocialSnapshot() {
+        return socialRepository.getSnapshot();
     }
 
     /** Nº de días con pomodoro de este mes, emitido sólo al completar el primero del día. */

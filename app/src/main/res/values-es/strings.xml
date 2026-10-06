@@ -352,4 +352,23 @@
     <string name="widget_avatar_studying">%1$s, estudiando ahora</string>
     <string name="widget_avatar_away">%1$s, ausente</string>
 
+    <!-- u13 · Home (html 04) -->
+    <string name="home_notifications">Notificaciones</string>
+    <string name="home_notifications_soon">El centro de notificaciones llegará pronto</string>
+    <string name="home_mode_paused">En pausa</string>
+    <string name="home_cycle_format">Ciclo %1$d de %2$d</string>
+    <string name="home_cycle_infinite_format">Ciclo %1$d</string>
+    <string name="home_cycle_next_format">%1$s · Siguiente: %2$s</string>
+    <string name="home_cycle_focusing_format">%1$s · Concentrado en: %2$s</string>
+    <string name="home_cycle_chip_desc">Ajustes del temporizador: %1$s</string>
+    <string name="home_open_focus">Abrir la sesión de concentración</string>
+    <plurals name="home_friends_studying">
+        <item quantity="one">%d amigo estudiando ahora</item>
+        <item quantity="other">%d amigos estudiando ahora</item>
+    </plurals>
+    <string name="home_next_up">A continuación</string>
+    <string name="home_next_up_empty">Nada programado esta semana</string>
+    <string name="home_next_up_desc">Abrir el calendario</string>
+    <string name="home_task_done">Hecha</string>
+
 </resources>

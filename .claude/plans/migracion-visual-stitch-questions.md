@@ -139,3 +139,16 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   `R.id.navigation_project_detail` a `MainActivity.TOP_LEVEL_DESTINATIONS`.
 - **Q:** Entre u12 y u14, el focus mode in-place de Home ya no oculta la barra inferior. — **Assumed:**
   aceptable de forma transitoria (u13/u14 mueven la sesión a la pantalla Focus, sin barra).
+
+## u13
+- **Q:** Home no guarda nombre de usuario: ¿qué mostrar en el saludo/avatar? — **Assumed:** «Hi there» + inicial
+  fija «B» (placeholder `home-user-name`). Para cambiarlo: un campo de nombre (Configuration o prefs) y en
+  `HomeFragment` `homeAvatar.setName(...)` + un `home_greeting` con formato.
+- **Q:** El engranaje de ajustes del temporizador desaparece (el diseño no lo tiene). — **Assumed:** la píldora
+  «Cycle x of N · Next: …» (con su ⌄) abre los ajustes del temporizador. Si se prefiere otro sitio (Focus o un
+  menú), mover `showTimerSettings()`.
+- **Q:** El servicio en primer plano ahora vive mientras haya sesión (también en segundo plano) y ya no
+  aparece con el temporizador en reposo. — **Assumed:** es la intención que describía el doc del sistema.
+  Para volver a lo anterior: quitar `syncForegroundService()` de `FocusSessionViewModel`.
+- **Q:** Entre u13 y u14 no hay forma de pausar/parar una sesión desde la UI (Focus es un cascarón). —
+  **Assumed:** aceptable de forma transitoria; u14 cablea los controles (lista en impl.md § u13).

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u13 · Home: "Cycle x of N · Next: <task>" selector pill (html 04 surface-container-high +
+     outline-variant hairline). Ripple: it opens the timer settings. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_surface_raised" />
+            <stroke android:width="@dimen/widget_hairline" android:color="@color/bb_outline" />
+            <corners android:radius="@dimen/radius_pill" />
+        </shape>
+    </item>
+</ripple>

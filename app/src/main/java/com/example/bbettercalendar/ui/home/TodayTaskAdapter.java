@@ -1,6 +1,8 @@
 package com.example.bbettercalendar.ui.home;
 
+import android.content.res.ColorStateList;
 import android.graphics.Paint;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +12,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
+import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.ui.projects.ProjectListAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,6 +61,21 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
 
     public void setOnTaskFocusListener(OnTaskFocusListener focusListener) {
         this.focusListener = focusListener;
+    }
+
+    // u13: chip de proyecto = join en memoria projectId -> Project (nombre + colorIndex), sin
+    // tocar el esquema. Lo alimenta HomeViewModel.getProjects() (LiveData de Room).
+    private final SparseArray<Project> projectsById = new SparseArray<>();
+
+    /** Proyectos para el chip de cada fila; null/vacío = sin chips. */
+    public void setProjects(List<Project> projects) {
+        projectsById.clear();
+        if (projects != null) {
+            for (Project project : projects) {
+                projectsById.put(project.id, project);
+            }
+        }
+        notifyDataSetChanged();
     }
 
     public TodayTaskAdapter(boolean showDate, OnTaskCheckedListener listener) {
@@ -105,7 +126,13 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
                     holder.itemView.getContext(), R.color.bb_on_surface));
         }
 
-        holder.time.setText(formatWhen(entry));
+        holder.time.setText(entry.isDone()
+                ? holder.itemView.getContext().getString(R.string.home_task_done)
+                : formatWhen(entry));
+        // html 04: separadores sólo ENTRE filas; la fila hecha se atenúa entera (opacity-60).
+        holder.divider.setVisibility(position == 0 ? View.GONE : View.VISIBLE);
+        holder.row.setAlpha(entry.isDone() ? DONE_ALPHA : 1f);
+        bindProjectChip(holder, entry);
 
         // Fila colapsada de una serie recurrente atrasada: muestra "missed N×" (spec tasks-recurrence).
         if (showDate && entry.getSeriesMissedCount() > 1) {
@@ -149,6 +176,26 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         });
     }
 
+    private static final float DONE_ALPHA = 0.6f;
+    // Relleno del chip = color del proyecto al ~15 % (html bg-primary/15) sobre bb_surface_card.
+    private static final int CHIP_FILL_ALPHA = 0x26;
+
+    private void bindProjectChip(TaskViewHolder holder, CalendarEntry entry) {
+        Project project = entry.getProjectId() > 0 && !entry.isDone()
+                ? projectsById.get(entry.getProjectId()) : null;
+        if (project == null || project.name == null || project.name.isEmpty()) {
+            holder.project.setVisibility(View.GONE);
+            return;
+        }
+        int color = ContextCompat.getColor(holder.itemView.getContext(),
+                ProjectListAdapter.accentColorResFor(project.colorIndex));
+        holder.project.setVisibility(View.VISIBLE);
+        holder.project.setText(project.name);
+        holder.project.setTextColor(color);
+        ViewCompat.setBackgroundTintList(holder.project,
+                ColorStateList.valueOf(ColorUtils.setAlphaComponent(color, CHIP_FILL_ALPHA)));
+    }
+
     private String formatWhen(CalendarEntry entry) {
         long startMillis = entry.getStartMillis();
         if (startMillis <= 0L) {
@@ -180,9 +227,15 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         final TextView remove;
         final TextView progress;
         final ImageView focus;
+        final TextView project;
+        final View divider;
+        final View row;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
+            project = itemView.findViewById(R.id.taskProjectChip);
+            divider = itemView.findViewById(R.id.taskDivider);
+            row = itemView.findViewById(R.id.taskRow);
             checkbox = itemView.findViewById(R.id.taskDoneCheckbox);
             title = itemView.findViewById(R.id.taskTitleText);
             time = itemView.findViewById(R.id.taskTimeText);

@@ -1,33 +1,35 @@
 package com.example.bbettercalendar.ui.home;
 
-import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.transition.AutoTransition;
-import android.transition.TransitionManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.blocking.AccessibilityAccess;
-import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.databinding.FragmentHomeBinding;
-import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
 import com.example.bbettercalendar.popups.AlertPopup;
 import com.example.bbettercalendar.popups.FirstFocusCelebrationPopup;
 import com.example.bbettercalendar.popups.FocusStreakPopup;
@@ -35,51 +37,56 @@ import com.example.bbettercalendar.popups.MessagePopup;
 import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.TimerPopup;
+import com.example.bbettercalendar.social.Friend;
+import com.example.bbettercalendar.social.SocialFeature;
+import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.ui.common.SingleEvent;
+import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+/**
+ * Home (migración visual u13, html 04). Sólo muestra y arranca: la sesión de pomodoro vive en
+ * {@link FocusSessionViewModel} (ámbito de actividad) y su UI en marcha es la pantalla Focus
+ * ({@code navigation_focus}). Play arranca la sesión y navega a Focus; con una sesión viva la
+ * tarjeta del temporizador muestra el restante y un toque abre Focus. Pausa, stop, saltar
+ * descanso, modo bloqueo y fallos de hoy viven en Focus (u14).
+ */
 @AndroidEntryPoint
-public class HomeFragment extends Fragment implements View.OnClickListener, OnPopupListener<Object>, AccessibilityDisclosureDialog.OnConsentGrantedListener {
+public class HomeFragment extends Fragment implements View.OnClickListener, OnPopupListener<Object> {
 
     private final String TAG = "HomeFragmentTag";
+    private static final int MAX_FRIEND_AVATARS = 3;
+
     private FragmentHomeBinding binding;
     HomeViewModel homeViewModel;
-    // El pomodoro (máquina de estados, ticker, gracia por segundo plano, guardado) vive en este
-    // ViewModel de ÁMBITO DE ACTIVIDAD (migración visual, u2): Home sólo observa y delega.
+    // El pomodoro (máquina de estados, ticker, gracia por segundo plano, guardado, servicio en
+    // primer plano) vive en este ViewModel de ÁMBITO DE ACTIVIDAD (u2/u13): Home observa y delega.
     private FocusSessionViewModel focusSession;
     // Último estado pintado: sólo se re-pintan los controles cuando cambia algo más que el texto.
     private FocusUiState lastRenderedState;
-    private AlertPopup alertPopup = new AlertPopup();
-    private TimerPopup timerPopup = new TimerPopup();
+    private final AlertPopup alertPopup = new AlertPopup();
+    private final TimerPopup timerPopup = new TimerPopup();
     private MessagePopup messagePopup;
-
-    private ImageButton playButton;
-    private ImageButton cancelButton;
-    private TextView skipRestButton;
-    private TextView blockModeButton;
-    private TextView focusBanner;
-    private TextView timerText;
-    private TextView todayFailsText;
-    private TextView todayTimeStudiedText;
-    private TextView timerModeText;
-    // Focus mode (spec focus-mode-and-streak): con el timer en marcha la tarjeta del pomodoro
-    // ocupa la pantalla y desaparece todo lo demás. Es un estado DERIVADO del estado de la sesión
-    // (FocusUiState.isSessionActive()), no una preferencia: se recalcula al re-renderizar.
-    private boolean focusModeActive = false;
 
     // "Today" task list (spec tasks-home-today)
     private TodayTaskAdapter todayTaskAdapter;
     private TodayTaskAdapter overdueTaskAdapter;
     private boolean overdueExpanded = false;
+    // Primera tarea pendiente de hoy: el "Next: <tarea>" de la tarjeta del temporizador.
+    private String nextTaskTitle;
 
     @Inject
     ConfigurationManager configurationManager;
@@ -93,64 +100,47 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         focusSession = new ViewModelProvider(requireActivity()).get(FocusSessionViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
-        playButton = binding.homePlayButton;
-        playButton.setOnClickListener(this);
-        cancelButton = binding.homeCancelButton;
-        cancelButton.setOnClickListener(this);
-        skipRestButton = binding.homeSkipRestButton;
-        skipRestButton.setOnClickListener(this);
-        blockModeButton = binding.homeBlockModeButton;
-        blockModeButton.setOnClickListener(this);
-        focusBanner = binding.homeFocusBanner;
-        // Tap en el banner = desvincular la sesión en curso (spec focus-attribution).
-        focusBanner.setOnClickListener(v -> {
-            FocusTarget.clear();
-            updateFocusBanner();
-        });
-        timerText = binding.homeTimerText;
-        todayFailsText = binding.homeToadyFailsText;
-        todayTimeStudiedText = binding.homeTodayTimeText;
-        timerModeText = binding.homeTimerTypeText;
-
-        // Racha y configuración del timer vivían en la toolbar; ahora están en el propio contenido
-        // (spec frontend-structure-cleanup).
+        binding.homePlayButton.setOnClickListener(this);
+        binding.homeTimerCard.setOnClickListener(this);
+        binding.homeCycleChip.setOnClickListener(this);
+        binding.homeBellButton.setOnClickListener(this);
+        binding.homeNextUpCard.setOnClickListener(this);
+        // Racha: tap = FocusStreakPopup (spec focus-mode-and-streak).
         binding.homeStreakButton.setOnClickListener(v -> showStreakPopup());
-        binding.homeTimerSettingsButton.setOnClickListener(v -> showTimerSettings());
 
         alertPopup.setOnPopupListener(this);
         timerPopup.setOnPopupListener(this);
         messagePopup = new MessagePopup();
         messagePopup.setOnPopupListener(this);
 
+        // Header. PLACEHOLDER(ui-placeholders#home-user-name): no hay nombre de usuario guardado,
+        // el saludo es genérico y el avatar lleva una inicial fija.
+        homeViewModel.getText().observe(getViewLifecycleOwner(), binding.textHome::setText);
+        binding.homeAvatar.setInitials(getString(R.string.home_avatar_placeholder_initial));
+        binding.homeDateText.setText(
+                new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
 
-
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-        // Texto, modo, controles y focus mode salen del estado de la sesión (antes: timerText /
-        // timerModeText de HomeViewModel + escrituras directas desde el contador del fragment).
+        // Tarjeta del temporizador: texto, modo y ciclo salen del estado de la sesión.
         lastRenderedState = null;
         focusSession.getUiState().observe(getViewLifecycleOwner(), this::renderTimer);
         focusSession.getCycleCompletedEvents()
                 .observe(getViewLifecycleOwner(), this::maybeShowCycleFinished);
         focusSession.getSessionFailedEvents()
                 .observe(getViewLifecycleOwner(), this::maybeShowSessionFailed);
-        // Los fallos ya no tienen tarjeta propia: acompañan a la fecha y sólo si los hay
-        // (spec focus-mode-and-streak).
-        homeViewModel.getTodayFailsText().observe(getViewLifecycleOwner(), fails -> {
-            todayFailsText.setText(fails);
-            boolean any = fails != null && !fails.isEmpty() && !"0".equals(fails);
-            binding.homeFailsChip.setVisibility(any ? View.VISIBLE : View.GONE);
-        });
-        // Racha = días de los últimos 30 con un pomodoro completado; vive junto al saludo.
-        homeViewModel.getActiveDaysLast30().observe(getViewLifecycleOwner(), days ->
-                binding.homeStreakCount.setText(String.valueOf(days == null ? 0 : days)));
+
+        // Racha real (StreakCalculator, u3): días seguidos + semana L→D.
+        homeViewModel.getStreak().observe(getViewLifecycleOwner(), binding.homeStreakWeek::setStreak);
+
+        // Amigos estudiando (maqueta tras FEATURE_SOCIAL_MOCK; GONE sin hueco con el flag apagado).
+        SocialFeature.applyVisibility(binding.homeFriendsCard);
+        if (SocialFeature.isEnabled()) {
+            homeViewModel.getSocialSnapshot().observe(getViewLifecycleOwner(), this::renderFriends);
+        }
+
         // Primer pomodoro del día -> celebración.
         homeViewModel.getFirstFocusOfDay()
                 .observe(getViewLifecycleOwner(), this::maybeShowFirstFocusCelebration);
-        homeViewModel.getTodayTimeStudiedText().observe(getViewLifecycleOwner(), time ->
-                todayTimeStudiedText.setText(getString(R.string.home_stat_studied_format, time)));
 
         // Auto-completado de una tarea al alcanzar su objetivo (spec focus-attribution): feedback
         // in-app (háptico + sonido) + notificación de fallback, y se desvincula el timer.
@@ -158,16 +148,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             if (title == null) {
                 return;
             }
-            HapticFeedback.confirm(focusBanner);
+            HapticFeedback.confirm(binding.homeTimerCard);
             SoundFeedback.get(requireContext()).playSuccess();
             focusCompleteNotifier.fire(title);
             FocusTarget.clear();
-            updateFocusBanner();
+            renderCycleLine();
             homeViewModel.clearAutoCompletedTaskTitle();
         });
 
-        binding.homeDateText.setText(
-                new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
+        homeViewModel.getNextUp().observe(getViewLifecycleOwner(), this::renderNextUp);
 
         setUpTaskList();
 
@@ -175,17 +164,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
         // Sin restauración manual: la sesión sobrevive a la rotación en el ViewModel de actividad
         // y a la muerte del proceso en su SavedStateHandle (instante de fin, no ticks).
-        return root;
+        return binding.getRoot();
     }
 
     /**
-     * Tarjeta "Tasks" de Home (spec tasks-home-today): lista de hoy con checkbox,
-     * alta rápida (bottom sheet) y sección plegable de tareas atrasadas.
+     * Tarjeta "Tasks" de Home (spec tasks-home-today): lista de hoy con checkbox, chip de
+     * proyecto (u13), alta rápida (bottom sheet) y sección plegable de tareas atrasadas.
      */
     private void setUpTaskList() {
         todayTaskAdapter = new TodayTaskAdapter(false,
                 (entry, done) -> homeViewModel.setTaskDone(entry, done));
-        // "Focus this" (spec focus-attribution): vincula el timer de Home a la tarea y arranca.
+        // "Focus this" (spec focus-attribution): vincula el timer a la tarea, arranca y abre Focus.
         todayTaskAdapter.setOnTaskFocusListener(this::onFocusRequested);
         // La sección de atrasadas pasa un removeListener: habilita el botón "quitar" que retira
         // (sin borrar) la serie/tarea atrasada — datos conservados para stats (spec tasks-recurrence).
@@ -200,21 +189,42 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
         binding.homeAddTaskButton.setOnClickListener(this);
         binding.homeShowOverdueButton.setOnClickListener(this);
+        updateOverdueToggle();
 
         // La vista siempre renace plegada (overdueExpanded = false), pero el ViewModel
         // sobrevive a la rotación: sin este reset su query de atrasadas seguiría viva
         // e invisible tras recrear la vista.
+        overdueExpanded = false;
         homeViewModel.setOverdueVisible(false);
 
         homeViewModel.getTodayTasks().observe(getViewLifecycleOwner(), tasks -> {
             todayTaskAdapter.submitList(tasks);
             binding.homeTasksEmptyText.setVisibility(tasks.isEmpty() ? View.VISIBLE : View.GONE);
+            nextTaskTitle = firstPendingTitle(tasks);
+            renderCycleLine();
         });
         homeViewModel.getOverdueTasks().observe(getViewLifecycleOwner(), tasks -> {
             overdueTaskAdapter.submitList(tasks);
             binding.homeOverdueEmptyText.setVisibility(
                     overdueExpanded && tasks.isEmpty() ? View.VISIBLE : View.GONE);
         });
+        homeViewModel.getProjects().observe(getViewLifecycleOwner(), projects -> {
+            todayTaskAdapter.setProjects(projects);
+            overdueTaskAdapter.setProjects(projects);
+        });
+    }
+
+    @Nullable
+    private static String firstPendingTitle(@Nullable List<CalendarEntry> tasks) {
+        if (tasks == null) {
+            return null;
+        }
+        for (CalendarEntry task : tasks) {
+            if (!task.isDone() && task.getTitle() != null && !task.getTitle().isEmpty()) {
+                return task.getTitle();
+            }
+        }
+        return null;
     }
 
     /**
@@ -239,33 +249,85 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     private void toggleOverdueSection() {
         overdueExpanded = !overdueExpanded;
         binding.homeOverdueSection.setVisibility(overdueExpanded ? View.VISIBLE : View.GONE);
-        binding.homeShowOverdueButton.setText(overdueExpanded
-                ? R.string.home_tasks_hide_overdue : R.string.home_tasks_show_overdue);
+        updateOverdueToggle();
         homeViewModel.setOverdueVisible(overdueExpanded);
     }
 
+    /** "Show older uncompleted tasks ⌄" (html 04): texto + chevron según el estado. */
+    private void updateOverdueToggle() {
+        binding.homeShowOverdueButton.setText(overdueExpanded
+                ? R.string.home_tasks_hide_overdue : R.string.home_tasks_show_overdue);
+        Drawable chevron = ContextCompat.getDrawable(requireContext(),
+                overdueExpanded ? R.drawable.ic_arrow_drop_up_24 : R.drawable.ic_expand_more_24);
+        if (chevron != null) {
+            chevron = DrawableCompat.wrap(chevron.mutate());
+            DrawableCompat.setTint(chevron,
+                    ContextCompat.getColor(requireContext(), R.color.bb_on_surface_muted));
+            int size = getResources().getDimensionPixelSize(R.dimen.home_inline_stat_icon_size);
+            chevron.setBounds(0, 0, size, size);
+        }
+        binding.homeShowOverdueButton.setCompoundDrawablesRelative(null, null, chevron, null);
+    }
+
+    // ------------------------------------------------------------------ timer card
+
     /**
-     * Pinta el estado de la sesión. El texto se actualiza en cada tick; chip, modo, controles y
-     * focus mode sólo cuando cambia algo más que el tiempo restante.
+     * Pinta el estado de la sesión. El texto se actualiza en cada tick; chip, botón y línea de
+     * ciclo sólo cuando cambia algo más que el tiempo restante.
      */
     private void renderTimer(FocusUiState state) {
         if (binding == null || state == null) return;
-        timerText.setText(FormatHelper.formatTime((int) state.getRemainingMillis(), "mm:ss"));
+        binding.homeTimerText.setText(
+                FormatHelper.formatTime((int) state.getRemainingMillis(), "mm:ss"));
         if (!state.controlsDifferFrom(lastRenderedState)) {
             lastRenderedState = state;
             return;
         }
         lastRenderedState = state;
-        timerModeText.setText(state.isRest()
-                ? R.string.home_mode_rest : R.string.home_mode_concentration);
-        updateModeChip(state.isRest());
-        updateTimerControls();
+
+        int mode;
+        if (state.isPaused()) {
+            mode = R.string.home_mode_paused;
+        } else if (state.isRest()) {
+            mode = R.string.home_mode_rest;
+        } else {
+            mode = R.string.home_mode_concentration;
+        }
+        binding.homeTimerTypeText.setText(mode);
+
+        // Idle: play. Sesión viva (corriendo, en pausa o en descanso): el botón y la tarjeta
+        // llevan a Focus, donde están pausa / stop / saltar descanso (u14).
+        boolean active = state.isSessionActive();
+        binding.homePlayButton.setImageResource(
+                active ? R.drawable.ic_arrow_forward_24 : R.drawable.ic_play_v2_filled_24);
+        binding.homePlayButton.setContentDescription(
+                getString(active ? R.string.home_open_focus : R.string.home_play));
+        binding.homeTimerCard.setClickable(active);
+        binding.homeTimerCard.setContentDescription(active ? getString(R.string.home_open_focus) : null);
+        renderCycleLine();
     }
 
-    private void updateModeChip(boolean isRest) {
-        if (timerModeText == null) return;
-        timerModeText.setBackgroundResource(
-                isRest ? R.drawable.bg_chip_secondary : R.drawable.bg_chip_energy);
+    /** "Cycle x of N · Next: <tarea>" (html 04) o "· Focusing: <tarea>" si hay una vinculada. */
+    private void renderCycleLine() {
+        if (binding == null || lastRenderedState == null) {
+            return;
+        }
+        FocusUiState state = lastRenderedState;
+        // En reposo cuenta los ciclos hechos ("Cycle 0 of 4", como el diseño); en marcha, el actual.
+        int cycle = state.isSessionActive() ? state.getCurrentCycle() : state.getCyclesCompleted();
+        String cycleText = state.isInfiniteCycles()
+                ? getString(R.string.home_cycle_infinite_format, cycle)
+                : getString(R.string.home_cycle_format, cycle, state.getTotalCycles());
+        String line;
+        if (FocusTarget.isSet() && FocusTarget.getTitle() != null) {
+            line = getString(R.string.home_cycle_focusing_format, cycleText, FocusTarget.getTitle());
+        } else if (nextTaskTitle != null) {
+            line = getString(R.string.home_cycle_next_format, cycleText, nextTaskTitle);
+        } else {
+            line = cycleText;
+        }
+        binding.homeCycleText.setText(line);
+        binding.homeCycleChip.setContentDescription(getString(R.string.home_cycle_chip_desc, line));
     }
 
     /** Todos los ciclos configurados completados (antes MessagePopup desde completeTimer/Rest). */
@@ -289,16 +351,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     }
 
     /**
-     * "Focus this" (spec focus-attribution): vincula el ÚNICO timer de Home a esta tarea/item y,
-     * si el timer está parado, arranca una sesión de concentración. Si ya hay una sesión corriendo,
-     * sólo re-vincula (la sesión en curso se atribuirá al completar). Punto de entrada primario
-     * (decisión #3) tanto desde la lista de hoy como, tras navegar a Home, desde el detalle de proyecto.
+     * "Focus this" (spec focus-attribution): vincula el ÚNICO timer a esta tarea/item y, si está
+     * parado, arranca una concentración. Si ya hay una sesión corriendo, sólo re-vincula (la sesión
+     * en curso se atribuirá al completar). En ambos casos abre Focus (u13).
      */
     private void onFocusRequested(CalendarEntry entry) {
         FocusTarget.set(entry.getId(), entry.getTitle(), entry.getTargetMinutes());
         FocusTarget.consumePendingAutoStart(); // el arranque lo hacemos aquí; evita doble arranque en onResume
         startBoundConcentrationIfIdle();
-        updateFocusBanner();
+        renderCycleLine();
+        openFocus();
     }
 
     /** Arranca una sesión de concentración sólo si el timer está parado (no pisa una en curso). */
@@ -310,17 +372,81 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         }
     }
 
-    /** Muestra/oculta el banner "Focusing: <tarea>" según el estado de FocusTarget. */
-    private void updateFocusBanner() {
-        if (binding == null || focusBanner == null) {
+    /** Play: arranca la sesión (si está parada) y abre Focus; con sesión viva sólo abre Focus. */
+    private void onPlayTapped() {
+        FocusUiState state = focusSession.getUiState().getValue();
+        boolean active = state != null && state.isSessionActive();
+        if (!active) {
+            Log.i(TAG, "Timer started");
+            if (focusSession.toggle()) {
+                SoundFeedback.get(requireContext()).playStart();
+            }
+        }
+        openFocus();
+    }
+
+    /** Navega a Focus (u12/u14) sólo desde Home: un doble toque no apila dos Focus. */
+    private void openFocus() {
+        NavController nav = NavHostFragment.findNavController(this);
+        NavDestination current = nav.getCurrentDestination();
+        if (current != null && current.getId() == R.id.navigation_home) {
+            nav.navigate(R.id.navigation_focus);
+        }
+    }
+
+    // ------------------------------------------------------------------ friends / next up
+
+    // PLACEHOLDER(ui-placeholders#social-home-friends): maqueta (MockSocialRepository).
+    private void renderFriends(SocialSnapshot snapshot) {
+        if (binding == null || snapshot == null) {
             return;
         }
-        if (FocusTarget.isSet()) {
-            focusBanner.setVisibility(View.VISIBLE);
-            focusBanner.setText(getString(R.string.home_focus_banner, FocusTarget.getTitle()));
-        } else {
-            focusBanner.setVisibility(View.GONE);
+        List<Friend> studying = snapshot.getStudying();
+        binding.homeFriendsTitle.setText(getResources().getQuantityString(
+                R.plurals.home_friends_studying, studying.size(), studying.size()));
+
+        LinearLayout row = binding.homeFriendsAvatars;
+        // Quitar los avatares de una emisión anterior (el último hijo es el texto de nombres).
+        while (row.getChildCount() > 1) {
+            row.removeViewAt(0);
         }
+        int size = getResources().getDimensionPixelSize(R.dimen.home_friend_avatar_size);
+        int overlap = getResources().getDimensionPixelSize(R.dimen.home_friend_avatar_overlap);
+        int shown = Math.min(MAX_FRIEND_AVATARS, studying.size());
+        List<String> names = new ArrayList<>();
+        for (int i = 0; i < shown; i++) {
+            Friend friend = studying.get(i);
+            AvatarView avatar = new AvatarView(requireContext());
+            avatar.setName(friend.getName());
+            // html 04: una sola letra en los avatares solapados de 32dp.
+            avatar.setInitials(friend.getName().substring(0, 1));
+            avatar.setStatus(AvatarView.Status.STUDYING);
+            avatar.setShowPresenceDot(true);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+            lp.setMarginStart(i == 0 ? 0 : overlap);
+            row.addView(avatar, i, lp);
+            names.add(friend.getName().split(" ")[0]);
+        }
+        binding.homeFriendsNames.setText(TextUtils.join(", ", names));
+    }
+
+    /** "Next up": hora (o día + hora si no es hoy) y título del siguiente evento. */
+    private void renderNextUp(@Nullable CalendarEntry entry) {
+        if (binding == null) {
+            return;
+        }
+        if (entry == null) {
+            binding.homeNextUpText.setText(R.string.home_next_up_empty);
+            return;
+        }
+        Calendar start = Calendar.getInstance();
+        start.setTimeInMillis(entry.getStartMillis());
+        Calendar now = Calendar.getInstance();
+        boolean today = start.get(Calendar.YEAR) == now.get(Calendar.YEAR)
+                && start.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR);
+        String when = new SimpleDateFormat(today ? "HH:mm" : "EEE HH:mm", Locale.getDefault())
+                .format(new Date(entry.getStartMillis()));
+        binding.homeNextUpText.setText(when + " " + entry.getTitle());
     }
 
     @Override
@@ -328,20 +454,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         int id = view.getId();
         HapticFeedback.lightTap(view);
         if (id == R.id.homePlayButton) {
-            Log.i(TAG, "Timer started");
-            SoundFeedback feedback = SoundFeedback.get(requireContext());
-            if (focusSession.toggle()) {
-                feedback.playStart();
-            } else {
-                feedback.playStop();
-            }
-        } else if (id == R.id.homeCancelButton) {
-            cancelSession();
-        } else if (id == R.id.homeSkipRestButton) {
-            focusSession.skipRest();
-            SoundFeedback.get(requireContext()).playStop();
-        } else if (id == R.id.homeBlockModeButton) {
-            handleBlockModeToggle();
+            onPlayTapped();
+        } else if (id == R.id.homeTimerCard) {
+            openFocus();
+        } else if (id == R.id.homeCycleChip) {
+            showTimerSettings();
+        } else if (id == R.id.homeBellButton) {
+            // PLACEHOLDER(ui-placeholders#home-notification-centre)
+            Toast.makeText(requireContext(), R.string.home_notifications_soon, Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.homeNextUpCard) {
+            openCalendarTab();
         } else if (id == R.id.homeAddTaskButton) {
             // childFragmentManager: QuickAddTaskSheet localiza este fragment como parent
             // para compartir el HomeViewModel.
@@ -351,190 +473,42 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         }
     }
 
-    /**
-     * Tap on the 🚫 block-mode toggle. Off -> on requires the accessibility grant (same gate as
-     * the Progress enforce toggle): if already granted, arm immediately; otherwise show the shared
-     * disclosure dialog and arm only once the user consents (onAccessibilityConsentGranted()).
-     * On -> off never needs permission. El botón está SIEMPRE activo, también con el timer
-     * corriendo (spec focus-mode-and-streak): armar a mitad de sesión bloquea al instante y
-     * desarmar devuelve el móvil al usuario, que si no quedaría atrapado hasta acabar el ciclo.
-     */
-    private void handleBlockModeToggle() {
-        if (focusSession.isBlockModeArmed()) {
-            focusSession.setBlockModeArmed(false);
-            return;
-        }
-        if (AccessibilityAccess.isEnabled(requireContext())) {
-            focusSession.setBlockModeArmed(true);
-        } else {
-            AccessibilityDisclosureDialog.newInstance()
-                    .show(getChildFragmentManager(), "accessibility_disclosure");
+    /** Como un toque en la pestaña Calendar (mantiene el estado de la barra inferior). */
+    private void openCalendarTab() {
+        View nav = requireActivity().findViewById(R.id.nav_view);
+        if (nav instanceof BottomNavigationView) {
+            ((BottomNavigationView) nav)
+                    .setSelectedItemId(R.id.navigation_calendar_month);
         }
     }
-
-    @Override
-    public void onAccessibilityConsentGranted() {
-        focusSession.setBlockModeArmed(true);
-    }
-
-    /**
-     * Cancelar la sesión desde el focus mode (spec focus-mode-and-streak): corta el contador, tira
-     * el ciclo entero y vuelve a Home en reposo. NO registra fallo — un fallo es haberse ido de la
-     * app a mitad de sesión; esto es una decisión explícita del usuario y penalizarla haría que la
-     * única salida "barata" fuese aguantar mirando la pantalla.
-     */
-    private void cancelSession() {
-        // La sesión también desvincula FocusTarget: dejar el banner "Focusing: X" colgado sin
-        // sesión viva confunde sobre si la siguiente cuenta atrás se atribuiría sola a esa tarea.
-        if (!focusSession.cancelSession()) {
-            return;
-        }
-        updateFocusBanner();
-        SoundFeedback.get(requireContext()).playStop();
-    }
-
-    /** Keep the play/pause icon and the skip-rest button in sync with the session state. */
-    private void updateTimerControls() {
-        if (binding == null || lastRenderedState == null) return;
-        FocusUiState state = lastRenderedState;
-
-        boolean isRunning = state.isRunning();
-        playButton.setImageResource(
-                isRunning ? R.drawable.ic_pause_v2_filled_24 : R.drawable.ic_play_v2_filled_24);
-        playButton.setContentDescription(
-                getString(isRunning ? R.string.home_pause : R.string.home_play));
-
-        skipRestButton.setVisibility(state.canSkipRest() ? View.VISIBLE : View.GONE);
-
-        updateBlockModeButton();
-        updateFocusMode();
-    }
-
-    /**
-     * Focus mode (spec focus-mode-and-streak): el estado se DERIVA del estado de la sesión, no de
-     * un flag propio, así que cualquier salida del temporizador (fin de ciclo, cancelación, fallo
-     * por background, cambio de configuración) devuelve Home a la normalidad sin ruta especial.
-     */
-    private void updateFocusMode() {
-        boolean shouldBeActive = lastRenderedState != null && lastRenderedState.isSessionActive();
-        if (binding == null || shouldBeActive == focusModeActive) {
-            return;
-        }
-        focusModeActive = shouldBeActive;
-        applyFocusMode();
-    }
-
-    private void applyFocusMode() {
-        if (binding == null) {
-            return;
-        }
-        TransitionManager.beginDelayedTransition(binding.homeContent,
-                new AutoTransition().setDuration(220));
-
-        binding.homeHeaderSection.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
-        binding.homeTasksCard.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
-        binding.homeTimerSettingsButton.setVisibility(focusModeActive ? View.GONE : View.VISIBLE);
-        cancelButton.setVisibility(focusModeActive ? View.VISIBLE : View.GONE);
-        // El hueco sólo existe para compensar el botón de cancelar y mantener centrado el play.
-        binding.homeControlsSpacer.setVisibility(focusModeActive ? View.VISIBLE : View.GONE);
-
-        // match_parent + el resto GONE: con fillViewport el ScrollView re-mide su hijo a la altura
-        // del viewport, así que la tarjeta pasa a ocupar la pantalla entera (ver fragment_home.xml).
-        ViewGroup.MarginLayoutParams params =
-                (ViewGroup.MarginLayoutParams) binding.homeTimerCard.getLayoutParams();
-        params.height = focusModeActive
-                ? ViewGroup.LayoutParams.MATCH_PARENT : ViewGroup.LayoutParams.WRAP_CONTENT;
-        params.topMargin = focusModeActive
-                ? 0 : getResources().getDimensionPixelSize(R.dimen.spacing_md);
-        binding.homeTimerCard.setLayoutParams(params);
-
-        // A sangre: sin el padding del contenedor, sin esquinas y sin sombra, la tarjeta deja de
-        // leerse como "una tarjeta estirada" y pasa a ser la pantalla. Con el marco puesto se veía
-        // el fondo beige alrededor y delataba que seguíamos en Home.
-        applyFocusModeChrome();
-        // u12: la barra inferior ya no se toca desde aquí; MainActivity la muestra/oculta por
-        // destino (addOnDestinationChangedListener). Home es de primer nivel → siempre visible.
-    }
-
-    /** Quita/restaura el marco de tarjeta del timer según el focus mode. */
-    private void applyFocusModeChrome() {
-        int side = focusModeActive ? 0 : getResources().getDimensionPixelSize(R.dimen.spacing_md);
-        int bottom = focusModeActive ? 0 : getResources().getDimensionPixelSize(R.dimen.spacing_lg);
-        binding.homeContent.setPadding(side, side, side, bottom);
-
-        // u7: sin setElevation — las tarjetas son tonales (elevation_card = 0dp, sin sombra).
-        binding.homeTimerCard.setBackgroundResource(focusModeActive
-                ? R.color.bb_surface_card : R.drawable.bg_card);
-        // setBackgroundResource pisa el padding del propio card: hay que reponerlo siempre.
-        int cardPadding = getResources().getDimensionPixelSize(R.dimen.home_card_padding);
-        binding.homeTimerCard.setPadding(cardPadding, cardPadding, cardPadding, cardPadding);
-    }
-
-    /**
-     * Render the 🚫 block-mode toggle's 3 states (muted off / bb_danger active / bb_accent_reward
-     * pending-permission — same visual language as the Progress enforce toggle). Se puede armar y
-     * desarmar en cualquier momento, también a mitad de sesión (spec focus-mode-and-streak). El
-     * flag vivo FocusBlockState ya NO se escribe aquí: su único escritor es FocusSessionViewModel,
-     * que lo recalcula en cada transición (armado Y concentración corriendo).
-     */
-    private void updateBlockModeButton() {
-        if (binding == null || blockModeButton == null) return;
-        boolean blockModeArmed = focusSession.isBlockModeArmed();
-
-        // El texto dice el estado (off / on / falta permiso): con sólo el color, "off" se leía
-        // como un botón deshabilitado (spec frontend-structure-cleanup).
-        int tint;
-        float alpha;
-        int label;
-        if (!blockModeArmed) {
-            tint = R.color.bb_on_surface_muted;
-            alpha = 0.7f;
-            label = R.string.home_block_mode_off;
-        } else if (AccessibilityAccess.isEnabled(requireContext())) {
-            tint = R.color.bb_danger;
-            alpha = 1f;
-            label = R.string.home_block_mode_on;
-        } else {
-            tint = R.color.bb_accent_reward;
-            alpha = 0.9f;
-            label = R.string.home_block_mode_pending;
-        }
-        blockModeButton.setText(label);
-        blockModeButton.setBackgroundTintList(
-                ContextCompat.getColorStateList(requireContext(), tint));
-        blockModeButton.setAlpha(alpha);
-    }
-
 
     @Override
     public void onDestroyView() {
-        focusModeActive = false;
         lastRenderedState = null;
         super.onDestroyView();
         binding = null;
     }
 
     // La detección de primer/segundo plano y el periodo de gracia (FAIL_GRACE_MILLIS) viven en
-    // FocusSessionViewModel + FocusBackgroundObserver, registrado por MainActivity.
+    // FocusSessionViewModel + FocusBackgroundObserver, registrado por MainActivity. El servicio en
+    // primer plano lo arranca/para FocusSessionViewModel según el estado de la sesión (u13).
 
     @Override
     public void onResume() {
         super.onResume();
-        // No callback from Settings -> Accessibility (same caveat as ProgressFragment): re-check
-        // and re-render in case the user granted/revoked the service while away, and re-assert
-        // the live block flag (the accessibility service clears it when it reconnects).
-        updateBlockModeButton();
+        // The accessibility service clears the live block flag when it reconnects: re-assert it.
         focusSession.syncBlockState();
-        // Recalcula [startOfToday, endOfToday]: sólo re-dispara la query si el día cambió con
-        // la app abierta -- volver de AddEventActivity no lo necesita, la lista de hoy ya se
-        // re-emite sola (LiveData de Room, ver repository-layer-consolidation T2).
+        // Recalcula [startOfToday, endOfToday] (sólo re-dispara la query si el día cambió) y
+        // re-ancla la ventana de "Next up" a ahora.
         homeViewModel.refreshToday();
         // "Focus this" desde otra pantalla (p. ej. detalle de proyecto) fija FocusTarget y navega a
-        // Home; aquí consumimos el arranque pendiente (una vez) y refrescamos el banner.
+        // Home; aquí consumimos el arranque pendiente (una vez) y abrimos Focus.
         if (FocusTarget.consumePendingAutoStart()) {
             startBoundConcentrationIfIdle();
+            openFocus();
+            return;
         }
-        updateFocusBanner();
+        renderCycleLine();
         // Red de seguridad: si el premio llegó mientras el estado estaba guardado, el observador
         // no pudo abrirlo y el valor sigue sin limpiar. Aquí ya es seguro comitear.
         maybeShowFirstFocusCelebration(homeViewModel.getFirstFocusOfDay().getValue());
@@ -544,28 +518,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        if (getActivity() != null) {
-            Intent serviceIntent = new Intent(getActivity(), HomeForegroundService.class);
-            ContextCompat.startForegroundService(getActivity(), serviceIntent);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if (getActivity() != null) {
-            Intent serviceIntent = new Intent(getActivity(), HomeForegroundService.class);
-            getActivity().stopService(serviceIntent);
-        }
-    }
-
-    @Override
     public void OnClosePopup(int popupType) {
-        if (popupType==PopupHelper.ALERT_POPUP){
+        if (popupType == PopupHelper.ALERT_POPUP) {
             focusSession.resetIdleDisplay();
         }
     }
@@ -589,15 +543,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         }
     }
 
-    /** Tap en la racha del header (spec focus-mode-and-streak). */
+    /** Tap en la tarjeta de racha (spec focus-mode-and-streak). */
     private void showStreakPopup() {
         new FocusStreakPopup().show(getParentFragmentManager(), FocusStreakPopup.POPUP_TAG);
     }
 
-    /** Tap en el engranaje de la tarjeta del timer: configuración del pomodoro. */
+    /** Tap en el chip "Cycle x of N": configuración del pomodoro (antes el engranaje). */
     private void showTimerSettings() {
         timerPopup.setConfiguration(configurationManager.getConfiguration());
         timerPopup.show(getParentFragmentManager(), "popup_tag");
     }
-    /** --------------------------------------------------------------------------- */
 }

@@ -1,12 +1,14 @@
 package com.example.bbettercalendar.ui.focus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
@@ -24,6 +26,7 @@ import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.Snapshot;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.State;
 import com.example.bbettercalendar.ui.home.FocusSessionConstants;
 import com.example.bbettercalendar.ui.home.FocusTarget;
+import com.example.bbettercalendar.ui.home.HomeForegroundService;
 
 import javax.inject.Inject;
 
@@ -73,6 +76,10 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     // Old HomeFragment.isBackground: true between "app went to background with a running,
     // unarmed concentration" and either the return to foreground or the grace expiring.
     private boolean graceArmed;
+    // u13: el servicio en primer plano sigue a la SESIÓN (≠ STOPPED), no a la pantalla visible.
+    // Antes lo arrancaba/paraba HomeFragment en onStart/onStop; Home ya no está a la vista
+    // mientras corre la sesión (Play navega a Focus).
+    private boolean foregroundServiceOn;
 
     private final Runnable tick = this::onTick;
     private final Runnable graceExpired = this::onGraceExpired;
@@ -304,8 +311,34 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private void onTransition() {
         saveState();
         syncBlockState();
+        syncForegroundService();
         publish();
         scheduleTick();
+    }
+
+    /**
+     * Arranca {@link HomeForegroundService} cuando empieza una sesión y lo para cuando vuelve a
+     * STOPPED (fin de ciclos, cancelación, fallo). Las transiciones a "activa" sólo ocurren por
+     * un toque del usuario o al restaurar la Activity, siempre en primer plano; aun así se
+     * captura el rechazo del sistema (arranque de FGS desde segundo plano, API 31+).
+     */
+    private void syncForegroundService() {
+        boolean active = machine.getState() != State.STOPPED;
+        if (active == foregroundServiceOn) {
+            return;
+        }
+        Intent intent = new Intent(appContext, HomeForegroundService.class);
+        if (active) {
+            try {
+                ContextCompat.startForegroundService(appContext, intent);
+                foregroundServiceOn = true;
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Could not start the foreground service", e);
+            }
+        } else {
+            appContext.stopService(intent);
+            foregroundServiceOn = false;
+        }
     }
 
     private void publish() {
@@ -384,6 +417,10 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         // The ticker dies with the ViewModel, but a pending grace period is left to fire: leaving
         // the app with back mid-session (activity finishing) still counts as a fail, as before.
         handler.removeCallbacks(tick);
+        if (foregroundServiceOn) {
+            appContext.stopService(new Intent(appContext, HomeForegroundService.class));
+            foregroundServiceOn = false;
+        }
         // Nada podrá volver a apagar el bloqueo total sin un timer vivo (kill-trap): se suelta aquí.
         FocusBlockState.setActive(appContext, false);
         super.onCleared();

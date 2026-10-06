@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Home (migración visual u13, .stitch/designs/04-home.png + .stitch/html/04-home.html).
+     Header (avatar, saludo, fecha, campana) · tarjeta del temporizador · racha + amigos ·
+     Tasks · Next up. La sesión en marcha ya NO se pinta aquí a pantalla completa (el antiguo
+     "focus mode"): Play arranca la sesión y navega a navigation_focus; con una sesión viva la
+     tarjeta muestra el restante y un toque abre Focus. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -10,216 +15,111 @@
     android:scrollbars="none"
     tools:context=".ui.home.HomeFragment">
 
-    <!-- fillViewport + este LinearLayout en wrap_content es lo que hace posible el "focus mode"
-         (spec focus-mode-and-streak): al pasar homeTimerCard a match_parent con el resto GONE, el
-         ScrollView re-mide este hijo a la altura exacta del viewport y la tarjeta ocupa la
-         pantalla entera sin necesidad de otro Fragment. -->
     <LinearLayout
         android:id="@+id/homeContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingStart="@dimen/spacing_md"
-        android:paddingEnd="@dimen/spacing_md"
         android:paddingTop="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
         android:paddingBottom="@dimen/spacing_lg">
 
-        <!-- ============ Header strip ============ -->
+        <!-- ============ Header: avatar + saludo/fecha + campana ============ -->
         <LinearLayout
-            android:id="@+id/homeHeaderSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <!-- Saludo + racha (spec frontend-structure-cleanup): la racha vivía en la toolbar, que
-                 ya no existe. Tap = FocusStreakPopup, igual que antes. -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- PLACEHOLDER(ui-placeholders#home-user-name): sin nombre de usuario guardado. -->
+            <com.example.bbettercalendar.ui.common.widget.AvatarView
+                android:id="@+id/homeAvatar"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:importantForAccessibility="no"
+                app:avatarCutoutColor="@color/bb_surface"
+                app:avatarPresenceDot="true" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_card_gap"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/text_home"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textAppearance="@style/TextAppearance.BBetter.Headline"
-                    android:textColor="@color/bb_on_surface"
-                    tools:text="Hi there" />
-
-                <LinearLayout
-                    android:id="@+id/homeStreakButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="@string/home_streak_desc"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/spacing_sm"
-                    android:paddingEnd="@dimen/spacing_xs">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_flame_v2_24"
-                        app:tint="@color/bb_accent_reward" />
-
-                    <TextView
-                        android:id="@+id/homeStreakCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_xs"
-                        android:text="@string/home_streak_placeholder"
-                        android:textAppearance="@style/TextAppearance.BBetter.Title"
-                        android:textColor="@color/bb_on_surface" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Fecha a la izquierda + tiempo estudiado hoy a la derecha, en la misma linea
-                 (spec focus-mode-and-streak): sustituye a la tarjeta de stats de 3 columnas.
-                 Los fallos solo aparecen si los hay. -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:baselineAligned="false"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                    android:textAppearance="@style/TextAppearance.BBetter.Headline"
+                    tools:text="Hi there" />
 
                 <TextView
                     android:id="@+id/homeDateText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textAppearance="@style/TextAppearance.BBetter.Label"
-                    tools:text="Tuesday, May 18" />
-
-                <LinearLayout
-                    android:id="@+id/homeFailsChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/spacing_sm"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                    <ImageView
-                        android:layout_width="@dimen/home_inline_stat_icon_size"
-                        android:layout_height="@dimen/home_inline_stat_icon_size"
-                        android:contentDescription="@string/home_stat_fails_label"
-                        android:src="@drawable/ic_cross_v2_24"
-                        app:tint="@color/bb_danger" />
-
-                    <TextView
-                        android:id="@+id/homeToadyFailsText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_xs"
-                        android:textAppearance="@style/TextAppearance.BBetter.Label"
-                        android:textColor="@color/bb_danger"
-                        tools:text="2" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="@dimen/home_inline_stat_icon_size"
-                        android:layout_height="@dimen/home_inline_stat_icon_size"
-                        android:contentDescription="@string/home_stat_studied_label"
-                        android:src="@drawable/ic_clock_v2_24"
-                        app:tint="@color/bb_primary" />
-
-                    <TextView
-                        android:id="@+id/homeTodayTimeText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_xs"
-                        android:hint="@string/home_stat_studied_placeholder"
-                        android:textAppearance="@style/TextAppearance.BBetter.Label"
-                        android:textColor="@color/bb_on_surface"
-                        tools:text="01:20" />
-                </LinearLayout>
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                    tools:text="Saturday, Oct 3" />
             </LinearLayout>
+
+            <!-- PLACEHOLDER(ui-placeholders#home-notification-centre): sin centro de notificaciones;
+                 el punto de "no leídas" del diseño no se pinta (no hay datos). -->
+            <ImageButton
+                android:id="@+id/homeBellButton"
+                android:layout_width="@dimen/home_header_icon_button"
+                android:layout_height="@dimen/home_header_icon_button"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/home_notifications"
+                android:padding="@dimen/spacing_sm"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_notifications_empty_24"
+                app:tint="@color/bb_on_surface_muted" />
         </LinearLayout>
 
-        <!-- ============ Timer card ============
-             En reposo es una tarjeta mas; con el timer en marcha HomeFragment le pone
-             height=match_parent y esconde el resto -> pantalla dedicada de concentracion. -->
+        <!-- ============ Timer card ============ -->
         <FrameLayout
             android:id="@+id/homeTimerCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_md"
             android:background="@drawable/bg_card"
-            android:elevation="@dimen/elevation_card"
+            android:foreground="?attr/selectableItemBackground"
             android:padding="@dimen/home_card_padding">
-
-            <!-- Configuración del timer (antes: reloj de arena en la toolbar). Oculto en focus mode. -->
-            <ImageButton
-                android:id="@+id/homeTimerSettingsButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="top|end"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/home_timer_settings"
-                android:padding="@dimen/spacing_sm"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_settings_24"
-                app:tint="@color/bb_on_surface_muted" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:orientation="vertical">
 
-                <!-- Mode chip -->
-                <TextView
-                    android:id="@+id/homeTimerTypeText"
+                <!-- Mode chip: punto salvia + CONCENTRATION / REST -->
+                <LinearLayout
+                    android:id="@+id/homeModeChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_energy"
-                    android:gravity="center"
-                    android:hint="@string/home_mode_concentration"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.BBetter.Chip"
-                    android:textColor="@color/bb_on_primary"
-                    android:textColorHint="@color/bb_on_primary" />
-
-                <!-- "Focusing: <task>" banner (spec focus-attribution): visible mientras el timer
-                     esta vinculado a una tarea/item. Tap = desvincular la sesion en curso. -->
-                <TextView
-                    android:id="@+id/homeFocusBanner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:paddingStart="@dimen/spacing_sm"
-                    android:paddingEnd="@dimen/spacing_sm"
+                    android:background="@drawable/bg_home_mode_chip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/spacing_card_gap"
                     android:paddingTop="@dimen/spacing_xs"
-                    android:paddingBottom="@dimen/spacing_xs"
-                    android:textAppearance="@style/TextAppearance.BBetter.Label"
-                    android:textColor="@color/bb_primary"
-                    android:visibility="gone"
-                    tools:text="Focusing: Read chapter 3" />
+                    android:paddingEnd="@dimen/spacing_card_gap"
+                    android:paddingBottom="@dimen/spacing_xs">
+
+                    <View
+                        android:layout_width="@dimen/home_mode_dot_size"
+                        android:layout_height="@dimen/home_mode_dot_size"
+                        android:background="@drawable/bg_dot_primary" />
+
+                    <TextView
+                        android:id="@+id/homeTimerTypeText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="@string/home_mode_concentration"
+                        android:textAppearance="@style/TextAppearance.BBetter.Chip"
+                        android:textColor="@color/bb_on_primary_container" />
+                </LinearLayout>
 
                 <!-- Countdown -->
                 <TextView
@@ -227,109 +127,161 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
+                    android:includeFontPadding="false"
                     android:textAppearance="@style/TextAppearance.BBetter.Display"
-                    android:textColor="@color/bb_on_surface"
-                    android:textSize="@dimen/text_display_compact"
+                    android:textSize="@dimen/home_timer_text"
                     tools:text="25:00" />
 
-                <!-- Controles: [hueco simetrico] play/pause [cancelar]. El hueco existe solo para
-                     que el boton grande siga centrado cuando aparece "cancelar" (focus mode). -->
+                <!-- Play (idle) / abrir Focus (sesión viva) -->
+                <ImageButton
+                    android:id="@+id/homePlayButton"
+                    android:layout_width="@dimen/home_play_button_size"
+                    android:layout_height="@dimen/home_play_button_size"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_play_button"
+                    android:contentDescription="@string/home_play"
+                    android:padding="20dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_play_v2_filled_24"
+                    app:tint="@color/bb_on_primary" />
+
+                <!-- "Cycle x of N · Next: <task>" — abre la configuración del temporizador -->
                 <LinearLayout
+                    android:id="@+id/homeCycleChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_home_cycle_chip"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:minHeight="36dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/spacing_md"
+                    android:paddingEnd="@dimen/spacing_card_gap">
 
-                    <View
-                        android:id="@+id/homeControlsSpacer"
-                        android:layout_width="@dimen/home_secondary_button_size"
-                        android:layout_height="@dimen/home_secondary_button_size"
-                        android:layout_marginEnd="@dimen/spacing_md"
-                        android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/homeCycleText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                        android:textColor="@color/bb_on_surface"
+                        tools:text="Cycle 0 of 4 · Next: Final thesis: chapter 3" />
 
-                    <ImageButton
-                        android:id="@+id/homePlayButton"
-                        android:layout_width="@dimen/home_play_button_size"
-                        android:layout_height="@dimen/home_play_button_size"
-                        android:background="@drawable/bg_play_button"
-                        android:clickable="true"
-                        android:contentDescription="@string/home_play"
-                        android:focusable="true"
-                        android:padding="16dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_play_v2_filled_24"
-                        app:tint="@color/bb_on_primary" />
-
-                    <ImageButton
-                        android:id="@+id/homeCancelButton"
-                        android:layout_width="@dimen/home_secondary_button_size"
-                        android:layout_height="@dimen/home_secondary_button_size"
-                        android:layout_marginStart="@dimen/spacing_md"
-                        android:background="@drawable/bg_close_circle"
-                        android:clickable="true"
-                        android:contentDescription="@string/home_cancel_session"
-                        android:focusable="true"
-                        android:padding="14dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_close_24"
-                        android:visibility="gone"
-                        app:tint="@color/bb_on_surface_muted"
-                        tools:visibility="visible" />
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="6dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_expand_more_24"
+                        app:tint="@color/bb_on_surface_muted" />
                 </LinearLayout>
-
-                <!-- Focus block-mode toggle: arms/disarms blocking every other app while the
-                     concentration timer runs (see blocking/FocusBlockState.java). Editable en
-                     cualquier momento, tambien a mitad de sesion (spec focus-mode-and-streak). -->
-                <TextView
-                    android:id="@+id/homeBlockModeButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:background="@drawable/bg_block_mode_button"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:paddingStart="18dp"
-                    android:paddingEnd="18dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:text="@string/home_block_mode_off"
-                    android:textAppearance="@style/TextAppearance.BBetter.Chip"
-                    android:textColor="@color/bb_on_primary" />
-
-                <!-- Skip-rest button (only shown while resting) -->
-                <TextView
-                    android:id="@+id/homeSkipRestButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:background="@drawable/bg_chip_secondary"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:paddingStart="18dp"
-                    android:paddingEnd="18dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:text="@string/home_skip_rest"
-                    android:textAppearance="@style/TextAppearance.BBetter.Chip"
-                    android:textColor="@color/bb_on_primary"
-                    android:visibility="gone" />
-
             </LinearLayout>
         </FrameLayout>
 
-        <!-- ============ Today tasks card (spec tasks-home-today) ============ -->
+        <!-- ============ Racha + amigos estudiando ============ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <!-- Tap = FocusStreakPopup (como el antiguo botón de racha del saludo). -->
+            <LinearLayout
+                android:id="@+id/homeStreakButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card"
+                android:clickable="true"
+                android:contentDescription="@string/home_streak_desc"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <com.example.bbettercalendar.ui.common.widget.StreakWeekView
+                    android:id="@+id/homeStreakWeek"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:streakFlame="top" />
+            </LinearLayout>
+
+            <!-- Bloque social (maqueta tras FEATURE_SOCIAL_MOCK; GONE sin hueco con el flag apagado).
+                 PLACEHOLDER(ui-placeholders#social-home-friends) -->
+            <LinearLayout
+                android:id="@+id/homeFriendsCard"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/spacing_card_gap"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/homeFriendsTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+                        android:textColor="@color/bb_on_surface"
+                        tools:text="5 friends studying now" />
+
+                    <View
+                        android:layout_width="@dimen/spacing_sm"
+                        android:layout_height="@dimen/spacing_sm"
+                        android:layout_marginStart="@dimen/spacing_xs"
+                        android:background="@drawable/bg_dot_primary" />
+                </LinearLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:minHeight="@dimen/spacing_card_gap" />
+
+                <LinearLayout
+                    android:id="@+id/homeFriendsAvatars"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/homeFriendsNames"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                        tools:text="Laia, Pau, Marc" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============ Tasks (spec tasks-home-today) ============ -->
         <LinearLayout
             android:id="@+id/homeTasksCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_md"
             android:background="@drawable/bg_card"
-            android:elevation="@dimen/elevation_card"
             android:orientation="vertical"
-            android:padding="@dimen/home_card_padding">
+            android:padding="@dimen/spacing_md">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -346,10 +298,11 @@
 
                 <ImageButton
                     android:id="@+id/homeAddTaskButton"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:layout_width="@dimen/home_add_task_button"
+                    android:layout_height="@dimen/home_add_task_button"
+                    android:background="@drawable/bg_stepper_button"
                     android:contentDescription="@string/home_tasks_add"
+                    android:padding="5dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_add_24"
                     app:tint="@color/bb_primary" />
@@ -376,15 +329,18 @@
                 android:id="@+id/homeShowOverdueButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:paddingStart="@dimen/spacing_sm"
+                android:paddingEnd="@dimen/spacing_sm"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
+                android:drawablePadding="@dimen/spacing_xs"
                 android:focusable="true"
-                android:paddingTop="@dimen/spacing_xs"
-                android:paddingBottom="@dimen/spacing_xs"
+                android:gravity="center"
+                android:minHeight="40dp"
                 android:text="@string/home_tasks_show_overdue"
-                android:textAppearance="@style/TextAppearance.BBetter.Label"
-                android:textColor="@color/bb_primary" />
+                android:textAppearance="@style/TextAppearance.BBetter.Caption" />
 
             <LinearLayout
                 android:id="@+id/homeOverdueSection"
@@ -409,7 +365,63 @@
                     android:nestedScrollingEnabled="false"
                     android:overScrollMode="never" />
             </LinearLayout>
+        </LinearLayout>
 
+        <!-- ============ Next up: siguiente evento (CalendarEntryDAO.getEventsBetween) ============ -->
+        <LinearLayout
+            android:id="@+id/homeNextUpCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:clickable="true"
+            android:contentDescription="@string/home_next_up_desc"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <ImageView
+                android:layout_width="@dimen/home_next_up_icon_tile"
+                android:layout_height="@dimen/home_next_up_icon_tile"
+                android:background="@drawable/bg_home_icon_tile"
+                android:importantForAccessibility="no"
+                android:padding="@dimen/spacing_sm"
+                android:src="@drawable/ic_calendar_v2_24"
+                app:tint="@color/bb_primary" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_card_gap"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.06"
+                    android:text="@string/home_next_up"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro" />
+
+                <TextView
+                    android:id="@+id/homeNextUpText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+                    tools:text="17:30 Study group" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_chevron_right_24"
+                app:tint="@color/bb_on_surface_muted" />
         </LinearLayout>
 
     </LinearLayout>

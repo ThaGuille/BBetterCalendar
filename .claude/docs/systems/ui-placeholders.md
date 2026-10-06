@@ -39,10 +39,12 @@ debug, false in release**) through `social/SocialFeature`:
 |---|---|---|---|---|---|
 | `social-backend` | all social blocks | `MockSocialRepository` | Static fake friends from the Stitch mocks (debug only) | Accounts, friend graph, presence sync, a real `SocialRepository` bound in `SocialModule` | P2 (hidden in release) |
 | `social-rank` | Cycle complete (u15) | "Best · 2nd among friends" tile | Fixed `SocialRank(2, 9)` | Rank computed from the user's real focus time vs friends' (needs `social-backend`) | P2 (hidden in release) |
-| `social-home-friends` | Home (u13) | "N friends studying now" row next to the streak | Mock studying friends (avatars + names) | Real presence (`social-backend`); tap target / friends screen | P2 (hidden in release) |
+| `social-home-friends` | Home (u13) | `homeFriendsCard` ("N friends studying now" next to the streak) | Mock studying friends (avatars + names) | Real presence (`social-backend`); tap target / friends screen | P2 (hidden in release) |
 | `social-focus-studying` | Focus (u14) | "Studying now x / y" grid with crown | Mock friends, static times | Live presence + ticking session times (`social-backend`) | P2 (hidden in release) |
 | `social-focus-invite` | Focus (u14) | "Invite friends to study together" | Inert button / no-op | Invite flow (share link, deep link, accounts) | P2 (hidden in release) |
 | `social-celebration-strip` | Cycle complete (u15) | "Laia and 3 others still studying · Live" strip | Mock top friend + count | Real presence (`social-backend`) | P2 (hidden in release) |
+| `home-user-name` | Home (u13) | `text_home` + `homeAvatar` | Generic greeting "Hi there" and a fixed initial "B" (`home_avatar_placeholder_initial`) | A stored user/display name (onboarding or settings) → "Hi, <name>" + real initials | P2 |
+| `home-notification-centre` | Home (u13) | `homeBellButton` | Bell with no unread dot; tap shows a "coming soon" toast | Notification centre / inbox screen + unread state for the honey dot | P2 |
 
 ## Resolved
 | id | Date | How |
@@ -52,3 +54,4 @@ debug, false in release**) through `social/SocialFeature`:
 | Date | Change | Ref |
 |---|---|---|
 | 2026-10-06 | Created with the social rows; flag + mock repository | u11 (migracion-visual-stitch) |
+| 2026-10-06 | Home rows (`home-user-name`, `home-notification-centre`); `social-home-friends` view id | u13 |

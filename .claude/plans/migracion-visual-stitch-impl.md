@@ -697,3 +697,46 @@ coinciden; residuos: pesos 500/600 (ver hallazgo), chip «NEW» a 12sp (html 10s
 
 **Para u13–u20:** no rehacer a mano lo que ya cubre una vista; si falta un estado, añadirlo a la vista (y a la
 galería) en vez de copiar su layout. La galería es la referencia rápida de estados.
+
+## u11 · Maqueta social tras flag
+
+**Hecho.** `app/build.gradle`: `buildFeatures { buildConfig true }` (AGP 8 no genera `BuildConfig` por
+defecto) y `buildConfigField "boolean", "FEATURE_SOCIAL_MOCK"` = `true` en `debug`, `false` en `release`.
+Paquete nuevo **`com.example.bbettercalendar.social`**:
+- `SocialFeature` — `isEnabled()` (= el flag) y `applyVisibility(View...)` (VISIBLE/GONE; llamarlo sobre la
+  **raíz** de cada bloque social para que no quede hueco).
+- `SocialRepository` (interfaz) — `LiveData<SocialSnapshot> getSnapshot()`, nunca null ni con valor null.
+- `MockSocialRepository` (datos estáticos, sin reloj ni I/O) y `EmptySocialRepository`
+  (`SocialSnapshot.EMPTY`). `SocialModule` (Hilt, `SingletonComponent`, `@Singleton`) elige uno según el
+  flag → siempre inyectable, sin comprobaciones de null en las pantallas.
+- Modelo: `Friend` (`id`, `name`, `initials`, `Status{STUDYING, AWAY}` → mapear a `AvatarView.Status`,
+  `getFocusSecondsToday()` / `getMinutesToday()`), `SocialRank` (`getPosition()` 1-based, `getGroupSize()`
+  incluye al usuario, `isFirst()`), `SocialSnapshot` (`getFriends()` ordenados: estudiando primero y luego
+  por tiempo desc.; `getStudying()`, `getStudyingCount()`, `getFriendCount()`, `getTopFriend()` = corona,
+  `getUserRank()`, `isEmpty()`).
+- Datos (un único conjunto para todas las pantallas): 8 amigos, 5 estudiando — Laia 3:12:05 (corona), Pau
+  2:05:44, Marc 1:48:30, Júlia 1:10:02, Noa 0:52:10; ausentes Oriol, Elena, Alex. Rango del usuario **2.º de 9**.
+- Doc nuevo `.claude/docs/systems/ui-placeholders.md` (cómo añadir/resolver filas + filas sociales:
+  `social-backend`, `social-rank`, `social-home-friends`, `social-focus-studying`, `social-focus-invite`,
+  `social-celebration-strip`) y fila en la tabla de System docs de `CLAUDE.md`. Marcadores
+  `// PLACEHOLDER(ui-placeholders#social-backend|social-rank)` en `MockSocialRepository`.
+- Test `app/src/test/.../social/MockSocialRepositoryTest` (8 tests).
+
+### Desviaciones / decisiones
+- Sin color de avatar por amigo: los html pintan todos los avatares igual y `AvatarView` no tiene color por
+  instancia.
+- Home (html 04) dice «3 friends studying now · Maya, Alex, Leo»; se usa el conjunto de html 01/02 en todas las
+  pantallas, así que Home mostrará 5 (Laia, Pau, Marc…). El orden del grid sale por tiempo (html 01 pone Marc
+  antes que Pau).
+- El rango es fijo (mock), no se calcula con los minutos reales del usuario.
+
+### Para u13–u15
+Inyectar `SocialRepository` en el ViewModel (o Fragment), observar `getSnapshot()` con
+`getViewLifecycleOwner()`, y llamar `SocialFeature.applyVisibility(raízDelBloque)` en `onViewCreated`.
+Poner el id real de la vista en la columna *View* de `ui-placeholders.md` y el marcador
+`// PLACEHOLDER(ui-placeholders#<id>)` en el código del bloque. «Invite friends» queda inerte.
+
+### Verificación
+`testDebugUnitTest` (104 tests, 0 fallos; 8 nuevos), `assembleDebug` y `assembleRelease` OK (release sale
+`app-release-unsigned.apk`, sin keystore; `BuildConfig` release con `FEATURE_SOCIAL_MOCK = false`).
+Auditoría de tokens sin cambios (50). Sin emulador (unidad local).

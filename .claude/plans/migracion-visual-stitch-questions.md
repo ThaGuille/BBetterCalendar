@@ -109,3 +109,9 @@ abiertas. Formato: **Q** (pregunta) — **Assumed** (lo que se hizo y cómo camb
   porque salvia/ember sobre forest no llegan a 4,5:1. — **Assumed:** píldora oscura. Para el aspecto del html:
   cambiar `bg_widget_inset_pill` a `bb_primary_container` y aceptar el contraste bajo (o aclarar forest en
   `palette.xml`).
+
+## u11
+- **Q:** Home (html 04) muestra «3 friends studying now · Maya, Alex, Leo», pero Focus/Cycle complete usan
+  otro grupo (Laia, Marc, Pau…). — **Assumed:** un único conjunto de datos falsos en todas las pantallas
+  (8 amigos, 5 estudiando, Laia arriba, usuario 2.º de 9), así que Home dirá «5 friends studying now». Para
+  cambiarlo: editar `MockSocialRepository.buildSnapshot()` (y los asserts de `MockSocialRepositoryTest`).

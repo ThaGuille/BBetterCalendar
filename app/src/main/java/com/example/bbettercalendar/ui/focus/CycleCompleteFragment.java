@@ -178,7 +178,8 @@ public class CycleCompleteFragment extends Fragment {
             if (i < studying.size()) {
                 avatars[i].setVisibility(View.VISIBLE);
                 avatars[i].setName(studying.get(i).getName());
-                avatars[i].setInitials(studying.get(i).getInitials().substring(0, 1));
+                String initials = studying.get(i).getInitials();
+                avatars[i].setInitials(initials == null || initials.isEmpty() ? "" : initials.substring(0, 1));
             } else {
                 avatars[i].setVisibility(View.GONE);
             }

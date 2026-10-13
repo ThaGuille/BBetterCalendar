@@ -3,13 +3,13 @@ package com.example.bbettercalendar.ui.calendar.weekview
 import com.example.bbettercalendar.R
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.annotation.AttrRes
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat.LAYOUT_DIRECTION_LTR
 import kotlin.math.roundToInt
@@ -108,13 +108,13 @@ internal object ViewStateFactory {
         }
 
         viewState.eventTextPaint.apply {
-            color = a.getColor(R.styleable.WeekView_eventTextColor, Color.WHITE)
+            color = a.getColor(R.styleable.WeekView_eventTextColor, ContextCompat.getColor(context, R.color.bb_on_primary))
             textSize = a.getDimension(R.styleable.WeekView_eventTextSize, context.defaultTextSize)
             typeface = customTypeface ?: Typeface.DEFAULT
         }
 
         viewState.allDayEventTextPaint.apply {
-            color = a.getColor(R.styleable.WeekView_eventTextColor, Color.WHITE)
+            color = a.getColor(R.styleable.WeekView_eventTextColor, ContextCompat.getColor(context, R.color.bb_on_primary))
             textSize = a.getDimension(R.styleable.WeekView_allDayEventTextSize, viewState.eventTextPaint.textSize)
             typeface = customTypeface ?: Typeface.DEFAULT
         }
@@ -124,13 +124,13 @@ internal object ViewStateFactory {
         }
 
         viewState.weekNumberTextPaint.apply {
-            color = a.getColor(R.styleable.WeekView_weekNumberTextColor, Color.WHITE)
+            color = a.getColor(R.styleable.WeekView_weekNumberTextColor, ContextCompat.getColor(context, R.color.bb_on_surface))
             textSize = a.getDimension(R.styleable.WeekView_weekNumberTextSize, context.defaultTextSize)
             typeface = customTypeface ?: Typeface.DEFAULT
         }
 
         viewState.weekNumberBackgroundPaint.apply {
-            color = a.getColor(R.styleable.WeekView_weekNumberBackgroundColor, Color.LTGRAY)
+            color = a.getColor(R.styleable.WeekView_weekNumberBackgroundColor, ContextCompat.getColor(context, R.color.bb_surface_subtle))
         }
 
         viewState.apply {

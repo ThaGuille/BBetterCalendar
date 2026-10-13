@@ -2,9 +2,11 @@
 <!-- Marca de HOY en la celda del mes: cuadrado con borde (spec frontend-structure-cleanup). Antes
      era un círculo y el cuadrado marcaba la selección; ahora el cuadrado es siempre "hoy" y la
      selección es un relleno suave (bg_calendar_day_selected). -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <corners android:radius="@dimen/radius_sm" />
-    <stroke android:width="2dp" android:color="@color/bb_primary" />
-    <solid android:color="@android:color/transparent" />
-</shape>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="@dimen/calendar_cell_inset">
+    <shape android:shape="rectangle">
+        <corners android:radius="@dimen/radius_sm" />
+        <stroke android:width="2dp" android:color="@color/bb_primary" />
+        <solid android:color="@android:color/transparent" />
+    </shape>
+</inset>

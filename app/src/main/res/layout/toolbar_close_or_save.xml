@@ -20,9 +20,9 @@
 
         <ImageButton
             android:id="@+id/btnClose"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_close_circle"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
+            android:background="@drawable/bg_close_circle_touch"
             android:contentDescription="@string/create_entry_btn_close"
             android:scaleType="centerInside"
             android:src="@drawable/ic_close_24"
@@ -39,10 +39,10 @@
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSaveEvent"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_save_pill"
+            android:layout_height="@dimen/touch_target_min"
+            android:background="@drawable/bg_save_pill_touch"
             android:minWidth="88dp"
-            android:minHeight="0dp"
+            android:minHeight="@dimen/touch_target_min"
             android:paddingStart="@dimen/spacing_md"
             android:paddingEnd="@dimen/spacing_md"
             android:stateListAnimator="@null"

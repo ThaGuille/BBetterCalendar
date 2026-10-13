@@ -68,7 +68,7 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
 
         binding.calendarAddEventButton2.setOnClickListener(this);
 
-        adapter = new WeekViewItemAdapter();
+        adapter = new WeekViewItemAdapter(requireContext());
         adapter.setOnRangeChangedListener(this::updateMonthTitle);
         binding.weekView.setAdapter(adapter);
         // WeekView pinta con Paint: su atributo fontFamily no acepta @font/ (u6).

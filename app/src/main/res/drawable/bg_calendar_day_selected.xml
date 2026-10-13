@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Día seleccionado: relleno suave. El borde cuadrado queda reservado para "hoy"
-     (bg_calendar_day_today), así ambos se distinguen y pueden coincidir en la misma celda. -->
+<!-- Dia seleccionado: relleno suave. El borde cuadrado queda reservado para "hoy"
+     (bg_calendar_day_today), asi ambos se distinguen y pueden coincidir en la misma celda.
+     u22 (A10): mismo inset que el recuadro de hoy para que se alineen. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/radius_sm" />
-            <solid android:color="@color/bb_surface_subtle" />
-        </shape>
+        <inset android:inset="@dimen/calendar_cell_inset">
+            <shape android:shape="rectangle">
+                <corners android:radius="@dimen/radius_sm" />
+                <solid android:color="@color/bb_surface_subtle" />
+            </shape>
+        </inset>
     </item>
     <item>
         <shape android:shape="rectangle">

@@ -1,6 +1,12 @@
 package com.example.bbettercalendar.ui.calendar.binders;
 
-import android.graphics.Color;
+import android.content.Context;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
+
+import com.example.bbettercalendar.R;
 
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
 import com.example.bbettercalendar.ui.calendar.weekview.WeekView;
@@ -15,6 +21,13 @@ public class WeekViewItemAdapter extends WeekView.SimpleAdapter<CalendarItem> {
     }
 
     private OnRangeChangedListener rangeListener;
+    private final int textOnLight;
+    private final int textOnDark;
+
+    public WeekViewItemAdapter(@NonNull Context context) {
+        textOnLight = ContextCompat.getColor(context, R.color.bb_on_primary);
+        textOnDark = ContextCompat.getColor(context, R.color.bb_on_surface);
+    }
 
     public void setOnRangeChangedListener(OnRangeChangedListener listener) {
         this.rangeListener = listener;
@@ -32,7 +45,7 @@ public class WeekViewItemAdapter extends WeekView.SimpleAdapter<CalendarItem> {
 
         WeekViewEntity.Style style = new WeekViewEntity.Style.Builder()
                 .setBackgroundColor(item.getColorArgb())
-                .setTextColor(Color.WHITE)
+                .setTextColor(ColorUtils.calculateLuminance(item.getColorArgb()) > 0.4 ? textOnLight : textOnDark)
                 .setCornerRadius(8)
                 .build();
 

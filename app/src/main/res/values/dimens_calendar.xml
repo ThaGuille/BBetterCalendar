@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u22: dimens del area calendar (mes, formularios, hoja rapida). -->
+<resources>
+    <!-- Minimo de area tactil (A4). -->
+    <dimen name="touch_target_min">48dp</dimen>
+    <!-- Celda del mes (A10): el relleno de seleccion y el recuadro de hoy comparten este inset. -->
+    <dimen name="calendar_cell_inset">2dp</dimen>
+    <dimen name="calendar_cell_text_top">8dp</dimen>
+    <!-- Cabecera del formulario: boton visual 40dp / 36dp dentro de un area tactil de 48dp. -->
+    <dimen name="form_close_inset">4dp</dimen>
+    <dimen name="form_save_inset">6dp</dimen>
+</resources>

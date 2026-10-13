@@ -15,6 +15,17 @@
 
         <include layout="@layout/view_calendar_mode_toggle" />
 
+        <!-- B7: la rejilla del mes vive dentro de una tarjeta. -->
+        <LinearLayout
+            android:id="@+id/monthGridCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_md"
+            android:background="@drawable/bg_calendar_grid_card"
+            android:orientation="vertical">
+
         <!-- Header bar: prev arrow | month-year | next arrow -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,8 +37,8 @@
 
             <ImageButton
                 android:id="@+id/monthPrevButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/month_view_prev"
                 android:src="@drawable/ic_chevron_left_24"
@@ -44,8 +55,8 @@
 
             <ImageButton
                 android:id="@+id/monthNextButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/month_view_next"
                 android:src="@drawable/ic_chevron_right_24"
@@ -58,13 +69,16 @@
             android:id="@+id/monthCalendarView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_sm"
+            android:layout_marginBottom="@dimen/spacing_sm"
             app:cv_dayViewResource="@layout/cell_month_day"
             app:cv_daySize="square"
             app:cv_orientation="horizontal"
             app:cv_outDateStyle="endOfGrid"
             app:cv_scrollPaged="true" />
+
+        </LinearLayout>
 
         <!-- Day-detail panel -->
         <LinearLayout
@@ -91,8 +105,7 @@
                     android:layout_weight="1"
                     android:paddingTop="@dimen/spacing_sm"
                     android:paddingBottom="@dimen/spacing_sm"
-                    android:textAppearance="@style/TextAppearance.BBetter.Title"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
                     tools:text="Events for Jun 15, 2026" />
             </LinearLayout>
 
@@ -103,7 +116,6 @@
                 android:paddingStart="12dp"
                 android:paddingTop="@dimen/spacing_xs"
                 android:paddingEnd="12dp"
-                android:text="@string/no_events_today"
                 android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
                 android:visibility="gone" />
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u22: bg_save_pill dentro de un area tactil de 48dp (pastilla visual de 36dp). -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/bg_save_pill"
+    android:insetTop="@dimen/form_save_inset"
+    android:insetBottom="@dimen/form_save_inset" />

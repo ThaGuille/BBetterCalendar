@@ -87,6 +87,7 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
 
         binding.calendarAddEventButton.setOnClickListener(this);
 
+        binding.dayDetailEmptyText.setText(R.string.no_events_today);
         populateWeekdayLegend();
         setupCalendar();
         setupDayDetail();

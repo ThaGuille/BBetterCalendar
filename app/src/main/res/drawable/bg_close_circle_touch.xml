@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u22: bg_close_circle dentro de un area tactil de 48dp (circulo visual de 40dp). -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/bg_close_circle"
+    android:inset="@dimen/form_close_inset" />

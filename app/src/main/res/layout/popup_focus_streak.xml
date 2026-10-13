@@ -112,18 +112,12 @@
             android:text="@string/focus_streak_legend"
             android:textAppearance="@style/TextAppearance.BBetter.Label" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/streakCloseButton"
+            style="@style/Widget.BBetter.Button.Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="@dimen/spacing_sm"
-            android:text="@string/focus_streak_close"
-            android:textAppearance="@style/TextAppearance.BBetter.Title"
-            android:textColor="@color/bb_primary"
-            android:textSize="@dimen/text_body" />
+            android:text="@string/focus_streak_close" />
     </LinearLayout>
 
 </LinearLayout>

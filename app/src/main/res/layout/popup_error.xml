@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- u21: sin fondo propio (lo da RoundedDialog = bb_surface_card), solo tokens y TextAppearance. -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
     android:padding="@dimen/spacing_md">
 
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
         android:src="@drawable/ic_error_cross_24"
         app:layout_constraintTop_toTopOf="@id/alertMessage"
         app:layout_constraintBottom_toBottomOf="@id/alertMessage"
@@ -23,20 +24,18 @@
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/spacing_sm"
         android:text="@string/popup_timer_failed"
-        android:textColor="@color/black"
-        android:textSize="@dimen/text_dialog"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/icon"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/okButton"
+        style="@style/Widget.BBetter.Button.Primary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_square"
-        android:backgroundTint="@color/white"
+        android:layout_marginTop="@dimen/spacing_md"
         android:text="@string/popup_ok"
-        android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/alertMessage"
         app:layout_constraintEnd_toEndOf="parent" />
 

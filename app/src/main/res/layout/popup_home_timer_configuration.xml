@@ -79,7 +79,7 @@
                     android:text="20:00"
                     android:textAppearance="@style/TextAppearance.BBetter.Title"
                     android:textColor="@color/bb_accent_energy"
-                    android:textSize="44sp" />
+                    android:textSize="@dimen/text_display_compact" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -183,7 +183,7 @@
                         android:text="05:00"
                         android:textAppearance="@style/TextAppearance.BBetter.Title"
                         android:textColor="@color/bb_primary"
-                        android:textSize="44sp" />
+                        android:textSize="@dimen/text_display_compact" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -385,23 +385,19 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_cancel"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.BBetter.Button.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/spacing_xs"
                 android:text="@string/timer_btn_cancel"
-                android:textAllCaps="false"
                 android:textColor="@color/bb_on_surface_muted" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save"
+                style="@style/Widget.BBetter.Button.Primary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/bb_accent_energy"
-                android:text="@string/timer_btn_save"
-                android:textAllCaps="false"
-                android:textColor="@color/bb_on_primary"
-                app:cornerRadius="@dimen/radius_md" />
+                android:text="@string/timer_btn_save" />
         </LinearLayout>
 
     </LinearLayout>

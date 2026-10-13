@@ -26,7 +26,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/first_focus_badge"
-            android:textSize="44sp" />
+            android:textAppearance="@style/TextAppearance.BBetter.Display"
+            android:textSize="@dimen/text_display_compact" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -63,22 +64,13 @@
             android:textAppearance="@style/TextAppearance.BBetter.Label"
             tools:text="days with a pomodoro this month" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/firstFocusButton"
+            style="@style/Widget.BBetter.Button.Reward"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_lg"
-            android:background="@drawable/bg_chip_primary"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:paddingStart="26dp"
-            android:paddingEnd="26dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/first_focus_button"
-            android:textAppearance="@style/TextAppearance.BBetter.Chip"
-            android:textColor="@color/bb_on_primary" />
+            android:text="@string/first_focus_button" />
 
     </LinearLayout>
 </FrameLayout>

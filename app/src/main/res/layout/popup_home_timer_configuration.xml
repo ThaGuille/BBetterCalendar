@@ -78,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:text="20:00"
                     android:textAppearance="@style/TextAppearance.BBetter.Title"
-                    android:textColor="@color/bb_accent_energy"
+                    android:textColor="@color/bb_primary"
                     android:textSize="@dimen/text_display_compact" />
 
                 <TextView
@@ -98,10 +98,10 @@
                 android:stepSize="1"
                 android:valueFrom="1"
                 android:valueTo="90"
-                app:haloColor="@color/bb_accent_energy"
-                app:thumbColor="@color/bb_accent_energy"
+                app:haloColor="@color/bb_primary"
+                app:thumbColor="@color/bb_primary"
                 app:tickVisible="false"
-                app:trackColorActive="@color/bb_accent_energy"
+                app:trackColorActive="@color/bb_primary"
                 app:trackColorInactive="@color/bb_divider" />
 
             <LinearLayout

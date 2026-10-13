@@ -976,3 +976,204 @@ atrasadas. `logcat -b crash` sin `FATAL EXCEPTION`. Capturas `.claude/skills/adb
 jerarquía, colores y tipografía coinciden (residuos arriba). La sesión de prueba se cortó con `am force-stop`
 (Home ya no tiene stop). Lo pendiente de u2 (rotar a mitad, pausa, fallo por segundo plano, saltar descanso)
 pasa a u14, que tiene los controles.
+
+---
+
+# Continuación (u13b–u23, big-task)
+
+Notas de implementación de las unidades de la continuación, una sección por unidad, en el orden en
+que se ejecutaron (u14 primero; u13b y u15–u23 después). Fusionadas desde `migracion-visual-stitch/notes/`.
+
+## u14 · Focus (termina el WIP `be03abf`)
+
+_(Consolidado desde `notes/u14.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+**Partida.** Se revisó `git show --stat be03abf` y `git diff c52c967 be03abf`. Del WIP se conserva tal
+cual: `FocusViewModel`, `FocusSessionEventPresenter`, `BackgroundGrace`, `FocusBackgroundObserver` a
+nivel de proceso (`ProcessLifecycleOwner`, dependencia `lifecycle-process` ya en `app/build.gradle`),
+los cambios de `FocusSessionViewModel` (listener del observer, `getTodayTimeStudiedMillis`, gracia en
+`onCleared`), los drawables `bg_focus_control`, `bg_focus_dot_{current,done,pending}`, `menu_focus`,
+`ic_do_not_disturb(_on)_24`, y sus strings/dimens/color (`bb_focus_dot_ring`, alias de `sage_300_a32`)
+en `strings.xml`/`dimens.xml`/`colors.xml`. No se movieron a `*_focus.xml`: ya están en la base de las
+unidades paralelas y moverlos abriría conflictos en ficheros compartidos. Lo NUEVO de u14 va en
+`values/strings_focus.xml`, `values-es/strings_focus.xml` y `values/dimens_focus.xml`.
+
+**Hecho en esta unidad.**
+- `ui/focus/FocusFragment.java` (antes cascarón de u12): `@AndroidEntryPoint`; sesión de ámbito de
+  actividad + `FocusViewModel` de fragment. Chip «CONCENTRATION · x OF N» (clamp a N: sin auto-ciclo la
+  máquina queda en reposo con `cyclesCompleted == N` hasta la concentración siguiente, quirk u2),
+  puntos de ciclo (hecho / actual con halo / pendiente; ocultos con ciclos infinitos), anillo
+  `CircularProgressIndicator` que muestra lo que QUEDA (como el arco del html), «Ends at HH:mm»
+  (formato 12/24 h del sistema), «Paused» en pausa, «Ready when you are» parado. Controles stop
+  (`cancelSession`, no es fallo; deshabilitado y al 40 % sin sesión), centro play/pausa/reanudar
+  (`toggle`), skip (sólo actúa en descanso). 🚫 en la barra superior con tres estados. Tira Today
+  (`formatDuration`) / Streak (`StreakCalculator`) + contador de fallos de hoy. «Studying now» con
+  rejilla de 4 columnas (`item_focus_friend.xml`, `AvatarView` 44dp, corona `ic_crown_24` para
+  `getTopFriend()`, ausentes al 40 % la celda entera) y meta «5 / 8»; «Invite friends» al pie (hueco
+  con peso + `fillViewport`), inerte con toast. Bloque social e invitación con
+  `SocialFeature.applyVisibility`.
+- Barra superior: título centrado, flecha en `bb_on_surface_muted` (html 01 `text-lichen`).
+- `SplashActivity`: si `!isTaskRoot()` y el intent es `MAIN`/`LAUNCHER` → `finish()` sin arrancar otra
+  `MainActivity` (pregunta u6). No hizo falta `launchMode`.
+- Tests: `app/src/test/.../ui/focus/BackgroundGraceTest.java` (14 tests: gracia que expira una vez,
+  volver antes cancela, la sesión dice que no, rearmar reinicia, fuera-dentro-fuera, stale runnable,
+  dispatch del observer, listener que se quita a sí mismo, pausa en segundo plano).
+- Doc `.claude/docs/systems/pomodoro-timer.md` actualizado (semántica de `BackgroundGrace`,
+  `ProcessLifecycleOwner`, presentador compartido, launcher, Last verified 2026-10-07).
+- `HomeFragment`: sólo un comentario obsoleto («registrado por MainActivity»).
+
+**APIs nuevas.** Ninguna pública fuera de `ui/focus/`. `FocusSessionViewModel` no se tocó en esta
+ronda (sus cambios son del WIP).
+
+**Verificación (emulator-5554, API 37).** `assembleDebug`, `testDebugUnitTest`, auditoría 50 (sin
+cambios). Flujos: Home → Play → Focus (chip, puntos, anillo, Ends at, controles, rejilla 5/8);
+pausa → «Paused» + «Resume»; reanudar → HOME 7 s → vuelta: `AlertPopup` «Timer failed», fallos 0 → 1;
+con sesión en marcha back → Home (19:50 corriendo, «Open focus session») → Calendar → `AddEventActivity`
+8 s → back: sin «grace period armed» en logcat, fallos siguen en 1; tarea arrancada con
+`am start -n …SplashActivity` (sin categoría) + sesión + HOME + icono del launcher (monkey
+`-c LAUNCHER`): log «Launcher tap on a live task», una sola `MainActivity` en la pila, misma sesión
+(19:30), sin fallo; timer a 1 min → fin de concentración → `FirstFocusCelebrationPopup` en Focus →
+descanso (`REST · 1 OF 3`) → skip → ciclos 2 y 3 → al acabar la 4.ª concentración navega a
+`navigation_cycle_complete` y back vuelve a Home; 🚫 sin permiso → `AccessibilityDisclosureDialog` →
+«Not now» sin fallo. `logcat -b crash` sin `FATAL EXCEPTION` de `io.github.thaguille.bbettercalendar`.
+Capturas en el checkout principal `.claude/skills/adb-ui-test/captures/`: `mig-u14-focus-running`,
+`mig-u14-focus-paused`, `mig-u14-focus-rest`, `mig-u14-focus-scrolled` (pie con «Invite friends»).
+
+**Residuos frente a 01-focus-running.png (presupuesto de 2 iteraciones; anotados, no perseguidos).**
+- En un Pixel 9a (411×923 dp) el contenido no cabe entero: «Invite friends» y la 2.ª fila de amigos
+  quedan bajo el pliegue (el PNG es 390×1008). Se llega con scroll.
+- Sin el resplandor animado del anillo (`timer-ring-glow`) ni el halo pulsante de los amigos.
+- Tira Today/Streak sin el borde `hairline-moss/40` (tarjeta tonal plana de u7, como en u13).
+- Llama de trazo (`ic_flame_v2_24`), no la rellena del html (residuo de u9).
+- Orden de amigos por tiempo (Laia, Pau, Marc…); el html pone Marc antes que Pau (u13b).
+- «Ends at» en Label 13sp (html `text-sm` 14sp): no hay appearance de 14sp/500.
+
+## u13b · Alinear lo hecho con Stitch
+
+_(Consolidado desde `notes/u13b.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- Chip delta (`bg_widget_inset_pill`) y chip de estado de `AppUsageRowView`: relleno `bb_primary_container` (forest), como html 13/10. El chip de estado conserva el trazo del tono. Pesos ya correctos: delta = `Micro.Bold` (700, html 13 font-bold), estado = `ChipLabel` (600, font-semibold); sin cambios en `styles_typography.xml` salvo `Body.Medium` (500) nuevo.
+- Barras redondeadas: `RoundedBarChartRenderer` (extends `BarChartRenderer`: parte superior 8dp del segmento visible mas alto, apilados incluidos), `RoundedCombinedChartRenderer` (capa de barras de CombinedChart) y `BandBarDataSet` (bandas FOCUS contiguas = un bloque con rx 4dp). Enganchado en `ChartStyler.styleChart` (`roundBars`, idempotente) para BarChart y CombinedChart. API de ChartStyler solo ampliada.
+- Social: `SocialRepository` gana `getHomeSnapshot()` (Maya, Alex, Leo; html 04) y `getCelebrationSnapshot()` (Laia + 3 estudiando, rango 2.o; html 02, para u15). `getSnapshot()` sigue siendo el grupo de Focus (html 01). `HomeViewModel.getSocialSnapshot()` usa el de Home. Test ampliado.
+- Home: saludo "Hi, Guille" / "Hola, Guille" (`home_greeting` con formato + `home_user_name_placeholder`), avatar "G", punto ambar de la campana, titulos de tarea a 500 (`Body.Medium`), marca de hecho 14dp.
+- Residuos de u13 no tocados: sin resplandor ni borde de tarjeta (decision u7 tonal plano), play con icono pino como el PNG.
+
+## u15 · Cycle complete
+
+_(Consolidado desde `notes/u15.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- `CycleCompleteFragment` (`@AndroidEntryPoint`) + `CycleCompleteViewModel` (streak via `FocusInsightsRepository.observeStreak`, social via `SocialRepository.getCelebrationSnapshot`). Layout `fragment_cycle_complete.xml` copies html 02: close pill, plant vector (`ic_cycle_plant`, flat bb_* fills), amber title, summary with bold count, optional task chip, tiles Focus / Streak (+1 badge) / Best, friends strip with Live dot, amber Continue, Share placeholder.
+- `FocusSessionEventPresenter` now passes args `cycles` (event payload) and `focusMillis` (new additive `FocusSessionViewModel.getConfiguredFocusMillis()`). No `MessagePopup` is used under `ui/`; `FirstFocusCelebrationPopup` untouched.
+- Continue, close pill and system back call `session.resetIdleDisplay()` then `navigateUp()` (Focus was popped, so Home).
+- Social blocks (Best tile + gap, strip) are GONE without gap when `SocialFeature` is off.
+- Resources: `strings_cycle.xml` (EN+ES), `dimens_cycle.xml`, `styles_cycle.xml` (CycleTitle, CycleTileValue), `bg_cycle_*` drawables. No new colours. Token audit TOTAL 41, no category above baseline.
+- Verified on emulator-5560 via debug jump `bb_debug_nav cycle_complete`: renders, no app FATAL EXCEPTION. Capture `mig-u15-cycle-complete.png`. The Continue tap and the real trigger flow were not re-driven in this pass (u14 verified the navigation to this destination).
+- Residuals vs 02-celebration.png: halo uses `bb_chart_halo` (25 %) instead of the html 16 % and looks slightly stronger; no float/pulse animations; plant has flat fills (no gradients/glow); tile cards lack the `card-sheen`; debug jump shows 0 pomodoros (no args).
+
+## u16 · Projects (tarjetas desplegables y detalle)
+
+_(Consolidado desde `notes/u16.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- `ProjectListAdapter`: tarjeta desplegable (varias a la vez, estado en `expandedIds`). Cabecera tocable
+  despliega; pulsacion larga o "Open project" abre `ProjectDetailFragment`. Subtareas (fila entera
+  alterna hecho), "Add subtask" reusa `QuickAddTaskSheet.forProject`. FAB y `CreateProjectDialog` sin cambios.
+- `ProjectsViewModel` ahora compone (MediatorLiveData) `observeAllWithCounts` + items de todos los
+  proyectos + minutos de foco de hoy + duracion de pomodoro (ConfigurationManager en executor, postValue).
+  Resumen de cabecera (`Summary`): activos, vencen en 7 dias, racha global.
+- Aditivo fuera del area: `CalendarEntryDAO.observeAllProjectItems()`, `FocusEventDAO.observeMinutesByProject()`.
+- Derivaciones puras en `ProjectListItem` (test `ProjectListItemTest`): pomodoros = ceil(target/duracion),
+  "x Pomodoros today" = minutos de hoy / duracion, "Est. Nh remaining" = suma de targetMinutes de subtareas sin hacer.
+- Ids duplicados resueltos: `item_project.xml` usa `projectCardProgress`/`projectTasksText`/`projectPercentText`;
+  `item_project_progress.xml` (Progress) intacto.
+- Detalle: tarjetas `bg_project_card`, chip con `bg_project_due_chip`, botones `Widget.BBetter.Button.Primary/Danger`, filas de 48dp.
+- Recursos: `strings_projects.xml` (EN+ES), `dimens_projects.xml`, drawables `bg_project_*`. Sin colores nuevos.
+- Verificacion: emulator-5554 (lease u16), datos sembrados; capturas mig-u16-projects, -expanded, -project-detail; sin crash de la app.
+
+## u17 · Progress (pantalla rediseñada)
+
+_(Consolidado desde `notes/u17.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- `fragment_progress.xml` reescrito segun html 13: cabecera fija (titulo, escudo, compartir) + scroll con Week/Month/Year (`SegmentedControlView`), `PeriodNavigatorView`, tarjeta de 3 `StatTileView`, "Past 12 weeks" (`LineChart` + `ChartStyler`), "See all", tarjeta Screen time & blocking, "Projects this week" (`ProgressRowView`).
+- `Granularity.YEAR` + `TimeRange` (YEAR, `subtitle()`); `buildBundle` agrega daily_stat por mes en YEAR (carrusel heredado).
+- `ProgressViewModel`: `overview` / `blockingCard` (LiveData, executor + postValue); `ProgressOverview` plano. Constructor recibe `CalendarEntryDAO` y `FocusInsightsRepository` (Hilt).
+- Aditivo fuera del area: `CalendarEntryDAO.countDoneTasksBetween`.
+- Heredado intacto al final en `progressLegacyCharts`: `chart_dots`, `chart_pager`, banda de uso (u18 los retira). El antiguo `projects_band` desaparece (sustituido); `ProjectProgressAdapter` queda sin uso.
+- Fila del selector Day eliminada de la UI (DAY solo sobrevive en el enum para el carrusel).
+- Recursos: `strings_progress.xml` EN+ES, `dimens_progress.xml`, drawables `bg_progress_*`, `ic_progress_legend_dash`, `item_progress_app_chip`. Sin colores nuevos.
+- Verificacion: emulator-5560 (lease u17), DB sembrada; capturas mig-u17-progress y mig-u17-progress-bottom; See all y escudo navegan; sin crash de la app. La CTA inferior no queda tapada por la bottom nav (A3).
+
+## u18 · All progress + Progress usage band solo resumen
+
+_(Consolidado desde `notes/u18.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- `fragment_all_progress.xml`: top bar + `SegmentedControlView` Day/Week/Month/Year (`allProgressGranularity`) + `PeriodNavigatorView` (`allProgressPeriodNavigator`) + `TabLayout chart_dots` + `ViewPager2 chart_pager`. `AllProgressFragment` (@AndroidEntryPoint) usa su propio `ProgressViewModel` (ambito del fragment): su selector no mueve el rango de Progress.
+- `ChartCarouselAdapter` sin cambios de logica; etiquetas finales (`all_progress_tab_*`): Focus time / Interruptions / Time of day / Projects.
+- Progress: sin carrusel ni contenedor `progressLegacyCharts`. Banda de uso (`usage_band`) solo resume: tiempo de pantalla + lista de solo lectura (`AppUsageAdapter(Context)`, sin toggles ni click), sin "Add apps" ni interruptor maestro. Estado EMPTY: la CTA ahora lleva a Screen time ("Manage in Screen time"); LOCKED conserva su CTA de permiso.
+- `AppLimitDialog`, `AccessibilityDisclosureDialog` y strings/drawables antiguos (`progress_usage_add_apps`, `progress_enforce_master_*`, `ic_block_24` toggle...) quedan sin uso desde Progress: limpieza en u24.
+- Verificacion: emulator-5560 (lease u18), DB sembrada + 3 app_rule; capturas `mig-u18-all-progress`, `mig-u18-progress-usage-summary`; sin crash de la app.
+
+## u19 · Screen time & blocking
+
+_(Consolidado desde `notes/u19.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- `ScreenTimeFragment` (@AndroidEntryPoint) + `ScreenTimeViewModel` + `ScreenTimeState`, layout `fragment_screen_time.xml` segun html 14: 3 tiles, "Today by hour" (CombinedChart con `ChartStyler.styleUsageLine` + `focusBandsData`), "Manage your apps" (`AppUsageRowView`), "Focus shield", pie de permisos.
+- `UsageStatsRepository.foregroundMillisByHour(LocalDate)` (aditivo; `foregroundMillis` ahora comparte el recorrido de eventos `walkIntervals`, mismo resultado) + `UsageHourBuckets` puro con `UsageHourBucketsTest`.
+- Candado = `setEnforceAtLimit`; chevron / fila / "Set limit" = `navigation_app_detail` con `packageName`; "Block a new app" = `AppPickerActivity`.
+- Focus shield: preferencia `BlockingSettings.isFocusShieldEnabled` (arranca cada sesion con bloqueo armado; `FocusSessionViewModel.restoreFromSavedState` la lee). Semantica en `app-limits.md`.
+- Recursos: `strings_screen_time.xml` EN+ES, `dimens_screen_time.xml`, drawables `bg_screen_time_*`, `bb_switch_thumb_check`. Sin colores nuevos. Progress no tocado.
+- Verificacion: emulator-5570 (lease u19, liberado, emulador apagado), DB sembrada; capturas `mig-u19-screen-time` y `-bottom`; sin crash de la app.
+
+## u20 · Detalle por app
+
+_(Consolidado desde `notes/u20.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- `AppDetailFragment` (@AndroidEntryPoint) + `AppDetailViewModel` + `AppDetailState`, layout `fragment_app_detail.xml` segun html 10: cabecera propia (flecha, icono de PackageManager, nombre, categoria `ApplicationInfo.getCategoryTitle` en API 26+ y estado Limited / No limit), Week/Month (`SegmentedControlView`), 3 tiles, barras apiladas dentro/sobre el limite con `LimitLine` (`ChartStyler.styleLimitBars/splitAtLimit/addLimitLine`), `StepperView` + presets, "Warn me before", "Block when limit is reached", nota y "Stop tracking".
+- Aditivo: `UsageStatsRepository.foregroundMillisByDay` + `UsageDayBuckets` puro (+ `UsageDayBucketsTest`), `AppRuleDAO.setWarnBefore`.
+- Recursos: `strings_app_detail.xml` EN+ES, `dimens_app_detail.xml`, `styles_app_detail.xml` (`Widget.BBetter.Chip.Preset`), `color/bb_app_detail_chip_*` (selectores sobre tokens bb_*), drawables `bg_app_detail_*`. Sin colores nuevos.
+- ScreenTimeFragment ya no usa `AppLimitDialog` (u19); lock y apertura siguen igual. `app-limits.md` actualizado.
+- Verificacion: emulator-5560 (lease u20, liberado), DB sembrada con Settings limite 2 min; capturas `mig-u20-app-detail` y `-bottom`; preset 45m escribe el limite; sin crash de la app.
+
+## u21 · Compat: popups y diálogos
+
+_(Consolidado desde `notes/u21.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- `popup_error`, `popup_message`, `popup_description`: quitadas las raíces `#FFFFFF`, `@color/black|white`; el fondo lo da `RoundedDialog` (bb_surface_card). Texto con `TextAppearance.BBetter.Body/Title`, botón OK = `MaterialButton` `Widget.BBetter.Button.Primary` (id `okButton` intacto). Los `EditText`/hint de `popup_description` usan `bb_on_surface` / `bb_on_surface_muted` (antes negro sobre oscuro).
+- `popup_home_timer_configuration` (TimerPopup): Cancel = `Button.Text`, Save = `Button.Primary`; `44sp` -> `@dimen/text_display_compact`.
+- `popup_focus_streak` (FocusStreakPopup): Close pasa a `MaterialButton` `Button.Text` (mismo id `streakCloseButton`).
+- `popup_first_focus` (FirstFocusCelebrationPopup): botón `firstFocusButton` = `Button.Reward`; badge con `TextAppearance.BBetter.Display` + dimen.
+- Resto (notifications, repetition, usage/accessibility disclosure, dialog_*) ya usaban tokens y TextAppearance/estilos; sin cambios.
+- Token audit: TOTAL 41 -> 26, baseline reescrito (--update).
+- Emulador emulator-5560 (lease liberado). Sin FATAL EXCEPTION. Capturas (6): timer-popup, streak-popup, repetition-popup, repetition-full, description-popup, notifications-popup.
+- No alcanzados en emulador: AlertPopup/popup_error (fallo de sesión), MessagePopup (nadie lo llama), FirstFocusCelebrationPopup (primer pomodoro del día), usage/accessibility disclosure.
+
+## u22 · Compat: calendario mes/semana, formularios, hoja rapida
+
+_(Consolidado desde `notes/u22.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- Mes: `cell_month_day` usa `TextAppearance.BBetter.Label` (sin 14sp literal); seleccion (`bg_calendar_day_selected`) y recuadro de hoy (`bg_calendar_day_today`) comparten el inset `calendar_cell_inset` (A10). Rejilla (cabecera, leyenda, CalendarView) dentro de `monthGridCard` con `bg_calendar_grid_card` (B7). Flechas prev/next a 48dp (A4).
+- Semana: `fragment_calendar_week.xml` fija los 23 atributos de color de WeekView; `ViewStateFactory.kt` ya no usa `Color.WHITE/LTGRAY` (defaults `bb_on_primary`, `bb_on_surface`, `bb_surface_subtle`); `WeekViewItemAdapter(Context)` elige `bb_on_primary` o `bb_on_surface` segun la luminancia del color de categoria. Linea de ahora y su punto: `bb_accent_reward` (antes `bb_accent_energy`, obsoleto).
+- Detalle del dia: `item_day_event` sin tamanos literales (BodyStrong / Caption), fila min 48dp; `dayDetailTitle` BodyStrong. `no_events_today` cableado en `CalendarFragmentMonth` (`dayDetailEmptyText.setText`).
+- Formularios: ya usaban tokens; `toolbar_close_or_save` (compartido por evento y tarea) pasa a areas de 48dp con `bg_close_circle_touch` / `bg_save_pill_touch` (inset: visual 40/36dp). `bg_chip_energy` apunta a `bb_primary`.
+- Hoja rapida: los 4 controles tocables con `minHeight` 48dp.
+- Recursos: `values/dimens_calendar.xml`; sin strings ni colores nuevos. Baseline de token_audit actualizado (java_color_const 5->0, textsize_literal_sp 10->6).
+- Verificacion: emulator-5560 (lease u22; el emulador de 2 GB por defecto moria por lowmemorykiller, se arranco Pixel_9a con -memory 4096), sin FATAL en `logcat -b crash`. Capturas mig-u22-month/week/create-event/create-task/quickadd.
+- Observado, no tocado: los NumberPicker de duracion (activity_create_task) dibujan sus divisores como tachado sobre 01/24 y 05/55 (tema del sistema); la semana de la captura no muestra el evento (esta a las 00:00, fuera de vista).
+
+## u23 · Compat: splash, AppPicker, overlay de bloqueo
+
+_(Consolidado desde `notes/u23.md` en u24. Preguntas en [`migracion-visual-stitch-questions.md`](migracion-visual-stitch-questions.md), placeholders en `ui-placeholders.md`, selectores en `bbetter-selectors.md`.)_
+
+- Splash: manifest usa `Theme.BBetter.NoActionBar` (ventana `bb_surface`); `SplashTheme` y su `blue_oval` eliminados de `style.xml` (el drawable `blue_oval` queda sin uso: u24). `activity_splash.xml` con fondo `@color/bb_surface` y logo 160dp (`dimens_splash.xml`).
+- `f_streak_logo` ahora WebP en `drawable-mdpi..xxxhdpi` (160/240/320/480/500 px, ~10-47 KB); borrado el PNG de `drawable-v24` (249 KB). Los PNG `a`-`e_streak_logo` intactos (u24).
+- `item_app_pick`: fila `bg_app_row` (tarjeta elevada redondeada como Screen time), icono 40dp, etiqueta `BodyStrong`. `activity_app_picker`: titulo Headline, Save como pastilla `bg_save_pill`, sin divisor.
+- `view_block_cover`: colores `@color/bb_*` explicitos, `android:tint` en lugar de `app:tint` (la factory de AppCompat no existe en el contexto del servicio). Cambio minimo en `BlockerAccessibilityService.showCover`: infla con `ContextThemeWrapper(this, R.style.Theme_BBetter)` para que los `?attr` de los vectores resuelvan.
+- Verificacion: emulator-5560 (lease u23, liberado). Capturas `mig-u23-splash`, `-app-picker`, `-block-cover` (cover disparada por Focus shield + sesion en curso + Ajustes). Sin FATAL EXCEPTION.
+
+## u24 · Limpieza de legado, documentación y consolidación
+
+- Fusionadas las notas de u13b–u23 (arriba), las preguntas (`migracion-visual-stitch-questions.md`, reorganizado por pantalla), los placeholders (`ui-placeholders.md`) y los selectores (`bbetter-selectors.md`). Los ficheros `notes/*.md` se conservan como fuente original.
+- Legado borrado (guiado por `./gradlew lint` / `UnusedResources`): la paleta heredada de `colors.xml` (31 colores), `bb_accent_energy` y `bb_surface_energy_subtle` (sus 5 usos pasan a `bb_primary` / `bb_primary_container`), los 17 estilos muertos de `style.xml`, 33 drawables sin referencia (incluidos los PNG `a`–`e_streak_logo`, `toggle_on/off`, `blue_oval`, `round_background`...), `fragment_calendar_week_simple.xml`, `divider_horizontal.xml`, 19 dimens y ~45 strings sin uso (EN + ES).
+- Conservado por referencia indirecta: los menús `close_or_save`/`home_toolbar`/`toolbar` (los ids los usa `ToolbarHelper`) y lo que cuelgan (`action_streak_counter`, `ic_settings_24`, `ic_hourglass_bottom_24`, `ic_calendar_24`, `home_streak_*`); `chip_status_min_height` (lo usa `Widget.BBetter.Chip.Status`); `streak_day_marker_size`; `raw/readme.txt`. `AppLimitDialog` no se borró (ver preguntas, Screen time / Detalle de app): solo la mencionan comentarios, pero ningún camino lo abre.
+- Lint: `ic_crown_24` (`.5` -> `0.5`) y `view_block_cover.xml` (`tools:ignore="UseAppTint"`: el contexto del servicio de accesibilidad no tiene la factory de AppCompat, ver u23).
+- Auditoría de tokens: TOTAL 26 -> 1 (hex, `@android:color/white|black`, legacy y `Color.*` a 0; queda 1 `textSize` literal de `CalendarLegendDay`). Baseline reescrito con `--update`.
+- Hook y `token_audit.py`: la lista de nombres heredados pasa a ser una lista de bloqueo (ya no están en `colors.xml`).

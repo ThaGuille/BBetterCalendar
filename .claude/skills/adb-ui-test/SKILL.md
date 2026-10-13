@@ -50,14 +50,14 @@ re-derive ids.
    into context):
    ```powershell
    .\scripts\find-node.ps1 -Id navigation_progress -Tap
-   .\scripts\find-node.ps1 -Id granularity_month   -Tap
-   .\scripts\find-node.ps1 -Id range_prev          -Tap
+   .\scripts\find-node.ps1 -Id progressGranularity   -Tap
+   .\scripts\find-node.ps1 -Id periodNavPrevious          -Tap
    .\scripts\find-node.ps1 -List                      # discovery: id | text | desc | bounds
    ```
 
 4. **Assert the effect + scan for crashes**:
    ```powershell
-   .\scripts\find-node.ps1 -Id range_label                     # prints its text
+   .\scripts\find-node.ps1 -Id periodNavTitle                     # prints its text
    adb -s emulator-5554 logcat -d -b crash                     # must contain no FATAL EXCEPTION
    ```
 
@@ -88,9 +88,9 @@ cd .claude\skills\adb-ui-test\scripts
 .\bb-adb.ps1 -Scenario progress-smoke -Init
 .\bb-adb.ps1 -Scenario progress-smoke -Start .configuration.SplashActivity
 .\bb-adb.ps1 -Scenario progress-smoke -Tap navigation_progress
-.\bb-adb.ps1 -Scenario progress-smoke -Tap granularity_month
-.\bb-adb.ps1 -Scenario progress-smoke -Tap range_prev
-.\bb-adb.ps1 -Scenario progress-smoke -AssertId range_label
+.\bb-adb.ps1 -Scenario progress-smoke -Tap progressGranularity
+.\bb-adb.ps1 -Scenario progress-smoke -Tap periodNavPrevious
+.\bb-adb.ps1 -Scenario progress-smoke -AssertId periodNavTitle
 # later, as many times as you like, for free:
 .\replay.ps1 progress-smoke
 ```
@@ -103,7 +103,7 @@ when that scenario renders a chart you need to eyeball.
 
 ## RIGHT / WRONG
 
-- **RIGHT:** `find-node.ps1 -Id range_label` then assert its **text** changed after a tap.
+- **RIGHT:** `find-node.ps1 -Id periodNavTitle` then assert its **text** changed after a tap.
   **WRONG:** trying to read which segmented button "looks selected" — selection is a
   background-drawable swap, invisible to the dump.
 - **RIGHT:** assert chart *data* with JUnit on `ProgressViewModel`.
@@ -124,14 +124,14 @@ when that scenario renders a chart you need to eyeball.
   structure/text/crash checks.
 - Chart *data* correctness still belongs in JUnit on `ProgressViewModel`; a screenshot proves
   "it rendered / looks right", not "the numbers are correct".
-- Segmented selection state isn't reliably in the dump → assert the resulting `range_label`
+- Segmented selection state isn't reliably in the dump → assert the resulting `periodNavTitle`
   text or a logcat marker instead.
 
 ## Verification checklist
 
 - [ ] `adb devices` shows the target.
 - [ ] App installs and `am start` launches without `FATAL EXCEPTION` in `logcat -b crash`.
-- [ ] `find-node.ps1 -Id range_label` returns `FOUND ...` (proves navigation reached Progress).
+- [ ] `find-node.ps1 -Id periodNavTitle` returns `FOUND ...` (proves navigation reached Progress).
 - [ ] A non-existent id returns `NOT FOUND` with exit code 1 (proves assertions actually gate).
 - [ ] `replay.ps1 <scenario>` reports `PASS`.
 - [ ] (charts only) `capture-screen.ps1 -Label x` prints `SAVED ...png` and the file opens as a

@@ -35,7 +35,6 @@
     <string name="progress_blocking_no_apps">No apps tracked yet</string>
     <string name="progress_blocking_locked">Usage access is off</string>
     <string name="progress_blocking_percent">%1$d%% of daily limit</string>
-    <string name="progress_blocking_no_limits">No daily limits set</string>
     <string name="progress_blocking_remaining">%1$s remaining</string>
     <string name="progress_blocking_blocked">Blocked</string>
     <string name="progress_blocking_opens_count">%1$d opens</string>

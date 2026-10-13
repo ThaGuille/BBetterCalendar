@@ -1,8 +1,5 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="cuarenta_y_ocho">56dp</dimen>
 
     <!-- Spacing scale (u7): 4/8 grid (.stitch/DESIGN.md §5). spacing_lg was 25dp. -->
     <dimen name="spacing_xs">4dp</dimen>
@@ -14,15 +11,10 @@
     <dimen name="spacing_xl">36dp</dimen>
 
     <!-- Form rows -->
-    <dimen name="form_row_height">70dp</dimen>
-    <dimen name="form_row_icon_size">45dp</dimen>
-    <dimen name="form_row_arrow_size">20dp</dimen>
     <dimen name="form_row_inner_height">45dp</dimen>
 
     <!-- Buttons -->
     <dimen name="icon_button_size">56dp</dimen>
-    <dimen name="primary_button_size">128dp</dimen>
-    <dimen name="segmented_button_height">36dp</dimen>
     <dimen name="toggle_button_size">30dp</dimen>
     <!-- u7 component sizes (.stitch/DESIGN.md §4 + .stitch/html). -->
     <!-- Full-width pill buttons (Widget.BBetter.Button.*). -->
@@ -36,7 +28,6 @@
     <dimen name="segmented_track_height">40dp</dimen>
     <dimen name="segmented_track_padding">4dp</dimen>
     <dimen name="chip_min_height">32dp</dimen>
-    <dimen name="chip_status_min_height">24dp</dimen>
     <!-- Progress indicators: linear 6dp (html h-1.5), focus ring 7dp (01-focus-running svg). -->
     <dimen name="progress_linear_thickness">6dp</dimen>
     <dimen name="progress_ring_thickness">7dp</dimen>
@@ -96,8 +87,6 @@
     <!-- u9: number inside a stat tile (html text-[22px] / text-2xl) and tiny meta (html 10-11px). -->
     <dimen name="text_stat_tile">22sp</dimen>
     <dimen name="text_micro">11sp</dimen>
-    <dimen name="text_small">12sp</dimen>
-    <dimen name="text_dialog">18sp</dimen>
 
     <!-- Corner radii (u7). Tailwind in .stitch/html: rounded-lg 8px, rounded-xl 12px,
          rounded-[16px], rounded-[20px] = cards, rounded-full = pills. -->
@@ -124,11 +113,9 @@
     <!-- Home screen -->
     <dimen name="home_card_padding">20dp</dimen>
     <dimen name="home_play_button_size">@dimen/play_button_size</dimen>
-    <dimen name="home_stat_icon_size">28dp</dimen>
     <!-- Iconos del par fecha / tiempo estudiado del header (spec focus-mode-and-streak) -->
     <dimen name="home_inline_stat_icon_size">16dp</dimen>
     <!-- Botón "cancelar sesión" del focus mode: satélite del play, deliberadamente menor -->
-    <dimen name="home_secondary_button_size">48dp</dimen>
     <!-- u13 · Home (html 04) -->
     <dimen name="home_timer_text">72sp</dimen>          <!-- text-7xl hero countdown -->
     <dimen name="home_mode_dot_size">6dp</dimen>        <!-- w-1.5 dot in the mode chip -->
@@ -147,13 +134,8 @@
     <dimen name="focus_cycle_dot_inset">2dp</dimen>
     <dimen name="focus_cycle_dot_gap">4dp</dimen>        <!-- gap-2 minus the ring boxes -->
     <dimen name="focus_friend_avatar_size">44dp</dimen>  <!-- w-11 -->
-    <dimen name="focus_icon_button">48dp</dimen>         <!-- w-12 top-bar action -->
-    <!-- Celda del calendario de rachas dentro del popup -->
-    <dimen name="streak_day_marker_size">30dp</dimen>
 
     <!-- Fixed positions formerly hardcoded -->
-    <dimen name="home_timer_button_margin_bottom">45dp</dimen>
-    <dimen name="calendar_fab_margin_bottom">65dp</dimen>
 
     <!-- Dialog widths -->
     <dimen name="dialog_min_width">240dp</dimen>
@@ -161,7 +143,6 @@
     <!-- Progress screen -->
     <!-- Carrusel algo más bajo (era 300dp) para dejar sitio a la banda de uso de Phase 2; la
          pantalla scrollea entera, así que en pantallas pequeñas no se recorta nada. -->
-    <dimen name="progress_chart_height">240dp</dimen>
     <!-- u10 ChartStyler: latest-point marker (bg_chart_point_reward): 16dp halo, 10dp dot, 2dp ring. -->
     <dimen name="chart_point_halo">16dp</dimen>
     <dimen name="chart_point_inset">3dp</dimen>
@@ -169,4 +150,7 @@
     <!-- Altura mínima del área de la banda de uso (tarjeta LOCKED/EMPTY o lista) para que no quede
          aplastada cuando hay pocas apps. -->
     <dimen name="progress_usage_band_min_height">180dp</dimen>
+    <dimen name="chip_status_min_height">24dp</dimen>
+    <!-- Celda del calendario de rachas dentro del popup -->
+    <dimen name="streak_day_marker_size">30dp</dimen>
 </resources>

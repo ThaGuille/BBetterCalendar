@@ -1,6 +1,6 @@
 # System — Calendar (`ui/calendar/` + `calendarEntries/` + `notifications/event/`)
 
-**Last verified:** 2026-10-06 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-13 (DB v14, u22/u24) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Month and week views over a single unified entity (`CalendarEntry`) that represents events,
 tasks, and reminders via an int `type` field. Includes creation (`AddEventActivity`) and the
@@ -85,3 +85,9 @@ or get alarms.
 | 2026-08-29 | Repository layer: `CalendarViewModel.refresh()` (and both `CalendarFragmentMonth`/`Week` call sites) deleted — Room's `LiveData` query already auto-invalidated correctly, the "InvalidationTracker lag" comment was folklore, not the real cause. Proven on-device. No schema change. | — |
 | 2026-09-01 | Project soft deadlines painted read-only on the Calendar: `Type.DEADLINE` + `ProjectDeadlineItemMapper` (negative id, zero-length span) merged into `CalendarViewModel` via `MediatorLiveData` alongside the entries query — no mirror `CalendarEntry` rows. Day-detail taps wired for deadlines only. `BootReceiver` gains a third tenant. No schema change. | — |
 | 2026-09-10 | Recurring series can be hidden from the Calendar while staying actionable on Home: `hiddenInCalendar` column on `CalendarEntry` (DB v13→v14, `MIGRATION_13_14` additive + backfill), `CalendarEntryDAO.getVisibleEventsBetween` powers `CalendarViewModel` only, `RepetitionPopup` gains a "Hide from calendar" row (checked by default, hidden when "Doesn't repeat"). Verified on emulator against a pre-existing DB: migration ran clean, no crash, hide/show behavior confirmed on Calendar and Home. | — |
+
+## u22 token pass (2026-10-13)
+
+- Month grid (`cell_month_day`, `bg_calendar_day_selected` / `bg_calendar_day_today`) shares the `calendar_cell_inset`; the grid sits inside the `monthGridCard` card. `dayDetailEmptyText` shows `no_events_today`.
+- WeekView: the 23 colour attributes are set in `fragment_calendar_week.xml`; `ViewStateFactory.kt` no longer uses `Color.WHITE/LTGRAY`; `WeekViewItemAdapter(Context)` picks `bb_on_primary` or `bb_on_surface` from the category colour luminance (threshold 0.4). The "now" line uses `bb_accent_reward`.
+- Forms: `toolbar_close_or_save` has 48dp touch areas (`bg_close_circle_touch`, `bg_save_pill_touch`); the quick-add sheet controls have `minHeight` 48dp.

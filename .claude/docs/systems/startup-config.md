@@ -1,6 +1,6 @@
 # System — Startup & configuration (`configuration/`)
 
-**Last verified:** 2026-07-05 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-13 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 App entry point and the timer/rest/cycle settings that back the Pomodoro screen. `SplashActivity`
 is the real `LAUNCHER` activity: it does first-run DB seeding, the daily-stats reset, and streak

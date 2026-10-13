@@ -1,6 +1,6 @@
 # System — Notifications infra (`notifications/`)
 
-**Last verified:** 2026-10-06 · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-13 · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Shared notification plumbing every feature-specific notifier builds on: channel definitions, the
 actual `NotificationManagerCompat` wrapper, a spec builder, and `POST_NOTIFICATIONS` runtime

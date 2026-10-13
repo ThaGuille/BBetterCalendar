@@ -71,7 +71,7 @@ If a build hangs: `.\gradlew.bat --stop` then retry. Full table of commands in [
 2. **Token** — add to `bb_*` block at the **top** of [`colors.xml`](../../app/src/main/res/values/colors.xml). Name semantically (`bb_warning`, not `bb_yellow`).
 3. **Theme wiring** — if it should override a Material role (`colorTertiary`, etc.), add an `<item>` to `Theme.BBetter` in [`themes.xml`](../../app/src/main/res/values/themes.xml).
 4. **Drawable / chip** — if there's a recurring shape (chip background, indicator), add a matching `bg_<name>.xml`.
-5. **Don't** touch the legacy palette section.
+5. **Don't** bring back the legacy palette (deleted in u24; the audit and hook flag its names).
 
 **Verify**: render in the Android Studio preview against `Theme.BBetter`; spot-check on a real device for contrast.
 

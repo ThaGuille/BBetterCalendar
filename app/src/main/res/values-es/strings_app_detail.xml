@@ -4,7 +4,6 @@
     <string name="app_detail_status_limited">Con límite</string>
     <string name="app_detail_status_no_limit">Sin límite</string>
     <string name="app_detail_subtitle_join">%1$s • %2$s</string>
-    <string name="app_detail_unknown_app">App no instalada</string>
 
     <string-array name="app_detail_periods">
         <item>Semana</item>

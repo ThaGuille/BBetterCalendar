@@ -33,7 +33,6 @@
     <string name="progress_blocking_no_apps">Aún no sigues ninguna app</string>
     <string name="progress_blocking_locked">El acceso a uso está desactivado</string>
     <string name="progress_blocking_percent">%1$d%% del límite diario</string>
-    <string name="progress_blocking_no_limits">Sin límites diarios</string>
     <string name="progress_blocking_remaining">%1$s restantes</string>
     <string name="progress_blocking_blocked">Bloqueada</string>
     <string name="progress_blocking_opens_count">%1$d aperturas</string>

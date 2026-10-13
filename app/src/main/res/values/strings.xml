@@ -10,7 +10,6 @@
     <string name="title_all_progress">All progress</string>
     <string name="title_screen_time">Screen time &amp; blocking</string>
     <string name="title_app_detail">App details</string>
-    <string name="screen_placeholder_message">This screen is on its way.</string>
     <string name="popup_ok">OK</string>
     <string name="popup_timer_failed">Timer failed</string>
     <string name="picker_selected_format">Selected: %1$s</string>
@@ -27,12 +26,9 @@
     <string name="create_project_name_required">Give it a name</string>
     <string name="project_progress_format">%1$d/%2$d done</string>
     <string name="project_progress_empty">No items yet</string>
-    <string name="project_progress_with_deadline" translatable="false">%1$s · %2$s</string>
-    <string name="project_deadline_date_format">due %1$s</string>
     <string name="project_deadline_approaching">Due soon</string>
     <string name="project_deadline_passed">Overdue</string>
     <string name="project_detail_title">Project</string>
-    <string name="project_detail_save">Save</string>
     <string name="project_detail_items_title">Items</string>
     <string name="project_detail_add_item">Add item</string>
     <string name="project_detail_items_empty">No items yet — add one</string>
@@ -40,12 +36,9 @@
     <string name="project_detail_delete">Delete project</string>
     <string name="project_detail_delete_confirm_title">Delete this project?</string>
     <string name="project_detail_delete_confirm_message">This deletes the project and all its items. This can\'t be undone.</string>
-    <string name="project_item_no_date">No date</string>
     <string name="title_calendar">Calendar</string>
-    <string name="title">Title</string>
     <string name="event">Event</string>
     <string name="task">Task</string>
-    <string name="notification">Notification</string>
 
     <string name="events_for">Events for %1$s</string>
     <string name="month_view_prev">Previous month</string>
@@ -59,25 +52,13 @@
 
     <!-- Home screen -->
     <string name="home_greeting">Hi, %1$s</string>
-    <string name="home_today_card_title">Today</string>
     <string name="home_mode_concentration">Concentration</string>
     <string name="home_mode_rest">Rest</string>
-    <string name="home_skip_rest">Skip rest</string>
     <string name="home_play">Start timer</string>
-    <string name="home_pause">Pause timer</string>
     <!-- El botón dice su estado (spec frontend-structure-cleanup) -->
     <string name="home_block_mode_off">Block mode: off</string>
     <string name="home_block_mode_on">Block mode: on</string>
     <string name="home_block_mode_pending">Block mode: needs permission</string>
-    <string name="home_timer_settings">Timer settings</string>
-    <string name="home_cycle_finished">Cycle finished — you completed your study cycle</string>
-    <string name="home_stat_studied_label">Studied today</string>
-    <string name="home_stat_streak_label">Current streak</string>
-    <string name="home_stat_fails_label">Missed sessions</string>
-    <string name="home_stat_studied_placeholder" translatable="false">00:00</string>
-    <string name="home_stat_studied_format">%1$s today</string>
-    <string name="home_stat_streak_placeholder">0 days</string>
-    <string name="home_stat_fails_placeholder" translatable="false">0</string>
 
     <!-- Home: Today task list + quick-add (spec tasks-home-today) -->
     <string name="home_tasks_card_title">Tasks</string>
@@ -103,15 +84,12 @@
     <string name="timer_range_max">90 min</string>
     <string name="timer_range_rest_max">30 min</string>
     <string name="timer_cycles_label">Total cycles</string>
-    <string name="timer_infinite_label">Infinite</string>
     <string name="timer_infinite_symbol" translatable="false">∞</string>
     <string name="timer_auto_cycle_label">Auto-chain cycles</string>
     <string name="timer_auto_cycle_hint">Start the next session automatically</string>
     <string name="timer_btn_restore">Restore\ndefaults</string>
     <string name="timer_btn_cancel">Cancel</string>
     <string name="timer_btn_save">Save</string>
-    <string name="timer_error_range">Timer must be between 1 and 90 minutes.</string>
-    <string name="timer_error_rest_range">Rest must be between 1 minute and the concentration time.</string>
     <string name="timer_error_cycles_range">Cycles must be between 1 and 15.</string>
 
     <!-- Create event / task screen -->
@@ -122,10 +100,7 @@
     <string name="create_entry_segment_reminder">Reminder</string>
     <string name="create_entry_btn_save">Save</string>
     <string name="create_entry_btn_close">Close</string>
-    <string name="create_entry_starts">Starts</string>
-    <string name="create_entry_ends">Ends</string>
     <string name="create_entry_duration">Duration</string>
-    <string name="create_entry_repetition">Repetition</string>
     <string name="create_entry_notification_hint">Add notification</string>
     <string name="create_entry_description_hint">Add description</string>
     <string name="create_entry_title_hint">Title</string>
@@ -188,40 +163,27 @@
     <string name="progress_granularity_day">Day</string>
     <string name="progress_granularity_week">Week</string>
     <string name="progress_granularity_month">Month</string>
-    <string name="progress_range_prev">Previous range</string>
-    <string name="progress_range_next">Next range</string>
     <string name="progress_range_today">Today</string>
     <string name="progress_range_yesterday">Yesterday</string>
     <string name="progress_range_this_week">This week</string>
     <string name="progress_range_this_month">This month</string>
     <!-- Etiquetas cortas: son pestañas fijas de 4 (spec frontend-structure-cleanup) -->
-    <string name="progress_chart_concent">Focus</string>
-    <string name="progress_chart_fails">Fails</string>
-    <string name="progress_chart_when">Hours</string>
-    <string name="progress_chart_projects">Projects</string>
     <!-- u10 ChartStyler -->
     <string name="chart_no_data">No data for this period yet</string>
     <string name="chart_band_focus">FOCUS</string>
     <string name="chart_limit_label">Limit %1$s</string>
 
     <!-- Progress screen — project-progress band (spec project-deadlines-progress) -->
-    <string name="progress_projects_header">Projects</string>
     <string name="progress_project_minutes_format" translatable="false">%1$dm</string>
 
     <!-- Progress screen — phone & app usage (Phase 2) -->
     <string name="progress_usage_header">Screen time</string>
     <string name="progress_usage_time_none" translatable="false">—</string>
-    <string name="progress_usage_add_apps">Add apps</string>
-    <string name="progress_usage_block_toggle">Enforce daily limit</string>
-    <string name="progress_enforce_master_on">Enforcing app limits · tap to pause</string>
-    <string name="progress_enforce_master_off">App-limit enforcement paused · tap to resume</string>
     <string name="progress_usage_locked_title">See your app usage</string>
     <string name="progress_usage_locked_body">Turn on Usage access to track the time you spend in the apps you choose. Your usage stays on this device.</string>
     <string name="progress_usage_locked_cta">Turn on usage access</string>
     <string name="progress_usage_empty_title">No apps tracked yet</string>
     <string name="progress_usage_empty_body">Pick the apps you want to keep an eye on and they\'ll show up here.</string>
-    <string name="progress_usage_empty_cta">Add apps</string>
-    <string name="progress_usage_no_limit">no limit</string>
     <string name="progress_usage_limit_progress_format" translatable="false">%1$s / %2$s</string>
 
     <!-- App-limit dialog (Phase 3 — tap a usage row to set/clear a daily limit) -->
@@ -323,15 +285,10 @@
     <!-- Objetivos de minutos + "focus this" (spec focus-attribution) -->
     <string name="quick_add_target_hint">Target minutes (optional)</string>
     <string name="focus_progress_format" translatable="false">%1$d/%2$dm</string>
-    <string name="task_focus_this_symbol" translatable="false">▶</string>
     <string name="task_focus_this_desc">Focus this task</string>
-    <string name="home_focus_banner">Focusing: %1$s</string>
 
     <!-- Focus mode + racha de 30 días (spec focus-mode-and-streak) -->
-    <string name="home_cancel_session">Cancel session</string>
-    <string name="home_streak_title">Focus days</string>
     <string name="home_streak_desc">Days with a completed pomodoro</string>
-    <string name="home_streak_placeholder" translatable="false">0</string>
     <string name="focus_streak_popup_title">Focus days</string>
     <string name="focus_streak_summary">%1$d of the last 30 days with a completed pomodoro</string>
     <string name="focus_streak_legend">Day you finished a pomodoro</string>
@@ -428,4 +385,6 @@
     <string name="focus_invite_soon">Inviting friends is coming soon</string>
     <string name="focus_cycles_desc">Cycle %1$d of %2$d</string>
 
+    <string name="home_streak_title">Focus days</string>
+    <string name="home_streak_placeholder" translatable="false">0</string>
 </resources>

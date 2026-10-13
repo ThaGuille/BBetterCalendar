@@ -1,8 +1,8 @@
 # Frontend overhaul — hoja de ruta
 
-**Status:** in progress
+**Status:** in progress — fases 2–6 sustituidas por [`migracion-visual-stitch.md`](migracion-visual-stitch.md) (merged, u24)
 **Created:** 2026-09-10
-**Last updated:** 2026-09-11
+**Last updated:** 2026-10-13
 
 > **Fase 0 cerrada** (2026-09-11) → [`frontend-fase-0-baseline.md`](frontend-fase-0-baseline.md).
 > Corrige tres números de la auditoría de abajo: los tokens `bb_*` son **14**, no 49; en oscuro la app

@@ -1,6 +1,6 @@
 # System — Data model (`stats/` + `database/`)
 
-**Last verified:** 2026-10-06 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-13 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Room persistence layer: `AppDatabase` (8 entities, version 14) plus every entity/DAO under
 `stats/`. This is the **contract hub** — sibling system docs (`app-limits.md`,

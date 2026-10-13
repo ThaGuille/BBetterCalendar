@@ -4,7 +4,7 @@
     <!-- ============================================================ -->
     <!-- BBetter semantic tokens (dark-first, Stitch «Calm Focus»).    -->
     <!-- Aliases of the primitives in palette.xml — never a raw hex.   -->
-    <!-- Prefer these tokens over the legacy color names below.        -->
+    <!-- The legacy palette (azul, verde, purple_500, ...) was deleted in u24.        -->
     <!-- A future light theme only needs values-notnight/colors.xml    -->
     <!-- redefining these names.                                       -->
     <!-- WCAG table: .claude/plans/migracion-visual-stitch-impl.md u4. -->
@@ -63,52 +63,6 @@
     <color name="bb_project_3">@color/sage_200</color>
     <color name="bb_project_4">@color/seafoam_200</color>
 
-    <!-- Obsolete aliases — kept so old references compile. Removed in u24. -->
-    <color name="bb_accent_energy">@color/bb_primary</color>
-    <color name="bb_surface_energy_subtle">@color/bb_primary_container</color>
-
-    <!-- ============================================================ -->
-    <!-- Legacy palette (kept so existing layouts keep rendering).     -->
-    <!-- New code should prefer the bb_* semantic tokens above.        -->
-    <!-- ============================================================ -->
-
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="transparent">#00FFFFFF</color>
-
-    <color name="azul">#FF007BFF</color>
-    <color name="naranja">#FFFF9F40</color>
-    <color name="blanco">#FFFFFFFF</color>
-    <color name="gris">#FF708090</color>
-    <color name="gris_claro">#F1F2F3</color>
-    <color name="rojo">#FFFF0000</color>
-
-    <color name="verde">#FF2ECC71</color>
-    <color name="amarillo">#FFF1C40F</color>
-    <color name="beige">#FFF5F5DC</color>
-    <color name="marron_claro">#FFD2B48C</color>
-
-    <color name="azul_marino">#FF34495E</color>
-    <color name="teal">#FF48C9B0</color>
-    <color name="plata">#FFC0C0C0</color>
-
-    <color name="purpura">#FF9B59B6</color>
-    <color name="magenta">#FFE91E63</color>
-    <color name="gris_oscuro">#FF34495E</color>
-
-    <color name="eventalkNaranja">#FFFF4E03</color>
-    <color name="eventalkAzul">#FF0336FF</color>
-    <color name="eventalkAzulSecundario">#FF819BFF</color>
-
-    <color name="c_azul_claro">#AEDFF7</color>
-    <color name="c_verde_claro">#C1E1C1</color>
-    <color name="c_azul_oscuro">#4A90E2</color>
-    <color name="c_verde_oscuro">#77DD77</color>
 
     <!-- Calendar categorical colors (provisional until the calendar is designed, plan u4):
          aliases of primitives, never hex copies. Text on them is bb_on_primary (pine_950). -->

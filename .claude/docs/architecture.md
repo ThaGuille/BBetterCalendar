@@ -133,7 +133,7 @@ graph LR
     Calendar -.->|"BootReceiver also re-arms"| AppLimits
 ```
 
-Declared exclusions from the system docs (owned elsewhere): `ui/projects` (genuine stub),
+Declared exclusions from the system docs (owned elsewhere):
 `popups`/`helpers`/`feedback` (see [`architectural_patterns.md`](architectural_patterns.md)).
 
 ---
@@ -150,19 +150,22 @@ graph LR
     CalMonth -->|"toolbar switch"| CalWeek["CalendarFragmentWeek"]
     CalWeek  -->|"toolbar switch"| CalMonth
     Projects --> ProjectDetail["ProjectDetailFragment (projectId: int)"]
-    Home -.-> Focus["FocusFragment (u14)"]
-    Focus -.-> CycleComplete["CycleCompleteFragment (u15)"]
-    Progress -.-> AllProgress["AllProgressFragment (u18)"]
-    Progress -.-> ScreenTime["ScreenTimeFragment (u19)"]
-    ScreenTime -.-> AppDetail["AppDetailFragment (packageName: string, u20)"]
+    Home --> Focus["FocusFragment"]
+    Focus --> CycleComplete["CycleCompleteFragment"]
+    Progress --> AllProgress["AllProgressFragment"]
+    Progress --> ScreenTime["ScreenTimeFragment"]
+    ScreenTime --> AppDetail["AppDetailFragment (packageName: string)"]
 ```
 
 Destination ids (`res/navigation/mobile_navigation.xml`): top level `navigation_home`,
 `navigation_progress`, `navigation_calendar_month`, `navigation_calendar_week`,
 `navigation_projects`; secondary `navigation_project_detail` (global action
 `action_global_project_detail`), `navigation_focus`, `navigation_cycle_complete`,
-`navigation_all_progress`, `navigation_screen_time`, `navigation_app_detail`. Dotted edges are
-the entry points the screen units (u13–u20) add; until then the secondary screens are shells.
+`navigation_all_progress`, `navigation_screen_time`, `navigation_app_detail`. Entry points: Home play
+button / timer card → Focus (finishing the cycle navigates to `navigation_cycle_complete`, popping Focus);
+Progress "See all your progress" → All progress and "Manage app blocking" → Screen time; Screen time
+row / chevron / "Set limit" → App detail (`packageName`); Projects card long-press or "Open project" →
+project detail. Done in u13–u20; Back always returns to the previous screen.
 
 **Chrome per destination (u12):** `MainActivity` hides `nav_view` + `nav_divider` from an
 `addOnDestinationChangedListener` unless the destination is in `TOP_LEVEL_DESTINATIONS` (the 5
@@ -175,6 +178,18 @@ arrow and system back both pop to wherever you came from.
 handles `bb_debug_nav` = `focus|cycle_complete|all_progress|screen_time|app_detail`, optional
 `bb_debug_from` = `home|progress|calendar|projects` (tab opened first, so back lands there) and
 `bb_debug_pkg` (for `app_detail`). See `bbetter-selectors.md`.
+
+## Where the visual layers live (u24)
+
+| Path | What |
+|---|---|
+| `ui/common/widget/` | Reusable compound views (`StatTileView`, `SectionHeaderView`, `SegmentedControlView`, `PeriodNavigatorView`, `AppUsageRowView`, `ProgressRowView`, `StreakWeekView`, `AvatarView`, `StepperView`, `EmptyStateView`) |
+| `ui/common/chart/` | `ChartStyler` + rounded bar renderers (`RoundedBarChartRenderer`, `RoundedCombinedChartRenderer`, `BandBarDataSet`) |
+| `ui/common/TopBarHelper`, `SingleEvent` | Secondary-screen top bar; single-use LiveData events |
+| `ui/focus/`, `ui/projects/`, `ui/progress/`, `ui/screentime/` | Screens: Focus + Cycle complete, Projects + detail, Progress + All progress, Screen time + App detail |
+| `social/` | Social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK` (hidden in release) |
+| `res/values/strings_<area>.xml`, `dimens_<area>.xml`, `styles_<area>.xml` | Per-screen resources (EN + `values-es`), see [`style_guide.md`](style_guide.md) §3b |
+| `app/src/debug/` | `DebugGalleryActivity` (widget/chart gallery), debug-only |
 
 Start destination: `SplashActivity` (real `LAUNCHER` activity) → `MainActivity` → `HomeFragment`.
 

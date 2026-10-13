@@ -31,8 +31,9 @@ JAVA = os.path.join(MAIN, "java")
 COLORS_XML = os.path.join(RES, "values", "colors.xml")
 PALETTE_XML = os.path.join(RES, "values", "palette.xml")
 
-# Fallback if colors.xml can't be parsed. Derived from the legacy section of
-# values/colors.xml and .claude/hooks/check-legacy-palette.ps1 (keep in sync).
+# Blocklist of the legacy palette names. u24 deleted them from values/colors.xml, so this list is
+# now the source of truth: any new reference to one of them is a legacy_color hit. Keep it in sync
+# with .claude/hooks/check-legacy-palette.ps1.
 FALLBACK_LEGACY = [
     "purple_200", "purple_500", "purple_700", "teal_200", "teal_700",
     "black", "white", "transparent",
@@ -133,8 +134,8 @@ def legacy_color_names():
         pass
     if not names:
         names = list(FALLBACK_LEGACY)
-    # Always include the hook's historic set even if a later unit deletes them from colors.xml
-    # (a dangling ref would fail the build anyway, but keep the regex stable).
+    # Always include the historic set: u24 deleted the legacy colours from colors.xml, and the
+    # blocklist keeps flagging a reference to one (it would not link anyway).
     for name in FALLBACK_LEGACY:
         if name not in names:
             names.append(name)

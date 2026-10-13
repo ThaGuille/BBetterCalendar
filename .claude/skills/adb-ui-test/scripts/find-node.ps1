@@ -9,7 +9,7 @@
     hah23255/adb-android-control and nighteblis/uiautomatorDump.
 
 .PARAMETER Id
-    resource-id suffix to match (the part after ':id/'), e.g. 'range_label'.
+    resource-id suffix to match (the part after ':id/'), e.g. 'periodNavTitle'.
 
 .PARAMETER Text
     Substring to match against a node's text OR content-desc (case-insensitive).
@@ -31,7 +31,7 @@
 
 .EXAMPLE
     .\find-node.ps1 -Id navigation_progress -Tap
-    .\find-node.ps1 -Id range_label
+    .\find-node.ps1 -Id periodNavTitle
     .\find-node.ps1 -Text "This week"
     .\find-node.ps1 -List
 #>

@@ -1,13 +1,9 @@
 <resources>
     <!-- Tablet overrides — bump up the largest values for 7"+ screens -->
-    <dimen name="primary_button_size">192dp</dimen>
-    <dimen name="form_row_height">88dp</dimen>
-    <dimen name="form_row_icon_size">56dp</dimen>
     <dimen name="icon_button_size">72dp</dimen>
     <!-- u6: escala de DESIGN.md; en tablet solo crecen el número héroe (rango 72-96sp) y el
          cuerpo (antes 24sp, mayor que los títulos de 17/22sp). -->
     <dimen name="text_display">96sp</dimen>
     <dimen name="text_body">17sp</dimen>
     <dimen name="text_body_line_height">25sp</dimen>
-    <dimen name="text_dialog">22sp</dimen>
 </resources>

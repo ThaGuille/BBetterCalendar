@@ -31,8 +31,8 @@
     .\bb-adb.ps1 -Scenario progress-smoke -Init
     .\bb-adb.ps1 -Scenario progress-smoke -Start .configuration.SplashActivity
     .\bb-adb.ps1 -Scenario progress-smoke -Tap navigation_progress
-    .\bb-adb.ps1 -Scenario progress-smoke -Tap granularity_month
-    .\bb-adb.ps1 -Scenario progress-smoke -AssertId range_label
+    .\bb-adb.ps1 -Scenario progress-smoke -Tap progressGranularity
+    .\bb-adb.ps1 -Scenario progress-smoke -AssertId periodNavTitle
 #>
 [CmdletBinding()]
 param(

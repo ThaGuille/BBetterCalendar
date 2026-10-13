@@ -21,7 +21,8 @@
         android:layout_height="@dimen/block_cover_icon_size"
         android:contentDescription="@null"
         android:src="@drawable/ic_block_24"
-        android:tint="@color/bb_danger" />
+        android:tint="@color/bb_danger"
+        tools:ignore="UseAppTint" />
 
     <TextView
         android:id="@+id/block_cover_app_label"

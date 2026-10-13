@@ -1,6 +1,6 @@
 # System — Progress screen (`ui/progress/` + `ui/progress/apppicker/`)
 
-**Last verified:** 2026-10-06 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-13 (DB v13, u24) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Progress tab: a fixed Day/Week/Month + range-stepper header pinned under the toolbar, then
 three stacked, scrolling bands below it. A charts carousel (always renders, no permission needed,
@@ -32,7 +32,7 @@ the `Project` entity itself lives in `projects.md`.
 | `ProjectProgressAdapter` | `ui/progress/ProjectProgressAdapter.java` | Renders project rows; accent colour via `ProjectListAdapter.accentColorResFor(colorIndex)` so a project looks identical here and in the Projects tab |
 | `AppUsageRow` | `ui/progress/AppUsageRow.java` | Plain row data (package, label, foreground ms, limit, enforce flag) — icon resolved by the adapter, not held in the VM |
 | `AppUsageAdapter` | `ui/progress/AppUsageAdapter.java` | Renders usage rows incl. the 3-state enforce toggle (off / active / pending-permission) |
-| `AppLimitDialog` | `ui/progress/AppLimitDialog.java` | Set/clear a tracked app's daily limit; shares the parent Fragment's `ProgressViewModel` instance |
+| `AppLimitDialog` | `ui/progress/AppLimitDialog.java` | **Dead code since u18/u19** (limits are set in App detail); not opened from anywhere. Originally set/clear a tracked app's daily limit via the parent Fragment's `ProgressViewModel` |
 | `UsageDisclosureDialog` | `ui/progress/UsageDisclosureDialog.java` | Consent dialog shown before the Usage Access Settings deep-link |
 | `AppPickerActivity` | `ui/progress/apppicker/AppPickerActivity.java` | Lists launchable installed apps, pre-checks currently tracked, persists selection via `AppRuleDAO` |
 | `AppPickerAdapter` / `AppPickItem` | `ui/progress/apppicker/AppPickerAdapter.java`, `AppPickItem.java` | Multi-select list backing the picker |

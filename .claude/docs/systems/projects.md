@@ -1,6 +1,6 @@
 # System — Projects (`projects/` + `ui/projects/`)
 
-**Last verified:** 2026-10-07 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-13 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Projects bottom-nav tab: a `Project` entity that groups existing `CalendarEntry` (type
 task) rows via a nullable `projectId` — there is no separate "project item" table. Progress is

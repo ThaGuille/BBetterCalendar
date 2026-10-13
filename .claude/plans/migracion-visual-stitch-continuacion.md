@@ -1,8 +1,8 @@
 # Migración visual Stitch — continuación con big-task (u13b–u25)
 
-**Status:** proposed
+**Status:** merged
 **Created:** 2026-10-07
-**Last updated:** 2026-10-07
+**Last updated:** 2026-10-13
 
 > Continuación de [`migracion-visual-stitch.md`](migracion-visual-stitch.md) (plan maestro: contexto,
 > decisiones, arquitectura y **la especificación de cada unidad**, que aquí no se repite). Este fichero

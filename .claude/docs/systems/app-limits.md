@@ -81,7 +81,7 @@ three tiles (tracked apps today vs the previous 7-day daily average, sum of dail
 
 ## Per-app detail (u20)
 
-`ui/screentime/AppDetailFragment` + `AppDetailViewModel` + `AppDetailState` (`navigation_app_detail`, arg `packageName`; reached from the Screen time row / chevron / "Set limit"). It is the only place that edits a limit: `AppLimitDialog` is no longer used from Screen time (Progress still references it until u24).
+`ui/screentime/AppDetailFragment` + `AppDetailViewModel` + `AppDetailState` (`navigation_app_detail`, arg `packageName`; reached from the Screen time row / chevron / "Set limit"). It is the only place that edits a limit: `AppLimitDialog` is no longer opened from anywhere (Screen time since u19, Progress since u18); the class is dead code left in `ui/progress/` (u24 did not delete it, see the questions doc).
 
 - Limit: `StepperView` (0-240 min, step 5; 0 = no limit, "+" from 0 jumps to 30) and presets 30m/45m/1h/No limit -> `AppRuleDAO.setDailyLimit`, then `UsageLimitChecker.run()` + `UsageLimitScheduler.arm()`. Setting 0 also clears `enforceAtLimit`.
 - Warn me before: dialog 5/10/15/30 -> `AppRuleDAO.setWarnBefore` (`warnBeforeMinutes`); disabled without a limit.

@@ -34,7 +34,8 @@ $file   = Split-Path $path -Leaf
 $isCode = $path -match '\.(java|kt)$'
 $isXml  = -not $isCode
 
-# Legacy colour names (everything in values/colors.xml that is not bb_* / calendar_item_*).
+# Legacy colour names: DELETED from values/colors.xml in u24, kept here as a blocklist so a new
+# reference is flagged (final patterns; keep in sync with FALLBACK_LEGACY in token_audit.py).
 # Longest first so e.g. teal_200 wins over teal.
 $legacyNames = @(
     'eventalkAzulSecundario', 'eventalkNaranja', 'eventalkAzul',

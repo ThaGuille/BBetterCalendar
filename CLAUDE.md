@@ -55,7 +55,7 @@ Any design or implementation plan you produce (an `ExitPlanMode` payload, a writ
 
 ### 2. Style tokens are mandatory for new UI
 
-New layouts, drawables, and themes must use the `bb_*` semantic palette and `TextAppearance.BBetter.*` typography. Don't reference the legacy palette (`azul`, `verde`, `purple_500`, etc.) in new code — those exist only so old screens keep rendering. Full rules: [`.claude/docs/style_guide.md`](.claude/docs/style_guide.md).
+New layouts, drawables, and themes must use the `bb_*` semantic palette and `TextAppearance.BBetter.*` typography. The legacy palette (`azul`, `verde`, `purple_500`, `white`, `black`…) was deleted in u24; don't reintroduce it (the audit and the hook flag those names). New strings/dimens/styles of a screen go in its own `values/strings_<area>.xml` (+ `values-es`), `dimens_<area>.xml`, `styles_<area>.xml`. Full rules: [`.claude/docs/style_guide.md`](.claude/docs/style_guide.md).
 
 ### 3. Threading
 
@@ -185,7 +185,7 @@ with e.g. "use the code-reviewer subagent".
 
 | Path | Purpose |
 |---|---|
-| `app/src/main/java/.../ui/` | MVVM screens: `home/`, `calendar/`, `progress/`, `projects/` |
+| `app/src/main/java/.../ui/` | MVVM screens: `home/`, `focus/`, `calendar/`, `progress/`, `screentime/`, `projects/`; `common/` = reusable widgets (`widget/`) + `ChartStyler` (`chart/`) |
 | `app/src/main/java/.../calendarEntries/` | `CalendarEntry` entity + `EventBuilder`, `AddEventActivity` |
 | `app/src/main/java/.../configuration/` | `Configuration` entity, `ConfigurationManager`, `SplashActivity`, Hilt modules |
 | `app/src/main/java/.../database/` | `AppDatabase` (v10, 3 real migrations + destructive fallback), `DBConverter`, `DBMigration` (Application class) |
@@ -197,7 +197,7 @@ with e.g. "use the code-reviewer subagent".
 | `app/src/main/java/.../helpers/` | `FormatHelper`, `ScreenHelper`, `ToolbarHelper`, toolbar listener interfaces |
 | `app/src/main/java/.../popups/` | `PopupHelper` base + 6 concrete dialog fragments |
 | `app/src/main/java/.../feedback/` | `HapticFeedback`, `SoundFeedback` |
-| `app/src/main/res/navigation/` | Bottom-nav graph (Home, Progress, Calendar, Projects) |
+| `app/src/main/res/navigation/` | Bottom-nav graph (Home, Progress, Calendar, Projects) + secondary destinations |
 | `app/src/main/res/values/` | `colors.xml` (palette), `themes.xml`, `styles_typography.xml`, `style.xml`, `dimens.xml`, `strings.xml` |
 | `.claude/docs/` | Knowledge base (see index above) |
 | `.claude/docs/systems/` | Per-runtime-subsystem living docs (see System docs table above) |

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u12: destination shell (top bar + back). Real content arrives in its screen unit (u14–u20). -->
+<!-- u18: All progress = top bar + selector de periodo (Day/Week/Month/Year + navegador) + carrusel
+     de graficos (tabs + ViewPager2). El carrusel vivia en Progress hasta u17. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -12,12 +13,42 @@
 
     <include layout="@layout/view_top_bar" />
 
-    <com.example.bbettercalendar.ui.common.widget.EmptyStateView
+    <com.example.bbettercalendar.ui.common.widget.SegmentedControlView
+        android:id="@+id/allProgressGranularity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_md" />
+
+    <com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView
+        android:id="@+id/allProgressPeriodNavigator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginTop="@dimen/spacing_card_gap"
+        android:layout_marginEnd="@dimen/spacing_md" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/chart_dots"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:background="@android:color/transparent"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/bb_primary"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/bb_primary"
+        app:tabTextAppearance="@style/TextAppearance.BBetter.Label"
+        app:tabTextColor="@color/bb_on_surface_muted" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/chart_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        app:emptyTitle="@string/title_all_progress"
-        app:emptyMessage="@string/screen_placeholder_message" />
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:layout_marginEnd="@dimen/spacing_sm"
+        android:layout_marginBottom="@dimen/progress_bottom_clearance"
+        android:layout_weight="1" />
 
 </LinearLayout>

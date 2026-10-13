@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u18 · All progress: carrusel de gráficos (movido desde Progress). -->
+<resources>
+    <string name="all_progress_tab_focus">Tiempo de foco</string>
+    <string name="all_progress_tab_interruptions">Interrupciones</string>
+    <string name="all_progress_tab_time_of_day">Hora del día</string>
+    <string name="all_progress_tab_projects">Proyectos</string>
+    <string name="all_progress_usage_empty_cta">Gestionar en Tiempo de pantalla</string>
+</resources>

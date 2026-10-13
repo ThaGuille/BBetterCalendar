@@ -2,8 +2,8 @@
 <!-- Progress (migracion visual u17, .stitch/designs/13-progress-final.png + html/13).
      Titulo + escudo + compartir fijos arriba; el resto scrollea: Week/Month/Year + navegador de
      periodo, tarjeta de tiles, "Past 12 weeks", "See all", Screen time & blocking, Projects.
-     Al final, dentro de progressLegacyCharts, queda el carrusel antiguo y la banda de uso con sus
-     controles: los retira u18 (All progress). -->
+     (u18) Al final queda la banda de uso, solo resumen (sin controles); el carrusel de graficos
+     se movio a All progress. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -437,40 +437,15 @@
                     android:orientation="vertical" />
             </LinearLayout>
 
-            <!-- ============ Legado (u18 lo retira): carrusel de graficos + banda de uso ============ -->
-            <LinearLayout
-                android:id="@+id/progressLegacyCharts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_lg"
-                android:orientation="vertical">
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/chart_dots"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    app:tabGravity="fill"
-                    app:tabIndicatorColor="@color/bb_primary"
-                    app:tabMode="fixed"
-                    app:tabSelectedTextColor="@color/bb_primary"
-                    app:tabTextAppearance="@style/TextAppearance.BBetter.Label"
-                    app:tabTextColor="@color/bb_on_surface_muted" />
-
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/chart_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/progress_chart_height"
-                    android:layout_marginTop="@dimen/spacing_sm" />
-
-                <!-- ============ (3) App-usage band (Phase 2) ============ -->
-                <!-- Banda de uso por app: cabecera (screen time + "Add apps") + lista, o tarjeta de estado
-                     (LOCKED / EMPTY) / spinner. Tarjeta propia (bg_card), igual que la banda de proyectos,
-                     para que las tres secciones de la pantalla se lean como bloques distintos. -->
+                <!-- ============ App-usage band (u18: solo resume, sin controles propios) ============ -->
+                <!-- Tiempo de pantalla + lista de solo lectura de apps seguidas, o tarjeta de estado
+                     (LOCKED / EMPTY) / spinner. Los controles (anadir apps, limites, bloqueo) viven
+                     en Screen time. -->
                 <LinearLayout
                     android:id="@+id/usage_band"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
+                    android:layout_marginTop="@dimen/spacing_lg"
                     android:background="@drawable/bg_card"
                     android:elevation="@dimen/elevation_card"
                     android:orientation="vertical"
@@ -495,31 +470,6 @@
                             android:layout_marginStart="@dimen/spacing_sm"
                             android:textAppearance="@style/TextAppearance.BBetter.Title"
                             tools:text="3h 30m" />
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
-
-                        <!-- Botón real (pill outline + icono) en vez de un TextView de color suelto. -->
-                        <TextView
-                            android:id="@+id/usage_add_apps"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_pill_outline_primary"
-                            android:clickable="true"
-                            android:drawablePadding="@dimen/spacing_xs"
-                            android:focusable="true"
-                            android:gravity="center_vertical"
-                            android:paddingStart="@dimen/spacing_sm"
-                            android:paddingTop="@dimen/spacing_xs"
-                            android:paddingEnd="@dimen/spacing_md"
-                            android:paddingBottom="@dimen/spacing_xs"
-                            android:text="@string/progress_usage_add_apps"
-                            android:textAppearance="@style/TextAppearance.BBetter.Label"
-                            android:textColor="@color/bb_primary"
-                            app:drawableStartCompat="@drawable/ic_add_24"
-                            app:drawableTint="@color/bb_primary" />
                     </LinearLayout>
 
                     <FrameLayout
@@ -551,29 +501,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical" />
                     </FrameLayout>
-
-                    <!-- Interruptor maestro de "hacer cumplir los límites" (Phase 4a): pausa/reanuda TODO el
-                         bloqueo sin tocar los grants del OS. Pill outline que cambia de color (bb_primary ON /
-                         bb_on_surface_muted OFF) además del texto, para que el estado se note sin leer. -->
-                    <TextView
-                        android:id="@+id/usage_enforce_master"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="@dimen/spacing_sm"
-                        android:background="@drawable/bg_pill_outline_muted"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:paddingStart="@dimen/spacing_md"
-                        android:paddingTop="@dimen/spacing_xs"
-                        android:paddingEnd="@dimen/spacing_md"
-                        android:paddingBottom="@dimen/spacing_xs"
-                        android:textAppearance="@style/TextAppearance.BBetter.Label"
-                        android:textColor="@color/bb_on_surface_muted"
-                        tools:text="Enforcing app limits · tap to pause" />
                 </LinearLayout>
-
-            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

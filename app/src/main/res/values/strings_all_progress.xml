@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u18 · All progress: chart carousel (moved from Progress). -->
+<resources>
+    <string name="all_progress_tab_focus">Focus time</string>
+    <string name="all_progress_tab_interruptions">Interruptions</string>
+    <string name="all_progress_tab_time_of_day">Time of day</string>
+    <string name="all_progress_tab_projects">Projects</string>
+    <string name="all_progress_usage_empty_cta">Manage in Screen time</string>
+</resources>

@@ -1,7 +1,6 @@
 package com.example.bbettercalendar.ui.progress;
 
 import android.content.ActivityNotFoundException;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -23,9 +22,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.blocking.AccessibilityAccess;
-import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
-import com.example.bbettercalendar.blocking.BlockingSettings;
 import com.example.bbettercalendar.databinding.FragmentProgressBinding;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.ui.common.chart.ChartStyler;
@@ -33,14 +29,12 @@ import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.ProgressRowView;
 import com.example.bbettercalendar.ui.common.widget.StatTileView;
 import com.example.bbettercalendar.ui.common.widget.WidgetTone;
-import com.example.bbettercalendar.ui.progress.apppicker.AppPickerActivity;
 import com.example.bbettercalendar.ui.projects.ProjectListAdapter;
 import com.example.bbettercalendar.usage.UsageAccess;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -54,7 +48,6 @@ public class ProgressFragment extends Fragment {
 
     private FragmentProgressBinding binding;
     private ProgressViewModel viewModel;
-    private ChartCarouselAdapter adapter;
     private AppUsageAdapter usageAdapter;
 
     // u17: pantalla rediseñada (html 13). Las vistas que se repintan se resuelven una vez.
@@ -78,15 +71,6 @@ public class ProgressFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(ProgressViewModel.class);
         binding = FragmentProgressBinding.inflate(inflater, container, false);
 
-        adapter = new ChartCarouselAdapter();
-        binding.chartPager.setAdapter(adapter);
-        // Selector con el título de cada gráfico (no puntos ciegos): tocar un tab salta directo a esa
-        // página; el tab seleccionado sigue al swipe igual que antes. autoRefresh (por defecto true)
-        // vuelve a llamar este callback en cada notifyDataSetChanged, así que el remapeo de labels de
-        // DAY (menos páginas) se refleja solo al cambiar de granularidad.
-        new TabLayoutMediator(binding.chartDots, binding.chartPager,
-                (tab, position) -> tab.setText(adapter.pageTitle(requireContext(), position))).attach();
-
         setupHeader();
         setupNavigator();
 
@@ -94,20 +78,10 @@ public class ProgressFragment extends Fragment {
         tileSessions = binding.progressTileSessions;
         tileTasks = binding.progressTileTasks;
 
-        // --- banda 3: uso de apps ---
-        usageAdapter = new AppUsageAdapter(requireContext(),
-                (packageName, label, currentLimitMinutes) ->
-                        AppLimitDialog.newInstance(packageName, label, currentLimitMinutes)
-                                .show(getChildFragmentManager(), "app_limit"),
-                this::onEnforceToggle);
+        // --- banda de uso de apps (u18: solo resume) ---
+        usageAdapter = new AppUsageAdapter(requireContext());
         binding.usageList.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.usageList.setAdapter(usageAdapter);
-
-        binding.usageEnforceMaster.setOnClickListener(v -> {
-            boolean nowEnabled = !BlockingSettings.isEnforcementEnabled(requireContext());
-            BlockingSettings.setEnforcementEnabled(requireContext(), nowEnabled);
-            updateEnforceMaster();
-        });
 
         View root = binding.getRoot();
         usageStateCard = root.findViewById(R.id.usage_state_card);
@@ -115,9 +89,6 @@ public class ProgressFragment extends Fragment {
         usageStateBody = root.findViewById(R.id.usage_state_body);
         usageStateCta = root.findViewById(R.id.usage_state_cta);
 
-        binding.usageAddApps.setOnClickListener(v -> openPicker());
-
-        viewModel.getCharts().observe(getViewLifecycleOwner(), bundle -> adapter.setBundle(bundle));
         viewModel.getSelectedRange().observe(getViewLifecycleOwner(), this::renderRange);
         viewModel.getProjectRows().observe(getViewLifecycleOwner(), this::renderProjectRows);
         viewModel.getOverview().observe(getViewLifecycleOwner(), this::renderOverview);
@@ -138,51 +109,6 @@ public class ProgressFragment extends Fragment {
             viewModel.refreshUsageAccess();
             viewModel.armUsageLimitMonitor();
         }
-        // Al volver de Ajustes -> Accesibilidad el usuario pudo (o no) activar el servicio: re-leer y
-        // re-pintar los toggles (pendiente ámbar -> activo rojo si ya está activado, o al revés).
-        if (usageAdapter != null) {
-            usageAdapter.setAccessibilityEnabled(AccessibilityAccess.isEnabled(requireContext()));
-        }
-        updateEnforceMaster();
-    }
-
-    // Tap en el toggle 🚫 de una fila (Phase 4a). Sin límite -> abrir primero el diálogo de límite (no
-    // se puede hacer cumplir lo que no existe). Apagar enforce no requiere permiso -> se hace directo.
-    // Encender: si el servicio de Accesibilidad ya está activado, se arma ya (rojo). Si no, se muestra
-    // SIEMPRE la divulgación/guía (no sólo la 1ª vez) — y NO se arma nada hasta que el usuario pulse
-    // "Enable" en ella (así el toggle no se pone "activo" sin que el usuario acepte y active el servicio).
-    private void onEnforceToggle(String packageName, String label, int currentLimitMinutes,
-                                 boolean currentlyEnforced) {
-        if (currentLimitMinutes <= 0) {
-            AppLimitDialog.newInstance(packageName, label, currentLimitMinutes)
-                    .show(getChildFragmentManager(), "app_limit");
-            return;
-        }
-        if (currentlyEnforced) {
-            viewModel.setEnforceAtLimit(packageName, false);
-            return;
-        }
-        if (AccessibilityAccess.isEnabled(requireContext())) {
-            viewModel.setEnforceAtLimit(packageName, true);
-        } else {
-            AccessibilityDisclosureDialog.newInstance(packageName)
-                    .show(getChildFragmentManager(), "accessibility_disclosure");
-        }
-    }
-
-    // Interruptor maestro "hacer cumplir los límites": refleja el estado guardado (por defecto ON).
-    // El pill cambia de color (bb_primary ON / bb_on_surface_muted OFF), no sólo el texto, para que
-    // el estado se note de un vistazo — mismo patrón que highlightGranularity() con los segmentos.
-    private void updateEnforceMaster() {
-        if (binding == null) return;
-        boolean enabled = BlockingSettings.isEnforcementEnabled(requireContext());
-        binding.usageEnforceMaster.setText(enabled
-                ? R.string.progress_enforce_master_on
-                : R.string.progress_enforce_master_off);
-        binding.usageEnforceMaster.setBackgroundResource(enabled
-                ? R.drawable.bg_pill_outline_primary : R.drawable.bg_pill_outline_muted);
-        binding.usageEnforceMaster.setTextColor(ContextCompat.getColor(requireContext(),
-                enabled ? R.color.bb_primary : R.color.bb_on_surface_muted));
     }
 
     // --- cabecera y navegador (u17) ---
@@ -202,7 +128,7 @@ public class ProgressFragment extends Fragment {
     }
 
     private void setupNavigator() {
-        // Week / Month / Year. DAY sigue existiendo en Granularity para el carrusel heredado (u18).
+        // Week / Month / Year. DAY solo se elige en All progress (carrusel).
         binding.progressGranularity.setItems(
                 getString(R.string.progress_granularity_week),
                 getString(R.string.progress_granularity_month),
@@ -419,7 +345,7 @@ public class ProgressFragment extends Fragment {
                 .navigate(R.id.action_global_project_detail, args);
     }
 
-    // Banda 3: alterna lista / spinner / tarjeta de estado y configura la tarjeta según el estado.
+    // Banda de uso: alterna lista / spinner / tarjeta de estado y configura la tarjeta según el estado.
     private void renderUsageState(UsageBandState state) {
         if (binding == null) return;
         switch (state) {
@@ -443,8 +369,8 @@ public class ProgressFragment extends Fragment {
             case EMPTY_NO_APPS:
                 showStateCard(R.string.progress_usage_empty_title,
                         R.string.progress_usage_empty_body,
-                        R.string.progress_usage_empty_cta,
-                        v -> openPicker());
+                        R.string.all_progress_usage_empty_cta,
+                        v -> openScreenTime());
                 break;
         }
     }
@@ -477,10 +403,6 @@ public class ProgressFragment extends Fragment {
         } catch (ActivityNotFoundException e) {
             // Algunos dispositivos no exponen la pantalla; el estado seguirá LOCKED.
         }
-    }
-
-    private void openPicker() {
-        startActivity(new Intent(requireContext(), AppPickerActivity.class));
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.example.bbettercalendar.ui.progress;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,51 +22,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-// Lista de apps seguidas con su tiempo del rango. Cada fila: [toggle "hacer cumplir"]
-// [icono] [nombre] [tiempo (+ límite diario, Phase 3)]. El toggle 🚫 refleja/alterna enforceAtLimit
-// (Phase 4a). El icono se resuelve vía PackageManager y se cachea por paquete (lista corta; evita
-// relecturas al re-vincular). Tocar la fila abre el diálogo de límite (Phase 3).
+// Lista de solo lectura de apps seguidas con su tiempo del rango (u18: Progress solo resume; los
+// controles de limite/bloqueo viven en Screen time). Cada fila: [icono] [nombre] [tiempo (+ limite
+// diario)]. El icono se resuelve via PackageManager y se cachea por paquete.
 public class AppUsageAdapter extends RecyclerView.Adapter<AppUsageAdapter.VH> {
 
-    // Callback de tap en fila: pasa el paquete/etiqueta/límite actual para abrir AppLimitDialog.
-    public interface OnRowClickListener {
-        void onRowClick(String packageName, String label, int currentLimitMinutes);
-    }
-
-    // Callback de tap en el toggle 🚫: el Fragment decide la ruta (sin límite -> diálogo de límite;
-    // servicio no activado -> divulgación/Ajustes; si no -> alternar enforceAtLimit).
-    public interface OnEnforceToggleListener {
-        void onEnforceToggle(String packageName, String label, int currentLimitMinutes,
-                             boolean currentlyEnforced);
-    }
-
     private final PackageManager pm;
-    private final OnRowClickListener rowClickListener;
-    private final OnEnforceToggleListener enforceToggleListener;
     private final Map<String, Drawable> iconCache = new HashMap<>();
     private List<AppUsageRow> rows = Collections.emptyList();
-    // ¿Está activado el servicio de Accesibilidad? Decide si un toggle enforce=on se pinta "activo"
-    // (rojo, bloqueando) o "pendiente" (ámbar, armado pero el servicio aún no está activado). Global,
-    // no por fila; lo fija el Fragment en onResume tras leer AccessibilityAccess.isEnabled().
-    private boolean accessibilityEnabled;
-
-    public AppUsageAdapter(Context context, OnRowClickListener rowClickListener,
-                           OnEnforceToggleListener enforceToggleListener) {
+    public AppUsageAdapter(Context context) {
         this.pm = context.getApplicationContext().getPackageManager();
-        this.rowClickListener = rowClickListener;
-        this.enforceToggleListener = enforceToggleListener;
     }
 
     public void submit(@NonNull List<AppUsageRow> newRows) {
         this.rows = newRows;
-        notifyDataSetChanged();
-    }
-
-    // Lo llama el Fragment (onResume / al volver de Ajustes): re-pinta los toggles enforce=on como
-    // "activo" o "pendiente" según el servicio esté o no activado. Sólo re-vincula si cambió.
-    public void setAccessibilityEnabled(boolean enabled) {
-        if (this.accessibilityEnabled == enabled) return;
-        this.accessibilityEnabled = enabled;
         notifyDataSetChanged();
     }
 
@@ -85,44 +53,6 @@ public class AppUsageAdapter extends RecyclerView.Adapter<AppUsageAdapter.VH> {
         holder.label.setText(row.label);
         holder.icon.setImageDrawable(iconFor(row.packageName));
         bindTime(holder, row);
-        bindEnforceToggle(holder, row);
-        holder.itemView.setOnClickListener(v ->
-                rowClickListener.onRowClick(row.packageName, row.label, row.dailyLimitMinutes));
-    }
-
-    // Toggle 🚫, tres estados: apagado (muted, semitransparente) cuando enforce=off; ACTIVO (bb_danger,
-    // opaco) cuando enforce=on Y el servicio de Accesibilidad está activado (bloqueando de verdad);
-    // PENDIENTE (bb_accent_reward ámbar) cuando enforce=on pero el servicio aún NO está activado —
-    // armado, pero no bloqueará hasta que el usuario active el servicio en Ajustes. Así el toggle
-    // nunca se pinta "activo" sin el permiso concedido. El chip (bg_icon_chip) detrás del icono se
-    // retinta con el mismo color a baja opacidad, para que el toggle se lea como un botón con área
-    // propia en vez de un icono suelto flotando sobre la fila.
-    private void bindEnforceToggle(VH holder, AppUsageRow row) {
-        int tint;
-        float alpha;
-        int chipAlpha;
-        if (!row.enforceAtLimit) {
-            tint = R.color.bb_on_surface_muted;
-            alpha = 0.35f;
-            chipAlpha = 20;
-        } else if (accessibilityEnabled) {
-            tint = R.color.bb_danger;
-            alpha = 1f;
-            chipAlpha = 40;
-        } else {
-            tint = R.color.bb_accent_reward;
-            alpha = 0.9f;
-            chipAlpha = 40;
-        }
-        ColorStateList tintList = ContextCompat.getColorStateList(holder.enforceToggle.getContext(), tint);
-        holder.enforceToggle.setImageTintList(tintList);
-        holder.enforceToggle.setAlpha(alpha);
-        Drawable chipBackground = holder.enforceChip.getBackground().mutate();
-        chipBackground.setTintList(tintList);
-        chipBackground.setAlpha(chipAlpha);
-        holder.enforceToggle.setOnClickListener(v ->
-                enforceToggleListener.onEnforceToggle(row.packageName, row.label,
-                        row.dailyLimitMinutes, row.enforceAtLimit));
     }
 
     private void bindTime(VH holder, AppUsageRow row) {
@@ -165,16 +95,12 @@ public class AppUsageAdapter extends RecyclerView.Adapter<AppUsageAdapter.VH> {
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        final View enforceChip;
-        final ImageView enforceToggle;
         final ImageView icon;
         final TextView label;
         final TextView time;
 
         VH(@NonNull View itemView) {
             super(itemView);
-            enforceChip = itemView.findViewById(R.id.usage_block_toggle_chip);
-            enforceToggle = itemView.findViewById(R.id.usage_block_toggle);
             icon = itemView.findViewById(R.id.usage_app_icon);
             label = itemView.findViewById(R.id.usage_app_label);
             time = itemView.findViewById(R.id.usage_app_time);

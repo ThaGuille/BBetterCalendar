@@ -25,7 +25,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import java.util.ArrayList;
 import java.util.List;
 
-// Carrusel (ViewPager2) de los gráficos de Progress. Convierte el ChartBundle plano del ViewModel
+// Carrusel (ViewPager2) de los gráficos de All progress (movido desde Progress en u18). Convierte el ChartBundle plano del ViewModel
 // en LineChart/BarChart de MPAndroidChart; el estilo (colores bb_*, fuente, ejes, rejilla) lo pone
 // ui/common/chart/ChartStyler (u10). Cada página tiene su propio viewType para que el gráfico se
 // cree una sola vez por posición.
@@ -71,7 +71,7 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
         return new CardVH(v);
     }
 
-    // Título de la página, expuesto para el selector con nombre (TabLayout en ProgressFragment):
+    // Título de la página, expuesto para el selector con nombre (TabLayout en AllProgressFragment):
     // así el tab y la tarjeta del carrusel siempre muestran la misma etiqueta, incluida la
     // remapeada de DAY, sin duplicar el switch en dos sitios.
     public CharSequence pageTitle(Context ctx, int position) {
@@ -132,18 +132,18 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
     // modo: en DAY la posición 2 ya no es "When" sino la de proyectos.
     private String labelFor(Context ctx, int position) {
         if (isDay() && position == PAGE_PROJECTS_DAY) {
-            return ctx.getString(R.string.progress_chart_projects);
+            return ctx.getString(R.string.all_progress_tab_projects);
         }
         switch (position) {
             case PAGE_CONCENT:
-                return ctx.getString(R.string.progress_chart_concent);
+                return ctx.getString(R.string.all_progress_tab_focus);
             case PAGE_FAILS:
-                return ctx.getString(R.string.progress_chart_fails);
+                return ctx.getString(R.string.all_progress_tab_interruptions);
             case PAGE_HOURLY:
-                return ctx.getString(R.string.progress_chart_when);
+                return ctx.getString(R.string.all_progress_tab_time_of_day);
             case PAGE_PROJECTS:
             default:
-                return ctx.getString(R.string.progress_chart_projects);
+                return ctx.getString(R.string.all_progress_tab_projects);
         }
     }
 
@@ -181,10 +181,10 @@ public class ChartCarouselAdapter extends RecyclerView.Adapter<ChartCarouselAdap
             hourLabels[hr] = String.valueOf(hr);
         }
         BarDataSet focusSet = styler.styleBars(
-                new BarDataSet(focusEntries, ctx.getString(R.string.progress_chart_concent)),
+                new BarDataSet(focusEntries, ctx.getString(R.string.all_progress_tab_focus)),
                 ChartStyler.Tone.PRIMARY);
         BarDataSet failSet = styler.styleBars(
-                new BarDataSet(failEntries, ctx.getString(R.string.progress_chart_fails)),
+                new BarDataSet(failEntries, ctx.getString(R.string.all_progress_tab_interruptions)),
                 ChartStyler.Tone.DANGER);
 
         BarData data = new BarData(focusSet, failSet);

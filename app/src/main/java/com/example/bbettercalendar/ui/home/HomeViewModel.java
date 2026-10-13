@@ -102,9 +102,10 @@ public class HomeViewModel extends AndroidViewModel {
                          @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
         mText = new MutableLiveData<>();
-        // R.string.home_greeting ("Hi there") ya existía sin usar; el literal anterior era un
-        // placeholder de plantilla que se estaba mostrando en producción.
-        mText.setValue(application.getString(com.example.bbettercalendar.R.string.home_greeting));
+        // "Hi, Guille" (html 04). PLACEHOLDER(ui-placeholders#home-user-name): no hay nombre de
+        // usuario guardado; se usa el del diseño.
+        mText.setValue(application.getString(com.example.bbettercalendar.R.string.home_greeting,
+                application.getString(com.example.bbettercalendar.R.string.home_user_name_placeholder)));
         this.focusEventDao = focusEventDao;
         this.calendarEntryDao = calendarEntryDao;
         this.focusAttributionRepository = focusAttributionRepository;
@@ -388,7 +389,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     // PLACEHOLDER(ui-placeholders#social-home-friends): maqueta tras FEATURE_SOCIAL_MOCK.
     public LiveData<SocialSnapshot> getSocialSnapshot() {
-        return socialRepository.getSnapshot();
+        return socialRepository.getHomeSnapshot();
     }
 
     /** Nº de días con pomodoro de este mes, emitido sólo al completar el primero del día. */

@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.helpers.FontHelper;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.CombinedChart;
@@ -183,6 +184,34 @@ public final class ChartStyler {
         x.setGranularityEnabled(true);
         if (xLabels != null) {
             x.setValueFormatter(new IndexAxisValueFormatter(xLabels));
+        }
+        roundBars(chart);
+    }
+
+    /**
+     * Rounded bars and FOCUS bands (html 10 / 14): MPAndroidChart draws square rects, so every
+     * bar chart (plain, stacked, grouped, or the bar layer of a combined chart) gets the custom
+     * renderer. Idempotent; safe before or after {@code setData}.
+     */
+    private void roundBars(@NonNull BarLineChartBase<?> chart) {
+        if (chart instanceof CombinedChart) {
+            if (!(chart.getRenderer() instanceof RoundedCombinedChartRenderer)) {
+                chart.setRenderer(new RoundedCombinedChartRenderer((CombinedChart) chart,
+                        chart.getAnimator(), chart.getViewPortHandler()));
+                // CombinedChart.setData builds the sub-renderers and buffers; if data is already
+                // there, do it now for the new renderer.
+                if (chart.getData() != null) {
+                    ((RoundedCombinedChartRenderer) chart.getRenderer()).initBuffers();
+                }
+            }
+        } else if (chart instanceof BarChart) {
+            if (!(chart.getRenderer() instanceof RoundedBarChartRenderer)) {
+                chart.setRenderer(new RoundedBarChartRenderer((BarChart) chart,
+                        chart.getAnimator(), chart.getViewPortHandler()));
+                if (chart.getData() != null) {
+                    chart.getRenderer().initBuffers();
+                }
+            }
         }
     }
 
@@ -440,7 +469,7 @@ public final class ChartStyler {
             entries.add(new BarEntry(x, top, runStart ? Boolean.TRUE : null));
         }
         final String label = context.getString(R.string.chart_band_focus);
-        BarDataSet set = new BarDataSet(entries, label);
+        BarDataSet set = new BandBarDataSet(entries, label);
         set.setColor(ContextCompat.getColor(context, R.color.bb_chart_band));
         set.setHighLightAlpha(0);
         set.setAxisDependency(YAxis.AxisDependency.RIGHT);

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- u13: Material Symbols "check" in sage, WITHOUT a theme tint: it is drawn inside the
-     bg_task_check_on layer-list, where nothing retints it. 12dp so 12 + 2x4 inset = the 20dp circle
+     bg_task_check_on layer-list, where nothing retints it. 14dp (html text-sm check) so 14 + 2x3 inset = the 20dp circle
      (a layer-list takes the largest item size; 24dp stretched the oval). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="12dp"
-    android:height="12dp"
+    android:width="14dp"
+    android:height="14dp"
     android:viewportWidth="960"
     android:viewportHeight="960">
     <group android:translateY="960">

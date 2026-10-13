@@ -62,6 +62,12 @@
         <item name="android:textColor">@color/bb_on_surface</item>
     </style>
 
+    <!-- u13b: body with the 500 weight of html text-sm font-medium (Home task titles). -->
+    <style name="TextAppearance.BBetter.Body.Medium">
+        <item name="android:fontFamily">@font/bb_font_medium</item>
+        <item name="fontFamily">@font/bb_font_medium</item>
+    </style>
+
     <style name="TextAppearance.BBetter.BodyMuted" parent="TextAppearance.BBetter.Body">
         <item name="android:textColor">@color/bb_on_surface_muted</item>
     </style>

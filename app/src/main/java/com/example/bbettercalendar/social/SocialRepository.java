@@ -17,4 +17,16 @@ public interface SocialRepository {
     /** Never null and never holds null: {@link SocialSnapshot#EMPTY} when there is no data. */
     @NonNull
     LiveData<SocialSnapshot> getSnapshot();
+
+    /**
+     * The set Home shows (html 04: "3 friends studying now · Maya, Alex, Leo"). Same contract as
+     * {@link #getSnapshot()}. Each design shows its own group, so each has its own accessor
+     * (u13b); {@link #getSnapshot()} stays the Focus group (html 01).
+     */
+    @NonNull
+    LiveData<SocialSnapshot> getHomeSnapshot();
+
+    /** The set Cycle complete shows (html 02: "Laia and 3 others still studying", rank 2nd). */
+    @NonNull
+    LiveData<SocialSnapshot> getCelebrationSnapshot();
 }

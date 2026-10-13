@@ -85,4 +85,40 @@ public class MockSocialRepositoryTest {
     public void rank_rejectsPositionOutsideGroup() {
         new SocialRank(3, 2);
     }
+
+    @Test
+    public void home_matchesHtml04() {
+        // html 04: "3 friends studying now" · "Maya, Alex, Leo" (avatars M, A, L)
+        SocialSnapshot home = new MockSocialRepository().getHomeSnapshot().getValue();
+        assertNotNull(home);
+        assertEquals(3, home.getStudyingCount());
+        List<Friend> studying = home.getStudying();
+        assertEquals("Maya", studying.get(0).getName());
+        assertEquals("Alex", studying.get(1).getName());
+        assertEquals("Leo", studying.get(2).getName());
+        for (Friend f : studying) {
+            assertTrue(f.isStudying());
+        }
+    }
+
+    @Test
+    public void celebration_matchesHtml02() {
+        // html 02: "Laia and 3 others still studying", avatars L, M, J, rank 2nd among friends
+        SocialSnapshot celebration = new MockSocialRepository().getCelebrationSnapshot().getValue();
+        assertNotNull(celebration);
+        assertEquals(4, celebration.getStudyingCount());
+        List<Friend> studying = celebration.getStudying();
+        assertEquals("Laia", studying.get(0).getName());
+        assertEquals("Marc", studying.get(1).getName());
+        assertEquals("Júlia", studying.get(2).getName());
+        assertNotNull(celebration.getUserRank());
+        assertEquals(2, celebration.getUserRank().getPosition());
+    }
+
+    @Test
+    public void empty_repositoryHasNoDataForEveryScreen() {
+        EmptySocialRepository empty = new EmptySocialRepository();
+        assertSame(SocialSnapshot.EMPTY, empty.getHomeSnapshot().getValue());
+        assertSame(SocialSnapshot.EMPTY, empty.getCelebrationSnapshot().getValue());
+    }
 }

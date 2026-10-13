@@ -42,7 +42,7 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.BBetter.Body"
+            android:textAppearance="@style/TextAppearance.BBetter.Body.Medium"
             tools:text="Write 3.1 Methods" />
 
         <!-- Progreso de minutos atribuidos "X/Ym" (spec focus-attribution). Sólo visible para

@@ -34,7 +34,8 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
  *   click is the "open detail" gesture.</li>
  * </ul>
  * Contrast: the usage line stays muted even when blocked (ember on the raised row is 4.34:1, below
- * AA); the chip sits on {@code bb_surface}, where ember / honey pass.
+ * AA). u13b: the chip is a forest pill ({@code bb_primary_container}) with a tone hairline, as the
+ * status pills of the design; ember / honey text on forest is below AA (see notes u13b).
  */
 public class AppUsageRowView extends LinearLayout {
 
@@ -167,7 +168,7 @@ public class AppUsageRowView extends LinearLayout {
         status.setText(text);
         status.setTextColor(color);
         GradientDrawable chip = new GradientDrawable();
-        chip.setColor(ContextCompat.getColor(ctx, R.color.bb_surface));
+        chip.setColor(ContextCompat.getColor(ctx, R.color.bb_primary_container));
         chip.setStroke(getResources().getDimensionPixelSize(R.dimen.widget_hairline), color);
         chip.setCornerRadius(getResources().getDimension(R.dimen.radius_pill));
         status.setBackground(chip);

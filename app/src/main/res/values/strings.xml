@@ -58,7 +58,7 @@
     <string name="calendar_untitled">(untitled)</string>
 
     <!-- Home screen -->
-    <string name="home_greeting">Hi there</string>
+    <string name="home_greeting">Hi, %1$s</string>
     <string name="home_today_card_title">Today</string>
     <string name="home_mode_concentration">Concentration</string>
     <string name="home_mode_rest">Rest</string>
@@ -379,7 +379,8 @@
 
     <!-- u13 · Home (html 04) -->
     <!-- PLACEHOLDER(ui-placeholders#home-user-name): no user name is stored yet. -->
-    <string name="home_avatar_placeholder_initial" translatable="false">B</string>
+    <!-- PLACEHOLDER(ui-placeholders#home-user-name): name copied from html 04; there is no stored user name. -->
+    <string name="home_user_name_placeholder" translatable="false">Guille</string>
     <string name="home_notifications">Notifications</string>
     <string name="home_notifications_soon">Notification centre is coming soon</string>
     <string name="home_mode_paused">Paused</string>

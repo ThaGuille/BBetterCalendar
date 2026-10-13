@@ -18,4 +18,16 @@ public class EmptySocialRepository implements SocialRepository {
     public LiveData<SocialSnapshot> getSnapshot() {
         return snapshot;
     }
+
+    @NonNull
+    @Override
+    public LiveData<SocialSnapshot> getHomeSnapshot() {
+        return snapshot;
+    }
+
+    @NonNull
+    @Override
+    public LiveData<SocialSnapshot> getCelebrationSnapshot() {
+        return snapshot;
+    }
 }

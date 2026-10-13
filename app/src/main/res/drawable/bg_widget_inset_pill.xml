@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u9: inset pill (StatTileView delta chip). Background-coloured, so primary AND danger text both
-     pass AA on it (u4 table: sage 7.25:1, ember 5.91:1); a raised pill would fail for ember. -->
+<!-- u9/u13b: StatTileView delta chip. Forest pill (bb_primary_container) as in html 13 / 10
+     (bg-primary-container/20 over the card reads as forest). Sage / ember text on forest is below
+     AA (3.87:1 / 3.16:1): kept as the design has it, see notes u13b (question). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/bb_surface" />
+    <solid android:color="@color/bb_primary_container" />
     <corners android:radius="@dimen/radius_pill" />
 </shape>

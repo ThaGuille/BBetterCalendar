@@ -60,7 +60,7 @@
     <string name="calendar_untitled">(sin título)</string>
 
     <!-- Inicio -->
-    <string name="home_greeting">¡Hola!</string>
+    <string name="home_greeting">Hola, %1$s</string>
     <string name="home_today_card_title">Hoy</string>
     <string name="home_mode_concentration">Concentración</string>
     <string name="home_mode_rest">Descanso</string>

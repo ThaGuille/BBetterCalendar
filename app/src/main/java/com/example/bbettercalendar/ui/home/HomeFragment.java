@@ -104,9 +104,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         timerPopup.setOnPopupListener(this);
 
         // Header. PLACEHOLDER(ui-placeholders#home-user-name): no hay nombre de usuario guardado,
-        // el saludo es genérico y el avatar lleva una inicial fija.
+        // saludo y avatar usan el nombre del diseño (html 04: "Hi, Guille", avatar "G").
         homeViewModel.getText().observe(getViewLifecycleOwner(), binding.textHome::setText);
-        binding.homeAvatar.setInitials(getString(R.string.home_avatar_placeholder_initial));
+        binding.homeAvatar.setInitials(
+                getString(R.string.home_user_name_placeholder).substring(0, 1));
         binding.homeDateText.setText(
                 new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
 

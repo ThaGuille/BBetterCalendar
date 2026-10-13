@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u15 · Cycle complete (ES). -->
+<resources>
+    <string name="cycle_title">¡Ciclo completado!</string>
+    <plurals name="cycle_pomodoros">
+        <item quantity="one">%d pomodoro</item>
+        <item quantity="other">%d pomodoros</item>
+    </plurals>
+    <string name="cycle_finished_format">Has terminado %1$s</string>
+    <string name="cycle_finished_on_format">Has terminado %1$s en</string>
+    <string name="cycle_tile_focus">Foco</string>
+    <string name="cycle_tile_focus_sub">sin interrupciones</string>
+    <string name="cycle_tile_streak">Racha</string>
+    <string name="cycle_streak_badge">+1</string>
+    <string name="cycle_streak_personal_best">Récord personal</string>
+    <string name="cycle_streak_best_format">Mejor: %1$s</string>
+    <string name="cycle_tile_best">Mejor</string>
+    <string name="cycle_tile_best_sub">entre amigos</string>
+    <string name="cycle_rank_st">%1$d.º</string>
+    <string name="cycle_rank_nd">%1$d.º</string>
+    <string name="cycle_rank_rd">%1$d.º</string>
+    <string name="cycle_rank_th">%1$d.º</string>
+    <string name="cycle_friend_one_format">%1$s sigue estudiando</string>
+    <plurals name="cycle_friends_format">
+        <item quantity="one">%1$s y %2$d más siguen estudiando</item>
+        <item quantity="other">%1$s y %2$d más siguen estudiando</item>
+    </plurals>
+    <string name="cycle_live">En vivo</string>
+    <string name="cycle_continue">Continuar</string>
+    <string name="cycle_share">Compartir mi progreso</string>
+    <string name="cycle_share_soon">Compartir llegará pronto</string>
+    <string name="cycle_close_desc">Cerrar</string>
+</resources>

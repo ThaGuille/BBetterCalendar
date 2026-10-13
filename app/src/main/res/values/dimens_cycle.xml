@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u15 · Cycle complete (html 02). -->
+<resources>
+    <dimen name="cycle_title_text">30sp</dimen>             <!-- text-3xl font-extrabold -->
+    <dimen name="cycle_tile_value_text">18sp</dimen>        <!-- text-lg font-bold -->
+    <dimen name="cycle_illustration_size">192dp</dimen>     <!-- w-48 h-48 -->
+    <dimen name="cycle_tile_accent_height">4dp</dimen>      <!-- h-1 top accent line -->
+    <dimen name="cycle_tile_padding">12dp</dimen>           <!-- p-3 -->
+    <dimen name="cycle_tile_gap">10dp</dimen>               <!-- gap-2.5 -->
+    <dimen name="cycle_tile_icon_size">14dp</dimen>         <!-- w-3.5 h-3.5 -->
+    <dimen name="cycle_avatar_size">24dp</dimen>            <!-- w-6 h-6 -->
+    <dimen name="cycle_avatar_overlap">-8dp</dimen>         <!-- -space-x-2 -->
+    <dimen name="cycle_live_dot">8dp</dimen>                <!-- h-2 w-2 -->
+    <dimen name="cycle_close_size">36dp</dimen>             <!-- w-9 h-9 -->
+</resources>

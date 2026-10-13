@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u15 · Cycle complete hero (html 02 sapling in a badge), simplified: flat bb_* fills instead of
+     the html's gradients/glow filter. Same geometry as the html's 280x280 svg. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="192dp"
+    android:viewportWidth="280"
+    android:viewportHeight="280">
+    <!-- Badge disc with hairline -->
+    <path
+        android:fillColor="@color/bb_surface_card"
+        android:strokeColor="@color/bb_outline"
+        android:strokeWidth="2"
+        android:pathData="M140,52 a88,88 0 1,0 0.01,0 Z" />
+    <!-- Soil -->
+    <path
+        android:fillColor="@color/bb_surface"
+        android:pathData="M98,186 a42,8 0 1,0 84,0 a42,8 0 1,0 -84,0 Z" />
+    <path
+        android:fillColor="@color/bb_surface_raised"
+        android:pathData="M106,186 C120,178 160,178 174,186 Z" />
+    <!-- Stalk -->
+    <path
+        android:fillColor="@color/bb_accent_reward"
+        android:pathData="M138.5,186 C138.5,158 137.5,135 140,108 C142.5,135 141.5,158 141.5,186 Z" />
+    <!-- Lower leaves -->
+    <path
+        android:fillColor="@color/bb_primary"
+        android:pathData="M139,152 C116,150 96,138 92,122 C112,120 134,136 139,152 Z" />
+    <path
+        android:fillColor="@color/bb_primary"
+        android:pathData="M141,146 C164,144 184,132 188,116 C168,114 146,130 141,146 Z" />
+    <!-- Upper leaves -->
+    <path
+        android:fillColor="@color/bb_primary"
+        android:pathData="M139,126 C124,116 114,100 112,88 C128,88 138,104 139,126 Z" />
+    <path
+        android:fillColor="@color/bb_primary"
+        android:pathData="M141,122 C156,112 166,96 168,84 C152,84 142,100 141,122 Z" />
+    <!-- Golden bud -->
+    <path
+        android:fillColor="@color/bb_accent_reward"
+        android:pathData="M140,108 C132,94 134,78 140,68 C146,78 148,94 140,108 Z" />
+    <!-- Sparkles -->
+    <path
+        android:fillColor="@color/bb_accent_reward"
+        android:pathData="M196,63 Q196,72 205,72 Q196,72 196,81 Q196,72 187,72 Q196,72 196,63 Z" />
+    <path
+        android:fillColor="@color/bb_accent_reward"
+        android:pathData="M78,85 Q78,92 85,92 Q78,92 78,99 Q78,92 71,92 Q78,92 78,85 Z" />
+    <path
+        android:fillColor="@color/bb_accent_reward"
+        android:pathData="M211,142 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z" />
+    <path
+        android:fillColor="@color/bb_primary"
+        android:pathData="M63.5,154 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0 Z" />
+    <path
+        android:fillColor="@color/bb_accent_reward"
+        android:pathData="M137.8,54 a2.2,2.2 0 1,0 4.4,0 a2.2,2.2 0 1,0 -4.4,0 Z" />
+</vector>

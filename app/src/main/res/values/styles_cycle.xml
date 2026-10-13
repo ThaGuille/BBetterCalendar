@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u15 · Cycle complete: hero title and tile value (html 02). -->
+<resources>
+    <!-- "Cycle complete!": 30sp, 800 (bold is the heaviest slot of the app font), amber. -->
+    <style name="TextAppearance.BBetter.CycleTitle">
+        <item name="android:textSize">@dimen/cycle_title_text</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/bb_accent_reward</item>
+    </style>
+
+    <!-- Tile value ("1h 40m"): 18sp, 700, tabular. -->
+    <style name="TextAppearance.BBetter.CycleTileValue">
+        <item name="android:textSize">@dimen/cycle_tile_value_text</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+</resources>

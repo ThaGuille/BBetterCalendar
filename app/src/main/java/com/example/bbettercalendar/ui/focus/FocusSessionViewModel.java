@@ -453,6 +453,11 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         return value != null ? value : fallback;
     }
 
+    /** u15: configured concentration length (Cycle complete multiplies it by the cycles done). */
+    public long getConfiguredFocusMillis() {
+        return currentSettings().focusMillis;
+    }
+
     private Settings currentSettings() {
         return toSettings(configurationManager.getConfiguration());
     }

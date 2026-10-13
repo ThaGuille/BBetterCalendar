@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u15 · html 02 .hero-glow-layer: radial honey wash centred at 50% / 28%, fading to the
+     background. bb_chart_halo (honey 25 %) is the closest existing token to the html's 16 %. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="radial"
+        android:centerX="0.5"
+        android:centerY="0.28"
+        android:gradientRadius="75%p"
+        android:startColor="@color/bb_chart_halo"
+        android:endColor="@color/bb_surface" />
+</shape>

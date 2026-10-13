@@ -1,5 +1,6 @@
 package com.example.bbettercalendar.ui.focus;
 
+import android.os.Bundle;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -100,7 +101,7 @@ public final class FocusSessionEventPresenter implements OnPopupListener<Object>
         if (current == null) {
             return;
         }
-        event.consume();
+        Integer cycles = event.consume();
         if (current.getId() == R.id.navigation_cycle_complete) {
             return;
         }
@@ -109,7 +110,10 @@ public final class FocusSessionEventPresenter implements OnPopupListener<Object>
             // Back desde Cycle complete vuelve a Home: la sesión ya terminó, Focus no pinta nada.
             options.setPopUpTo(R.id.navigation_focus, true);
         }
-        nav.navigate(R.id.navigation_cycle_complete, null, options.build());
+        Bundle args = new Bundle();
+        args.putInt(CycleCompleteFragment.ARG_CYCLES, cycles == null ? 0 : cycles);
+        args.putLong(CycleCompleteFragment.ARG_FOCUS_MILLIS, session.getConfiguredFocusMillis());
+        nav.navigate(R.id.navigation_cycle_complete, args, options.build());
     }
 
     private void onSessionFailed(@Nullable SingleEvent<Boolean> event) {

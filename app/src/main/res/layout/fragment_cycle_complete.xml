@@ -1,23 +1,431 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u12: destination shell (top bar + back). Real content arrives in its screen unit (u14–u20). -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- u15 · Cycle complete (html 02-celebration). Triggered by FocusSessionEventPresenter. Social
+     blocks (Best tile + its gap, friends strip) are GONE when SocialFeature is off. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cycleCompleteScreen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bb_surface"
-    android:orientation="vertical"
     tools:context=".ui.focus.CycleCompleteFragment">
 
-    <include layout="@layout/view_top_bar" />
-
-    <com.example.bbettercalendar.ui.common.widget.EmptyStateView
+    <View
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        app:emptyTitle="@string/title_cycle_complete"
-        app:emptyMessage="@string/screen_placeholder_message" />
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_cycle_halo"
+        android:importantForAccessibility="no" />
 
-</LinearLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="12dp">
+
+                <ImageButton
+                    android:id="@+id/cycleCloseButton"
+                    android:layout_width="@dimen/cycle_close_size"
+                    android:layout_height="@dimen/cycle_close_size"
+                    android:layout_gravity="end"
+                    android:background="@drawable/bg_cycle_close"
+                    android:contentDescription="@string/cycle_close_desc"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_close_24"
+                    app:tint="@color/bb_on_surface_muted" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp">
+
+                <ImageView
+                    android:layout_width="@dimen/cycle_illustration_size"
+                    android:layout_height="@dimen/cycle_illustration_size"
+                    android:layout_marginBottom="12dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_cycle_plant" />
+
+                <TextView
+                    android:id="@+id/cycleTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cycle_title"
+                    android:textAppearance="@style/TextAppearance.BBetter.CycleTitle" />
+
+                <TextView
+                    android:id="@+id/cycleSummary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body"
+                    android:textColor="@color/bb_on_surface_muted"
+                    tools:text="You finished 4 Pomodoros on" />
+
+                <TextView
+                    android:id="@+id/cycleTaskChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_cycle_strip"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="3dp"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+                    android:textColor="@color/bb_primary"
+                    android:visibility="gone"
+                    tools:text="Final thesis: chapter 3"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cycleFocusTile"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:contentPadding="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cycle_tile_accent_height"
+                        android:background="@color/bb_primary" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/cycle_tile_padding">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="@dimen/cycle_tile_icon_size"
+                                android:layout_height="@dimen/cycle_tile_icon_size"
+                                android:layout_marginEnd="6dp"
+                                android:importantForAccessibility="no"
+                                android:src="@drawable/ic_clock_v2_24"
+                                app:tint="@color/bb_primary" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="@string/cycle_tile_focus"
+                                android:textAllCaps="true"
+                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/cycleFocusValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
+                            tools:text="1h 40m" />
+
+                        <TextView
+                            android:id="@+id/cycleFocusSub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                            android:textColor="@color/bb_on_surface_muted"
+                            tools:text="unbroken" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Space
+                android:layout_width="@dimen/cycle_tile_gap"
+                android:layout_height="match_parent" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cycleStreakTile"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:contentPadding="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cycle_tile_accent_height"
+                        android:background="@color/bb_accent_reward" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/cycle_tile_padding">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="@dimen/cycle_tile_icon_size"
+                                android:layout_height="@dimen/cycle_tile_icon_size"
+                                android:layout_marginEnd="6dp"
+                                android:importantForAccessibility="no"
+                                android:src="@drawable/ic_flame_v2_24"
+                                app:tint="@color/bb_accent_reward" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="@string/cycle_tile_streak"
+                                android:textAllCaps="true"
+                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold" />
+
+                        <TextView
+                            android:id="@+id/cycleStreakBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_cycle_badge"
+                            android:paddingHorizontal="6dp"
+                            android:paddingVertical="1dp"
+                            android:text="@string/cycle_streak_badge"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                            android:textColor="@color/bb_accent_reward" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/cycleStreakValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
+                            tools:text="13 days" />
+
+                        <TextView
+                            android:id="@+id/cycleStreakSub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                            android:textColor="@color/bb_accent_reward"
+                            tools:text="Personal best" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Space
+                android:id="@+id/cycleBestGap"
+                android:layout_width="@dimen/cycle_tile_gap"
+                android:layout_height="match_parent" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cycleBestTile"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:contentPadding="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cycle_tile_accent_height"
+                        android:background="@color/bb_accent_reward" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/cycle_tile_padding">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="@dimen/cycle_tile_icon_size"
+                                android:layout_height="@dimen/cycle_tile_icon_size"
+                                android:layout_marginEnd="6dp"
+                                android:importantForAccessibility="no"
+                                android:src="@drawable/ic_trophy_24"
+                                app:tint="@color/bb_accent_reward" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="@string/cycle_tile_best"
+                                android:textAllCaps="true"
+                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/cycleBestValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
+                            tools:text="2nd" />
+
+                        <TextView
+                            android:id="@+id/cycleBestSub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                            android:textColor="@color/bb_on_surface_muted"
+                            tools:text="among friends" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cycleFriendsStrip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_cycle_strip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.example.bbettercalendar.ui.common.widget.AvatarView
+                        android:id="@+id/cycleAvatar1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:avatarSize="@dimen/cycle_avatar_size" />
+
+                    <com.example.bbettercalendar.ui.common.widget.AvatarView
+                        android:id="@+id/cycleAvatar2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/cycle_avatar_overlap"
+                        app:avatarSize="@dimen/cycle_avatar_size" />
+
+                    <com.example.bbettercalendar.ui.common.widget.AvatarView
+                        android:id="@+id/cycleAvatar3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/cycle_avatar_overlap"
+                        app:avatarSize="@dimen/cycle_avatar_size" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/cycleFriendsText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                    tools:text="Laia and 3 others still studying" />
+
+                <View
+                    android:layout_width="@dimen/cycle_live_dot"
+                    android:layout_height="@dimen/cycle_live_dot"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_cycle_live_dot"
+                    android:importantForAccessibility="no" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/cycle_live"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                    android:textColor="@color/bb_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="24dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cycleContinueButton"
+                    style="@style/Widget.BBetter.Button.Reward"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:text="@string/cycle_continue"
+                    app:icon="@drawable/ic_chevron_right_24"
+                    app:iconGravity="textEnd" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cycleShareButton"
+                    style="@style/Widget.BBetter.Button.Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/cycle_share"
+                    android:textColor="@color/bb_on_surface_muted"
+                    app:icon="@drawable/ic_share_24"
+                    app:iconGravity="textStart"
+                    app:iconTint="@color/bb_on_surface_muted" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

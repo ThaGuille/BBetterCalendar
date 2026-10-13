@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u15 · Cycle complete (html 02). Spanish in values-es/strings_cycle.xml. -->
+<resources>
+    <string name="cycle_title">Cycle complete!</string>
+    <plurals name="cycle_pomodoros">
+        <item quantity="one">%d Pomodoro</item>
+        <item quantity="other">%d Pomodoros</item>
+    </plurals>
+    <string name="cycle_finished_format">You finished %1$s</string>
+    <string name="cycle_finished_on_format">You finished %1$s on</string>
+    <string name="cycle_tile_focus">Focus</string>
+    <string name="cycle_tile_focus_sub">unbroken</string>
+    <string name="cycle_tile_streak">Streak</string>
+    <string name="cycle_streak_badge">+1</string>
+    <string name="cycle_streak_personal_best">Personal best</string>
+    <string name="cycle_streak_best_format">Best: %1$s</string>
+    <string name="cycle_tile_best">Best</string>
+    <string name="cycle_tile_best_sub">among friends</string>
+    <string name="cycle_rank_st">%1$dst</string>
+    <string name="cycle_rank_nd">%1$dnd</string>
+    <string name="cycle_rank_rd">%1$drd</string>
+    <string name="cycle_rank_th">%1$dth</string>
+    <string name="cycle_friend_one_format">%1$s still studying</string>
+    <plurals name="cycle_friends_format">
+        <item quantity="one">%1$s and %2$d other still studying</item>
+        <item quantity="other">%1$s and %2$d others still studying</item>
+    </plurals>
+    <string name="cycle_live">Live</string>
+    <string name="cycle_continue">Continue</string>
+    <string name="cycle_share">Share my progress</string>
+    <string name="cycle_share_soon">Sharing is coming soon</string>
+    <string name="cycle_close_desc">Dismiss</string>
+</resources>

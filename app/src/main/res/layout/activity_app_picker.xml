@@ -32,25 +32,23 @@
             android:layout_marginStart="@dimen/spacing_sm"
             android:layout_weight="1"
             android:text="@string/app_picker_title"
-            android:textAppearance="@style/TextAppearance.BBetter.Title" />
+            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
 
         <TextView
             android:id="@+id/app_picker_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_save_pill"
             android:clickable="true"
             android:focusable="true"
-            android:padding="@dimen/spacing_sm"
+            android:paddingStart="@dimen/spacing_lg"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_sm"
             android:text="@string/app_picker_save"
-            android:textAppearance="@style/TextAppearance.BBetter.Title"
-            android:textColor="@color/bb_primary" />
+            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+            android:textColor="@color/bb_on_primary" />
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/bb_divider" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -62,6 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
+            android:paddingTop="@dimen/spacing_xs"
             android:paddingBottom="@dimen/spacing_md" />
 
         <ProgressBar

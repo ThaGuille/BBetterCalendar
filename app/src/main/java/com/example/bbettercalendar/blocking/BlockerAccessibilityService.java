@@ -9,6 +9,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -240,7 +241,9 @@ public class BlockerAccessibilityService extends AccessibilityService {
             removeCover();
         }
 
-        LayoutInflater inflater = LayoutInflater.from(this);
+        // u23: el contexto del servicio no tiene el tema de la app; se envuelve para que cualquier
+        // ?attr de los drawables del overlay resuelva (los colores del layout ya son explícitos).
+        LayoutInflater inflater = LayoutInflater.from(new ContextThemeWrapper(this, R.style.Theme_BBetter));
         View view = inflater.inflate(R.layout.view_block_cover, null);
 
         TextView label = view.findViewById(R.id.block_cover_app_label);

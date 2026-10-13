@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Portada de bloqueo de pantalla completa (Phase 4a). Opaca y clickable a propósito: intercepta
-     todos los toques sobre la app cubierta. Tokens bb_* únicamente (regla #2). -->
+     todos los toques sobre la app cubierta. Tokens bb_* únicamente (regla #2).
+     u23: la infla el contexto del servicio de accesibilidad, que no hereda el tema de la app:
+     por eso todos los colores son explícitos (@color/bb_*), el tinte es android:tint (no app:tint,
+     que solo lo entiende la factory de AppCompat) y el servicio infla con un ContextThemeWrapper
+     sobre Theme.BBetter como red de seguridad para los ?attr de los vectores. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,11 +17,11 @@
     android:padding="@dimen/spacing_lg">
 
     <ImageView
-        android:layout_width="72dp"
-        android:layout_height="72dp"
+        android:layout_width="@dimen/block_cover_icon_size"
+        android:layout_height="@dimen/block_cover_icon_size"
         android:contentDescription="@null"
         android:src="@drawable/ic_block_24"
-        app:tint="@color/bb_danger" />
+        android:tint="@color/bb_danger" />
 
     <TextView
         android:id="@+id/block_cover_app_label"

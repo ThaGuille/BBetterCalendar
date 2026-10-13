@@ -50,7 +50,7 @@
 
         <activity
             android:name=".configuration.SplashActivity"
-            android:theme="@style/SplashTheme"
+            android:theme="@style/Theme.BBetter.NoActionBar"
             android:exported="true"
             android:screenOrientation="portrait"
             android:label="@string/app_name">

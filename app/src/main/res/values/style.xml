@@ -5,12 +5,6 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <!-- Splash (u5: re-parented onto the app theme so the whole tree is DayNight + forced night;
-         the splash visuals themselves are u23). -->
-    <style name="SplashTheme" parent="Theme.BBetter.NoActionBar">
-        <item name="android:windowBackground">@drawable/blue_oval</item>
-    </style>
-
    <style name="CalendarLegendDay">
        <item name="android:layout_width">0dp</item>
        <item name="android:layout_height">wrap_content</item>

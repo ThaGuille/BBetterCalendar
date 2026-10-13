@@ -8,6 +8,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,18 +30,48 @@ public final class UsageStatsRepository {
         this.ownPackage = appContext.getPackageName();
     }
 
+    // Recibe cada intervalo de primer plano ya reconstruido (sin recortar) de un paquete.
+    private interface IntervalSink {
+        void onInterval(String pkg, long start, long stop);
+    }
+
     // Milisegundos en primer plano por paquete dentro de [begin, end). Excluye nuestro propio
     // paquete. Mapa vacío si no hay acceso/eventos.
     public Map<String, Long> foregroundMillis(long begin, long end) {
-        Map<String, Long> totals = new HashMap<>();
-        if (end <= begin) return totals;
+        final Map<String, Long> totals = new HashMap<>();
+        walkIntervals(begin, end, (pkg, start, stop) -> addInterval(totals, pkg, start, stop, begin, end));
+        totals.remove(ownPackage);
+        return totals;
+    }
+
+    // u19: milisegundos de uso por hora LOCAL (0..23) de `day`, de todas las apps salvo la nuestra
+    // y el launcher por defecto (la pantalla de inicio inflaria el total, como en totalScreenTime).
+    // Un intervalo que cruza una hora se reparte entre ambas; el tiempo fuera del dia se ignora.
+    public long[] foregroundMillisByHour(LocalDate day) {
+        ZoneId zone = ZoneId.systemDefault();
+        final long dayStart = day.atStartOfDay(zone).toInstant().toEpochMilli();
+        final long dayEnd = day.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli();
+        final long[] buckets = new long[UsageHourBuckets.HOURS];
+        final String launcher = defaultLauncherPackage();
+        walkIntervals(dayStart, dayEnd, (pkg, start, stop) -> {
+            if (pkg.equals(ownPackage) || pkg.equals(launcher)) return;
+            UsageHourBuckets.addInterval(buckets, start, stop, dayStart, dayEnd, zone);
+        });
+        return buckets;
+    }
+
+    // Recorre el flujo de eventos de [begin, end) y entrega cada intervalo MOVE_TO_FOREGROUND ->
+    // cierre (sin recortar: el sink recorta). Nuestro propio paquete participa en la maquina de
+    // estados; el sink decide si lo descarta.
+    private void walkIntervals(long begin, long end, IntervalSink sink) {
+        if (end <= begin) return;
 
         UsageStatsManager usm =
                 (UsageStatsManager) appContext.getSystemService(Context.USAGE_STATS_SERVICE);
-        if (usm == null) return totals;
+        if (usm == null) return;
 
         UsageEvents events = usm.queryEvents(begin, end);
-        if (events == null) return totals;
+        if (events == null) return;
 
         // Sólo UNA app está en primer plano a la vez: un MOVE_TO_FOREGROUND cierra la anterior en
         // ese instante. Así, si a un intervalo le falta su MOVE_TO_BACKGROUND (proceso muerto,
@@ -58,13 +90,13 @@ public final class UsageStatsRepository {
             int type = ev.getEventType();
             if (type == UsageEvents.Event.MOVE_TO_FOREGROUND) {
                 if (currentPkg != null) {
-                    addInterval(totals, currentPkg, currentSince, ev.getTimeStamp(), begin, end);
+                    sink.onInterval(currentPkg, currentSince, ev.getTimeStamp());
                 }
                 currentPkg = pkg;
                 currentSince = ev.getTimeStamp();
             } else if (type == UsageEvents.Event.MOVE_TO_BACKGROUND) {
                 if (pkg.equals(currentPkg)) {
-                    addInterval(totals, currentPkg, currentSince, ev.getTimeStamp(), begin, end);
+                    sink.onInterval(currentPkg, currentSince, ev.getTimeStamp());
                     currentPkg = null;
                 }
             }
@@ -73,12 +105,8 @@ public final class UsageStatsRepository {
         // tiempo futuro (el rango "esta semana" termina en el futuro) ni un intervalo sin cerrar
         // más allá del presente.
         if (currentPkg != null) {
-            addInterval(totals, currentPkg, currentSince,
-                    Math.min(end, System.currentTimeMillis()), begin, end);
+            sink.onInterval(currentPkg, currentSince, Math.min(end, System.currentTimeMillis()));
         }
-
-        totals.remove(ownPackage);
-        return totals;
     }
 
     // Tiempo total de pantalla del rango: suma del uso por app, excluyendo el launcher por defecto

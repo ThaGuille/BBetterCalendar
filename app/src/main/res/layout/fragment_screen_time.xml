@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u12: destination shell (top bar + back). Real content arrives in its screen unit (u14–u20). -->
+<!-- u19 · Screen time & blocking (.stitch/designs/14-screen-time-blocking-final.png + html/14).
+     Top bar fijo (flecha atras + titulo) y debajo un scroll: 3 tiles, "Today by hour" (grafico en
+     codigo, ChartStyler), "Manage your apps" (filas AppUsageRowView anadidas por el Fragment),
+     "Focus shield" y el pie de permisos. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -12,12 +15,366 @@
 
     <include layout="@layout/view_top_bar" />
 
-    <com.example.bbettercalendar.ui.common.widget.EmptyStateView
+    <ScrollView
+        android:id="@+id/screenTimeScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center"
-        app:emptyTitle="@string/title_screen_time"
-        app:emptyMessage="@string/screen_placeholder_message" />
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="@dimen/spacing_lg">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md">
+
+            <!-- ============ 3 tiles ============ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/screenTimeTileTracked"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    app:tileLabel="@string/screen_time_tile_tracked"
+                    app:tileLabelAllCaps="false" />
+
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/screenTimeTileLimit"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/screen_time_tile_gap"
+                    android:layout_weight="1"
+                    app:tileLabel="@string/screen_time_tile_limit"
+                    app:tileLabelAllCaps="false" />
+
+                <!-- PLACEHOLDER(ui-placeholders#screen-time-blocked-opens): no se cuentan aperturas bloqueadas. -->
+                <LinearLayout
+                    android:id="@+id/screenTimeTileBlocked"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/screen_time_tile_gap"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="@dimen/widget_tile_padding">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/screen_time_tile_blocked"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/screenTimeBlockedCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.BBetter.Stat.Tile"
+                            android:textColor="@color/bb_accent_reward"
+                            tools:text="23" />
+
+                        <ImageView
+                            android:layout_width="@dimen/widget_tile_icon_size"
+                            android:layout_height="@dimen/widget_tile_icon_size"
+                            android:layout_marginStart="@dimen/spacing_xs"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_shield_24"
+                            app:tint="@color/bb_accent_reward" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/screen_time_tile_blocked_sub"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ============ Today by hour ============ -->
+            <LinearLayout
+                android:id="@+id/screenTimeHourCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/screen_time_hour_title"
+                            android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/screen_time_hour_subtitle"
+                            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_marginTop="2dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="@dimen/screen_time_legend_dot"
+                            android:layout_height="@dimen/screen_time_legend_dot"
+                            android:background="@drawable/bg_dot_primary"
+                            android:backgroundTint="@color/bb_data_compare" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="@string/screen_time_legend_usage"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro" />
+
+                        <View
+                            android:layout_width="@dimen/screen_time_legend_dot"
+                            android:layout_height="@dimen/screen_time_legend_dot"
+                            android:layout_marginStart="@dimen/spacing_card_gap"
+                            android:background="@drawable/bg_dot_primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="@string/screen_time_legend_focus"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/screenTimeHourChartHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/screen_time_chart_height"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:contentDescription="@string/screen_time_hour_cd" />
+            </LinearLayout>
+
+            <!-- ============ Manage your apps ============ -->
+            <LinearLayout
+                android:id="@+id/screenTimeManageCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/screen_time_header_icon"
+                        android:layout_height="@dimen/screen_time_header_icon"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_lock_24"
+                        app:tint="@color/bb_primary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:text="@string/screen_time_manage_title"
+                        android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+                    <!-- PLACEHOLDER(ui-placeholders#screen-time-new-badge): insignia fija. -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:background="@drawable/bg_progress_new_badge"
+                        android:paddingStart="@dimen/spacing_sm"
+                        android:paddingTop="2dp"
+                        android:paddingEnd="@dimen/spacing_sm"
+                        android:paddingBottom="2dp"
+                        android:text="@string/screen_time_manage_new"
+                        android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                        android:textColor="@color/bb_on_reward" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_shield_24"
+                            app:tint="@color/bb_primary" />
+
+                        <TextView
+                            android:id="@+id/screenTimeProtected"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_xs"
+                            android:maxWidth="@dimen/screen_time_protected_max_width"
+                            android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+                            android:textColor="@color/bb_primary"
+                            tools:text="3 apps protected" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/screen_time_manage_body"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/screenTimeBlockNew"
+                    style="@style/Widget.BBetter.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/screen_time_block_button_height"
+                    android:layout_marginTop="@dimen/spacing_card_gap"
+                    android:minHeight="@dimen/screen_time_block_button_height"
+                    android:text="@string/screen_time_block_new"
+                    app:icon="@drawable/ic_add_24"
+                    app:iconGravity="textStart" />
+
+                <LinearLayout
+                    android:id="@+id/screenTimeAppRows"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/screenTimeAppsEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_card_gap"
+                    android:gravity="center"
+                    android:text="@string/screen_time_apps_empty"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- ============ Focus shield ============ -->
+            <LinearLayout
+                android:id="@+id/screenTimeShieldCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_md">
+
+                <ImageView
+                    android:layout_width="@dimen/screen_time_icon_tile"
+                    android:layout_height="@dimen/screen_time_icon_tile"
+                    android:background="@drawable/bg_screen_time_icon_tile"
+                    android:importantForAccessibility="no"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_do_not_disturb_on_24"
+                    app:tint="@color/bb_on_surface_muted" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_card_gap"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/screen_time_shield_title"
+                        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/screen_time_shield_desc"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+                </LinearLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/screenTimeShieldSwitch"
+                    style="@style/Widget.BBetter.Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:contentDescription="@string/screen_time_shield_title"
+                    android:thumb="@drawable/bb_switch_thumb_check" />
+            </LinearLayout>
+
+            <!-- ============ Pie de permisos ============ -->
+            <LinearLayout
+                android:id="@+id/screenTimeFooter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_screen_time_footer"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:minHeight="48dp"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/spacing_md"
+                android:paddingTop="12dp"
+                android:paddingEnd="@dimen/spacing_md"
+                android:paddingBottom="12dp">
+
+                <ImageView
+                    android:id="@+id/screenTimeFooterIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_check_24"
+                    app:tint="@color/bb_primary" />
+
+                <TextView
+                    android:id="@+id/screenTimeFooterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                    tools:text="Usage access granted · Accessibility service active" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

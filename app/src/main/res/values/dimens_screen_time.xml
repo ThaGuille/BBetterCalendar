@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u19 · Screen time & blocking (html 14). -->
+<resources>
+    <dimen name="screen_time_tile_gap">10dp</dimen>
+    <dimen name="screen_time_chart_height">140dp</dimen>
+    <dimen name="screen_time_block_button_height">44dp</dimen>
+    <dimen name="screen_time_icon_tile">40dp</dimen>
+    <dimen name="screen_time_legend_dot">10dp</dimen>
+    <dimen name="screen_time_header_icon">19dp</dimen>
+    <dimen name="screen_time_protected_max_width">96dp</dimen>
+</resources>

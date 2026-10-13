@@ -14,6 +14,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
+import com.example.bbettercalendar.blocking.BlockingSettings;
 import com.example.bbettercalendar.blocking.FocusBlockState;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
@@ -420,7 +421,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private void restoreFromSavedState() {
         String stateName = savedState.get(KEY_STATE);
         Boolean armed = savedState.get(KEY_BLOCK_ARMED);
-        blockModeArmed = armed != null && armed;
+        // u19: sin estado guardado (sesion nueva) arranca como diga "Focus shield" de Screen time.
+        blockModeArmed = armed != null ? armed : BlockingSettings.isFocusShieldEnabled(appContext);
         if (stateName != null) {
             try {
                 machine.restore(new Snapshot(

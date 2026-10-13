@@ -12,6 +12,7 @@ public final class BlockingSettings {
 
     private static final String PREFS_NAME = "blocking_settings";
     private static final String KEY_ENFORCEMENT_ENABLED = "enforcement_enabled";
+    private static final String KEY_FOCUS_SHIELD = "focus_shield";
 
     private BlockingSettings() { }
 
@@ -21,6 +22,17 @@ public final class BlockingSettings {
 
     public static void setEnforcementEnabled(Context context, boolean enabled) {
         prefs(context).edit().putBoolean(KEY_ENFORCEMENT_ENABLED, enabled).apply();
+    }
+
+    // u19 "Focus shield" (Screen time): preferencia persistente de que cada sesion de concentracion
+    // ARRANCA con el modo bloqueo total armado (FocusSessionViewModel la lee al crearse). No es el
+    // estado vivo (eso es FocusBlockState) ni toca el interruptor maestro de arriba. Por defecto OFF.
+    public static boolean isFocusShieldEnabled(Context context) {
+        return prefs(context).getBoolean(KEY_FOCUS_SHIELD, false);
+    }
+
+    public static void setFocusShieldEnabled(Context context, boolean enabled) {
+        prefs(context).edit().putBoolean(KEY_FOCUS_SHIELD, enabled).apply();
     }
 
     private static SharedPreferences prefs(Context context) {

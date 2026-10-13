@@ -1,12 +1,11 @@
 # System — App usage limits (`usage/` + `usage/limits/` + `blocking/`)
 
-**Last verified:** 2026-08-29 (DB v10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-13 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Measure → warn → enforce pipeline for per-app daily usage limits. Reads real usage via
 `UsageStatsManager` (special-access permission, no runtime dialog), lets the user set a daily
 limit per tracked app, warns before the limit via a scheduled alarm poll, and optionally covers
-the app full-screen via an `AccessibilityService` once the limit is crossed. UI (the Progress
-screen list/dialogs) is a separate doc — see `progress-screen.md`.
+the app full-screen via an `AccessibilityService` once the limit is crossed. UI: the Progress band is in `progress-screen.md`; the Screen time & blocking screen (u19) is described below.
 
 ## Surface (manifest + entry points)
 | Kind | Entry |
@@ -22,7 +21,7 @@ screen list/dialogs) is a separate doc — see `progress-screen.md`.
 | Class | Path | Role |
 |---|---|---|
 | `UsageAccess` | `usage/UsageAccess.java` | `hasUsageAccess()` via `AppOpsManager`; settings-intent helper |
-| `UsageStatsRepository` | `usage/UsageStatsRepository.java` | Per-app foreground ms from `queryEvents` (state-machine over MOVE_TO_FOREGROUND/BACKGROUND, own package excluded); no caching — callers must throttle |
+| `UsageStatsRepository` | `usage/UsageStatsRepository.java` | Per-app foreground ms from `queryEvents` (state-machine over MOVE_TO_FOREGROUND/BACKGROUND, own package excluded); no caching — callers must throttle. `foregroundMillisByHour(day)` (u19) reuses the same interval walk and splits each interval over the 24 local-clock hours via the pure `UsageHourBuckets` (cross-hour intervals divided, time outside the day ignored; own package and default launcher excluded) |
 | `UsageLimitScheduler` | `usage/limits/UsageLimitScheduler.java` | Arms/disarms the exact-alarm-with-inexact-fallback poll; only armed while ≥1 limited app hasn't fired today |
 | `UsageLimitReceiver` | `usage/limits/UsageLimitReceiver.java` | `@AndroidEntryPoint`; `goAsync()` + executor → `UsageLimitChecker.run()` → reschedule |
 | `UsageLimitChecker` | `usage/limits/UsageLimitChecker.java` | Per limited app: today's foreground ms vs. warn/limit thresholds; fires notifications, de-duped |
@@ -47,6 +46,16 @@ screen list/dialogs) is a separate doc — see `progress-screen.md`.
 ## Contracts
 - Reads/Writes: `AppRule` (owner: `data-model.md#per-entity-readerswriters-contract-table`) — `dailyLimitMinutes`/`warnBeforeMinutes` (Phase 3) and `instantBlock`-backed `enforceAtLimit` (Phase 4a) · Shared with: `progress-screen.md` (UI that writes these fields), `notifications.md` (`UsageLimitNotifier`)
 
+## Screen time & blocking screen (u19, `ui/screentime/`)
+
+`ScreenTimeFragment` + `ScreenTimeViewModel` (+ flat `ScreenTimeState`) draw `.stitch/designs/14-*`:
+three tiles (tracked apps today vs the previous 7-day daily average, sum of daily limits with % reached, blocked opens = **placeholder**), "Today by hour" (usage line from `foregroundMillisByHour`, FOCUS bands from `focus_event` minutes per hour — same rule as `ProgressViewModel.buildBundle`'s `focusMinutesByHour`), the "Manage your apps" list (`AppUsageRowView`) and the permissions footer. Everything runs on the `@IoExecutor` and publishes with `postValue`.
+
+- **Lock switch = `enforceAtLimit`** (`AppRuleDAO.setEnforceAtLimit`). Same gates as Progress: no limit → toast (the limit is set in the app detail); service off → `AccessibilityDisclosureDialog.newInstance()` and the enforce is armed in `onAccessibilityConsentGranted()`.
+- **Row / chevron / "Set limit"** → `navigation_app_detail` with `packageName`; **"Block a new app"** → `AppPickerActivity`.
+- **Focus shield semantics (chosen):** a persistent preference, `BlockingSettings.isFocusShieldEnabled()`, meaning "every Pomodoro session starts with block mode armed". `FocusSessionViewModel.restoreFromSavedState()` seeds `blockModeArmed` from it when there is no saved state. Flipping the switch also arms/disarms the *current* session (`FocusSessionViewModel.setBlockModeArmed`, activity-scoped) and turning it on needs the accessibility service (same gate as the Focus block button). It is neither `FocusBlockState` (the live "block is active right now" flag, still written only by the session) nor `BlockingSettings.isEnforcementEnabled` (the per-app limits master switch). Default OFF.
+- **Footer** shows `UsageAccess.hasUsageAccess` / `AccessibilityAccess.isEnabled`; when one is missing it is tappable and starts that grant flow (usage disclosure first if there is no consent yet).
+
 ## Invariants & gotchas
 
 - **Two independent "over limit" computations.** `UsageLimitChecker` (alarm poll, warn-only, minute-granularity, can lag) and `BlockDecisionEngine` (live per-event, enforcement) both derive "is this app over its daily limit" from the same `AppRule` + `UsageStatsRepository` inputs but never share a cache or a code path. A fix to one's threshold logic does not apply to the other — check both.
@@ -68,3 +77,4 @@ screen list/dialogs) is a separate doc — see `progress-screen.md`.
 | 2026-07-04 | Phase 3 — per-app daily limit + warn-only alarm poll + two notifications | — |
 | 2026-07-04 | Phase 4a — soft blocking (accessibility service, cover overlay, enforce toggle) | — |
 | 2026-07-05 | Pomodoro "focus block mode" — `FocusBlockState` pre-empts `decide()` to cover every app but the launcher/assistant while a concentration run is active; kill-trap reset on service reconnect | — |
+| 2026-10-13 | u19 — Screen time & blocking screen, `UsageStatsRepository.foregroundMillisByHour`, Focus shield preference (`BlockingSettings`) | `.claude/plans/migracion-visual-stitch/notes/u19.md` |

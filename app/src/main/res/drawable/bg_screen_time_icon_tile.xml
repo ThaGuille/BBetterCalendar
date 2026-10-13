@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u19 · Screen time: icon tile of the Focus shield card (html 14 surface-container-high, rounded). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_raised" />
+    <corners android:radius="@dimen/radius_md" />
+</shape>

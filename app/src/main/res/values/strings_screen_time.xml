@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u19 · Screen time & blocking (html 14). title_screen_time stays in strings.xml. -->
+<resources>
+    <string name="screen_time_tile_tracked">Tracked apps</string>
+    <string name="screen_time_delta_vs_avg">%1$d%% vs avg</string>
+    <string name="screen_time_tile_limit">Daily limit</string>
+    <string name="screen_time_limit_none">No limit</string>
+    <string name="screen_time_value_none">—</string>
+    <string name="screen_time_limit_reached">%1$d%% reached</string>
+    <string name="screen_time_tile_blocked">Opens blocked</string>
+    <string name="screen_time_tile_blocked_sub">this week</string>
+
+    <string name="screen_time_hour_title">Today by hour</string>
+    <string name="screen_time_hour_subtitle">App usage drops flat during deep focus</string>
+    <string name="screen_time_legend_usage">Usage</string>
+    <string name="screen_time_legend_focus">Focus</string>
+    <string name="screen_time_hour_cd">Hourly app usage today, with the hours you focused marked</string>
+
+    <string name="screen_time_manage_title">Manage your apps</string>
+    <string name="screen_time_manage_new">NEW</string>
+    <plurals name="screen_time_protected">
+        <item quantity="one">%1$d app protected</item>
+        <item quantity="other">%1$d apps protected</item>
+    </plurals>
+    <string name="screen_time_manage_body">Set a daily limit. When time\'s up, BBetter covers the app until midnight.</string>
+    <string name="screen_time_block_new">Block a new app</string>
+    <string name="screen_time_apps_empty">No apps yet. Pick the apps you want to limit.</string>
+
+    <string name="screen_time_row_of">%1$s of %2$s</string>
+    <string name="screen_time_row_reached">%1$s of %2$s reached</string>
+    <string name="screen_time_row_no_limit">%1$s · no limit</string>
+    <string name="screen_time_row_blocked_until">Blocked · %1$s</string>
+    <string name="screen_time_row_over_limit">Over limit</string>
+    <string name="screen_time_midnight">00:00</string>
+    <string name="screen_time_lock_needs_limit">Set a daily limit first</string>
+
+    <string name="screen_time_shield_title">Focus shield</string>
+    <string name="screen_time_shield_desc">During a Pomodoro, all apps are blocked</string>
+
+    <string name="screen_time_footer_usage_on">Usage access granted</string>
+    <string name="screen_time_footer_usage_off">Usage access needed</string>
+    <string name="screen_time_footer_a11y_on">Accessibility service active</string>
+    <string name="screen_time_footer_a11y_off">Accessibility service off</string>
+    <string name="screen_time_footer_join">%1$s · %2$s</string>
+</resources>

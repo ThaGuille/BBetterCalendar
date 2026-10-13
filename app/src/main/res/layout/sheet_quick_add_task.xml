@@ -46,7 +46,7 @@
         android:paddingBottom="@dimen/spacing_xs"
         android:text="@string/quick_add_set_time"
         android:textAppearance="@style/TextAppearance.BBetter.Label"
-        android:textColor="@color/bb_primary" />
+        android:textColor="@color/bb_primary_bright" />
 
     <TextView
         android:id="@+id/quickAddRepeatButton"
@@ -62,7 +62,7 @@
         android:paddingBottom="@dimen/spacing_xs"
         android:text="@string/quick_add_repeat_label"
         android:textAppearance="@style/TextAppearance.BBetter.Label"
-        android:textColor="@color/bb_primary" />
+        android:textColor="@color/bb_primary_bright" />
 
     <!-- Objetivo de minutos de concentración (spec focus-attribution). Opcional; en blanco = 0. -->
     <EditText

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focus REST skip (html 01c): the same ghost circle with a crisp sage rim ("Skip break"). -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/bb_ripple_primary">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_sanct_ghost_fill" />
+            <stroke android:width="1.5dp" android:color="@color/bb_sanct_sage" />
+        </shape>
+    </item>
+</ripple>

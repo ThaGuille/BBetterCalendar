@@ -9,10 +9,37 @@ Formato: `- **Q:**` pregunta — **Assumed:** lo que se hizo — **Revertir:** d
 Unidad de origen entre paréntesis `(uN)`. Notas por unidad: `migracion-visual-stitch/notes/uN.md`;
 implementación: [`migracion-visual-stitch-impl.md`](migracion-visual-stitch-impl.md).
 
+## Decisiones del usuario (2026-10-14) — sustituyen a las de 2026-10-07 donde choquen
+
+- **Colores = la paleta que Stitch pinta de verdad**, es decir los `namedColors` M3 del sistema de diseño
+  «BBetter Calm Focus» (`assets/12718199624129390014`): fondo `#081612`, tarjeta `#14221E`
+  (`surface_container`), barra inferior `#101E1A` (`surface_container_low`), elevadas `#1F2D28` /
+  `#293833`, texto `#D6E6DF` / `#C0C9C2`, primario `#9BD3B5` (texto/iconos) y `#7FB69A`
+  (`primary_container`: play, botones), secundario `#ABCEC7` / contenedor `#2C4C47`, ámbar `#FABC4A`,
+  contorno `#8A938C` / `#404943`. **La paleta escrita a mano de `.stitch/DESIGN.md` (`#12201C`,
+  `#1B2D27`…) deja de usarse.** Verificado midiendo píxeles de `04-home.png` frente a la app.
+- **Segunda paleta para el modo concentración:** sistema «Calm Focus Sanctuary»
+  (`assets/f05b8e6776b14744ba52356033e93ad4`): fondo `#091610`, primario ámbar `#E5A93C` / `#F5BE58`,
+  secundario salvia `#7FB69A`/`#9BD3B5`, texto `#EBF3EE` / `#A3B8AD`, bordes finos translúcidos,
+  resplandor radial ámbar. Ya la usa `02-celebration`; **la pantalla Focus (`01-focus-running`) se
+  generó con la paleta vieja y hay que rediseñarla en Stitch** con este sistema antes de implementarla.
+  ✅ Rediseñada el 2026-10-14: `.stitch/designs/01b` (en curso), `01c` (descanso) y `01d` (pausa); ver
+  `.stitch/designs/README.md`. Asumido: el botón principal es ámbar en concentración y pausa, y en el
+  descanso todo pasa a salvia (el ámbar se reserva para concentración y logros).
+  ✅ Implementado el 2026-10-14 (plan `paleta-stitch-y-focus-sanctuary.md`), también la paleta global.
+- **Q:** La línea del descanso de 01c dice «Stretch, drink some water. Next: Write 3.1 Methods», pero
+  Focus no conoce la tarea siguiente. — **Assumed:** solo «Stretch, drink some water.». — **Revertir:**
+  pasar el título de la siguiente tarea al `FocusUiState` y usarlo en `FocusFragment.renderControls`.
+- **Q:** La línea «N missed sessions» no está en 01b. — **Assumed:** solo aparece si hoy hay algún fallo.
+  — **Revertir:** `FocusFragment.renderFails`.
+- **Q:** Focus no cabía en una pantalla. — **Assumed:** caja del anillo 270dp (como el svg), barra
+  superior de 56dp y filas de amigos a 8dp; el resplandor (288px en el html) queda recortado a la caja.
+  — **Revertir:** `dimens_focus.xml` (`focus_sanct_*`).
+
 ## Decisiones del usuario (2026-10-07)
 
-- **Colores = `.stitch/DESIGN.md`** (los 11 primitivos de `palette.xml`), no el esquema M3 que Stitch
-  generó dentro de algunos HTML.
+- ~~**Colores = `.stitch/DESIGN.md`** (los 11 primitivos de `palette.xml`), no el esquema M3 que Stitch
+  generó dentro de algunos HTML.~~ Sustituida el 2026-10-14 (ver arriba).
 - **Los diseños de Stitch (PNG + HTML) son la verdad de base** en composición, textos, espaciados,
   formas y pesos. No se admiten desviaciones por criterio propio, solo por imposibilidad técnica.
 - **Las preguntas se anotan, no bloquean**, y se revisan al final (este documento).

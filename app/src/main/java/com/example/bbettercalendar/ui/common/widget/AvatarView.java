@@ -173,7 +173,7 @@ public class AvatarView extends View {
         switch (status) {
             case STUDYING:
                 stroke.setStrokeWidth(ring);
-                stroke.setColor(ContextCompat.getColor(ctx, R.color.bb_primary));
+                stroke.setColor(ContextCompat.getColor(ctx, R.color.bb_primary_bright));
                 fill.setColor(ContextCompat.getColor(ctx, R.color.bb_primary_container));
                 canvas.drawCircle(cx, cy, r - ring, fill);
                 canvas.drawCircle(cx, cy, r - ring / 2f, stroke);
@@ -217,7 +217,7 @@ public class AvatarView extends View {
             float dy = cy + r - dotR - hairline * 1.5f;
             fill.setColor(cutoutColor);
             canvas.drawCircle(dx, dy, dotR + hairline * 1.5f, fill);
-            fill.setColor(ContextCompat.getColor(ctx, R.color.bb_primary));
+            fill.setColor(ContextCompat.getColor(ctx, R.color.bb_primary_bright));
             canvas.drawCircle(dx, dy, dotR, fill);
         }
 

@@ -19,7 +19,7 @@
             android:layout_height="@dimen/widget_empty_icon_size"
             android:layout_gravity="center"
             android:importantForAccessibility="no"
-            app:tint="@color/bb_primary" />
+            app:tint="@color/bb_primary_bright" />
     </FrameLayout>
 
     <TextView

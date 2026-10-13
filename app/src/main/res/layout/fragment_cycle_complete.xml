@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- u15 · Cycle complete (html 02-celebration). Triggered by FocusSessionEventPresenter. Social
      blocks (Best tile + its gap, friends strip) are GONE when SocialFeature is off. -->
+<!-- Cycle complete, «Calm Focus Sanctuary» tokens since 2026-10-14 (html 02 already used them). -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cycleCompleteScreen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bb_surface"
+    android:background="@color/bb_sanct_surface"
     tools:context=".ui.focus.CycleCompleteFragment">
 
     <View
@@ -42,7 +43,7 @@
                     android:contentDescription="@string/cycle_close_desc"
                     android:padding="10dp"
                     android:src="@drawable/ic_close_24"
-                    app:tint="@color/bb_on_surface_muted" />
+                    app:tint="@color/bb_sanct_on_surface_muted" />
             </FrameLayout>
 
             <LinearLayout
@@ -74,7 +75,7 @@
                     android:layout_marginTop="8dp"
                     android:gravity="center"
                     android:textAppearance="@style/TextAppearance.BBetter.Body"
-                    android:textColor="@color/bb_on_surface_muted"
+                    android:textColor="@color/bb_sanct_on_surface_muted"
                     tools:text="You finished 4 Pomodoros on" />
 
                 <TextView
@@ -88,7 +89,7 @@
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="3dp"
                     android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
-                    android:textColor="@color/bb_primary"
+                    android:textColor="@color/bb_sanct_sage_bright"
                     android:visibility="gone"
                     tools:text="Final thesis: chapter 3"
                     tools:visibility="visible" />
@@ -106,7 +107,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                app:contentPadding="0dp">
+                app:cardBackgroundColor="@color/bb_sanct_card"
+                app:contentPadding="0dp"
+                app:strokeColor="@color/bb_sanct_card_rim"
+                app:strokeWidth="@dimen/widget_hairline">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -116,7 +120,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/cycle_tile_accent_height"
-                        android:background="@color/bb_primary" />
+                        android:background="@color/bb_sanct_sage" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -136,7 +140,7 @@
                                 android:layout_marginEnd="6dp"
                                 android:importantForAccessibility="no"
                                 android:src="@drawable/ic_clock_v2_24"
-                                app:tint="@color/bb_primary" />
+                                app:tint="@color/bb_sanct_sage_bright" />
 
                             <TextView
                                 android:layout_width="0dp"
@@ -164,7 +168,7 @@
                             android:layout_height="wrap_content"
                             android:maxLines="1"
                             android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                            android:textColor="@color/bb_on_surface_muted"
+                            android:textColor="@color/bb_sanct_on_surface_muted"
                             tools:text="unbroken" />
                     </LinearLayout>
                 </LinearLayout>
@@ -179,7 +183,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                app:contentPadding="0dp">
+                app:cardBackgroundColor="@color/bb_sanct_card"
+                app:contentPadding="0dp"
+                app:strokeColor="@color/bb_sanct_card_rim"
+                app:strokeWidth="@dimen/widget_hairline">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -189,7 +196,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/cycle_tile_accent_height"
-                        android:background="@color/bb_accent_reward" />
+                        android:background="@color/bb_sanct_primary" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -209,7 +216,7 @@
                                 android:layout_marginEnd="6dp"
                                 android:importantForAccessibility="no"
                                 android:src="@drawable/ic_flame_v2_24"
-                                app:tint="@color/bb_accent_reward" />
+                                app:tint="@color/bb_sanct_primary" />
 
                             <TextView
                                 android:layout_width="0dp"
@@ -230,7 +237,7 @@
                             android:paddingVertical="1dp"
                             android:text="@string/cycle_streak_badge"
                             android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-                            android:textColor="@color/bb_accent_reward" />
+                            android:textColor="@color/bb_sanct_primary" />
                         </LinearLayout>
 
                         <TextView
@@ -248,7 +255,7 @@
                             android:layout_height="wrap_content"
                             android:maxLines="1"
                             android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                            android:textColor="@color/bb_accent_reward"
+                            android:textColor="@color/bb_sanct_primary"
                             tools:text="Personal best" />
                     </LinearLayout>
                 </LinearLayout>
@@ -264,7 +271,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                app:contentPadding="0dp">
+                app:cardBackgroundColor="@color/bb_sanct_card"
+                app:contentPadding="0dp"
+                app:strokeColor="@color/bb_sanct_card_rim"
+                app:strokeWidth="@dimen/widget_hairline">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -274,7 +284,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/cycle_tile_accent_height"
-                        android:background="@color/bb_accent_reward" />
+                        android:background="@color/bb_sanct_primary" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -294,7 +304,7 @@
                                 android:layout_marginEnd="6dp"
                                 android:importantForAccessibility="no"
                                 android:src="@drawable/ic_trophy_24"
-                                app:tint="@color/bb_accent_reward" />
+                                app:tint="@color/bb_sanct_primary" />
 
                             <TextView
                                 android:layout_width="0dp"
@@ -322,7 +332,7 @@
                             android:layout_height="wrap_content"
                             android:maxLines="1"
                             android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                            android:textColor="@color/bb_on_surface_muted"
+                            android:textColor="@color/bb_sanct_on_surface_muted"
                             tools:text="among friends" />
                     </LinearLayout>
                 </LinearLayout>
@@ -392,7 +402,7 @@
                     android:layout_marginStart="6dp"
                     android:text="@string/cycle_live"
                     android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-                    android:textColor="@color/bb_primary" />
+                    android:textColor="@color/bb_sanct_sage_bright" />
             </LinearLayout>
 
             <LinearLayout
@@ -407,6 +417,9 @@
                     android:id="@+id/cycleContinueButton"
                     style="@style/Widget.BBetter.Button.Reward"
                     android:layout_width="match_parent"
+                    android:textColor="@color/bb_sanct_on_primary"
+                    app:backgroundTint="@color/bb_sanct_primary"
+                    app:iconTint="@color/bb_sanct_on_primary"
                     android:layout_height="wrap_content"
                     android:minHeight="56dp"
                     android:text="@string/cycle_continue"
@@ -421,10 +434,10 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="6dp"
                     android:text="@string/cycle_share"
-                    android:textColor="@color/bb_on_surface_muted"
+                    android:textColor="@color/bb_sanct_on_surface_muted"
                     app:icon="@drawable/ic_share_24"
                     app:iconGravity="textStart"
-                    app:iconTint="@color/bb_on_surface_muted" />
+                    app:iconTint="@color/bb_sanct_on_surface_muted" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

@@ -127,7 +127,7 @@ public class CycleCompleteFragment extends Fragment {
         if (at >= 0) {
             int end = at + count.length();
             summary.setSpan(new ForegroundColorSpan(
-                            ContextCompat.getColor(requireContext(), R.color.bb_on_surface)),
+                            ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface)),
                     at, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             summary.setSpan(new StyleSpan(Typeface.BOLD), at, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
@@ -193,7 +193,7 @@ public class CycleCompleteFragment extends Fragment {
         int at = text.indexOf(first);
         if (at >= 0) {
             styled.setSpan(new ForegroundColorSpan(
-                            ContextCompat.getColor(requireContext(), R.color.bb_on_surface)),
+                            ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface)),
                     at, at + first.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         friendsText.setText(styled);

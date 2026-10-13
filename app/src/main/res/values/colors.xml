@@ -3,6 +3,7 @@
 
     <!-- ============================================================ -->
     <!-- BBetter semantic tokens (dark-first, Stitch «Calm Focus»).    -->
+    <!-- Values = Stitch namedColors since 2026-10-14 (palette.xml).  -->
     <!-- Aliases of the primitives in palette.xml — never a raw hex.   -->
     <!-- The legacy palette (azul, verde, purple_500, ...) was deleted in u24.        -->
     <!-- A future light theme only needs values-notnight/colors.xml    -->
@@ -15,6 +16,9 @@
     <color name="bb_surface_card">@color/pine_900</color>
     <color name="bb_surface_subtle">@color/pine_800</color>
     <color name="bb_surface_raised">@color/pine_800</color>
+    <!-- 2026-10-14: the two ends of the Stitch surface-container scale. -->
+    <color name="bb_surface_low">@color/pine_925</color>
+    <color name="bb_surface_highest">@color/pine_750</color>
     <color name="bb_scrim">@color/pine_950_a60</color>
     <!-- u7: pressed wash on sage/honey fills (pre-multiplied alpha, so it also works in
          framework <ripple> on API 21-22, where a color-state-list android:alpha is ignored). -->
@@ -23,7 +27,10 @@
     <!-- Brand -->
     <color name="bb_primary">@color/sage_300</color>
     <color name="bb_primary_dark">@color/forest_600</color>
-    <color name="bb_on_primary">@color/pine_950</color>
+    <!-- Sage FILLS use bb_primary (Stitch primary-container); sage TEXT and ICONS use
+         bb_primary_bright (Stitch primary). Content on sage fills: bb_on_primary. -->
+    <color name="bb_primary_bright">@color/sage_200</color>
+    <color name="bb_on_primary">@color/forest_900</color>
     <color name="bb_primary_container">@color/forest_600</color>
     <color name="bb_on_primary_container">@color/mist_50</color>
 
@@ -36,10 +43,11 @@
     <!-- Content on surfaces -->
     <color name="bb_on_surface">@color/mist_50</color>
     <color name="bb_on_surface_muted">@color/lichen_300</color>
+    <color name="bb_on_surface_faint">@color/grey_400</color>
     <color name="bb_disabled">@color/mist_50_a38</color>
 
     <!-- Lines -->
-    <color name="bb_divider">@color/pine_700</color>
+    <color name="bb_divider">@color/outline_v_a30</color>
     <color name="bb_outline">@color/pine_700</color>
 
     <!-- State & data -->
@@ -72,5 +80,30 @@
     <!-- Deadline de proyecto (spec project-deadlines-progress). Antes alias del ámbar de recompensa;
          desde u4 el ámbar es el de los recordatorios y el deadline pasa a ember (plan u4). -->
     <color name="calendar_item_deadline">@color/ember_300</color>
+
+    <!-- «Calm Focus Sanctuary» tokens: ONLY Focus (fragment_focus) and Cycle complete
+         (fragment_cycle_complete) use them. Plan paleta-stitch-y-focus-sanctuary.md. -->
+    <color name="bb_sanct_surface">@color/sanct_pine_950</color>
+    <color name="bb_sanct_card">@color/sanct_pine_900</color>
+    <color name="bb_sanct_card_rim">@color/birch_50_a06</color>
+    <color name="bb_sanct_track">@color/sanct_pine_850</color>
+    <color name="bb_sanct_pill">@color/sanct_pine_800</color>
+    <color name="bb_sanct_primary">@color/amber_400</color>
+    <color name="bb_sanct_primary_bright">@color/amber_300</color>
+    <color name="bb_sanct_on_primary">@color/sanct_pine_ink</color>
+    <color name="bb_sanct_sage">@color/sage_300</color>
+    <color name="bb_sanct_sage_bright">@color/sage_200</color>
+    <color name="bb_sanct_on_surface">@color/birch_50</color>
+    <color name="bb_sanct_on_surface_muted">@color/birch_300</color>
+    <color name="bb_sanct_on_surface_faint">@color/birch_500</color>
+    <color name="bb_sanct_ghost_fill">@color/sanct_pine_900_a60</color>
+    <color name="bb_sanct_ghost_rim">@color/sage_300_a30</color>
+    <color name="bb_sanct_chip_rim">@color/sage_300_a20</color>
+    <color name="bb_sanct_chip_fill">@color/sage_300_a10</color>
+    <color name="bb_sanct_divider">@color/sage_300_a15</color>
+    <color name="bb_sanct_glow_sage">@color/sage_300_a10</color>
+    <color name="bb_sanct_button_glow">@color/amber_400_a25</color>
+    <color name="bb_sanct_glow_start">@color/amber_400_a18</color>
+    <color name="bb_sanct_glow_end">@color/amber_400_a00</color>
 
 </resources>

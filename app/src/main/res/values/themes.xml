@@ -36,7 +36,7 @@
         <item name="android:windowBackground">@color/bb_surface</item>
         <item name="android:colorBackground">@color/bb_surface</item>
         <item name="android:statusBarColor">@color/bb_surface</item>
-        <item name="android:navigationBarColor">@color/bb_surface_card</item>
+        <item name="android:navigationBarColor">@color/bb_surface_low</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
 
@@ -108,7 +108,7 @@
     <style name="ThemeOverlay.BBetter.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
         <!-- u7: Widget.BBetter.BottomSheet (styles_components.xml) = 24dp top corners. -->
         <item name="bottomSheetStyle">@style/Widget.BBetter.BottomSheet</item>
-        <item name="android:navigationBarColor">@color/bb_surface_card</item>
+        <item name="android:navigationBarColor">@color/bb_surface_low</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
 

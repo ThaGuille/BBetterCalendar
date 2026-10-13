@@ -231,6 +231,6 @@
             android:paddingEnd="@dimen/spacing_sm"
             android:text="@string/project_open_detail"
             android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
-            android:textColor="@color/bb_primary" />
+            android:textColor="@color/bb_primary_bright" />
     </LinearLayout>
 </LinearLayout>

@@ -299,7 +299,7 @@
                         android:paddingBottom="2dp"
                         android:text="@string/app_detail_limit_active"
                         android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
-                        android:textColor="@color/bb_primary" />
+                        android:textColor="@color/bb_primary_bright" />
                 </LinearLayout>
 
                 <com.example.bbettercalendar.ui.common.widget.StepperView
@@ -497,7 +497,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/spacing_xs"
                             android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
-                            android:textColor="@color/bb_primary"
+                            android:textColor="@color/bb_primary_bright"
                             tools:text="Enabled" />
                     </LinearLayout>
                 </LinearLayout>

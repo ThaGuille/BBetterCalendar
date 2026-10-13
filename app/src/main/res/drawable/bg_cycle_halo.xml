@@ -8,6 +8,6 @@
         android:centerX="0.5"
         android:centerY="0.28"
         android:gradientRadius="75%p"
-        android:startColor="@color/bb_chart_halo"
-        android:endColor="@color/bb_surface" />
+        android:startColor="@color/bb_sanct_glow_start"
+        android:endColor="@color/bb_sanct_surface" />
 </shape>

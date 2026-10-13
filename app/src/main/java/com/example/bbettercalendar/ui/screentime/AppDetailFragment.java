@@ -354,7 +354,7 @@ public class AppDetailFragment extends Fragment
         limitBadge.setText(s.hasLimit() ? R.string.app_detail_limit_active
                 : R.string.app_detail_limit_off);
         limitBadge.setTextColor(ContextCompat.getColor(requireContext(),
-                s.hasLimit() ? R.color.bb_primary : R.color.bb_on_surface_muted));
+                s.hasLimit() ? R.color.bb_primary_bright : R.color.bb_on_surface_muted));
         stepper.setValue(s.limitMinutes);
         stepper.setUnit(s.hasLimit() ? getString(R.string.app_detail_stepper_unit) : null);
         stepper.setCaption(getString(s.hasLimit() ? R.string.app_detail_stepper_caption
@@ -404,7 +404,7 @@ public class AppDetailFragment extends Fragment
         boolean on = AccessibilityAccess.isEnabled(requireContext());
         a11yText.setText(on ? R.string.app_detail_a11y_enabled : R.string.app_detail_a11y_disabled);
         int color = ContextCompat.getColor(requireContext(),
-                on ? R.color.bb_primary : R.color.bb_accent_reward);
+                on ? R.color.bb_primary_bright : R.color.bb_accent_reward);
         a11yText.setTextColor(color);
         ViewCompat.setBackgroundTintList(a11yDot, ColorStateList.valueOf(color));
         a11yStatus.setClickable(!on);

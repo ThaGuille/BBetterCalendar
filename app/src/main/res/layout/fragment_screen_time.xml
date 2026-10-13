@@ -207,7 +207,7 @@
                         android:layout_height="@dimen/screen_time_header_icon"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_lock_24"
-                        app:tint="@color/bb_primary" />
+                        app:tint="@color/bb_primary_bright" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -243,7 +243,7 @@
                             android:layout_height="14dp"
                             android:importantForAccessibility="no"
                             android:src="@drawable/ic_shield_24"
-                            app:tint="@color/bb_primary" />
+                            app:tint="@color/bb_primary_bright" />
 
                         <TextView
                             android:id="@+id/screenTimeProtected"
@@ -252,7 +252,7 @@
                             android:layout_marginStart="@dimen/spacing_xs"
                             android:maxWidth="@dimen/screen_time_protected_max_width"
                             android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
-                            android:textColor="@color/bb_primary"
+                            android:textColor="@color/bb_primary_bright"
                             tools:text="3 apps protected" />
                     </LinearLayout>
                 </LinearLayout>
@@ -364,7 +364,7 @@
                     android:layout_height="16dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_check_24"
-                    app:tint="@color/bb_primary" />
+                    app:tint="@color/bb_primary_bright" />
 
                 <TextView
                     android:id="@+id/screenTimeFooterText"

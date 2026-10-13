@@ -48,7 +48,7 @@
         android:paddingBottom="@dimen/spacing_xs"
         android:text="@string/create_project_set_deadline"
         android:textAppearance="@style/TextAppearance.BBetter.Label"
-        android:textColor="@color/bb_primary" />
+        android:textColor="@color/bb_primary_bright" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -80,7 +80,7 @@
             android:padding="@dimen/spacing_sm"
             android:text="@string/create_project_save"
             android:textAppearance="@style/TextAppearance.BBetter.Title"
-            android:textColor="@color/bb_primary" />
+            android:textColor="@color/bb_primary_bright" />
     </LinearLayout>
 
 </LinearLayout>

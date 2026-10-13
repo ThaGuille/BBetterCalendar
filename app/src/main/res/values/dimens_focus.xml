@@ -11,4 +11,20 @@
     <dimen name="focus_streak_flame_size">20dp</dimen>     <!-- text-[20px] icon -->
     <dimen name="focus_friend_row_gap">14dp</dimen>        <!-- gap-y-3.5 -->
     <dimen name="focus_friend_col_gap">8dp</dimen>         <!-- gap-x-2 -->
+    <!-- Sanctuary redesign (html 01b-01d, plan paleta-stitch-y-focus-sanctuary). -->
+    <dimen name="focus_sanct_ring_box">270dp</dimen>       <!-- w-[270px] svg box; ring r = 118 -->
+    <dimen name="focus_sanct_timer_text">72sp</dimen>      <!-- 72px bold tabular -->
+    <dimen name="focus_sanct_ghost_size">48dp</dimen>      <!-- w-12 stop / skip -->
+    <dimen name="focus_sanct_play_box">88dp</dimen>        <!-- w-16 disc + 12dp glow each side -->
+    <dimen name="focus_sanct_play_icon_padding">28dp</dimen> <!-- 32px glyph in the 64dp disc -->
+    <dimen name="focus_sanct_ghost_icon_padding">13dp</dimen> <!-- 22px glyph -->
+    <dimen name="focus_sanct_control_gap">16dp</dimen>     <!-- gap-7 minus the play glow margin -->
+    <dimen name="focus_sanct_chip_dot">8dp</dimen>         <!-- h-2 w-2 -->
+    <dimen name="focus_sanct_stat_text">20sp</dimen>       <!-- headline-sm 20px semibold -->
+    <dimen name="focus_sanct_card_padding_v">8dp</dimen>   <!-- py-2 -->
+    <dimen name="focus_sanct_avatar_size">36dp</dimen>     <!-- w-9 -->
+    <dimen name="focus_sanct_invite_height">44dp</dimen>
+    <dimen name="focus_sanct_top_bar_height">56dp</dimen>  <!-- h-12 bar (+ 8dp so the touch target stays 48) -->
+    <dimen name="focus_sanct_friend_row_gap">8dp</dimen>   <!-- gap-y-2 -->
+
 </resources>

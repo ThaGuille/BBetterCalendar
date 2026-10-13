@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focus status chip (html 01b): pill, sage at 10 % with a sage rim at 20 %. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_sanct_chip_fill" />
+    <stroke android:width="1dp" android:color="@color/bb_sanct_chip_rim" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

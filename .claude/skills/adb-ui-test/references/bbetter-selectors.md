@@ -91,17 +91,18 @@ Focus (`fragment_focus.xml`, destino `navigation_focus`, raíz `focusScreen`):
 |---|---|
 | `topBar` | Barra superior (flecha «Back» = navigateUp, sin cancelar) |
 | `focusBlockModeButton` | Acción 🚫 de la barra; content-desc «Block mode: off/on/needs permission. …» |
-| `focusModeChip` | «CONCENTRATION · x OF N» / «REST · x OF N» |
+| `focusModeChip` (`focusModeChipRow`, `focusModeDot`) | «CONCENTRATION · x OF N» / «REST · x OF N» / «PAUSED · x OF N» |
 | `focusCycleDots` | Puntos de ciclo (content-desc «Cycle x of N») |
-| `focusRing` | `CircularProgressIndicator` (restante) |
+| `focusRing` | `FocusRingView` (restante; canvas, invisible en el dump) |
 | `focusTimerText` | mm:ss |
 | `focusEndsAtText` (`focusEndsAtRow`, `focusEndsAtIcon`) | «Ends at …» / «Paused» / «Ready when you are» |
 | `focusStopButton` | Stop (desc «Stop focus session»; deshabilitado sin sesión) |
 | `focusPlayButton` | desc «Start focus» / «Pause focus timer» / «Resume focus timer» |
 | `focusSkipButton` | desc «Skip rest» en descanso, «Skip rest (only during a rest)» si no |
 | `focusStatsCard` (`focusTodayColumn`, `focusStreakColumn`) | Tira Today / Streak |
-| `focusTodayText`, `focusFailsText`, `focusStreakText` | Tiempo de hoy, «N missed sessions», «N days» |
-| `focusSocialBlock`, `focusStudyingHeader` (`sectionHeaderMeta` = «5 / 8»), `focusFriendsGrid` | Maqueta social |
+| `focusTodayText`, `focusFailsText`, `focusStreakText` | Tiempo de hoy, «N missed sessions» (GONE con 0), «N days» |
+| `focusRestHint` | «Stretch, drink some water.» (solo en descanso) |
+| `focusSocialBlock`, `focusStudyingHeader` (`focusStudyingMeta` = «5 / 8»), `focusFriendsGrid` | Maqueta social |
 | celdas: `focusFriendAvatar`, `focusFriendName`, `focusFriendTime` | Una por amigo (`item_focus_friend.xml`) |
 | `focusInviteButton` | «Invite friends to study together» (pie; toast) |
 

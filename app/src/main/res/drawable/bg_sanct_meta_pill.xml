@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "5 / 8" counter (html 01b): surface-container-high pill, no rim. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_sanct_pill" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

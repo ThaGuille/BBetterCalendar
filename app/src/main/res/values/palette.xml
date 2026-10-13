@@ -6,45 +6,72 @@
     names: layouts, drawables, themes and Java use the bb_* semantic tokens in colors.xml, which
     alias the primitives below. Enforced by .claude/scripts/token_audit.py (palette_primitive_ref).
 
-    Source: .stitch/DESIGN.md §2, cross-checked against .stitch/html/*.html (every opaque hex below
-    appears verbatim in the exported HTML; the _aNN variants are derived). Naming: <family>_<tone>, lower tone = lighter;
+    Source (since 2026-10-14): the M3 namedColors that Stitch actually renders (design system
+    «BBetter Calm Focus», the tailwind config of .stitch/html/03,04,10,13,14), measured against the PNGs.
+    The hand-written hex of .stitch/DESIGN.md are no longer used. Plan: paleta-stitch-y-focus-sanctuary.md. Naming: <family>_<tone>, lower tone = lighter;
     _aNN suffix = same colour at NN % opacity.
 -->
 <resources>
 
     <!-- Foundation (dark-first) -->
-    <color name="pine_950">#FF12201C</color>   <!-- Deep Pine Night: app background -->
-    <color name="pine_900">#FF1B2D27</color>   <!-- Pine Card: cards, sheets, bottom nav -->
-    <color name="pine_800">#FF24392F</color>   <!-- Raised Moss: raised/selected surfaces, inputs -->
-    <color name="pine_700">#FF2E453B</color>   <!-- Hairline Moss: dividers, gridlines, outlines -->
+    <color name="pine_950">#FF081612</color>   <!-- background / surface -->
+    <color name="pine_925">#FF101E1A</color>   <!-- surface-container-low: bottom nav, insets -->
+    <color name="pine_900">#FF14221E</color>   <!-- surface-container: cards, sheets -->
+    <color name="pine_800">#FF1F2D28</color>   <!-- surface-container-high: raised/selected, inputs -->
+    <color name="pine_750">#FF293833</color>   <!-- surface-container-highest -->
+    <color name="pine_700">#FF2E453B</color>   <!-- chart gridlines / hairline (used verbatim by html 13/14) -->
 
     <!-- Brand & interactive -->
-    <color name="forest_600">#FF2F4F4A</color> <!-- Forest Deep: tinted containers -->
-    <color name="sage_300">#FF7FB69A</color>   <!-- Sage Leaf: primary -->
-    <color name="sage_200">#FF9BD3B5</color>   <!-- light sage: 3rd project accent (03-projects.html) -->
-    <color name="seafoam_200">#FFABCEC7</color> <!-- seafoam: 4th project accent (03-projects.html) -->
+    <color name="forest_600">#FF2C4C47</color> <!-- secondary-container: nav pill, tinted chips -->
+    <color name="forest_900">#FF0E4832</color> <!-- on-primary-container: icon/text on sage fills -->
+    <color name="sage_300">#FF7FB69A</color>   <!-- primary-container: sage fills (play, FAB, checks, bars) -->
+    <color name="sage_200">#FF9BD3B5</color>   <!-- primary: accent text and icons; 3rd project accent -->
+    <color name="seafoam_200">#FFABCEC7</color> <!-- secondary: 4th project accent -->
 
     <!-- Reward (use sparingly) -->
-    <color name="honey_300">#FFF2B544</color>  <!-- Honey Amber: earned moments only -->
+    <color name="honey_300">#FFFABC4A</color>  <!-- tertiary (Honey Amber): earned moments only -->
 
     <!-- Text -->
-    <color name="mist_50">#FFEAF2EC</color>    <!-- Mist White: primary text, big numbers -->
-    <color name="lichen_300">#FF9DB3A8</color> <!-- Lichen Grey: secondary labels -->
+    <color name="mist_50">#FFD6E6DF</color>    <!-- on-surface: primary text, big numbers -->
+    <color name="lichen_300">#FFC0C9C2</color> <!-- on-surface-variant: secondary labels -->
+    <color name="grey_400">#FF8A938C</color>   <!-- outline: tertiary text, captions -->
 
     <!-- Data & state -->
     <color name="dusk_300">#FF8FA8D8</color>   <!-- Dusk Blue: comparison series -->
     <color name="ember_300">#FFE8796B</color>  <!-- Ember Red: destructive / errors -->
 
     <!-- Alpha variants -->
-    <color name="mist_50_a38">#61EAF2EC</color>  <!-- 38 %: disabled content (MD3) -->
-    <color name="pine_950_a60">#9912201C</color> <!-- 60 %: scrim (never pure black) -->
-    <color name="pine_950_a20">#3312201C</color> <!-- 20 %: ripple on accent fills (u7) -->
+    <color name="mist_50_a38">#61D6E6DF</color>  <!-- 38 %: disabled content (MD3) -->
+    <color name="pine_950_a60">#99081612</color> <!-- 60 %: scrim (never pure black) -->
+    <color name="pine_950_a20">#33081612</color> <!-- 20 %: ripple on accent fills (u7) -->
     <!-- Chart washes (u10, html 13 / 14): gradient ends + translucent bands / halo. -->
+    <color name="outline_v_a30">#4D404943</color> <!-- 30 %: outline-variant dividers -->
     <color name="sage_300_a32">#527FB69A</color> <!-- 32 %: hero line area top -->
     <color name="sage_300_a12">#1F7FB69A</color> <!-- 12 %: FOCUS bands -->
     <color name="sage_300_a00">#007FB69A</color> <!-- 0 %: gradient end (same hue, no grey fringe) -->
     <color name="dusk_300_a35">#598FA8D8</color> <!-- 35 %: usage line area top -->
     <color name="dusk_300_a00">#008FA8D8</color> <!-- 0 %: gradient end -->
-    <color name="honey_300_a25">#40F2B544</color> <!-- 25 %: halo of the latest point -->
+    <color name="honey_300_a25">#40FABC4A</color> <!-- 25 %: halo of the latest point -->
+
+    <!-- «Calm Focus Sanctuary» (Focus + Cycle complete; .stitch/html/01b-01d, 02). 2026-10-14. -->
+    <color name="sanct_pine_950">#FF091610</color>   <!-- background -->
+    <color name="sanct_pine_900">#FF13221C</color>   <!-- Sanctuary card -->
+    <color name="sanct_pine_850">#FF15221C</color>   <!-- ring track -->
+    <color name="sanct_pine_800">#FF202D26</color>   <!-- surface-container-high: meta pill -->
+    <color name="sanct_pine_ink">#FF0E1B15</color>   <!-- Deep Pine Void: icon/text on amber -->
+    <color name="amber_400">#FFE5A93C</color>        <!-- primary-container: amber fills, ring start -->
+    <color name="amber_300">#FFF5BE58</color>        <!-- tertiary-fixed-dim: amber text glow -->
+    <color name="birch_50">#FFEBF3EE</color>         <!-- Muted Birch: primary text -->
+    <color name="birch_300">#FFA3B8AD</color>        <!-- secondary text -->
+    <color name="birch_500">#FF586E63</color>        <!-- tertiary hints -->
+    <color name="birch_50_a06">#0FEBF3EE</color>     <!-- 6 %: Sanctuary card rim -->
+    <color name="sanct_pine_900_a60">#9913221C</color> <!-- 60 %: ghost button fill -->
+    <color name="sage_300_a30">#4D7FB69A</color>     <!-- 30 %: ghost button rim -->
+    <color name="sage_300_a20">#337FB69A</color>     <!-- 20 %: chip rim, invite rim -->
+    <color name="sage_300_a15">#267FB69A</color>     <!-- 15 %: metric divider -->
+    <color name="sage_300_a10">#1A7FB69A</color>     <!-- 10 %: chip fill, rest glow -->
+    <color name="amber_400_a25">#40E5A93C</color>    <!-- 25 %: amber button glow -->
+    <color name="amber_400_a18">#2EE5A93C</color>    <!-- 18 %: hearth glow centre -->
+    <color name="amber_400_a00">#00E5A93C</color>    <!-- 0 %: glow end -->
 
 </resources>

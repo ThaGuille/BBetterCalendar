@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u14 · Focus "Studying now" cell (html 01): 44dp avatar (sage ring when studying, crown for the
+<!-- u14 · Focus "Studying now" cell (Sanctuary html 01b since 2026-10-14): 36dp avatar (sage ring when studying, crown for the
      top earner) · name (text-xs medium, Mist) · time today (11px medium Sage, tabular) or "away".
      Away cells are drawn at 40 % by FocusFragment (the whole cell, html opacity-40). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -16,8 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/spacing_xs"
-        app:avatarCutoutColor="@color/bb_surface"
-        app:avatarSize="@dimen/focus_friend_avatar_size" />
+        app:avatarCutoutColor="@color/bb_sanct_surface"
+        app:avatarSize="@dimen/focus_sanct_avatar_size" />
 
     <TextView
         android:id="@+id/focusFriendName"
@@ -27,7 +27,7 @@
         android:gravity="center_horizontal"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.BBetter.Caption"
-        android:textColor="@color/bb_on_surface"
+        android:textColor="@color/bb_sanct_on_surface"
         tools:text="Laia" />
 
     <TextView
@@ -37,6 +37,7 @@
         android:gravity="center_horizontal"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.BBetter.Micro"
-        android:textColor="@color/bb_primary"
+        android:fontFeatureSettings="tnum"
+        android:textColor="@color/bb_sanct_sage_bright"
         tools:text="3:12:05" />
 </LinearLayout>

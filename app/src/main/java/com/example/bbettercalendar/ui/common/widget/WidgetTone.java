@@ -21,7 +21,7 @@ import com.example.bbettercalendar.R;
 public enum WidgetTone {
     NORMAL(R.color.bb_on_surface),
     MUTED(R.color.bb_on_surface_muted),
-    PRIMARY(R.color.bb_primary),
+    PRIMARY(R.color.bb_primary_bright),
     REWARD(R.color.bb_accent_reward),
     DANGER(R.color.bb_danger);
 

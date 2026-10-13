@@ -86,7 +86,7 @@
                     android:paddingBottom="@dimen/spacing_xs"
                     android:text="@string/create_project_set_deadline"
                     android:textAppearance="@style/TextAppearance.BBetter.Label"
-                    android:textColor="@color/bb_primary" />
+                    android:textColor="@color/bb_primary_bright" />
 
                 <TextView
                     android:id="@+id/projectDetailDeadlineChip"
@@ -136,7 +136,7 @@
                     android:contentDescription="@string/project_detail_add_item"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_add_24"
-                    app:tint="@color/bb_primary" />
+                    app:tint="@color/bb_primary_bright" />
             </LinearLayout>
 
             <TextView

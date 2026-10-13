@@ -2,7 +2,7 @@
 <!-- u15 · "+1" streak badge (html 02): honey text on a tinted pill with honey hairline. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/bb_chart_halo" />
-    <stroke android:width="1dp" android:color="@color/bb_accent_reward" />
+    <solid android:color="@color/bb_sanct_glow_start" />
+    <stroke android:width="1dp" android:color="@color/bb_sanct_primary" />
     <corners android:radius="@dimen/radius_pill" />
 </shape>

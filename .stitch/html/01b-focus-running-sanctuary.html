@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>BBetter — Focus Sanctuary</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#fabc4d",
+            "primary": "#ffc665",
+            "primary-fixed-dim": "#fabc4d",
+            "on-surface": "#d7e6dc",
+            "tertiary-container": "#e0ab47",
+            "surface-variant": "#2a3831",
+            "surface": "#091610",
+            "on-error-container": "#ffdad6",
+            "secondary": "#9bd3b5",
+            "on-tertiary-fixed": "#271900",
+            "surface-container-high": "#202d26",
+            "inverse-surface": "#d7e6dc",
+            "tertiary-fixed-dim": "#f5be58",
+            "on-tertiary-container": "#5d4000",
+            "error-container": "#93000a",
+            "on-primary-fixed-variant": "#604100",
+            "on-primary": "#432c00",
+            "error": "#ffb4ab",
+            "on-tertiary": "#422c00",
+            "inverse-on-surface": "#26332d",
+            "background": "#091610",
+            "on-secondary-fixed": "#002114",
+            "outline-variant": "#504535",
+            "secondary-container": "#18503a",
+            "outline": "#9d8f7c",
+            "on-secondary-fixed-variant": "#18503a",
+            "on-primary-fixed": "#281900",
+            "on-tertiary-fixed-variant": "#5e4100",
+            "on-surface-variant": "#d4c4b0",
+            "secondary-fixed": "#b6efd1",
+            "on-primary-container": "#5e4000",
+            "surface-dim": "#091610",
+            "primary-fixed": "#ffdead",
+            "surface-container-low": "#111e18",
+            "surface-bright": "#2f3c35",
+            "on-error": "#690005",
+            "tertiary-fixed": "#ffdea9",
+            "surface-container-highest": "#2a3831",
+            "primary-container": "#e5a93c",
+            "on-secondary-container": "#8ac1a4",
+            "on-secondary": "#003825",
+            "surface-container": "#15221c",
+            "inverse-primary": "#7e5700",
+            "tertiary": "#fec65f",
+            "on-background": "#d7e6dc",
+            "secondary-fixed-dim": "#9bd3b5",
+            "surface-container-lowest": "#05110b"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1.5rem",
+            "gutter-sm": "0.75rem",
+            "gutter": "1.25rem",
+            "space-sm": "0.5rem",
+            "margin-sm": "1rem",
+            "space-xs": "0.25rem",
+            "margin-lg": "3rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2.5rem",
+            "gutter-lg": "2rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "label-md": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      background-color: #091610;
+      color: #d7e6dc;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .focus-ring-glow {
+      box-shadow: 0 0 60px 10px rgba(155, 211, 181, 0.08), 0 0 100px 30px rgba(229, 169, 60, 0.06);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface h-screen max-h-screen overflow-hidden flex flex-col justify-between font-body-md antialiased selection:bg-secondary-container">
+<!-- Mobile Viewport Shell (Constraint: max-w-[480px]) -->
+<div class="relative w-full max-w-[480px] mx-auto h-full flex flex-col justify-between px-margin-sm py-space-xs select-none overflow-hidden">
+<!-- Top Container: Status Bar + App Bar -->
+<header class="w-full flex flex-col shrink-0">
+<!-- Android Material 3 Status Bar Simulation -->
+<div class="w-full flex items-center justify-between px-space-xs pt-1 pb-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="tracking-tight font-medium text-on-surface">17:05</span>
+<div class="flex items-center space-x-1.5 opacity-80">
+<span class="material-symbols-outlined !text-[14px]">wifi</span>
+<span class="material-symbols-outlined !text-[14px]">signal_cellular_4_bar</span>
+<span class="material-symbols-outlined !text-[14px]">battery_full</span>
+</div>
+</div>
+<!-- TopAppBar Shared Component Blueprint -->
+<div class="flex items-center justify-between h-12 w-full px-space-xs bg-surface/80 backdrop-blur-md border-b border-secondary/10">
+<!-- Leading Icon Action -->
+<button aria-label="Go back" class="p-2 text-on-surface hover:text-primary hover:bg-surface-container-high/40 active:scale-95 transition-all duration-150 rounded-full flex items-center justify-center" type="button">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<!-- Centered Headline -->
+<h1 class="text-headline-sm font-headline-sm font-semibold text-on-surface tracking-tight">Focus</h1>
+<!-- Trailing Action: DND/Block distractions -->
+<button aria-label="Do Not Disturb" class="p-2 text-primary hover:text-primary hover:bg-surface-container-high/40 active:scale-95 transition-all duration-150 rounded-full flex items-center justify-center relative" type="button">
+<span class="material-symbols-outlined" data-icon="do_not_disturb_on" data-weight="fill" style="font-variation-settings: 'FILL' 1;">do_not_disturb_on</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+</button>
+</div>
+</header>
+<!-- Main Sanctuary Center Canvas -->
+<main class="w-full flex flex-col items-center justify-evenly flex-1 py-1">
+<!-- 2. Session Chip & Cycle Dots -->
+<div class="flex flex-col items-center gap-1.5 shrink-0">
+<div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-secondary/20" style="background-color: rgba(127,182,154,0.1);">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span class="text-label-sm font-label-sm text-secondary font-semibold tracking-wider">CONCENTRATION · 2 OF 4</span>
+</div>
+<!-- 4 Cycle Indicator Dots -->
+<div aria-label="Session cycle progress" class="flex items-center gap-2 mt-0.5">
+<!-- 1: Done -->
+<span class="w-1.5 h-1.5 rounded-full bg-secondary/80"></span>
+<!-- 2: Current (Luminous Halo) -->
+<span class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(155,211,181,0.9)] ring-2 ring-secondary/30"></span>
+<!-- 3: Upcoming -->
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest border border-secondary/30"></span>
+<!-- 4: Upcoming -->
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest border border-secondary/30"></span>
+</div>
+</div>
+<!-- 3. Hero Focus Ring (Sole Luminous Focal Point) -->
+<div class="relative flex items-center justify-center my-0 shrink-0">
+<!-- Enhanced Soft Amber Hearth Radial Light Glow -->
+<div class="absolute w-72 h-72 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(229,169,60,0.18) 0%, rgba(229,169,60,0.06) 50%, transparent 70%); filter: blur(36px);"></div>
+<div class="absolute w-60 h-60 rounded-full bg-secondary/10 blur-2xl pointer-events-none"></div>
+<!-- SVG Ring Container (~270px / ~70% screen width) -->
+<div class="relative w-[270px] h-[270px] flex items-center justify-center">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 270 270">
+<!-- Background Track -->
+<circle cx="135" cy="135" fill="transparent" r="118" stroke="#15221c" stroke-width="6"></circle>
+<!-- Progress Arc: Thin stroke with round caps (~75% elapsed) -->
+<circle class="transition-all duration-1000 ease-out" cx="135" cy="135" fill="transparent" r="118" stroke="url(#focus-gradient)" stroke-dasharray="741.42" stroke-dashoffset="185" stroke-linecap="round" stroke-width="7"></circle>
+<defs>
+<lineargradient id="focus-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#E5A93C"></stop>
+<stop offset="65%" stop-color="#9BD3B5"></stop>
+<stop offset="100%" stop-color="#7FB69A"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Inner Content: Numerals (~72px) & Finish Time -->
+<div class="absolute flex flex-col items-center justify-center text-center select-none">
+<span class="font-bold tabular-nums tracking-tight text-white leading-none drop-shadow-sm" style="font-size: 72px; font-family: 'Plus Jakarta Sans', sans-serif;">
+18:42
+</span>
+<div class="flex items-center gap-1.5 mt-2.5 font-label-md text-label-md text-secondary/90">
+<span class="material-symbols-outlined !text-[15px]" data-icon="schedule">schedule</span>
+<span class="text-on-surface-variant/90 tracking-tight font-medium">Ends at 17:30</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. Primary Controls Row (48dp Minimum Touch Targets) -->
+<div class="flex items-center justify-center gap-7 shrink-0">
+<!-- Stop Button (Ghost Circle) -->
+<button aria-label="End session" class="w-12 h-12 rounded-full flex items-center justify-center text-on-surface hover:text-white transition-all active:scale-90" style="background-color: rgba(19,34,28,0.6); border: 1px solid rgba(127,182,154,0.3);" type="button">
+<span class="material-symbols-outlined !text-[20px] text-secondary/90" data-icon="stop" data-weight="fill" style="font-variation-settings: 'FILL' 1;">stop</span>
+</button>
+<!-- Pause Button (Honey amber fill #E5A93C with ambient glow and deep pine icon) -->
+<button aria-label="Pause session" class="w-16 h-16 rounded-full flex items-center justify-center transition-transform active:scale-95" style="background-color: #E5A93C; color: #0E1B15; box-shadow: 0 8px 24px rgba(229,169,60,0.25);" type="button">
+<span class="material-symbols-outlined !text-[32px] font-bold" data-icon="pause" data-weight="fill" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<!-- Skip Button (Ghost Circle) -->
+<button aria-label="Skip to next session" class="w-12 h-12 rounded-full flex items-center justify-center text-on-surface hover:text-white transition-all active:scale-90" style="background-color: rgba(19,34,28,0.6); border: 1px solid rgba(127,182,154,0.3);" type="button">
+<span class="material-symbols-outlined !text-[22px] text-secondary/90" data-icon="skip_next" data-weight="fill" style="font-variation-settings: 'FILL' 1;">skip_next</span>
+</button>
+</div>
+<!-- 5. Today / Streak Split Sanctuary Card -->
+<div class="w-full backdrop-blur-md py-2 px-space-md grid grid-cols-2 shrink-0" style="background-color: #13221C; border: 1px solid rgba(235,243,238,0.06); border-radius: 32px;">
+<!-- Left: Today -->
+<div class="flex flex-col items-center justify-center pr-2" style="border-right: 1px solid rgba(127,182,154,0.15);">
+<span class="text-label-sm font-label-sm text-outline tracking-wider">Today</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-on-surface tracking-tight mt-0.5">2h 14m</span>
+</div>
+<!-- Right: Streak -->
+<div class="flex flex-col items-center justify-center pl-2">
+<span class="text-label-sm font-label-sm text-outline tracking-wider">Streak</span>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined !text-[18px] text-tertiary" data-icon="local_fire_department" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-on-surface tracking-tight">12 days</span>
+</div>
+</div>
+</div>
+<!-- 6. Studying Now (Subtle Sanctuary Social Layer) -->
+<div class="w-full flex flex-col gap-1.5 shrink-0">
+<!-- Header -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-label-md font-label-md font-medium text-on-surface">Studying now</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm">5 / 8</span>
+</div>
+<!-- 4 cols x 2 rows Compact Grid -->
+<div class="grid grid-cols-4 gap-y-2 gap-x-1.5 px-1 py-1 w-full">
+<!-- Row 1 (Active) -->
+<!-- 1: Laia (Crown Lead) -->
+<div class="flex flex-col items-center text-center">
+<div class="relative">
+<div class="w-9 h-9 rounded-full bg-surface-container-high border-2 border-secondary flex items-center justify-center font-semibold text-label-md text-secondary">
+L
+</div>
+<span class="absolute -top-1.5 -right-1 text-tertiary">
+<span class="material-symbols-outlined !text-[13px]" data-icon="crown" data-weight="fill" style="font-variation-settings: 'FILL' 1;">crown</span>
+</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium truncate w-full mt-0.5">Laia</span>
+<span class="text-[10px] leading-3 text-secondary/90 font-medium tabular-nums">3:12:05</span>
+</div>
+<!-- 2: Pau -->
+<div class="flex flex-col items-center text-center">
+<div class="w-9 h-9 rounded-full bg-surface-container-high border-2 border-secondary flex items-center justify-center font-semibold text-label-md text-secondary">
+P
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium truncate w-full mt-0.5">Pau</span>
+<span class="text-[10px] leading-3 text-secondary/90 font-medium tabular-nums">2:05:44</span>
+</div>
+<!-- 3: Marc -->
+<div class="flex flex-col items-center text-center">
+<div class="w-9 h-9 rounded-full bg-surface-container-high border-2 border-secondary flex items-center justify-center font-semibold text-label-md text-secondary">
+M
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium truncate w-full mt-0.5">Marc</span>
+<span class="text-[10px] leading-3 text-secondary/90 font-medium tabular-nums">1:48:30</span>
+</div>
+<!-- 4: Júlia -->
+<div class="flex flex-col items-center text-center">
+<div class="w-9 h-9 rounded-full bg-surface-container-high border-2 border-secondary flex items-center justify-center font-semibold text-label-md text-secondary">
+J
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium truncate w-full mt-0.5">Júlia</span>
+<span class="text-[10px] leading-3 text-secondary/90 font-medium tabular-nums">1:10:02</span>
+</div>
+<!-- Row 2 (Active + Away) -->
+<!-- 5: Noa -->
+<div class="flex flex-col items-center text-center">
+<div class="w-9 h-9 rounded-full bg-surface-container-high border-2 border-secondary flex items-center justify-center font-semibold text-label-md text-secondary">
+N
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium truncate w-full mt-0.5">Noa</span>
+<span class="text-[10px] leading-3 text-secondary/90 font-medium tabular-nums">0:52:10</span>
+</div>
+<!-- 6: Oriol (Away) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-9 h-9 rounded-full bg-surface-container border border-outline/30 flex items-center justify-center font-medium text-label-md text-on-surface-variant">
+O
+</div>
+<span class="text-label-sm font-label-sm text-outline truncate w-full mt-0.5">Oriol</span>
+<span class="text-[10px] leading-3 text-outline font-medium tabular-nums">away</span>
+</div>
+<!-- 7: Elena (Away) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-9 h-9 rounded-full bg-surface-container border border-outline/30 flex items-center justify-center font-medium text-label-md text-on-surface-variant">
+E
+</div>
+<span class="text-label-sm font-label-sm text-outline truncate w-full mt-0.5">Elena</span>
+<span class="text-[10px] leading-3 text-outline font-medium tabular-nums">away</span>
+</div>
+<!-- 8: Alex (Away) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-9 h-9 rounded-full bg-surface-container border border-outline/30 flex items-center justify-center font-medium text-label-md text-on-surface-variant">
+A
+</div>
+<span class="text-label-sm font-label-sm text-outline truncate w-full mt-0.5">Alex</span>
+<span class="text-[10px] leading-3 text-outline font-medium tabular-nums">away</span>
+</div>
+</div>
+</div>
+</main>
+<!-- 7. Footer: Grounded Subtle Action Pill -->
+<footer class="w-full pt-1 pb-1 flex flex-col items-center shrink-0">
+<button class="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-full border border-secondary/25 bg-surface-container/50 text-secondary hover:bg-secondary/10 active:scale-[0.99] transition-all duration-150" type="button">
+<span class="material-symbols-outlined !text-[18px]" data-icon="person_add">person_add</span>
+<span class="text-label-md font-label-md font-medium tracking-tight">Invite friends to study together</span>
+</button>
+<!-- Android Gesture Navigation Home Indicator Pill -->
+<div class="w-32 h-1 bg-on-surface/20 rounded-full mt-2 mb-0.5"></div>
+</footer>
+</div>
+</body></html>

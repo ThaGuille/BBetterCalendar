@@ -84,7 +84,7 @@
                     android:layout_height="20dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_title_24"
-                    app:tint="@color/bb_primary" />
+                    app:tint="@color/bb_primary_bright" />
 
                 <EditText
                     android:id="@+id/event_title"
@@ -112,7 +112,7 @@
                         android:layout_height="20dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_calendar_empty_24"
-                        app:tint="@color/bb_primary" />
+                        app:tint="@color/bb_primary_bright" />
 
                     <TextView
                         android:id="@+id/event_start_date"
@@ -145,7 +145,7 @@
                         android:layout_height="20dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_calendar_range_24"
-                        app:tint="@color/bb_primary" />
+                        app:tint="@color/bb_primary_bright" />
 
                     <TextView
                         android:id="@+id/event_end_date"
@@ -182,7 +182,7 @@
                         android:layout_height="20dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_notifications_empty_24"
-                        app:tint="@color/bb_primary" />
+                        app:tint="@color/bb_primary_bright" />
 
                     <TextView
                         android:id="@+id/event_notification_1"
@@ -213,7 +213,7 @@
                         android:layout_height="20dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_text_snippet_24"
-                        app:tint="@color/bb_primary" />
+                        app:tint="@color/bb_primary_bright" />
 
                     <TextView
                         android:id="@+id/event_description"

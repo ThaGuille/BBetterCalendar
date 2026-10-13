@@ -155,6 +155,15 @@
          the framework's 14sp "Small" size so legacy screens do not reflow, but in the app font
          and bb_on_surface (the framework default is textColorTertiary). New UI sets a
          TextAppearance.BBetter.* explicitly. -->
+    <!-- Focus top bar, «Calm Focus Sanctuary» (html 01b headline-sm: 20px semibold, -0.01em). -->
+    <style name="TextAppearance.BBetter.TopBar.Sanctuary" parent="TextAppearance.BBetter">
+        <item name="android:textSize">@dimen/focus_sanct_stat_text</item>
+        <item name="android:fontFamily">@font/bb_font_semibold</item>
+        <item name="fontFamily">@font/bb_font_semibold</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="android:textColor">@color/bb_sanct_on_surface</item>
+    </style>
+
     <style name="TextAppearance.BBetter.Default" parent="TextAppearance.AppCompat.Small">
         <item name="android:fontFamily">@font/bb_font</item>
         <item name="fontFamily">@font/bb_font</item>

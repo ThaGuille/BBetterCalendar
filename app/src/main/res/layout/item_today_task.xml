@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_sm"
             android:textAppearance="@style/TextAppearance.BBetter.Micro"
-            android:textColor="@color/bb_primary"
+            android:textColor="@color/bb_primary_bright"
             android:visibility="gone" />
 
         <!-- Hora (hoy), fecha (atrasadas) o "Done" (hechas). -->
@@ -98,7 +98,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_timer_clock_24"
             android:visibility="gone"
-            app:tint="@color/bb_primary" />
+            app:tint="@color/bb_primary_bright" />
 
         <!-- "Quitar" de una tarea atrasada (spec tasks-recurrence): oculto salvo en la sección de
              atrasadas, donde TodayTaskAdapter recibe un OnTaskRemoveListener. No borra: retira. -->

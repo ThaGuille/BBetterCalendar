@@ -381,7 +381,7 @@ public class ScreenTimeFragment extends Fragment
         boolean ok = usage && a11y;
         footerIcon.setImageResource(ok ? R.drawable.ic_check_24 : R.drawable.ic_info_24);
         ImageViewCompat.setImageTintList(footerIcon, ColorStateList.valueOf(ContextCompat.getColor(
-                requireContext(), ok ? R.color.bb_primary : R.color.bb_accent_reward)));
+                requireContext(), ok ? R.color.bb_primary_bright : R.color.bb_accent_reward)));
         footer.setClickable(!ok);
     }
 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focus REST (html 01c): the centre button turns into a ghost sage disc (amber is for focus and
+     rewards) with a soft sage glow, same 64dp disc in an 88dp box as bg_sanct_play. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/bb_ripple_primary">
+    <item android:top="6dp">
+        <shape android:shape="oval">
+            <gradient
+                android:endColor="@color/bb_sanct_glow_end"
+                android:gradientRadius="50%"
+                android:startColor="@color/bb_sanct_ghost_rim"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item
+        android:bottom="12dp"
+        android:left="12dp"
+        android:right="12dp"
+        android:top="12dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_sanct_card" />
+            <stroke android:width="1.5dp" android:color="@color/bb_sanct_sage" />
+        </shape>
+    </item>
+    <item
+        android:id="@android:id/mask"
+        android:bottom="12dp"
+        android:left="12dp"
+        android:right="12dp"
+        android:top="12dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_sanct_card" />
+        </shape>
+    </item>
+</ripple>

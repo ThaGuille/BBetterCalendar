@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/spacing_sm"
         android:textAppearance="@style/TextAppearance.BBetter.Label"
-        android:textColor="@color/bb_primary"
+        android:textColor="@color/bb_primary_bright"
         android:visibility="gone" />
 
     <TextView
@@ -64,7 +64,7 @@
         android:padding="@dimen/spacing_xs"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_timer_clock_24"
-        app:tint="@color/bb_primary"
+        app:tint="@color/bb_primary_bright"
         android:visibility="gone" />
 
 </LinearLayout>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focus cycle dot, current (html 01b): 10dp light sage with a 2dp sage halo at 30 %. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_sanct_ghost_rim" />
+        </shape>
+    </item>
+    <item android:bottom="2dp" android:left="2dp" android:right="2dp" android:top="2dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_sanct_sage_bright" />
+        </shape>
+    </item>
+</layer-list>

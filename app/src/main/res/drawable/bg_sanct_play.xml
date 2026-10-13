@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focus (Sanctuary, html 01b/01d): 64dp honey amber disc with its ambient glow
+     (box-shadow 0 8px 24px rgba(229,169,60,.25)) inside an 88dp box; the glow sits 6dp lower. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/bb_ripple_dark">
+    <item android:top="6dp">
+        <shape android:shape="oval">
+            <gradient
+                android:endColor="@color/bb_sanct_glow_end"
+                android:gradientRadius="50%"
+                android:startColor="@color/bb_sanct_button_glow"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item
+        android:bottom="12dp"
+        android:left="12dp"
+        android:right="12dp"
+        android:top="12dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_sanct_primary" />
+        </shape>
+    </item>
+    <item
+        android:id="@android:id/mask"
+        android:bottom="12dp"
+        android:left="12dp"
+        android:right="12dp"
+        android:top="12dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_sanct_primary" />
+        </shape>
+    </item>
+</ripple>

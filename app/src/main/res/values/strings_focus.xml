@@ -2,7 +2,10 @@
 <!-- u14 · Focus: strings added after the WIP be03abf (the WIP ones stay in strings.xml, already in
      the base of every parallel unit). Spanish in values-es/strings_focus.xml. -->
 <resources>
-    <string name="focus_paused_line">Paused</string>
+    <string name="focus_paused_line">Paused · the timer is waiting</string>
+    <!-- Sanctuary redesign (html 01c): rest line under the ring + hint under the controls. -->
+    <string name="focus_back_at">Back to focus at %1$s</string>
+    <string name="focus_rest_hint">Stretch, drink some water.</string>
     <string name="focus_friend_time_format" translatable="false">%1$d:%2$02d:%3$02d</string>
     <string name="focus_block_mode_desc_off">Turn on block mode</string>
     <string name="focus_block_mode_desc_on">Turn off block mode</string>

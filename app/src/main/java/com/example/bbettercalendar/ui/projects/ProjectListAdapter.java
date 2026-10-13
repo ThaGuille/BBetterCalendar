@@ -112,7 +112,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
                 : context.getString(R.string.project_percent_completed, item.percent()));
         holder.percent.setTextColor(ContextCompat.getColor(context,
                 item.doneCount > 0 && item.percent() >= 40
-                        ? R.color.bb_primary : R.color.bb_on_surface_muted));
+                        ? R.color.bb_primary_bright : R.color.bb_on_surface_muted));
 
         holder.progress.setIndicatorColor(accent);
         holder.progress.setProgressCompat(item.percent(), false);

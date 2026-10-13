@@ -1,5 +1,6 @@
 package com.example.bbettercalendar.ui.focus;
 
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.MenuItemCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -34,9 +37,7 @@ import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
-import com.example.bbettercalendar.ui.common.widget.SectionHeaderView;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.util.Date;
 import java.util.List;
@@ -44,7 +45,8 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * Focus screen (u14, {@code navigation_focus}; .stitch html/PNG 01): the running-session UI.
+ * Focus screen (u14, {@code navigation_focus}): the running-session UI, «Calm Focus Sanctuary»
+ * since 2026-10-14 (.stitch 01b running · 01c rest · 01d paused; only {@code bb_sanct_*} colours).
  *
  * <p>The session itself is the <b>activity-scoped</b> {@link FocusSessionViewModel} shared with
  * Home, so leaving this screen (back arrow, system back) returns to Home <b>without</b> cancelling
@@ -68,25 +70,28 @@ public class FocusFragment extends Fragment
     private static final int MAX_CYCLE_DOTS = 12;
     private static final float AWAY_CELL_ALPHA = 0.4f;
     private static final float DISABLED_ALPHA = 0.4f;
+    private static final float PAUSED_DOT_ALPHA = 0.5f;
 
     private FocusSessionViewModel session;
     private FocusViewModel viewModel;
     private FocusSessionEventPresenter sessionEvents;
 
     @Nullable private MaterialToolbar toolbar;
+    private View modeDot;
     private TextView modeChip;
     private LinearLayout cycleDots;
-    private CircularProgressIndicator ring;
+    private FocusRingView ring;
     private TextView timerText;
-    private View endsAtIcon;
+    private ImageView endsAtIcon;
     private TextView endsAtText;
+    private TextView restHint;
     private ImageButton stopButton;
     private ImageButton playButton;
     private ImageButton skipButton;
     private TextView todayText;
     private TextView failsText;
     private TextView streakText;
-    private SectionHeaderView studyingHeader;
+    private TextView studyingMeta;
     private LinearLayout friendsGrid;
 
     // Último estado pintado: los controles sólo se repintan cuando cambia algo más que el tiempo.
@@ -135,31 +140,39 @@ public class FocusFragment extends Fragment
     }
 
     private void bindViews(@NonNull View view) {
+        modeDot = view.findViewById(R.id.focusModeDot);
         modeChip = view.findViewById(R.id.focusModeChip);
         cycleDots = view.findViewById(R.id.focusCycleDots);
         ring = view.findViewById(R.id.focusRing);
         timerText = view.findViewById(R.id.focusTimerText);
         endsAtIcon = view.findViewById(R.id.focusEndsAtIcon);
         endsAtText = view.findViewById(R.id.focusEndsAtText);
+        restHint = view.findViewById(R.id.focusRestHint);
         stopButton = view.findViewById(R.id.focusStopButton);
         playButton = view.findViewById(R.id.focusPlayButton);
         skipButton = view.findViewById(R.id.focusSkipButton);
         todayText = view.findViewById(R.id.focusTodayText);
         failsText = view.findViewById(R.id.focusFailsText);
         streakText = view.findViewById(R.id.focusStreakText);
-        studyingHeader = view.findViewById(R.id.focusStudyingHeader);
+        studyingMeta = view.findViewById(R.id.focusStudyingMeta);
         friendsGrid = view.findViewById(R.id.focusFriendsGrid);
     }
 
-    /** html 01: centred "Focus", lichen back arrow (minimises, never cancels), 🚫 action. */
+    /** html 01b: centred "Focus" (20sp semibold), birch back arrow (minimises, never cancels), 🚫 action. */
     private void setUpTopBar(@NonNull View view) {
         toolbar = TopBarHelper.bind(this, view, R.string.title_focus);
         if (toolbar == null) {
             return;
         }
         toolbar.setTitleCentered(true);
+        toolbar.getLayoutParams().height =
+                getResources().getDimensionPixelSize(R.dimen.focus_sanct_top_bar_height);
+        toolbar.setMinimumHeight(toolbar.getLayoutParams().height);
+        toolbar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_surface));
+        toolbar.setTitleTextAppearance(requireContext(), R.style.TextAppearance_BBetter_TopBar_Sanctuary);
+        toolbar.setTitleTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface));
         toolbar.setNavigationIconTint(
-                ContextCompat.getColor(requireContext(), R.color.bb_on_surface_muted));
+                ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface));
         toolbar.inflateMenu(R.menu.menu_focus);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.focusBlockModeButton) {
@@ -178,9 +191,12 @@ public class FocusFragment extends Fragment
             return;
         }
         timerText.setText(FormatHelper.formatTime((int) state.getRemainingMillis(), "mm:ss"));
-        // html 01: el arco es lo que QUEDA (se vacía en sentido horario desde arriba).
-        int remaining = Math.round((1f - state.getProgress()) * ring.getMax());
-        ring.setProgressCompat(state.isIdle() ? ring.getMax() : remaining, false);
+        // html 01b: el arco es lo que QUEDA (se vacía en sentido horario desde arriba).
+        ring.setRemaining(state.isIdle() ? 1f : 1f - state.getProgress());
+        ring.setMode(state.isRest() ? FocusRingView.Mode.REST
+                : state.isPaused() ? FocusRingView.Mode.PAUSED : FocusRingView.Mode.FOCUS);
+        timerText.setTextColor(ContextCompat.getColor(requireContext(), state.isPaused()
+                ? R.color.bb_sanct_on_surface_muted : R.color.bb_sanct_on_surface));
         renderEndsAt(state);
 
         if (!state.controlsDifferFrom(lastRendered)) {
@@ -194,10 +210,12 @@ public class FocusFragment extends Fragment
         renderBlockMode();
     }
 
-    /** "CONCENTRATION · 2 OF 4" (textAllCaps del appearance Chip). */
+    /** "CONCENTRATION · 2 OF 4" / "REST · …" / "PAUSED · …" (textAllCaps del appearance Chip). */
     private void renderChip(@NonNull FocusUiState state) {
-        String mode = getString(state.isRest()
-                ? R.string.home_mode_rest : R.string.home_mode_concentration);
+        String mode = getString(state.isPaused() ? R.string.home_mode_paused
+                : state.isRest() ? R.string.home_mode_rest : R.string.home_mode_concentration);
+        // html 01d: en pausa el punto se apaga.
+        modeDot.setAlpha(state.isPaused() ? PAUSED_DOT_ALPHA : 1f);
         // Sin auto-ciclo, tras el descanso N la máquina queda en reposo con cyclesCompleted == N
         // (el aviso "ciclos completados" llega al acabar la concentración siguiente, quirk u2):
         // el chip no pasa de "N OF N".
@@ -209,30 +227,36 @@ public class FocusFragment extends Fragment
                 : getString(R.string.focus_mode_chip_format, mode, cycle, state.getTotalCycles()));
     }
 
-    /** Running: "Ends at 17:30". Paused: "Paused". Idle: "Ready when you are" (no clock). */
+    /**
+     * Running: "Ends at 17:30" (rest: "Back to focus at 17:35"). Paused: pause glyph + "Paused · the
+     * timer is waiting". Idle: "Ready when you are" (no icon).
+     */
     private void renderEndsAt(@NonNull FocusUiState state) {
         String line;
-        boolean clock;
+        boolean icon;
         if (state.isRunning() && state.getEndsAtMillis() > 0) {
-            line = getString(R.string.focus_ends_at,
-                    DateFormat.getTimeFormat(requireContext()).format(new Date(state.getEndsAtMillis())));
-            clock = true;
+            String at = DateFormat.getTimeFormat(requireContext())
+                    .format(new Date(state.getEndsAtMillis()));
+            line = getString(state.isRest() ? R.string.focus_back_at : R.string.focus_ends_at, at);
+            icon = true;
         } else if (state.isPaused()) {
             line = getString(R.string.focus_paused_line);
-            clock = false;
+            icon = true;
         } else {
             line = getString(R.string.focus_idle_line);
-            clock = false;
+            icon = false;
         }
         if (!line.contentEquals(endsAtText.getText())) {
             endsAtText.setText(line);
         }
-        endsAtIcon.setVisibility(clock ? View.VISIBLE : View.GONE);
+        endsAtIcon.setVisibility(icon ? View.VISIBLE : View.GONE);
+        endsAtIcon.setImageResource(state.isPaused()
+                ? R.drawable.ic_pause_v2_filled_24 : R.drawable.ic_clock_v2_24);
     }
 
     /**
-     * html 01: one dot per configured cycle — done (sage), current (sage + halo), pending (card +
-     * hairline). Infinite cycles have no N: no dots.
+     * html 01b: one dot per configured cycle — done (sage), current (light sage + halo), pending
+     * (dark disc + sage rim). Infinite cycles have no N: no dots.
      */
     private void renderCycleDots(@NonNull FocusUiState state) {
         cycleDots.removeAllViews();
@@ -250,11 +274,11 @@ public class FocusFragment extends Fragment
             View dot = new View(requireContext());
             @DrawableRes int bg;
             if (i == current) {
-                bg = R.drawable.bg_focus_dot_current;
+                bg = R.drawable.bg_sanct_cycle_current;
             } else if (i <= done) {
-                bg = R.drawable.bg_focus_dot_done;
+                bg = R.drawable.bg_sanct_cycle_done;
             } else {
-                bg = R.drawable.bg_focus_dot_pending;
+                bg = R.drawable.bg_sanct_cycle_pending;
             }
             dot.setBackgroundResource(bg);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(box, box);
@@ -279,6 +303,15 @@ public class FocusFragment extends Fragment
             playDesc = R.string.focus_start;
         }
         playButton.setContentDescription(getString(playDesc));
+        // html 01c: en descanso el ámbar se retira (queda para concentración y logros): botón
+        // fantasma salvia y "saltar" destacado. html 01d: en pausa "saltar" se apaga al 40 %.
+        boolean rest = state.isRest();
+        playButton.setBackgroundResource(rest ? R.drawable.bg_sanct_play_rest : R.drawable.bg_sanct_play);
+        ImageViewCompat.setImageTintList(playButton, ColorStateList.valueOf(ContextCompat.getColor(
+                requireContext(), rest ? R.color.bb_sanct_sage_bright : R.color.bb_sanct_on_primary)));
+        skipButton.setBackgroundResource(rest ? R.drawable.bg_sanct_ghost_strong : R.drawable.bg_sanct_ghost);
+        skipButton.setAlpha(state.isPaused() ? DISABLED_ALPHA : 1f);
+        restHint.setVisibility(rest && state.isSessionActive() ? View.VISIBLE : View.GONE);
 
         // Stop: sólo hay algo que parar con una sesión viva.
         boolean active = state.isSessionActive();
@@ -371,7 +404,7 @@ public class FocusFragment extends Fragment
             desc = R.string.focus_block_mode_desc_off;
         } else if (AccessibilityAccess.isEnabled(requireContext())) {
             icon = R.drawable.ic_do_not_disturb_on_24;
-            tint = R.color.bb_primary;
+            tint = R.color.bb_primary_bright;
             title = R.string.home_block_mode_on;
             desc = R.string.focus_block_mode_desc_on;
         } else {
@@ -405,6 +438,8 @@ public class FocusFragment extends Fragment
         }
         int n = fails == null ? 0 : fails;
         failsText.setText(getResources().getQuantityString(R.plurals.focus_fails_today, n, n));
+        // html 01b has no fails line: it only shows up once there is a missed session today.
+        failsText.setVisibility(n > 0 ? View.VISIBLE : View.GONE);
     }
 
     private void renderStreak(@Nullable StreakCalculator.Result streak) {
@@ -422,14 +457,14 @@ public class FocusFragment extends Fragment
         if (friendsGrid == null || snapshot == null) {
             return;
         }
-        studyingHeader.setMeta(getString(R.string.focus_friends_meta,
-                snapshot.getStudyingCount(), snapshot.getFriendCount()), true);
+        studyingMeta.setText(getString(R.string.focus_friends_meta,
+                snapshot.getStudyingCount(), snapshot.getFriendCount()));
 
         friendsGrid.removeAllViews();
         List<Friend> friends = snapshot.getFriends();
         Friend top = snapshot.getTopFriend();
         int shown = Math.min(MAX_FRIENDS, friends.size());
-        int rowGap = getResources().getDimensionPixelSize(R.dimen.focus_friend_row_gap);
+        int rowGap = getResources().getDimensionPixelSize(R.dimen.focus_sanct_friend_row_gap);
         int colGap = getResources().getDimensionPixelSize(R.dimen.focus_friend_col_gap);
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         LinearLayout row = null;
@@ -482,8 +517,8 @@ public class FocusFragment extends Fragment
             avatar.setStatus(AvatarView.Status.AWAY);
             avatar.setAlpha(1f);
             avatar.setBadgeIcon(0);
-            name.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_on_surface_muted));
-            time.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_on_surface_muted));
+            name.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
+            time.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
             time.setText(R.string.focus_friend_away);
             cell.setAlpha(AWAY_CELL_ALPHA);
         }
@@ -506,19 +541,21 @@ public class FocusFragment extends Fragment
     public void onDestroyView() {
         lastRendered = null;
         toolbar = null;
+        modeDot = null;
         modeChip = null;
         cycleDots = null;
         ring = null;
         timerText = null;
         endsAtIcon = null;
         endsAtText = null;
+        restHint = null;
         stopButton = null;
         playButton = null;
         skipButton = null;
         todayText = null;
         failsText = null;
         streakText = null;
-        studyingHeader = null;
+        studyingMeta = null;
         friendsGrid = null;
         super.onDestroyView();
     }

@@ -73,7 +73,7 @@
             android:padding="@dimen/spacing_sm"
             android:text="@string/app_limit_dialog_save"
             android:textAppearance="@style/TextAppearance.BBetter.Title"
-            android:textColor="@color/bb_primary" />
+            android:textColor="@color/bb_primary_bright" />
     </LinearLayout>
 
 </LinearLayout>

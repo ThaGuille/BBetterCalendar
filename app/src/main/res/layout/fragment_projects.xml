@@ -130,7 +130,7 @@
                     android:importantForAccessibility="no"
                     android:padding="10dp"
                     android:src="@drawable/ic_eco_24"
-                    app:tint="@color/bb_primary" />
+                    app:tint="@color/bb_primary_bright" />
 
                 <LinearLayout
                     android:layout_width="0dp"

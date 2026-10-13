@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Invite friends to study together" (html 01b): full-width outlined pill, sage rim at 20 %. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/bb_ripple_primary">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_sanct_ghost_fill" />
+            <stroke android:width="1dp" android:color="@color/bb_sanct_chip_rim" />
+            <corners android:radius="@dimen/radius_pill" />
+        </shape>
+    </item>
+</ripple>

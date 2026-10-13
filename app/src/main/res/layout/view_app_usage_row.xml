@@ -87,7 +87,7 @@
             android:maxLines="1"
             android:text="@string/widget_app_set_limit"
             android:textAppearance="@style/TextAppearance.BBetter.ChipLabel"
-            android:textColor="@color/bb_primary"
+            android:textColor="@color/bb_primary_bright"
             android:visibility="gone"
             app:layout_constraintBaseline_toBaselineOf="@id/appUsageText"
             app:layout_constraintStart_toEndOf="@id/appUsageText" />

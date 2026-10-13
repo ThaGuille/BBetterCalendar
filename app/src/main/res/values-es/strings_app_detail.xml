@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u20 · Detalle por app (html 10). title_app_detail sigue en strings.xml. -->
+<resources>
+    <string name="app_detail_status_limited">Con límite</string>
+    <string name="app_detail_status_no_limit">Sin límite</string>
+    <string name="app_detail_subtitle_join">%1$s • %2$s</string>
+    <string name="app_detail_unknown_app">App no instalada</string>
+
+    <string-array name="app_detail_periods">
+        <item>Semana</item>
+        <item>Mes</item>
+    </string-array>
+
+    <string name="app_detail_tile_today">Hoy</string>
+    <string name="app_detail_tile_avg">Media diaria</string>
+    <string name="app_detail_tile_blocked">Bloqueadas</string>
+    <string name="app_detail_tile_blocked_sub">Aperturas frenadas</string>
+    <string name="app_detail_unit_minutes_short">m</string>
+    <string name="app_detail_value_hours_minutes">%1$dh %2$d</string>
+    <string name="app_detail_value_none">—</string>
+    <string name="app_detail_today_under">%1$s por debajo del límite</string>
+    <string name="app_detail_today_over">%1$s por encima del límite</string>
+    <string name="app_detail_today_no_limit">Sin límite fijado</string>
+    <string name="app_detail_delta">%1$d%%</string>
+    <string name="app_detail_duration_hm">%1$dh %2$dm</string>
+    <string name="app_detail_duration_h">%1$dh</string>
+    <string name="app_detail_duration_m">%1$dm</string>
+
+    <string name="app_detail_chart_title_week">Últimos 7 días</string>
+    <string name="app_detail_chart_title_month">Últimos 30 días</string>
+    <string name="app_detail_chart_subtitle">Distribución diaria del tiempo de pantalla</string>
+    <string name="app_detail_legend_within">Dentro</string>
+    <string name="app_detail_legend_over">Sobre el límite</string>
+    <string name="app_detail_chart_cd">Tiempo de pantalla diario de esta app, separado en dentro y por encima del límite</string>
+
+    <string name="app_detail_limit_title">Límite diario</string>
+    <string name="app_detail_limit_subtitle">Tiempo concedido antes de pausar %1$s</string>
+    <string name="app_detail_limit_active">Activo</string>
+    <string name="app_detail_limit_off">Desactivado</string>
+    <string name="app_detail_stepper_unit">min</string>
+    <string name="app_detail_stepper_caption">Límite de uso objetivo</string>
+    <string name="app_detail_stepper_caption_none">Sin límite diario</string>
+    <string name="app_detail_preset_30">30m</string>
+    <string name="app_detail_preset_45">45m</string>
+    <string name="app_detail_preset_60">1h</string>
+    <string name="app_detail_preset_none">Sin límite</string>
+
+    <string name="app_detail_warn_title">Avisarme antes</string>
+    <string name="app_detail_warn_sub">Aviso discreto en una notificación</string>
+    <string name="app_detail_warn_value">%1$d min antes</string>
+    <string name="app_detail_warn_dialog_title">Avisarme antes del límite</string>
+    <string name="app_detail_warn_option">%1$d min antes</string>
+
+    <string name="app_detail_block_title">Bloquear al llegar al límite</string>
+    <string name="app_detail_block_desc">Cubre la app hasta medianoche. Requiere el servicio de accesibilidad:</string>
+    <string name="app_detail_a11y_enabled">Activado</string>
+    <string name="app_detail_a11y_disabled">Desactivado</string>
+    <string name="app_detail_block_needs_limit">Fija primero un límite diario</string>
+
+    <string name="app_detail_note">Los cambios se aplican desde ahora. Los bloqueos se reinician solos a medianoche.</string>
+    <string name="app_detail_stop_tracking">Dejar de seguir %1$s</string>
+</resources>

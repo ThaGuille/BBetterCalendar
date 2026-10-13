@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u20: "Active" badge of the Daily limit card (html 10 surface-container-high pill). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_raised" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

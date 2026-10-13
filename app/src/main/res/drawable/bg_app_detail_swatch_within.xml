@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u20: legend swatch "Within" (html 10: rounded-sm square in the compare colour). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_data_compare" />
+    <corners android:radius="2dp" />
+</shape>

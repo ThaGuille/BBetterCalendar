@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u20 · Per-app detail (html 10). title_app_detail stays in strings.xml. -->
+<resources>
+    <string name="app_detail_status_limited">Limited</string>
+    <string name="app_detail_status_no_limit">No limit</string>
+    <string name="app_detail_subtitle_join">%1$s • %2$s</string>
+    <string name="app_detail_unknown_app">App not installed</string>
+
+    <string-array name="app_detail_periods">
+        <item>Week</item>
+        <item>Month</item>
+    </string-array>
+
+    <string name="app_detail_tile_today">Today</string>
+    <string name="app_detail_tile_avg">Daily avg</string>
+    <string name="app_detail_tile_blocked">Blocked</string>
+    <string name="app_detail_tile_blocked_sub">Opens stopped</string>
+    <string name="app_detail_unit_minutes_short">m</string>
+    <string name="app_detail_value_hours_minutes">%1$dh %2$d</string>
+    <string name="app_detail_value_none">—</string>
+    <string name="app_detail_today_under">%1$s under limit</string>
+    <string name="app_detail_today_over">%1$s over limit</string>
+    <string name="app_detail_today_no_limit">No limit set</string>
+    <string name="app_detail_delta">%1$d%%</string>
+    <string name="app_detail_duration_hm">%1$dh %2$dm</string>
+    <string name="app_detail_duration_h">%1$dh</string>
+    <string name="app_detail_duration_m">%1$dm</string>
+
+    <string name="app_detail_chart_title_week">Past 7 days</string>
+    <string name="app_detail_chart_title_month">Past 30 days</string>
+    <string name="app_detail_chart_subtitle">Daily screen time distribution</string>
+    <string name="app_detail_legend_within">Within</string>
+    <string name="app_detail_legend_over">Over limit</string>
+    <string name="app_detail_chart_cd">Daily screen time of this app, split into time within and over the limit</string>
+
+    <string name="app_detail_limit_title">Daily limit</string>
+    <string name="app_detail_limit_subtitle">Time granted before %1$s is paused</string>
+    <string name="app_detail_limit_active">Active</string>
+    <string name="app_detail_limit_off">Off</string>
+    <string name="app_detail_stepper_unit">min</string>
+    <string name="app_detail_stepper_caption">Target session limit</string>
+    <string name="app_detail_stepper_caption_none">No daily limit</string>
+    <string name="app_detail_preset_30">30m</string>
+    <string name="app_detail_preset_45">45m</string>
+    <string name="app_detail_preset_60">1h</string>
+    <string name="app_detail_preset_none">No limit</string>
+
+    <string name="app_detail_warn_title">Warn me before</string>
+    <string name="app_detail_warn_sub">Gentle reminder banner</string>
+    <string name="app_detail_warn_value">%1$d min before</string>
+    <string name="app_detail_warn_dialog_title">Warn me before the limit</string>
+    <string name="app_detail_warn_option">%1$d min before</string>
+
+    <string name="app_detail_block_title">Block when limit is reached</string>
+    <string name="app_detail_block_desc">Covers the app until midnight. Needs accessibility service:</string>
+    <string name="app_detail_a11y_enabled">Enabled</string>
+    <string name="app_detail_a11y_disabled">Off</string>
+    <string name="app_detail_block_needs_limit">Set a daily limit first</string>
+
+    <string name="app_detail_note">Changes apply from now. Blocks reset automatically at midnight.</string>
+    <string name="app_detail_stop_tracking">Stop tracking %1$s</string>
+</resources>

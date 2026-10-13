@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u20 · Per-app detail (html 10): quick preset chips. Selected = forest container + mist text,
+     unselected = raised surface + muted text, no outline (differs from Widget.BBetter.Chip). -->
+<resources>
+    <style name="Widget.BBetter.Chip.Preset">
+        <item name="chipBackgroundColor">@color/bb_app_detail_chip_bg</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="android:textColor">@color/bb_app_detail_chip_text</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Caption.Semibold</item>
+    </style>
+</resources>

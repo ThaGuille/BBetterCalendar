@@ -78,3 +78,13 @@ three tiles (tracked apps today vs the previous 7-day daily average, sum of dail
 | 2026-07-04 | Phase 4a — soft blocking (accessibility service, cover overlay, enforce toggle) | — |
 | 2026-07-05 | Pomodoro "focus block mode" — `FocusBlockState` pre-empts `decide()` to cover every app but the launcher/assistant while a concentration run is active; kill-trap reset on service reconnect | — |
 | 2026-10-13 | u19 — Screen time & blocking screen, `UsageStatsRepository.foregroundMillisByHour`, Focus shield preference (`BlockingSettings`) | `.claude/plans/migracion-visual-stitch/notes/u19.md` |
+
+## Per-app detail (u20)
+
+`ui/screentime/AppDetailFragment` + `AppDetailViewModel` + `AppDetailState` (`navigation_app_detail`, arg `packageName`; reached from the Screen time row / chevron / "Set limit"). It is the only place that edits a limit: `AppLimitDialog` is no longer used from Screen time (Progress still references it until u24).
+
+- Limit: `StepperView` (0-240 min, step 5; 0 = no limit, "+" from 0 jumps to 30) and presets 30m/45m/1h/No limit -> `AppRuleDAO.setDailyLimit`, then `UsageLimitChecker.run()` + `UsageLimitScheduler.arm()`. Setting 0 also clears `enforceAtLimit`.
+- Warn me before: dialog 5/10/15/30 -> `AppRuleDAO.setWarnBefore` (`warnBeforeMinutes`); disabled without a limit.
+- Block when limit is reached: `enforceAtLimit`, same accessibility gate as the Screen time lock (disclosure dialog first); the status line reads `AccessibilityAccess.isEnabled`.
+- Stop tracking: `setTracked(pkg, false)` (rule kept), then back.
+- Usage per day: `UsageStatsRepository.foregroundMillisByDay` (one event walk, split by `UsageDayBuckets`); Week = 7 days, Month = 30, delta vs the previous period of equal length. Android only keeps recent usage events, so older days read 0.

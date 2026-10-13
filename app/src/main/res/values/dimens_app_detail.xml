@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u20 · Per-app detail (html 10). -->
+<resources>
+    <dimen name="app_detail_header_icon">36dp</dimen>
+    <dimen name="app_detail_header_icon_padding">4dp</dimen>
+    <dimen name="app_detail_tile_gap">8dp</dimen>
+    <dimen name="app_detail_chart_height">176dp</dimen>
+    <dimen name="app_detail_legend_swatch">10dp</dimen>
+    <dimen name="app_detail_row_icon_tile">32dp</dimen>
+    <dimen name="app_detail_row_icon_padding">7dp</dimen>
+    <dimen name="app_detail_status_dot">6dp</dimen>
+    <dimen name="app_detail_stop_height">48dp</dimen>
+</resources>

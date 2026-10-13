@@ -60,6 +60,23 @@ public final class UsageStatsRepository {
         return buckets;
     }
 
+    // u20: milisegundos en primer plano de UNA app por dia local: indice i = firstDay + i. Un solo
+    // recorrido del flujo de eventos para todo el rango (el detalle por app pide 7-60 dias).
+    // Android solo conserva los eventos de los ultimos dias: los anteriores salen a 0.
+    public long[] foregroundMillisByDay(String packageName, LocalDate firstDay, int days) {
+        ZoneId zone = ZoneId.systemDefault();
+        final long[] buckets = new long[Math.max(days, 0)];
+        if (buckets.length == 0) return buckets;
+        long begin = firstDay.atStartOfDay(zone).toInstant().toEpochMilli();
+        long end = firstDay.plusDays(days).atStartOfDay(zone).toInstant().toEpochMilli();
+        walkIntervals(begin, end, (pkg, start, stop) -> {
+            if (!pkg.equals(packageName)) return;
+            UsageDayBuckets.addInterval(buckets, start, Math.min(stop, System.currentTimeMillis()),
+                    firstDay, zone);
+        });
+        return buckets;
+    }
+
     // Recorre el flujo de eventos de [begin, end) y entrega cada intervalo MOVE_TO_FOREGROUND ->
     // cierre (sin recortar: el sink recorta). Nuestro propio paquete participa en la maquina de
     // estados; el sink decide si lo descarta.

@@ -36,6 +36,10 @@ public interface AppRuleDAO {
     @Query("UPDATE app_rule SET dailyLimitMinutes = :minutes WHERE packageName = :pkg")
     void setDailyLimit(String pkg, int minutes);
 
+    // u20: aviso previo en minutos (detalle por app). Columna ya existente desde MIGRATION_9_10.
+    @Query("UPDATE app_rule SET warnBeforeMinutes = :minutes WHERE packageName = :pkg")
+    void setWarnBefore(String pkg, int minutes);
+
     // Apps seguidas Y con un límite activo — lo que UsageLimitChecker/Scheduler necesitan comprobar.
     @Query("SELECT * FROM app_rule WHERE tracked = 1 AND dailyLimitMinutes > 0")
     List<AppRule> getLimited();

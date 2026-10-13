@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="progress_title">Progreso</string>
+    <string name="progress_granularity_year">Año</string>
+    <string name="progress_range_this_year">Este año</string>
+    <string name="progress_header_screen_time_cd">Tiempo de pantalla y bloqueo</string>
+    <string name="progress_header_share_cd">Compartir informe de progreso</string>
+    <string name="progress_share_soon">Compartir tu progreso llegará pronto</string>
+
+    <string name="progress_tile_focus_time">Tiempo de foco</string>
+    <string name="progress_tile_sessions">Sesiones</string>
+    <string name="progress_tile_tasks_done">Tareas hechas</string>
+    <string name="progress_tile_delta_percent">%1$s%%</string>
+    <string name="progress_tile_sessions_avg">%1$s / día de media</string>
+    <string name="progress_tile_tasks_vs_week">%1$s vs sem. anterior</string>
+    <string name="progress_tile_tasks_vs_month">%1$s vs mes anterior</string>
+    <string name="progress_tile_tasks_vs_year">%1$s vs año anterior</string>
+    <string name="progress_tile_tasks_vs_day">%1$s vs ayer</string>
+
+    <string name="progress_trend_title">Últimas 12 semanas</string>
+    <string name="progress_trend_subtitle">Volumen semanal de foco</string>
+    <string name="progress_trend_legend">12 sem. previas</string>
+    <string name="progress_trend_unit">h</string>
+    <string name="progress_trend_delta">%1$s h vs anteriores</string>
+    <string name="progress_trend_cd">Horas de foco por semana en las últimas 12 semanas frente a las 12 anteriores</string>
+
+    <string name="progress_see_all">Ver todo tu progreso</string>
+
+    <string name="progress_blocking_title">Tiempo de pantalla y bloqueo</string>
+    <string name="progress_blocking_new">NUEVO</string>
+    <string name="progress_blocking_today_goal">%1$s hoy · objetivo %2$s</string>
+    <string name="progress_blocking_today_only">%1$s hoy</string>
+    <string name="progress_blocking_no_apps">Aún no sigues ninguna app</string>
+    <string name="progress_blocking_locked">El acceso a uso está desactivado</string>
+    <string name="progress_blocking_percent">%1$d%% del límite diario</string>
+    <string name="progress_blocking_no_limits">Sin límites diarios</string>
+    <string name="progress_blocking_remaining">%1$s restantes</string>
+    <string name="progress_blocking_blocked">Bloqueada</string>
+    <string name="progress_blocking_opens_count">%1$d aperturas</string>
+    <string name="progress_blocking_opens_suffix">bloqueadas esta semana</string>
+    <string name="progress_blocking_manage">Gestionar bloqueo de apps</string>
+
+    <string name="progress_projects_week">Proyectos esta semana</string>
+    <string name="progress_projects_month">Proyectos este mes</string>
+    <string name="progress_projects_year">Proyectos este año</string>
+    <string name="progress_projects_logged">%1$s registradas</string>
+</resources>

@@ -104,4 +104,12 @@ public interface CalendarEntryDAO {
     // Cascade manual del borrado de proyecto (decisión #3 del proposal — sin Room FK onDelete).
     @Query("DELETE FROM CalendarEntry WHERE projectId = :projectId")
     void deleteItemsByProject(int projectId);
+
+    // u17 (Progress, tile "Tasks done"): tareas marcadas como hechas cuya fecha cae en el rango.
+    // APROXIMADO a propósito: no existe fecha de completado, así que se usa la fecha de la tarea
+    // (startMillis). PLACEHOLDER(ui-placeholders#progress-tasks-done-approx).
+    @Query("SELECT COUNT(*) FROM CalendarEntry WHERE type = 2 AND isDone = 1 " +
+            "AND isTemplate = 0 AND isDismissed = 0 " +
+            "AND startMillis BETWEEN :startMillis AND :endMillis")
+    int countDoneTasksBetween(long startMillis, long endMillis);
 }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- u17 · Progress (html 13). The older progress_* strings (granularity, range labels, legacy
+     carousel and usage band) stay in strings.xml. -->
+<resources>
+    <string name="progress_title">Progress</string>
+    <string name="progress_granularity_year">Year</string>
+    <string name="progress_range_this_year">This year</string>
+    <string name="progress_header_screen_time_cd">Screen time and blocking</string>
+    <string name="progress_header_share_cd">Share progress report</string>
+    <string name="progress_share_soon">Sharing your progress is coming soon</string>
+
+    <string name="progress_tile_focus_time">Focus time</string>
+    <string name="progress_tile_sessions">Sessions</string>
+    <string name="progress_tile_tasks_done">Tasks done</string>
+    <string name="progress_tile_delta_percent">%1$s%%</string>
+    <string name="progress_tile_sessions_avg">%1$s / day avg</string>
+    <string name="progress_tile_tasks_vs_week">%1$s vs last wk</string>
+    <string name="progress_tile_tasks_vs_month">%1$s vs last mo</string>
+    <string name="progress_tile_tasks_vs_year">%1$s vs last yr</string>
+    <string name="progress_tile_tasks_vs_day">%1$s vs yesterday</string>
+
+    <string name="progress_trend_title">Past 12 weeks</string>
+    <string name="progress_trend_subtitle">Weekly focus volume</string>
+    <string name="progress_trend_legend">prev 12 wks</string>
+    <string name="progress_trend_unit">hrs</string>
+    <string name="progress_trend_delta">%1$s hrs vs prior</string>
+    <string name="progress_trend_cd">Weekly focus hours over the past 12 weeks compared with the 12 before</string>
+
+    <string name="progress_see_all">See all your progress</string>
+
+    <string name="progress_blocking_title">Screen time &amp; blocking</string>
+    <string name="progress_blocking_new">NEW</string>
+    <string name="progress_blocking_today_goal">%1$s today · goal %2$s</string>
+    <string name="progress_blocking_today_only">%1$s today</string>
+    <string name="progress_blocking_no_apps">No apps tracked yet</string>
+    <string name="progress_blocking_locked">Usage access is off</string>
+    <string name="progress_blocking_percent">%1$d%% of daily limit</string>
+    <string name="progress_blocking_no_limits">No daily limits set</string>
+    <string name="progress_blocking_remaining">%1$s remaining</string>
+    <string name="progress_blocking_blocked">Blocked</string>
+    <string name="progress_blocking_opens_count">%1$d opens</string>
+    <string name="progress_blocking_opens_suffix">blocked this week</string>
+    <string name="progress_blocking_manage">Manage app blocking</string>
+
+    <string name="progress_projects_week">Projects this week</string>
+    <string name="progress_projects_month">Projects this month</string>
+    <string name="progress_projects_year">Projects this year</string>
+    <string name="progress_projects_logged">%1$s logged</string>
+</resources>

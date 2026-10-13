@@ -4,8 +4,10 @@ import android.content.Context;
 
 import com.example.bbettercalendar.R;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.Locale;
 
 // Rango temporal seleccionado en el navegador de Progress. Inmutable: cada cambio
@@ -32,6 +34,8 @@ public final class TimeRange {
                 return anchor.minusDays(anchor.getDayOfWeek().getValue() - 1); // lunes
             case MONTH:
                 return anchor.withDayOfMonth(1);
+            case YEAR:
+                return anchor.withDayOfYear(1);
             case DAY:
             default:
                 return anchor;
@@ -44,6 +48,8 @@ public final class TimeRange {
                 return startDay().plusDays(6); // domingo
             case MONTH:
                 return anchor.withDayOfMonth(anchor.lengthOfMonth());
+            case YEAR:
+                return anchor.withDayOfYear(anchor.lengthOfYear());
             case DAY:
             default:
                 return anchor;
@@ -61,6 +67,8 @@ public final class TimeRange {
                 return new TimeRange(anchor.plusWeeks(dir), granularity);
             case MONTH:
                 return new TimeRange(anchor.plusMonths(dir), granularity);
+            case YEAR:
+                return new TimeRange(anchor.plusYears(dir), granularity);
             case DAY:
             default:
                 return new TimeRange(anchor.plusDays(dir), granularity);
@@ -83,6 +91,28 @@ public final class TimeRange {
     private static final DateTimeFormatter MONTH_FMT =
             DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault());
 
+    private static final DateTimeFormatter YEAR_FMT =
+            DateTimeFormatter.ofPattern("yyyy", Locale.getDefault());
+
+    // Subtítulo del PeriodNavigatorView (html 13: "This week · Mon – Sun"). Sólo existe cuando el
+    // rango es el actual; los rangos pasados ya llevan su fecha en la etiqueta principal.
+    public String subtitle(Context ctx) {
+        LocalDate today = LocalDate.now();
+        if (!contains(today)) return null;
+        switch (granularity) {
+            case WEEK:
+                return DayOfWeek.MONDAY.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                        + " – " + DayOfWeek.SUNDAY.getDisplayName(TextStyle.SHORT, Locale.getDefault());
+            case MONTH:
+                return anchor.format(MONTH_FMT);
+            case YEAR:
+                return anchor.format(YEAR_FMT);
+            case DAY:
+            default:
+                return null;
+        }
+    }
+
     // Etiqueta para el centro del stepper ("Today" / "This week" / "June 2026" ...).
     public String label(Context ctx) {
         LocalDate today = LocalDate.now();
@@ -93,6 +123,9 @@ public final class TimeRange {
             case MONTH:
                 if (contains(today)) return ctx.getString(R.string.progress_range_this_month);
                 return anchor.format(MONTH_FMT);
+            case YEAR:
+                if (contains(today)) return ctx.getString(R.string.progress_range_this_year);
+                return anchor.format(YEAR_FMT);
             case DAY:
             default:
                 if (anchor.equals(today)) return ctx.getString(R.string.progress_range_today);

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- La franja Día/Semana/Mes + selector de rango vive fija arriba, justo debajo de la toolbar de la
-     Activity: es la única pieza que decide qué datos ven las tres bandas de abajo, así que no debía
-     estar a un scroll de distancia. Sólo el resto (carrusel de gráficos + banda de proyectos + banda
-     de uso) scrollea, dentro del NestedScrollView. Las listas internas siguen wrap_content con
-     nestedScrollingEnabled=false para que scrolleen con la página en vez de crear un scroll anidado. -->
+<!-- Progress (migracion visual u17, .stitch/designs/13-progress-final.png + html/13).
+     Titulo + escudo + compartir fijos arriba; el resto scrollea: Week/Month/Year + navegador de
+     periodo, tarjeta de tiles, "Past 12 weeks", "See all", Screen time & blocking, Projects.
+     Al final, dentro de progressLegacyCharts, queda el carrusel antiguo y la banda de uso con sus
+     controles: los retira u18 (All progress). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -13,164 +13,399 @@
     android:orientation="vertical"
     tools:context=".ui.progress.ProgressFragment">
 
-    <!-- ============ (1) Cabecera fija: Día/Semana/Mes + stepper de rango ============ -->
+    <!-- ============ Cabecera: titulo + escudo (Screen time) + compartir ============ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingStart="@dimen/spacing_md"
-        android:paddingTop="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_sm"
         android:paddingEnd="@dimen/spacing_md"
         android:paddingBottom="@dimen/spacing_sm">
 
-        <LinearLayout style="@style/Widget.BBetter.SegmentedControl">
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/granularity_day"
-                style="@style/Widget.BBetter.SegmentedControl.Item"
-                android:text="@string/progress_granularity_day" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/granularity_week"
-                style="@style/Widget.BBetter.SegmentedControl.Item"
-                android:text="@string/progress_granularity_week" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/granularity_month"
-                style="@style/Widget.BBetter.SegmentedControl.Item"
-                android:text="@string/progress_granularity_month" />
-        </LinearLayout>
-
-        <!-- ‹ label › stepper (sin flechas grandes) -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/progressTitle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_sm"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_weight="1"
+            android:text="@string/progress_title"
+            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
 
-            <ImageButton
-                android:id="@+id/range_prev"
-                android:layout_width="@dimen/icon_button_size"
-                android:layout_height="@dimen/icon_button_size"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/progress_range_prev"
-                android:src="@drawable/ic_arrow_back_24"
-                app:tint="@color/bb_on_surface" />
+        <FrameLayout
+            android:id="@+id/progressShieldButton"
+            android:layout_width="@dimen/progress_header_button"
+            android:layout_height="@dimen/progress_header_button"
+            android:background="@drawable/bg_progress_header_button"
+            android:clickable="true"
+            android:contentDescription="@string/progress_header_screen_time_cd"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless">
 
-            <TextView
-                android:id="@+id/range_label"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textAppearance="@style/TextAppearance.BBetter.Title"
-                tools:text="This week" />
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_shield_24"
+                app:tint="@color/bb_primary" />
 
-            <ImageButton
-                android:id="@+id/range_next"
-                android:layout_width="@dimen/icon_button_size"
-                android:layout_height="@dimen/icon_button_size"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/progress_range_next"
-                android:src="@drawable/ic_arrow_forward_24"
-                app:tint="@color/bb_on_surface" />
-        </LinearLayout>
+            <!-- PLACEHOLDER(ui-placeholders#progress-new-badge): punto de "novedad" fijo. -->
+            <View
+                android:layout_width="@dimen/progress_header_badge_dot"
+                android:layout_height="@dimen/progress_header_badge_dot"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:background="@drawable/bg_progress_badge_dot" />
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/progressShareButton"
+            android:layout_width="@dimen/progress_header_button"
+            android:layout_height="@dimen/progress_header_button"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/progress_header_share_cd"
+            android:padding="@dimen/spacing_sm"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_share_24"
+            app:tint="@color/bb_on_surface_muted" />
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/bb_divider" />
-
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/progressScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
         android:fillViewport="true"
         android:paddingStart="@dimen/spacing_md"
-        android:paddingTop="@dimen/spacing_md"
         android:paddingEnd="@dimen/spacing_md">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/spacing_lg">
+            android:paddingBottom="@dimen/progress_bottom_clearance">
 
-            <!-- ============ (2) Chart carousel ============ -->
-            <!-- Pestañas ENCIMA del carrusel (spec frontend-structure-cleanup): primero se elige qué
-                 ver y luego se ve; abajo quedaban cortadas y la tarjeta repetía el título.
-                 Selector con el título de cada gráfico (en vez de puntos ciegos): tabMode="fixed"
-                 muestra todos a la vez y tocar uno salta directo a esa página; TabLayoutMediator
-                 (ProgressFragment) sincroniza en ambos sentidos y re-etiqueta si DAY quita la
-                 página "by hour" (mismo remapeo que ya hace ChartCarouselAdapter#labelFor). -->
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/chart_dots"
+            <!-- ============ Week / Month / Year + navegador de periodo ============ -->
+            <com.example.bbettercalendar.ui.common.widget.SegmentedControlView
+                android:id="@+id/progressGranularity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView
+                android:id="@+id/progressPeriodNavigator"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                app:tabGravity="fill"
-                app:tabIndicatorColor="@color/bb_primary"
-                app:tabMode="fixed"
-                app:tabSelectedTextColor="@color/bb_primary"
-                app:tabTextAppearance="@style/TextAppearance.BBetter.Label"
-                app:tabTextColor="@color/bb_on_surface_muted" />
+                android:layout_marginTop="@dimen/spacing_card_gap" />
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/chart_pager"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/progress_chart_height"
-                android:layout_marginTop="@dimen/spacing_sm" />
-
-            <!-- ============ (2b) Project-progress band (spec project-deadlines-progress) ============ -->
-            <!-- Va entre el carrusel y la banda de uso a propósito: la pantalla se lee gráficas (cómo
-                 fue la concentración) -> proyectos (a dónde fue el trabajo) -> uso del móvil (por dónde
-                 se escapó el tiempo). A diferencia de la banda de uso NO depende de ningún permiso: se
-                 pinta desde filas locales, igual que las gráficas. Todo el bloque se oculta cuando no
-                 hay proyectos que mostrar (no hay tarjeta de estado: no hay nada que desbloquear).
-                 Tarjeta propia (bg_card) para separarse visualmente del carrusel y de la banda de uso.
-                 Misma receta que la lista de uso: wrap_content + nestedScrollingEnabled=false para que
-                 scrollee con la página en vez de crear un scroll anidado. -->
+            <!-- ============ Tarjeta de tiles: Focus time / Sessions / Tasks done ============ -->
             <LinearLayout
-                android:id="@+id/projects_band"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
+                android:layout_marginTop="@dimen/spacing_card_gap"
                 android:background="@drawable/bg_card"
-                android:elevation="@dimen/elevation_card"
-                android:orientation="vertical"
-                android:padding="@dimen/home_card_padding">
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:padding="@dimen/spacing_md">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/progressTileFocus"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/progress_projects_header"
-                    android:textAppearance="@style/TextAppearance.BBetter.Label" />
+                    android:layout_weight="1"
+                    app:tileCard="false"
+                    app:tileLabel="@string/progress_tile_focus_time" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/projects_list"
-                    android:layout_width="match_parent"
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/bb_divider" />
+
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/progressTileSessions"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false" />
+                    android:layout_marginStart="@dimen/spacing_card_gap"
+                    android:layout_weight="1"
+                    app:tileCard="false"
+                    app:tileLabel="@string/progress_tile_sessions" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/bb_divider" />
+
+                <!-- PLACEHOLDER(ui-placeholders#progress-tasks-done-approx): sin fecha de completado,
+                     se cuentan las tareas hechas cuya fecha cae en el rango. -->
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/progressTileTasks"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_card_gap"
+                    android:layout_weight="1"
+                    app:tileCard="false"
+                    app:tileLabel="@string/progress_tile_tasks_done" />
             </LinearLayout>
 
-            <!-- ============ (3) App-usage band (Phase 2) ============ -->
-            <!-- Banda de uso por app: cabecera (screen time + "Add apps") + lista, o tarjeta de estado
-                 (LOCKED / EMPTY) / spinner. Tarjeta propia (bg_card), igual que la banda de proyectos,
-                 para que las tres secciones de la pantalla se lean como bloques distintos. -->
+            <!-- ============ Past 12 weeks ============ -->
             <LinearLayout
-                android:id="@+id/usage_band"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_md"
                 android:background="@drawable/bg_card"
-                android:elevation="@dimen/elevation_card"
                 android:orientation="vertical"
-                android:padding="@dimen/home_card_padding">
+                android:padding="@dimen/spacing_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/progress_trend_title"
+                            android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/progress_trend_subtitle"
+                            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="@dimen/spacing_sm"
+                        android:gravity="center_vertical"
+                        android:text="@string/progress_trend_legend"
+                        android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                        app:drawableStartCompat="@drawable/ic_progress_legend_dash" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_card_gap"
+                    android:baselineAligned="true"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/progressTrendValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.BBetter.Stat"
+                        tools:text="148.5" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_xs"
+                        android:text="@string/progress_trend_unit"
+                        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+                    <TextView
+                        android:id="@+id/progressTrendDelta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                        android:textColor="@color/bb_primary"
+                        tools:text="+18.2 hrs vs prior" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/progressTrendChartHolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/progress_trend_chart_height"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:contentDescription="@string/progress_trend_cd" />
+            </LinearLayout>
+
+            <!-- ============ See all your progress ============ -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/progressSeeAll"
+                style="@style/Widget.BBetter.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/progress_see_all_height"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:minHeight="@dimen/progress_see_all_height"
+                android:text="@string/progress_see_all"
+                app:icon="@drawable/ic_arrow_forward_24"
+                app:iconGravity="textEnd" />
+
+            <!-- ============ Screen time & blocking ============ -->
+            <LinearLayout
+                android:id="@+id/progressBlockingCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_progress_blocking_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/progress_blocking_icon_tile"
+                        android:layout_height="@dimen/progress_blocking_icon_tile"
+                        android:background="@drawable/bg_progress_icon_tile"
+                        android:importantForAccessibility="no"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_shield_24"
+                        app:tint="@color/bb_primary" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_card_gap"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/progress_blocking_title"
+                                android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+                            <!-- PLACEHOLDER(ui-placeholders#progress-new-badge): insignia fija. -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_sm"
+                                android:background="@drawable/bg_progress_new_badge"
+                                android:paddingStart="@dimen/spacing_sm"
+                                android:paddingTop="2dp"
+                                android:paddingEnd="@dimen/spacing_sm"
+                                android:paddingBottom="2dp"
+                                android:text="@string/progress_blocking_new"
+                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                                android:textColor="@color/bb_on_reward" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/progressBlockingSubtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                            tools:text="1h 18m today · goal 1h 30m" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/progressBlockingGoalGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progressBlockingBar"
+                        style="@style/Widget.BBetter.LinearProgress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="100"
+                        app:trackColor="@color/bb_surface_card"
+                        app:trackThickness="8dp"
+                        tools:progress="78" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/progressBlockingPercent"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                            tools:text="78% of daily limit" />
+
+                        <TextView
+                            android:id="@+id/progressBlockingRemaining"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                            android:textColor="@color/bb_on_surface"
+                            tools:text="12m remaining" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/progressBlockingChips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_card_gap"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal" />
+
+                <!-- PLACEHOLDER(ui-placeholders#progress-blocked-opens): no se cuentan aperturas bloqueadas. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_card_gap"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_shield_24"
+                        app:tint="@color/bb_primary" />
+
+                    <TextView
+                        android:id="@+id/progressBlockingOpens"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                        tools:text="23 opens blocked this week" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/progressManageBlocking"
+                    style="@style/Widget.BBetter.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/progress_blocking_cta_height"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:minHeight="@dimen/progress_blocking_cta_height"
+                    android:text="@string/progress_blocking_manage"
+                    app:icon="@drawable/ic_arrow_forward_24"
+                    app:iconGravity="textEnd" />
+            </LinearLayout>
+
+            <!-- ============ Projects this week ============ -->
+            <LinearLayout
+                android:id="@+id/progressProjectsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -179,96 +414,166 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/progress_usage_header"
-                        android:textAppearance="@style/TextAppearance.BBetter.Label" />
-
-                    <TextView
-                        android:id="@+id/usage_screen_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:textAppearance="@style/TextAppearance.BBetter.Title"
-                        tools:text="3h 30m" />
-
-                    <View
+                        android:id="@+id/progressProjectsTitle"
                         android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/progress_projects_week"
+                        android:textAppearance="@style/TextAppearance.BBetter.Title" />
 
-                    <!-- Botón real (pill outline + icono) en vez de un TextView de color suelto. -->
                     <TextView
-                        android:id="@+id/usage_add_apps"
+                        android:id="@+id/progressProjectsLogged"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_pill_outline_primary"
-                        android:clickable="true"
-                        android:drawablePadding="@dimen/spacing_xs"
-                        android:focusable="true"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+                        tools:text="8h 15m logged" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/progressProjectsRows"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <!-- ============ Legado (u18 lo retira): carrusel de graficos + banda de uso ============ -->
+            <LinearLayout
+                android:id="@+id/progressLegacyCharts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:orientation="vertical">
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/chart_dots"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    app:tabGravity="fill"
+                    app:tabIndicatorColor="@color/bb_primary"
+                    app:tabMode="fixed"
+                    app:tabSelectedTextColor="@color/bb_primary"
+                    app:tabTextAppearance="@style/TextAppearance.BBetter.Label"
+                    app:tabTextColor="@color/bb_on_surface_muted" />
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/chart_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/progress_chart_height"
+                    android:layout_marginTop="@dimen/spacing_sm" />
+
+                <!-- ============ (3) App-usage band (Phase 2) ============ -->
+                <!-- Banda de uso por app: cabecera (screen time + "Add apps") + lista, o tarjeta de estado
+                     (LOCKED / EMPTY) / spinner. Tarjeta propia (bg_card), igual que la banda de proyectos,
+                     para que las tres secciones de la pantalla se lean como bloques distintos. -->
+                <LinearLayout
+                    android:id="@+id/usage_band"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:background="@drawable/bg_card"
+                    android:elevation="@dimen/elevation_card"
+                    android:orientation="vertical"
+                    android:padding="@dimen/home_card_padding">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:paddingStart="@dimen/spacing_sm"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/progress_usage_header"
+                            android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+                        <TextView
+                            android:id="@+id/usage_screen_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_sm"
+                            android:textAppearance="@style/TextAppearance.BBetter.Title"
+                            tools:text="3h 30m" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
+
+                        <!-- Botón real (pill outline + icono) en vez de un TextView de color suelto. -->
+                        <TextView
+                            android:id="@+id/usage_add_apps"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_pill_outline_primary"
+                            android:clickable="true"
+                            android:drawablePadding="@dimen/spacing_xs"
+                            android:focusable="true"
+                            android:gravity="center_vertical"
+                            android:paddingStart="@dimen/spacing_sm"
+                            android:paddingTop="@dimen/spacing_xs"
+                            android:paddingEnd="@dimen/spacing_md"
+                            android:paddingBottom="@dimen/spacing_xs"
+                            android:text="@string/progress_usage_add_apps"
+                            android:textAppearance="@style/TextAppearance.BBetter.Label"
+                            android:textColor="@color/bb_primary"
+                            app:drawableStartCompat="@drawable/ic_add_24"
+                            app:drawableTint="@color/bb_primary" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:minHeight="@dimen/progress_usage_band_min_height">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/usage_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:nestedScrollingEnabled="false" />
+
+                        <ProgressBar
+                            android:id="@+id/usage_loading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:indeterminateTint="@color/bb_primary"
+                            android:visibility="gone" />
+
+                        <!-- Sin android:id en el <include>: si lo lleva, sobrescribe el id del root incluido
+                             (usage_state_card) y findViewById(R.id.usage_state_card) devolvería null. -->
+                        <include
+                            layout="@layout/view_usage_locked"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical" />
+                    </FrameLayout>
+
+                    <!-- Interruptor maestro de "hacer cumplir los límites" (Phase 4a): pausa/reanuda TODO el
+                         bloqueo sin tocar los grants del OS. Pill outline que cambia de color (bb_primary ON /
+                         bb_on_surface_muted OFF) además del texto, para que el estado se note sin leer. -->
+                    <TextView
+                        android:id="@+id/usage_enforce_master"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:background="@drawable/bg_pill_outline_muted"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="@dimen/spacing_md"
                         android:paddingTop="@dimen/spacing_xs"
                         android:paddingEnd="@dimen/spacing_md"
                         android:paddingBottom="@dimen/spacing_xs"
-                        android:text="@string/progress_usage_add_apps"
                         android:textAppearance="@style/TextAppearance.BBetter.Label"
-                        android:textColor="@color/bb_primary"
-                        app:drawableStartCompat="@drawable/ic_add_24"
-                        app:drawableTint="@color/bb_primary" />
+                        android:textColor="@color/bb_on_surface_muted"
+                        tools:text="Enforcing app limits · tap to pause" />
                 </LinearLayout>
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:minHeight="@dimen/progress_usage_band_min_height">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/usage_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:nestedScrollingEnabled="false" />
-
-                    <ProgressBar
-                        android:id="@+id/usage_loading"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:indeterminateTint="@color/bb_primary"
-                        android:visibility="gone" />
-
-                    <!-- Sin android:id en el <include>: si lo lleva, sobrescribe el id del root incluido
-                         (usage_state_card) y findViewById(R.id.usage_state_card) devolvería null. -->
-                    <include
-                        layout="@layout/view_usage_locked"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical" />
-                </FrameLayout>
-
-                <!-- Interruptor maestro de "hacer cumplir los límites" (Phase 4a): pausa/reanuda TODO el
-                     bloqueo sin tocar los grants del OS. Pill outline que cambia de color (bb_primary ON /
-                     bb_on_surface_muted OFF) además del texto, para que el estado se note sin leer. -->
-                <TextView
-                    android:id="@+id/usage_enforce_master"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:background="@drawable/bg_pill_outline_muted"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:paddingStart="@dimen/spacing_md"
-                    android:paddingTop="@dimen/spacing_xs"
-                    android:paddingEnd="@dimen/spacing_md"
-                    android:paddingBottom="@dimen/spacing_xs"
-                    android:textAppearance="@style/TextAppearance.BBetter.Label"
-                    android:textColor="@color/bb_on_surface_muted"
-                    tools:text="Enforcing app limits · tap to pause" />
             </LinearLayout>
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

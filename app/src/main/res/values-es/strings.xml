@@ -172,12 +172,6 @@
     <!-- Progreso: banda de proyectos -->
 
     <!-- Progreso: uso del móvil y de apps -->
-    <string name="progress_usage_header">Tiempo de pantalla</string>
-    <string name="progress_usage_locked_title">Mira tu uso de apps</string>
-    <string name="progress_usage_locked_body">Activa el acceso de uso para medir el tiempo que pasas en las apps que elijas. Tu uso se queda en este dispositivo.</string>
-    <string name="progress_usage_locked_cta">Activar acceso de uso</string>
-    <string name="progress_usage_empty_title">Aún no sigues ninguna app</string>
-    <string name="progress_usage_empty_body">Elige las apps que quieres vigilar y aparecerán aquí.</string>
 
     <!-- Diálogo de límite de app -->
     <string name="app_limit_dialog_title">Límite diario</string>

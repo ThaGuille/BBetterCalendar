@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Iconos de html 04: timer / monitoring / calendar_today / folder (Material Symbols). -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/navigation_home"
-        android:icon="@drawable/ic_home_v2_24"
+        android:icon="@drawable/ic_timer_24"
         android:title="@string/title_home" />
 
     <item
         android:id="@+id/navigation_progress"
-        android:icon="@drawable/ic_progress_24"
+        android:icon="@drawable/ic_monitoring_24"
         android:title="@string/title_progress" />
 
     <item
         android:id="@+id/navigation_calendar_month"
-        android:icon="@drawable/ic_calendar_v2_24"
+        android:icon="@drawable/ic_calendar_today_24"
         android:title="@string/title_calendar" />
 
     <item
         android:id="@+id/navigation_projects"
-        android:icon="@drawable/ic_projects_24"
+        android:icon="@drawable/ic_folder_24"
         android:title="@string/title_projects" />
 
 </menu>

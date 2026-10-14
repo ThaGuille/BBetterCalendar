@@ -51,6 +51,8 @@ public class AvatarView extends View {
     private final float ring;
     private final float hairline;
     @ColorInt private int cutoutColor;
+    @ColorInt private int plainFill;
+    @ColorInt private int plainInitials;
 
     @Nullable private CharSequence name;
     @NonNull private String initials = "";
@@ -75,12 +77,16 @@ public class AvatarView extends View {
         text.setTextAlign(Paint.Align.CENTER);
         stroke.setStyle(Paint.Style.STROKE);
         cutoutColor = ContextCompat.getColor(context, R.color.bb_surface_card);
+        plainFill = ContextCompat.getColor(context, R.color.bb_primary_container);
+        plainInitials = ContextCompat.getColor(context, R.color.bb_on_primary_container);
 
         int size = getResources().getDimensionPixelSize(R.dimen.widget_avatar_size);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AvatarView, defStyleAttr, 0);
         try {
             size = a.getDimensionPixelSize(R.styleable.AvatarView_avatarSize, size);
             cutoutColor = a.getColor(R.styleable.AvatarView_avatarCutoutColor, cutoutColor);
+            plainFill = a.getColor(R.styleable.AvatarView_avatarFillColor, plainFill);
+            plainInitials = a.getColor(R.styleable.AvatarView_avatarInitialsColor, plainInitials);
             presenceDot = a.getBoolean(R.styleable.AvatarView_avatarPresenceDot, false);
             CharSequence n = a.getText(R.styleable.AvatarView_avatarName);
             if (n != null) {
@@ -193,12 +199,12 @@ public class AvatarView extends View {
                 break;
             case NONE:
             default:
-                fill.setColor(ContextCompat.getColor(ctx, R.color.bb_primary_container));
+                fill.setColor(plainFill);
                 canvas.drawCircle(cx, cy, r - hairline, fill);
                 stroke.setStrokeWidth(hairline);
                 stroke.setColor(ContextCompat.getColor(ctx, R.color.bb_outline));
                 canvas.drawCircle(cx, cy, r - hairline / 2f, stroke);
-                initialsColor = ContextCompat.getColor(ctx, R.color.bb_on_primary_container);
+                initialsColor = plainInitials;
                 text.setTypeface(bold);
                 break;
         }

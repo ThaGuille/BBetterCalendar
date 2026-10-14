@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta «Weekly rhythm» de Projects (html 03: bg-surface-container-low, rounded-[20px],
+     border outline-variant/20): rellena, con un hairline apenas visible. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_low" />
+    <stroke android:width="@dimen/widget_hairline" android:color="@color/bb_divider" />
+    <corners android:radius="@dimen/radius_card" />
+</shape>

@@ -17,6 +17,7 @@ import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectWithCounts;
 import com.example.bbettercalendar.projects.ProjectsRepository;
+import com.example.bbettercalendar.stats.FocusAttributionRepository;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.FocusInsightsRepository;
 import com.example.bbettercalendar.stats.ProjectMinutes;
@@ -24,6 +25,7 @@ import com.example.bbettercalendar.stats.StreakCalculator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,7 @@ public class ProjectsViewModel extends AndroidViewModel {
     public ProjectsViewModel(@NonNull Application application, ProjectsRepository repository,
                              CalendarEntryDAO calendarEntryDao, FocusEventDAO focusEventDao,
                              FocusInsightsRepository focusInsightsRepository,
+                             FocusAttributionRepository focusAttributionRepository,
                              ConfigurationManager configurationManager,
                              @DbWriteExecutor ExecutorService dbWriteExecutor,
                              @IoExecutor ExecutorService ioExecutor) {
@@ -95,7 +98,9 @@ public class ProjectsViewModel extends AndroidViewModel {
             latestProjects = value;
             recompose();
         });
-        projectItems.addSource(calendarEntryDao.observeAllProjectItems(), value -> {
+        // Con minutos atribuidos: los "N Pomodoros" de cada subtarea cuentan sólo lo que falta.
+        projectItems.addSource(focusAttributionRepository.enrich(
+                calendarEntryDao.observeAllProjectItems()), value -> {
             latestItems = value;
             recompose();
         });
@@ -155,6 +160,7 @@ public class ProjectsViewModel extends AndroidViewModel {
             result.add(new ProjectListItem(pwc.project, pwc.doneCount, pwc.totalCount,
                     subtasks, pomodoroMin, today == null ? 0 : today));
         }
+        Collections.sort(result, ProjectListItem.BY_URGENCY);
         projectItems.setValue(result);
     }
 

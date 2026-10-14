@@ -58,6 +58,9 @@
     <color name="sanct_pine_900">#FF13221C</color>   <!-- Sanctuary card -->
     <color name="sanct_pine_850">#FF15221C</color>   <!-- ring track -->
     <color name="sanct_pine_800">#FF202D26</color>   <!-- surface-container-high: meta pill -->
+    <color name="sanct_pine_600">#FF1E3427</color>   <!-- pine-600: 3rd friend avatar (html 02) -->
+    <color name="sage_500">#FF5B9377</color>         <!-- sage-dark: 1st friend avatar (html 02) -->
+    <color name="amber_700">#FFB45309</color>        <!-- amber-700: 2nd friend avatar (html 02) -->
     <color name="sanct_pine_ink">#FF0E1B15</color>   <!-- Deep Pine Void: icon/text on amber -->
     <color name="amber_400">#FFE5A93C</color>        <!-- primary-container: amber fills, ring start -->
     <color name="amber_300">#FFF5BE58</color>        <!-- tertiary-fixed-dim: amber text glow -->
@@ -70,6 +73,10 @@
     <color name="sage_300_a20">#337FB69A</color>     <!-- 20 %: chip rim, invite rim -->
     <color name="sage_300_a15">#267FB69A</color>     <!-- 15 %: metric divider -->
     <color name="sage_300_a10">#1A7FB69A</color>     <!-- 10 %: chip fill, rest glow -->
+    <color name="sage_200_a08">#149BD3B5</color>     <!-- 8 %: Home timer card glow, top-end (html 04 primary/5 blurred) -->
+    <color name="sage_200_a00">#009BD3B5</color>     <!-- 0 %: glow end -->
+    <color name="forest_600_a60">#992C4C47</color>   <!-- 60 %: Home timer card glow, bottom-start (html 04 secondary-container/40) -->
+    <color name="forest_600_a00">#002C4C47</color>   <!-- 0 %: glow end -->
     <color name="amber_400_a25">#40E5A93C</color>    <!-- 25 %: amber button glow -->
     <color name="amber_400_a18">#2EE5A93C</color>    <!-- 18 %: hearth glow centre -->
     <color name="amber_400_a00">#00E5A93C</color>    <!-- 0 %: glow end -->

@@ -101,6 +101,15 @@
     <color name="bb_sanct_chip_rim">@color/sage_300_a20</color>
     <color name="bb_sanct_chip_fill">@color/sage_300_a10</color>
     <color name="bb_sanct_divider">@color/sage_300_a15</color>
+    <!-- Brillos de la tarjeta del temporizador de Home (html 04: dos manchas difuminadas). -->
+    <color name="bb_home_glow_primary_start">@color/sage_200_a08</color>
+    <color name="bb_home_glow_primary_end">@color/sage_200_a00</color>
+    <color name="bb_home_glow_container_start">@color/forest_600_a60</color>
+    <color name="bb_home_glow_container_end">@color/forest_600_a00</color>
+    <!-- Avatares de amigos de Cycle complete (html 02: sage-dark / amber-700 / pine-600). -->
+    <color name="bb_sanct_avatar_1">@color/sage_500</color>
+    <color name="bb_sanct_avatar_2">@color/amber_700</color>
+    <color name="bb_sanct_avatar_3">@color/sanct_pine_600</color>
     <color name="bb_sanct_glow_sage">@color/sage_300_a10</color>
     <color name="bb_sanct_button_glow">@color/amber_400_a25</color>
     <color name="bb_sanct_glow_start">@color/amber_400_a18</color>

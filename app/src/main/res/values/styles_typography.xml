@@ -47,6 +47,16 @@
         <item name="android:textColor">@color/bb_on_surface</item>
     </style>
 
+    <!-- Top bar title of the secondary screens: 20sp, 700 (Headline is the tab screens' 22sp). -->
+    <style name="TextAppearance.BBetter.TopBar" parent="TextAppearance.BBetter.Headline">
+        <item name="android:textSize">@dimen/text_top_bar</item>
+    </style>
+
+    <!-- Same, when a subtitle sits under it (App detail): 18sp. -->
+    <style name="TextAppearance.BBetter.TopBar.TwoLine">
+        <item name="android:textSize">@dimen/text_top_bar_two_line</item>
+    </style>
+
     <!-- Section / card title: 17sp, 700. -->
     <style name="TextAppearance.BBetter.Title">
         <item name="android:textSize">@dimen/text_title</item>

@@ -125,7 +125,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:clipToPadding="false"
-                android:paddingBottom="8dp" />
+                android:paddingBottom="@dimen/calendar_fab_clearance" />
         </LinearLayout>
 
     </LinearLayout>

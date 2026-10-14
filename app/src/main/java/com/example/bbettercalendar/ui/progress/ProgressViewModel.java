@@ -3,8 +3,6 @@ package com.example.bbettercalendar.ui.progress;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -13,19 +11,14 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
-import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
-import com.example.bbettercalendar.notifications.BBetterNotifier;
-import com.example.bbettercalendar.notifications.usage.UsageLimitNotifier;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
 import com.example.bbettercalendar.projects.ProjectWithCounts;
 import com.example.bbettercalendar.projects.ProjectsRepository;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
-import com.example.bbettercalendar.stats.ConsentRecord;
-import com.example.bbettercalendar.stats.ConsentRecordDAO;
 import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
 import com.example.bbettercalendar.stats.FocusEvent;
@@ -37,7 +30,6 @@ import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
 import com.example.bbettercalendar.usage.UsageAccess;
 import com.example.bbettercalendar.usage.UsageStatsRepository;
-import com.example.bbettercalendar.usage.limits.UsageLimitChecker;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
 
@@ -78,44 +70,29 @@ public class ProgressViewModel extends AndroidViewModel {
     private final MediatorLiveData<List<ProjectProgressRow>> projectRows;
     private List<ProjectWithCounts> latestProjectCounts;
 
-    // Banda 3 (uso de apps). Independiente de los gráficos: los gráficos nunca dependen del permiso.
-    private final MutableLiveData<UsageBandState> usageState;
-    private final MutableLiveData<List<AppUsageRow>> apps;
-    private final MutableLiveData<Long> screenTimeMillis;
-
     // u17: tiles + "Past 12 weeks" (dependen del rango) y tarjeta Screen time & blocking (de hoy).
     private final MutableLiveData<ProgressOverview> overview;
     private final MutableLiveData<ProgressOverview.BlockingCard> blockingCard;
 
     private final ExecutorService executorService;
-    private final ExecutorService dbWriteExecutor;
     private final DailyStatDAO dailyStatDao;
     private final FocusEventDAO focusEventDao;
     private final StatsDAO statsDao;
     private final CalendarEntryDAO calendarEntryDao;
     private final FocusInsightsRepository insights;
     private final AppRuleDAO appRuleDao;
-    private final ConsentRecordDAO consentRecordDao;
     private final UsageStatsRepository usageRepo;
     private final UsageLimitScheduler usageLimitScheduler;
-    private final UsageLimitChecker usageLimitChecker;
-    private final Handler mainHandler;
 
     private static final DateTimeFormatter X_LABEL =
             DateTimeFormatter.ofPattern("d/M", Locale.getDefault());
 
-    // Decisión del CTA "Turn on usage access": ¿hay que mostrar la divulgación o ir directo a Ajustes?
-    public interface DisclosureDecision {
-        void decided(boolean needsDisclosure);
-    }
-
     @Inject
     public ProgressViewModel(@NonNull Application application, DailyStatDAO dailyStatDao,
                               FocusEventDAO focusEventDao, StatsDAO statsDao, AppRuleDAO appRuleDao,
-                              ConsentRecordDAO consentRecordDao, ProjectsRepository projectsRepository,
+                              ProjectsRepository projectsRepository,
                               CalendarEntryDAO calendarEntryDao, FocusInsightsRepository insights,
-                              @IoExecutor ExecutorService executorService,
-                              @DbWriteExecutor ExecutorService dbWriteExecutor) {
+                              @IoExecutor ExecutorService executorService) {
         super(application);
         mText = new MutableLiveData<>();
         mText.setValue("This is progress fragment");
@@ -123,9 +100,6 @@ public class ProgressViewModel extends AndroidViewModel {
         charts = new MutableLiveData<>();
         projectMinutesInRange = new MutableLiveData<>();
         projectRows = new MediatorLiveData<>();
-        usageState = new MutableLiveData<>();
-        apps = new MutableLiveData<>();
-        screenTimeMillis = new MutableLiveData<>();
         overview = new MutableLiveData<>();
         blockingCard = new MutableLiveData<>();
 
@@ -135,16 +109,11 @@ public class ProgressViewModel extends AndroidViewModel {
         this.focusEventDao = focusEventDao;
         this.statsDao = statsDao;
         this.appRuleDao = appRuleDao;
-        this.consentRecordDao = consentRecordDao;
         usageRepo = new UsageStatsRepository(application);
         AlarmManager alarmManager = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
         WarnedTodayStore warnedStore = new WarnedTodayStore(application);
         usageLimitScheduler = new UsageLimitScheduler(application, alarmManager, appRuleDao, warnedStore);
-        usageLimitChecker = new UsageLimitChecker(application, appRuleDao, warnedStore,
-                new UsageLimitNotifier(application, new BBetterNotifier(application)));
-        mainHandler = new Handler(Looper.getMainLooper());
         this.executorService = executorService;
-        this.dbWriteExecutor = dbWriteExecutor;
 
         // La composición en sí es en memoria (dos listas ya cargadas), así que va en el hilo
         // principal: el trabajo de BD ya está fuera de él -- Room en su propio hilo para los
@@ -162,9 +131,6 @@ public class ProgressViewModel extends AndroidViewModel {
     public LiveData<TimeRange> getSelectedRange() { return selectedRange; }
     public LiveData<ChartBundle> getCharts() { return charts; }
     public LiveData<List<ProjectProgressRow>> getProjectRows() { return projectRows; }
-    public LiveData<UsageBandState> getUsageState() { return usageState; }
-    public LiveData<List<AppUsageRow>> getApps() { return apps; }
-    public LiveData<Long> getScreenTimeMillis() { return screenTimeMillis; }
     public LiveData<ProgressOverview> getOverview() { return overview; }
     public LiveData<ProgressOverview.BlockingCard> getBlockingCard() { return blockingCard; }
 
@@ -189,7 +155,7 @@ public class ProgressViewModel extends AndroidViewModel {
     }
 
     // selectedRange se publica en el hilo actual (UI/constructor); el cálculo pesado de los
-    // gráficos y del uso de apps se hace en el executor y se publica con postValue.
+    // gráficos y de la tarjeta de bloqueo se hace en el executor y se publica con postValue.
     private void applyRange(TimeRange range) {
         selectedRange.setValue(range);
         executorService.execute(() -> {
@@ -200,7 +166,7 @@ public class ProgressViewModel extends AndroidViewModel {
             projectMinutesInRange.postValue(toMinutesById(byProject));
         });
         executorService.execute(() -> refreshOverview(range));
-        executorService.execute(() -> refreshUsage(range));
+        executorService.execute(this::publishBlockingCard);
     }
 
     // --- u17: tiles del periodo + "Past 12 weeks" ---
@@ -220,6 +186,33 @@ public class ProgressViewModel extends AndroidViewModel {
 
     private static final DateTimeFormatter TREND_MONTH =
             DateTimeFormatter.ofPattern("MMM", Locale.getDefault());
+
+    /**
+     * Etiqueta del eje X por semana: el mes en cada cambio de mes, "" en el resto. La primera
+     * semana sólo se etiqueta si el siguiente cambio queda a {@link #TREND_LABEL_GAP} o más
+     * índices; si no, "JUL" y "AUG" se pisaban.
+     */
+    static String[] trendLabels(LocalDate[] weekStarts) {
+        int n = weekStarts.length;
+        String[] labels = new String[n];
+        int nextChange = n;
+        for (int i = 1; i < n; i++) {
+            if (weekStarts[i].getMonthValue() != weekStarts[i - 1].getMonthValue()) {
+                nextChange = i;
+                break;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            boolean change = i == 0
+                    ? nextChange >= TREND_LABEL_GAP
+                    : weekStarts[i].getMonthValue() != weekStarts[i - 1].getMonthValue();
+            labels[i] = change
+                    ? weekStarts[i].format(TREND_MONTH).toUpperCase(Locale.getDefault()) : "";
+        }
+        return labels;
+    }
+
+    private static final int TREND_LABEL_GAP = 3;
 
     // Corre SIEMPRE en el executor; publica con postValue. Rango en curso: el delta compara "hasta
     // hoy" con la misma posicion del periodo anterior (toDate); rango pasado: periodos completos.
@@ -244,22 +237,21 @@ public class ProgressViewModel extends AndroidViewModel {
         long pEnd = prev.endDay().plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1;
         int tasksPrev = calendarEntryDao.countDoneTasksBetween(pStart, pEnd);
 
-        // "Past 12 weeks" vs las 12 anteriores, terminando en el ancla del rango.
+        // "Past 12 weeks" vs las 12 anteriores: sólo semanas COMPLETAS. Si la del ancla está a
+        // medias, el último punto (2-3 días) caía al suelo y la línea parecía hundirse; se
+        // termina en la semana anterior.
+        LocalDate weekStart = PeriodComparison.periodStart(anchor, PeriodComparison.Period.WEEK);
+        LocalDate trendAnchor = anchor.equals(weekStart.plusDays(6)) ? anchor : weekStart.minusDays(1);
         PeriodComparison.Result trend = insights.focusMinutesComparison(
-                anchor, PeriodComparison.Period.WEEK, 12, false);
+                trendAnchor, PeriodComparison.Period.WEEK, 12, false);
         int n = trend.periods;
         float[] cur = new float[n];
         float[] prv = new float[n];
-        String[] labels = new String[n];
-        int lastMonth = -1;
         for (int i = 0; i < n; i++) {
             cur[i] = trend.current[i] / 60f;
             prv[i] = trend.previous[i] / 60f;
-            int month = trend.currentStarts[i].getMonthValue();
-            labels[i] = month != lastMonth
-                    ? trend.currentStarts[i].format(TREND_MONTH).toUpperCase(Locale.getDefault()) : "";
-            lastMonth = month;
         }
+        String[] labels = trendLabels(trend.currentStarts);
 
         overview.postValue(new ProgressOverview(focus.currentTotal, focus.hasDeltaPercent(),
                 focus.deltaPercent(), sessions, sessions / (double) elapsedDays,
@@ -368,113 +360,17 @@ public class ProgressViewModel extends AndroidViewModel {
         projectRows.setValue(rows);
     }
 
-    // --- banda 3: uso de apps ---
+    // --- tarjeta Screen time & blocking ---
 
-    // Re-evalúa el acceso a uso y recarga la lista para el rango actual. Lo llama el Fragment en
-    // onResume() (al volver de Ajustes o del picker no hay callback ni cambio de configuración).
+    // Re-evalúa el acceso a uso y recarga la tarjeta. Lo llama el Fragment en onResume() (al
+    // volver de Ajustes o de Screen time no hay callback ni cambio de configuración).
     public void refreshUsageAccess() {
-        TimeRange current = selectedRange.getValue();
-        if (current == null) return;
-        executorService.execute(() -> refreshUsage(current));
-    }
-
-    // Corre SIEMPRE en el executor (queryEvents + DAO fuera del hilo principal, regla #3).
-    // Si no hay permiso -> LOCKED y no se lee nada. Con permiso pero sin apps -> EMPTY_NO_APPS.
-    // Con apps -> READY con la lista (apps seguidas ⨝ uso del rango). El total de pantalla del
-    // rango se publica siempre que haya permiso (cabecera de la banda).
-    private void refreshUsage(TimeRange range) {
-        publishBlockingCard();
-        if (!UsageAccess.hasUsageAccess(getApplication())) {
-            apps.postValue(Collections.emptyList());
-            screenTimeMillis.postValue(0L);
-            usageState.postValue(UsageBandState.LOCKED);
-            return;
-        }
-
-        ZoneId zone = ZoneId.systemDefault();
-        long begin = range.startDay().atStartOfDay(zone).toInstant().toEpochMilli();
-        long end = range.endDay().plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli();
-
-        screenTimeMillis.postValue(usageRepo.totalScreenTime(begin, end));
-
-        List<AppRule> tracked = appRuleDao.getTracked();
-        if (tracked.isEmpty()) {
-            apps.postValue(Collections.emptyList());
-            usageState.postValue(UsageBandState.EMPTY_NO_APPS);
-            return;
-        }
-
-        Map<String, Long> foreground = usageRepo.foregroundMillis(begin, end);
-        // El límite es diario: sólo tiene sentido mostrar "usado/límite" cuando el rango
-        // seleccionado es un único día — en Semana/Mes el usado acumulado no es comparable
-        // contra un límite diario (saldría "superado" casi siempre). dailyLimitMinutes se
-        // conserva siempre (lo necesita AppLimitDialog para precargar el valor actual).
-        boolean showLimit = range.granularity == Granularity.DAY;
-        List<AppUsageRow> rows = new ArrayList<>(tracked.size());
-        for (AppRule rule : tracked) {
-            Long millis = foreground.get(rule.packageName);
-            rows.add(new AppUsageRow(rule.packageName, usageRepo.labelFor(rule.packageName),
-                    millis == null ? 0L : millis, rule.dailyLimitMinutes, showLimit,
-                    rule.enforceAtLimit));
-        }
-        // Más usadas primero.
-        Collections.sort(rows, (a, b) -> Long.compare(b.foregroundMillis, a.foregroundMillis));
-
-        apps.postValue(rows);
-        usageState.postValue(UsageBandState.READY);
-    }
-
-    // Phase 3: fija (o borra, con minutes=0) el límite diario de una app seguida. Escribe fuera
-    // del hilo principal (regla #3), evalúa el límite ya mismo (el uso de hoy puede ya superar el
-    // umbral de aviso si la app llevaba tiempo abierta antes de fijar el límite — si no, la primera
-    // comprobación periódica no llega hasta dentro de 5 min y puede saltarse la ventana de aviso),
-    // reprograma el monitor de límites y refresca la lista.
-    public void setDailyLimit(String packageName, int minutes) {
-        dbWriteExecutor.execute(() -> {
-            appRuleDao.setDailyLimit(packageName, minutes);
-            // El seguimiento (checker/scheduler/refreshUsage) no es parte de la escritura -- se
-            // reenvía a @IoExecutor para que corra en el mismo pool que applyRange()/
-            // refreshUsageAccess() (repository-layer-consolidation, T2: evita que refreshUsage()
-            // quede reenganchable desde dos pools sin orden entre sí, hallazgo del code-reviewer
-            // en la verificación de este tramo).
-            executorService.execute(() -> {
-                usageLimitChecker.run();
-                usageLimitScheduler.arm();
-                TimeRange current = selectedRange.getValue();
-                if (current != null) refreshUsage(current);
-            });
-        });
+        executorService.execute(this::publishBlockingCard);
     }
 
     // Reevalúa si el monitor de límites debe seguir armado (llamarlo, p.ej., en onResume).
     public void armUsageLimitMonitor() {
         executorService.execute(usageLimitScheduler::arm);
-    }
-
-    // Phase 4a: activa/desactiva "hacer cumplir el límite" para una app (toggle 🚫 de la fila).
-    // Escribe fuera del hilo principal (regla #3) y refresca la lista. El servicio de Accesibilidad
-    // observa observeEnforced(), así que recoge el cambio solo — aquí no hace falta notificarlo.
-    public void setEnforceAtLimit(String packageName, boolean enforce) {
-        dbWriteExecutor.execute(() -> {
-            appRuleDao.setEnforceAtLimit(packageName, enforce);
-            // Ver comentario en setDailyLimit(): refreshUsage() se reenvía a @IoExecutor, el
-            // único pool desde el que se dispara en toda la clase.
-            executorService.execute(() -> {
-                TimeRange current = selectedRange.getValue();
-                if (current != null) refreshUsage(current);
-            });
-        });
-    }
-
-    // El CTA de la tarjeta LOCKED: comprueba (fuera del hilo principal) si ya hay un consentimiento
-    // vigente. needsDisclosure=true -> mostrar la divulgación antes de Ajustes; false -> ir directo.
-    public void resolveUsageAccessCta(DisclosureDecision decision) {
-        executorService.execute(() -> {
-            ConsentRecord rec = consentRecordDao.get(ConsentRecord.KEY_USAGE_ACCESS);
-            boolean needsDisclosure = rec == null
-                    || rec.disclosureVersion < ConsentRecord.USAGE_ACCESS_DISCLOSURE_VERSION;
-            mainHandler.post(() -> decision.decided(needsDisclosure));
-        });
     }
 
     private ChartBundle buildBundle(TimeRange range, List<ProjectMinutes> byProject) {

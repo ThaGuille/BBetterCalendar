@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Subtarea hecha en Projects (html 03: disco primary-container #7FB69A = bb_primary, check
+     on-primary-container oscuro). Distinto del de Home (bg_task_check_on), que es disco
+     secondary-container con check salvia. Inset en vez de gravity: API 21. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <size android:width="@dimen/home_task_check_size" android:height="@dimen/home_task_check_size" />
+            <solid android:color="@color/bb_primary" />
+        </shape>
+    </item>
+    <item
+        android:bottom="3dp"
+        android:drawable="@drawable/ic_subtask_check_mark"
+        android:left="3dp"
+        android:right="3dp"
+        android:top="3dp" />
+</layer-list>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u20: preset chip fill (html 10 primary-container / surface-container-high). -->
+<!-- u20: preset chip fill (html 10 primary-container / surface-container-high). El primary-container
+     de Stitch (#7FB69A) es nuestro bb_primary; bb_primary_container es su secondary-container. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/bb_primary_container" android:state_checked="true" />
+    <item android:color="@color/bb_primary" android:state_checked="true" />
     <item android:color="@color/bb_surface_raised" />
 </selector>

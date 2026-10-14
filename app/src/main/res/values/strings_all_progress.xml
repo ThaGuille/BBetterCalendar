@@ -5,5 +5,4 @@
     <string name="all_progress_tab_interruptions">Interruptions</string>
     <string name="all_progress_tab_time_of_day">Time of day</string>
     <string name="all_progress_tab_projects">Projects</string>
-    <string name="all_progress_usage_empty_cta">Manage in Screen time</string>
 </resources>

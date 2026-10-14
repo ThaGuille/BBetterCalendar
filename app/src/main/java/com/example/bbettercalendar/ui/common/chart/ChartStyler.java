@@ -75,6 +75,7 @@ public final class ChartStyler {
     private static final float LIMIT_WIDTH = 1f;
     private static final float LIMIT_DASH = 4f;
     private static final float LIMIT_GAP = 3f;
+    private static final float LIMIT_LABEL_HEADROOM = 1.15f; // eje ≥ límite + 15 %: cabe la etiqueta
     private static final int Y_LABELS = 3;               // 0 / mitad / máximo
     private static final float BAND_WIDTH = 1f;          // barras contiguas = banda continua
     private static final float BAR_WIDTH = 0.6f;
@@ -373,6 +374,19 @@ public final class ChartStyler {
         return set;
     }
 
+    /**
+     * Hollow sage markers (html 13) on every {@code step}-th entry counting back from the latest
+     * one, which keeps its honey marker. Few markers on purpose: one per point made the 12-week line
+     * busy, none hid where the data points are.
+     */
+    public void markEvery(@NonNull LineDataSet set, int step) {
+        int last = set.getEntryCount() - 1;
+        for (int i = last - step; i >= 0; i -= step) {
+            set.getEntryForIndex(i).setIcon(drawable(R.drawable.bg_chart_point_hollow));
+        }
+        set.setDrawIcons(true);
+    }
+
     /** Puts the honey halo marker on the last entry of {@code set}. */
     public void markLatest(@NonNull LineDataSet set) {
         int n = set.getEntryCount();
@@ -445,11 +459,14 @@ public final class ChartStyler {
         YAxis y = chart.getAxisRight();
         y.removeAllLimitLines();
         y.addLimitLine(line);
-        // Que el límite quepa aunque ningún día lo alcance (el auto-rango ignora las LimitLine).
+        // Que el límite quepa aunque ningún día lo alcance (el auto-rango ignora las LimitLine), con
+        // sitio encima para su etiqueta: si el límite coincidía con el máximo del eje (60 → "1h"),
+        // la etiqueta caía fuera del área y no se veía.
         float current = y.isAxisMaxCustom() ? y.getAxisMaximum() : 0f;
-        if (current < limit) {
+        float needed = limit * LIMIT_LABEL_HEADROOM;
+        if (current < needed) {
             float dataMax = chart.getData() != null ? chart.getData().getYMax() : 0f;
-            fitYAxis(chart, Math.max(limit, dataMax));
+            fitYAxis(chart, Math.max(needed, dataMax));
         }
         return line;
     }

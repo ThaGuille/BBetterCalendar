@@ -133,6 +133,10 @@
         <!-- Colour of the cut-out around the presence dot = the background the avatar sits on
              (default bb_surface_card). -->
         <attr name="avatarCutoutColor" format="color" />
+        <!-- Fill / initials colour of a plain (status none) avatar; default bb_primary_container /
+             bb_on_primary_container. For rows of avatars in several tones (html 02). -->
+        <attr name="avatarFillColor" format="color" />
+        <attr name="avatarInitialsColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="StepperView">

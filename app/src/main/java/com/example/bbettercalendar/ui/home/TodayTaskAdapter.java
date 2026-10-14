@@ -164,10 +164,15 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
             holder.focus.setOnClickListener(v -> focusListener.onTaskFocus(entry));
         } else {
             // En la sección de hoy la columna del botón se reserva (INVISIBLE) aunque esta fila no
-            // lo lleve: así las horas quedan alineadas entre filas (spec frontend-structure-cleanup).
+            // lo lleve: así los chips quedan alineados entre filas (spec frontend-structure-cleanup).
             holder.focus.setVisibility(showDate ? View.GONE : View.INVISIBLE);
             holder.focus.setOnClickListener(null);
         }
+
+        // Línea secundaria (progreso · hora): fuera si no lleva nada, para que el título quede centrado.
+        holder.time.setVisibility(holder.time.getText().length() == 0 ? View.GONE : View.VISIBLE);
+        holder.meta.setVisibility(holder.time.getVisibility() == View.GONE
+                && holder.progress.getVisibility() == View.GONE ? View.GONE : View.VISIBLE);
 
         holder.checkbox.setOnCheckedChangeListener((button, isChecked) -> {
             if (listener != null) {
@@ -230,6 +235,7 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         final TextView project;
         final View divider;
         final View row;
+        final View meta;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -242,6 +248,7 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
             remove = itemView.findViewById(R.id.taskRemoveButton);
             progress = itemView.findViewById(R.id.taskProgressText);
             focus = itemView.findViewById(R.id.taskFocusButton);
+            meta = itemView.findViewById(R.id.taskMetaRow);
         }
     }
 }

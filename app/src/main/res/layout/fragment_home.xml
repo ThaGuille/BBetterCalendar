@@ -97,7 +97,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_md"
-            android:background="@drawable/bg_card"
+            android:background="@drawable/bg_home_timer_card"
             android:foreground="?attr/selectableItemBackground"
             android:padding="@dimen/home_card_padding">
 

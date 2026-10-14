@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.BBetter.Headline"
+                android:textAppearance="@style/TextAppearance.BBetter.TopBar.TwoLine"
                 tools:text="Instagram" />
 
             <TextView
@@ -413,7 +413,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/spacing_sm"
                         android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
-                        android:textColor="@color/bb_secondary"
+                        android:textColor="@color/bb_on_surface_muted"
                         tools:text="5 min before" />
 
                     <ImageView
@@ -421,7 +421,7 @@
                         android:layout_height="18dp"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_chevron_right_24"
-                        app:tint="@color/bb_secondary" />
+                        app:tint="@color/bb_on_surface_muted" />
                 </LinearLayout>
 
                 <View

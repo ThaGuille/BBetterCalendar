@@ -190,7 +190,9 @@ internal val Calendar.daysFromToday: Int
 
 internal fun today() = now().atStartOfDay
 
-internal fun now() = Calendar.getInstance()
+// BBetter (edición local del vendorizado): semana de lunes a domingo fija, como el mes, la racha y
+// Progress. Con el locale por defecto (en-US) showFirstDayOfWeekFirst arrancaba en domingo.
+internal fun now(): Calendar = Calendar.getInstance().apply { firstDayOfWeek = Calendar.MONDAY }
 
 internal fun Calendar.isSameDate(other: Calendar): Boolean = toEpochDays() == other.toEpochDays()
 

@@ -9,4 +9,6 @@
     <!-- Cabecera del formulario: boton visual 40dp / 36dp dentro de un area tactil de 48dp. -->
     <dimen name="form_close_inset">4dp</dimen>
     <dimen name="form_save_inset">6dp</dimen>
+    <!-- Hueco bajo la lista del día para que el FAB (56dp + 12dp de margen) no tape la última fila. -->
+    <dimen name="calendar_fab_clearance">80dp</dimen>
 </resources>

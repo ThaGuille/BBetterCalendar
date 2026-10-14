@@ -9,7 +9,7 @@
     android:viewportHeight="960">
     <group android:translateY="960">
         <path
-            android:fillColor="@color/bb_primary"
+            android:fillColor="@color/bb_primary_bright"
             android:pathData="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
     </group>
 </vector>

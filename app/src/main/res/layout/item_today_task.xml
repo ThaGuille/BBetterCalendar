@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Fila de la lista de tareas de Home (spec tasks-home-today; u13 html 04): círculo de hecho +
-     título + chip de proyecto, separadas por un hairline. El tachado/atenuado de las hechas, el
+     título en UNA línea + chip de proyecto, separadas por un hairline. El progreso "X/Ym" y la
+     hora van en una línea secundaria bajo el título (en la fila partían el título en dos). El tachado/atenuado de las hechas, el
      separador de la primera fila y el color del chip los aplica TodayTaskAdapter. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -32,37 +33,52 @@
             android:background="@null"
             android:button="@drawable/bb_task_check"
             android:minWidth="0dp"
-            android:minHeight="0dp" />
+            android:minHeight="0dp"
+            app:useMaterialThemeColors="false" />
+        <!-- useMaterialThemeColors=false: si no, MaterialCheckBox tiñe todo el layer-list de un
+             solo color y el check de la tarea hecha desaparece (disco gris liso). -->
 
-        <TextView
-            android:id="@+id/taskTitleText"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_card_gap"
             android:layout_weight="1"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.BBetter.Body.Medium"
-            tools:text="Write 3.1 Methods" />
+            android:orientation="vertical">
 
-        <!-- Progreso de minutos atribuidos "X/Ym" (spec focus-attribution). Sólo visible para
-             tareas con objetivo; lo rellena TodayTaskAdapter desde CalendarEntry.attributedMinutes. -->
-        <TextView
-            android:id="@+id/taskProgressText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_sm"
-            android:textAppearance="@style/TextAppearance.BBetter.Micro"
-            android:textColor="@color/bb_primary_bright"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/taskTitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.Body.Medium"
+                tools:text="Write 3.1 Methods" />
 
-        <!-- Hora (hoy), fecha (atrasadas) o "Done" (hechas). -->
-        <TextView
-            android:id="@+id/taskTimeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_sm"
-            android:textAppearance="@style/TextAppearance.BBetter.Micro" />
+            <LinearLayout
+                android:id="@+id/taskMetaRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Progreso de minutos atribuidos "X/Ym" (spec focus-attribution). Sólo visible para
+                     tareas con objetivo; lo rellena TodayTaskAdapter desde CalendarEntry.attributedMinutes. -->
+                <TextView
+                    android:id="@+id/taskProgressText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/spacing_sm"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                    android:textColor="@color/bb_primary_bright"
+                    android:visibility="gone" />
+
+                <!-- Hora (hoy), fecha (atrasadas) o "Done" (hechas). -->
+                <TextView
+                    android:id="@+id/taskTimeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro" />
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- u13: chip de proyecto (join projectId -> Project.name / colorIndex, sin esquema nuevo). -->
         <TextView

@@ -11,13 +11,11 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.stats.ConsentRecord;
 import com.example.bbettercalendar.stats.ConsentRecordDAO;
-import com.example.bbettercalendar.ui.progress.ProgressViewModel;
 
 import java.util.concurrent.ExecutorService;
 
@@ -29,34 +27,23 @@ import dagger.hilt.android.AndroidEntryPoint;
 // afirmativo ANTES del deep-link a Ajustes). Texto en lenguaje llano: el servicio SÓLO detecta la app
 // en primer plano y cubre las apps que TÚ elegiste limitar; nunca lee ni transmite el contenido de la
 // pantalla. Se muestra SIEMPRE que el servicio no esté activado (no sólo la 1ª vez): también hace de
-// guía de "qué tocar en Ajustes". En "Enable" persiste el ConsentRecord, ARMA el enforce de la app que
-// disparó el diálogo (para que el bloqueo funcione en cuanto se active el servicio) y abre Ajustes ->
+// guía de "qué tocar en Ajustes". En "Enable" persiste el ConsentRecord, avisa al host para que ARME lo
+// que disparó el diálogo (para que el bloqueo funcione en cuanto se active el servicio) y abre Ajustes ->
 // Accesibilidad; en "Not now" no cambia nada (no se arma nada sin consentimiento afirmativo).
 @AndroidEntryPoint
 public class AccessibilityDisclosureDialog extends DialogFragment {
 
-    private static final String ARG_PACKAGE = "package";
-
     @Inject ConsentRecordDAO consentRecordDao;
     @Inject @IoExecutor ExecutorService executor;
 
-    // Implementado por un host (p. ej. HomeFragment) que arma un permiso NO ligado a un paquete
-    // concreto (el modo bloqueo total del pomodoro) en vez de un enforceAtLimit por-app.
+    // Implementado por el host (Focus, Screen time, detalle de app): arma lo que disparó el diálogo
+    // (modo bloqueo total del pomodoro o el enforceAtLimit de una app).
     public interface OnConsentGrantedListener {
         void onAccessibilityConsentGranted();
     }
 
-    // packageName: la app cuyo toggle 🚫 disparó el diálogo (se arma su enforce en "Enable").
-    public static AccessibilityDisclosureDialog newInstance(String packageName) {
-        AccessibilityDisclosureDialog dialog = new AccessibilityDisclosureDialog();
-        Bundle args = new Bundle();
-        args.putString(ARG_PACKAGE, packageName);
-        dialog.setArguments(args);
-        return dialog;
-    }
-
-    // Variante sin paquete: el host se entera del consentimiento vía OnConsentGrantedListener
-    // (usada por el modo bloqueo total de HomeFragment, que no arma un AppRule).
+    // El host se entera del consentimiento vía OnConsentGrantedListener. (La variante con paquete,
+    // que armaba el enforce vía ProgressViewModel, desapareció con la banda de uso de Progress.)
     public static AccessibilityDisclosureDialog newInstance() {
         return new AccessibilityDisclosureDialog();
     }
@@ -93,19 +80,12 @@ public class AccessibilityDisclosureDialog extends DialogFragment {
         }
     }
 
-    // Arma el permiso correspondiente. Con packageName -> enforceAtLimit de esa app, vía el MISMO
-    // ProgressViewModel del fragmento padre (mismo scope). Sin packageName -> el host (p. ej.
-    // HomeFragment) se entera vía OnConsentGrantedListener y arma lo que le corresponda (modo
-    // bloqueo total). En ambos casos el servicio aún no está activo -> el toggle se pinta
-    // "pendiente" (ámbar), no "activo" (rojo), hasta que el usuario active el servicio en Ajustes.
+    // El host se entera vía OnConsentGrantedListener y arma lo que le corresponda. El servicio aún no
+    // está activo -> el toggle se pinta "pendiente" (ámbar), no "activo" (rojo), hasta que el usuario
+    // active el servicio en Ajustes.
     private void armEnforce() {
-        String packageName = getArguments() != null ? getArguments().getString(ARG_PACKAGE) : null;
         androidx.fragment.app.Fragment parent = getParentFragment();
-        if (parent == null) return;
-        if (packageName != null) {
-            new ViewModelProvider(parent).get(ProgressViewModel.class)
-                    .setEnforceAtLimit(packageName, true);
-        } else if (parent instanceof OnConsentGrantedListener) {
+        if (parent instanceof OnConsentGrantedListener) {
             ((OnConsentGrantedListener) parent).onAccessibilityConsentGranted();
         }
     }

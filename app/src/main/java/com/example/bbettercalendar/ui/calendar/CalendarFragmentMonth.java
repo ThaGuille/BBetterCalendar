@@ -36,7 +36,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.format.TextStyle;
-import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,8 +95,12 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
         return binding.getRoot();
     }
 
+    // Lunes fijo, como la racha (StreakCalculator.weekStart) y Progress: con el locale en-US el
+    // mes empezaba en domingo y no casaba con las semanas del resto de la app.
+    private static final DayOfWeek FIRST_DAY_OF_WEEK = DayOfWeek.MONDAY;
+
     private void populateWeekdayLegend() {
-        DayOfWeek firstDow = WeekFields.of(Locale.getDefault()).getFirstDayOfWeek();
+        DayOfWeek firstDow = FIRST_DAY_OF_WEEK;
         View root = binding.getRoot();
         int[] ids = {
                 R.id.legendDay0, R.id.legendDay1, R.id.legendDay2, R.id.legendDay3,
@@ -119,8 +122,7 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
         YearMonth currentMonth = YearMonth.now();
         YearMonth startMonth = currentMonth.minusMonths(12);
         YearMonth endMonth = currentMonth.plusMonths(12);
-        DayOfWeek firstDayOfWeek = WeekFields.of(Locale.getDefault()).getFirstDayOfWeek();
-        calendarView.setup(startMonth, endMonth, firstDayOfWeek);
+        calendarView.setup(startMonth, endMonth, FIRST_DAY_OF_WEEK);
         calendarView.scrollToMonth(currentMonth);
 
         binding.monthTitleText.setText(currentMonth.format(monthTitleFormatter));

@@ -118,7 +118,7 @@
                 android:id="@+id/projectsRhythmCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_project_card_expanded"
+                android:background="@drawable/bg_projects_insight_card"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="@dimen/project_card_padding">

@@ -279,6 +279,7 @@
         <item name="navigationIcon">@drawable/ic_arrow_back_24</item>
         <item name="navigationIconTint">@color/bb_on_surface</item>
         <item name="navigationContentDescription">@string/action_back</item>
+        <item name="titleTextAppearance">@style/TextAppearance.BBetter.TopBar</item>
         <item name="android:minHeight">@dimen/top_bar_height</item>
         <item name="contentInsetStartWithNavigation">@dimen/spacing_xs</item>
     </style>

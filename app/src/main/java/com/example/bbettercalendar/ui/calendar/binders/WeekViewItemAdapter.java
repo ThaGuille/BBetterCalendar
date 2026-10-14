@@ -20,6 +20,8 @@ public class WeekViewItemAdapter extends WeekView.SimpleAdapter<CalendarItem> {
         void onRangeChanged(Calendar firstVisibleDate, Calendar lastVisibleDate);
     }
 
+    private static final long ZERO_LENGTH_BLOCK_MILLIS = 60L * 60L * 1000L;
+
     private OnRangeChangedListener rangeListener;
     private final int textOnLight;
     private final int textOnDark;
@@ -38,10 +40,24 @@ public class WeekViewItemAdapter extends WeekView.SimpleAdapter<CalendarItem> {
         Calendar start = Calendar.getInstance();
         start.setTimeInMillis(item.getStartMillis());
         Calendar end = Calendar.getInstance();
-        long endMillis = item.getEndMillis() > item.getStartMillis()
-                ? item.getEndMillis()
-                : item.getStartMillis() + 60L * 60L * 1000L;
-        end.setTimeInMillis(endMillis);
+        if (item.getEndMillis() > item.getStartMillis()) {
+            end.setTimeInMillis(item.getEndMillis());
+        } else {
+            // Item de longitud cero (recordatorio, deadline): bloque de 1 h para que se vea. Si
+            // cruzaría la medianoche (deadline a las 23:59) se ancla al final de su día; si no,
+            // WeekView lo partía y salía como bloque del día siguiente a las 00:00.
+            Calendar dayEnd = (Calendar) start.clone();
+            dayEnd.set(Calendar.HOUR_OF_DAY, 23);
+            dayEnd.set(Calendar.MINUTE, 59);
+            dayEnd.set(Calendar.SECOND, 59);
+            dayEnd.set(Calendar.MILLISECOND, 999);
+            long endMillis = item.getStartMillis() + ZERO_LENGTH_BLOCK_MILLIS;
+            if (endMillis > dayEnd.getTimeInMillis()) {
+                endMillis = dayEnd.getTimeInMillis();
+                start.setTimeInMillis(endMillis - ZERO_LENGTH_BLOCK_MILLIS + 1);
+            }
+            end.setTimeInMillis(endMillis);
+        }
 
         WeekViewEntity.Style style = new WeekViewEntity.Style.Builder()
                 .setBackgroundColor(item.getColorArgb())

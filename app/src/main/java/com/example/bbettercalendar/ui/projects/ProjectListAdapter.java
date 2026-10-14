@@ -65,6 +65,9 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
 
     private final List<ProjectListItem> items = new ArrayList<>();
     private final Set<Integer> expandedIds = new HashSet<>();
+    // html 03: el primero (el más urgente) llega desplegado; sólo en la primera carga, para no
+    // reabrir lo que el usuario cerró.
+    private boolean firstExpanded;
     private final OnProjectClickListener listener;
     @Nullable private OnSubtaskActionListener subtaskListener;
 
@@ -80,6 +83,10 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         items.clear();
         if (newItems != null) {
             items.addAll(newItems);
+        }
+        if (!firstExpanded && !items.isEmpty()) {
+            expandedIds.add(items.get(0).project.id);
+            firstExpanded = true;
         }
         notifyDataSetChanged();
     }
@@ -194,7 +201,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         TextView meta = row.findViewById(R.id.projectSubtaskMeta);
         boolean done = entry.isDone();
 
-        check.setImageResource(done ? R.drawable.bg_task_check_on : R.drawable.bg_task_check_off);
+        check.setImageResource(done ? R.drawable.bg_subtask_check_on : R.drawable.bg_task_check_off);
         title.setText(entry.getTitle());
         int flags = title.getPaintFlags();
         title.setPaintFlags(done ? flags | Paint.STRIKE_THRU_TEXT_FLAG
@@ -207,10 +214,11 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
             meta.setVisibility(View.GONE);
         } else {
             meta.setVisibility(View.VISIBLE);
-            if (done) {
+            int remaining = ProjectListItem.remainingMinutes(entry);
+            if (done || remaining == 0) {
                 meta.setText(context.getString(R.string.project_subtask_minutes, target));
             } else {
-                int pomodoros = ProjectListItem.pomodorosFor(target, item.pomodoroMinutes);
+                int pomodoros = ProjectListItem.pomodorosFor(remaining, item.pomodoroMinutes);
                 meta.setText(context.getResources().getQuantityString(
                         R.plurals.project_subtask_pomodoros, pomodoros, pomodoros));
             }

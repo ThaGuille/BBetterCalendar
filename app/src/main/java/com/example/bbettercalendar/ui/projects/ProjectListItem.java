@@ -4,6 +4,7 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.projects.Project;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 // Fila de la lista de proyectos: el Project más su % ya calculado (recuento de items,
@@ -54,14 +55,35 @@ public class ProjectListItem {
         return todayMinutes / pomodoroMinutes;
     }
 
-    /** Minutos objetivo de las subtareas sin hacer (estimación restante; 0 si ninguna tiene objetivo). */
+    /** Minutos que le faltan a una subtarea: objetivo menos lo ya atribuido (nunca negativo). */
+    public static int remainingMinutes(CalendarEntry entry) {
+        return Math.max(0, entry.getTargetMinutes() - entry.getAttributedMinutes());
+    }
+
+    /** Minutos que faltan en las subtareas sin hacer (estimación restante; 0 si ninguna tiene objetivo). */
     public int estimatedRemainingMinutes() {
         int total = 0;
         for (CalendarEntry entry : subtasks) {
             if (!entry.isDone() && entry.getTargetMinutes() > 0) {
-                total += entry.getTargetMinutes();
+                total += remainingMinutes(entry);
             }
         }
         return total;
     }
+
+    /**
+     * Orden de la lista (html 03): activos antes que completados/archivados; dentro, por urgencia
+     * (fecha límite más cercana primero, los sin fecha al final) y, a igualdad, el más reciente.
+     */
+    public static final Comparator<ProjectListItem> BY_URGENCY = (a, b) -> {
+        int byStatus = Integer.compare(a.project.status, b.project.status);
+        if (byStatus != 0) return byStatus;
+        long da = a.project.softDeadlineMillis;
+        long db = b.project.softDeadlineMillis;
+        boolean ha = da > 0L;
+        boolean hb = db > 0L;
+        if (ha != hb) return ha ? -1 : 1;
+        if (ha && da != db) return Long.compare(da, db);
+        return Long.compare(b.project.createdAtMillis, a.project.createdAtMillis);
+    };
 }

@@ -77,6 +77,9 @@
     <dimen name="text_display_compact">44sp</dimen>
     <dimen name="text_stat">28sp</dimen>
     <dimen name="text_headline">22sp</dimen>
+    <!-- Barra superior de las pantallas secundarias (html 14 text-[20px]; html 10 text-lg con subtítulo). -->
+    <dimen name="text_top_bar">20sp</dimen>
+    <dimen name="text_top_bar_two_line">18sp</dimen>
     <dimen name="text_title">17sp</dimen>
     <dimen name="text_body">15sp</dimen>
     <!-- 15sp x 1.45 -->
@@ -112,6 +115,9 @@
 
     <!-- Home screen -->
     <dimen name="home_card_padding">20dp</dimen>
+    <!-- Radio de los brillos de la tarjeta del temporizador (html 04: manchas de 192/208px con blur-3xl). -->
+    <dimen name="home_timer_glow_radius">160dp</dimen>
+    <dimen name="home_timer_glow_radius_large">200dp</dimen>
     <dimen name="home_play_button_size">@dimen/play_button_size</dimen>
     <!-- Iconos del par fecha / tiempo estudiado del header (spec focus-mode-and-streak) -->
     <dimen name="home_inline_stat_icon_size">16dp</dimen>
@@ -147,9 +153,11 @@
     <dimen name="chart_point_halo">16dp</dimen>
     <dimen name="chart_point_inset">3dp</dimen>
     <dimen name="chart_point_ring">2dp</dimen>
+    <!-- Marcador hueco intermedio (html 13: r 3.2 + stroke 2 → ~8.4dp de diámetro). -->
+    <dimen name="chart_point_hollow">8dp</dimen>
+    <dimen name="chart_point_hollow_stroke">2dp</dimen>
     <!-- Altura mínima del área de la banda de uso (tarjeta LOCKED/EMPTY o lista) para que no quede
          aplastada cuando hay pocas apps. -->
-    <dimen name="progress_usage_band_min_height">180dp</dimen>
     <dimen name="chip_status_min_height">24dp</dimen>
     <!-- Celda del calendario de rachas dentro del popup -->
     <dimen name="streak_day_marker_size">30dp</dimen>

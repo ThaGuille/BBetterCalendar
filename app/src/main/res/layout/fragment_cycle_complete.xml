@@ -361,6 +361,8 @@
                         android:id="@+id/cycleAvatar1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        app:avatarFillColor="@color/bb_sanct_avatar_1"
+                        app:avatarInitialsColor="@color/bb_sanct_on_surface"
                         app:avatarSize="@dimen/cycle_avatar_size" />
 
                     <com.example.bbettercalendar.ui.common.widget.AvatarView
@@ -368,6 +370,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/cycle_avatar_overlap"
+                        app:avatarFillColor="@color/bb_sanct_avatar_2"
+                        app:avatarInitialsColor="@color/bb_sanct_on_surface"
                         app:avatarSize="@dimen/cycle_avatar_size" />
 
                     <com.example.bbettercalendar.ui.common.widget.AvatarView
@@ -375,6 +379,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/cycle_avatar_overlap"
+                        app:avatarFillColor="@color/bb_sanct_avatar_3"
+                        app:avatarInitialsColor="@color/bb_sanct_sage_bright"
                         app:avatarSize="@dimen/cycle_avatar_size" />
                 </LinearLayout>
 

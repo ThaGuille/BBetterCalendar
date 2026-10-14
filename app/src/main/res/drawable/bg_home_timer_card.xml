@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta del temporizador de Home (html 04 «Hero Timer Card»): la tarjeta normal más dos
+     manchas difuminadas, primary arriba a la derecha y secondary-container abajo a la izquierda,
+     y el hairline outline-variant/30. Los degradados radiales sustituyen al blur-3xl; cada capa
+     lleva las mismas esquinas para quedar recortada a la tarjeta. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_surface_card" />
+            <corners android:radius="@dimen/radius_card" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="1"
+                android:centerY="0"
+                android:endColor="@color/bb_home_glow_primary_end"
+                android:gradientRadius="@dimen/home_timer_glow_radius"
+                android:startColor="@color/bb_home_glow_primary_start"
+                android:type="radial" />
+            <corners android:radius="@dimen/radius_card" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="0"
+                android:centerY="1"
+                android:endColor="@color/bb_home_glow_container_end"
+                android:gradientRadius="@dimen/home_timer_glow_radius_large"
+                android:startColor="@color/bb_home_glow_container_start"
+                android:type="radial" />
+            <corners android:radius="@dimen/radius_card" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="@dimen/widget_hairline" android:color="@color/bb_divider" />
+            <corners android:radius="@dimen/radius_card" />
+        </shape>
+    </item>
+</layer-list>

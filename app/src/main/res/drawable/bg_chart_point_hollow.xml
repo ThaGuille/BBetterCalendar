@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Marcador hueco intermedio de la línea héroe (html 13: circle r 3.2, fill #14221E, stroke sage 2).
+     Se pinta como icono de la Entry (DataSet.setDrawIcons), centrado en el punto. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bb_surface_card" />
+    <stroke
+        android:width="@dimen/chart_point_hollow_stroke"
+        android:color="@color/bb_primary" />
+    <size
+        android:width="@dimen/chart_point_hollow"
+        android:height="@dimen/chart_point_hollow" />
+</shape>

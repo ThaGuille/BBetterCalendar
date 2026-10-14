@@ -2,8 +2,8 @@
 <!-- Progress (migracion visual u17, .stitch/designs/13-progress-final.png + html/13).
      Titulo + escudo + compartir fijos arriba; el resto scrollea: Week/Month/Year + navegador de
      periodo, tarjeta de tiles, "Past 12 weeks", "See all", Screen time & blocking, Projects.
-     (u18) Al final queda la banda de uso, solo resumen (sin controles); el carrusel de graficos
-     se movio a All progress. -->
+     El carrusel de graficos se movio a All progress (u18); la banda de uso que quedaba al final
+     duplicaba la tarjeta de bloqueo y se quito (fallos-frente-a-stitch). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -437,71 +437,6 @@
                     android:orientation="vertical" />
             </LinearLayout>
 
-                <!-- ============ App-usage band (u18: solo resume, sin controles propios) ============ -->
-                <!-- Tiempo de pantalla + lista de solo lectura de apps seguidas, o tarjeta de estado
-                     (LOCKED / EMPTY) / spinner. Los controles (anadir apps, limites, bloqueo) viven
-                     en Screen time. -->
-                <LinearLayout
-                    android:id="@+id/usage_band"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_lg"
-                    android:background="@drawable/bg_card"
-                    android:elevation="@dimen/elevation_card"
-                    android:orientation="vertical"
-                    android:padding="@dimen/home_card_padding">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/progress_usage_header"
-                            android:textAppearance="@style/TextAppearance.BBetter.Label" />
-
-                        <TextView
-                            android:id="@+id/usage_screen_time"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/spacing_sm"
-                            android:textAppearance="@style/TextAppearance.BBetter.Title"
-                            tools:text="3h 30m" />
-                    </LinearLayout>
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_sm"
-                        android:minHeight="@dimen/progress_usage_band_min_height">
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/usage_list"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:clipToPadding="false"
-                            android:nestedScrollingEnabled="false" />
-
-                        <ProgressBar
-                            android:id="@+id/usage_loading"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:indeterminateTint="@color/bb_primary"
-                            android:visibility="gone" />
-
-                        <!-- Sin android:id en el <include>: si lo lleva, sobrescribe el id del root incluido
-                             (usage_state_card) y findViewById(R.id.usage_state_card) devolvería null. -->
-                        <include
-                            layout="@layout/view_usage_locked"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical" />
-                    </FrameLayout>
-                </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

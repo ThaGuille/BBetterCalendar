@@ -36,6 +36,27 @@ implementación: [`migracion-visual-stitch-impl.md`](migracion-visual-stitch-imp
   superior de 56dp y filas de amigos a 8dp; el resplandor (288px en el html) queda recortado a la caja.
   — **Revertir:** `dimens_focus.xml` (`focus_sanct_*`).
 
+## Asunciones al arreglar los fallos del 2026-10-13 (plan `fallos-frente-a-stitch.md`)
+
+- **Q:** Filas de tareas de Home: Stitch solo pone título + chip, pero la app muestra además el progreso
+  «50/100m», la hora y el botón ⏱. — **Assumed:** se conservan; progreso y hora pasan a una línea
+  secundaria bajo el título (que ya va en una sola línea). — **Revertir:** `item_today_task.xml`
+  (`taskMetaRow`) y `TodayTaskAdapter`.
+- **Q:** «Past 12 weeks» con la semana en curso a medias. — **Assumed:** el gráfico usa 12 semanas
+  COMPLETAS (termina el domingo anterior); el total y el «vs prior» también. — **Revertir:**
+  `ProgressViewModel.refreshOverview` (`trendAnchor`).
+- **Q:** Marcadores de la línea héroe. — **Assumed:** huecos cada 4 semanas contando desde la última
+  (html 13 pinta dos), más el ámbar final. — **Revertir:** `ProgressFragment.TREND_MARKER_STEP`.
+- **Q:** La banda «Screen time — See your app usage» al final de Progress duplicaba la tarjeta de
+  bloqueo. — **Assumed:** eliminada (layout, Fragment, ViewModel y clases que solo usaba ella); el
+  acceso de uso se concede desde Screen time. — **Revertir:** recuperar de git (commit de este plan).
+- **Q:** Primer día de la semana. — **Assumed:** lunes fijo en mes y semana del calendario (antes
+  dependía del idioma: domingo en inglés), como la racha y Progress. — **Revertir:**
+  `CalendarFragmentMonth.FIRST_DAY_OF_WEEK` y `now()` en `weekview/CalendarExtensions.kt`.
+- **Q:** Projects: orden. — **Assumed:** activos primero, por fecha límite más cercana, los sin fecha al
+  final (más reciente primero); el primero llega desplegado solo en la primera carga. — **Revertir:**
+  `ProjectListItem.BY_URGENCY`, `ProjectListAdapter.firstExpanded`.
+
 ## Decisiones del usuario (2026-10-07)
 
 - ~~**Colores = `.stitch/DESIGN.md`** (los 11 primitivos de `palette.xml`), no el esquema M3 que Stitch

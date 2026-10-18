@@ -54,7 +54,7 @@ public class CycleCompleteFragment extends Fragment {
     private TextView streakSub;
     private TextView bestValue;
     private TextView bestSub;
-    private View streakBadge;
+    private TextView streakBadge;
     private View friendsStrip;
     private TextView friendsText;
     private AvatarView[] avatars;
@@ -146,17 +146,27 @@ public class CycleCompleteFragment extends Fragment {
         if (streakValue == null) {
             return;
         }
-        int days = streak == null ? 0 : streak.currentStreak;
-        int best = streak == null ? 0 : streak.bestStreak;
-        streakValue.setText(getResources().getQuantityString(R.plurals.focus_streak_days, days, days));
-        if (days >= best) {
+        // Weekly streak (plan racha-semanal-y-constancia): weeks in a row meeting the goal.
+        int weeks = streak == null ? 0 : streak.weekStreak;
+        int best = streak == null ? 0 : streak.bestWeekStreak;
+        streakValue.setText(getResources().getQuantityString(R.plurals.streak_weeks, weeks, weeks));
+        if (weeks >= best) {
             streakSub.setText(R.string.cycle_streak_personal_best);
         } else {
             streakSub.setText(getString(R.string.cycle_streak_best_format,
-                    getResources().getQuantityString(R.plurals.focus_streak_days, best, best)));
+                    getResources().getQuantityString(R.plurals.streak_weeks, best, best)));
         }
-        // +1 = the session that just ended counted today (assumed; see notes u15).
-        streakBadge.setVisibility(streak != null && streak.activeToday ? View.VISIBLE : View.GONE);
+        // Badge = this week's days vs the goal ("3/4"; "4/4 ✓" once met).
+        if (streak == null) {
+            streakBadge.setVisibility(View.GONE);
+        } else {
+            streakBadge.setVisibility(View.VISIBLE);
+            streakBadge.setText(getString(streak.goalMetThisWeek
+                            ? R.string.streak_week_goal_met : R.string.cycle_streak_week_badge,
+                    streak.daysThisWeek, streak.goal));
+            streakBadge.setContentDescription(getString(R.string.streak_week_goal_desc,
+                    streak.daysThisWeek, streak.goal));
+        }
     }
 
     // PLACEHOLDER(ui-placeholders#social-backend): maqueta (MockSocialRepository).

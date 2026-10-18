@@ -49,12 +49,12 @@ public class ProjectsViewModel extends AndroidViewModel {
     public static final class Summary {
         public final int active;
         public final int dueThisWeek;
-        public final int streakDays;
+        public final int streakWeeks;
 
-        Summary(int active, int dueThisWeek, int streakDays) {
+        Summary(int active, int dueThisWeek, int streakWeeks) {
             this.active = active;
             this.dueThisWeek = dueThisWeek;
-            this.streakDays = streakDays;
+            this.streakWeeks = streakWeeks;
         }
     }
 
@@ -184,7 +184,7 @@ public class ProjectsViewModel extends AndroidViewModel {
             }
         }
         summary.setValue(new Summary(active, due,
-                latestStreak == null ? 0 : latestStreak.currentStreak));
+                latestStreak == null ? 0 : latestStreak.weekStreak));
     }
 
     public LiveData<List<ProjectListItem>> getProjects() {

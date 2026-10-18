@@ -91,6 +91,7 @@ public class FocusFragment extends Fragment
     private TextView todayText;
     private TextView failsText;
     private TextView streakText;
+    private TextView streakWeekText;
     private TextView studyingMeta;
     private LinearLayout friendsGrid;
 
@@ -154,6 +155,7 @@ public class FocusFragment extends Fragment
         todayText = view.findViewById(R.id.focusTodayText);
         failsText = view.findViewById(R.id.focusFailsText);
         streakText = view.findViewById(R.id.focusStreakText);
+        streakWeekText = view.findViewById(R.id.focusStreakWeekText);
         studyingMeta = view.findViewById(R.id.focusStudyingMeta);
         friendsGrid = view.findViewById(R.id.focusFriendsGrid);
     }
@@ -446,8 +448,16 @@ public class FocusFragment extends Fragment
         if (streakText == null) {
             return;
         }
-        int days = streak == null ? 0 : streak.currentStreak;
-        streakText.setText(getResources().getQuantityString(R.plurals.focus_streak_days, days, days));
+        // Racha semanal (plan racha-semanal-y-constancia): semanas seguidas + días de esta semana.
+        int weeks = streak == null ? 0 : streak.weekStreak;
+        streakText.setText(getResources().getQuantityString(R.plurals.streak_weeks, weeks, weeks));
+        if (streakWeekText != null) {
+            streakWeekText.setVisibility(streak == null ? View.GONE : View.VISIBLE);
+            if (streak != null) {
+                streakWeekText.setText(getString(R.string.streak_this_week,
+                        streak.daysThisWeek, streak.goal));
+            }
+        }
     }
 
     // ================================================================== studying now (mock)
@@ -555,6 +565,7 @@ public class FocusFragment extends Fragment
         todayText = null;
         failsText = null;
         streakText = null;
+        streakWeekText = null;
         studyingMeta = null;
         friendsGrid = null;
         super.onDestroyView();

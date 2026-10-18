@@ -262,9 +262,9 @@
     <string name="task_focus_this_desc">Concentrarse en esta tarea</string>
 
     <!-- Modo concentración + racha de 30 días -->
-    <string name="home_streak_desc">Días con un pomodoro completado</string>
+    <string name="home_streak_desc">Racha semanal de concentración</string>
     <string name="focus_streak_popup_title">Días de concentración</string>
-    <string name="focus_streak_summary">%1$d de los últimos 30 días con un pomodoro completado</string>
+    <string name="focus_streak_summary">%1$d de los últimos 28 días con un pomodoro completado</string>
     <string name="focus_streak_legend">Día en que terminaste un pomodoro</string>
     <string name="focus_streak_close">Cerrar</string>
     <string name="focus_streak_empty">Aún no has terminado ningún pomodoro — empieza uno y esto se irá llenando.</string>
@@ -278,11 +278,6 @@
     </plurals>
 
     <!-- Componentes reutilizables ui/common/widget (migración visual u9) -->
-    <plurals name="widget_streak_days">
-        <item quantity="one">Racha de %d día</item>
-        <item quantity="many">Racha de %d días</item>
-        <item quantity="other">Racha de %d días</item>
-    </plurals>
     <string-array name="widget_streak_letters">
         <item>L</item>
         <item>M</item>
@@ -293,7 +288,6 @@
         <item>D</item>
     </string-array>
     <string name="widget_streak_day_done">%1$s: con sesión</string>
-    <string name="widget_streak_day_missed">%1$s: sin sesión</string>
     <string name="widget_streak_day_pending">%1$s: hoy, aún sin sesión</string>
     <string name="widget_streak_day_future">%1$s: por llegar</string>
     <string name="widget_period_previous">Periodo anterior</string>
@@ -341,10 +335,6 @@
     <string name="focus_skip_rest_unavailable">Saltar el descanso (solo durante un descanso)</string>
     <string name="focus_today">Hoy</string>
     <string name="focus_streak">Racha</string>
-    <plurals name="focus_streak_days">
-        <item quantity="one">%d día</item>
-        <item quantity="other">%d días</item>
-    </plurals>
     <plurals name="focus_fails_today">
         <item quantity="one">%d sesión perdida</item>
         <item quantity="other">%d sesiones perdidas</item>

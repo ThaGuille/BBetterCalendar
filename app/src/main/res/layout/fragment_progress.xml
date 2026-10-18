@@ -101,53 +101,128 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_card_gap" />
 
-            <!-- ============ Tarjeta de tiles: Focus time / Sessions / Tasks done ============ -->
+            <!-- ============ Tarjeta de tiles: Focus time / Sessions / Tasks done ============
+                 + pie de constancia (plan racha-semanal-y-constancia) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_card_gap"
                 android:background="@drawable/bg_card"
-                android:baselineAligned="false"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:padding="@dimen/spacing_md">
 
-                <com.example.bbettercalendar.ui.common.widget.StatTileView
-                    android:id="@+id/progressTileFocus"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:tileCard="false"
-                    app:tileLabel="@string/progress_tile_focus_time" />
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
+                    <com.example.bbettercalendar.ui.common.widget.StatTileView
+                        android:id="@+id/progressTileFocus"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:tileCard="false"
+                        app:tileLabel="@string/progress_tile_focus_time" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/bb_divider" />
+
+                    <com.example.bbettercalendar.ui.common.widget.StatTileView
+                        android:id="@+id/progressTileSessions"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_card_gap"
+                        android:layout_weight="1"
+                        app:tileCard="false"
+                        app:tileLabel="@string/progress_tile_sessions" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/bb_divider" />
+
+                    <!-- PLACEHOLDER(ui-placeholders#progress-tasks-done-approx): sin fecha de completado,
+                         se cuentan las tareas hechas cuya fecha cae en el rango. -->
+                    <com.example.bbettercalendar.ui.common.widget.StatTileView
+                        android:id="@+id/progressTileTasks"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_card_gap"
+                        android:layout_weight="1"
+                        app:tileCard="false"
+                        app:tileLabel="@string/progress_tile_tasks_done" />
+                </LinearLayout>
+
+                <!-- Constancia: una sola fila (etiqueta + "18/30 días" + delta | tira) para no
+                     estirar la tarjeta. Sigue el selector Semana/Mes/Año. -->
                 <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/widget_hairline"
+                    android:layout_marginTop="@dimen/spacing_card_gap"
                     android:background="@color/bb_divider" />
 
-                <com.example.bbettercalendar.ui.common.widget.StatTileView
-                    android:id="@+id/progressTileSessions"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:id="@+id/progressConsistencyRow"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_card_gap"
-                    android:layout_weight="1"
-                    app:tileCard="false"
-                    app:tileLabel="@string/progress_tile_sessions" />
+                    android:layout_marginTop="@dimen/spacing_card_gap"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/bb_divider" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:importantForAccessibility="noHideDescendants"
+                        android:orientation="vertical">
 
-                <!-- PLACEHOLDER(ui-placeholders#progress-tasks-done-approx): sin fecha de completado,
-                     se cuentan las tareas hechas cuya fecha cae en el rango. -->
-                <com.example.bbettercalendar.ui.common.widget.StatTileView
-                    android:id="@+id/progressTileTasks"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_card_gap"
-                    android:layout_weight="1"
-                    app:tileCard="false"
-                    app:tileLabel="@string/progress_tile_tasks_done" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:text="@string/progress_consistency_title"
+                            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:baselineAligned="true"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/progressConsistencyValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFeatureSettings="tnum"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+                                tools:text="18/30 days" />
+
+                            <TextView
+                                android:id="@+id/progressConsistencyDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:fontFeatureSettings="tnum"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                                android:visibility="gone"
+                                tools:text="+3"
+                                tools:visibility="visible" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <com.example.bbettercalendar.ui.common.widget.ConsistencyStripView
+                        android:id="@+id/progressConsistencyStrip"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:layout_weight="1"
+                        android:importantForAccessibility="no" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- ============ Past 12 weeks ============ -->

@@ -75,8 +75,8 @@ public class ProjectsFragment extends Fragment {
                 + " " + getString(R.string.projects_summary_separator)
                 + " " + getString(R.string.projects_summary_due, summary.dueThisWeek);
         binding.projectsSummaryText.setText(text);
-        binding.projectsStreakChip.setVisibility(summary.streakDays > 0 ? View.VISIBLE : View.GONE);
-        binding.projectsStreakText.setText(getString(R.string.projects_streak_chip, summary.streakDays));
+        binding.projectsStreakChip.setVisibility(summary.streakWeeks > 0 ? View.VISIBLE : View.GONE);
+        binding.projectsStreakText.setText(getString(R.string.projects_streak_chip, summary.streakWeeks));
     }
 
     @Override

@@ -16,6 +16,8 @@ import androidx.fragment.app.DialogFragment;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.stats.FocusEventDAO;
+import com.example.bbettercalendar.stats.WeeklyGoalStore;
+import com.example.bbettercalendar.ui.common.widget.StepperView;
 import com.kizitonwose.calendar.core.CalendarDay;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.core.DayPosition;
@@ -47,6 +49,10 @@ import dagger.hilt.android.AndroidEntryPoint;
  * <p>Los días salen de {@code focus_event} (una fila por sesión terminada), agregados por fecha
  * CIVIL local en SQL — ver {@code FocusEventDAO.getActiveDaysSince}. Se cargan de una sola vez
  * para los últimos 12 meses y se guardan en memoria: navegar de mes no vuelve a tocar la BD.
+ *
+ * <p>Racha semanal (plan racha-semanal-y-constancia): el resumen es la constancia de los últimos
+ * 28 días (4 semanas exactas) y el stepper fija el objetivo de días por semana en
+ * {@link WeeklyGoalStore}; todas las pantallas de racha lo observan y se recalculan solas.
  */
 @AndroidEntryPoint
 public class FocusStreakPopup extends DialogFragment {
@@ -59,6 +65,7 @@ public class FocusStreakPopup extends DialogFragment {
 
     @Inject FocusEventDAO focusEventDao;
     @Inject @IoExecutor ExecutorService ioExecutor;
+    @Inject WeeklyGoalStore weeklyGoalStore;
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final DateTimeFormatter monthTitleFormatter =
@@ -84,6 +91,7 @@ public class FocusStreakPopup extends DialogFragment {
 
         populateWeekdayLegend(view);
         setUpCalendar(view);
+        setUpGoal(view);
         loadDays();
 
         return builder.create();
@@ -130,11 +138,28 @@ public class FocusStreakPopup extends DialogFragment {
         });
     }
 
+    /** El objetivo llega por LiveData (primera lectura en el executor del store). */
+    private void setUpGoal(View root) {
+        StepperView stepper = root.findViewById(R.id.streakGoalStepper);
+        Integer current = weeklyGoalStore.observeGoal().getValue();
+        stepper.setValue(current != null ? current : WeeklyGoalStore.DEFAULT_GOAL);
+        // Un DialogFragment creado con onCreateDialog no tiene vista propia: se observa con el
+        // propio fragment, que vive lo mismo que el diálogo. onCreateDialog se repite al recrear
+        // el diálogo con el mismo fragment: se quita antes el observador del stepper anterior.
+        weeklyGoalStore.observeGoal().removeObservers(this);
+        weeklyGoalStore.observeGoal().observe(this, goal -> {
+            if (goal != null && goal != stepper.getValue()) {
+                stepper.setValue(goal);
+            }
+        });
+        stepper.setOnValueChangeListener((view, value) -> weeklyGoalStore.setGoal(value));
+    }
+
     /** Lectura en el executor de IO (regla #3) y vuelta al main thread para repintar. */
     private void loadDays() {
         long startOfToday = startOfTodayMillis();
         long since = startOfToday - (MONTHS_BACK + 1L) * 31 * DAY_MILLIS;
-        long last30Start = startOfToday - 29L * DAY_MILLIS;
+        long last28Start = startOfToday - 27L * DAY_MILLIS;
         long endOfToday = startOfToday + DAY_MILLIS - 1;
         ioExecutor.execute(() -> {
             List<String> isoDays = focusEventDao.getActiveDaysSince(since);
@@ -147,7 +172,7 @@ public class FocusStreakPopup extends DialogFragment {
                     // Una fila con timestamp corrupto no debe tumbar el popup entero.
                 }
             }
-            int last30 = focusEventDao.countActiveDaysBetween(last30Start, endOfToday);
+            int last28 = focusEventDao.countActiveDaysBetween(last28Start, endOfToday);
             mainHandler.post(() -> {
                 if (!isAdded() || calendarView == null) {
                     return;
@@ -156,7 +181,7 @@ public class FocusStreakPopup extends DialogFragment {
                 calendarView.notifyCalendarChanged();
                 summaryText.setText(days.isEmpty()
                         ? getString(R.string.focus_streak_empty)
-                        : getString(R.string.focus_streak_summary, last30));
+                        : getString(R.string.focus_streak_summary, last28));
             });
         });
     }

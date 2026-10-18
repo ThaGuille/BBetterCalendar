@@ -1,5 +1,7 @@
 package com.example.bbettercalendar.ui.progress;
 
+import com.example.bbettercalendar.stats.ConsistencyCalculator;
+
 import java.util.List;
 
 // Datos ya calculados de las tarjetas rediseñadas de Progress (u17): tiles del periodo y gráfico
@@ -23,10 +25,17 @@ public final class ProgressOverview {
     public final long trendCurrentMinutes;
     public final long trendDeltaMinutes;      // current - previous
 
+    // --- constancia (plan racha-semanal-y-constancia): pie de la tarjeta de tiles ---
+    public final ConsistencyCalculator.Result consistency;
+    public final boolean hasConsistencyDelta; // false si el periodo anterior no tiene días con foco
+    public final int consistencyDelta;        // días activos vs. el periodo anterior (a la misma altura si está en curso)
+
     public ProgressOverview(long focusMinutes, boolean hasFocusDelta, double focusDeltaPercent,
                             int sessions, double sessionsPerDay, int tasksDone, int tasksDoneDelta,
                             float[] trendCurrentHours, float[] trendPreviousHours, String[] trendLabels,
-                            long trendCurrentMinutes, long trendDeltaMinutes) {
+                            long trendCurrentMinutes, long trendDeltaMinutes,
+                            ConsistencyCalculator.Result consistency, boolean hasConsistencyDelta,
+                            int consistencyDelta) {
         this.focusMinutes = focusMinutes;
         this.hasFocusDelta = hasFocusDelta;
         this.focusDeltaPercent = focusDeltaPercent;
@@ -39,6 +48,9 @@ public final class ProgressOverview {
         this.trendLabels = trendLabels;
         this.trendCurrentMinutes = trendCurrentMinutes;
         this.trendDeltaMinutes = trendDeltaMinutes;
+        this.consistency = consistency;
+        this.hasConsistencyDelta = hasConsistencyDelta;
+        this.consistencyDelta = consistencyDelta;
     }
 
     // Tarjeta "Screen time & blocking" (html 13): uso de HOY frente a la suma de límites diarios.

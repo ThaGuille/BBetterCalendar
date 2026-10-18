@@ -93,7 +93,7 @@
                         android:layout_marginStart="@dimen/spacing_xs"
                         android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
                         android:textColor="@color/bb_accent_reward"
-                        tools:text="5d streak" />
+                        tools:text="5w streak" />
                 </LinearLayout>
             </LinearLayout>
 

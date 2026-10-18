@@ -16,10 +16,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/** Racha semanal (plan racha-semanal-y-constancia). */
 public class StreakCalculatorTest {
 
-    // Miércoles 2026-10-07 (comprobado en weekRow_midWeek).
+    // Miércoles 2026-10-07; su semana empieza el lunes 2026-10-05.
     private static final LocalDate WED = LocalDate.of(2026, 10, 7);
+    private static final LocalDate MON = WED.minusDays(2);
 
     private static List<String> days(LocalDate... ds) {
         List<String> out = new ArrayList<>();
@@ -29,137 +31,137 @@ public class StreakCalculatorTest {
         return out;
     }
 
+    /** {@code n} días (lunes, martes...) de la semana que empieza {@code weeksAgo} semanas antes de la de WED. */
+    private static List<String> week(int weeksAgo, int n) {
+        List<String> out = new ArrayList<>();
+        LocalDate monday = MON.minusWeeks(weeksAgo);
+        for (int i = 0; i < n; i++) {
+            out.add(monday.plusDays(i).toString());
+        }
+        return out;
+    }
+
+    @SafeVarargs
+    private static List<String> concat(List<String>... parts) {
+        List<String> out = new ArrayList<>();
+        for (List<String> p : parts) {
+            out.addAll(p);
+        }
+        return out;
+    }
+
     @Test
     public void empty_isZeroEverywhere() {
-        Result r = StreakCalculator.compute(Collections.<String>emptyList(), WED);
-        assertEquals(0, r.currentStreak);
-        assertEquals(0, r.bestStreak);
+        Result r = StreakCalculator.compute(Collections.<String>emptyList(), 3, WED);
+        assertEquals(3, r.goal);
+        assertEquals(0, r.daysThisWeek);
+        assertFalse(r.goalMetThisWeek);
+        assertEquals(0, r.weekStreak);
+        assertEquals(0, r.bestWeekStreak);
         assertFalse(r.activeToday);
         assertEquals(7, r.week.size());
     }
 
     @Test
-    public void consecutiveEndingToday() {
-        Result r = StreakCalculator.compute(days(WED, WED.minusDays(1), WED.minusDays(2)), WED);
-        assertEquals(3, r.currentStreak);
-        assertEquals(3, r.bestStreak);
+    public void currentWeekMet_countsTowardsStreak() {
+        Result r = StreakCalculator.compute(week(0, 2), 2, WED); // lunes y martes
+        assertEquals(2, r.daysThisWeek);
+        assertTrue(r.goalMetThisWeek);
+        assertEquals(1, r.weekStreak);
+        assertEquals(1, r.bestWeekStreak);
+    }
+
+    @Test
+    public void currentWeekNotMetYet_streakAliveThroughLastWeek() {
+        Result r = StreakCalculator.compute(concat(week(2, 3), week(1, 3), week(0, 1)), 3, WED);
+        assertEquals(1, r.daysThisWeek);
+        assertFalse(r.goalMetThisWeek);
+        assertEquals(2, r.weekStreak);
+    }
+
+    @Test
+    public void currentWeekMet_extendsPreviousRun() {
+        Result r = StreakCalculator.compute(concat(week(2, 3), week(1, 3), week(0, 3)), 3, WED);
+        assertEquals(3, r.weekStreak);
+        assertEquals(3, r.bestWeekStreak);
         assertTrue(r.activeToday);
     }
 
     @Test
-    public void todayWithoutSession_streakStillAliveThroughYesterday() {
+    public void lastWeekUnderGoal_streakBroken_bestKept() {
+        Result r = StreakCalculator.compute(concat(week(3, 3), week(2, 4), week(1, 1)), 3, WED);
+        assertEquals(0, r.weekStreak);
+        assertEquals(2, r.bestWeekStreak);
+    }
+
+    @Test
+    public void weekendsOff_doNotBreakTheStreak() {
+        // Lunes-viernes cada semana, nunca fin de semana; objetivo 5.
+        Result r = StreakCalculator.compute(concat(week(3, 5), week(2, 5), week(1, 5)), 5, WED);
+        assertEquals(3, r.weekStreak);
+    }
+
+    @Test
+    public void bestRun_survivesALaterGap() {
         Result r = StreakCalculator.compute(
-                days(WED.minusDays(1), WED.minusDays(2), WED.minusDays(3)), WED);
-        assertEquals(3, r.currentStreak);
-        assertFalse(r.activeToday);
+                concat(week(5, 2), week(4, 2), week(3, 2), week(2, 1), week(1, 2)), 2, WED);
+        assertEquals(1, r.weekStreak);
+        assertEquals(3, r.bestWeekStreak);
+    }
+
+    @Test
+    public void goalAppliesRetroactively() {
+        List<String> history = concat(week(2, 3), week(1, 3));
+        assertEquals(2, StreakCalculator.compute(history, 3, WED).weekStreak);
+        assertEquals(0, StreakCalculator.compute(history, 4, WED).weekStreak);
+    }
+
+    @Test
+    public void goalIsClamped() {
+        assertEquals(1, StreakCalculator.compute(Collections.<String>emptyList(), 0, WED).goal);
+        assertEquals(7, StreakCalculator.compute(Collections.<String>emptyList(), 9, WED).goal);
+    }
+
+    @Test
+    public void weekRow_pastDayWithoutSessionIsRest() {
+        Result r = StreakCalculator.compute(days(MON), 3, WED);
+        assertEquals(DayState.DONE, r.week.get(0).state);
+        assertEquals(DayState.REST, r.week.get(1).state);
         assertEquals(DayState.PENDING, r.week.get(2).state);
         assertTrue(r.week.get(2).isToday);
-    }
-
-    @Test
-    public void todayAndYesterdayWithoutSession_streakBroken_bestKept() {
-        Result r = StreakCalculator.compute(
-                days(WED.minusDays(2), WED.minusDays(3), WED.minusDays(4)), WED);
-        assertEquals(0, r.currentStreak);
-        assertEquals(3, r.bestStreak);
-    }
-
-    @Test
-    public void gaps_bestFromOlderRun() {
-        // Racha antigua de 5, hueco, racha actual de 2.
-        LocalDate t = WED;
-        Result r = StreakCalculator.compute(days(
-                t, t.minusDays(1),
-                t.minusDays(10), t.minusDays(11), t.minusDays(12), t.minusDays(13), t.minusDays(14),
-                t.minusDays(20)), t);
-        assertEquals(2, r.currentStreak);
-        assertEquals(5, r.bestStreak);
-    }
-
-    @Test
-    public void duplicatesAndUnorderedInput() {
-        Result r = StreakCalculator.compute(Arrays.asList(
-                WED.toString(), WED.minusDays(2).toString(), WED.toString(), WED.minusDays(1).toString()), WED);
-        assertEquals(3, r.currentStreak);
-        assertEquals(3, r.bestStreak);
-    }
-
-    @Test
-    public void yearChange_streakCrossesNewYear() {
-        LocalDate jan2 = LocalDate.of(2025, 1, 2);
-        Result r = StreakCalculator.compute(days(
-                LocalDate.of(2024, 12, 30), LocalDate.of(2024, 12, 31),
-                LocalDate.of(2025, 1, 1), jan2), jan2);
-        assertEquals(4, r.currentStreak);
-        assertEquals(4, r.bestStreak);
-        // La semana de 2025-01-02 (jueves) empieza el lunes 2024-12-30.
-        assertEquals(LocalDate.of(2024, 12, 30), r.week.get(0).date);
-        assertEquals(DayState.DONE, r.week.get(0).state);
-        assertEquals(DayState.DONE, r.week.get(3).state);
-        assertEquals(DayState.FUTURE, r.week.get(4).state);
-    }
-
-    @Test
-    public void yearChange_leapDay() {
-        LocalDate mar1 = LocalDate.of(2024, 3, 1);
-        Result r = StreakCalculator.compute(days(
-                LocalDate.of(2024, 2, 28), LocalDate.of(2024, 2, 29), mar1), mar1);
-        assertEquals(3, r.currentStreak);
-    }
-
-    @Test
-    public void weekRow_midWeek() {
-        assertEquals(DayOfWeek.WEDNESDAY, WED.getDayOfWeek());
-        Result r = StreakCalculator.compute(days(WED.minusDays(2), WED), WED); // lunes y miércoles
-        List<StreakCalculator.WeekDay> w = r.week;
-        assertEquals(DayOfWeek.MONDAY, w.get(0).date.getDayOfWeek());
-        assertEquals(DayOfWeek.SUNDAY, w.get(6).date.getDayOfWeek());
-        assertEquals(DayState.DONE, w.get(0).state);
-        assertEquals(DayState.MISSED, w.get(1).state);
-        assertEquals(DayState.DONE, w.get(2).state);
-        assertTrue(w.get(2).isToday);
-        assertFalse(w.get(1).isToday);
         for (int i = 3; i < 7; i++) {
-            assertEquals(DayState.FUTURE, w.get(i).state);
+            assertEquals(DayState.FUTURE, r.week.get(i).state);
         }
     }
 
     @Test
-    public void weekRow_mondayAndSundayEdges() {
-        LocalDate monday = LocalDate.of(2026, 10, 5);
-        Result m = StreakCalculator.compute(Collections.<String>emptyList(), monday);
-        assertEquals(monday, m.week.get(0).date);
-        assertEquals(DayState.PENDING, m.week.get(0).state);
-        assertEquals(DayState.FUTURE, m.week.get(1).state);
-
-        LocalDate sunday = LocalDate.of(2026, 10, 11);
-        Result s = StreakCalculator.compute(days(sunday), sunday);
-        assertEquals(monday, s.week.get(0).date);
-        assertEquals(DayState.MISSED, s.week.get(5).state);
-        assertEquals(DayState.DONE, s.week.get(6).state);
-        assertTrue(s.week.get(6).isToday);
-    }
-
-    @Test
-    public void malformedAndNullDaysIgnored() {
-        Result r = StreakCalculator.compute(Arrays.asList(null, "garbage", "", WED.toString()), WED);
-        assertEquals(1, r.currentStreak);
-        assertEquals(1, r.bestStreak);
+    public void weekRow_mondayFirstSundayLast() {
+        Result r = StreakCalculator.compute(Collections.<String>emptyList(), 3, WED);
+        assertEquals(DayOfWeek.MONDAY, r.week.get(0).date.getDayOfWeek());
+        assertEquals(DayOfWeek.SUNDAY, r.week.get(6).date.getDayOfWeek());
+        LocalDate sunday = MON.plusDays(6);
+        assertEquals(MON, StreakCalculator.weekStart(sunday));
+        assertEquals(MON, StreakCalculator.weekStart(MON));
     }
 
     @Test
     public void futureDaysIgnored() {
-        Result r = StreakCalculator.compute(days(
-                WED, WED.plusDays(1), WED.plusDays(2), WED.plusDays(3)), WED);
-        assertEquals(1, r.currentStreak);
-        assertEquals(1, r.bestStreak);
+        Result r = StreakCalculator.compute(days(WED.plusDays(1), WED.plusDays(2), WED.plusDays(3)), 1, WED);
+        assertEquals(0, r.daysThisWeek);
+        assertEquals(0, r.weekStreak);
         assertEquals(DayState.FUTURE, r.week.get(3).state);
     }
 
     @Test
-    public void weekStart_isMonday() {
-        assertEquals(LocalDate.of(2026, 10, 5), StreakCalculator.weekStart(LocalDate.of(2026, 10, 5)));
-        assertEquals(LocalDate.of(2026, 10, 5), StreakCalculator.weekStart(LocalDate.of(2026, 10, 11)));
-        assertEquals(LocalDate.of(2026, 10, 12), StreakCalculator.weekStart(LocalDate.of(2026, 10, 12)));
+    public void malformedAndNullDaysIgnored() {
+        Result r = StreakCalculator.compute(Arrays.asList(null, "garbage", "", WED.toString()), 1, WED);
+        assertEquals(1, r.daysThisWeek);
+        assertEquals(1, r.weekStreak);
+    }
+
+    @Test
+    public void duplicatesCountOnce() {
+        Result r = StreakCalculator.compute(days(WED, WED, MON, MON), 3, WED);
+        assertEquals(2, r.daysThisWeek);
     }
 }

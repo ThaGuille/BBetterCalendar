@@ -45,4 +45,16 @@
     <string name="progress_projects_month">Projects this month</string>
     <string name="progress_projects_year">Projects this year</string>
     <string name="progress_projects_logged">%1$s logged</string>
+
+    <!-- Constancia (plan racha-semanal-y-constancia): focus days of the elapsed days of the period. -->
+    <string name="progress_consistency_title">Consistency</string>
+    <!-- quantity = counted days ("18/30 days"). -->
+    <plurals name="progress_consistency_value">
+        <item quantity="one">%1$d/%2$d day</item>
+        <item quantity="other">%1$d/%2$d days</item>
+    </plurals>
+    <string name="progress_consistency_delta" translatable="false">%1$+d</string>
+    <string name="progress_consistency_none" translatable="false">–</string>
+    <string name="progress_consistency_desc">Consistency: focus on %1$d of %2$d days</string>
+    <string name="progress_consistency_desc_delta">Consistency: focus on %1$d of %2$d days, %3$+d vs the previous period</string>
 </resources>

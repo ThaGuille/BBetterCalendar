@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Calendario de rachas (spec focus-mode-and-streak): marca los días en los que el usuario
-     terminó un pomodoro. Se abre desde el contador de la toolbar de Home. -->
+     terminó un pomodoro, con la constancia de los últimos 28 días y el objetivo semanal de la
+     racha (plan racha-semanal-y-constancia). Se abre desde la tarjeta de racha de Home. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -42,7 +43,27 @@
         android:layout_marginTop="@dimen/spacing_xs"
         android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
         android:textSize="@dimen/text_label"
-        tools:text="12 of the last 30 days with a completed pomodoro" />
+        tools:text="12 of the last 28 days with a completed pomodoro" />
+
+    <!-- Objetivo de la racha semanal (plan racha-semanal-y-constancia): 1-7 días por semana. -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:text="@string/streak_goal_title"
+        android:textAppearance="@style/TextAppearance.BBetter.Label" />
+
+    <com.example.bbettercalendar.ui.common.widget.StepperView
+        android:id="@+id/streakGoalStepper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        app:stepperCaption="@string/streak_goal_caption"
+        app:stepperMax="7"
+        app:stepperMin="1"
+        app:stepperStep="1"
+        app:stepperUnit="@string/streak_goal_unit"
+        app:stepperValue="3" />
 
     <LinearLayout
         android:layout_width="match_parent"

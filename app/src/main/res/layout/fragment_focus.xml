@@ -298,8 +298,18 @@
                             android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
                             android:textColor="@color/bb_sanct_on_surface"
                             android:textSize="@dimen/focus_sanct_stat_text"
-                            tools:text="12 days" />
+                            tools:text="6 weeks" />
                     </LinearLayout>
+
+                    <!-- Días de esta semana frente al objetivo (racha semanal). -->
+                    <TextView
+                        android:id="@+id/focusStreakWeekText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFeatureSettings="tnum"
+                        android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                        android:textColor="@color/bb_sanct_on_surface_faint"
+                        tools:text="3/4 this week" />
                 </LinearLayout>
             </LinearLayout>
 

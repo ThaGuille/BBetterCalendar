@@ -11,7 +11,7 @@
     <string name="cycle_tile_focus">Focus</string>
     <string name="cycle_tile_focus_sub">unbroken</string>
     <string name="cycle_tile_streak">Streak</string>
-    <string name="cycle_streak_badge">+1</string>
+    <string name="cycle_streak_week_badge" translatable="false">%1$d/%2$d</string>
     <string name="cycle_streak_personal_best">Personal best</string>
     <string name="cycle_streak_best_format">Best: %1$s</string>
     <string name="cycle_tile_best">Best</string>

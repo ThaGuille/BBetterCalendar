@@ -23,19 +23,22 @@ import com.example.bbettercalendar.stats.StreakCalculator;
 import java.util.List;
 
 /**
- * Streak week row (u9; html 04 streak card, DESIGN §4 "Streak calendar"). Paints u3's
- * {@link StreakCalculator.Result} directly: {@link #setStreak(StreakCalculator.Result)}.
+ * Weekly streak row (u9; html 04 streak card, DESIGN §4 "Streak calendar"; weekly since plan
+ * racha-semanal-y-constancia). Paints {@link StreakCalculator.Result} directly:
+ * {@link #setStreak(StreakCalculator.Result)}.
  *
  * <pre>
- *   (flame) 12-day streak                  ← streakFlame="top" (default, html 04)
- *   (✓)(✓)(✓)(✓)(✓)( )( )   [flame/12]     ← streakFlame="end": tall honey pill
+ *   (flame) 6 weeks              3/4 days  ← streakFlame="top" (default, html 04)
+ *   (✓)(✓)( )(✓)( )( )( )   [flame/6]      ← streakFlame="end": tall honey pill
  *    M  T  W  T  F  S  S
  * </pre>
  *
- * Day states ({@link StreakCalculator.DayState}): DONE = honey disc + check (sage disc when it is
- * today), PENDING = raised disc with a sage ring, MISSED = raised disc + hairline, FUTURE = hairline
- * only. Today's letter is bright and bold. With {@code app:streakShowDates="true"} the not-done
- * discs show the day of the month (use a bigger {@code app:streakDotSize}, e.g. 28dp).
+ * The count is weeks in a row meeting the weekly goal; the right-hand text is this week's days vs
+ * the goal (honey with a check once met). Day states ({@link StreakCalculator.DayState}): DONE =
+ * honey disc + check (sage disc when it is today), PENDING = raised disc with a sage ring, REST =
+ * quiet raised disc (a day off is not a failure), FUTURE = hairline only. Today's letter is bright
+ * and bold. With {@code app:streakShowDates="true"} the not-done discs show the day of the month
+ * (use a bigger {@code app:streakDotSize}, e.g. 28dp).
  */
 public class StreakWeekView extends LinearLayout {
 
@@ -44,6 +47,8 @@ public class StreakWeekView extends LinearLayout {
     public static final int FLAME_NONE = 2;
 
     private final TextView label;
+    private final View header;
+    private final TextView goalText;
     private final LinearLayout daysRow;
     private final View pill;
     private final TextView pillCount;
@@ -57,7 +62,9 @@ public class StreakWeekView extends LinearLayout {
     private int flamePosition = FLAME_TOP;
     private boolean showDates;
     private int dotSize;
-    private int streakDays;
+    private int streakWeeks;
+    private int daysThisWeek;
+    private int goal;
     @Nullable private List<StreakCalculator.WeekDay> week;
 
     public StreakWeekView(@NonNull Context context) {
@@ -73,6 +80,8 @@ public class StreakWeekView extends LinearLayout {
         setOrientation(VERTICAL);
         inflate(context, R.layout.view_streak_week, this);
         label = findViewById(R.id.streakWeekLabel);
+        header = findViewById(R.id.streakWeekHeader);
+        goalText = findViewById(R.id.streakWeekGoal);
         daysRow = findViewById(R.id.streakWeekDays);
         pill = findViewById(R.id.streakWeekPill);
         pillCount = findViewById(R.id.streakWeekPillCount);
@@ -101,9 +110,14 @@ public class StreakWeekView extends LinearLayout {
 
     // ---- API ----
 
-    /** Count = {@code result.currentStreak}, circles = {@code result.week}. Null = empty week, 0. */
+    /**
+     * Count = {@code result.weekStreak}, goal text = {@code daysThisWeek/goal}, circles =
+     * {@code result.week}. Null = empty week, 0, no goal text.
+     */
     public void setStreak(@Nullable StreakCalculator.Result result) {
-        streakDays = result != null ? result.currentStreak : 0;
+        streakWeeks = result != null ? result.weekStreak : 0;
+        daysThisWeek = result != null ? result.daysThisWeek : 0;
+        goal = result != null ? result.goal : 0;
         week = result != null ? result.week : null;
         render();
     }
@@ -114,9 +128,9 @@ public class StreakWeekView extends LinearLayout {
         render();
     }
 
-    /** Number shown in the flame label / pill. */
-    public void setStreakCount(int days) {
-        streakDays = Math.max(0, days);
+    /** Weeks shown in the flame label / pill. */
+    public void setStreakCount(int weeks) {
+        streakWeeks = Math.max(0, weeks);
         render();
     }
 
@@ -139,18 +153,35 @@ public class StreakWeekView extends LinearLayout {
     // ---- rendering ----
 
     private void render() {
-        String streakText = getResources().getQuantityString(R.plurals.widget_streak_days, streakDays, streakDays);
-        label.setText(streakText);
-        label.setVisibility(flamePosition == FLAME_TOP ? VISIBLE : GONE);
+        String weeksText = getResources().getQuantityString(R.plurals.streak_weeks, streakWeeks, streakWeeks);
+        label.setText(streakWeeks > 0 ? weeksText : getContext().getString(R.string.streak_label_none));
+        header.setVisibility(flamePosition == FLAME_TOP ? VISIBLE : GONE);
         pill.setVisibility(flamePosition == FLAME_END ? VISIBLE : GONE);
-        pillCount.setText(String.valueOf(streakDays));
-        pill.setContentDescription(streakText);
+        pillCount.setText(String.valueOf(streakWeeks));
+        pill.setContentDescription(weeksText);
+        renderGoal();
 
         boolean valid = week != null && week.size() == 7;
         for (int i = 0; i < 7; i++) {
             StreakCalculator.WeekDay day = valid ? week.get(i) : null;
             bindCell(cells[i], i, day);
         }
+    }
+
+    private void renderGoal() {
+        if (goal <= 0) {
+            goalText.setVisibility(GONE);
+            return;
+        }
+        boolean met = daysThisWeek >= goal;
+        goalText.setVisibility(VISIBLE);
+        goalText.setText(met
+                ? getContext().getString(R.string.streak_week_goal_met, daysThisWeek, goal)
+                : getResources().getQuantityString(R.plurals.streak_week_goal, goal, daysThisWeek, goal));
+        goalText.setTextColor(ContextCompat.getColor(getContext(),
+                met ? R.color.bb_accent_reward : R.color.bb_on_surface_muted));
+        goalText.setContentDescription(getContext().getString(R.string.streak_week_goal_desc,
+                daysThisWeek, goal));
     }
 
     private void bindCell(@NonNull View cell, int index, @Nullable StreakCalculator.WeekDay day) {
@@ -182,9 +213,9 @@ public class StreakWeekView extends LinearLayout {
                 bg = R.drawable.bg_streak_dot_pending;
                 stateText = R.string.widget_streak_day_pending;
                 break;
-            case MISSED:
-                bg = R.drawable.bg_streak_dot_missed;
-                stateText = R.string.widget_streak_day_missed;
+            case REST:
+                bg = R.drawable.bg_streak_dot_rest;
+                stateText = R.string.streak_day_rest;
                 break;
             case FUTURE:
             default:

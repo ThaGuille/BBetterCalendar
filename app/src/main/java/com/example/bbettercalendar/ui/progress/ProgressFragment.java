@@ -22,6 +22,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.databinding.FragmentProgressBinding;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.stats.ConsistencyCalculator;
 import com.example.bbettercalendar.ui.common.chart.ChartStyler;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.ProgressRowView;
@@ -178,6 +179,34 @@ public class ProgressFragment extends Fragment {
         binding.progressTrendDelta.setText(getString(R.string.progress_trend_delta,
                 String.format(Locale.getDefault(), "%+.1f", o.trendDeltaMinutes / 60.0)));
         renderTrendChart(o);
+        renderConsistency(o);
+    }
+
+    // Pie de constancia (plan racha-semanal-y-constancia): "18/30 días" + delta + tira.
+    private void renderConsistency(ProgressOverview o) {
+        ConsistencyCalculator.Result c = o.consistency;
+        if (c == null) return;
+        // 0 días que cuenten (primer día del periodo, aún sin sesión): un guion, no "0/0".
+        binding.progressConsistencyValue.setText(c.countedDays == 0
+                ? getString(R.string.progress_consistency_none)
+                : getResources().getQuantityString(R.plurals.progress_consistency_value,
+                        c.countedDays, c.activeDays, c.countedDays));
+        binding.progressConsistencyStrip.setCells(c.cells);
+
+        TextView delta = binding.progressConsistencyDelta;
+        if (o.hasConsistencyDelta) {
+            delta.setVisibility(View.VISIBLE);
+            delta.setText(getString(R.string.progress_consistency_delta, o.consistencyDelta));
+            delta.setTextColor(ContextCompat.getColor(requireContext(), o.consistencyDelta > 0
+                    ? R.color.bb_primary : R.color.bb_on_surface_muted));
+            binding.progressConsistencyRow.setContentDescription(getString(
+                    R.string.progress_consistency_desc_delta, c.activeDays, c.countedDays,
+                    o.consistencyDelta));
+        } else {
+            delta.setVisibility(View.GONE);
+            binding.progressConsistencyRow.setContentDescription(getString(
+                    R.string.progress_consistency_desc, c.activeDays, c.countedDays));
+        }
     }
 
     private static final int TREND_MARKER_STEP = 4;

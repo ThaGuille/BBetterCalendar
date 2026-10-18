@@ -1,6 +1,6 @@
 # System — Progress screen (`ui/progress/` + `ui/progress/apppicker/`)
 
-**Last verified:** 2026-10-13 (DB v13, u24) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-19 (DB v14, consistency footer) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Progress tab: a fixed Day/Week/Month + range-stepper header pinned under the toolbar, then
 three stacked, scrolling bands below it. A charts carousel (always renders, no permission needed,
@@ -79,3 +79,10 @@ Screen now follows `.stitch/designs/13-progress-final.png`: fixed header (title,
 - `ProgressOverview` (flat, built in the executor, `postValue`) carries tiles + trend + `BlockingCard`; `refreshOverview` / `publishBlockingCard` run from `applyRange` / `refreshUsage`.
 - u18: the chart carousel (`chart_pager`, `chart_dots`, `ChartCarouselAdapter`) moved to `AllProgressFragment` (`navigation_all_progress`), with its own fragment-scoped `ProgressViewModel`, a Day/Week/Month/Year `SegmentedControlView` + `PeriodNavigatorView`, and final tab labels (Focus time / Interruptions / Time of day / Projects, `strings_all_progress.xml`). Progress keeps only the usage band at the end of the layout, summary-only: screen time + read-only `AppUsageAdapter` rows, no add-apps button, per-app toggles or enforce master (those live in Screen time); the EMPTY state CTA opens Screen time. The old projects band (`projects_band`) is replaced by the new card; `ProjectProgressAdapter` is now unused (u24 cleanup).
 - Placeholders: tasks-done approximation, "23 opens blocked", NEW badge / header dot, share button.
+
+## Consistency footer (2026-10-19, Last verified: 2026-10-19)
+
+Plan [`racha-semanal-y-constancia`](../../plans/racha-semanal-y-constancia.md). The tiles card (Focus time / Sessions / Tasks done) is now a vertical card whose footer is **one row**: "Consistency" caption + `progressConsistencyValue` ("18/30 days", BodyStrong) + `progressConsistencyDelta` ("+3", vs the previous period at the same point if in progress; hidden when that period had no focus days) | `ConsistencyStripView` (12dp). Kept to one row on purpose — the footer adds ~50dp, not a card.
+- Follows the selector like every band: Week/Month = one cell per day, Year = one cell per Monday-week (intensity = active/possible). Built in `refreshOverview` from a single `FocusEventDAO.getActiveDaysSince(previousPeriodStart)` read → `ConsistencyCalculator`; carried by `ProgressOverview.consistency`.
+- Denominator = elapsed days; today counts only once it has a session (no "0/0": shown as "–" on the first day before any session).
+- The rolling "last 28 days" variant (no selector) lives in `FocusStreakPopup`, for future screens without a period selector.

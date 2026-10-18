@@ -154,22 +154,22 @@ public class DebugGalleryActivity extends AppCompatActivity {
 
     private void bindStreaks() {
         LocalDate today = LocalDate.now();
-        // 12-day run ending today (done today) -> current streak 12, today's dot sage.
+        // 12-day run ending today (done today), goal 3/week -> a few weeks met, today's dot sage.
         List<LocalDate> doneToday = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
             doneToday.add(today.minusDays(i));
         }
         StreakWeekView top = findViewById(R.id.galleryStreakTop);
-        top.setStreak(StreakCalculator.computeFromDates(doneToday, today));
+        top.setStreak(StreakCalculator.computeFromDates(doneToday, 3, today));
 
-        // Today still pending, with a gap 3 days ago -> missed / done / pending / future mix.
+        // Today still pending, with a gap 3 days ago -> rest / done / pending / future mix.
         List<LocalDate> pending = new ArrayList<>();
         pending.add(today.minusDays(1));
         pending.add(today.minusDays(2));
         pending.add(today.minusDays(4));
         pending.add(today.minusDays(5));
         StreakWeekView end = findViewById(R.id.galleryStreakEnd);
-        end.setStreak(StreakCalculator.computeFromDates(pending, today));
+        end.setStreak(StreakCalculator.computeFromDates(pending, 5, today));
     }
 
     private void bindAppRows() {

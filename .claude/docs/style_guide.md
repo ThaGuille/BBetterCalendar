@@ -218,7 +218,8 @@ The one-line Java API of each view is in `.claude/plans/migracion-visual-stitch-
 |---|---|
 | `StatTileView` | label · number (+unit) · [bar] · [delta chip] · [sub]; own card or bare (`tileCard`) |
 | `SectionHeaderView` | [icon] title [NEW badge] / subtitle · meta (text or pill) / text action |
-| `StreakWeekView` | 7 day dots from `StreakCalculator.Result` + flame label (top) or honey pill (end) |
+| `StreakWeekView` | Weekly streak: 7 day dots from `StreakCalculator.Result` (done honey · rest quiet disc · today ring · future hairline) + flame "N weeks" and "3/4 days" (top) or honey pill (end) |
+| `ConsistencyStripView` | One 12dp row of rounded day/week cells from `ConsistencyCalculator.Cell`s (honey, alpha = active/possible) — no text; the screen sets the summary + content description |
 | `ProgressRowView` | title · value / 6dp bar (colour per project) |
 | `AppUsageRowView` | app icon · name [status chip] / usage + bar or "Set limit" · lock switch · chevron |
 | `PeriodNavigatorView` | "This week · Mon – Sun" · ‹ › |

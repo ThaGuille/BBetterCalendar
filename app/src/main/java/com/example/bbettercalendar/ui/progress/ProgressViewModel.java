@@ -19,6 +19,7 @@ import com.example.bbettercalendar.projects.ProjectWithCounts;
 import com.example.bbettercalendar.projects.ProjectsRepository;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.stats.ConsistencyCalculator;
 import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
 import com.example.bbettercalendar.stats.FocusEvent;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -253,10 +255,27 @@ public class ProgressViewModel extends AndroidViewModel {
         }
         String[] labels = trendLabels(trend.currentStarts);
 
+        // Constancia: una sola lectura desde el inicio del periodo anterior cubre los dos.
+        Set<LocalDate> activeDays = ConsistencyCalculator.parseIsoDays(
+                focusEventDao.getActiveDaysSince(pStart));
+        ConsistencyCalculator.Result consistency = ConsistencyCalculator.compute(activeDays,
+                range.startDay(), range.endDay(), today, range.granularity == Granularity.YEAR);
+        LocalDate prevTo = prev.endDay();
+        if (inProgress) {
+            // Misma altura del periodo anterior; con meses/años de distinta longitud se recorta.
+            LocalDate sameOffset = prev.startDay().plusDays(
+                    ChronoUnit.DAYS.between(range.startDay(), today));
+            if (sameOffset.isBefore(prevTo)) {
+                prevTo = sameOffset;
+            }
+        }
+        int prevActive = ConsistencyCalculator.activeDaysBetween(activeDays, prev.startDay(), prevTo);
+
         overview.postValue(new ProgressOverview(focus.currentTotal, focus.hasDeltaPercent(),
                 focus.deltaPercent(), sessions, sessions / (double) elapsedDays,
                 tasksDone, tasksDone - tasksPrev, cur, prv, labels,
-                trend.currentTotal, trend.deltaAbsolute()));
+                trend.currentTotal, trend.deltaAbsolute(),
+                consistency, prevActive > 0, consistency.activeDays - prevActive));
     }
 
     // Tarjeta "Screen time & blocking": uso de HOY de las apps seguidas frente a la suma de sus

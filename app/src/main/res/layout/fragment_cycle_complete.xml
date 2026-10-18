@@ -235,7 +235,9 @@
                             android:background="@drawable/bg_cycle_badge"
                             android:paddingHorizontal="6dp"
                             android:paddingVertical="1dp"
-                            android:text="@string/cycle_streak_badge"
+                            android:fontFeatureSettings="tnum"
+                            android:visibility="gone"
+                            tools:text="3/4"
                             android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
                             android:textColor="@color/bb_sanct_primary" />
                         </LinearLayout>

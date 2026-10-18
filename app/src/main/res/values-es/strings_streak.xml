@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="streak_weeks">
+        <item quantity="one">%d semana</item>
+        <item quantity="many">%d semanas</item>
+        <item quantity="other">%d semanas</item>
+    </plurals>
+    <string name="streak_label_none">Racha semanal</string>
+    <plurals name="streak_week_goal">
+        <item quantity="one">%1$d/%2$d día</item>
+        <item quantity="many">%1$d/%2$d días</item>
+        <item quantity="other">%1$d/%2$d días</item>
+    </plurals>
+    <string name="streak_week_goal_desc">%1$d de %2$d días de foco esta semana</string>
+    <string name="streak_this_week">%1$d/%2$d esta semana</string>
+    <string name="streak_day_rest">%1$s: descanso</string>
+
+    <string name="streak_goal_title">Objetivo semanal</string>
+    <string name="streak_goal_unit">días / semana</string>
+    <string name="streak_goal_caption">Cada semana que lo cumples, tu racha crece</string>
+</resources>

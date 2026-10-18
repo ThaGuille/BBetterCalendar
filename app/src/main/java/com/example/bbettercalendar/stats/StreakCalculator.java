@@ -7,33 +7,40 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Racha de concentración (migración visual u3). Puro, sin Android ni I/O: recibe los días con >= 1
- * pomodoro completado (lo que devuelve {@link FocusEventDAO#getActiveDaysSince(long)} /
- * {@link FocusEventDAO#observeAllActiveDays()}) y el "hoy" del llamador, para poder testearlo con
- * JUnit puro.
+ * Racha SEMANAL de concentración (plan racha-semanal-y-constancia, sustituye a la racha de días
+ * consecutivos de u3). Puro, sin Android ni I/O: recibe los días con >= 1 pomodoro completado (lo
+ * que devuelve {@link FocusEventDAO#observeAllActiveDays()}), el objetivo semanal del usuario
+ * ({@link WeeklyGoalStore}) y el "hoy" del llamador, para poder testearlo con JUnit puro.
  *
- * <p>Sustituye a "días activos en los últimos 30" y al heredado {@code Stats.currentStreak}, que
- * mide aperturas de la app, no sesiones.
+ * <p>Por qué semanal: la gente no abre la app todos los días (sobre todo en finde); una racha diaria
+ * se rompía con un sábado libre aunque la semana se hubiera cumplido de sobra.
  *
  * <p>Semántica:
  * <ul>
- *   <li><b>Racha actual</b>: días consecutivos con sesión que terminan hoy. Si hoy todavía no hay
- *   sesión, la racha sigue viva y termina ayer (el día no ha acabado): con sesiones lun-mar-mié y
- *   hoy = jueves sin sesión, la racha es 3. Si ayer tampoco hubo, es 0.</li>
- *   <li><b>Mejor racha</b>: la serie consecutiva más larga de todo el histórico recibido. Siempre
+ *   <li><b>Semana cumplida</b>: lunes-domingo (ISO-8601) con >= {@code goal} días con sesión.</li>
+ *   <li><b>Racha actual</b>: semanas cumplidas consecutivas que terminan en la semana actual. Si la
+ *   semana actual todavía no está cumplida, la racha sigue viva y termina en la anterior (la semana
+ *   no ha acabado). Si la anterior tampoco se cumplió, es 0.</li>
+ *   <li><b>Mejor racha</b>: la serie de semanas cumplidas más larga del histórico. Siempre
  *   &gt;= racha actual.</li>
- *   <li><b>Fila de la semana</b>: 7 días de lunes a domingo de la semana de hoy, cada uno
- *   {@link DayState}.</li>
+ *   <li><b>Fila de la semana</b>: 7 días de lunes a domingo; un día pasado sin sesión es
+ *   {@link DayState#REST} (descanso neutro, no un fallo).</li>
+ *   <li>El objetivo se aplica a todo el histórico (no se guarda por semana).</li>
  *   <li>Los días posteriores a hoy (reloj cambiado) se ignoran en todo el cálculo.</li>
  * </ul>
  */
 public final class StreakCalculator {
+
+    public static final int MIN_GOAL = 1;
+    public static final int MAX_GOAL = 7;
 
     private StreakCalculator() {
     }
@@ -42,8 +49,8 @@ public final class StreakCalculator {
     public enum DayState {
         /** Pasado u hoy, con >= 1 sesión completada. */
         DONE,
-        /** Pasado sin sesión. */
-        MISSED,
+        /** Pasado sin sesión: descanso, se pinta neutro. */
+        REST,
         /** Hoy, todavía sin sesión. */
         PENDING,
         /** Posterior a hoy. */
@@ -71,61 +78,106 @@ public final class StreakCalculator {
 
     /** Resultado inmutable de {@link #compute}. */
     public static final class Result {
-        public final int currentStreak;
-        public final int bestStreak;
+        /** Días por semana que el usuario se ha propuesto (1-7). */
+        public final int goal;
+        /** Días con sesión en la semana actual (0-7). */
+        public final int daysThisWeek;
+        public final boolean goalMetThisWeek;
+        /** Semanas cumplidas seguidas (ver semántica en la clase). */
+        public final int weekStreak;
+        public final int bestWeekStreak;
         public final boolean activeToday;
         /** Siempre 7 elementos, lunes (0) a domingo (6). */
         @NonNull public final List<WeekDay> week;
 
-        Result(int currentStreak, int bestStreak, boolean activeToday, @NonNull List<WeekDay> week) {
-            this.currentStreak = currentStreak;
-            this.bestStreak = bestStreak;
+        Result(int goal, int daysThisWeek, int weekStreak, int bestWeekStreak, boolean activeToday,
+               @NonNull List<WeekDay> week) {
+            this.goal = goal;
+            this.daysThisWeek = daysThisWeek;
+            this.goalMetThisWeek = daysThisWeek >= goal;
+            this.weekStreak = weekStreak;
+            this.bestWeekStreak = bestWeekStreak;
             this.activeToday = activeToday;
             this.week = Collections.unmodifiableList(week);
         }
     }
 
     /**
-     * Calcula racha actual, mejor racha y fila semanal a partir de fechas ISO "YYYY-MM-DD" (formato
-     * de {@code date(..., 'localtime')} en SQLite). Las cadenas nulas o mal formadas se ignoran.
+     * Calcula la racha semanal a partir de fechas ISO "YYYY-MM-DD" (formato de
+     * {@code date(..., 'localtime')} en SQLite). Las cadenas nulas o mal formadas se ignoran.
      */
     @NonNull
-    public static Result compute(@NonNull Collection<String> isoDays, @NonNull LocalDate today) {
-        return computeFromDates(parseIsoDays(isoDays), today);
+    public static Result compute(@NonNull Collection<String> isoDays, int goal, @NonNull LocalDate today) {
+        return computeFromDates(parseIsoDays(isoDays), goal, today);
     }
 
     /** Igual que {@link #compute} pero con fechas ya parseadas. */
     @NonNull
-    public static Result computeFromDates(@NonNull Collection<LocalDate> days, @NonNull LocalDate today) {
-        Set<LocalDate> set = new HashSet<>(days);
-        set.remove(null);
-        return new Result(currentStreak(set, today), bestStreak(set, today), set.contains(today),
+    public static Result computeFromDates(@NonNull Collection<LocalDate> days, int goal,
+                                          @NonNull LocalDate today) {
+        int g = clampGoal(goal);
+        Set<LocalDate> set = new HashSet<>();
+        for (LocalDate d : days) {
+            if (d != null && !d.isAfter(today)) {
+                set.add(d);
+            }
+        }
+        Map<LocalDate, Integer> perWeek = countPerWeek(set);
+        int current = currentWeekStreak(perWeek, g, today);
+        int best = Math.max(current, bestWeekStreak(perWeek, g));
+        Integer thisWeek = perWeek.get(weekStart(today));
+        return new Result(g, thisWeek == null ? 0 : thisWeek, current, best, set.contains(today),
                 weekRow(set, today));
     }
 
-    /** Racha consecutiva que termina hoy (o ayer, si hoy aún no hay sesión). */
-    public static int currentStreak(@NonNull Set<LocalDate> days, @NonNull LocalDate today) {
-        LocalDate cursor = days.contains(today) ? today : today.minusDays(1);
+    public static int clampGoal(int goal) {
+        return Math.max(MIN_GOAL, Math.min(MAX_GOAL, goal));
+    }
+
+    /** Lunes de cada semana -> nº de días con sesión en ella. */
+    @NonNull
+    static Map<LocalDate, Integer> countPerWeek(@NonNull Set<LocalDate> days) {
+        Map<LocalDate, Integer> out = new HashMap<>();
+        for (LocalDate d : days) {
+            LocalDate w = weekStart(d);
+            Integer n = out.get(w);
+            out.put(w, n == null ? 1 : n + 1);
+        }
+        return out;
+    }
+
+    private static boolean met(@NonNull Map<LocalDate, Integer> perWeek, LocalDate week, int goal) {
+        Integer n = perWeek.get(week);
+        return n != null && n >= goal;
+    }
+
+    /** Semanas cumplidas seguidas que terminan en la actual (o en la anterior, si la actual no se ha cumplido aún). */
+    static int currentWeekStreak(@NonNull Map<LocalDate, Integer> perWeek, int goal,
+                                 @NonNull LocalDate today) {
+        LocalDate thisWeek = weekStart(today);
+        LocalDate cursor = met(perWeek, thisWeek, goal) ? thisWeek : thisWeek.minusWeeks(1);
         int streak = 0;
-        while (days.contains(cursor)) {
+        while (met(perWeek, cursor, goal)) {
             streak++;
-            cursor = cursor.minusDays(1);
+            cursor = cursor.minusWeeks(1);
         }
         return streak;
     }
 
-    /** Serie consecutiva más larga entre los días &lt;= hoy. */
-    public static int bestStreak(@NonNull Set<LocalDate> days, @NonNull LocalDate today) {
+    /** Serie más larga de semanas cumplidas consecutivas. */
+    static int bestWeekStreak(@NonNull Map<LocalDate, Integer> perWeek, int goal) {
         int best = 0;
         int run = 0;
         LocalDate prev = null;
-        for (LocalDate d : new TreeSet<>(days)) {
-            if (d.isAfter(today)) {
-                break;
+        for (LocalDate w : new TreeSet<>(perWeek.keySet())) {
+            if (!met(perWeek, w, goal)) {
+                run = 0;
+                prev = null;
+                continue;
             }
-            run = (prev != null && prev.plusDays(1).equals(d)) ? run + 1 : 1;
+            run = (prev != null && prev.plusWeeks(1).equals(w)) ? run + 1 : 1;
             best = Math.max(best, run);
-            prev = d;
+            prev = w;
         }
         return best;
     }
@@ -145,7 +197,7 @@ public final class StreakCalculator {
             } else if (d.equals(today)) {
                 state = DayState.PENDING;
             } else {
-                state = DayState.MISSED;
+                state = DayState.REST;
             }
             row.add(new WeekDay(d, state, d.equals(today)));
         }

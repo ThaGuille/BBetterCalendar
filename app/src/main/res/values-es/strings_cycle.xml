@@ -11,7 +11,6 @@
     <string name="cycle_tile_focus">Foco</string>
     <string name="cycle_tile_focus_sub">sin interrupciones</string>
     <string name="cycle_tile_streak">Racha</string>
-    <string name="cycle_streak_badge">+1</string>
     <string name="cycle_streak_personal_best">Récord personal</string>
     <string name="cycle_streak_best_format">Mejor: %1$s</string>
     <string name="cycle_tile_best">Mejor</string>

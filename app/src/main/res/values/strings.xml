@@ -280,10 +280,10 @@
     <string name="focus_progress_format" translatable="false">%1$d/%2$dm</string>
     <string name="task_focus_this_desc">Focus this task</string>
 
-    <!-- Focus mode + racha de 30 días (spec focus-mode-and-streak) -->
-    <string name="home_streak_desc">Days with a completed pomodoro</string>
+    <!-- Focus mode + racha (spec focus-mode-and-streak; semanal desde plan racha-semanal-y-constancia) -->
+    <string name="home_streak_desc">Weekly focus streak</string>
     <string name="focus_streak_popup_title">Focus days</string>
-    <string name="focus_streak_summary">%1$d of the last 30 days with a completed pomodoro</string>
+    <string name="focus_streak_summary">%1$d of the last 28 days with a completed pomodoro</string>
     <string name="focus_streak_legend">Day you finished a pomodoro</string>
     <string name="focus_streak_close">Close</string>
     <string name="focus_streak_empty">No finished pomodoros yet — start one and this fills up.</string>
@@ -297,10 +297,6 @@
     </plurals>
 
     <!-- Componentes reutilizables ui/common/widget (migración visual u9) -->
-    <plurals name="widget_streak_days">
-        <item quantity="one">%d-day streak</item>
-        <item quantity="other">%d-day streak</item>
-    </plurals>
     <!-- Single letters under the streak dots (html 04: M T W T F S S), Monday first. -->
     <string-array name="widget_streak_letters">
         <item>M</item>
@@ -312,7 +308,6 @@
         <item>S</item>
     </string-array>
     <string name="widget_streak_day_done">%1$s: focused</string>
-    <string name="widget_streak_day_missed">%1$s: no session</string>
     <string name="widget_streak_day_pending">%1$s: today, no session yet</string>
     <string name="widget_streak_day_future">%1$s: upcoming</string>
     <string name="widget_period_previous">Previous period</string>
@@ -363,10 +358,6 @@
     <string name="focus_skip_rest_unavailable">Skip rest (only during a rest)</string>
     <string name="focus_today">Today</string>
     <string name="focus_streak">Streak</string>
-    <plurals name="focus_streak_days">
-        <item quantity="one">%d day</item>
-        <item quantity="other">%d days</item>
-    </plurals>
     <plurals name="focus_fails_today">
         <item quantity="one">%d missed session</item>
         <item quantity="other">%d missed sessions</item>

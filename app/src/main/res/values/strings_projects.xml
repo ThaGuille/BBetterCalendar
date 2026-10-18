@@ -6,7 +6,7 @@
     <string name="projects_summary_active">%1$d active</string>
     <string name="projects_summary_due">%1$d due this week</string>
     <string name="projects_summary_separator" translatable="false">·</string>
-    <string name="projects_streak_chip">%1$dd streak</string>
+    <string name="projects_streak_chip">%1$dw streak</string>
 
     <string name="project_tasks_count">%1$d / %2$d tasks</string>
     <string name="project_percent_completed">%1$d%% completed</string>

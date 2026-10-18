@@ -43,4 +43,13 @@
     <string name="progress_projects_month">Proyectos este mes</string>
     <string name="progress_projects_year">Proyectos este año</string>
     <string name="progress_projects_logged">%1$s registradas</string>
+
+    <string name="progress_consistency_title">Constancia</string>
+    <plurals name="progress_consistency_value">
+        <item quantity="one">%1$d/%2$d día</item>
+        <item quantity="many">%1$d/%2$d días</item>
+        <item quantity="other">%1$d/%2$d días</item>
+    </plurals>
+    <string name="progress_consistency_desc">Constancia: foco en %1$d de %2$d días</string>
+    <string name="progress_consistency_desc_delta">Constancia: foco en %1$d de %2$d días, %3$+d frente al periodo anterior</string>
 </resources>

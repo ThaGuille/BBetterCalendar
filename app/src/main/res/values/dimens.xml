@@ -55,6 +55,10 @@
     <dimen name="widget_streak_dot_size">16dp</dimen>
     <dimen name="widget_streak_dot_size_large">28dp</dimen>
     <dimen name="widget_streak_pill_width">48dp</dimen>
+    <!-- ConsistencyStripView (plan racha-semanal-y-constancia): one short row of day/week cells. -->
+    <dimen name="widget_consistency_height">12dp</dimen>
+    <dimen name="widget_consistency_cell_gap">3dp</dimen>
+    <dimen name="widget_consistency_cell_radius">3dp</dimen>
     <!-- AvatarView: DESIGN §4 40dp; ring 2dp + 2dp forest gap (html 01 ring-2 p-[2px]). -->
     <dimen name="widget_avatar_size">40dp</dimen>
     <dimen name="widget_avatar_ring">2dp</dimen>

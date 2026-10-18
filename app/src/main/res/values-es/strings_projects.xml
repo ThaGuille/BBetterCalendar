@@ -3,7 +3,7 @@
     <string name="projects_title">Proyectos</string>
     <string name="projects_summary_active">%1$d activos</string>
     <string name="projects_summary_due">%1$d vencen esta semana</string>
-    <string name="projects_streak_chip">Racha de %1$dd</string>
+    <string name="projects_streak_chip">Racha de %1$d sem</string>
 
     <string name="project_tasks_count">%1$d / %2$d tareas</string>
     <string name="project_percent_completed">%1$d%% completado</string>

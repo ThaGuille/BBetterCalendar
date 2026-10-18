@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- StreakWeekView: past day without a session = rest day. Weekly streak (plan
+     racha-semanal-y-constancia): a quiet raised disc with no ring, so a free weekend never reads
+     as a failure. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bb_surface_raised" />
+</shape>

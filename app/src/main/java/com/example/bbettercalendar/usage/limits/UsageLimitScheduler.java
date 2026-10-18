@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.util.Log;
 
 import com.example.bbettercalendar.stats.AppRule;
@@ -101,11 +100,7 @@ public class UsageLimitScheduler {
     private void scheduleAt(long triggerAt) {
         PendingIntent pi = buildPendingIntent(PendingIntent.FLAG_UPDATE_CURRENT);
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi);
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, pi);
-            }
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi);
         } catch (SecurityException e) {
             // Dispositivo denegó alarmas exactas — caer a inexacta para que el chequeo igual corra.
             Log.w(TAG, "Exact alarm denied, falling back to inexact", e);

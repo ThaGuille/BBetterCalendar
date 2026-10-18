@@ -10,7 +10,7 @@ BBetterCalendar is an Android productivity app: Pomodoro timer + habit streaks +
 
 - **Language:** Java 8 (source/target compat 1.8). No Kotlin sources.
 - **Architecture:** MVVM + Hilt DI + Room + LiveData
-- **Min / target / compile SDK:** 21 / 34 / 34
+- **Min / target / compile SDK:** 24 / 36 / 36
 - **Build:** AGP 8.13.2, Gradle wrapper 8.13
 - **Key libs:** Hilt 2.51.1, Room 2.6.1, Navigation 2.5.3, Material 1.9.0, Gson 2.9.1, Kizitonwose Calendar 2.5.4
 - **Pin:** Do not upgrade `com.google.android.material` past `1.9.0` (see `app/build.gradle:47`).

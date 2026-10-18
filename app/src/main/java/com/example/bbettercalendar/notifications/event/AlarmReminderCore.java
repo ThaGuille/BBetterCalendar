@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
 
 /**
@@ -80,11 +79,7 @@ public class AlarmReminderCore {
     private void scheduleOne(int entityId, int offsetIndex, long triggerAt, IntentPopulator extras) {
         PendingIntent pi = buildPendingIntent(entityId, offsetIndex, extras, PendingIntent.FLAG_UPDATE_CURRENT);
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi);
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, pi);
-            }
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pi);
         } catch (SecurityException e) {
             // Device denied exact alarms — fall back to inexact so the reminder still fires.
             Log.w(TAG, "Exact alarm denied, falling back to inexact", e);

@@ -149,6 +149,10 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-19 (3)** · F0-u1 hecha: minSdk 24, compile/target 36; arranque sin crash en API 37 (no hay
+  emulador API 36 ni 24; desvío acordado). **Siguiente:** F0-u2 (edge-to-edge); u3 y u4 esperan los pasos de
+  consola.
+
 - **2026-10-19 (2)** · El usuario acepta D-013 (UE) y D-016 (`firebase/` en este repo). Borrador de la
   política de privacidad v2 (F0.5, parcial). Abierta **F0**: plan
   [`social-f0-base.md`](social-f0-base.md).

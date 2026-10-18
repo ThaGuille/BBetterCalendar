@@ -17,15 +17,15 @@ if (hasReleaseKeystore) {
 
 android {
     namespace 'com.example.bbettercalendar'
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         // OJO: applicationId es PERMANENTE tras la 1ª subida a Play; no puede cambiarse nunca más.
         // namespace se queda en com.example.bbettercalendar a propósito -> los paquetes Java, la clase
         // R y el codegen de Hilt/Room no se mueven. (Phase 4b)
         applicationId "io.github.thaguille.bbettercalendar"
-        minSdk 21
-        targetSdk 34
+        minSdk 24
+        targetSdk 36
         versionCode 1
         versionName "1.0"
 

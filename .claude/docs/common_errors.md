@@ -21,7 +21,7 @@ Symptom → root cause → fix table for the failure modes that keep coming up i
 
 ### `Failed to resolve: com.kizitonwose.calendar:view:X.Y.Z`
 - **Cause**: Tried to upgrade the Kizitonwose calendar without bumping `compileSdk`.
-- **Fix**: Keep at `2.5.4`. We are on `compileSdk 34` now, so a future upgrade is possible, but the existing month-view binders/cell layouts were written against `2.5.4`. Do a tracked PR if upgrading.
+- **Fix**: Keep at `2.5.4`. We are on `compileSdk 36` now, so a future upgrade is possible, but the existing month-view binders/cell layouts were written against `2.5.4`. Do a tracked PR if upgrading.
 
 ### "Dependency requires libraries and applications that depend on it to compile against version 34 or later"
 - **Cause**: A transitive dep wants compileSdk > 34.

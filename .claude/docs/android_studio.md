@@ -45,7 +45,7 @@ If you change resource XML, no rebuild is needed for Apply Changes — Apply Cha
 ## 4. Emulator / AVD
 
 - **Device Manager** in the right rail.
-- Pixel 6 API 34 is a reasonable default (matches `targetSdk 34`).
+- Pixel 6 API 36 is a reasonable default (matches `targetSdk 36`).
 - Cold boot if state seems stale: *Device Manager → ⋮ → Cold Boot Now*.
 - Internet inside the emulator goes through host DNS; corporate VPNs sometimes block this.
 

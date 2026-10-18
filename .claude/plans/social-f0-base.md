@@ -44,7 +44,7 @@ Se pueden hacer en paralelo con u1 y u2. Son necesarios antes de u3 y u4.
 
 | Unidad | Qué | Ficheros principales | Verificación | Modelo | Estado |
 |---|---|---|---|---|---|
-| **F0-u1** | SDK: `minSdk 24`, `compileSdk 36`, `targetSdk 36` | `app/build.gradle` | `test` + `assembleDebug`; arranque sin crash en un emulador API 36 | sonnet | pendiente |
+| **F0-u1** | SDK: `minSdk 24`, `compileSdk 36`, `targetSdk 36` | `app/build.gradle` | `test` + `assembleDebug`; arranque sin crash en un emulador API 36 | sonnet | hecha |
 | **F0-u2** | Edge-to-edge e insets en todas las pantallas; back predictivo | `ui/common/InsetsHelper` (nuevo), `TopBarHelper`, `MainActivity`, las 4 activities, sheets | `ui-tester` + capturas en API 36 de cada pantalla (barra de estado y de navegación sin solapes) | opus | pendiente |
 | **F0-u3** | `firebase/` + emuladores + reglas que lo deniegan todo + test de reglas | `firebase/firebase.json`, `.firebaserc`, `firestore.rules`, `database.rules.json`, `functions/` (esqueleto TS), `tests/` | `firebase emulators:exec` ejecuta el test «todo denegado» en verde | sonnet | pendiente |
 | **F0-u4** | Gradle Firebase + `FirebaseModule` + flags | `build.gradle` (raíz y app), `social/firebase/FirebaseModule`, `google-services.json` | `assembleDebug`; ping de debug contra el emulador devuelve `PERMISSION_DENIED` (prueba la conexión) | sonnet | pendiente |
@@ -177,3 +177,17 @@ bajo las barras, y en 36 ya no se puede desactivar.
 ## Notas de unidades
 
 <!-- Una sección por unidad al terminarla: ### F0-uN · <título> — `<commit>` + ≤10 líneas -->
+
+### F0-u1 · SDK — commit «F0-u1: minSdk 24 y compile/targetSdk 36»
+
+- `app/build.gradle`: `minSdk 24`, `compileSdk 36`, `targetSdk 36`. `test` + `assembleDebug` en verde sin tocar
+  Material 1.9.0 ni Kizitonwose 2.5.4 (compilan con SDK 36).
+- Revisión de comportamiento 35/36, **sin cambios necesarios**: `HomeForegroundService` (`specialUse`) solo lo
+  arranca `FocusSessionViewModel` en primer plano, nunca desde el boot; `BootReceiver` solo rearma alarmas;
+  las alarmas exactas ya caen a inexactas ante `SecurityException`; el overlay del bloqueo es una ventana
+  `TYPE_ACCESSIBILITY_OVERLAY`, no una activity, así que edge-to-edge no le afecta (se confirma en u2).
+- Limpieza trivial: las ramas `SDK_INT >= M` de `AlarmReminderCore` y `UsageLimitScheduler` quedaban muertas.
+- **Desvío acordado con el usuario:** no existen emuladores API 36 ni 24 en la máquina. Arranque en frío
+  comprobado en **API 37** (Pixel_9a) hasta `MainActivity`, sin `FATAL EXCEPTION`. API 36 literal no probada.
+- Pendiente: la propiedad `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` del FGS no está en el manifest (Play la pide al declarar
+  `specialUse` en Console); se trata al preparar la ficha de Play, no aquí.

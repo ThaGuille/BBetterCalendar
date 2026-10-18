@@ -201,7 +201,8 @@ with e.g. "use the code-reviewer subagent".
 | `app/src/main/res/values/` | `colors.xml` (palette), `themes.xml`, `styles_typography.xml`, `style.xml`, `dimens.xml`, `strings.xml` |
 | `.claude/docs/` | Knowledge base (see index above) |
 | `.claude/docs/systems/` | Per-runtime-subsystem living docs (see System docs table above) |
-| `.claude/plans/` | Saved design plans |
+| `.claude/plans/` | Saved design plans. `sistema-social.md` is the **entry point of the social system** (progress board); phase plans are `social-fN-*.md` |
+| `docs/social/` | Social system guide: research, product, architecture, compliance, future, decision log (`D-xxx`). Work protocol in its `README.md` |
 | `.claude/references/` | Design knowledge libraries: `interaction-design/`, `visual-critique/`, `design-systems/` |
 | `.claude/skills/` | Project-level skills |
 | `.claude/agents/` | Subagent definitions (explorer, planner, code-reviewer, test-writer) |

@@ -13,6 +13,8 @@ finish a thing or change direction. For recent work use `git log`; for design pl
 
 ## Next focus
 
+- **Sistema social** (amigos, perfil, stats compartidas, presencia) — tablero:
+  [sistema-social.md](.claude/plans/sistema-social.md) · guía: [docs/social/](docs/social/README.md).
 - **Frontend overhaul** — see [frontend-overhaul-roadmap.md](.claude/plans/frontend-overhaul-roadmap.md).
 - **Architecture refactor** — see [architecture-refactor-roadmap.md](.claude/plans/architecture-refactor-roadmap.md)
   (T3: schema hygiene — indexes, legacy-column cleanup, drop `fallbackToDestructiveMigration()` —

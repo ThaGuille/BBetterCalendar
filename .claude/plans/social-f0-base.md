@@ -1,6 +1,6 @@
 # Social F0 — Base
 
-**Status:** proposed
+**Status:** in progress
 **Created:** 2026-10-19
 **Last updated:** 2026-10-19
 
@@ -38,8 +38,7 @@ Se pueden hacer en paralelo con u1 y u2. Son necesarios antes de u3 y u4.
 6. **CLI:** `npm install -g firebase-tools` y después `firebase login` (es interactivo: lánzalo tú con
    `! firebase login`). Los emuladores de Firestore pueden exigir **JDK 21**; la máquina tiene 18. Si
    `firebase emulators:start` lo pide, instalar JDK 21 (Temurin) solo para la CLI.
-7. **Si la app ya está publicada en Play:** pedir la prórroga del target API hasta el 1-nov-2026
-   desde Play Console (Q-07).
+7. ~~Prórroga del target API~~: no aplica, no hay nada publicado (Q-07 cerrada).
 
 ## Unidades
 
@@ -149,8 +148,8 @@ bajo las barras, y en 36 ya no se puede desactivar.
 
 | ID | Pregunta | Propuesta | Bloquea |
 |---|---|---|---|
-| Q-06 | ¿La app ya está publicada en Play? ¿Qué enlace lleva la tarjeta de compartir? | Si está publicada, el enlace de Play. Si no, la página de GitHub Pages hasta que lo esté | F0-u5 |
-| Q-07 | ¿Hay una versión en Play que necesite la prórroga de target API (hasta el 1-nov-2026)? | Pedirla ya si aplica | Publicar actualizaciones |
+| Q-06 | La app no está publicada. ¿Qué enlace lleva la tarjeta? | Ninguno por ahora: la tarjeta lleva la marca y `EXTRA_TEXT` solo el texto. El enlace de Play se añade al publicar | F0-u5 |
+| ~~Q-07~~ | Cerrada: no hay nada publicado, así que la prórroga no aplica | — | — |
 
 ## Riesgos
 

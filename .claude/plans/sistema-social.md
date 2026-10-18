@@ -15,12 +15,11 @@
 
 ## Ahora
 
-- **Fase activa:** **F0** · plan [`social-f0-base.md`](social-f0-base.md) (`proposed`, a la espera de
-  que el usuario lo apruebe).
-- **Siguiente paso:** el usuario revisa el plan de F0 y hace los pasos de consola (proyecto Firebase y
-  plan Blaze); después, F0-u1.
-- **Urgente aunque no hubiera social:** F0.1 (target 36). Play lo exige a las actualizaciones desde
-  el 31-ago-2026, con prórroga posible hasta el 1-nov-2026.
+- **Fase activa:** **F0** · plan [`social-f0-base.md`](social-f0-base.md) (`in progress`).
+- **En curso:** F0-u1 y F0-u2 (en otro chat). En paralelo, el usuario hace los pasos de consola
+  (prerrequisitos del plan) que necesitan u3 y u4.
+- **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
+  no hay urgencia de plazo.
 
 ## Fases
 
@@ -143,8 +142,8 @@ en el diario.
 | Q-03 | ¿Se confirma D-015 (tope de 50 amigos)? (D-013 y D-016 ya confirmadas) | Sí | F2 |
 | Q-04 | Durante el descanso entre pomodoros, ¿el amigo aparece como estudiando, ausente o con un estado propio? | Estado propio «en descanso» en Focus; cuenta como estudiando en Home | F4.1 |
 | Q-05 | ¿Se puede cambiar el `@usuario`? | Sí, una vez cada 30 días; el anterior queda libre | F1.4 |
-| Q-06 | ¿La app ya está en Play? ¿Qué enlace lleva la tarjeta de compartir? | Play si está publicada; si no, GitHub Pages | F0-u5 |
-| Q-07 | ¿Hay una versión en Play que necesite la prórroga de target API hasta el 1-nov-2026? | Pedirla ya si aplica | Publicar actualizaciones |
+| Q-06 | La app **no está publicada** (usuario, 2026-10-19). ¿Qué enlace lleva la tarjeta de compartir mientras tanto? | Ninguno: solo la marca «BBetter» en la tarjeta. El enlace de Play se añade al publicar | F0-u5 |
+| ~~Q-07~~ | ~~¿Prórroga del target API?~~ Cerrada: no hay nada publicado, así que no aplica | — | — |
 
 ## Diario
 

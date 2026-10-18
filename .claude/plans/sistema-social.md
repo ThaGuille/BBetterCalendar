@@ -143,6 +143,8 @@ en el diario.
 | Q-03 | ¿Se confirma D-015 (tope de 50 amigos)? (D-013 y D-016 ya confirmadas) | Sí | F2 |
 | Q-04 | Durante el descanso entre pomodoros, ¿el amigo aparece como estudiando, ausente o con un estado propio? | Estado propio «en descanso» en Focus; cuenta como estudiando en Home | F4.1 |
 | Q-05 | ¿Se puede cambiar el `@usuario`? | Sí, una vez cada 30 días; el anterior queda libre | F1.4 |
+| Q-06 | ¿La app ya está en Play? ¿Qué enlace lleva la tarjeta de compartir? | Play si está publicada; si no, GitHub Pages | F0-u5 |
+| Q-07 | ¿Hay una versión en Play que necesite la prórroga de target API hasta el 1-nov-2026? | Pedirla ya si aplica | Publicar actualizaciones |
 
 ## Diario
 

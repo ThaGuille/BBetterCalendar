@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u2 hecha)
+**Last updated:** 2026-10-20 (F1-u3 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -17,8 +17,8 @@
 
 - **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
   F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
-- **Siguiente paso:** F1-u1 (reglas) y F1-u2 (núcleo de cuenta) hechas. Siguen u3 (datos del perfil), u4 (UI de entrada) y
-  u6 (`deleteAccount`).
+- **Siguiente paso:** F1-u1 (reglas), F1-u2 (núcleo de cuenta) y F1-u3 (datos del perfil) hechas. Siguen u4 (UI de
+  entrada) y u6 (`deleteAccount`); después u5 (Crear perfil y Mi perfil, tras u3 y u4).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -153,6 +153,11 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-20 (10)** · F1-u3 hecha: paquete `social/profile/` (`ProfileRepository` con `observeMine`, alta, edición y
+  renombrado en un solo lote; `HandleValidator`, `BannedWords`, `Profile`, `ProfileWrites`, `ProfileState`) y tests
+  `HandleValidatorTest`, `ProfileWritesTest` y `ProfileTest` en verde; las reglas siguen en verde (36). Commit «F1-u3:
+  datos del perfil (ProfileRepository, HandleValidator, BannedWords)». **Siguiente:** F1-u4 (UI de entrada) y u6
+  (`deleteAccount`); luego u5.
 - **2026-10-20 (9)** · F1-u2 hecha: paquete `social/account/` (`AccountRepository` con Google por Credential
   Manager y email, `AgeGate`, `SocialPrefs`, `SocialEntryRouter`), `SocialFeature.isAccountEnabled()` y tests
   `AgeGateTest` y `SocialEntryRouterTest` en verde. Commit «F1-u2: núcleo de cuenta (Auth, Credential Manager,

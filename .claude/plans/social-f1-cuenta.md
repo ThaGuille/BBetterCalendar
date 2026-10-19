@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u2 hecha)
+**Last updated:** 2026-10-20 (F1-u3 hecha)
 
 > Tablero: [sistema-social.md](sistema-social.md) · Guía: 02 §3, §9 · 03 §3, §5, §6, §7, §10 · 04 §1, §2, §6
 > Decisiones que aplica: D-002, D-008, D-010, D-011, D-012, D-013, D-016, D-019 – D-024 · Preguntas que debe cerrar: ninguna (las del usuario se cerraron al abrir la fase con D-021 – D-024)
@@ -36,7 +36,7 @@ Quien quiera usar Amigos puede, desde un bloque social, pasar la puerta de edad,
 |---|---|---|---|---|
 | **F1-u1** | Reglas de `users/`, `profiles/` y `handles/` (unicidad, renombrado cada 30 días en el servidor, lista blanca de campos) + tests | `firebase/firestore.rules`, `firebase/tests/profiles-handles.test.js` (nuevo), `firebase/tests/deny-all.test.js` (ajustar), `firebase/README.md` | `firebase emulators:exec` en verde; prueba de mutación (abrir una regla hace fallar su test) | hecha |
 | **F1-u2** | Núcleo de cuenta: Credential Manager + Auth, puerta de edad, preferencias locales y router de entrada | `app/build.gradle` (+ `androidx.credentials`, `credentials-play-services-auth`, `googleid`), `social/account/AccountRepository`, `AgeGate`, `GoogleSignInHelper`, `SocialPrefs`, `SocialEntryRouter` (nuevos), `social/SocialFeature.java` (+ `isAccountEnabled()`), javadoc de `social/firebase/FirebaseModule.java` | JUnit `AgeGateTest` y `SocialEntryRouterTest`; `test assembleDebug` | hecha |
-| **F1-u3** | Datos del perfil: crear (lote atómico), editar, renombrar, observar; `HandleValidator` | `social/profile/ProfileRepository`, `Profile`, `HandleValidator`, `BannedWords` (nuevos) | JUnit `HandleValidatorTest`; contrato de escritura igual al de los tests de u1 | pendiente |
+| **F1-u3** | Datos del perfil: crear (lote atómico), editar, renombrar, observar; `HandleValidator` | `social/profile/ProfileRepository`, `Profile`, `HandleValidator`, `BannedWords` (nuevos) | JUnit `HandleValidatorTest`; contrato de escritura igual al de los tests de u1 | hecha |
 | **F1-u4** | UI de entrada (F1.1–F1.3): puerta de edad, pantalla «por debajo del umbral», hoja «Únete a tus amigos», pantalla de email; estado «sin cuenta» en Focus y Home | `ui/social/AgeGateFragment`, `UnderageFragment`, `JoinFriendsSheet`, `EmailSignInFragment` (nuevos), `res/navigation/mobile_navigation.xml`, `ui/focus/FocusFragment.java`, `ui/home/HomeFragment.java`, `values/strings_social.xml` (+es), `dimens_social.xml`, `styles_social.xml` | adb-ui-test en `api36` con emuladores: Focus → puerta → menor → pantalla amable; mayor → hoja → alta por email → sesión; Google abre el selector; sin `FATAL EXCEPTION` | pendiente |
 | **F1-u5** | UI de perfil (F1.4, F1.5): Crear perfil y Mi perfil (editar, renombrar `@usuario`, cerrar sesión); colores de avatar | `ui/social/CreateProfileFragment`, `MyProfileFragment`, `ProfileViewModel` (nuevos), `ui/common/widget/AvatarView.java` (+ `setFillColor`), `ui/social/AvatarPalette` (nuevo), `values/colors.xml` (+ `bb_avatar_0..7`), nav graph, `strings_social.xml` | adb-ui-test: crear perfil; un `@usuario` repetido (segunda cuenta) se rechaza; renombrar respeta la regla de 30 días; cerrar sesión; la UI del emulador muestra `users/`, `profiles/` y `handles/` | pendiente |
 | **F1-u6** | Callable `deleteAccount` (europe-west1) + test de integración | `firebase/functions/src/index.ts`, `firebase/functions/src/deleteAccount.ts` (nuevo), `firebase/tests/delete-account.test.js` (nuevo), `firebase/tests/package.json` | `emulators:exec` (auth + firestore + database + functions) en verde: datos y usuario de Auth borrados; sin sesión → `unauthenticated` | pendiente |
@@ -224,3 +224,16 @@ Modelo: opus para u1, u3 y u6 (reglas y transacciones); sonnet + `impeccable` pa
 - `SocialFeature.isAccountEnabled()` lee `FEATURE_SOCIAL`; `isEnabled()` sigue con `FEATURE_SOCIAL_MOCK`. Javadoc de `FirebaseModule` actualizado.
 - Dependencias nuevas: `credentials` 1.5.0, `credentials-play-services-auth` 1.5.0, `googleid` 1.1.1.
 - Tests: `AgeGateTest` (8) y `SocialEntryRouterTest` (8). Pendiente: probar el selector de Google en el emulador (u4).
+
+### F1-u3 · Datos del perfil: crear (lote atómico), editar, renombrar, observar; `HandleValidator` — commit «F1-u3: datos del perfil (ProfileRepository, HandleValidator, BannedWords)»
+
+- Nuevo paquete `social/profile/`: `ProfileRepository` (`@Singleton`), `Profile`, `HandleValidator`, `BannedWords` y, además del plan, `ProfileWrites` (mapas puros) y `ProfileState`.
+- `observeMine()` da `LiveData<ProfileState>` (`SIGNED_OUT`, `LOADING`, `NONE`, `READY`, `ERROR`): un «no existe» de la caché sigue en `LOADING` hasta que responde el servidor, para que el router no mande a Crear perfil antes de tiempo.
+- El listener va con `addSnapshotListener(ioExecutor, MetadataChanges.INCLUDE, …)` y `postValue`; se cambia con cada `AuthStateListener`. Los `Callback` llegan en el `@IoExecutor`.
+- `create(nombre, @usuario, color, ageBand, termsVersion)`, `update(nombre, color)` y `rename(nuevo)` escriben un solo `WriteBatch` con los mapas de `ProfileWrites`. `update` y `rename` leen antes el perfil del servidor.
+- `rename` comprueba los 30 días en el cliente (`RENAME_TOO_SOON`), pero quien manda son las reglas. `canRenameAt(profile)` es `handleChangedAt + 30 días`, o ahora si es null (D-022).
+- Además del plan, `readTermsVersion()` y `acceptTerms(v)` (`users/`) para la rama `ACCEPT_TERMS` del router. `isHandleFree(h)` hace un `get` de `handles/h` al servidor.
+- `HandleValidator`: recorta, quita la `@` y pasa a minúsculas; `^[a-z0-9_.]{3,20}$`; reservados exactos (admin, bbetter, soporte, support, moderator…) y cualquiera que contenga «bbetter». Nombre de 1–30, recortado.
+- `BannedWords`: 57 palabras ES, EN y CA como subcadena, sin acentos ni `. _ - *`. Se quitan raíces cortas con falsos positivos (`puta`, `culo`, `polla`, `nazi`…).
+- Tests: `HandleValidatorTest` (17), `ProfileWritesTest` (8, claves exactas de la lista blanca de u1 y `serverTimestamp()`) y `ProfileTest` (4). Reglas: 36 en verde. `AppDatabase` sigue en la versión 14.
+- Pendiente: la UI que lo usa (u5). Moderación de verdad en L.4.

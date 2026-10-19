@@ -29,6 +29,8 @@
 | D-016 | Configuración del backend en `firebase/` + Emulator Suite | aceptada | 2026-10-19 |
 | D-017 | Fases F0–F5 y gate de lanzamiento L | aceptada | 2026-10-19 |
 | D-018 | Q-06: la tarjeta de compartir de F0 no lleva enlace hasta publicar | aceptada | 2026-10-19 |
+| D-019 | Q-05: el `@usuario` se puede cambiar una vez cada 30 días | aceptada | 2026-10-19 |
+| D-020 | Verificar en API 36 durante el desarrollo; API 24 y el overlay de bloqueo, al final | aceptada | 2026-10-19 |
 
 ---
 
@@ -150,3 +152,23 @@
   enlace a Play ni a ningún otro sitio. El enlace de Play se añade al publicar la app; el enlace de
   invitación con código es de F2.
 - **Por qué:** no hay ficha de Play a la que apuntar, y un enlace inventado o roto sería peor que ninguno.
+
+### D-019 · Q-05: el `@usuario` se puede cambiar una vez cada 30 días
+- **Estado:** aceptada (usuario, 2026-10-19: «1 oportunidad de renombrarse cada 30 días está bien»).
+- **Decisión:** el `@usuario` se puede renombrar como mucho una vez cada 30 días; el anterior queda libre
+  para cualquiera. El nombre visible no tiene ese límite.
+- **Por qué:** permite corregir un `@usuario` mal elegido sin facilitar la suplantación ni confundir a los
+  amigos con cambios frecuentes (P1: solo se encuentra a alguien por su `@usuario` exacto).
+- **Consecuencias:** el perfil guarda cuándo se cambió por última vez y el límite se comprueba en el
+  servidor, no solo en la app; renombrar libera `handles/{viejo}` y reserva `handles/{nuevo}` en la misma
+  transacción (F1.4, F1.5).
+
+### D-020 · Verificar en API 36 durante el desarrollo; API 24 y el overlay de bloqueo, al final
+- **Estado:** aceptada (usuario, 2026-10-19: «la API 24 va a seguir sin probarse, que si no se tarda mucho…
+  ya al final se revisa la 24»).
+- **Decisión:** las fases F1–F5 se verifican en el AVD `api36`. Ejecutar la app en API 24 y probar el
+  overlay de bloqueo pasa a DIF-10, que se revisa en el gate L.
+- **Por qué:** los AVD 24–28 no llegaron a arrancar en esta máquina y montarlos cuesta mucho; el
+  `minSdk 24` sí se compila en cada build.
+- **Consecuencias:** hasta el gate L no hay prueba de que la app funcione en API 24–35. Cualquier API
+  nueva de Android que use F1–F5 necesita su comprobación de versión aunque no se pruebe.

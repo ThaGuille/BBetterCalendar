@@ -65,7 +65,8 @@ en el diario.
 - [ ] **F1.2** Estado «sin cuenta» de los bloques sociales → hoja «Únete a tus amigos» (D-008) — 02 §9
 - [ ] **F1.3** Login con Google (Credential Manager) y email; cerrar sesión — 03 §3
 - [ ] **F1.4** Crear perfil: nombre, `@usuario` único (transacción en `handles/`), color, aceptar
-  términos; `HandleValidator` con lista de palabras prohibidas (Q-05) — 02 §3, 04 §6
+  términos; `HandleValidator` con lista de palabras prohibidas; renombrar el `@usuario` una vez cada 30
+  días (D-019) — 02 §3, 04 §6
 - [ ] **F1.5** Mi perfil (ver y editar) — 02 §3
 - [ ] **F1.6** Borrar cuenta: `deleteAccount` + página web — 03 §7, 04 §2
 - [ ] **F1.7** Saludo y avatar de Home desde el perfil (o un nombre local sin cuenta) — 02 §9
@@ -134,6 +135,7 @@ en el diario.
 | DIF-07 | Grupos de estudio, reto cooperativo, racha compartida | 05 §3 | Tras F5, con datos de uso |
 | DIF-08 | Exportación automática de datos (portabilidad) | 04 §3 | En el gate L, si se considera necesaria |
 | DIF-09 | Pestaña propia de Amigos en la barra inferior | D-012 | Si el uso lo justifica |
+| DIF-10 | Ejecutar la app en API 24 (`minSdk`) y probar el overlay de bloqueo | D-020 (usuario): montar un AVD API 24 cuesta mucho; mientras, se verifica en `api36` | En el gate L, antes de activar lo social en release |
 
 ## Preguntas abiertas
 
@@ -143,7 +145,7 @@ en el diario.
 | Q-02 | ¿Se mide el uso con Firebase Analytics o solo con contadores agregados del backend? | Solo contadores: la política v1 promete «never used for analytics» (04 §4) | Métricas de 02 §11; gate L |
 | Q-03 | ¿Se confirma D-015 (tope de 50 amigos)? (D-013 y D-016 ya confirmadas) | Sí | F2 |
 | Q-04 | Durante el descanso entre pomodoros, ¿el amigo aparece como estudiando, ausente o con un estado propio? | Estado propio «en descanso» en Focus; cuenta como estudiando en Home | F4.1 |
-| Q-05 | ¿Se puede cambiar el `@usuario`? | Sí, una vez cada 30 días; el anterior queda libre | F1.4 |
+| ~~Q-05~~ | ~~¿Se puede cambiar el `@usuario`?~~ Cerrada (D-019): sí, una vez cada 30 días; el anterior queda libre | — | — |
 | ~~Q-06~~ | ~~¿Qué enlace lleva la tarjeta de compartir mientras la app no está publicada?~~ Cerrada (D-018): ninguno, solo la marca «BBetter»; el enlace de Play se añade al publicar | — | — |
 | ~~Q-07~~ | ~~¿Prórroga del target API?~~ Cerrada: no hay nada publicado, así que no aplica | — | — |
 

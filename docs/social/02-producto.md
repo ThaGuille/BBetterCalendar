@@ -37,7 +37,7 @@ El diseño de ahora no debe cerrarles la puerta.
 | Campo | Regla | Quién lo ve |
 |---|---|---|
 | Nombre visible | 1–30 caracteres, se puede repetir entre usuarios | Amigos; también quien busca tu `@usuario` exacto |
-| `@usuario` | 3–20 caracteres `[a-z0-9_.]`, único, sin mayúsculas, con una lista básica de palabras prohibidas. Cambiarlo: Q-05 | Ídem |
+| `@usuario` | 3–20 caracteres `[a-z0-9_.]`, único, sin mayúsculas, con una lista básica de palabras prohibidas. Se puede cambiar una vez cada 30 días y el anterior queda libre (D-019) | Ídem |
 | Avatar | Iniciales + uno de 8 colores de la paleta `bb_*`. **Sin foto** (no hay nada que moderar) | Ídem |
 | Tramo de edad | `14-17` o `18+` (04 §1). No se guarda la fecha de nacimiento en el servidor | Nadie: solo lo leen el backend y las reglas |
 | Email | El de la cuenta (Auth) | Nadie |

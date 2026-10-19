@@ -28,6 +28,5 @@
     <string name="cycle_live">Live</string>
     <string name="cycle_continue">Continue</string>
     <string name="cycle_share">Share my progress</string>
-    <string name="cycle_share_soon">Sharing is coming soon</string>
     <string name="cycle_close_desc">Dismiss</string>
 </resources>

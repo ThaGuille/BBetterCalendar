@@ -24,6 +24,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.bbettercalendar.databinding.ActivityMainBinding;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
+import com.example.bbettercalendar.ui.focus.CycleCompleteFragment;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_DEBUG_NAV_FROM = "bb_debug_from";
     /** Solo debug: packageName para {@code app_detail} (por defecto, el de esta app). */
     public static final String EXTRA_DEBUG_NAV_PACKAGE = "bb_debug_pkg";
+    /** Solo debug: ARG_CYCLES / ARG_FOCUS_MILLIS de {@code cycle_complete} ({@code --ei} / {@code --el}). */
+    public static final String EXTRA_DEBUG_CYCLES = "bb_debug_cycles";
+    public static final String EXTRA_DEBUG_FOCUS_MILLIS = "bb_debug_focus_millis";
 
     private final String TAG = "MainActivityTAG";
     private ActivityMainBinding binding;
@@ -199,7 +203,15 @@ public class MainActivity extends AppCompatActivity {
         int destination;
         switch (target) {
             case "focus": destination = R.id.navigation_focus; break;
-            case "cycle_complete": destination = R.id.navigation_cycle_complete; break;
+            case "cycle_complete":
+                destination = R.id.navigation_cycle_complete;
+                args = new Bundle();
+                args.putInt(CycleCompleteFragment.ARG_CYCLES, intent.getIntExtra(EXTRA_DEBUG_CYCLES, 0));
+                args.putLong(CycleCompleteFragment.ARG_FOCUS_MILLIS,
+                        intent.getLongExtra(EXTRA_DEBUG_FOCUS_MILLIS, 0L));
+                intent.removeExtra(EXTRA_DEBUG_CYCLES);
+                intent.removeExtra(EXTRA_DEBUG_FOCUS_MILLIS);
+                break;
             case "all_progress": destination = R.id.navigation_all_progress; break;
             case "screen_time": destination = R.id.navigation_screen_time; break;
             case "app_detail":

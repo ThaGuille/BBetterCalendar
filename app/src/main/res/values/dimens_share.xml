@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F0-u5 · Share card (view_share_card.xml). The card is drawn at a fixed 1080x1350 px bitmap with
+     a context pinned to 360 dpi / font scale 1, so it is always 480x600 dp / sp. -->
+<resources>
+    <integer name="share_card_px_width">1080</integer>
+    <integer name="share_card_px_height">1350</integer>
+    <integer name="share_card_density_dpi">360</integer>
+
+    <dimen name="share_card_padding">40dp</dimen>
+    <dimen name="share_card_glow_size">480dp</dimen>
+    <dimen name="share_card_glow_radius">240dp</dimen>
+    <dimen name="share_card_brand_dot">14dp</dimen>
+    <dimen name="share_card_brand_gap">10dp</dimen>
+    <dimen name="share_card_eyebrow_text">15sp</dimen>
+    <dimen name="share_card_hero_text">76sp</dimen>
+    <dimen name="share_card_hero_sub_text">20sp</dimen>
+    <dimen name="share_card_stat_text">26sp</dimen>
+    <dimen name="share_card_stat_label_text">15sp</dimen>
+    <dimen name="share_card_tagline_text">14sp</dimen>
+    <dimen name="share_card_divider">1dp</dimen>
+    <dimen name="share_card_gap_md">28dp</dimen>
+    <dimen name="share_card_gap_lg">40dp</dimen>
+    <dimen name="share_card_stat_gap">16dp</dimen>
+    <dimen name="share_card_gap_sm">6dp</dimen>
+</resources>

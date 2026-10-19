@@ -50,13 +50,11 @@ debug, false in release**) through `social/SocialFeature`:
 | `social-celebration-strip` | Cycle complete (u15) | `cycleFriendsStrip` ("Laia and 3 others still studying · Live") | Mock top friend + count (`getCelebrationSnapshot()`) | Real presence (`social-backend`) | P2 (hidden in release) |
 | `home-user-name` | Home (u13/u13b) | `text_home` + `homeAvatar` | Greeting "Hi, Guille" / "Hola, Guille" and avatar "G" copied from the design (`home_user_name_placeholder`) | A stored user/display name (onboarding or settings) → "Hi, <name>" + real initials | P2 |
 | `home-notification-centre` | Home (u13) | `homeBellButton` | Bell with a fixed honey dot; tap shows a "coming soon" toast | Notification centre / inbox screen + unread state for the dot | P2 |
-| `cycle-share` | Cycle complete (u15) | `cycleShareButton` | Toast "Sharing is coming soon" | Share flow | P2 |
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
 | `projects-streak-chip` | Projects (u16) | `projectsStreakChip` | The **global** streak (hidden at 0), not a per-project streak | `focus_event` does not attribute a streak per project | P2 |
 | `progress-tasks-done-approx` | Progress (u17) | `progressTileTasks` | Counts done tasks whose start date falls in the range | A completion timestamp on `CalendarEntry` (schema change + real `Migration`) | P2 |
 | `progress-blocked-opens` | Progress (u17) | `progressBlockingCard` | "23 opens blocked this week" (`MOCK_BLOCKED_OPENS`) | Counting blocked opens in `BlockerAccessibilityService` + storage | P2 |
 | `progress-new-badge` | Progress (u17) | shield dot + NEW chip | Fixed honey dot / NEW chip | A "seen" flag once the blocking feature has an announcement state | P3 |
-| `progress-share` | Progress (u17) | `progressShareButton` | Toast only | Share flow | P2 |
 | `screen-time-blocked-opens` | Screen time (u19) | `screenTimeTileBlocked` / `screenTimeBlockedCount` | "23" (`MOCK_BLOCKED_OPENS`) | Same counter as `progress-blocked-opens` | P2 |
 | `screen-time-new-badge` | Screen time (u19) | `screenTimeBlockNew` | Fixed NEW chip | A "seen" flag | P3 |
 | `app-detail-blocked-opens` | App detail (u20) | `appDetailTileBlocked` / `appDetailBlockedCount` | "6" (`MOCK_BLOCKED_OPENS`) | Per-app blocked-open counter | P2 |
@@ -64,6 +62,8 @@ debug, false in release**) through `social/SocialFeature`:
 ## Resolved
 | id | Date | How |
 |---|---|---|
+| `cycle-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
+| `progress-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
 
 ## History
 | Date | Change | Ref |
@@ -71,3 +71,4 @@ debug, false in release**) through `social/SocialFeature`:
 | 2026-10-06 | Created with the social rows; flag + mock repository | u11 (migracion-visual-stitch) |
 | 2026-10-06 | Home rows (`home-user-name`, `home-notification-centre`); `social-home-friends` view id | u13 |
 | 2026-10-13 | Rows of u13b–u20 consolidated; social data sets split per design | u24 (migracion-visual-stitch-cont) |
+| 2026-10-19 | `cycle-share` and `progress-share` resolved: image card + FileProvider + ACTION_SEND (text only, Q-06) | F0-u5 (social-f0-base) |

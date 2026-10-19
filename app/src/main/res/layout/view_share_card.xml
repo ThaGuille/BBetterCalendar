@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F0-u5 · Share card, rendered off screen to a 1080x1350 bitmap by ShareCardRenderer (never
+     shown in a screen). Focus Sanctuary language: dark pine, amber eyebrow, sage detail. No URL (Q-06). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/shareCardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_sanct_surface">
+
+    <View
+        android:layout_width="@dimen/share_card_glow_size"
+        android:layout_height="@dimen/share_card_glow_size"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_share_card_glow" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/share_card_padding">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="@dimen/share_card_brand_dot"
+                android:layout_height="@dimen/share_card_brand_dot"
+                android:background="@drawable/bg_sanct_dot" />
+
+            <TextView
+                android:id="@+id/shareCardBrand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/share_card_brand_gap"
+                android:text="@string/share_card_brand"
+                android:textAppearance="@style/TextAppearance.BBetter.TopBar.Sanctuary" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/shareCardEyebrow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:letterSpacing="0.08"
+            android:maxLines="1"
+            android:textAllCaps="true"
+            android:textAppearance="@style/TextAppearance.BBetter.Label"
+            android:textColor="@color/bb_sanct_primary"
+            android:textSize="@dimen/share_card_eyebrow_text" />
+
+        <TextView
+            android:id="@+id/shareCardHeroValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/share_card_gap_sm"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.Display"
+            android:textColor="@color/bb_sanct_on_surface"
+            android:textSize="@dimen/share_card_hero_text" />
+
+        <TextView
+            android:id="@+id/shareCardHeroSub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.BBetter.Body"
+            android:textColor="@color/bb_sanct_on_surface_muted"
+            android:textSize="@dimen/share_card_hero_sub_text" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/share_card_divider"
+            android:layout_marginTop="@dimen/share_card_gap_lg"
+            android:background="@color/bb_sanct_divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/share_card_gap_md"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/share_card_stat_gap"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/shareCardStat1Value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.Stat"
+                    android:textColor="@color/bb_sanct_sage_bright"
+                    android:textSize="@dimen/share_card_stat_text" />
+
+                <TextView
+                    android:id="@+id/shareCardStat1Label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label"
+                    android:textColor="@color/bb_sanct_on_surface_muted"
+                    android:textSize="@dimen/share_card_stat_label_text" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/shareCardStat2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/shareCardStat2Value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.Stat"
+                    android:textColor="@color/bb_sanct_sage_bright"
+                    android:textSize="@dimen/share_card_stat_text" />
+
+                <TextView
+                    android:id="@+id/shareCardStat2Label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label"
+                    android:textColor="@color/bb_sanct_on_surface_muted"
+                    android:textSize="@dimen/share_card_stat_label_text" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/share_card_gap_lg"
+            android:text="@string/share_card_tagline"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            android:textColor="@color/bb_sanct_on_surface_faint"
+            android:textSize="@dimen/share_card_tagline_text" />
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F0-u5 · Tarjeta de compartir + texto del selector (Q-06: solo texto, sin enlace). -->
+<resources>
+    <string name="share_card_brand" translatable="false">BBetter</string>
+    <string name="share_card_tagline">Pequeños pasos, cada día.</string>
+    <string name="share_cycle_eyebrow">Ciclo completado</string>
+    <string name="share_cycle_hero_sub">de enfoque en esta sesión</string>
+    <string name="share_cycle_stat_cycles_label">Completados</string>
+    <string name="share_cycle_stat_streak_label">Racha semanal</string>
+    <string name="share_progress_hero_sub">de tiempo de enfoque</string>
+    <string name="share_progress_stat_label">Constancia</string>
+    <string name="share_cycle_text">Acabo de completar %1$s de enfoque con BBetter.</string>
+    <string name="share_progress_text">Mi enfoque (%1$s): %2$s con BBetter.</string>
+    <string name="share_chooser_title">Comparte tu progreso</string>
+    <string name="share_error">No se pudo preparar la imagen para compartir</string>
+</resources>

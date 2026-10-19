@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -24,6 +23,7 @@ import com.example.bbettercalendar.databinding.FragmentProgressBinding;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.ConsistencyCalculator;
 import com.example.bbettercalendar.ui.common.chart.ChartStyler;
+import com.example.bbettercalendar.ui.common.share.ShareCardRenderer;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.ProgressRowView;
 import com.example.bbettercalendar.ui.common.widget.StatTileView;
@@ -46,6 +46,7 @@ public class ProgressFragment extends Fragment {
 
     private FragmentProgressBinding binding;
     private ProgressViewModel viewModel;
+    private final ShareCardRenderer shareRenderer = new ShareCardRenderer();
 
     // u17: pantalla rediseñada (html 13). Las vistas que se repintan se resuelven una vez.
     private StatTileView tileFocus;
@@ -98,9 +99,37 @@ public class ProgressFragment extends Fragment {
         binding.progressManageBlocking.setOnClickListener(v -> openScreenTime());
         binding.progressSeeAll.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigate(R.id.navigation_all_progress));
-        // PLACEHOLDER(ui-placeholders#progress-share): sin informe que compartir todavía.
-        binding.progressShareButton.setOnClickListener(v ->
-                Toast.makeText(requireContext(), R.string.progress_share_soon, Toast.LENGTH_SHORT).show());
+        // F0-u5: tarjeta-imagen del periodo + ACTION_SEND solo con texto (Q-06, sin enlace).
+        shareRenderer.attach(this, binding.progressShareButton);
+        binding.progressShareButton.setOnClickListener(v -> {
+            ShareCardRenderer.Card card = buildShareCard();
+            if (card != null) {
+                shareRenderer.share(requireActivity(), card);
+            }
+        });
+    }
+
+    /** Total de enfoque y constancia del periodo seleccionado; null mientras carga. */
+    private ShareCardRenderer.Card buildShareCard() {
+        ProgressOverview o = viewModel.getOverview().getValue();
+        TimeRange range = viewModel.getSelectedRange().getValue();
+        if (o == null || range == null) return null;
+        String label = range.label(requireContext());
+        String focus = FormatHelper.formatDuration(o.focusMinutes * 60_000L);
+        ConsistencyCalculator.Result c = o.consistency;
+        String constancy = c == null || c.countedDays == 0
+                ? getString(R.string.progress_consistency_none)
+                : getResources().getQuantityString(R.plurals.progress_consistency_value,
+                        c.countedDays, c.activeDays, c.countedDays);
+        return new ShareCardRenderer.Card(
+                label,
+                focus,
+                getString(R.string.share_progress_hero_sub),
+                constancy,
+                getString(R.string.share_progress_stat_label),
+                null, null,
+                getString(R.string.share_progress_text, label, focus),
+                "bbetter-progress-card.png");
     }
 
     private void openScreenTime() {

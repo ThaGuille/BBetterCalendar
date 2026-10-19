@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F0-u5 · Share card + chooser text (Q-06: text only, no link). Spanish in values-es. -->
+<resources>
+    <string name="share_card_brand" translatable="false">BBetter</string>
+    <string name="share_card_tagline">Small steps, every day.</string>
+    <string name="share_cycle_eyebrow">Cycle complete</string>
+    <string name="share_cycle_hero_sub">of focus this session</string>
+    <string name="share_cycle_stat_cycles_label">Completed</string>
+    <string name="share_cycle_stat_streak_label">Weekly streak</string>
+    <string name="share_progress_hero_sub">of focus time</string>
+    <string name="share_progress_stat_label">Consistency</string>
+    <string name="share_cycle_text">I just finished %1$s of focus with BBetter.</string>
+    <string name="share_progress_text">My focus (%1$s): %2$s with BBetter.</string>
+    <string name="share_chooser_title">Share your progress</string>
+    <string name="share_error">Couldn\'t prepare the image to share</string>
+</resources>

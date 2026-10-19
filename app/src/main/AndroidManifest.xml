@@ -74,6 +74,18 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.BBetter.NoActionBar"/>
 
+        <!-- F0-u5: shares the PNG share cards (cache/shared/ only, see res/xml/file_paths.xml).
+             The authority is built from the applicationId, never from the namespace. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <service
             android:name=".ui.home.HomeForegroundService"
             android:foregroundServiceType="specialUse" />

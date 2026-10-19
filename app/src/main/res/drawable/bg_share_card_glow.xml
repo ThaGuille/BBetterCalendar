@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F0-u5: soft amber halo behind the top of the share card. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="radial"
+        android:centerX="0.5"
+        android:centerY="0.5"
+        android:gradientRadius="@dimen/share_card_glow_radius"
+        android:startColor="@color/bb_sanct_glow_start"
+        android:endColor="@color/bb_sanct_glow_end" />
+</shape>

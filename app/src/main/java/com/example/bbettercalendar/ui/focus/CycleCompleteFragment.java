@@ -9,7 +9,6 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -26,6 +25,7 @@ import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialRank;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.stats.StreakCalculator;
+import com.example.bbettercalendar.ui.common.share.ShareCardRenderer;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.example.bbettercalendar.ui.home.FocusTarget;
 
@@ -49,6 +49,12 @@ public class CycleCompleteFragment extends Fragment {
 
     private FocusSessionViewModel session;
     private CycleCompleteViewModel viewModel;
+
+    private final ShareCardRenderer shareRenderer = new ShareCardRenderer();
+    // What the screen shows, kept for the share card.
+    private int shareCycles;
+    private long shareFocusMillis;
+    @Nullable private StreakCalculator.Result shareStreak;
 
     private TextView streakValue;
     private TextView streakSub;
@@ -85,9 +91,10 @@ public class CycleCompleteFragment extends Fragment {
 
         view.findViewById(R.id.cycleContinueButton).setOnClickListener(v -> finish());
         view.findViewById(R.id.cycleCloseButton).setOnClickListener(v -> finish());
-        // PLACEHOLDER(ui-placeholders#cycle-share): no share flow yet.
-        view.findViewById(R.id.cycleShareButton).setOnClickListener(v ->
-                Toast.makeText(requireContext(), R.string.cycle_share_soon, Toast.LENGTH_SHORT).show());
+        // F0-u5: image card of this session + text-only ACTION_SEND (Q-06, no link).
+        View shareButton = view.findViewById(R.id.cycleShareButton);
+        shareRenderer.attach(this, shareButton);
+        shareButton.setOnClickListener(v -> shareRenderer.share(requireActivity(), buildShareCard()));
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(),
                 new OnBackPressedCallback(true) {
                     @Override
@@ -116,6 +123,9 @@ public class CycleCompleteFragment extends Fragment {
             FocusUiState state = session.getUiState().getValue();
             cycles = state == null ? 0 : state.getCyclesCompleted();
         }
+
+        shareCycles = cycles;
+        shareFocusMillis = focusMillis;
 
         String count = getResources().getQuantityString(R.plurals.cycle_pomodoros, cycles, cycles);
         String title = FocusTarget.isSet() ? FocusTarget.getTitle() : null;
@@ -146,6 +156,7 @@ public class CycleCompleteFragment extends Fragment {
         if (streakValue == null) {
             return;
         }
+        shareStreak = streak;
         // Weekly streak (plan racha-semanal-y-constancia): weeks in a row meeting the goal.
         int weeks = streak == null ? 0 : streak.weekStreak;
         int best = streak == null ? 0 : streak.bestWeekStreak;
@@ -223,6 +234,22 @@ public class CycleCompleteFragment extends Fragment {
             }
         }
         return getString(res, n);
+    }
+
+    /** Same values the screen shows: focus tile (cycles x length), cycles and the weekly streak. */
+    private ShareCardRenderer.Card buildShareCard() {
+        String focus = FormatHelper.formatDuration(shareCycles * shareFocusMillis);
+        int weeks = shareStreak == null ? 0 : shareStreak.weekStreak;
+        return new ShareCardRenderer.Card(
+                getString(R.string.share_cycle_eyebrow),
+                focus,
+                getString(R.string.share_cycle_hero_sub),
+                getResources().getQuantityString(R.plurals.cycle_pomodoros, shareCycles, shareCycles),
+                getString(R.string.share_cycle_stat_cycles_label),
+                getResources().getQuantityString(R.plurals.streak_weeks, weeks, weeks),
+                getString(R.string.share_cycle_stat_streak_label),
+                getString(R.string.share_cycle_text, focus),
+                "bbetter-cycle-card.png");
     }
 
     /** Continue / close / back: the session shows idle again and Home is next on the stack. */

@@ -5,7 +5,6 @@
     <string name="progress_range_this_year">Este año</string>
     <string name="progress_header_screen_time_cd">Tiempo de pantalla y bloqueo</string>
     <string name="progress_header_share_cd">Compartir informe de progreso</string>
-    <string name="progress_share_soon">Compartir tu progreso llegará pronto</string>
 
     <string name="progress_tile_focus_time">Tiempo de foco</string>
     <string name="progress_tile_sessions">Sesiones</string>

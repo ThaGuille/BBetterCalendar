@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-19 (F1-u1 hecha)
 
 > Tablero: [sistema-social.md](sistema-social.md) · Guía: 02 §3, §9 · 03 §3, §5, §6, §7, §10 · 04 §1, §2, §6
 > Decisiones que aplica: D-002, D-008, D-010, D-011, D-012, D-013, D-016, D-019 – D-024 · Preguntas que debe cerrar: ninguna (las del usuario se cerraron al abrir la fase con D-021 – D-024)
@@ -34,7 +34,7 @@ Quien quiera usar Amigos puede, desde un bloque social, pasar la puerta de edad,
 
 | Unidad | Qué | Ficheros principales | Verificación | Estado |
 |---|---|---|---|---|
-| **F1-u1** | Reglas de `users/`, `profiles/` y `handles/` (unicidad, renombrado cada 30 días en el servidor, lista blanca de campos) + tests | `firebase/firestore.rules`, `firebase/tests/profiles-handles.test.js` (nuevo), `firebase/tests/deny-all.test.js` (ajustar), `firebase/README.md` | `firebase emulators:exec` en verde; prueba de mutación (abrir una regla hace fallar su test) | pendiente |
+| **F1-u1** | Reglas de `users/`, `profiles/` y `handles/` (unicidad, renombrado cada 30 días en el servidor, lista blanca de campos) + tests | `firebase/firestore.rules`, `firebase/tests/profiles-handles.test.js` (nuevo), `firebase/tests/deny-all.test.js` (ajustar), `firebase/README.md` | `firebase emulators:exec` en verde; prueba de mutación (abrir una regla hace fallar su test) | hecha |
 | **F1-u2** | Núcleo de cuenta: Credential Manager + Auth, puerta de edad, preferencias locales y router de entrada | `app/build.gradle` (+ `androidx.credentials`, `credentials-play-services-auth`, `googleid`), `social/account/AccountRepository`, `AgeGate`, `GoogleSignInHelper`, `SocialPrefs`, `SocialEntryRouter` (nuevos), `social/SocialFeature.java` (+ `isAccountEnabled()`), javadoc de `social/firebase/FirebaseModule.java` | JUnit `AgeGateTest` y `SocialEntryRouterTest`; `test assembleDebug` | pendiente |
 | **F1-u3** | Datos del perfil: crear (lote atómico), editar, renombrar, observar; `HandleValidator` | `social/profile/ProfileRepository`, `Profile`, `HandleValidator`, `BannedWords` (nuevos) | JUnit `HandleValidatorTest`; contrato de escritura igual al de los tests de u1 | pendiente |
 | **F1-u4** | UI de entrada (F1.1–F1.3): puerta de edad, pantalla «por debajo del umbral», hoja «Únete a tus amigos», pantalla de email; estado «sin cuenta» en Focus y Home | `ui/social/AgeGateFragment`, `UnderageFragment`, `JoinFriendsSheet`, `EmailSignInFragment` (nuevos), `res/navigation/mobile_navigation.xml`, `ui/focus/FocusFragment.java`, `ui/home/HomeFragment.java`, `values/strings_social.xml` (+es), `dimens_social.xml`, `styles_social.xml` | adb-ui-test en `api36` con emuladores: Focus → puerta → menor → pantalla amable; mayor → hoja → alta por email → sesión; Google abre el selector; sin `FATAL EXCEPTION` | pendiente |
@@ -202,3 +202,15 @@ Modelo: opus para u1, u3 y u6 (reglas y transacciones); sonnet + `impeccable` pa
 ## Notas de unidades
 
 <!-- Una sección por unidad al terminarla: ### F1-uN · <título> — `<commit>` + ≤10 líneas -->
+
+### F1-u1 · Reglas de `users/`, `profiles/` y `handles/` + tests — commit «F1-u1: reglas de users/, profiles/ y handles/ con sus tests»
+
+- `firestore.rules`: `users/` y `profiles/` solo del dueño, con lista blanca exacta; `handles/` con `get` para quien tenga sesión y sin `list`. El resto, denegado.
+- Crear, renombrar y liberar se validan con `getAfter`/`existsAfter`. Al renombrar, el `@usuario` viejo tiene que desaparecer en el mismo lote (no hay un segundo).
+- Más que el plan: el cliente no puede borrar `users/` ni `profiles/` (lo hará `deleteAccount`, u6), `createdAt` no cambia y `termsVersion` no baja.
+- Además, `handleChangedAt` solo cambia al renombrar, así que no se puede borrar para reabrir la ventana de 30 días.
+- La tarjeta de `handles/` tiene que copiar `displayName` y `avatarColor` del perfil final, así que u3 los escribe en el mismo lote.
+- Contrato para u3: `createdAt`, `termsAcceptedAt` y `handleChangedAt` con `serverTimestamp()`; el perfil se crea sin `handleChangedAt` (D-022).
+- Tests: `profiles-handles.test.js` (nuevo, 29 casos) y `deny-all.test.js` ajustado (`stats/`, `friendRequests/`, `blocks/`, `reports/`, subcolecciones, RTDB), con el control positivo. 36 en verde.
+- Los dos ficheros leen `BB_FIRESTORE_RULES`. La mutación mata 4/4 (abrir `handles/`, `profiles/` o `users/`, o quitar los 30 días), con una copia del script que llama al bash de Git: el original arranca el de WSL de `System32`, que no tiene distribución.
+- Pendiente: `isFriend` en `profiles/` (F2). Las palabras prohibidas siguen en el cliente (u3) y la moderación en L.4.

@@ -3,8 +3,177 @@ rules_version = '2';
 // F0-u3: todo denegado. Cada fase abre solo lo suyo (F1 profiles/handles, F2 friendRequests/friends/blocks,
 // F3 stats...), siempre con su test en firebase/tests/. Las Functions escriben con el Admin SDK, que se
 // salta estas reglas.
+//
+// F1-u1 abre users/{uid}, profiles/{uid} y handles/{h} (03 §5 §6, D-019, D-022). Contrato con el cliente
+// (ProfileRepository, F1-u3): crear, renombrar y liberar van en un solo WriteBatch, y estas reglas leen el
+// estado final con getAfter/existsAfter. Los timestamps (createdAt, termsAcceptedAt, handleChangedAt) se
+// escriben con serverTimestamp(): aquí se comparan con request.time. Las palabras prohibidas NO se miran
+// aquí (cliente, HandleValidator; moderación de verdad en L.4). Borrar users/ o profiles/ solo lo hace la
+// callable deleteAccount (Admin SDK): así no quedan @usuario huérfanos.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function profilePath(uid) {
+      return /databases/$(database)/documents/profiles/$(uid);
+    }
+
+    function handlePath(h) {
+      return /databases/$(database)/documents/handles/$(h);
+    }
+
+    function validDisplayName(n) {
+      return n is string && n.size() >= 1 && n.size() <= 30;
+    }
+
+    function validAvatarColor(c) {
+      return c is int && c >= 0 && c <= 7;
+    }
+
+    // ---- users/{uid} ----------------------------------------------------------------------------------
+
+    function validUser(d) {
+      return d.keys().hasOnly(['createdAt', 'ageBand', 'termsVersion', 'termsAcceptedAt'])
+          && d.keys().hasAll(['createdAt', 'ageBand', 'termsVersion', 'termsAcceptedAt'])
+          && d.createdAt is timestamp
+          && d.ageBand in ['14-17', '18+']
+          && d.termsVersion is int && d.termsVersion >= 1
+          && d.termsAcceptedAt is timestamp;
+    }
+
+    function validUserCreate() {
+      let d = request.resource.data;
+      return validUser(d) && d.createdAt == request.time && d.termsAcceptedAt == request.time;
+    }
+
+    // Re-aceptar términos: termsVersion no baja y termsAcceptedAt, si cambia, es request.time.
+    function validUserUpdate() {
+      let d = request.resource.data;
+      return validUser(d)
+          && d.createdAt == resource.data.createdAt
+          && d.termsVersion >= resource.data.termsVersion
+          && (d.termsAcceptedAt == resource.data.termsAcceptedAt || d.termsAcceptedAt == request.time);
+    }
+
+    // ---- profiles/{uid} -------------------------------------------------------------------------------
+
+    function validProfile(d) {
+      return d.keys().hasOnly(['displayName', 'handle', 'avatarColor', 'createdAt', 'handleChangedAt'])
+          && d.keys().hasAll(['displayName', 'handle', 'avatarColor', 'createdAt'])
+          && validDisplayName(d.displayName)
+          && d.handle is string && d.handle.matches('^[a-z0-9_.]{3,20}$')
+          && validAvatarColor(d.avatarColor)
+          && d.createdAt is timestamp;
+    }
+
+    // El @usuario del perfil, en el estado final del lote, es de quien escribe.
+    function ownsHandleAfter(h) {
+      return existsAfter(handlePath(h)) && getAfter(handlePath(h)).data.uid == request.auth.uid;
+    }
+
+    // D-022: el perfil se crea sin handleChangedAt, así el primer renombrado es libre.
+    function validProfileCreate() {
+      let d = request.resource.data;
+      return validProfile(d)
+          && !('handleChangedAt' in d)
+          && d.createdAt == request.time
+          && ownsHandleAfter(d.handle);
+    }
+
+    // D-019: cada 30 días como mucho (el primero libre, D-022). El viejo se libera en el mismo lote.
+    function validRename() {
+      let d = request.resource.data;
+      let old = resource.data;
+      return (!('handleChangedAt' in old)
+              || request.time >= old.handleChangedAt + duration.value(30, 'd'))
+          && d.handleChangedAt == request.time
+          && !existsAfter(handlePath(old.handle));
+    }
+
+    function validProfileUpdate() {
+      let d = request.resource.data;
+      let old = resource.data;
+      return validProfile(d)
+          && d.createdAt == old.createdAt
+          && ownsHandleAfter(d.handle)
+          && (d.handle == old.handle
+              ? d.get('handleChangedAt', null) == old.get('handleChangedAt', null)
+              : validRename());
+    }
+
+    // ---- handles/{h} ----------------------------------------------------------------------------------
+
+    // La tarjeta pública mínima copia el nombre y el color del perfil en su estado final.
+    function matchesProfileAfter(d) {
+      let p = getAfter(profilePath(request.auth.uid)).data;
+      return d.displayName == p.displayName && d.avatarColor == p.avatarColor;
+    }
+
+    function validHandleCard(d) {
+      return d.keys().hasOnly(['uid', 'displayName', 'avatarColor'])
+          && d.keys().hasAll(['uid', 'displayName', 'avatarColor'])
+          && validDisplayName(d.displayName)
+          && validAvatarColor(d.avatarColor);
+    }
+
+    // Solo se reserva el @usuario al que apunta el propio perfil: uno por persona, sin acaparar.
+    function validHandleCreate(h) {
+      let d = request.resource.data;
+      return signedIn()
+          && validHandleCard(d)
+          && d.uid == request.auth.uid
+          && existsAfter(profilePath(request.auth.uid))
+          && getAfter(profilePath(request.auth.uid)).data.handle == h
+          && matchesProfileAfter(d);
+    }
+
+    function validHandleUpdate() {
+      let d = request.resource.data;
+      return signedIn()
+          && resource.data.uid == request.auth.uid
+          && d.diff(resource.data).affectedKeys().hasOnly(['displayName', 'avatarColor'])
+          && validHandleCard(d)
+          && matchesProfileAfter(d);
+    }
+
+    // Solo se libera cuando el perfil ya no apunta a él (renombrado en el mismo lote).
+    function validHandleDelete(h) {
+      return signedIn()
+          && resource.data.uid == request.auth.uid
+          && (!existsAfter(profilePath(request.auth.uid))
+              || getAfter(profilePath(request.auth.uid)).data.handle != h);
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && validUserCreate();
+      allow update: if isOwner(uid) && validUserUpdate();
+      allow delete: if false;
+    }
+
+    // F1: solo el dueño lee; los amigos llegan en F2 (isFriend, 03 §6).
+    match /profiles/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && validProfileCreate();
+      allow update: if isOwner(uid) && validProfileUpdate();
+      allow delete: if false;
+    }
+
+    match /handles/{h} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if validHandleCreate(h);
+      allow update: if validHandleUpdate();
+      allow delete: if validHandleDelete(h);
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-19 (F0 hecha)
+**Last updated:** 2026-10-19 (F1-u1 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -17,8 +17,8 @@
 
 - **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
   F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
-- **Siguiente paso:** los prerrequisitos de consola del plan de F1 (proveedores de Auth, nuevo
-  `google-services.json`, SHA-1 de debug, cuenta de Google en `api36`) y después la ola 1 (F1-u1 ∥ F1-u2).
+- **Siguiente paso:** F1-u1 hecha (reglas de `users/`, `profiles/` y `handles/`). Sigue F1-u2 (núcleo de
+  cuenta); después u3 y u6, que dependen de u1.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -152,6 +152,11 @@ en el diario.
 ## Diario
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
+
+- **2026-10-19 (8)** · F1-u1 hecha: reglas de `users/`, `profiles/` y `handles/` (dueño, lista blanca, un
+  `@usuario` por persona, renombrado cada 30 días con el primero libre) y 36 tests de reglas en verde; la
+  mutación mata 4/4. Commit «F1-u1: reglas de users/, profiles/ y handles/ con sus tests». **Siguiente:** F1-u2
+  (núcleo de cuenta) y después u3 y u6, que dependen de u1.
 
 - **2026-10-19 (7)** · **F1 abierta:** plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (9 unidades en 4
   olas). Q-05 cerrada con D-019; decisiones de apertura D-020 (API 24 al final, DIF-10) y D-021 – D-024

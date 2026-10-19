@@ -28,6 +28,7 @@
 | D-015 | Tope de 50 amigos | propuesta | 2026-10-19 |
 | D-016 | Configuración del backend en `firebase/` + Emulator Suite | aceptada | 2026-10-19 |
 | D-017 | Fases F0–F5 y gate de lanzamiento L | aceptada | 2026-10-19 |
+| D-018 | Q-06: la tarjeta de compartir de F0 no lleva enlace hasta publicar | aceptada | 2026-10-19 |
 
 ---
 
@@ -142,3 +143,10 @@
   de F3 y F5).
 - **Decisión:** F0 base → F1 cuenta → F2 amigos → F3 stats y ranking → F4 presencia → F5 interacción.
   Lo social no se activa en release hasta pasar el gate L. F6 en adelante está en [05](05-futuro.md).
+
+### D-018 · Q-06: la tarjeta de compartir de F0 no lleva enlace hasta publicar
+- **Estado:** aceptada (usuario, 2026-10-19: la app no está publicada).
+- **Decisión:** la tarjeta-imagen de F0 lleva solo la marca «BBetter» y `EXTRA_TEXT` es solo texto, sin
+  enlace a Play ni a ningún otro sitio. El enlace de Play se añade al publicar la app; el enlace de
+  invitación con código es de F2.
+- **Por qué:** no hay ficha de Play a la que apuntar, y un enlace inventado o roto sería peor que ninguno.

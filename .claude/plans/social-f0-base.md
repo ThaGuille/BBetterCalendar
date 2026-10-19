@@ -1,8 +1,8 @@
 # Social F0 — Base
 
-**Status:** in progress
+**Status:** merged
 **Created:** 2026-10-19
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-19 (cierre de F0)
 
 > Tablero: [sistema-social.md](sistema-social.md) · Guía: 03 §2, §3, §10, §11 · 04 §4 · 02 §9
 > Decisiones que aplica: D-002, D-003, D-004, D-013, D-016 · Preguntas que debe cerrar: Q-06, Q-07
@@ -48,8 +48,8 @@ Se pueden hacer en paralelo con u1 y u2. Son necesarios antes de u3 y u4.
 | **F0-u2** | Edge-to-edge e insets en todas las pantallas; back predictivo | `ui/common/InsetsHelper` (nuevo), `TopBarHelper`, `MainActivity`, las 4 activities, sheets | `ui-tester` + capturas en API 36 de cada pantalla (barra de estado y de navegación sin solapes) | opus | hecha |
 | **F0-u3** | `firebase/` + emuladores + reglas que lo deniegan todo + test de reglas | `firebase/firebase.json`, `.firebaserc`, `firestore.rules`, `database.rules.json`, `functions/` (esqueleto TS), `tests/` | `firebase emulators:exec` ejecuta el test «todo denegado» en verde | sonnet | hecha |
 | **F0-u4** | Gradle Firebase + `FirebaseModule` + flags | `build.gradle` (raíz y app), `social/firebase/FirebaseModule`, `google-services.json` | `assembleDebug`; ping de debug contra el emulador devuelve `PERMISSION_DENIED` (prueba la conexión) | sonnet | hecha |
-| **F0-u5** | Compartir: tarjeta-imagen + enlace | `ui/common/share/ShareCardRenderer`, `layout/view_share_card.xml`, `FileProvider` en el manifest, `CycleCompleteFragment`, `ProgressFragment`, `strings_share.xml` (+es) | `ui-tester`: los dos botones abren el menú de compartir con imagen y texto; placeholders resueltos | sonnet + `impeccable` | pendiente |
-| **F0-u6** | Borradores legales restantes | `docs/legal/terms-draft.md`, `docs/legal/delete-account-draft.md`, `docs/_config.yml` | Están excluidos de Pages | sonnet | pendiente |
+| **F0-u5** | Compartir: tarjeta-imagen + enlace | `ui/common/share/ShareCardRenderer`, `layout/view_share_card.xml`, `FileProvider` en el manifest, `CycleCompleteFragment`, `ProgressFragment`, `strings_share.xml` (+es) | `ui-tester`: los dos botones abren el menú de compartir con imagen y texto; placeholders resueltos | sonnet + `impeccable` | hecha |
+| **F0-u6** | Borradores legales restantes | `docs/legal/terms-draft.md`, `docs/legal/delete-account-draft.md`, `docs/_config.yml` | Están excluidos de Pages | sonnet | hecha |
 
 Orden: **u1 → u2**. u3 y u4 van tras los prerrequisitos, y u4 tras u1. u5 va tras u2 (para no
 arreglar los insets dos veces). u6 es independiente.
@@ -164,15 +164,23 @@ bajo las barras, y en 36 ya no se puede desactivar.
 
 ## Hecho cuando
 
-- [ ] `.\gradlew.bat test assembleDebug assembleRelease` en verde con min 24 y target/compile 36.
-- [ ] Ninguna pantalla solapa las barras del sistema en API 36, según las capturas de u2; back
-  funciona en todas.
-- [ ] `firebase emulators:exec` pasa el test «todo denegado».
-- [ ] El ping de debug llega al emulador (`PERMISSION_DENIED`).
-- [ ] Compartir funciona en Cycle complete y Progress; `cycle-share` y `progress-share` resueltos.
-- [ ] Borradores legales en `docs/legal/` excluidos de Pages.
-- [ ] Verificación con `ui-tester` (regla #7) sin `FATAL EXCEPTION`.
-- [ ] Tablero: F0 hecha, entregables marcados, diario actualizado.
+- [x] `.\gradlew.bat test assembleDebug assembleRelease` en verde con min 24 y target/compile 36
+  (BUILD SUCCESSFUL en la rama de cierre, cierre de F0 del 2026-10-19).
+- [x] Ninguna pantalla solapa las barras del sistema en API 36, según las capturas de u2; back
+  funciona en todas (comprobado en API 36, 37 y 32; ver la nota de F0-u2).
+- [x] `firebase emulators:exec` pasa el test «todo denegado» (5 tests en verde, nota de F0-u3).
+- [x] El ping de debug llega al emulador (`PERMISSION_DENIED`; nota de F0-u4, el emulador se infiere del log).
+- [x] Compartir funciona en Cycle complete y Progress; `cycle-share` y `progress-share` resueltos
+  (selector con imagen y texto en AVD api36, nota de F0-u5).
+- [x] Borradores legales en `docs/legal/` excluidos de Pages (política v2, términos y borrado; Pages
+  solo publica `legal/privacy-policy.md`).
+- [ ] Verificación con `ui-tester` (regla #7) sin `FATAL EXCEPTION`: pendiente en parte. Sin crashes
+  en API 36/37/32 (u2, u4, u5), pero el overlay de bloqueo sigue sin probar y no existe AVD API 24.
+- [x] Tablero: F0 hecha, entregables marcados, diario actualizado.
+
+Sin probar, y no se da por hecho: **no existe AVD API 24** (los AVD 24-28 nunca arrancaron, así que el
+`minSdk` solo está compilado, no ejecutado en API 24) y el **overlay de bloqueo** del servicio de
+accesibilidad no se ha probado en ningún dispositivo. Ambos pasan a F1 / gate L.
 
 ## Notas de unidades
 
@@ -220,3 +228,21 @@ bajo las barras, y en 36 ya no se puede desactivar.
 - Flags: `FEATURE_SOCIAL` (debug `true`, release `false`; sin efecto hasta F4) y `USE_FIREBASE_EMULATOR` (debug por `-PfirebaseEmulator`, por defecto `true`; release `false`). Debug añade `network_security_config` que permite HTTP en claro solo a `10.0.2.2` y `localhost`.
 - Ping en `DebugGalleryActivity` (botón «Ping Firestore»): `PERMISSION_DENIED (expected)` contra el **emulador** y contra el **proyecto real**. Que fuera el emulador se infiere del log (`false for 'get' @ L9`, texto del evaluador de reglas local).
 - Pendiente: restringir la clave de API a la app y su SHA-1 en Google Cloud (mitigación del plan, antes de publicar). Hallazgo previo, no de esta unidad: la vista semanal no dibuja la línea de «ahora» (`showNowLine` nunca se activa).
+
+### F0-u5 · Compartir — commit «F0-u5: compartir con tarjeta-imagen, FileProvider y ACTION_SEND en Cycle complete y Progress»
+
+- Nuevo ui/common/share/ShareCardRenderer: infla view_share_card.xml con un contexto tematizado fijado a 360 dpi y fontScale 1 (siempre 480x600 dp = bitmap 1080x1350), lo dibuja en el hilo principal y escribe el PNG en cache/shared/ en un ExecutorService; el chooser vuelve por LiveData.postValue (SingleEvent). Boton desactivado mientras se renderiza; se podan los PNG viejos.
+- Q-06: la tarjeta lleva solo la marca BBetter y EXTRA_TEXT es solo texto, sin enlace. ClipData + FLAG_GRANT_READ_URI_PERMISSION para la vista previa.
+- FileProvider ${applicationId}.fileprovider (exported=false) con res/xml/file_paths.xml solo cache/shared/; la autoridad se arma con getPackageName().
+- Cycle complete: minutos de la sesion, ciclos y racha semanal. Progress: etiqueta y total del periodo y constancia (la segunda columna de la tarjeta queda oculta).
+- cycle-share y progress-share resueltos en ui-placeholders.md; quitadas las cadenas *_share_soon. Recursos en strings_share/dimens_share (+ values-es).
+- MainActivity (solo debug): extras bb_debug_cycles y bb_debug_focus_millis para cycle_complete.
+- Verificado en AVD api36: ambos selectores con imagen y texto, 0 crashes. Pendiente: probar con usuarios reales de otras apps (sin enlace hasta publicar).
+
+### F0-u6 · Legales — commit «F0-u6: borradores de terminos de uso y de borrado de cuenta, fuera de Pages»
+
+- Nuevos docs/legal/terms-draft.md y docs/legal/delete-account-draft.md (ingles, mismo formato que privacy-policy-v2-draft.md: front matter con permalink /legal/..., bloque DRAFT, marcadores [CONFIRM]).
+- Terminos: edad minima 14 para Amigos (D-010; el resto de la app sin limite), conducta, motivos de suspension, moderacion, contacto yonkiporki@gmail.com.
+- Borrado: desde la app (Mi perfil, callable deleteAccount) y por email; que se borra, que se conserva y que queda en el dispositivo.
+- docs/_config.yml excluye ambos hasta el gate L.2; check_pages.py sigue dando solo la politica v1.
+- Pendiente: los [CONFIRM] dependen de F1 (flujo de borrado F1.6, aceptacion de terminos F1.4, plazos de retencion) y de revision legal antes de L.2.

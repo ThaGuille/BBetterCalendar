@@ -213,7 +213,8 @@ ui/social/         age gate, hoja de login, crear perfil, mi perfil, amigos, añ
   arranque, `InstallReferrerReader` (`com.android.installreferrer`) lo lee y propone la solicitud. Puede
   llegar vacío en instalaciones fuera de Play: entonces el usuario escribe el `@usuario`.
 - **QR:** el mismo enlace como imagen, generado en local (librería ligera, a elegir en F2).
-- **Compartir de F0:** la tarjeta-imagen lleva el enlace a Play (sin código) hasta que exista F2.
+- **Compartir de F0:** la tarjeta-imagen lleva solo la marca «BBetter» y el texto no incluye enlace: la app
+  no está publicada (D-018). El enlace de Play se añade al publicar y el de invitación con código llega en F2.
 - El dominio propio de GitHub Pages (`thaguille.github.io/BBetterCalendar/`) **no sirve** para App
   Links, porque `assetlinks.json` tiene que estar en la raíz del dominio. Por eso se usa Hosting.
 

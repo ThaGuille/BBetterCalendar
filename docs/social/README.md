@@ -143,3 +143,4 @@ el usuario, también se registra una `D-xxx`.
 | Fecha | Cambio | Ref |
 |---|---|---|
 | 2026-10-19 | Guía creada a partir de la investigación inicial (informe del Bench Log «Sistema social: amigos, perfil y stats compartidas») | D-001 … D-017 |
+| 2026-10-19 | Q-06 cerrada: la tarjeta de compartir de F0 no lleva enlace hasta publicar; se corrige 03 §11 | D-018 |

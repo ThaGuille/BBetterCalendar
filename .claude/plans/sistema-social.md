@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-19 (F0 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,9 +15,10 @@
 
 ## Ahora
 
-- **Fase activa:** **F0** · plan [`social-f0-base.md`](social-f0-base.md) (`in progress`).
-- **En curso:** F0-u1 y F0-u2 hechas; siguen u3–u6. En paralelo, el usuario hace los pasos de consola
-  (prerrequisitos del plan) que necesitan u3 y u4.
+- **Fase activa:** ninguna. **F0 hecha** · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
+- **Siguiente paso:** abrir **F1** (Cuenta) según el protocolo del
+  [README de la guía](../../docs/social/README.md#cómo-se-trabaja): plan `social-f1-*.md` con solo
+  las secciones de la guía que cite. F1 sigue `pendiente`: aún no hay plan.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -25,7 +26,7 @@
 
 | Fase | Objetivo | Estado | Plan | Placeholders que resuelve |
 |---|---|---|---|---|
-| **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | activa | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
+| **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | hecha | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
 | **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | pendiente | — | `home-user-name` |
 | **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, bloquear y reportar | pendiente | — | `social-focus-invite`, `home-notification-centre` (parcial) |
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | pendiente | — | `social-rank` |
@@ -48,14 +49,15 @@ en el diario.
   Emulator Suite funcionando (D-016) — 03 §3
 - [x] **F0.3** Firebase BoM + `google-services`, `social/firebase/FirebaseModule` (Hilt) y flag
   `FEATURE_SOCIAL` — 03 §10
-- [ ] **F0.4** Compartir sin backend: tarjeta-imagen del logro + enlace a Play por el menú de
-  compartir (Cycle complete y Progress) — 02 §9, 03 §11
-- [ ] **F0.5** Borradores de la política de privacidad v2, los términos y la página de borrado en
+- [x] **F0.4** Compartir sin backend: tarjeta-imagen del logro, sin enlace (Q-06, D-018), por el menú
+  de compartir (Cycle complete y Progress) — 02 §9, 03 §11
+- [x] **F0.5** Borradores de la política de privacidad v2, los términos y la página de borrado en
   `docs/legal/`. **Ojo:** GitHub Pages publica todo `docs/` desde `main`, así que cada borrador va a
   `exclude` en `docs/_config.yml` hasta L.2. La política v2 se escribe en un fichero aparte para no
   pisar la v1 publicada — 04 §4
   - [x] Política v2: [`docs/legal/privacy-policy-v2-draft.md`](../../docs/legal/privacy-policy-v2-draft.md) (excluida de Pages)
-  - [ ] Términos de uso (`terms.md`) y página de borrado (`delete-account.md`)
+  - [x] Términos de uso ([`docs/legal/terms-draft.md`](../../docs/legal/terms-draft.md)) y página de borrado
+    ([`docs/legal/delete-account-draft.md`](../../docs/legal/delete-account-draft.md)), excluidos de Pages
 
 ### F1 · Cuenta y perfil
 - [ ] **F1.1** Puerta de edad neutral + `SOCIAL_MIN_AGE` configurable; pantalla para quien está por
@@ -142,12 +144,18 @@ en el diario.
 | Q-03 | ¿Se confirma D-015 (tope de 50 amigos)? (D-013 y D-016 ya confirmadas) | Sí | F2 |
 | Q-04 | Durante el descanso entre pomodoros, ¿el amigo aparece como estudiando, ausente o con un estado propio? | Estado propio «en descanso» en Focus; cuenta como estudiando en Home | F4.1 |
 | Q-05 | ¿Se puede cambiar el `@usuario`? | Sí, una vez cada 30 días; el anterior queda libre | F1.4 |
-| Q-06 | La app **no está publicada** (usuario, 2026-10-19). ¿Qué enlace lleva la tarjeta de compartir mientras tanto? | Ninguno: solo la marca «BBetter» en la tarjeta. El enlace de Play se añade al publicar | F0-u5 |
+| ~~Q-06~~ | ~~¿Qué enlace lleva la tarjeta de compartir mientras la app no está publicada?~~ Cerrada (D-018): ninguno, solo la marca «BBetter»; el enlace de Play se añade al publicar | — | — |
 | ~~Q-07~~ | ~~¿Prórroga del target API?~~ Cerrada: no hay nada publicado, así que no aplica | — | — |
 
 ## Diario
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
+
+- **2026-10-19 (6)** · **F0 cerrada.** F0-u5 (compartir: tarjeta-imagen sin enlace, `FileProvider`, selector
+  con imagen y texto en Cycle complete y Progress; `cycle-share` y `progress-share` resueltos) y F0-u6
+  (borradores de términos y de borrado, excluidos de Pages). **F0.4 y F0.5 marcadas.** Q-06 cerrada con
+  D-018. Sin probar: AVD API 24 (no existe) y el overlay de bloqueo. «Poner al día `systems/social.md`» no
+  aplica hasta F1.8. **Siguiente:** abrir F1 (Cuenta) por el protocolo; aún sin plan.
 
 - **2026-10-19 (5)** · F0-u3 y F0-u4 hechas, con la consola ya montada (Firestore `eur3`, RTDB `europe-west1`, CLI logueada, JDK 21 aparte). Kotlin sube a 2.3.21 (Firebase). **F0.2 y F0.3 marcadas.** **Siguiente:** F0-u5 (compartir) y F0-u6 (legales).
 

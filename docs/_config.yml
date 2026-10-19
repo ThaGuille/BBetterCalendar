@@ -14,3 +14,5 @@ exclude:
   - legal/play-declarations-phase4.md
   - legal/play-release-guide.md
   - legal/privacy-policy-v2-draft.md   # sistema social: se publica (sustituyendo a la v1) en el gate L.2
+  - legal/terms-draft.md   # sistema social: terminos de uso, se publican en el gate L.2
+  - legal/delete-account-draft.md   # sistema social: pagina de borrado de cuenta, se publica en el gate L.2

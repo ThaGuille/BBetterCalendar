@@ -36,6 +36,14 @@ public final class InsetsHelper {
     private InsetsHelper() { }
 
     /**
+     * Destino secundario que se encarga él mismo del inset inferior: MainActivity no lo suma a la
+     * raíz y el fragment lo aplica con {@link #apply(View, int)} a su contenedor desplazable (con
+     * {@code clipToPadding="false"}), para que el contenido pase bajo la barra de navegación y el
+     * último elemento quede por encima de ella al llegar al final.
+     */
+    public interface OwnsBottomInset { }
+
+    /**
      * A sangre completa con barras transparentes e iconos claros (el tema es oscuro). Llamar en
      * {@code onCreate}, antes de {@code setContentView}.
      */

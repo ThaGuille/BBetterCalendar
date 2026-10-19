@@ -140,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
      * fragment para que su propio fondo llegue bajo las barras:
      * <ul>
      *   <li>arriba, salvo que lleve {@code view_top_bar} (esa barra se encarga en TopBarHelper);</li>
-     *   <li>abajo, solo en los destinos secundarios: en los de primer nivel lo pone la bottom nav.</li>
+     *   <li>abajo, solo en los destinos secundarios: en los de primer nivel lo pone la bottom nav, y los que
+     *       implementan {@link InsetsHelper.OwnsBottomInset} lo ponen en su scroll.</li>
      * </ul>
      */
     private void installFragmentInsets(@NonNull NavHostFragment host) {
@@ -159,7 +160,8 @@ public class MainActivity extends AppCompatActivity {
                                                       Bundle savedInstanceState) {
                         int sides = 0;
                         if (v.findViewById(R.id.topBar) == null) sides |= InsetsHelper.TOP;
-                        if (!topLevelClasses.contains(f.getClass().getName())) {
+                        if (!topLevelClasses.contains(f.getClass().getName())
+                                && !(f instanceof InsetsHelper.OwnsBottomInset)) {
                             sides |= InsetsHelper.BOTTOM;
                         }
                         if (sides != 0) InsetsHelper.apply(v, sides);

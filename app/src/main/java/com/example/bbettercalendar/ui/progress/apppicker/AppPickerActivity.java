@@ -20,6 +20,7 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +49,9 @@ public class AppPickerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        InsetsHelper.enableEdgeToEdge(this);
         setContentView(R.layout.activity_app_picker);
+        InsetsHelper.applyToContent(this);
 
         RecyclerView list = findViewById(R.id.app_picker_list);
         loading = findViewById(R.id.app_picker_loading);

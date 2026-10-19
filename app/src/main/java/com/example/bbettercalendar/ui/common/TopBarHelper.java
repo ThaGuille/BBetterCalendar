@@ -14,7 +14,8 @@ import com.google.android.material.appbar.MaterialToolbar;
 /**
  * u12: wires the shared secondary-screen top bar ({@code @layout/view_top_bar}, id
  * {@code R.id.topBar}): title + back arrow that pops the nav back stack (same as system back).
- * The bottom nav is hidden for these destinations by MainActivity, not here.
+ * The bottom nav is hidden for these destinations by MainActivity, not here. F0-u2: it also takes
+ * the status-bar inset so the bar's background extends under it (see {@link InsetsHelper}).
  */
 public final class TopBarHelper {
 
@@ -34,6 +35,8 @@ public final class TopBarHelper {
         if (toolbar == null) {
             return null;
         }
+        // Edge-to-edge: la barra se extiende bajo la barra de estado (padding = inset superior).
+        InsetsHelper.apply(toolbar, InsetsHelper.TOP);
         toolbar.setTitle(title);
         toolbar.setNavigationOnClickListener(v -> {
             // navigateUp devuelve false si ya no hay nada debajo (p. ej. destino abierto como

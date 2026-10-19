@@ -8,14 +8,11 @@
     android:id="@+id/cycleCompleteScreen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bb_sanct_surface"
+    android:background="@drawable/bg_cycle_halo"
     tools:context=".ui.focus.CycleCompleteFragment">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/bg_cycle_halo"
-        android:importantForAccessibility="no" />
+    <!-- F0-u2: el halo (que acaba en bb_sanct_surface) es el fondo de la raíz y no una vista hija:
+         la raíz lleva el padding de los insets y un hijo dejaría una costura bajo la barra de estado. -->
 
     <ScrollView
         android:layout_width="match_parent"

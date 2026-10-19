@@ -16,7 +16,7 @@
 ## Ahora
 
 - **Fase activa:** **F0** · plan [`social-f0-base.md`](social-f0-base.md) (`in progress`).
-- **En curso:** F0-u1 y F0-u2 (en otro chat). En paralelo, el usuario hace los pasos de consola
+- **En curso:** F0-u1 y F0-u2 hechas; siguen u3–u6. En paralelo, el usuario hace los pasos de consola
   (prerrequisitos del plan) que necesitan u3 y u4.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
@@ -42,7 +42,7 @@ Cada entregable cita la sección de la guía que implementa. Se marca `[x]` al h
 en el diario.
 
 ### F0 · Base
-- [ ] **F0.1** `minSdk 24`, `targetSdk` y `compileSdk 36` (D-003, D-004). Revisar edge-to-edge y
+- [x] **F0.1** `minSdk 24`, `targetSdk` y `compileSdk 36` (D-003, D-004). Revisar edge-to-edge y
   back predictivo en todas las pantallas, y la compatibilidad de Material 1.9.0 y Kizitonwose — 03 §2
 - [ ] **F0.2** Proyecto Firebase en la UE (D-013) y `firebase/` con reglas que lo deniegan todo +
   Emulator Suite funcionando (D-016) — 03 §3
@@ -148,6 +148,10 @@ en el diario.
 ## Diario
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
+
+- **2026-10-19 (4)** · F0-u2 hecha: `InsetsHelper` + edge-to-edge en todas las pantallas; verificado en API 37 y
+  32 (no hay 36 ni 24), overlay de bloqueo sin probar. **F0.1 marcada.** **Siguiente:** u3/u4 cuando estén
+  los pasos de consola; u5 (compartir) y u6 (legales) no dependen de la consola.
 
 - **2026-10-19 (3)** · F0-u1 hecha: minSdk 24, compile/target 36; arranque sin crash en API 37 (no hay
   emulador API 36 ni 24; desvío acordado). **Siguiente:** F0-u2 (edge-to-edge); u3 y u4 esperan los pasos de

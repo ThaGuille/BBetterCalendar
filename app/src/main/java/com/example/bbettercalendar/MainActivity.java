@@ -7,6 +7,9 @@ import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.notifications.PermissionGate;
@@ -14,10 +17,13 @@ import com.example.bbettercalendar.stats.StatsDAO;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.bbettercalendar.databinding.ActivityMainBinding;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         // Sin ActionBar (spec frontend-structure-cleanup): la bottom-nav ya dice en qué pantalla estás.
         // El tema (Theme.BBetter.NoActionBar) viene del manifest; sin setTheme en ejecución (u5).
         super.onCreate(savedInstanceState);
+        InsetsHelper.enableEdgeToEdge(this);
 
         notificationPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
@@ -92,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        // Edge-to-edge (F0-u2): lados en el contenedor, inferior en la bottom nav (su fondo llega
+        // hasta el borde). Arriba y abajo de cada destino los pone installFragmentInsets().
+        InsetsHelper.apply(binding.container, InsetsHelper.HORIZONTAL);
+        InsetsHelper.apply(binding.navView, InsetsHelper.BOTTOM);
 
         // Iniciar la configuración si no se ha hecho antes
         if (InitialConfiguration.getInstance().getInitializationStatus().getValue() == null) {
@@ -105,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 .findFragmentById(R.id.nav_host_fragment_activity_main);
         navController = navHostFragment.getNavController();
         NavigationUI.setupWithNavController(binding.navView, navController);
+        installFragmentInsets(navHostFragment);
 
         // u12: chrome por destino (sustituye al setAppChromeVisible de HomeFragment). El listener
         // se dispara también con el destino actual al registrarlo, así que cubre la recreación.
@@ -117,6 +129,38 @@ public class MainActivity extends AppCompatActivity {
 
         openProjectFromIntent(getIntent());
         handleDebugNav(getIntent());
+    }
+
+    /**
+     * Insets de los destinos de navegación (F0-u2), en un solo sitio y sobre la RAÍZ de cada
+     * fragment para que su propio fondo llegue bajo las barras:
+     * <ul>
+     *   <li>arriba, salvo que lleve {@code view_top_bar} (esa barra se encarga en TopBarHelper);</li>
+     *   <li>abajo, solo en los destinos secundarios: en los de primer nivel lo pone la bottom nav.</li>
+     * </ul>
+     */
+    private void installFragmentInsets(@NonNull NavHostFragment host) {
+        Set<String> topLevelClasses = new HashSet<>();
+        for (int id : TOP_LEVEL_DESTINATIONS) {
+            NavDestination node = navController.getGraph().findNode(id);
+            if (node instanceof FragmentNavigator.Destination) {
+                topLevelClasses.add(((FragmentNavigator.Destination) node).getClassName());
+            }
+        }
+        host.getChildFragmentManager().registerFragmentLifecycleCallbacks(
+                new FragmentManager.FragmentLifecycleCallbacks() {
+                    @Override
+                    public void onFragmentViewCreated(@NonNull FragmentManager fm,
+                                                      @NonNull Fragment f, @NonNull View v,
+                                                      Bundle savedInstanceState) {
+                        int sides = 0;
+                        if (v.findViewById(R.id.topBar) == null) sides |= InsetsHelper.TOP;
+                        if (!topLevelClasses.contains(f.getClass().getName())) {
+                            sides |= InsetsHelper.BOTTOM;
+                        }
+                        if (sides != 0) InsetsHelper.apply(v, sides);
+                    }
+                }, false);
     }
 
     // El Intent de la notificación lleva CLEAR_TOP y el launchMode por defecto es standard, así que

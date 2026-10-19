@@ -35,8 +35,10 @@
         <!-- Window & system bars -->
         <item name="android:windowBackground">@color/bb_surface</item>
         <item name="android:colorBackground">@color/bb_surface</item>
-        <item name="android:statusBarColor">@color/bb_surface</item>
-        <item name="android:navigationBarColor">@color/bb_surface_low</item>
+        <!-- F0-u2 edge-to-edge: barras transparentes y el fondo lo pone la app (InsetsHelper). Desde
+             API 35 estos colores ya no tienen efecto; en API 24-34 evitan una barra opaca encima. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
 

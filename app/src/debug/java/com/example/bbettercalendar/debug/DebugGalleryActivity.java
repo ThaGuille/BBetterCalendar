@@ -13,6 +13,7 @@ import androidx.core.widget.TextViewCompat;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.helpers.FontHelper;
 import com.example.bbettercalendar.stats.StreakCalculator;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.chart.ChartStyler;
 import com.example.bbettercalendar.ui.common.widget.AppUsageRowView;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
@@ -50,7 +51,9 @@ public class DebugGalleryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        InsetsHelper.enableEdgeToEdge(this);
         setContentView(R.layout.activity_debug_gallery);
+        InsetsHelper.applyToContent(this);
 
         bindCharts();
         bindFontWeights();

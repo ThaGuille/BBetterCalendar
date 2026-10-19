@@ -45,6 +45,7 @@ import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.RepetitionOptions;
 import com.example.bbettercalendar.popups.RepetitionPopup;
 import com.example.bbettercalendar.popups.RepetitionSpec;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.google.android.material.textfield.TextInputEditText;
 
 import javax.inject.Inject;
@@ -131,6 +132,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     public void onCreate(@Nullable Bundle savedInstanceState) {
         // Tema Theme.BBetter.NoActionBar desde el manifest (u5: sin setTheme en ejecución).
         super.onCreate(savedInstanceState);
+        InsetsHelper.enableEdgeToEdge(this);
 
         Intent intent = getIntent();
         layoutType = intent.getIntExtra("entry", TYPE_EVENT); //todo algo esta mal con esto
@@ -156,6 +158,8 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 setContentView(R.layout.activity_create_event);
                 break;
         }
+
+        InsetsHelper.applyToContent(this);
 
         // Inicializar componentes comunes y específicos del layout
         eventBuilder = new CalendarEntry.EventBuilder();

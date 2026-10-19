@@ -18,6 +18,7 @@ import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
 import com.example.bbettercalendar.stats.Stats;
 import com.example.bbettercalendar.stats.StatsDAO;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -40,6 +41,8 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // A sangre completa (F0-u2): el logo va centrado, no hay nada que proteger de las barras.
+        InsetsHelper.enableEdgeToEdge(this);
         // u14 (pregunta u6): el icono del launcher con la app ya viva. Si la tarea no se abrió
         // desde el launcher (notificación, adb, IDE...), su intent base no coincide y el sistema
         // apila ESTA Splash encima de la MainActivity viva: antes arrancaba una segunda

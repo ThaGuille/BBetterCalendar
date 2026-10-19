@@ -45,7 +45,7 @@ Se pueden hacer en paralelo con u1 y u2. Son necesarios antes de u3 y u4.
 | Unidad | Qué | Ficheros principales | Verificación | Modelo | Estado |
 |---|---|---|---|---|---|
 | **F0-u1** | SDK: `minSdk 24`, `compileSdk 36`, `targetSdk 36` | `app/build.gradle` | `test` + `assembleDebug`; arranque sin crash en un emulador API 36 | sonnet | hecha |
-| **F0-u2** | Edge-to-edge e insets en todas las pantallas; back predictivo | `ui/common/InsetsHelper` (nuevo), `TopBarHelper`, `MainActivity`, las 4 activities, sheets | `ui-tester` + capturas en API 36 de cada pantalla (barra de estado y de navegación sin solapes) | opus | pendiente |
+| **F0-u2** | Edge-to-edge e insets en todas las pantallas; back predictivo | `ui/common/InsetsHelper` (nuevo), `TopBarHelper`, `MainActivity`, las 4 activities, sheets | `ui-tester` + capturas en API 36 de cada pantalla (barra de estado y de navegación sin solapes) | opus | hecha |
 | **F0-u3** | `firebase/` + emuladores + reglas que lo deniegan todo + test de reglas | `firebase/firebase.json`, `.firebaserc`, `firestore.rules`, `database.rules.json`, `functions/` (esqueleto TS), `tests/` | `firebase emulators:exec` ejecuta el test «todo denegado» en verde | sonnet | pendiente |
 | **F0-u4** | Gradle Firebase + `FirebaseModule` + flags | `build.gradle` (raíz y app), `social/firebase/FirebaseModule`, `google-services.json` | `assembleDebug`; ping de debug contra el emulador devuelve `PERMISSION_DENIED` (prueba la conexión) | sonnet | pendiente |
 | **F0-u5** | Compartir: tarjeta-imagen + enlace | `ui/common/share/ShareCardRenderer`, `layout/view_share_card.xml`, `FileProvider` en el manifest, `CycleCompleteFragment`, `ProgressFragment`, `strings_share.xml` (+es) | `ui-tester`: los dos botones abren el menú de compartir con imagen y texto; placeholders resueltos | sonnet + `impeccable` | pendiente |
@@ -191,3 +191,14 @@ bajo las barras, y en 36 ya no se puede desactivar.
   comprobado en **API 37** (Pixel_9a) hasta `MainActivity`, sin `FATAL EXCEPTION`. API 36 literal no probada.
 - Pendiente: la propiedad `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` del FGS no está en el manifest (Play la pide al declarar
   `specialUse` en Console); se trata al preparar la ficha de Play, no aquí.
+
+### F0-u2 · Edge-to-edge — commit «F0-u2: edge-to-edge con InsetsHelper»
+
+- `ui/common/InsetsHelper`: `enableEdgeToEdge(activity)` (barras transparentes, iconos claros), `apply/applyWithIme(view, TOP|BOTTOM|HORIZONTAL)` (suma el inset al padding inicial; sustituye el listener de la vista) y `applyToContent(activity)`. Suma el inset superior a una altura fija (Focus).
+- Dónde: `TopBarHelper` (barra con `view_top_bar`), `MainActivity` (laterales, bottom nav abajo y, vía `FragmentLifecycleCallbacks`, la **raíz de cada destino**: arriba si no lleva `view_top_bar`, abajo solo los secundarios), `AddEventActivity`/`AppPickerActivity`/`DebugGallery` (`android.R.id.content` + IME), `QuickAddTaskSheet`. Splash solo `enableEdgeToEdge`. Tema: barras `transparent`.
+- **Añadido al plan:** las pestañas y Cycle/Project detail no tienen `view_top_bar`; el plan no los citaba y hacían falta. Cycle complete: el halo pasa a ser el `background` de la raíz (si no, costura bajo la barra de estado).
+- `QuickAddTaskSheet`: solo inset de navegación (`ADJUST_RESIZE` ya encoge la ventana; sumar `ime()` contaba el teclado dos veces) y se abre `EXPANDED`: sin eso, en API 32 el teclado dejaba Repeat/Guardar fuera. No hay línea base, no sé si lo segundo era previo.
+- Back: no hay ningún `onBackPressed()` sobrescrito; todo pasa por `OnBackPressedDispatcher`. Back comprobado en cada pantalla secundaria, diálogos y hoja.
+- Verificación (`ui-tester`) en **API 37** (no hay API 36) y **API 32** (no hay API 24; no se probó 24-28): sin `FATAL EXCEPTION` de la app; capturas de las 14 pantallas en 37, y en 32 Home/Focus/Progress/Calendar/AddEvent/Screen time/hoja.
+- **Sin probar:** overlay de bloqueo (necesita el servicio de accesibilidad y un límite alcanzado; es una ventana a pantalla completa con contenido centrado y 24dp de padding). Cycle complete, Project detail y AppPicker no se repitieron en API 32.
+- Pendiente (cosmético): en App detail, App picker y Screen time el contenido que hace scroll se corta con borde duro sobre la barra de navegación en vez de pasar por debajo (`clipToPadding`).

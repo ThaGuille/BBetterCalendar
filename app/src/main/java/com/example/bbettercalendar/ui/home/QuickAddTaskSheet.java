@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,7 +25,10 @@ import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.RepetitionPopup;
 import com.example.bbettercalendar.popups.RepetitionSpec;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.projects.ProjectDetailViewModel;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.Calendar;
@@ -89,6 +93,9 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Edge-to-edge (F0-u2): solo la barra de navegación. El teclado NO se suma aquí: ADJUST_RESIZE
+        // (abajo) ya encoge la ventana del diálogo, y contarlo también dejaba la hoja sin altura.
+        InsetsHelper.apply(view, InsetsHelper.BOTTOM);
 
         Bundle args = getArguments();
         if (args != null) {
@@ -119,6 +126,18 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
             getDialog().getWindow().setSoftInputMode(
                     WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
                             | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Abierta ya del todo: colapsada, el peek (~16:9 del ancho) deja Repeat/Guardar fuera de
+        // la zona visible en cuanto sale el teclado en pantallas bajas.
+        if (getDialog() instanceof BottomSheetDialog) {
+            BottomSheetBehavior<FrameLayout> behavior = ((BottomSheetDialog) getDialog()).getBehavior();
+            behavior.setSkipCollapsed(true);
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
     }
 

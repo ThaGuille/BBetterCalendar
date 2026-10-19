@@ -8,11 +8,11 @@ BBetterCalendar is an Android productivity app: Pomodoro timer + habit streaks +
 
 ## Tech Stack (canonical numbers — match `app/build.gradle`)
 
-- **Language:** Java 8 (source/target compat 1.8). No Kotlin sources.
+- **Language:** Java 8 (source/target compat 1.8). The only Kotlin is the vendored WeekView (`ui/calendar/weekview/`, 35 files); Kotlin plugin 2.3.21 (Firebase ships Kotlin 2.x metadata).
 - **Architecture:** MVVM + Hilt DI + Room + LiveData
 - **Min / target / compile SDK:** 24 / 36 / 36
 - **Build:** AGP 8.13.2, Gradle wrapper 8.13
-- **Key libs:** Hilt 2.51.1, Room 2.6.1, Navigation 2.5.3, Material 1.9.0, Gson 2.9.1, Kizitonwose Calendar 2.5.4
+- **Key libs:** Hilt 2.51.1, Room 2.6.1, Navigation 2.5.3, Material 1.9.0, Gson 2.9.1, Kizitonwose Calendar 2.5.4, Firebase BoM 35.0.2 (auth, firestore, database, functions)
 - **Pin:** Do not upgrade `com.google.android.material` past `1.9.0` (see `app/build.gradle:47`).
 
 ## Environment
@@ -193,7 +193,8 @@ with e.g. "use the code-reviewer subagent".
 | `app/src/main/java/.../usage/` | Usage measurement (`UsageStatsRepository`) + `limits/` (alarm-based warn pipeline) |
 | `app/src/main/java/.../blocking/` | Accessibility-service enforcement (cover overlay / bounce-to-home) |
 | `app/src/main/java/.../notifications/` | Channels, `BBetterNotifier`, permission gate + per-feature notifiers (`focus/`, `usage/`, `event/`) |
-| `app/src/main/java/.../social/` | Social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK`: `SocialFeature`, `SocialRepository` (mock / empty), Hilt `SocialModule` |
+| `app/src/main/java/.../social/` | Social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK`: `SocialFeature`, `SocialRepository` (mock / empty), Hilt `SocialModule`; `firebase/FirebaseModule` (Hilt, 4 Firebase clients, emulator switch) |
+| `firebase/` | Backend of the social system (D-016): rules (deny-all), Functions skeleton, rules tests, Emulator Suite config. Commands in its `README.md` (needs JDK 21 for the CLI) |
 | `app/src/main/java/.../helpers/` | `FormatHelper`, `ScreenHelper`, `ToolbarHelper`, toolbar listener interfaces |
 | `app/src/main/java/.../popups/` | `PopupHelper` base + 6 concrete dialog fragments |
 | `app/src/main/java/.../feedback/` | `HapticFeedback`, `SoundFeedback` |

@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'dagger.hilt.android.plugin'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
 }
 
 // Clave de subida (upload key) para builds de release firmadas. keystore.properties NO se versiona
@@ -48,9 +49,17 @@ android {
             // u11 (migración visual): bloques sociales con datos falsos (MockSocialRepository).
             // Solo debug; en release los bloques sociales desaparecen (SocialFeature.isEnabled()).
             buildConfigField "boolean", "FEATURE_SOCIAL_MOCK", "true"
+            // F0-u4: backend social. FEATURE_SOCIAL no tiene efecto hasta que exista el repositorio real
+            // (F4); USE_FIREBASE_EMULATOR apunta Firebase al Emulator Suite del PC (10.0.2.2). Para usar el
+            // proyecto real desde debug: .\gradlew.bat assembleDebug -PfirebaseEmulator=false
+            buildConfigField "boolean", "FEATURE_SOCIAL", "true"
+            buildConfigField "boolean", "USE_FIREBASE_EMULATOR",
+                    (project.findProperty("firebaseEmulator") ?: "true").toString()
         }
         release {
             buildConfigField "boolean", "FEATURE_SOCIAL_MOCK", "false"
+            buildConfigField "boolean", "FEATURE_SOCIAL", "false"
+            buildConfigField "boolean", "USE_FIREBASE_EMULATOR", "false"
             // minifyEnabled se queda en false para la 1ª release: Hilt/Room/Gson usan reflexión y las
             // reglas ProGuard no están probadas. Revisar más adelante para reducir el tamaño del APK.
             minifyEnabled false
@@ -122,5 +131,12 @@ dependencies {
 
     // Carrusel de gráficos (ViewPager2 + dots vía TabLayoutMediator de Material)
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
+
+    // F0-u4: Firebase (sistema social). BoM 35: sin sufijo -ktx (somos Java). Credential Manager llega en F1.
+    implementation platform('com.google.firebase:firebase-bom:35.0.2')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-functions'
 
 }

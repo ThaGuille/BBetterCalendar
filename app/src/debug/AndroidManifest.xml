@@ -2,7 +2,7 @@
 <!-- Debug-only additions, merged into the debug variant (never in release). -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <application>
+    <application android:networkSecurityConfig="@xml/network_security_config">
         <!-- u9 component gallery. exported=true ONLY here (debug manifest) so it can be opened with
              adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugGalleryActivity
              No intent filter: it never shows in the launcher. -->

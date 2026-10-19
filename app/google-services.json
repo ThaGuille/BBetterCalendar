@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "260436989173",
+    "project_id": "bbetter-dbcda",
+    "storage_bucket": "bbetter-dbcda.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260436989173:android:c0e951b2be8ad60f3861bc",
+        "android_client_info": {
+          "package_name": "io.github.thaguille.bbettercalendar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD02uvGOltlNKGl_dej5a3BszxW8hdPFXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -46,7 +46,7 @@ en el diario.
   back predictivo en todas las pantallas, y la compatibilidad de Material 1.9.0 y Kizitonwose — 03 §2
 - [x] **F0.2** Proyecto Firebase en la UE (D-013) y `firebase/` con reglas que lo deniegan todo +
   Emulator Suite funcionando (D-016) — 03 §3
-- [ ] **F0.3** Firebase BoM + `google-services`, `social/firebase/FirebaseModule` (Hilt) y flag
+- [x] **F0.3** Firebase BoM + `google-services`, `social/firebase/FirebaseModule` (Hilt) y flag
   `FEATURE_SOCIAL` — 03 §10
 - [ ] **F0.4** Compartir sin backend: tarjeta-imagen del logro + enlace a Play por el menú de
   compartir (Cycle complete y Progress) — 02 §9, 03 §11
@@ -148,6 +148,8 @@ en el diario.
 ## Diario
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
+
+- **2026-10-19 (5)** · F0-u3 y F0-u4 hechas, con la consola ya montada (Firestore `eur3`, RTDB `europe-west1`, CLI logueada, JDK 21 aparte). Kotlin sube a 2.3.21 (Firebase). **F0.2 y F0.3 marcadas.** **Siguiente:** F0-u5 (compartir) y F0-u6 (legales).
 
 - **2026-10-19 (4)** · F0-u2 hecha: `InsetsHelper` + edge-to-edge en todas las pantallas; verificado en API 36,
   37 y 32 (falta API 24), overlay de bloqueo sin probar; hoja de alta rápida desplazable (commit de corrección).

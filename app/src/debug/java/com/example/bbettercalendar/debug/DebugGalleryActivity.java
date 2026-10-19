@@ -2,6 +2,7 @@ package com.example.bbettercalendar.debug;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -10,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.TextViewCompat;
 
+import com.example.bbettercalendar.BuildConfig;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.helpers.FontHelper;
 import com.example.bbettercalendar.stats.StreakCalculator;
@@ -22,6 +24,8 @@ import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.example.bbettercalendar.ui.common.widget.StepperView;
 import com.example.bbettercalendar.ui.common.widget.StreakWeekView;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -37,6 +41,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * Debug-only gallery of the reusable widgets of {@code ui/common/widget} (plan
  * migracion-visual-stitch, u9), each in its main states, so the components can be checked on a
@@ -46,7 +54,33 @@ import java.util.List;
  * </pre>
  * Demo data only; nothing here touches the database.
  */
+@AndroidEntryPoint
 public class DebugGalleryActivity extends AppCompatActivity {
+
+    @Inject FirebaseFirestore firestore;
+
+    /**
+     * F0-u4: lee un documento y enseña el error. Con las reglas que lo deniegan todo el resultado correcto es
+     * PERMISSION_DENIED: prueba a la vez que la app llega a Firebase (al emulador si USE_FIREBASE_EMULATOR) y que
+     * las reglas mandan. Cualquier otro código (UNAVAILABLE...) es que no hay conexión con el emulador.
+     */
+    private void bindFirebasePing() {
+        Button button = findViewById(R.id.galleryFirebasePingButton);
+        TextView result = findViewById(R.id.galleryFirebasePingResult);
+        button.setOnClickListener(v -> {
+            result.setText("Pinging " + (BuildConfig.USE_FIREBASE_EMULATOR ? "emulator" : "project") + "...");
+            firestore.collection("ping").document("x").get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    result.setText("UNEXPECTED: read allowed (rules are not deny-all)");
+                    return;
+                }
+                Exception e = task.getException();
+                String code = e instanceof FirebaseFirestoreException
+                        ? ((FirebaseFirestoreException) e).getCode().name() : String.valueOf(e);
+                result.setText(code + (code.equals("PERMISSION_DENIED") ? " (expected)" : " - not reaching Firebase?"));
+            });
+        });
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,6 +89,7 @@ public class DebugGalleryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_debug_gallery);
         InsetsHelper.applyToContent(this);
 
+        bindFirebasePing();
         bindCharts();
         bindFontWeights();
         bindStreaks();

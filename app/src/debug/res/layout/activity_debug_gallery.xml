@@ -31,6 +31,24 @@
             android:text="ui/common/widget · u9"
             android:textAppearance="@style/TextAppearance.BBetter.Caption" />
 
+        <!-- ===================== Firebase ping (F0-u4) ===================== -->
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="Firebase ping (F0-u4)" />
+
+        <Button
+            android:id="@+id/galleryFirebasePingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ping Firestore" />
+
+        <TextView
+            android:id="@+id/galleryFirebasePingResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reads ping/x: PERMISSION_DENIED means the app reached Firebase and the rules deny everything."
+            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
         <!-- ===================== Charts (u10 ChartStyler) ===================== -->
         <TextView
             style="@style/GalleryLabel"

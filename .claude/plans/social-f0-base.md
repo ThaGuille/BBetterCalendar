@@ -47,7 +47,7 @@ Se pueden hacer en paralelo con u1 y u2. Son necesarios antes de u3 y u4.
 | **F0-u1** | SDK: `minSdk 24`, `compileSdk 36`, `targetSdk 36` | `app/build.gradle` | `test` + `assembleDebug`; arranque sin crash en un emulador API 36 | sonnet | hecha |
 | **F0-u2** | Edge-to-edge e insets en todas las pantallas; back predictivo | `ui/common/InsetsHelper` (nuevo), `TopBarHelper`, `MainActivity`, las 4 activities, sheets | `ui-tester` + capturas en API 36 de cada pantalla (barra de estado y de navegación sin solapes) | opus | hecha |
 | **F0-u3** | `firebase/` + emuladores + reglas que lo deniegan todo + test de reglas | `firebase/firebase.json`, `.firebaserc`, `firestore.rules`, `database.rules.json`, `functions/` (esqueleto TS), `tests/` | `firebase emulators:exec` ejecuta el test «todo denegado» en verde | sonnet | hecha |
-| **F0-u4** | Gradle Firebase + `FirebaseModule` + flags | `build.gradle` (raíz y app), `social/firebase/FirebaseModule`, `google-services.json` | `assembleDebug`; ping de debug contra el emulador devuelve `PERMISSION_DENIED` (prueba la conexión) | sonnet | pendiente |
+| **F0-u4** | Gradle Firebase + `FirebaseModule` + flags | `build.gradle` (raíz y app), `social/firebase/FirebaseModule`, `google-services.json` | `assembleDebug`; ping de debug contra el emulador devuelve `PERMISSION_DENIED` (prueba la conexión) | sonnet | hecha |
 | **F0-u5** | Compartir: tarjeta-imagen + enlace | `ui/common/share/ShareCardRenderer`, `layout/view_share_card.xml`, `FileProvider` en el manifest, `CycleCompleteFragment`, `ProgressFragment`, `strings_share.xml` (+es) | `ui-tester`: los dos botones abren el menú de compartir con imagen y texto; placeholders resueltos | sonnet + `impeccable` | pendiente |
 | **F0-u6** | Borradores legales restantes | `docs/legal/terms-draft.md`, `docs/legal/delete-account-draft.md`, `docs/_config.yml` | Están excluidos de Pages | sonnet | pendiente |
 
@@ -211,3 +211,12 @@ bajo las barras, y en 36 ya no se puede desactivar.
 - Consola comprobada por CLI: Firestore `(default)` Standard en `eur3`; RTDB `bbetter-dbcda-default-rtdb` en `europe-west1`. Plan **Spark**: no hace falta Blaze hasta desplegar Functions (F2).
 - Las reglas **no están desplegadas** al proyecto real (en producción rigen las de «modo producción», que deniegan todo). Desplegarlas es una decisión de F1/F2.
 - Tests de reglas con id `demo-bbetter`; la app contra el emulador exige `--project bbetter-dbcda` (singleProjectMode).
+
+### F0-u4 · Gradle y módulo — commit «F0-u4: Firebase en Gradle, FirebaseModule y flags»
+
+- Plugin `google-services` 4.5.0, BoM **35.0.2** (`auth`, `firestore`, `database`, `functions`, sin `-ktx`), `app/google-services.json` commiteado (proyecto `bbetter-dbcda`, paquete correcto).
+- **Kotlin 1.8.22 → 2.3.21** (el riesgo del plan se cumplió, pero con **35** `.kt`, la vista semanal vendorizada, no uno: convertir a Java no era opción). Compila sin cambios de código. Humo en API 36: semana (swipe, scroll, toggle, evento) igual; pinch-zoom sin probar.
+- `social/firebase/FirebaseModule` (Hilt, singletons): Auth, Firestore, RTDB (URL `europe-west1` explícita) y Functions (`europe-west1`); con `USE_FIREBASE_EMULATOR` llaman a `useEmulator("10.0.2.2", …)`.
+- Flags: `FEATURE_SOCIAL` (debug `true`, release `false`; sin efecto hasta F4) y `USE_FIREBASE_EMULATOR` (debug por `-PfirebaseEmulator`, por defecto `true`; release `false`). Debug añade `network_security_config` que permite HTTP en claro solo a `10.0.2.2` y `localhost`.
+- Ping en `DebugGalleryActivity` (botón «Ping Firestore»): `PERMISSION_DENIED (expected)` contra el **emulador** y contra el **proyecto real**. Que fuera el emulador se infiere del log (`false for 'get' @ L9`, texto del evaluador de reglas local).
+- Pendiente: restringir la clave de API a la app y su SHA-1 en Google Cloud (mitigación del plan, antes de publicar). Hallazgo previo, no de esta unidad: la vista semanal no dibuja la línea de «ahora» (`showNowLine` nunca se activa).

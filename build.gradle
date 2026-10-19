@@ -3,7 +3,9 @@ plugins {
     id 'com.android.application' version '8.13.2' apply false
     id 'com.android.library' version '8.13.2' apply false
     id 'com.google.dagger.hilt.android' version '2.51.1' apply false
-    id 'org.jetbrains.kotlin.android' version '1.8.22' apply false
+    id 'org.jetbrains.kotlin.android' version '2.3.21' apply false
+    // F0-u4: lee app/google-services.json (Firebase). El plugin no genera nada si no hay dependencias Firebase.
+    id 'com.google.gms.google-services' version '4.5.0' apply false
 }
 
 tasks.register('clean', Delete) {

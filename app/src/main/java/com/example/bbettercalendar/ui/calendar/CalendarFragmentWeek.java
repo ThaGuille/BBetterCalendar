@@ -112,6 +112,30 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        nowLineTick.run();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (binding != null) binding.weekView.removeCallbacks(nowLineTick);
+    }
+
+    // WeekView solo redibuja al desplazarse: sin este tic la línea de «ahora» se quedaría quieta.
+    // Redibuja y se reprograma al inicio del minuto siguiente (la línea tiene resolución de minuto).
+    private final Runnable nowLineTick = new Runnable() {
+        @Override
+        public void run() {
+            if (binding == null) return;
+            binding.weekView.invalidate();
+            long msToNextMinute = 60_000L - (System.currentTimeMillis() % 60_000L);
+            binding.weekView.postDelayed(this, msToNextMinute);
+        }
+    };
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

@@ -15,10 +15,10 @@
 
 ## Ahora
 
-- **Fase activa:** ninguna. **F0 hecha** · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
-- **Siguiente paso:** abrir **F1** (Cuenta) según el protocolo del
-  [README de la guía](../../docs/social/README.md#cómo-se-trabaja): plan `social-f1-*.md` con solo
-  las secciones de la guía que cite. F1 sigue `pendiente`: aún no hay plan.
+- **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
+  F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
+- **Siguiente paso:** los prerrequisitos de consola del plan de F1 (proveedores de Auth, nuevo
+  `google-services.json`, SHA-1 de debug, cuenta de Google en `api36`) y después la ola 1 (F1-u1 ∥ F1-u2).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -27,7 +27,7 @@
 | Fase | Objetivo | Estado | Plan | Placeholders que resuelve |
 |---|---|---|---|---|
 | **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | hecha | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
-| **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | pendiente | — | `home-user-name` |
+| **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | activa | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
 | **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, bloquear y reportar | pendiente | — | `social-focus-invite`, `home-notification-centre` (parcial) |
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | pendiente | — | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | pendiente | — | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
@@ -152,6 +152,11 @@ en el diario.
 ## Diario
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
+
+- **2026-10-19 (7)** · **F1 abierta:** plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (9 unidades en 4
+  olas). Q-05 cerrada con D-019; decisiones de apertura D-020 (API 24 al final, DIF-10) y D-021 – D-024
+  (solo emulador, primer renombrado libre, email y contraseña, edad por año conservadora). **Siguiente:**
+  prerrequisitos de consola (usuario) y ola 1.
 
 - **2026-10-19 (6)** · **F0 cerrada.** F0-u5 (compartir: tarjeta-imagen sin enlace, `FileProvider`, selector
   con imagen y texto en Cycle complete y Progress; `cycle-share` y `progress-share` resueltos) y F0-u6

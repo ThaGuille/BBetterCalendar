@@ -31,6 +31,10 @@
 | D-018 | Q-06: la tarjeta de compartir de F0 no lleva enlace hasta publicar | aceptada | 2026-10-19 |
 | D-019 | Q-05: el `@usuario` se puede cambiar una vez cada 30 días | aceptada | 2026-10-19 |
 | D-020 | Verificar en API 36 durante el desarrollo; API 24 y el overlay de bloqueo, al final | aceptada | 2026-10-19 |
+| D-021 | F1 solo contra el Emulator Suite: sin desplegar reglas ni Functions, sin Blaze | aceptada | 2026-10-19 |
+| D-022 | El primer renombrado del `@usuario` es libre; los siguientes, cada 30 días | aceptada | 2026-10-19 |
+| D-023 | Login por email con email y contraseña, no con enlace mágico | aceptada | 2026-10-19 |
+| D-024 | La puerta de edad pide solo el año y calcula la edad mínima posible | aceptada | 2026-10-19 |
 
 ---
 
@@ -172,3 +176,29 @@
   `minSdk 24` sí se compila en cada build.
 - **Consecuencias:** hasta el gate L no hay prueba de que la app funcione en API 24–35. Cualquier API
   nueva de Android que use F1–F5 necesita su comprobación de versión aunque no se pruebe.
+
+### D-021 · F1 solo contra el Emulator Suite: sin desplegar reglas ni Functions, sin Blaze
+- **Estado:** aceptada (usuario, 2026-10-19, al abrir F1).
+- **Decisión:** las reglas de `users/`, `profiles/` y `handles/` y la callable `deleteAccount` se prueban
+  solo en el Emulator Suite. El proyecto real se queda en Spark con las reglas que lo deniegan todo.
+- **Por qué:** en release lo social sigue apagado hasta el gate L, así que no hay nadie que use el
+  backend real; Blaze exige tarjeta y alertas de presupuesto (L.5) sin beneficio todavía.
+- **Consecuencias:** el despliegue de reglas y Functions, y el paso a Blaze, se deciden al cerrar F2 o en
+  el gate L. Auth sí puede usar el proyecto real (los proveedores se activan en la consola).
+
+### D-022 · El primer renombrado del `@usuario` es libre; los siguientes, cada 30 días
+- **Estado:** aceptada (usuario, 2026-10-19, al abrir F1). Precisa D-019.
+- **Decisión:** al crear el perfil, `handleChangedAt` queda vacío y el primer renombrado se puede hacer
+  en cualquier momento. Desde ese renombrado rige la espera de 30 días de D-019.
+- **Por qué:** permite corregir una errata justo después de crear el perfil sin esperar un mes.
+
+### D-023 · Login por email con email y contraseña, no con enlace mágico
+- **Estado:** aceptada (usuario, 2026-10-19, al abrir F1). Precisa el «email» de 03 §3.
+- **Decisión:** registro e inicio de sesión con email y contraseña, con «olvidé la contraseña».
+- **Por qué:** el enlace mágico necesita Hosting y App Links, que llegan con F2.3.
+
+### D-024 · La puerta de edad pide solo el año y calcula la edad mínima posible
+- **Estado:** aceptada (usuario, 2026-10-19, al abrir F1). Aplica D-010.
+- **Decisión:** la puerta pide solo el año de nacimiento; edad = año actual − año de nacimiento − 1.
+  Quien cumple `SOCIAL_MIN_AGE` este año entra el 1 de enero siguiente.
+- **Por qué:** una sola pregunta, y nunca deja pasar a alguien por debajo del umbral (04 §1).

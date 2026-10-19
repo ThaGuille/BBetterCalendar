@@ -149,9 +149,10 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
-- **2026-10-19 (4)** · F0-u2 hecha: `InsetsHelper` + edge-to-edge en todas las pantallas; verificado en API 37 y
-  32 (no hay 36 ni 24), overlay de bloqueo sin probar. **F0.1 marcada.** **Siguiente:** u3/u4 cuando estén
-  los pasos de consola; u5 (compartir) y u6 (legales) no dependen de la consola.
+- **2026-10-19 (4)** · F0-u2 hecha: `InsetsHelper` + edge-to-edge en todas las pantallas; verificado en API 36,
+  37 y 32 (falta API 24), overlay de bloqueo sin probar; hoja de alta rápida desplazable (commit de corrección).
+  **F0.1 marcada.** **Siguiente:** u3/u4 cuando estén los pasos de consola; u5 (compartir) y u6 (legales) no
+  dependen de la consola.
 
 - **2026-10-19 (3)** · F0-u1 hecha: minSdk 24, compile/target 36; arranque sin crash en API 37 (no hay
   emulador API 36 ni 24; desvío acordado). **Siguiente:** F0-u2 (edge-to-edge); u3 y u4 esperan los pasos de

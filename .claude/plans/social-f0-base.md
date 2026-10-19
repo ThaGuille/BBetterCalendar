@@ -192,13 +192,13 @@ bajo las barras, y en 36 ya no se puede desactivar.
 - Pendiente: la propiedad `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` del FGS no está en el manifest (Play la pide al declarar
   `specialUse` en Console); se trata al preparar la ficha de Play, no aquí.
 
-### F0-u2 · Edge-to-edge — commit «F0-u2: edge-to-edge con InsetsHelper»
+### F0-u2 · Edge-to-edge — commits «F0-u2: edge-to-edge con InsetsHelper» y «F0-u2: hoja de alta rápida desplazable»
 
-- `ui/common/InsetsHelper`: `enableEdgeToEdge(activity)` (barras transparentes, iconos claros), `apply/applyWithIme(view, TOP|BOTTOM|HORIZONTAL)` (suma el inset al padding inicial; sustituye el listener de la vista) y `applyToContent(activity)`. Suma el inset superior a una altura fija (Focus).
-- Dónde: `TopBarHelper` (barra con `view_top_bar`), `MainActivity` (laterales, bottom nav abajo y, vía `FragmentLifecycleCallbacks`, la **raíz de cada destino**: arriba si no lleva `view_top_bar`, abajo solo los secundarios), `AddEventActivity`/`AppPickerActivity`/`DebugGallery` (`android.R.id.content` + IME), `QuickAddTaskSheet`. Splash solo `enableEdgeToEdge`. Tema: barras `transparent`.
-- **Añadido al plan:** las pestañas y Cycle/Project detail no tienen `view_top_bar`; el plan no los citaba y hacían falta. Cycle complete: el halo pasa a ser el `background` de la raíz (si no, costura bajo la barra de estado).
-- `QuickAddTaskSheet`: solo inset de navegación (`ADJUST_RESIZE` ya encoge la ventana; sumar `ime()` contaba el teclado dos veces) y se abre `EXPANDED`: sin eso, en API 32 el teclado dejaba Repeat/Guardar fuera. No hay línea base, no sé si lo segundo era previo.
-- Back: no hay ningún `onBackPressed()` sobrescrito; todo pasa por `OnBackPressedDispatcher`. Back comprobado en cada pantalla secundaria, diálogos y hoja.
-- Verificación (`ui-tester`) en **API 37** (no hay API 36) y **API 32** (no hay API 24; no se probó 24-28): sin `FATAL EXCEPTION` de la app; capturas de las 14 pantallas en 37, y en 32 Home/Focus/Progress/Calendar/AddEvent/Screen time/hoja.
-- **Sin probar:** overlay de bloqueo (necesita el servicio de accesibilidad y un límite alcanzado; es una ventana a pantalla completa con contenido centrado y 24dp de padding). Cycle complete, Project detail y AppPicker no se repitieron en API 32.
-- Pendiente (cosmético): en App detail, App picker y Screen time el contenido que hace scroll se corta con borde duro sobre la barra de navegación en vez de pasar por debajo (`clipToPadding`).
+- `ui/common/InsetsHelper`: `enableEdgeToEdge`, `apply/applyWithIme(view, TOP|BOTTOM|HORIZONTAL)` (suma al padding inicial; suma el inset a una altura fija, p. ej. Focus), `applyToContent`. Tema: barras `transparent`.
+- Aplicado en `TopBarHelper`, `MainActivity` (laterales, bottom nav y **raíz de cada destino** vía `FragmentLifecycleCallbacks`), `AddEvent`/`AppPicker`/`DebugGallery` (`android.R.id.content` + IME), `QuickAddTaskSheet`; Splash solo `enableEdgeToEdge`.
+- **Añadido al plan:** las pestañas y Cycle/Project detail no llevan `view_top_bar`; Cycle: el halo es el `background` de la raíz.
+- `QuickAddTaskSheet`: solo inset de navegación (sumar `ime()` contaba el teclado dos veces), abre `EXPANDED` y su contenido va en un `NestedScrollView` (en 360×640dp los botones se aplastaban). Con teclado, en pantallas bajas hay que desplazar para ver ADD TASK.
+- Back: ningún `onBackPressed()` sobrescrito; comprobado en cada pantalla secundaria, diálogos y hoja.
+- Verificado con `ui-tester` en **API 36** (AVD `api36`, gestos y 3 botones), **37** y **32**: sin `FATAL EXCEPTION`. **No hay API 24** (sin probar 24-28).
+- Sin probar: overlay de bloqueo, tema claro, horizontal/tablet. Costura menor en 3 botones (la barra la pinta el sistema).
+- Pendiente (cosmético): el scroll de App detail/App picker/Screen time se corta sobre la barra de navegación (`clipToPadding`).

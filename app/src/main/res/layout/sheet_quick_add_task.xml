@@ -3,7 +3,13 @@
      Título + hora opcional; "More options" abre AddEventActivity precargada.
      u7: sin android:background en la raíz — lo pinta Widget.BBetter.BottomSheet (surface_card,
      esquinas superiores de 24dp); un fondo aquí taparía las esquinas redondeadas. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- F0-u2: el contenido va en un NestedScrollView: en pantallas bajas (p. ej. 360x640dp) con el
+     teclado abierto la altura natural de la hoja no cabe y los botones se aplastaban. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -120,3 +126,5 @@
     </LinearLayout>
 
 </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

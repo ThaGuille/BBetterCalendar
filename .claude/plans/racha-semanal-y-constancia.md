@@ -1,6 +1,6 @@
 # Racha semanal con objetivo + constancia en Progress
 
-**Status:** in progress
+**Status:** merged (10ce6ca, main)
 **Created:** 2026-10-19
 **Last updated:** 2026-10-19
 

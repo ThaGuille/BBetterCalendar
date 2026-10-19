@@ -22,6 +22,15 @@ public final class SocialFeature {
         return BuildConfig.FEATURE_SOCIAL_MOCK;
     }
 
+    /**
+     * F1: whether real accounts (age gate, sign-in, profile) are on. Backed by
+     * {@code BuildConfig.FEATURE_SOCIAL}: true in debug, false in release. Independent of
+     * {@link #isEnabled()}, which keeps gating the F4 mock blocks.
+     */
+    public static boolean isAccountEnabled() {
+        return BuildConfig.FEATURE_SOCIAL;
+    }
+
     /** VISIBLE when the feature is on, GONE otherwise. Null views are skipped. */
     public static void applyVisibility(@Nullable View... blocks) {
         if (blocks == null) return;

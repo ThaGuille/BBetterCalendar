@@ -21,8 +21,9 @@ import dagger.hilt.components.SingletonComponent;
  * solo puede llamarse antes del primer uso y una vez por instancia: por eso son singletons y no se
  * toca ningún cliente fuera de este módulo.
  *
- * <p>Nada de esto se usa todavía en la app: {@code FEATURE_SOCIAL} no tiene efecto hasta que exista el
- * repositorio real (F4).
+ * <p>Desde F1 los usa la cuenta ({@code social/account/AccountRepository} usa {@code FirebaseAuth});
+ * {@code FEATURE_SOCIAL} (vía {@code SocialFeature.isAccountEnabled()}) activa la cuenta en debug.
+ * El repositorio social real (amigos, stats, presencia) sigue pendiente hasta F4.
  */
 @Module
 @InstallIn(SingletonComponent.class)

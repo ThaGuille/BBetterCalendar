@@ -132,11 +132,16 @@ dependencies {
     // Carrusel de gráficos (ViewPager2 + dots vía TabLayoutMediator de Material)
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
-    // F0-u4: Firebase (sistema social). BoM 35: sin sufijo -ktx (somos Java). Credential Manager llega en F1.
+    // F0-u4: Firebase (sistema social). BoM 35: sin sufijo -ktx (somos Java). Credential Manager: ver F1-u2 abajo.
     implementation platform('com.google.firebase:firebase-bom:35.0.2')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-functions'
+
+    // F1-u2: Credential Manager + Iniciar sesión con Google (selector de cuentas)
+    implementation 'androidx.credentials:credentials:1.5.0'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.5.0'
+    implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
 
 }

@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-19 (F1-u1 hecha)
+**Last updated:** 2026-10-20 (F1-u2 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -17,8 +17,8 @@
 
 - **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
   F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
-- **Siguiente paso:** F1-u1 hecha (reglas de `users/`, `profiles/` y `handles/`). Sigue F1-u2 (núcleo de
-  cuenta); después u3 y u6, que dependen de u1.
+- **Siguiente paso:** F1-u1 (reglas) y F1-u2 (núcleo de cuenta) hechas. Siguen u3 (datos del perfil), u4 (UI de entrada) y
+  u6 (`deleteAccount`).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -153,6 +153,10 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-20 (9)** · F1-u2 hecha: paquete `social/account/` (`AccountRepository` con Google por Credential
+  Manager y email, `AgeGate`, `SocialPrefs`, `SocialEntryRouter`), `SocialFeature.isAccountEnabled()` y tests
+  `AgeGateTest` y `SocialEntryRouterTest` en verde. Commit «F1-u2: núcleo de cuenta (Auth, Credential Manager,
+  AgeGate, SocialPrefs, SocialEntryRouter)». **Siguiente:** F1-u3 (datos del perfil) y u4 (UI de entrada).
 - **2026-10-19 (8)** · F1-u1 hecha: reglas de `users/`, `profiles/` y `handles/` (dueño, lista blanca, un
   `@usuario` por persona, renombrado cada 30 días con el primero libre) y 36 tests de reglas en verde; la
   mutación mata 4/4. Commit «F1-u1: reglas de users/, profiles/ y handles/ con sus tests». **Siguiente:** F1-u2

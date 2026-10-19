@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "260436989173",
+    "firebase_url": "https://bbetter-dbcda-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "bbetter-dbcda",
     "storage_bucket": "bbetter-dbcda.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "io.github.thaguille.bbettercalendar"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "260436989173-s06pnn62v973f2rrvfhc3ljrbt1c8kdh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.github.thaguille.bbettercalendar",
+            "certificate_hash": "c43ea5d26dff16b493a38684e252d2f6a9f6d593"
+          }
+        },
+        {
+          "client_id": "260436989173-nmo9vgepla7jushtiedgv2uc5sns14gh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD02uvGOltlNKGl_dej5a3BszxW8hdPFXA"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "260436989173-nmo9vgepla7jushtiedgv2uc5sns14gh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

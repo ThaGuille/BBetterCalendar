@@ -44,7 +44,7 @@ en el diario.
 ### F0 · Base
 - [x] **F0.1** `minSdk 24`, `targetSdk` y `compileSdk 36` (D-003, D-004). Revisar edge-to-edge y
   back predictivo en todas las pantallas, y la compatibilidad de Material 1.9.0 y Kizitonwose — 03 §2
-- [ ] **F0.2** Proyecto Firebase en la UE (D-013) y `firebase/` con reglas que lo deniegan todo +
+- [x] **F0.2** Proyecto Firebase en la UE (D-013) y `firebase/` con reglas que lo deniegan todo +
   Emulator Suite funcionando (D-016) — 03 §3
 - [ ] **F0.3** Firebase BoM + `google-services`, `social/firebase/FirebaseModule` (Hilt) y flag
   `FEATURE_SOCIAL` — 03 §10

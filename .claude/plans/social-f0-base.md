@@ -46,7 +46,7 @@ Se pueden hacer en paralelo con u1 y u2. Son necesarios antes de u3 y u4.
 |---|---|---|---|---|---|
 | **F0-u1** | SDK: `minSdk 24`, `compileSdk 36`, `targetSdk 36` | `app/build.gradle` | `test` + `assembleDebug`; arranque sin crash en un emulador API 36 | sonnet | hecha |
 | **F0-u2** | Edge-to-edge e insets en todas las pantallas; back predictivo | `ui/common/InsetsHelper` (nuevo), `TopBarHelper`, `MainActivity`, las 4 activities, sheets | `ui-tester` + capturas en API 36 de cada pantalla (barra de estado y de navegación sin solapes) | opus | hecha |
-| **F0-u3** | `firebase/` + emuladores + reglas que lo deniegan todo + test de reglas | `firebase/firebase.json`, `.firebaserc`, `firestore.rules`, `database.rules.json`, `functions/` (esqueleto TS), `tests/` | `firebase emulators:exec` ejecuta el test «todo denegado» en verde | sonnet | pendiente |
+| **F0-u3** | `firebase/` + emuladores + reglas que lo deniegan todo + test de reglas | `firebase/firebase.json`, `.firebaserc`, `firestore.rules`, `database.rules.json`, `functions/` (esqueleto TS), `tests/` | `firebase emulators:exec` ejecuta el test «todo denegado» en verde | sonnet | hecha |
 | **F0-u4** | Gradle Firebase + `FirebaseModule` + flags | `build.gradle` (raíz y app), `social/firebase/FirebaseModule`, `google-services.json` | `assembleDebug`; ping de debug contra el emulador devuelve `PERMISSION_DENIED` (prueba la conexión) | sonnet | pendiente |
 | **F0-u5** | Compartir: tarjeta-imagen + enlace | `ui/common/share/ShareCardRenderer`, `layout/view_share_card.xml`, `FileProvider` en el manifest, `CycleCompleteFragment`, `ProgressFragment`, `strings_share.xml` (+es) | `ui-tester`: los dos botones abren el menú de compartir con imagen y texto; placeholders resueltos | sonnet + `impeccable` | pendiente |
 | **F0-u6** | Borradores legales restantes | `docs/legal/terms-draft.md`, `docs/legal/delete-account-draft.md`, `docs/_config.yml` | Están excluidos de Pages | sonnet | pendiente |
@@ -202,3 +202,12 @@ bajo las barras, y en 36 ya no se puede desactivar.
 - Verificado con `ui-tester` en **API 36** (AVD `api36`, gestos y 3 botones), **37** y **32**: sin `FATAL EXCEPTION`. **No hay API 24** (sin probar 24-28).
 - Sin probar: overlay de bloqueo, tema claro, horizontal/tablet. Costura menor en 3 botones (la barra la pinta el sistema).
 - Pendiente (cosmético): el scroll de App detail/App picker/Screen time se corta sobre la barra de navegación (`clipToPadding`).
+
+### F0-u3 · `firebase/` — commit «F0-u3: firebase/ con reglas que lo deniegan todo y test de reglas»
+
+- `firebase/`: `firebase.json` (emuladores auth 9099, functions 5001, firestore 8080, database 9000, UI 4000), `.firebaserc` (`bbetter-dbcda`), reglas que lo deniegan todo, `functions/` (TS, Node 22, `europe-west1`, sin funciones; compila) y `tests/` (mocha + `@firebase/rules-unit-testing`). Comandos en `firebase/README.md`.
+- Test: 5 en verde (`firebase emulators:exec`), con un **control positivo** (sin él un emulador caído hace pasar los `assertFails`). Prueba de mutación hecha: con las reglas abiertas fallan 4 de 5.
+- **Prerrequisito nuevo:** la CLI 15 exige **JDK 21** (había 18). Temurin 21 instalado aparte; se usa solo por proceso con `JAVA_HOME` (el `java` por defecto sigue siendo el 18).
+- Consola comprobada por CLI: Firestore `(default)` Standard en `eur3`; RTDB `bbetter-dbcda-default-rtdb` en `europe-west1`. Plan **Spark**: no hace falta Blaze hasta desplegar Functions (F2).
+- Las reglas **no están desplegadas** al proyecto real (en producción rigen las de «modo producción», que deniegan todo). Desplegarlas es una decisión de F1/F2.
+- Tests de reglas con id `demo-bbetter`; la app contra el emulador exige `--project bbetter-dbcda` (singleProjectMode).

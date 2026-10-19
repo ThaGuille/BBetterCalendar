@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// F0-u3: todo denegado. Cada fase abre solo lo suyo (F1 profiles/handles, F2 friendRequests/friends/blocks,
+// F3 stats...), siempre con su test en firebase/tests/. Las Functions escriben con el Admin SDK, que se
+// salta estas reglas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

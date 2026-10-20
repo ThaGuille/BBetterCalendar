@@ -146,3 +146,4 @@ el usuario, también se registra una `D-xxx`.
 | 2026-10-19 | Q-06 cerrada: la tarjeta de compartir de F0 no lleva enlace hasta publicar; se corrige 03 §11 | D-018 |
 | 2026-10-19 | Q-05 cerrada: el `@usuario` se cambia como mucho una vez cada 30 días; se corrige 02 §3 | D-019 |
 | 2026-10-19 | API 24 y el overlay de bloqueo se prueban al final (DIF-10); F1–F5 se verifican en API 36 | D-020 |
+| 2026-10-20 | 03 §5: `profiles/{uid}` incluye `handleChangedAt` (consecuencia del renombrado cada 30 días; sin decisión nueva) | D-019, D-022 |

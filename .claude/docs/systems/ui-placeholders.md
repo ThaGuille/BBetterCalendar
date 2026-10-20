@@ -1,6 +1,6 @@
 # System — UI placeholders (functional-debt ledger)
 
-**Last verified:** 2026-10-13 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-20 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Stitch visual migration (`.claude/plans/migracion-visual-stitch.md`) builds every designed
 element whose data already exists in the DB, and **registers the rest here** instead of bumping
@@ -48,7 +48,6 @@ debug, false in release**) through `social/SocialFeature`:
 | `social-focus-studying` | Focus (u14) | `focusSocialBlock` (`focusStudyingHeader` "5 / 8", `focusFriendsGrid`) | Mock friends, static times, crown on the first | Live presence + ticking session times (`social-backend`) | P2 (hidden in release) |
 | `social-focus-invite` | Focus (u14) | `focusInviteButton` | Inert button (toast "Inviting friends is coming soon") | Invite flow (share link, deep link, accounts) | P2 (hidden in release) |
 | `social-celebration-strip` | Cycle complete (u15) | `cycleFriendsStrip` ("Laia and 3 others still studying · Live") | Mock top friend + count (`getCelebrationSnapshot()`) | Real presence (`social-backend`) | P2 (hidden in release) |
-| `home-user-name` | Home (u13/u13b) | `text_home` + `homeAvatar` | Greeting "Hi, Guille" / "Hola, Guille" and avatar "G" copied from the design (`home_user_name_placeholder`) | A stored user/display name (onboarding or settings) → "Hi, <name>" + real initials | P2 |
 | `home-notification-centre` | Home (u13) | `homeBellButton` | Bell with a fixed honey dot; tap shows a "coming soon" toast | Notification centre / inbox screen + unread state for the dot | P2 |
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
 | `projects-streak-chip` | Projects (u16) | `projectsStreakChip` | The **global** streak (hidden at 0), not a per-project streak | `focus_event` does not attribute a streak per project | P2 |
@@ -64,6 +63,7 @@ debug, false in release**) through `social/SocialFeature`:
 |---|---|---|
 | `cycle-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
 | `progress-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
+| `home-user-name` | 2026-10-20 | F1-u8: `GreetingResolver` (profile name, else local name in `SocialPrefs`, else generic greeting) |
 
 ## History
 | Date | Change | Ref |
@@ -72,3 +72,4 @@ debug, false in release**) through `social/SocialFeature`:
 | 2026-10-06 | Home rows (`home-user-name`, `home-notification-centre`); `social-home-friends` view id | u13 |
 | 2026-10-13 | Rows of u13b–u20 consolidated; social data sets split per design | u24 (migracion-visual-stitch-cont) |
 | 2026-10-19 | `cycle-share` and `progress-share` resolved: image card + FileProvider + ACTION_SEND (text only, Q-06) | F0-u5 (social-f0-base) |
+| 2026-10-20 | `home-user-name` resolved: Home greeting and avatar come from the profile or a local name; markers and `home_user_name_placeholder` removed | F1-u8 (social-f1-cuenta) |

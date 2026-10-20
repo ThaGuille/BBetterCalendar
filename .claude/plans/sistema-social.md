@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u8 hecha)
+**Last updated:** 2026-10-20 (F1 cerrada)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,10 +15,10 @@
 
 ## Ahora
 
-- **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
-  F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
-- **Siguiente paso:** F1-u1 (reglas), F1-u2 (núcleo de cuenta), F1-u3 (datos del perfil), F1-u4 (UI de entrada) y
-  F1-u5 (Crear perfil y Mi perfil) y F1-u6 (`deleteAccount`) hechas. F1-u7 (borrar cuenta en la app) y F1-u8 (Home) hechas. Sigue u9 (cierre documental).
+- **Fase activa:** ninguna abierta. F0 y F1 hechas · planes [`social-f0-base.md`](social-f0-base.md) y
+  [`social-f1-cuenta.md`](social-f1-cuenta.md) (`merged`). El estado as-built de F1 está en
+  [`systems/social.md`](../docs/systems/social.md).
+- **Siguiente paso:** abrir **F2** (Amigos) con su plan `social-f2-*.md`, siguiendo el protocolo de la guía.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -27,7 +27,7 @@
 | Fase | Objetivo | Estado | Plan | Placeholders que resuelve |
 |---|---|---|---|---|
 | **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | hecha | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
-| **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | activa | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
+| **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | hecha | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
 | **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, bloquear y reportar | pendiente | — | `social-focus-invite`, `home-notification-centre` (parcial) |
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | pendiente | — | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | pendiente | — | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
@@ -70,7 +70,7 @@ en el diario.
 - [x] **F1.5** Mi perfil (ver y editar) — 02 §3
 - [x] **F1.6** Borrar cuenta: `deleteAccount` + página web — 03 §7, 04 §2
 - [x] **F1.7** Saludo y avatar de Home desde el perfil (o un nombre local sin cuenta) — 02 §9
-- [ ] **F1.8** Crear `.claude/docs/systems/social.md` (as-built) + fila en la tabla de system docs de
+- [x] **F1.8** Crear `.claude/docs/systems/social.md` (as-built) + fila en la tabla de system docs de
   CLAUDE.md
 
 ### F2 · Amigos
@@ -153,6 +153,11 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-20 (16)** · F1 cerrada: F1-u9 hecha. `systems/social.md` (as-built) y su fila en CLAUDE.md; `home-user-name`
+  en *Resolved*; resueltos los `[CONFIRM]` de F1 de los borradores legales (siguen los de F2, F5 y L.2); `handleChangedAt`
+  en 03 §5 con su fila de Historial (D-019, D-022). Corridos `test assembleDebug assembleRelease` y la suite de Firebase
+  (40 en verde); F1.1 a F1.8 marcados. Commit «F1-u9: cierre de la fase F1 (systems/social.md, legales, 03 §5 y
+  tablero)». **Siguiente:** abrir F2 (Amigos).
 - **2026-10-20 (15)** · F1-u8 hecha: el saludo y el avatar de Home salen del perfil, de un nombre local o de un saludo
   genérico (`GreetingResolver`); tocar el avatar abre Mi perfil, Crear perfil (sesión sin perfil) o `LocalNameDialog`
   (también en release). Quitados los marcadores `home-user-name`. Probado en api36 con el Emulator Suite. Commit «F1-u8:

@@ -30,12 +30,13 @@ your Friends data from our servers.
 
 ## Option 1: delete it inside the app
 
-1. Open BBetter and go to *My profile*. [CONFIRM navigation path, F1.6]
-2. Tap *Delete account*. [CONFIRM label, F1.6]
-3. Confirm. You may be asked to sign in again first, for security. [CONFIRM re-authentication]
+1. Open BBetter, go to *Home* and tap your avatar (top right) to open *My profile*.
+2. Tap *Delete account*.
+3. Confirm. If you signed in a while ago you will be asked to sign in again first, for security: your
+   password if you use email, or the Google account picker if you use Google.
 
 The app calls the `deleteAccount` function, which removes your data and your sign-in, then signs you
-out. [CONFIRM: `deleteAccount` callable does not exist yet (F1.6)]
+out.
 
 ## Option 2: request deletion by email
 
@@ -54,8 +55,8 @@ When your account is deleted we remove:
 - your friend list, friend requests sent and received, and your blocks;
 - your notification token and pending notifications. [CONFIRM when notifications ship, F5]
 
-Deletion from Firestore and the Realtime Database is immediate. [CONFIRM: depends on the F1.6
-implementation, including the removal of presence and the cleanup of friends' lists]
+Deletion from Firestore and the Realtime Database is immediate. Your @username is released at the same
+time and can be claimed again. [CONFIRM: cleanup of friends' lists and presence, tested in F2]
 
 ## What may be kept
 

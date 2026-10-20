@@ -1,8 +1,8 @@
 # Social F1 — Cuenta y perfil
 
-**Status:** in progress
+**Status:** merged
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u8 hecha)
+**Last updated:** 2026-10-20 (F1 cerrada, F1-u9 hecha)
 
 > Tablero: [sistema-social.md](sistema-social.md) · Guía: 02 §3, §9 · 03 §3, §5, §6, §7, §10 · 04 §1, §2, §6
 > Decisiones que aplica: D-002, D-008, D-010, D-011, D-012, D-013, D-016, D-019 – D-024 · Preguntas que debe cerrar: ninguna (las del usuario se cerraron al abrir la fase con D-021 – D-024)
@@ -42,7 +42,7 @@ Quien quiera usar Amigos puede, desde un bloque social, pasar la puerta de edad,
 | **F1-u6** | Callable `deleteAccount` (europe-west1) + test de integración | `firebase/functions/src/index.ts`, `firebase/functions/src/deleteAccount.ts` (nuevo), `firebase/tests/delete-account.test.js` (nuevo), `firebase/tests/package.json` | `emulators:exec` (auth + firestore + database + functions) en verde: datos y usuario de Auth borrados; sin sesión → `unauthenticated` | hecha |
 | **F1-u7** | Borrar cuenta en la app (F1.6): botón en Mi perfil, confirmación, re-autenticación y llamada | `MyProfileFragment`, `ProfileViewModel`, `AccountRepository` (+ `reauthenticate`, `deleteAccount`), `strings_social.xml` | adb-ui-test: borrar → vuelve a «sin cuenta»; en la UI del emulador no queda nada y el `@usuario` vuelve a estar libre | hecha |
 | **F1-u8** | Saludo y avatar de Home (F1.7): perfil, o nombre local sin cuenta (también en release); al tocar el avatar se abre Mi perfil o el editor del nombre local | `ui/home/HomeViewModel.java`, `HomeFragment.java`, `ui/home/LocalNameDialog` (nuevo), `ui/home/GreetingResolver` (nuevo, puro), `values/strings_home.xml` (+es, nuevo), `strings.xml`, `layout/fragment_home.xml` | JUnit `GreetingResolverTest`; adb-ui-test: sin cuenta y nombre local → «Hola, X»; con perfil → su nombre e iniciales con su color | hecha |
-| **F1-u9** | Cierre documental (F1.8): `systems/social.md`, fila en CLAUDE.md, placeholder resuelto, `[CONFIRM]` legales, cambio en 03 §5 | `.claude/docs/systems/social.md` (nuevo), `CLAUDE.md`, `.claude/docs/systems/ui-placeholders.md`, `docs/legal/terms-draft.md`, `docs/legal/delete-account-draft.md`, `docs/social/03-arquitectura.md` | Enlaces correctos; `check_pages.py` solo publica la v1; `grep PLACEHOLDER(ui-placeholders#home-user-name)` vacío | pendiente |
+| **F1-u9** | Cierre documental (F1.8): `systems/social.md`, fila en CLAUDE.md, placeholder resuelto, `[CONFIRM]` legales, cambio en 03 §5 | `.claude/docs/systems/social.md` (nuevo), `CLAUDE.md`, `.claude/docs/systems/ui-placeholders.md`, `docs/legal/terms-draft.md`, `docs/legal/delete-account-draft.md`, `docs/social/03-arquitectura.md` | Enlaces correctos; `check_pages.py` solo publica la v1; `grep PLACEHOLDER(ui-placeholders#home-user-name)` vacío | hecha |
 
 **Orden y paralelismo.** Cada unidad: implementar → `.\gradlew.bat test assembleDebug` → un commit.
 - **Ola 1:** u1 ∥ u2 (`firebase/` frente a `app/`).
@@ -191,13 +191,13 @@ Modelo: opus para u1, u3 y u6 (reglas y transacciones); sonnet + `impeccable` pa
 
 ## Hecho cuando
 
-- [ ] `.\gradlew.bat test assembleDebug assembleRelease` en verde.
-- [ ] Tests de reglas y de `deleteAccount` en verde con `firebase emulators:exec`.
-- [ ] En `api36`, con emuladores: puerta de edad (por debajo y por encima), alta con email y selector de Google, crear perfil, `@usuario` repetido rechazado, renombrado limitado, cerrar sesión y borrar cuenta (sin rastro en el emulador y con el `@usuario` libre).
-- [ ] Home saluda con el nombre del perfil o el local; `home-user-name` resuelto.
-- [ ] Verificación en `api36` sin `FATAL EXCEPTION` (regla #7).
-- [ ] `systems/social.md` creado y enlazado desde CLAUDE.md; marcadores `[CONFIRM]` de F1 resueltos.
-- [ ] Tablero: F1 hecha, F1.1–F1.8 marcados, diario al día.
+- [x] `.\gradlew.bat test assembleDebug assembleRelease` en verde (BUILD SUCCESSFUL, corrido en u9).
+- [x] Tests de reglas y de `deleteAccount` en verde con `firebase emulators:exec` (40 en verde, corrido en u9).
+- [x] En `api36`, con emuladores: puerta de edad (por debajo y por encima), alta con email y selector de Google, crear perfil, `@usuario` repetido rechazado, renombrado limitado, cerrar sesión y borrar cuenta (sin rastro en el emulador y con el `@usuario` libre).
+- [x] Home saluda con el nombre del perfil o el local; `home-user-name` resuelto (u8).
+- [x] Verificación en `api36` sin `FATAL EXCEPTION` (regla #7): u4, u5, u7 y u8 con `APP CRASHES: 0`.
+- [x] `systems/social.md` creado y enlazado desde CLAUDE.md; marcadores `[CONFIRM]` de F1 resueltos.
+- [x] Tablero: F1 hecha, F1.1–F1.8 marcados, diario al día.
 
 ## Notas de unidades
 
@@ -289,3 +289,12 @@ Modelo: opus para u1, u3 y u6 (reglas y transacciones); sonnet + `impeccable` pa
 - Quitados los 4 marcadores `home-user-name` y `home_user_name_placeholder`; la fila de `ui-placeholders.md` pasa a Resolved en u9.
 - Emulador api36 + Emulator Suite: saludo genérico, nombre local «Guille» (persiste al reiniciar), perfil «Delia Roca» con iniciales y color, avatar → Mi perfil; 0 `FATAL EXCEPTION`. Release solo por código y `assembleRelease`.
 - Pendiente: la rama release del avatar no se probó en dispositivo (APK sin firmar).
+
+### F1-u9 · Cierre documental de F1: systems/social.md, CLAUDE.md, placeholder, [CONFIRM] legales, 03 §5 y Hecho cuando — commit «F1-u9: cierre de la fase F1 (systems/social.md, legales, 03 §5 y tablero)»
+
+- `.claude/docs/systems/social.md` (nuevo): flags, flujo de entrada, clases, rutas y reglas de Firestore, `deleteAccount`, flujo con el Emulator Suite, invariantes y lo que sigue siendo maqueta. Fila en la tabla de system docs de CLAUDE.md.
+- `home-user-name` pasa a *Resolved* en `ui-placeholders.md` (con fila de Historial); sin marcadores en `app/src`.
+- Legales: resueltos los `[CONFIRM]` de F1 de `terms-draft.md` (umbral, métodos, reglas del validador, re-aceptación) y `delete-account-draft.md` (ruta, etiqueta, re-autenticación, callable, borrado inmediato). Siguen abiertos F2.6, plazo de revisión, F5, la vista de los amigos tras borrar, plazos de retención, URLs y revisión legal (L.2). La limpieza de amigos y presencia queda marcada hasta F2.
+- Guía: 03 §5 añade `handleChangedAt` a `profiles/{uid}` (consecuencia de D-019 y D-022, sin D-xxx nueva) y una fila en el Historial del README.
+- Corridos en u9: `test assembleDebug assembleRelease` y la suite completa de Firebase (40 en verde, con `deleteAccount`). Todas las casillas de «Hecho cuando» tienen evidencia (notas u1 a u8 y carpeta de evidencia); Google se probó contra el emulador de Auth.
+- Pendiente: el SHA-1 de release y el despliegue (L), la rama de re-autenticación en dispositivo, API 24 a 33 (DIF-10) y F2.

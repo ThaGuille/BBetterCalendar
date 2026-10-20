@@ -34,15 +34,15 @@ accounts that break these rules.
   any age. It sends nothing off your device.
 - **Friends requires being at least 14 years old.** The app asks for your year of birth before you
   create an account and does not let you continue if you are under 14. You must answer truthfully.
-  [CONFIRM the threshold in code: `SOCIAL_MIN_AGE = 14`; it may rise to 16 if Spanish law changes,
-  see board DIF-02]
+  The year is stored once on your device and is not asked again. (In code: `SOCIAL_MIN_AGE = 14`;
+  it may rise to 16 if Spanish law changes, see board DIF-02.)
 - Users aged 14 to 17 are expected to have read these terms with the help of a parent or guardian
   where appropriate. [CONFIRM wording with legal review]
 
 ## 2. Your account
 
-- Sign in with Google or email. You are responsible for what happens under your account; do not share
-  your credentials. [CONFIRM sign-in methods at F1]
+- Sign in with Google, or with your email and a password. You are responsible for what happens under
+  your account; do not share your credentials.
 - One person, one account. Do not create accounts to evade a suspension or a block.
 - You choose a display name and an @username. They are the only profile content in Friends: there are
   no photos, free-text bios, chat or public posts.
@@ -61,8 +61,11 @@ When you use Friends you agree not to:
   limits;
 - use Friends for anything illegal, or to collect information about other users.
 
-Reserved @usernames (for example admin, bbetter, support) cannot be registered, and a basic word
-filter is applied to names and @usernames. [CONFIRM final rules in `HandleValidator`, F1]
+An @username has 3 to 20 characters (lowercase letters, digits, `_` and `.`), is unique, and can be
+changed once, for free, and then at most once every 30 days. A display name has 1 to 30 characters.
+Reserved @usernames (for example admin, bbetter, support, moderator) and anything containing "bbetter"
+cannot be registered, and a basic word filter in Spanish, English and Catalan is applied to names and
+@usernames.
 
 ## 4. What other users see
 
@@ -104,7 +107,8 @@ features. Nothing in these terms limits rights you have as a consumer under appl
 ## 8. Changes to these terms
 
 If the terms change in substance, we bump the version above and ask you to accept the new version in
-the app before you continue using Friends. [CONFIRM re-acceptance flow, `users/{uid}.termsVersion`]
+the app before you continue using Friends. The version you accepted is stored with your account
+(`users/{uid}.termsVersion`) and compared with the current one each time you open Friends.
 
 ## 9. Law
 

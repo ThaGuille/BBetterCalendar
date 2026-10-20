@@ -1,6 +1,6 @@
 # 03 · Arquitectura
 
-> **Última revisión:** 2026-10-19 · Guía: [README](README.md) · Producto: [02](02-producto.md)
+> **Última revisión:** 2026-10-20 · Guía: [README](README.md) · Producto: [02](02-producto.md)
 >
 > Cómo se monta. Es el diseño objetivo: lo que ya existe se documenta en
 > `.claude/docs/systems/social.md` a partir de F1. Las secciones se citan como `03 §N`.
@@ -66,7 +66,7 @@ Nadie lee tu Room. Tú publicas agregados y presencia, y tus amigos los escuchan
 | Ruta | Campos | Lee | Escribe |
 |---|---|---|---|
 | `users/{uid}` (privado) | `createdAt`, `ageBand` (`14-17`/`18+`), `termsVersion`, `termsAcceptedAt`, `fcmTokens[]` (F5) | Dueño | Dueño |
-| `profiles/{uid}` | `displayName`, `handle`, `avatarColor` (0–7), `createdAt` | Dueño + amigos | Dueño |
+| `profiles/{uid}` | `displayName`, `handle`, `avatarColor` (0–7), `createdAt`, `handleChangedAt` (ausente hasta el primer renombrado) | Dueño + amigos | Dueño |
 | `handles/{handle}` | `uid`, `displayName`, `avatarColor` (tarjeta pública mínima) | Cualquier usuario con sesión, **solo `get`** (sin `list`) | Dueño; crear solo si no existe (unicidad) |
 | `friendRequests/{fromUid_toUid}` | `from`, `to`, `createdAt`, `status` (`pending`/`accepted`/`declined`) | `from` y `to` | `from` crea y borra (cancelar); `to` cambia el estado. El id determinista evita duplicados |
 | `users/{uid}/friends/{friendUid}` | `since` | Dueño | **Solo Functions** |

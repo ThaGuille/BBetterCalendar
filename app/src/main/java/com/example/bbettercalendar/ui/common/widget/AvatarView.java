@@ -149,6 +149,18 @@ public class AvatarView extends View {
         invalidate();
     }
 
+    /** Disc colour of a plain ({@link Status#NONE}) avatar, e.g. a profile colour (F1-u5 AvatarPalette). */
+    public void setFillColor(@ColorInt int color) {
+        plainFill = color;
+        invalidate();
+    }
+
+    /** Initials colour of a plain ({@link Status#NONE}) avatar; pair it with {@link #setFillColor}. */
+    public void setInitialsColor(@ColorInt int color) {
+        plainInitials = color;
+        invalidate();
+    }
+
     /** Colour of the background the avatar sits on (cut-out around the dot / badge). */
     public void setCutoutColor(@ColorInt int color) {
         cutoutColor = color;

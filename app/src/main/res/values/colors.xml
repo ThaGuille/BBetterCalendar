@@ -71,6 +71,17 @@
     <color name="bb_project_3">@color/sage_200</color>
     <color name="bb_project_4">@color/seafoam_200</color>
 
+    <!-- F1-u5: the 8 profile avatar colours (profiles/{uid}.avatarColor 0-7, AvatarPalette). Aliases of
+         the existing ramps, never hex; initials on them are bb_on_reward (pine_950). -->
+    <color name="bb_avatar_0">@color/sage_300</color>
+    <color name="bb_avatar_1">@color/sage_200</color>
+    <color name="bb_avatar_2">@color/seafoam_200</color>
+    <color name="bb_avatar_3">@color/dusk_300</color>
+    <color name="bb_avatar_4">@color/honey_300</color>
+    <color name="bb_avatar_5">@color/amber_400</color>
+    <color name="bb_avatar_6">@color/ember_300</color>
+    <color name="bb_avatar_7">@color/sage_500</color>
+
 
     <!-- Calendar categorical colors (provisional until the calendar is designed, plan u4):
          aliases of primitives, never hex copies. Text on them is bb_on_primary (pine_950). -->

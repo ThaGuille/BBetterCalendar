@@ -9,4 +9,10 @@
     <dimen name="social_cta_icon">40dp</dimen>
     <dimen name="social_cta_icon_padding">10dp</dimen>
     <dimen name="social_cta_card_padding">16dp</dimen>
+    <!-- F1-u5 · Create profile / My profile -->
+    <dimen name="social_avatar_large">96dp</dimen>
+    <dimen name="social_avatar_preview">72dp</dimen>
+    <dimen name="social_picker_swatch">40dp</dimen>
+    <dimen name="social_picker_ring">2dp</dimen>
+    <dimen name="social_picker_cell_height">56dp</dimen>
 </resources>

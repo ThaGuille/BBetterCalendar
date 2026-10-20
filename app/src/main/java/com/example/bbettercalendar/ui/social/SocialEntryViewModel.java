@@ -11,8 +11,11 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.bbettercalendar.social.account.AccountRepository;
 import com.example.bbettercalendar.social.account.AccountState;
+import com.example.bbettercalendar.social.account.AgeGate;
 import com.example.bbettercalendar.social.account.SocialEntryRouter;
 import com.example.bbettercalendar.social.account.SocialPrefs;
+import com.example.bbettercalendar.social.account.SocialTerms;
+import com.example.bbettercalendar.social.profile.ProfileRepository;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -36,9 +39,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class SocialEntryViewModel extends ViewModel {
 
-    /** termsVersion vigente de los términos. F1-u5 la usa al crear el perfil. */
-    private static final int CURRENT_TERMS_VERSION = 1;
-
     /** Qué falló, sin texto: la pantalla elige la cadena. */
     public enum Failure {
         INVALID_EMAIL, WEAK_PASSWORD, EMAIL_IN_USE, BAD_CREDENTIALS, NETWORK, GOOGLE, GENERIC
@@ -59,16 +59,18 @@ public class SocialEntryViewModel extends ViewModel {
 
     private final AccountRepository account;
     private final SocialPrefs prefs;
+    private final ProfileRepository profiles;
 
     private final MutableLiveData<SocialEntryRouter.Step> entryStep = new MutableLiveData<>();
     private final MutableLiveData<Boolean> busy = new MutableLiveData<>(false);
     private final MutableLiveData<Outcome> outcome = new MutableLiveData<>();
-    private boolean entryPending;
+    private volatile boolean entryPending;
 
     @Inject
-    public SocialEntryViewModel(AccountRepository account, SocialPrefs prefs) {
+    public SocialEntryViewModel(AccountRepository account, SocialPrefs prefs, ProfileRepository profiles) {
         this.account = account;
         this.prefs = prefs;
+        this.profiles = profiles;
     }
 
     public LiveData<AccountState> getAccountState() {
@@ -95,10 +97,29 @@ public class SocialEntryViewModel extends ViewModel {
         }
         entryPending = true;
         prefs.readBirthYear(birthYear -> {
-            AccountState state = account.getState().getValue();
-            // Sin perfil conocido hasta F1-u5: CREATE_PROFILE termina con la sesión iniciada.
-            entryStep.postValue(SocialEntryRouter.route(birthYear, currentYear(),
-                    state == null ? AccountState.SIGNED_OUT : state, null, CURRENT_TERMS_VERSION));
+            // La sesión se mira en FirebaseAuth (síncrono), no en el LiveData: justo tras iniciar
+            // sesión el LiveData aún puede decir SIGNED_OUT.
+            if (birthYear == null || !AgeGate.isAllowed(birthYear, currentYear())
+                    || account.getUid() == null) {
+                entryStep.postValue(SocialEntryRouter.route(birthYear, currentYear(),
+                        signedIn() ? AccountState.SIGNED_IN : AccountState.SIGNED_OUT, null,
+                        SocialTerms.TERMS_VERSION));
+                return;
+            }
+            // Con sesión: la versión de términos aceptada dice si hay perfil (F1-u5).
+            profiles.readTermsVersion(new ProfileRepository.TermsCallback() {
+                @Override
+                public void onResult(@Nullable Integer termsVersion) {
+                    entryStep.postValue(SocialEntryRouter.route(birthYear, currentYear(),
+                            AccountState.SIGNED_IN, termsVersion, SocialTerms.TERMS_VERSION));
+                }
+
+                @Override
+                public void onError(@NonNull Throwable error) {
+                    // Sin saber si hay perfil no se manda a ninguna parte; otro toque lo reintenta.
+                    entryPending = false;
+                }
+            });
         });
     }
 
@@ -120,9 +141,13 @@ public class SocialEntryViewModel extends ViewModel {
     /** Guarda el año (solo la primera vez) y devuelve el paso que le toca con ese año. */
     public SocialEntryRouter.Step saveBirthYear(int birthYear) {
         prefs.saveBirthYearOnce(birthYear);
-        AccountState state = account.getState().getValue();
         return SocialEntryRouter.route(birthYear, currentYear(),
-                state == null ? AccountState.SIGNED_OUT : state, null, CURRENT_TERMS_VERSION);
+                signedIn() ? AccountState.SIGNED_IN : AccountState.SIGNED_OUT, null,
+                SocialTerms.TERMS_VERSION);
+    }
+
+    private boolean signedIn() {
+        return account.getUid() != null;
     }
 
     public void signInWithGoogle(@NonNull Activity activity) {

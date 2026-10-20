@@ -49,4 +49,54 @@
     <string name="email_error_in_use">Ese email ya tiene una cuenta. Prueba a iniciar sesión.</string>
     <string name="email_error_bad_credentials">El email o la contraseña no son correctos.</string>
     <string name="email_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+
+    <!-- F1-u5 · Crear perfil -->
+    <string name="create_profile_top_title">Crear perfil</string>
+    <string name="create_profile_title">Crea tu perfil</string>
+    <string name="create_profile_body">Así te verán tus amigos.</string>
+    <string name="create_profile_name_hint">Nombre</string>
+    <string name="create_profile_handle_hint">usuario</string>
+    <string name="create_profile_handle_help">De 3 a 20 caracteres: letras, números, _ y .</string>
+    <string name="create_profile_color_label">Color del avatar</string>
+    <string name="create_profile_terms_prefix">"Acepto los "</string>
+    <string name="create_profile_terms_link">Términos de uso</string>
+    <string name="create_profile_terms_url" translatable="false">https://thaguille.github.io/BBetterCalendar/legal/terms/</string>
+    <string name="create_profile_save">Crear perfil</string>
+
+    <!-- Estado del @usuario (validación en vivo + disponibilidad) -->
+    <string name="handle_status_checking">Comprobando…</string>
+    <string name="handle_status_free">El usuario @%1$s está disponible.</string>
+    <string name="handle_status_taken">Ese usuario no está disponible.</string>
+    <string name="handle_status_error">No se pudo comprobar ahora. Revisa tu conexión.</string>
+    <string name="handle_status_too_short">Usa al menos 3 caracteres.</string>
+    <string name="handle_status_too_long">Usa 20 caracteres como máximo.</string>
+    <string name="handle_status_invalid_chars">Solo letras, números, _ y .</string>
+    <string name="handle_status_reserved">Ese usuario está reservado.</string>
+    <string name="handle_status_banned">Elige otro usuario.</string>
+    <string name="name_status_banned">Elige otro nombre.</string>
+
+    <!-- Errores al guardar -->
+    <string name="profile_error_taken">Ese usuario no está disponible. Elige otro.</string>
+    <string name="profile_error_rename_soon">Todavía no puedes cambiar tu usuario.</string>
+    <string name="profile_error_network">Sin conexión. Revisa tu internet e inténtalo de nuevo.</string>
+    <string name="profile_error_invalid">Revisa el nombre y el usuario e inténtalo de nuevo.</string>
+    <string name="profile_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+
+    <!-- F1-u5 · Mi perfil -->
+    <string name="my_profile_top_title">Mi perfil</string>
+    <string name="my_profile_loading">Cargando tu perfil…</string>
+    <string name="my_profile_error">No pudimos cargar tu perfil. Revisa tu conexión y vuelve.</string>
+    <string name="my_profile_name_label">Nombre</string>
+    <string name="my_profile_color_label">Color del avatar</string>
+    <string name="my_profile_save">Guardar cambios</string>
+    <string name="my_profile_saved">Cambios guardados.</string>
+    <string name="my_profile_handle_section">Usuario</string>
+    <string name="my_profile_rename_hint">Nuevo usuario</string>
+    <string name="my_profile_rename_button">Cambiar usuario</string>
+    <string name="my_profile_rename_free">Puedes cambiar tu usuario una vez ahora. Después, una vez cada 30 días.</string>
+    <string name="my_profile_rename_blocked">Podrás cambiar tu usuario otra vez el %1$s.</string>
+    <string name="my_profile_rename_same">Ese es tu usuario actual.</string>
+    <string name="my_profile_renamed">Usuario cambiado.</string>
+    <string name="my_profile_sign_out">Cerrar sesión</string>
+    <string name="profile_color_picker_description">Color de avatar %1$d de %2$d</string>
 </resources>

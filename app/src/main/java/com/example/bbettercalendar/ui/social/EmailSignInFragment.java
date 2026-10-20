@@ -12,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
@@ -23,8 +22,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * F1-u4: alta e inicio de sesión con email y contraseña, y «olvidé mi contraseña» (D-023). Un solo
- * formulario con dos modos. Al iniciar sesión vuelve al origen (la sesión la refleja
- * AccountRepository); el perfil llega con F1-u5.
+ * formulario con dos modos. Al iniciar sesión sigue SocialEntryRouter: Crear perfil si aún no hay
+ * perfil, Mi perfil si ya existe (F1-u5).
  */
 @AndroidEntryPoint
 public class EmailSignInFragment extends Fragment {
@@ -86,6 +85,13 @@ public class EmailSignInFragment extends Fragment {
             switchMode.setEnabled(enabled);
             forgot.setEnabled(enabled);
         });
+        viewModel.getEntryStep().observe(getViewLifecycleOwner(), step -> {
+            if (step == null) {
+                return;
+            }
+            viewModel.consumeEntryStep();
+            SocialEntryNavigator.goReplacing(this, step, R.id.navigation_email_sign_in);
+        });
         viewModel.getOutcome().observe(getViewLifecycleOwner(), outcome -> {
             if (outcome == null) {
                 return;
@@ -93,7 +99,8 @@ public class EmailSignInFragment extends Fragment {
             viewModel.consumeOutcome();
             switch (outcome.kind) {
                 case SIGNED_IN:
-                    NavHostFragment.findNavController(this).popBackStack();
+                    // F1-u5: el router decide (Crear perfil si aún no tiene, Mi perfil si ya).
+                    viewModel.requestEntry();
                     break;
                 case RESET_SENT:
                     showMessage(R.string.email_reset_sent);

@@ -58,13 +58,21 @@ public class JoinFriendsSheet extends BottomSheetDialogFragment {
 
         viewModel.isBusy().observe(getViewLifecycleOwner(), busy ->
                 googleButton.setEnabled(!Boolean.TRUE.equals(busy)));
+        viewModel.getEntryStep().observe(getViewLifecycleOwner(), step -> {
+            if (step == null) {
+                return;
+            }
+            viewModel.consumeEntryStep();
+            SocialEntryNavigator.goReplacing(this, step, R.id.navigation_join_friends);
+        });
         viewModel.getOutcome().observe(getViewLifecycleOwner(), outcome -> {
             if (outcome == null) {
                 return;
             }
             viewModel.consumeOutcome();
             if (outcome.kind == SocialEntryViewModel.Outcome.Kind.SIGNED_IN) {
-                NavHostFragment.findNavController(this).popBackStack();
+                // F1-u5: el router decide (Crear perfil si aún no tiene, Mi perfil si ya existe).
+                viewModel.requestEntry();
             } else {
                 error.setText(outcome.failure == SocialEntryViewModel.Failure.NETWORK
                         ? R.string.join_error_network : R.string.join_error_google);

@@ -18,4 +18,9 @@
     <style name="TextAppearance.BBetter.SocialError" parent="TextAppearance.BBetter.Caption">
         <item name="android:textColor">@color/bb_danger</item>
     </style>
+
+    <!-- F1-u5: positive status line under the username field (available). -->
+    <style name="TextAppearance.BBetter.SocialOk" parent="TextAppearance.BBetter.Caption">
+        <item name="android:textColor">@color/bb_primary_bright</item>
+    </style>
 </resources>

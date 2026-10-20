@@ -136,4 +136,17 @@
         android:label="@string/email_top_title_sign_up"
         tools:layout="@layout/fragment_email_sign_in" />
 
+    <!-- ===== F1-u5: perfil. Crear perfil lo abre el router tras iniciar sesión; termina en Mi perfil. ===== -->
+    <fragment
+        android:id="@+id/navigation_create_profile"
+        android:name="com.example.bbettercalendar.ui.social.CreateProfileFragment"
+        android:label="@string/create_profile_top_title"
+        tools:layout="@layout/fragment_create_profile" />
+
+    <fragment
+        android:id="@+id/navigation_my_profile"
+        android:name="com.example.bbettercalendar.ui.social.MyProfileFragment"
+        android:label="@string/my_profile_top_title"
+        tools:layout="@layout/fragment_my_profile" />
+
 </navigation>

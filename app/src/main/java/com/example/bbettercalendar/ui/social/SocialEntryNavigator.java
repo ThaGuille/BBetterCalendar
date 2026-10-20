@@ -42,10 +42,16 @@ public final class SocialEntryNavigator {
             case JOIN:
                 destination = R.id.navigation_join_friends;
                 break;
+            case CREATE_PROFILE:
+                destination = R.id.navigation_create_profile;
+                break;
+            case ACCEPT_TERMS:
+            case DESTINATION:
             default:
-                // CREATE_PROFILE / ACCEPT_TERMS / DESTINATION: hasta F1-u5 el flujo termina con la
-                // sesión iniciada; el destino de cada uno lo cablea esa unidad.
-                return;
+                // F1-u5: Mi perfil es el destino de la cuenta. ACCEPT_TERMS no puede darse mientras
+                // TERMS_VERSION sea 1; su pantalla de re-aceptación queda para cuando suba.
+                destination = R.id.navigation_my_profile;
+                break;
         }
         NavOptions options = popUpToInclusive == 0 ? null
                 : new NavOptions.Builder().setPopUpTo(popUpToInclusive, true).build();

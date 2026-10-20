@@ -1,6 +1,6 @@
 # 04 · Cumplimiento
 
-> **Última revisión:** 2026-10-19 · Guía: [README](README.md)
+> **Última revisión:** 2026-10-20 · Guía: [README](README.md)
 >
 > Límites legales y de Google Play. No es asesoría legal: antes del lanzamiento (gate L), revisar los
 > textos oficiales vigentes. Las secciones se citan como `04 §N`.
@@ -44,7 +44,7 @@ círculo de amigos de estudio cuenta como «red social» a efectos de esa ley.
 | Requisito | Qué exige | Cómo lo cumplimos | Entregable |
 |---|---|---|---|
 | **Borrado de cuenta** (desde 2023–24) | Si la app permite crear cuenta: borrado **dentro de la app y en la web**, y borrar también los datos asociados. Desactivar o congelar la cuenta no cuenta como borrado | `deleteAccount` (03 §7) desde Mi perfil. Página web en `docs/legal/` con instrucciones y un contacto para pedirlo. Enlace en Data safety | F1.6, L.2 |
-| **Contenido generado por usuarios** | Los perfiles son UGC: aceptar términos antes de crearlo, **reportar y bloquear** usuarios (controles separados y con etiqueta clara), actuar a tiempo sobre los reportes | Términos en Crear perfil; reportar y bloquear en el perfil del amigo; proceso de moderación (§6) | F1.4, F2.6, L.4 |
+| **Contenido generado por usuarios** | Los perfiles son UGC: aceptar términos antes de crearlo, **reportar y bloquear** usuarios (controles separados y con etiqueta clara), actuar a tiempo sobre los reportes | Términos en Crear perfil; reportar desde la lista de amigos y las solicitudes; **sin bloquear** (D-027): se revisa en L.3 si Play lo exige (DIF-11); proceso de moderación (§6) | F1.4, F2.6, L.4 |
 | **Data safety** | Declarar qué datos se recogen y se comparten | Pasa de «nada sale del dispositivo» a: nombre, email, IDs de usuario, actividad en la app (minutos de foco agregados). Sin ubicación, contactos ni anuncios | L.2 |
 | **Target API** | 36 para apps nuevas y actualizaciones desde el 31-ago-2026 | F0.1 | F0.1 |
 | **Público objetivo** | Declaración veraz; Families Policy si incluye menores de 13 | 13+ (§1.6) | L.3 |

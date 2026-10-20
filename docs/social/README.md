@@ -1,6 +1,6 @@
 # Sistema social — guía
 
-> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-19
+> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-20
 > **¿Dónde estamos?** → [tablero](../../.claude/plans/sistema-social.md) (fases, entregables, diferidos,
 > preguntas abiertas, diario). El progreso **no** vive en esta carpeta.
 
@@ -147,3 +147,6 @@ el usuario, también se registra una `D-xxx`.
 | 2026-10-19 | Q-05 cerrada: el `@usuario` se cambia como mucho una vez cada 30 días; se corrige 02 §3 | D-019 |
 | 2026-10-19 | API 24 y el overlay de bloqueo se prueban al final (DIF-10); F1–F5 se verifican en API 36 | D-020 |
 | 2026-10-20 | 03 §5: `profiles/{uid}` incluye `handleChangedAt` (consecuencia del renombrado cada 30 días; sin decisión nueva) | D-019, D-022 |
+| 2026-10-20 | Q-03 cerrada: tope de 50 amigos confirmado | D-015 |
+| 2026-10-20 | F2 solo en el emulador (App Links en el AVD, Install Referrer en L) y pruebas en un móvil físico por USB; 03 §3 y §11 | D-025, D-026 |
+| 2026-10-20 | Sin bloquear: amistad mutua con añadir y eliminar, reportar aparte; 02 §4 y §9, 03 §3–§7 y 04 §2 | D-027 |

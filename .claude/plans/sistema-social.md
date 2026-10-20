@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1 cerrada)
+**Last updated:** 2026-10-20 (F2 abierta)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,10 +15,10 @@
 
 ## Ahora
 
-- **Fase activa:** ninguna abierta. F0 y F1 hechas · planes [`social-f0-base.md`](social-f0-base.md) y
-  [`social-f1-cuenta.md`](social-f1-cuenta.md) (`merged`). El estado as-built de F1 está en
-  [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** abrir **F2** (Amigos) con su plan `social-f2-*.md`, siguiendo el protocolo de la guía.
+- **Fase activa:** **F2** (Amigos) · plan [`social-f2-amigos.md`](social-f2-amigos.md) (`in progress`, 9 unidades
+  en 5 olas). F0 y F1 hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md));
+  el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
+- **Siguiente paso:** ola 1 de F2: u1 (endurecer F1) y u2 (host del emulador configurable, D-026).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -28,7 +28,7 @@
 |---|---|---|---|---|
 | **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | hecha | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
 | **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | hecha | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
-| **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, bloquear y reportar | pendiente | — | `social-focus-invite`, `home-notification-centre` (parcial) |
+| **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, eliminar y reportar (sin bloquear, D-027) | activa | [`social-f2-amigos.md`](social-f2-amigos.md) | `social-focus-invite`, `home-notification-centre` (parcial) |
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | pendiente | — | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | pendiente | — | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
 | **F5** Interacción | Ánimo, empujón, push, bandeja | pendiente | — | `home-notification-centre` |
@@ -77,16 +77,19 @@ en el diario.
 - [ ] **F2.1** Solicitudes (enviar, aceptar, rechazar, cancelar) + `onFriendRequestAccepted` (los dos
   lados + espejo RTDB) — 02 §4, 03 §7
 - [ ] **F2.2** Añadir por `@usuario` exacto — 02 §4
-- [ ] **F2.3** Enlace de invitación: App Links (Hosting + `assetlinks.json`), Install Referrer y QR —
-  03 §11
+- [ ] **F2.3** Enlace de invitación: App Links (`assetlinks.json` en el emulador de Hosting, probado en el AVD),
+  Install Referrer (código + JUnit; prueba real en L.7) y QR — 03 §11, D-025
 - [ ] **F2.4** Pantalla Amigos (lista y solicitudes) como destino secundario, con entradas desde Home,
   Focus y el avatar (D-012) — 02 §9
 - [ ] **F2.5** «Invitar» de Focus real — 02 §9
-- [ ] **F2.6** Eliminar amigo, bloquear y reportar (controles separados) + `removeFriend` y
-  `onBlockCreated` — 02 §4, 04 §2
+- [ ] **F2.6** Eliminar amigo y reportar (controles separados) + `removeFriend`; sin bloquear (D-027) —
+  02 §4, 04 §2
 - [ ] **F2.7** Campana: bandeja de solicitudes — 02 §9
 - [ ] **F2.8** Límites: 50 amigos (D-015) y 20 solicitudes al día — 02 §4
-- [ ] **F2.9** Tests de reglas en el emulador (`friendRequests`, `friends`, `blocks`, `handles`) — 03 §6, §13
+- [ ] **F2.9** Tests de reglas (`friendRequests`, `friends`, `profiles`, `reports`, `invites`, `handles`, RTDB `/friends`)
+  y de Functions (`onFriendRequestAccepted`, `removeFriend`) en el emulador — 03 §6, §13
+- [ ] **F2.10** Endurecer F1 (listener en serie y con reenganche, `@usuario` reservados, falsos positivos, reglas de
+  `ageBand` y de `users/`) y probar en un móvil físico por USB (D-026) — plan F2-u1, F2-u2
 
 ### F3 · Stats y ranking
 - [ ] **F3.1** `StatsPublisher` enganchado a `FocusSessionRepository` (y al arrancar si cambia el día
@@ -117,10 +120,12 @@ en el diario.
 - [ ] **L.1** App Check (Play Integrity) en modo enforce — 03 §3
 - [ ] **L.2** Política v2, términos y página de borrado publicados; Data safety actualizado; enlace de
   borrado en Play Console — 04 §2, §4
-- [ ] **L.3** Público objetivo declarado (13+) y revisión UGC (reportar y bloquear funcionan) — 04 §1, §2
+- [ ] **L.3** Público objetivo declarado (13+) y revisión UGC (reportar funciona; ¿Play exige bloquear? → DIF-11) — 04 §1, §2
 - [ ] **L.4** Proceso de moderación acordado: quién revisa `reports/`, cada cuánto y cómo se banea — 04 §6
 - [ ] **L.5** Alertas de presupuesto en Blaze — 03 §12
 - [ ] **L.6** Prueba con 3 o más usuarios reales durante una semana
+- [ ] **L.7** Desplegar Hosting (`assetlinks.json` con el SHA-256 de release), reglas y Functions; App Link verificado
+  de verdad e Install Referrer probado instalando desde Play (D-025)
 
 ## Diferidos
 
@@ -135,6 +140,7 @@ en el diario.
 | DIF-07 | Grupos de estudio, reto cooperativo, racha compartida | 05 §3 | Tras F5, con datos de uso |
 | DIF-08 | Exportación automática de datos (portabilidad) | 04 §3 | En el gate L, si se considera necesaria |
 | DIF-09 | Pestaña propia de Amigos en la barra inferior | D-012 | Si el uso lo justifica |
+| DIF-11 | Bloquear y desbloquear usuarios | D-027 (usuario): solo añadir y eliminar amigos; reportar se mantiene | En el gate L.3, si la revisión UGC de Play lo exige, o si hay acoso con solicitudes repetidas |
 | DIF-10 | Ejecutar la app en API 24 (`minSdk`) y probar el overlay de bloqueo | D-020 (usuario): montar un AVD API 24 cuesta mucho; mientras, se verifica en `api36` | En el gate L, antes de activar lo social en release |
 
 ## Preguntas abiertas
@@ -143,7 +149,7 @@ en el diario.
 |---|---|---|---|
 | Q-01 | ¿Hay un interruptor global «Compartir mi estado en directo» en v1, a pesar de D-009? | Sí: la presencia revela tu rutina en tiempo real, cuesta poco y es especialmente sensible para usuarios de 14–17 | F4.7 |
 | Q-02 | ¿Se mide el uso con Firebase Analytics o solo con contadores agregados del backend? | Solo contadores: la política v1 promete «never used for analytics» (04 §4) | Métricas de 02 §11; gate L |
-| Q-03 | ¿Se confirma D-015 (tope de 50 amigos)? (D-013 y D-016 ya confirmadas) | Sí | F2 |
+| ~~Q-03~~ | ~~¿Se confirma D-015 (tope de 50 amigos)?~~ Cerrada: sí, D-015 aceptada (2026-10-20) | — | — |
 | Q-04 | Durante el descanso entre pomodoros, ¿el amigo aparece como estudiando, ausente o con un estado propio? | Estado propio «en descanso» en Focus; cuenta como estudiando en Home | F4.1 |
 | ~~Q-05~~ | ~~¿Se puede cambiar el `@usuario`?~~ Cerrada (D-019): sí, una vez cada 30 días; el anterior queda libre | — | — |
 | ~~Q-06~~ | ~~¿Qué enlace lleva la tarjeta de compartir mientras la app no está publicada?~~ Cerrada (D-018): ninguno, solo la marca «BBetter»; el enlace de Play se añade al publicar | — | — |
@@ -153,6 +159,10 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-20 (17)** · **F2 abierta:** plan [`social-f2-amigos.md`](social-f2-amigos.md) (9 unidades en 5 olas). Q-03
+  cerrada (D-015 aceptada). Decisiones del usuario: D-025 (F2 solo en el emulador; App Links en el AVD), D-026 (móvil
+  físico por USB) y D-027 (sin bloquear: añadir y eliminar, reportar aparte → DIF-11, L.7 nuevo); D-028 propuesta (modelo
+  de datos). Guía corregida (02 §4 y §9, 03 §3–§7 y §11, 04 §2). **Siguiente:** ola 1 (u1 y u2).
 - **2026-10-20 (16)** · F1 cerrada: F1-u9 hecha. `systems/social.md` (as-built) y su fila en CLAUDE.md; `home-user-name`
   en *Resolved*; resueltos los `[CONFIRM]` de F1 de los borradores legales (siguen los de F2, F5 y L.2); `handleChangedAt`
   en 03 §5 con su fila de Historial (D-019, D-022). Corridos `test assembleDebug assembleRelease` y la suite de Firebase

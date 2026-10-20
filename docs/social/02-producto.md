@@ -1,6 +1,6 @@
 # 02 · Producto
 
-> **Última revisión:** 2026-10-19 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
+> **Última revisión:** 2026-10-20 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
 >
 > Qué construimos y qué no. Las secciones se citan como `02 §N`.
 
@@ -30,7 +30,7 @@ El diseño de ahora no debe cerrarles la puerta.
 | **P5** | **Nunca exponer lo negativo ni lo íntimo.** | E7, E8; 04 §3 | No se comparten fallos, sesiones abandonadas, calendario, tareas, proyectos, uso de apps ni tiempo de pantalla. |
 | **P6** | **Privado por defecto.** | E11 | Todo lo compartido lo ven solo tus amigos. El control fino (por dato o por amigo) está diferido (D-009, DIF-01). |
 | **P7** | **Login perezoso.** | E9 | La app sigue completa sin cuenta. La cuenta se pide la primera vez que tocas algo social. |
-| **P8** | **Cumplir desde el día uno.** | 04 | Puerta de edad, borrado de cuenta en la app y en la web, reportar y bloquear, aceptación de términos. |
+| **P8** | **Cumplir desde el día uno.** | 04 | Puerta de edad, borrado de cuenta en la app y en la web, reportar (sin bloquear, D-027), aceptación de términos. |
 
 ## §3 Identidad y perfil
 
@@ -50,9 +50,7 @@ No hay bio, ni foto, ni enlaces, ni texto libre aparte del nombre (P4).
             envía solicitud              acepta
   (●) ──▶ [Ninguna] ─────────────▶ [Pendiente] ─────────▶ [Amigos]
               ▲  ◀───── rechaza / cancela ─────┘              │
-              │  ◀───────────────── eliminar ─────────────────┘
-              │                                               │ bloquear (desde cualquier estado)
-              └──────── desbloquear ──────── [Bloqueado] ◀────┘
+              └──────────────────── eliminar ─────────────────┘
 ```
 
 - La amistad es **mutua**: solo existe cuando las dos partes la han aceptado (P1).
@@ -60,11 +58,11 @@ No hay bio, ni foto, ni enlaces, ni texto libre aparte del nombre (P4).
   solicitud), **enlace de invitación** y **QR** del mismo enlace. Si quien abre el enlace no tiene la
   app, el enlace lleva a Play y la solicitud se recupera tras instalarla (03 §11).
 - **Límites:** 50 amigos (D-015) y 20 solicitudes salientes al día como protección contra spam.
-- **Bloquear** elimina la amistad y las solicitudes pendientes y oculta todo en ambos sentidos. El
-  bloqueado no recibe aviso.
-- **Reportar** es una acción separada de bloquear y con su propia etiqueta, como exige Play. Usa
+- **No hay bloquear** (D-027): quien recibe un rechazo puede volver a enviar la solicitud, con el tope
+  de 20 al día. Se revisa en el gate L.3 (DIF-11).
+- **Reportar** es una acción aparte y con su propia etiqueta, como exige Play. Usa
   motivos predefinidos (nombre ofensivo, suplantación, acoso, otro) y no tiene texto libre.
-- Al eliminar o bloquear a un amigo no se avisa a nadie.
+- Al rechazar una solicitud o eliminar a un amigo no se avisa a nadie.
 
 ## §5 Datos compartidos
 
@@ -138,7 +136,7 @@ función no esté lista para release, siguen ocultos con el flag (03 §10).
 | Invitar (`focusInviteButton`) | Toast | Hoja con enlace, QR y `@usuario` | F2 |
 | Amigos | — | Lista (primero quien estudia), solicitudes, añadir | F2 |
 | Campana (`homeBellButton`) | Punto fijo | Bandeja: solicitudes (F2), ánimos y empujones (F5) | F2 / F5 |
-| Perfil de amigo | — | Racha semanal, días de la semana, minutos de la semana, mejor racha, total. Acciones: ánimo, eliminar, bloquear, reportar | F3 |
+| Perfil de amigo | — | Racha semanal, días de la semana, minutos de la semana, mejor racha, total. Acciones: ánimo, eliminar, reportar | F3 |
 | Ranking (pestaña dentro de Amigos) | — | Minutos con tope y Constancia; se reinicia el lunes | F3 |
 | Cycle complete «2º entre amigos» (`cycleBestTile`) | `SocialRank(2, 9)` fijo | Posición real | F3 |
 | Focus «Estudiando ahora 5/8» (`focusSocialBlock`) | Mock | Presencia real, tiempo en vivo, corona | F4 |
@@ -171,7 +169,7 @@ Las pantallas nuevas siguen la regla #2 (tokens `bb_*`, `TextAppearance.BBetter.
 | Invitaciones enviadas → instalaciones → amistades | El cuello de botella está en la primera invitación (E4) |
 | Sesiones por semana y constancia, con amigos frente a sin amigos | El objetivo de §1 |
 | Retención a 7 y 30 días, con amigos frente a sin amigos | Ídem |
-| Reportes y bloqueos por cada 100 usuarios | Salud del círculo |
+| Reportes y amistades eliminadas por cada 100 usuarios | Salud del círculo |
 
 **Cómo medir** depende de **Q-02** (Firebase Analytics o solo contadores agregados en el backend).
 Los recuentos de amistades e invitaciones salen de Firestore sin analítica.

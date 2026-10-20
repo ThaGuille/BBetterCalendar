@@ -25,7 +25,7 @@
 | D-012 | Amigos como destino secundario, no pestaña | aceptada | 2026-10-19 |
 | D-013 | Datos en la UE | aceptada | 2026-10-19 |
 | D-014 | Sistema de documentación (guía + tablero + planes por fase) | aceptada | 2026-10-19 |
-| D-015 | Tope de 50 amigos | propuesta | 2026-10-19 |
+| D-015 | Tope de 50 amigos | aceptada | 2026-10-19 |
 | D-016 | Configuración del backend en `firebase/` + Emulator Suite | aceptada | 2026-10-19 |
 | D-017 | Fases F0–F5 y gate de lanzamiento L | aceptada | 2026-10-19 |
 | D-018 | Q-06: la tarjeta de compartir de F0 no lleva enlace hasta publicar | aceptada | 2026-10-19 |
@@ -35,6 +35,10 @@
 | D-022 | El primer renombrado del `@usuario` es libre; los siguientes, cada 30 días | aceptada | 2026-10-19 |
 | D-023 | Login por email con email y contraseña, no con enlace mágico | aceptada | 2026-10-19 |
 | D-024 | La puerta de edad pide solo el año y calcula la edad mínima posible | aceptada | 2026-10-19 |
+| D-025 | F2 también solo contra el Emulator Suite; los App Links se prueban en el AVD | aceptada | 2026-10-20 |
+| D-026 | Probar lo social en un móvil físico por USB | aceptada | 2026-10-20 |
+| D-027 | Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene | aceptada | 2026-10-20 |
+| D-028 | Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja | propuesta | 2026-10-20 |
 
 ---
 
@@ -94,6 +98,7 @@
   «ocultarme a X», ni silenciar por amigo → DIF-01.
 - **Lo que se mantiene:** bloquear y reportar (lo exige Play, no es control fino) y el canal de
   Android «Amigos», que el sistema ya permite silenciar sin construir nada.
+- **Precisada por D-027:** bloquear sale de v1; reportar se mantiene.
 - **Abierto:** Q-01 (interruptor global de presencia).
 
 ### D-010 · Menores: puerta de edad y umbral de 14 configurable; por debajo, sin social en v1
@@ -136,7 +141,7 @@
   leer en cada sesión.
 
 ### D-015 · Tope de 50 amigos
-- **Estado:** propuesta. Se confirma al abrir F2.
+- **Estado:** aceptada (usuario, 2026-10-20, al abrir F2; cierra Q-03).
 - **Por qué:** E3 y E4 (Duolingo lanzó con 5). Mantiene acotados el ranking y las lecturas.
 
 ### D-016 · Configuración del backend en `firebase/` + Emulator Suite
@@ -202,3 +207,52 @@
 - **Decisión:** la puerta pide solo el año de nacimiento; edad = año actual − año de nacimiento − 1.
   Quien cumple `SOCIAL_MIN_AGE` este año entra el 1 de enero siguiente.
 - **Por qué:** una sola pregunta, y nunca deja pasar a alguien por debajo del umbral (04 §1).
+
+### D-025 · F2 también solo contra el Emulator Suite; los App Links se prueban en el AVD
+- **Estado:** aceptada (usuario, 2026-10-20, al abrir F2). Prolonga D-021.
+- **Decisión:** las reglas, las Functions de F2 y las invitaciones se prueban solo en el Emulator Suite;
+  el proyecto real sigue en Spark con todo denegado. `assetlinks.json` y la página del enlace viven en
+  `firebase/` y se sirven con el emulador de Hosting. El App Link se prueba en el AVD aprobando el dominio
+  a mano (`pm set-app-links-user-selection`). `InstallReferrerReader` se escribe y se prueba con JUnit;
+  su prueba real (instalar desde Play) espera al gate L.
+- **Por qué:** nada social es público hasta L. Un despliegue de Hosting sería lo primero público y no
+  aporta nada hasta publicar: el enlace a Play aún no existe.
+- **Consecuencias:** desplegar Hosting, reglas y Functions y pasar a Blaze se decide en el gate L (L.7).
+
+### D-026 · Probar lo social en un móvil físico por USB
+- **Estado:** aceptada (usuario, 2026-10-20, al abrir F2).
+- **Decisión:** el host del Emulator Suite deja de estar fijo en `10.0.2.2`. Una propiedad de Gradle lo
+  cambia (p. ej. `-PfirebaseEmulatorHost=127.0.0.1`) y, con el móvil por USB, `adb reverse` reenvía al PC
+  los puertos de `firebase/firebase.json`. Un script lo prepara.
+- **Por qué:** el usuario prueba en su móvil, y en un móvil real todo lo social falla: `10.0.2.2` solo
+  existe dentro del emulador de Android.
+- **Consecuencias:** el proyecto real sigue sin tocarse (D-021, D-025).
+
+### D-027 · Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene
+- **Estado:** aceptada (usuario, 2026-10-20, al abrir F2: «no block and no unblock, there is just… add to
+  friends and remove from friends»). Mantiene D-001; precisa D-009.
+- **Decisión:** la amistad sigue siendo mutua (una solicitud que el otro acepta). Las acciones son enviar,
+  aceptar, rechazar, cancelar y eliminar amigo. No hay bloquear ni desbloquear, ni `blocks/` ni
+  `onBlockCreated`. Quien recibe un rechazo puede volver a enviar la solicitud, con el tope de 20
+  solicitudes al día por remitente. Reportar (motivos predefinidos, sin texto libre) se mantiene como
+  acción aparte. Nadie recibe aviso al rechazar o eliminar.
+- **Por qué:** un modelo más simple: solo «añadir a amigos» y «quitar de amigos».
+- **Riesgo:** la política de contenido generado por usuarios de Play pide poder bloquear a usuarios
+  abusivos (04 §2), y una persona rechazada puede insistir hasta 20 veces al día. Se revisa en el gate L.3
+  → DIF-11.
+- **Consecuencias:** se corrigen 02 §4 y §9, 03 §3, §4, §5 y §7 y 04 §2. `deleteAccount` sigue borrando
+  `blocks/` (inofensivo; se puede simplificar).
+
+### D-028 · Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja
+- **Estado:** propuesta (Claude, 2026-10-20, en el plan [`social-f2-amigos.md`](../../.claude/plans/social-f2-amigos.md)).
+  Se acepta al cerrar F2, cuando 03 §5, §6 y §11 se corrijan con lo construido.
+- **Decisión:**
+  1. Rechazar o cancelar borra la solicitud: no hay estado `declined`. Volver a enviar es crear otra vez
+     el id `fromUid_toUid`. `status` es `pending`, `accepted` o `failed` (solo Functions: `cap` o `gone`).
+  2. El tope de 20 solicitudes al día es un contador en `users/{uid}` (`reqDay`, `reqCount`, `reqLastTo`)
+     que se escribe en el mismo lote que la solicitud y que validan las reglas.
+  3. El código de invitación es `invites/{código}` (`uid`, `handle`), solo `get`, uno por persona
+     (`users/{uid}.inviteCode`): se resuelve con una lectura de Firestore, sin desplegar nada (D-025).
+  4. Los reportes tienen id `{reporter}_{reported}`: uno por pareja y solo se crean.
+- **Por qué:** es lo que D-025 y D-027 dejan a la implementación. Rechazar = borrar evita una transición
+  `declined` → `pending` en las reglas; el contador evita una Function solo para contar.

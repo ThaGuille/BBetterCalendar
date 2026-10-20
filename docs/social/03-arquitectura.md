@@ -26,11 +26,11 @@
 | Pieza | Para qué | Fase |
 |---|---|---|
 | **Auth** | Cuentas: Google (Credential Manager + `googleid`) y email | F1 |
-| **Firestore** | Perfiles, handles, solicitudes, amistades, stats, bloqueos, reportes | F1–F3 |
+| **Firestore** | Perfiles, handles, solicitudes, amistades, stats, reportes | F1–F3 |
 | **Realtime Database** (RTDB) | Presencia (`onDisconnect`) y espejo de amistades para sus reglas | F2 (espejo), F4 |
-| **Cloud Functions** (TypeScript, plan Blaze) | Lo que el cliente no puede hacer solo: aceptar amistad (escribir los dos lados), bloquear, borrar cuenta, push | F1, F2, F5 |
+| **Cloud Functions** (TypeScript, plan Blaze) | Lo que el cliente no puede hacer solo: aceptar y eliminar amistad (los dos lados), borrar cuenta, push | F1, F2, F5 |
 | **FCM** | Push de solicitudes, ánimos y empujones | F5 |
-| **Hosting** | `/.well-known/assetlinks.json` para los App Links de invitación + página de aterrizaje del enlace | F2 |
+| **Hosting** | `/.well-known/assetlinks.json` para los App Links de invitación + página de aterrizaje del enlace | F2 en el emulador (D-025); despliegue en L |
 | **App Check** (Play Integrity) | Que solo nuestra app hable con el backend | Gate L.1 |
 
 **Región** (D-013, propuesta): todo en la UE. Firestore en `eur3`, RTDB en `europe-west1` y
@@ -53,7 +53,7 @@ Node LTS en la máquina.
      StatsPublisher (tras sesión)   profiles/{uid}                     │
                                           ▲                            ▼
                                     Cloud Functions ──FCM push──▶  SocialSnapshot (LiveData)
-                                    (amistad, bloqueo, borrado)     → Focus · Home · Cycle · Amigos
+                                    (amistad y borrado)             → Focus · Home · Cycle · Amigos
 ```
 
 Nadie lee tu Room. Tú publicas agregados y presencia, y tus amigos los escuchan. El cálculo
@@ -71,7 +71,6 @@ Nadie lee tu Room. Tú publicas agregados y presencia, y tus amigos los escuchan
 | `friendRequests/{fromUid_toUid}` | `from`, `to`, `createdAt`, `status` (`pending`/`accepted`/`declined`) | `from` y `to` | `from` crea y borra (cancelar); `to` cambia el estado. El id determinista evita duplicados |
 | `users/{uid}/friends/{friendUid}` | `since` | Dueño | **Solo Functions** |
 | `stats/{uid}` | `dayKey`, `weekKey`, `minutesToday`, `minutesWeekCapped`, `daysThisWeek`, `weeklyGoal`, `weekStreak`, `bestWeekStreak`, `totalMinutes`, `updatedAt` | Dueño + amigos | Dueño (con rangos validados) |
-| `blocks/{uid}/blocked/{otherUid}` | `createdAt` | Dueño | Dueño. Una Function deshace la amistad y las solicitudes |
 | `reports/{autoId}` | `reporter`, `reported`, `reason` (enum), `createdAt` | Nadie (consola) | Crear: cualquier usuario con sesión, con `reporter == auth.uid` |
 | `users/{uid}/inbox/{id}` (F5) | `type` (`request`/`cheer`/`nudge`), `from`, `createdAt`, `read` | Dueño | Functions; el dueño marca `read` |
 
@@ -120,7 +119,6 @@ tests son parte del «hecho cuando» de F2 y F3.
 | `deleteAccount` | Callable | Borra perfil, handle, stats, solicitudes, amistades (los dos lados), espejo, estado, inbox y bloqueos, y por último el usuario de Auth | F1 |
 | `onFriendRequestAccepted` | Firestore: `friendRequests` pasa a `accepted` | En un batch: `users/A/friends/B`, `users/B/friends/A`, espejo RTDB y borrar la solicitud. Comprueba el tope de 50 | F2 |
 | `removeFriend` | Callable | Borra los dos lados y el espejo | F2 |
-| `onBlockCreated` | Firestore: `blocks/{uid}/blocked/{other}` | Deshace la amistad y las solicitudes pendientes | F2 |
 | `sendCheer` / `sendNudge` | Callable | Comprueba la amistad y el límite diario, escribe en el inbox y manda push FCM | F5 |
 | `onFriendRequestCreated` | Firestore | Escribe en el inbox y manda push | F5 (sin push en F2: solo inbox) |
 
@@ -215,6 +213,8 @@ ui/social/         age gate, hoja de login, crear perfil, mi perfil, amigos, añ
 - **QR:** el mismo enlace como imagen, generado en local (librería ligera, a elegir en F2).
 - **Compartir de F0:** la tarjeta-imagen lleva solo la marca «BBetter» y el texto no incluye enlace: la app
   no está publicada (D-018). El enlace de Play se añade al publicar y el de invitación con código llega en F2.
+- **En F2 (D-025):** `assetlinks.json` y la página se sirven con el emulador de Hosting; el App Link se
+  prueba en el AVD aprobando el dominio a mano. Install Referrer solo con JUnit hasta el gate L.
 - El dominio propio de GitHub Pages (`thaguille.github.io/BBetterCalendar/`) **no sirve** para App
   Links, porque `assetlinks.json` tiene que estar en la raíz del dominio. Por eso se usa Hosting.
 

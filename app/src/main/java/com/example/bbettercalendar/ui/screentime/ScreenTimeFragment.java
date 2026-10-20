@@ -27,6 +27,7 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.blocking.BlockingSettings;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
 import com.example.bbettercalendar.ui.common.chart.ChartStyler;
 import com.example.bbettercalendar.ui.common.widget.AppUsageRowView;
@@ -57,7 +58,8 @@ import dagger.hilt.android.AndroidEntryPoint;
  */
 @AndroidEntryPoint
 public class ScreenTimeFragment extends Fragment
-        implements AccessibilityDisclosureDialog.OnConsentGrantedListener {
+        implements AccessibilityDisclosureDialog.OnConsentGrantedListener,
+        InsetsHelper.OwnsBottomInset {
 
     // PLACEHOLDER(ui-placeholders#screen-time-blocked-opens): no se cuentan aperturas bloqueadas.
     private static final int MOCK_BLOCKED_OPENS = 23;
@@ -95,6 +97,7 @@ public class ScreenTimeFragment extends Fragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         TopBarHelper.bind(this, view, R.string.title_screen_time);
+        InsetsHelper.apply(view.findViewById(R.id.screenTimeScroll), InsetsHelper.BOTTOM);
 
         viewModel = new ViewModelProvider(this).get(ScreenTimeViewModel.class);
         session = new ViewModelProvider(requireActivity()).get(FocusSessionViewModel.class);

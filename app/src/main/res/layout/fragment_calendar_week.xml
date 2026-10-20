@@ -56,6 +56,8 @@
             app:showCurrentTimeFirst="true"
             app:showFirstDayOfWeekFirst="true"
             app:showHeaderBottomLine="true"
+            app:showNowLine="true"
+            app:showNowLineDot="true"
             app:timeColumnBackgroundColor="@color/bb_surface"
             app:timeColumnSeparatorColor="@color/bb_divider"
             app:timeColumnTextColor="@color/bb_on_surface_muted"

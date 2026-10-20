@@ -51,9 +51,13 @@ public class AppPickerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         InsetsHelper.enableEdgeToEdge(this);
         setContentView(R.layout.activity_app_picker);
-        InsetsHelper.applyToContent(this);
+        // Sin campos de texto: no hace falta el IME de applyToContent. El inset inferior va en la
+        // lista (clipToPadding="false") para que se desplace bajo la barra de navegación.
+        InsetsHelper.apply(findViewById(android.R.id.content),
+                InsetsHelper.TOP | InsetsHelper.HORIZONTAL);
 
         RecyclerView list = findViewById(R.id.app_picker_list);
+        InsetsHelper.apply(list, InsetsHelper.BOTTOM);
         loading = findViewById(R.id.app_picker_loading);
         empty = findViewById(R.id.app_picker_empty);
 

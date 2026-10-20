@@ -26,6 +26,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.chart.ChartStyler;
 import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.example.bbettercalendar.ui.common.widget.StatTileView;
@@ -58,7 +59,8 @@ import dagger.hilt.android.AndroidEntryPoint;
  */
 @AndroidEntryPoint
 public class AppDetailFragment extends Fragment
-        implements AccessibilityDisclosureDialog.OnConsentGrantedListener {
+        implements AccessibilityDisclosureDialog.OnConsentGrantedListener,
+        InsetsHelper.OwnsBottomInset {
 
     /** Nav argument (mobile_navigation.xml): package of the app whose detail is shown. */
     public static final String ARG_PACKAGE_NAME = "packageName";
@@ -103,6 +105,7 @@ public class AppDetailFragment extends Fragment
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        InsetsHelper.apply(view.findViewById(R.id.appDetailScroll), InsetsHelper.BOTTOM);
         packageName = getArguments() != null ? getArguments().getString(ARG_PACKAGE_NAME) : null;
         if (packageName == null) {
             NavHostFragment.findNavController(this).navigateUp();

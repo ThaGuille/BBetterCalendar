@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F1-u8 · Saludo y avatar de Home: saludo genérico y diálogo del nombre local. Mismos nombres
+     que values/strings_home.xml. -->
+<resources>
+    <string name="home_greeting_generic">Hola</string>
+
+    <string name="local_name_title">¿Cómo te llamamos?</string>
+    <string name="local_name_body">El nombre se queda en este teléfono y aparece en el saludo de Inicio.</string>
+    <string name="local_name_hint">Tu nombre</string>
+    <string name="local_name_save">Guardar</string>
+    <string name="local_name_join">Únete a tus amigos</string>
+    <string name="local_name_avatar_cd">Tu nombre y tu perfil</string>
+</resources>

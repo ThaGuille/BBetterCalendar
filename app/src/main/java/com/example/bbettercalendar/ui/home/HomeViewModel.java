@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
@@ -23,8 +24,13 @@ import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
+import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialRepository;
 import com.example.bbettercalendar.social.SocialSnapshot;
+import com.example.bbettercalendar.social.account.SocialPrefs;
+import com.example.bbettercalendar.social.profile.Profile;
+import com.example.bbettercalendar.social.profile.ProfileRepository;
+import com.example.bbettercalendar.social.profile.ProfileState;
 import com.example.bbettercalendar.stats.FocusAttributionRepository;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.FocusInsightsRepository;
@@ -50,7 +56,11 @@ public class HomeViewModel extends AndroidViewModel {
     private static final long DAY_MILLIS = 24L * 60 * 60 * 1000;
 
     private final String TAG = "HomeFragmentTag";
-    private final MutableLiveData<String> mText;
+    // Saludo y avatar (F1-u8): perfil de la cuenta > nombre local > saludo genérico.
+    private final MediatorLiveData<GreetingResolver.Greeting> greeting = new MediatorLiveData<>();
+    private final MutableLiveData<String> localName = new MutableLiveData<>();
+    private final SocialPrefs socialPrefs;
+    private final LiveData<ProfileState> profileState;
     // Los contadores de hoy viven en FocusSessionRepository (singleton): los escribe la sesión de
     // pomodoro (FocusSessionViewModel, ámbito de actividad) aunque Home no esté en pantalla.
     private final LiveData<String> todayFailsText;
@@ -98,14 +108,20 @@ public class HomeViewModel extends AndroidViewModel {
                          FocusInsightsRepository focusInsightsRepository,
                          ProjectDAO projectDao,
                          SocialRepository socialRepository,
+                         ProfileRepository profileRepository,
+                         SocialPrefs socialPrefs,
                          @IoExecutor ExecutorService ioExecutor,
                          @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
-        mText = new MutableLiveData<>();
-        // "Hi, Guille" (html 04). PLACEHOLDER(ui-placeholders#home-user-name): no hay nombre de
-        // usuario guardado; se usa el del diseño.
-        mText.setValue(application.getString(com.example.bbettercalendar.R.string.home_greeting,
-                application.getString(com.example.bbettercalendar.R.string.home_user_name_placeholder)));
+        this.socialPrefs = socialPrefs;
+        // Sin cuenta habilitada (release) el perfil no se observa: solo manda el nombre local.
+        this.profileState = SocialFeature.isAccountEnabled() ? profileRepository.observeMine() : null;
+        greeting.setValue(GreetingResolver.resolve(null, 0, null));
+        greeting.addSource(localName, name -> recomputeGreeting());
+        if (profileState != null) {
+            greeting.addSource(profileState, state -> recomputeGreeting());
+        }
+        socialPrefs.readLocalName(localName::postValue);
         this.focusEventDao = focusEventDao;
         this.calendarEntryDao = calendarEntryDao;
         this.focusAttributionRepository = focusAttributionRepository;
@@ -419,8 +435,29 @@ public class HomeViewModel extends AndroidViewModel {
         dbWriteExecutor.execute(() -> configManager.updateConfiguration(config));
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<GreetingResolver.Greeting> getGreeting() {
+        return greeting;
+    }
+
+    /** Guarda el nombre local (vacío lo borra) y refresca el saludo. */
+    public void saveLocalName(String name) {
+        String clean = name == null ? "" : name.trim();
+        socialPrefs.saveLocalName(clean);
+        localName.postValue(clean.isEmpty() ? null : clean);
+    }
+
+    /** Nombre local actual (null si no hay), para rellenar el diálogo. */
+    public String getLocalName() {
+        return localName.getValue();
+    }
+
+    private void recomputeGreeting() {
+        ProfileState state = profileState == null ? null : profileState.getValue();
+        Profile profile = state != null && state.status == ProfileState.Status.READY ? state.profile : null;
+        greeting.setValue(GreetingResolver.resolve(
+                profile == null ? null : profile.displayName,
+                profile == null ? 0 : profile.avatarColor,
+                localName.getValue()));
     }
 
     public LiveData<String> getTodayFailsText() {return todayFailsText;}

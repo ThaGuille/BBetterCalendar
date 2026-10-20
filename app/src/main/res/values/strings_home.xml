@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F1-u8 · Home greeting and avatar: generic greeting and the local-name dialog. Spanish in
+     values-es/strings_home.xml (same names). -->
+<resources>
+    <string name="home_greeting_generic">Hi there</string>
+
+    <string name="local_name_title">What should we call you?</string>
+    <string name="local_name_body">The name stays on this phone and appears in your Home greeting.</string>
+    <string name="local_name_hint">Your name</string>
+    <string name="local_name_save">Save</string>
+    <string name="local_name_join">Join your friends</string>
+    <string name="local_name_avatar_cd">Your name and profile</string>
+</resources>

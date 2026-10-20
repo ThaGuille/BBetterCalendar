@@ -41,6 +41,7 @@ import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.example.bbettercalendar.ui.focus.FocusSessionEventPresenter;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
+import com.example.bbettercalendar.ui.social.AvatarPalette;
 import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
 import com.example.bbettercalendar.ui.social.SocialEntryViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -78,6 +79,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     private FocusUiState lastRenderedState;
     private final TimerPopup timerPopup = new TimerPopup();
     private FocusSessionEventPresenter sessionEvents;
+    // Solo con SocialFeature.isAccountEnabled(); lo comparten el avatar y el diálogo del nombre.
+    @Nullable private SocialEntryViewModel socialEntry;
 
     // "Today" task list (spec tasks-home-today)
     private TodayTaskAdapter todayTaskAdapter;
@@ -106,11 +109,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
         timerPopup.setOnPopupListener(this);
 
-        // Header. PLACEHOLDER(ui-placeholders#home-user-name): no hay nombre de usuario guardado,
-        // saludo y avatar usan el nombre del diseño (html 04: "Hi, Guille", avatar "G").
-        homeViewModel.getText().observe(getViewLifecycleOwner(), binding.textHome::setText);
-        binding.homeAvatar.setInitials(
-                getString(R.string.home_user_name_placeholder).substring(0, 1));
+        // Header (F1-u8): saludo e iniciales salen del perfil, del nombre local o, sin nada, un
+        // saludo genérico (GreetingResolver). Tocar el avatar abre Mi perfil o el nombre local.
+        homeViewModel.getGreeting().observe(getViewLifecycleOwner(), this::renderGreeting);
+        binding.homeAvatar.setContentDescription(getString(R.string.local_name_avatar_cd));
+        binding.homeAvatar.setOnClickListener(v -> onAvatarClicked());
         binding.homeDateText.setText(
                 new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
 
@@ -344,6 +347,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             return;
         }
         SocialEntryViewModel entry = new ViewModelProvider(this).get(SocialEntryViewModel.class);
+        socialEntry = entry;
         entry.getEntryStep().observe(getViewLifecycleOwner(), step -> {
             if (step == null) {
                 return;
@@ -374,6 +378,47 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 renderFriends(homeViewModel.getSocialSnapshot().getValue());
             }
         });
+    }
+
+    private void renderGreeting(@Nullable GreetingResolver.Greeting greeting) {
+        if (binding == null || greeting == null) {
+            return;
+        }
+        binding.textHome.setText(greeting.kind == GreetingResolver.Kind.GENERIC
+                ? getString(R.string.home_greeting_generic)
+                : getString(R.string.home_greeting, greeting.name));
+        AvatarView avatar = binding.homeAvatar;
+        avatar.setInitials(greeting.initials);
+        if (greeting.kind == GreetingResolver.Kind.PROFILE) {
+            avatar.setFillColor(AvatarPalette.color(requireContext(), greeting.colorIndex));
+            avatar.setInitialsColor(AvatarPalette.onColor(requireContext()));
+        } else {
+            avatar.setFillColor(ContextCompat.getColor(requireContext(), R.color.bb_primary_container));
+            avatar.setInitialsColor(ContextCompat.getColor(requireContext(), R.color.bb_on_primary_container));
+        }
+    }
+
+    /**
+     * Avatar de Home: con perfil abre Mi perfil; con sesión pero sin perfil sigue al router (Crear
+     * perfil); sin cuenta, o en release, abre el editor del nombre local.
+     */
+    private void onAvatarClicked() {
+        if (SocialFeature.isAccountEnabled()) {
+            GreetingResolver.Greeting greeting = homeViewModel.getGreeting().getValue();
+            if (greeting != null && greeting.kind == GreetingResolver.Kind.PROFILE) {
+                NavHostFragment.findNavController(this).navigate(R.id.navigation_my_profile);
+                return;
+            }
+            if (socialEntry != null
+                    && socialEntry.getAccountState().getValue() == AccountState.SIGNED_IN) {
+                socialEntry.requestEntry();
+                return;
+            }
+        }
+        if (getChildFragmentManager().findFragmentByTag(LocalNameDialog.TAG) == null) {
+            LocalNameDialog.newInstance(homeViewModel.getLocalName())
+                    .show(getChildFragmentManager(), LocalNameDialog.TAG);
+        }
     }
 
     // PLACEHOLDER(ui-placeholders#social-home-friends): maqueta (MockSocialRepository).

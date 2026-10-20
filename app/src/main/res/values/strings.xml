@@ -323,9 +323,6 @@
     <string name="widget_avatar_away">%1$s, away</string>
 
     <!-- u13 · Home (html 04) -->
-    <!-- PLACEHOLDER(ui-placeholders#home-user-name): no user name is stored yet. -->
-    <!-- PLACEHOLDER(ui-placeholders#home-user-name): name copied from html 04; there is no stored user name. -->
-    <string name="home_user_name_placeholder" translatable="false">Guille</string>
     <string name="home_notifications">Notifications</string>
     <string name="home_notifications_soon">Notification centre is coming soon</string>
     <string name="home_mode_paused">Paused</string>

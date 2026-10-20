@@ -32,12 +32,12 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- PLACEHOLDER(ui-placeholders#home-user-name): sin nombre de usuario guardado. -->
             <com.example.bbettercalendar.ui.common.widget.AvatarView
                 android:id="@+id/homeAvatar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:importantForAccessibility="no"
+                android:clickable="true"
+                android:focusable="true"
                 app:avatarCutoutColor="@color/bb_surface"
                 app:avatarPresenceDot="true" />
 

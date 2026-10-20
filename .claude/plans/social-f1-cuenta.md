@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u7 hecha)
+**Last updated:** 2026-10-20 (F1-u8 hecha)
 
 > Tablero: [sistema-social.md](sistema-social.md) · Guía: 02 §3, §9 · 03 §3, §5, §6, §7, §10 · 04 §1, §2, §6
 > Decisiones que aplica: D-002, D-008, D-010, D-011, D-012, D-013, D-016, D-019 – D-024 · Preguntas que debe cerrar: ninguna (las del usuario se cerraron al abrir la fase con D-021 – D-024)
@@ -41,7 +41,7 @@ Quien quiera usar Amigos puede, desde un bloque social, pasar la puerta de edad,
 | **F1-u5** | UI de perfil (F1.4, F1.5): Crear perfil y Mi perfil (editar, renombrar `@usuario`, cerrar sesión); colores de avatar | `ui/social/CreateProfileFragment`, `MyProfileFragment`, `ProfileViewModel` (nuevos), `ui/common/widget/AvatarView.java` (+ `setFillColor`), `ui/social/AvatarPalette` (nuevo), `values/colors.xml` (+ `bb_avatar_0..7`), nav graph, `strings_social.xml` | adb-ui-test: crear perfil; un `@usuario` repetido (segunda cuenta) se rechaza; renombrar respeta la regla de 30 días; cerrar sesión; la UI del emulador muestra `users/`, `profiles/` y `handles/` | hecha |
 | **F1-u6** | Callable `deleteAccount` (europe-west1) + test de integración | `firebase/functions/src/index.ts`, `firebase/functions/src/deleteAccount.ts` (nuevo), `firebase/tests/delete-account.test.js` (nuevo), `firebase/tests/package.json` | `emulators:exec` (auth + firestore + database + functions) en verde: datos y usuario de Auth borrados; sin sesión → `unauthenticated` | hecha |
 | **F1-u7** | Borrar cuenta en la app (F1.6): botón en Mi perfil, confirmación, re-autenticación y llamada | `MyProfileFragment`, `ProfileViewModel`, `AccountRepository` (+ `reauthenticate`, `deleteAccount`), `strings_social.xml` | adb-ui-test: borrar → vuelve a «sin cuenta»; en la UI del emulador no queda nada y el `@usuario` vuelve a estar libre | hecha |
-| **F1-u8** | Saludo y avatar de Home (F1.7): perfil, o nombre local sin cuenta (también en release); al tocar el avatar se abre Mi perfil o el editor del nombre local | `ui/home/HomeViewModel.java`, `HomeFragment.java`, `ui/home/LocalNameDialog` (nuevo), `ui/home/GreetingResolver` (nuevo, puro), `values/strings_home.xml` (+es, nuevo), `strings.xml`, `layout/fragment_home.xml` | JUnit `GreetingResolverTest`; adb-ui-test: sin cuenta y nombre local → «Hola, X»; con perfil → su nombre e iniciales con su color | pendiente |
+| **F1-u8** | Saludo y avatar de Home (F1.7): perfil, o nombre local sin cuenta (también en release); al tocar el avatar se abre Mi perfil o el editor del nombre local | `ui/home/HomeViewModel.java`, `HomeFragment.java`, `ui/home/LocalNameDialog` (nuevo), `ui/home/GreetingResolver` (nuevo, puro), `values/strings_home.xml` (+es, nuevo), `strings.xml`, `layout/fragment_home.xml` | JUnit `GreetingResolverTest`; adb-ui-test: sin cuenta y nombre local → «Hola, X»; con perfil → su nombre e iniciales con su color | hecha |
 | **F1-u9** | Cierre documental (F1.8): `systems/social.md`, fila en CLAUDE.md, placeholder resuelto, `[CONFIRM]` legales, cambio en 03 §5 | `.claude/docs/systems/social.md` (nuevo), `CLAUDE.md`, `.claude/docs/systems/ui-placeholders.md`, `docs/legal/terms-draft.md`, `docs/legal/delete-account-draft.md`, `docs/social/03-arquitectura.md` | Enlaces correctos; `check_pages.py` solo publica la v1; `grep PLACEHOLDER(ui-placeholders#home-user-name)` vacío | pendiente |
 
 **Orden y paralelismo.** Cada unidad: implementar → `.\gradlew.bat test assembleDebug` → un commit.
@@ -279,3 +279,13 @@ Modelo: opus para u1, u3 y u6 (reglas y transacciones); sonnet + `impeccable` pa
 - Cadenas en `strings_social.xml` (+es). Sin cambio de esquema.
 - Emulador api36 + Emulator Suite: alta por email, perfil, borrar → vuelve a «sin cuenta»; `fb_dump` antes (Auth, `users/`, `profiles/`, `handles/delia.u7`) y después (todo a cero); una cuenta nueva ve `@delia.u7` disponible; año y Room intactos; 0 `FATAL EXCEPTION`.
 - Pendiente: la rama de re-autenticación no se ejercitó en el dispositivo (el login tenía menos de 5 minutos; el servidor la cubre en `delete-account.test.js`) y Google solo está cubierto por revisión de código.
+
+### F1-u8 · Saludo y avatar de Home desde el perfil o un nombre local (GreetingResolver, LocalNameDialog) — commit «F1-u8: saludo y avatar de Home desde el perfil o un nombre local»
+
+- `GreetingResolver` (puro, `ui/home`): perfil > nombre local > genérico; devuelve nombre, iniciales y color (0-7 solo con perfil). `GreetingResolverTest`: 6 casos.
+- `HomeViewModel`: `getGreeting()` (MediatorLiveData) con `ProfileRepository.observeMine()` (solo si `isAccountEnabled()`) y `SocialPrefs.readLocalName`; `saveLocalName()` escribe en `SocialPrefs`. `getText()` desaparece.
+- `HomeFragment`: pinta saludo, iniciales y color (`AvatarPalette`; por defecto `bb_primary_container`). Tocar `homeAvatar`: con perfil → Mi perfil; con sesión sin perfil → router (Crear perfil, cierra el hueco de u5); sin cuenta o en release → `LocalNameDialog`.
+- `LocalNameDialog` (hoja, `sheet_local_name.xml`, ADJUST_RESIZE): nombre local (máx. 30); en debug ofrece «Únete a tus amigos» vía `SocialEntryViewModel`. Cadenas en `strings_home.xml` (+es).
+- Quitados los 4 marcadores `home-user-name` y `home_user_name_placeholder`; la fila de `ui-placeholders.md` pasa a Resolved en u9.
+- Emulador api36 + Emulator Suite: saludo genérico, nombre local «Guille» (persiste al reiniciar), perfil «Delia Roca» con iniciales y color, avatar → Mi perfil; 0 `FATAL EXCEPTION`. Release solo por código y `assembleRelease`.
+- Pendiente: la rama release del avatar no se probó en dispositivo (APK sin firmar).

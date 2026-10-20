@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u4 hecha)
+**Last updated:** 2026-10-20 (F1-u6 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -17,8 +17,8 @@
 
 - **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
   F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
-- **Siguiente paso:** F1-u1 (reglas), F1-u2 (núcleo de cuenta), F1-u3 (datos del perfil) y F1-u4 (UI de entrada)
-  hechas. Sigue u6 (`deleteAccount`); después u5 (Crear perfil y Mi perfil, tras u3 y u4).
+- **Siguiente paso:** F1-u1 (reglas), F1-u2 (núcleo de cuenta), F1-u3 (datos del perfil), F1-u4 (UI de entrada) y
+  F1-u6 (`deleteAccount`) hechas. Sigue u5 (Crear perfil y Mi perfil, tras u3 y u4); después u7 y u8.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -153,6 +153,12 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-20 (12)** · F1-u6 hecha: callable v2 `deleteAccount` en `europe-west1` (sesión y `auth_time` de menos de
+  5 minutos; borra `users/` con `friends` e `inbox`, `profiles/`, `handles/`, `stats/`, `blocks/`, solicitudes, el lado
+  opuesto de las amistades y RTDB `status/` y `friends/`, y por último el usuario de Auth) con
+  `tests/delete-account.test.js` contra auth + firestore + database + functions; suite completa en verde (40). Nada
+  desplegado (D-021). Commit «F1-u6: callable deleteAccount (europe-west1) con su test de integración».
+  **Siguiente:** F1-u5 (Crear perfil y Mi perfil); luego u7 (borrar cuenta en la app) y u8.
 - **2026-10-20 (11)** · F1-u4 hecha: paquete `ui/social/` (`AgeGateFragment`, `UnderageFragment`, `JoinFriendsSheet`,
   `EmailSignInFragment`, `SocialEntryViewModel`, `SocialEntryNavigator`), destinos en el nav graph y estado «sin
   cuenta» en Focus y Home; verificado en `api36` con el Emulator Suite (puerta de edad, menor, hoja, alta e inicio con

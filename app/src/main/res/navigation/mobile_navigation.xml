@@ -104,4 +104,36 @@
             app:argType="string" />
     </fragment>
 
+    <!-- ===== F1-u4: entrada social. Se llega por SocialEntryRouter (SocialEntryNavigator), desde
+         Focus y Home. Secundarios: sin barra inferior. ===== -->
+    <fragment
+        android:id="@+id/navigation_age_gate"
+        android:name="com.example.bbettercalendar.ui.social.AgeGateFragment"
+        android:label="@string/age_gate_top_title"
+        tools:layout="@layout/fragment_age_gate" />
+
+    <fragment
+        android:id="@+id/navigation_underage"
+        android:name="com.example.bbettercalendar.ui.social.UnderageFragment"
+        android:label="@string/underage_top_title"
+        tools:layout="@layout/fragment_underage" />
+
+    <dialog
+        android:id="@+id/navigation_join_friends"
+        android:name="com.example.bbettercalendar.ui.social.JoinFriendsSheet"
+        tools:layout="@layout/sheet_join_friends">
+        <!-- La hoja sale de la pila al pasar al email: atrás vuelve al origen. -->
+        <action
+            android:id="@+id/action_join_to_email"
+            app:destination="@id/navigation_email_sign_in"
+            app:popUpTo="@id/navigation_join_friends"
+            app:popUpToInclusive="true" />
+    </dialog>
+
+    <fragment
+        android:id="@+id/navigation_email_sign_in"
+        android:name="com.example.bbettercalendar.ui.social.EmailSignInFragment"
+        android:label="@string/email_top_title_sign_up"
+        tools:layout="@layout/fragment_email_sign_in" />
+
 </navigation>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F1-u4 · Social entry (age gate, under-threshold screen, Join sheet, email) and the no-account
+     state of Focus / Home. Spanish in values-es/strings_social.xml (same names). -->
+<resources>
+    <!-- No-account state (Focus + Home) -->
+    <string name="social_cta_title">Study with friends</string>
+    <string name="social_cta_body">Join to see who is focusing right now.</string>
+    <string name="social_cta_button">Join your friends</string>
+
+    <!-- Age gate (neutral: only the year, no hint of what it unlocks) -->
+    <string name="age_gate_top_title">Before you start</string>
+    <string name="age_gate_title">What year were you born?</string>
+    <string name="age_gate_body">We only ask once, and the answer stays on this phone.</string>
+    <string name="age_gate_hint">Birth year</string>
+    <string name="age_gate_continue">Continue</string>
+    <string name="age_gate_invalid">Enter a valid year.</string>
+
+    <!-- Under-threshold screen (docs/social/04 section 1.4) -->
+    <string name="underage_top_title">Friends</string>
+    <string name="underage_title">Friends is not available yet</string>
+    <string name="underage_body">To use Friends you need permission from your mother, father or guardian. Soon you will be able to ask for it from here.</string>
+    <string name="underage_rest">The rest of BBetter works exactly the same.</string>
+    <string name="underage_back">Back to the app</string>
+
+    <!-- Join sheet -->
+    <string name="join_sheet_title">Join your friends</string>
+    <string name="join_sheet_body">Create a free account to study together.</string>
+    <string name="join_google">Continue with Google</string>
+    <string name="join_email">Continue with email</string>
+    <string name="join_error_google">We could not sign you in with Google. Try again or use your email.</string>
+    <string name="join_error_network">No connection. Check your internet and try again.</string>
+
+    <!-- Email screen -->
+    <string name="email_top_title_sign_up">Create account</string>
+    <string name="email_top_title_sign_in">Sign in</string>
+    <string name="email_title_sign_up">Create your account</string>
+    <string name="email_title_sign_in">Welcome back</string>
+    <string name="email_hint_email">Email</string>
+    <string name="email_hint_password">Password</string>
+    <string name="email_submit_sign_up">Create account</string>
+    <string name="email_submit_sign_in">Sign in</string>
+    <string name="email_switch_to_sign_in">I already have an account</string>
+    <string name="email_switch_to_sign_up">Create a new account</string>
+    <string name="email_forgot">Forgot your password?</string>
+    <string name="email_reset_sent">If that email has an account, a reset link is on its way.</string>
+    <string name="email_reset_needs_email">Type your email above first.</string>
+    <string name="email_error_invalid_email">That email does not look right.</string>
+    <string name="email_error_weak_password">Use at least 6 characters.</string>
+    <string name="email_error_in_use">That email already has an account. Try signing in.</string>
+    <string name="email_error_bad_credentials">Email or password is incorrect.</string>
+    <string name="email_error_generic">Something went wrong. Try again.</string>
+</resources>

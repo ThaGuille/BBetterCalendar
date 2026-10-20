@@ -8,6 +8,7 @@ import android.view.View;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -157,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onFragmentViewCreated(@NonNull FragmentManager fm,
                                                       @NonNull Fragment f, @NonNull View v,
                                                       Bundle savedInstanceState) {
+                        // F1-u4: las hojas (destinos <dialog>) tratan sus propios insets.
+                        if (f instanceof DialogFragment) return;
                         int sides = 0;
                         if (v.findViewById(R.id.topBar) == null) sides |= InsetsHelper.TOP;
                         if (!topLevelClasses.contains(f.getClass().getName())) {

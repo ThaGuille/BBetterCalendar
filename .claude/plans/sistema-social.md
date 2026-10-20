@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u3 hecha)
+**Last updated:** 2026-10-20 (F1-u4 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -17,8 +17,8 @@
 
 - **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
   F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
-- **Siguiente paso:** F1-u1 (reglas), F1-u2 (núcleo de cuenta) y F1-u3 (datos del perfil) hechas. Siguen u4 (UI de
-  entrada) y u6 (`deleteAccount`); después u5 (Crear perfil y Mi perfil, tras u3 y u4).
+- **Siguiente paso:** F1-u1 (reglas), F1-u2 (núcleo de cuenta), F1-u3 (datos del perfil) y F1-u4 (UI de entrada)
+  hechas. Sigue u6 (`deleteAccount`); después u5 (Crear perfil y Mi perfil, tras u3 y u4).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -60,9 +60,9 @@ en el diario.
     ([`docs/legal/delete-account-draft.md`](../../docs/legal/delete-account-draft.md)), excluidos de Pages
 
 ### F1 · Cuenta y perfil
-- [ ] **F1.1** Puerta de edad neutral + `SOCIAL_MIN_AGE` configurable; pantalla para quien está por
+- [x] **F1.1** Puerta de edad neutral + `SOCIAL_MIN_AGE` configurable; pantalla para quien está por
   debajo del umbral (D-010) — 04 §1
-- [ ] **F1.2** Estado «sin cuenta» de los bloques sociales → hoja «Únete a tus amigos» (D-008) — 02 §9
+- [x] **F1.2** Estado «sin cuenta» de los bloques sociales → hoja «Únete a tus amigos» (D-008) — 02 §9
 - [ ] **F1.3** Login con Google (Credential Manager) y email; cerrar sesión — 03 §3
 - [ ] **F1.4** Crear perfil: nombre, `@usuario` único (transacción en `handles/`), color, aceptar
   términos; `HandleValidator` con lista de palabras prohibidas; renombrar el `@usuario` una vez cada 30
@@ -153,6 +153,11 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-20 (11)** · F1-u4 hecha: paquete `ui/social/` (`AgeGateFragment`, `UnderageFragment`, `JoinFriendsSheet`,
+  `EmailSignInFragment`, `SocialEntryViewModel`, `SocialEntryNavigator`), destinos en el nav graph y estado «sin
+  cuenta» en Focus y Home; verificado en `api36` con el Emulator Suite (puerta de edad, menor, hoja, alta e inicio con
+  email, selector de Google) sin `FATAL EXCEPTION`. Commit «F1-u4: UI de entrada (puerta de edad, pantalla de menor,
+  hoja Únete, email y estado sin cuenta)». **Siguiente:** F1-u6 (`deleteAccount`); luego u5 (Crear perfil y Mi perfil).
 - **2026-10-20 (10)** · F1-u3 hecha: paquete `social/profile/` (`ProfileRepository` con `observeMine`, alta, edición y
   renombrado en un solo lote; `HandleValidator`, `BannedWords`, `Profile`, `ProfileWrites`, `ProfileState`) y tests
   `HandleValidatorTest`, `ProfileWritesTest` y `ProfileTest` en verde; las reglas siguen en verde (36). Commit «F1-u3:

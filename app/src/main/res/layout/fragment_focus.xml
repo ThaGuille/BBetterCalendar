@@ -368,6 +368,55 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
                     android:orientation="vertical" />
+
+                <!-- F1-u4: estado «sin cuenta» (SocialFeature.isAccountEnabled + SIGNED_OUT).
+                     Sustituye a la cabecera y la rejilla de arriba; toda la tarjeta lleva al
+                     router social. -->
+                <LinearLayout
+                    android:id="@+id/focusNoAccountCta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_sanct_card"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/social_cta_card_padding"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="@dimen/social_cta_icon"
+                        android:layout_height="@dimen/social_cta_icon"
+                        android:background="@drawable/bg_social_cta_icon"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:padding="@dimen/social_cta_icon_padding"
+                        android:src="@drawable/ic_group_add_24"
+                        android:tint="@color/bb_sanct_sage_bright" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/social_cta_title"
+                            android:textAppearance="@style/TextAppearance.BBetter.Title"
+                            android:textColor="@color/bb_sanct_on_surface" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:text="@string/social_cta_body"
+                            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                            android:textColor="@color/bb_sanct_on_surface_muted" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <View
@@ -386,6 +435,7 @@
                 android:focusable="true">
 
                 <TextView
+                    android:id="@+id/focusInviteLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"

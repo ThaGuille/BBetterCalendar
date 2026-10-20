@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F1-u4 · Social entry screens. -->
+<resources>
+    <!-- Single-line text field of the social forms: card fill, hairline outline, 52dp. -->
+    <style name="Widget.BBetter.Social.Input" parent="">
+        <item name="android:background">@drawable/bg_social_input</item>
+        <item name="android:minHeight">@dimen/social_input_min_height</item>
+        <item name="android:paddingStart">@dimen/social_input_padding_h</item>
+        <item name="android:paddingEnd">@dimen/social_input_padding_h</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Body</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+        <item name="android:textColorHint">@color/bb_on_surface_muted</item>
+        <item name="android:importantForAutofill">no</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <!-- Inline field error / status line. -->
+    <style name="TextAppearance.BBetter.SocialError" parent="TextAppearance.BBetter.Caption">
+        <item name="android:textColor">@color/bb_danger</item>
+    </style>
+</resources>

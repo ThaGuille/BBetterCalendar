@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icon tile at the top of the social entry screens and the Join sheet. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_primary_container" />
+    <corners android:radius="@dimen/radius_card" />
+</shape>

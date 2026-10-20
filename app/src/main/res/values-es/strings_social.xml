@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F1-u4 · Entrada social (puerta de edad, pantalla de menor, hoja Únete, email) y estado «sin
+     cuenta» de Focus / Home. Mismos nombres que values/strings_social.xml. -->
+<resources>
+    <!-- Estado sin cuenta (Focus + Home) -->
+    <string name="social_cta_title">Estudia con tus amigos</string>
+    <string name="social_cta_body">Únete para ver quién está concentrado ahora mismo.</string>
+    <string name="social_cta_button">Únete a tus amigos</string>
+
+    <!-- Puerta de edad (neutral: solo el año, sin pistas de lo que desbloquea) -->
+    <string name="age_gate_top_title">Antes de empezar</string>
+    <string name="age_gate_title">¿En qué año naciste?</string>
+    <string name="age_gate_body">Solo lo preguntamos una vez y la respuesta se queda en este teléfono.</string>
+    <string name="age_gate_hint">Año de nacimiento</string>
+    <string name="age_gate_continue">Continuar</string>
+    <string name="age_gate_invalid">Introduce un año válido.</string>
+
+    <!-- Pantalla por debajo del umbral (docs/social/04 sección 1.4) -->
+    <string name="underage_top_title">Amigos</string>
+    <string name="underage_title">Amigos aún no está disponible</string>
+    <string name="underage_body">Para usar Amigos necesitas el permiso de tu madre, padre o tutor. Pronto podrás pedirlo desde aquí.</string>
+    <string name="underage_rest">El resto de BBetter funciona exactamente igual.</string>
+    <string name="underage_back">Volver a la app</string>
+
+    <!-- Hoja Únete -->
+    <string name="join_sheet_title">Únete a tus amigos</string>
+    <string name="join_sheet_body">Crea una cuenta gratis para estudiar juntos.</string>
+    <string name="join_google">Continuar con Google</string>
+    <string name="join_email">Continuar con email</string>
+    <string name="join_error_google">No pudimos iniciar sesión con Google. Inténtalo de nuevo o usa tu email.</string>
+    <string name="join_error_network">Sin conexión. Revisa tu internet e inténtalo de nuevo.</string>
+
+    <!-- Pantalla de email -->
+    <string name="email_top_title_sign_up">Crear cuenta</string>
+    <string name="email_top_title_sign_in">Iniciar sesión</string>
+    <string name="email_title_sign_up">Crea tu cuenta</string>
+    <string name="email_title_sign_in">Qué bien verte de nuevo</string>
+    <string name="email_hint_email">Email</string>
+    <string name="email_hint_password">Contraseña</string>
+    <string name="email_submit_sign_up">Crear cuenta</string>
+    <string name="email_submit_sign_in">Iniciar sesión</string>
+    <string name="email_switch_to_sign_in">Ya tengo una cuenta</string>
+    <string name="email_switch_to_sign_up">Crear una cuenta nueva</string>
+    <string name="email_forgot">¿Olvidaste tu contraseña?</string>
+    <string name="email_reset_sent">Si ese email tiene cuenta, te llegará un enlace para restablecerla.</string>
+    <string name="email_reset_needs_email">Escribe primero tu email arriba.</string>
+    <string name="email_error_invalid_email">Ese email no parece correcto.</string>
+    <string name="email_error_weak_password">Usa al menos 6 caracteres.</string>
+    <string name="email_error_in_use">Ese email ya tiene una cuenta. Prueba a iniciar sesión.</string>
+    <string name="email_error_bad_credentials">El email o la contraseña no son correctos.</string>
+    <string name="email_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+</resources>

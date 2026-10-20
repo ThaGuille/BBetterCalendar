@@ -254,6 +254,7 @@
                         tools:text="5 friends studying now" />
 
                     <View
+                        android:id="@+id/homeFriendsDot"
                         android:layout_width="@dimen/spacing_sm"
                         android:layout_height="@dimen/spacing_sm"
                         android:layout_marginStart="@dimen/spacing_xs"
@@ -284,6 +285,17 @@
                         android:textAppearance="@style/TextAppearance.BBetter.Micro"
                         tools:text="Laia, Pau, Marc" />
                 </LinearLayout>
+
+                <!-- F1-u4: estado «sin cuenta» (isAccountEnabled + SIGNED_OUT): sustituye a la
+                     fila de avatares; la tarjeta entera lleva al router social. -->
+                <TextView
+                    android:id="@+id/homeFriendsJoin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/social_cta_button"
+                    android:textAppearance="@style/TextAppearance.BBetter.Label"
+                    android:textColor="@color/bb_primary_bright"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 

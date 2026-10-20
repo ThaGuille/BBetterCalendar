@@ -34,8 +34,11 @@ import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.social.Friend;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialSnapshot;
+import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
+import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
+import com.example.bbettercalendar.ui.social.SocialEntryViewModel;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -136,6 +139,7 @@ public class FocusFragment extends Fragment
             invite.setOnClickListener(v -> Toast.makeText(requireContext(),
                     R.string.focus_invite_soon, Toast.LENGTH_SHORT).show());
         }
+        setUpSocialEntry(view, socialBlock, invite);
 
         SoundFeedback.get(requireContext()); // warm singleton so the first tap is silent-fast
     }
@@ -158,6 +162,53 @@ public class FocusFragment extends Fragment
         streakWeekText = view.findViewById(R.id.focusStreakWeekText);
         studyingMeta = view.findViewById(R.id.focusStudyingMeta);
         friendsGrid = view.findViewById(R.id.focusFriendsGrid);
+    }
+
+    /**
+     * F1-u4: estado «sin cuenta». Con {@link SocialFeature#isAccountEnabled()} y sesión cerrada, el
+     * bloque social enseña la llamada a la acción (en lugar de la maqueta) y tocarla sigue
+     * SocialEntryRouter. Con sesión, la maqueta de siempre (F4). En release no hace nada.
+     */
+    private void setUpSocialEntry(@NonNull View view, @NonNull View socialBlock, @NonNull View invite) {
+        if (!SocialFeature.isAccountEnabled()) {
+            return;
+        }
+        View header = view.findViewById(R.id.focusStudyingHeader);
+        View cta = view.findViewById(R.id.focusNoAccountCta);
+        TextView inviteLabel = view.findViewById(R.id.focusInviteLabel);
+        SocialEntryViewModel entry = new ViewModelProvider(this).get(SocialEntryViewModel.class);
+        entry.getEntryStep().observe(getViewLifecycleOwner(), step -> {
+            if (step == null) {
+                return;
+            }
+            entry.consumeEntryStep();
+            SocialEntryNavigator.go(this, step);
+        });
+        View.OnClickListener join = v -> entry.requestEntry();
+        entry.getAccountState().observe(getViewLifecycleOwner(), state -> {
+            if (state == AccountState.SIGNED_OUT) {
+                socialBlock.setVisibility(View.VISIBLE);
+                invite.setVisibility(View.VISIBLE);
+                header.setVisibility(View.GONE);
+                friendsGrid.setVisibility(View.GONE);
+                cta.setVisibility(View.VISIBLE);
+                inviteLabel.setText(R.string.social_cta_button);
+                cta.setOnClickListener(join);
+                invite.setOnClickListener(join);
+            } else {
+                header.setVisibility(View.VISIBLE);
+                friendsGrid.setVisibility(View.VISIBLE);
+                cta.setVisibility(View.GONE);
+                cta.setOnClickListener(null);
+                inviteLabel.setText(R.string.focus_invite_friends);
+                SocialFeature.applyVisibility(socialBlock, invite);
+                // PLACEHOLDER(ui-placeholders#social-focus-invite): no hay backend social.
+                invite.setOnClickListener(SocialFeature.isEnabled()
+                        ? v -> Toast.makeText(requireContext(), R.string.focus_invite_soon,
+                                Toast.LENGTH_SHORT).show()
+                        : null);
+            }
+        });
     }
 
     /** html 01b: centred "Focus" (20sp semibold), birch back arrow (minimises, never cancels), 🚫 action. */

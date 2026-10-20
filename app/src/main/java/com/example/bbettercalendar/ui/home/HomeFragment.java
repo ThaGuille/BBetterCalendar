@@ -36,10 +36,13 @@ import com.example.bbettercalendar.popups.TimerPopup;
 import com.example.bbettercalendar.social.Friend;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialSnapshot;
+import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.example.bbettercalendar.ui.focus.FocusSessionEventPresenter;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
+import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
+import com.example.bbettercalendar.ui.social.SocialEntryViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
@@ -128,6 +131,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         if (SocialFeature.isEnabled()) {
             homeViewModel.getSocialSnapshot().observe(getViewLifecycleOwner(), this::renderFriends);
         }
+        setUpSocialEntry();
 
         homeViewModel.getNextUp().observe(getViewLifecycleOwner(), this::renderNextUp);
 
@@ -329,6 +333,48 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     }
 
     // ------------------------------------------------------------------ friends / next up
+
+    /**
+     * F1-u4: estado «sin cuenta». Con {@link SocialFeature#isAccountEnabled()} y sesión cerrada, la
+     * tarjeta de amigos enseña la llamada a la acción y tocarla sigue SocialEntryRouter. Con sesión,
+     * la maqueta de siempre (F4). En release no hace nada (la tarjeta sigue GONE).
+     */
+    private void setUpSocialEntry() {
+        if (!SocialFeature.isAccountEnabled()) {
+            return;
+        }
+        SocialEntryViewModel entry = new ViewModelProvider(this).get(SocialEntryViewModel.class);
+        entry.getEntryStep().observe(getViewLifecycleOwner(), step -> {
+            if (step == null) {
+                return;
+            }
+            entry.consumeEntryStep();
+            SocialEntryNavigator.go(this, step);
+        });
+        entry.getAccountState().observe(getViewLifecycleOwner(), state -> {
+            if (binding == null) {
+                return;
+            }
+            boolean signedOut = state == AccountState.SIGNED_OUT;
+            if (signedOut) {
+                binding.homeFriendsCard.setVisibility(View.VISIBLE);
+                binding.homeFriendsTitle.setText(R.string.social_cta_title);
+                binding.homeFriendsDot.setVisibility(View.GONE);
+                binding.homeFriendsAvatars.setVisibility(View.GONE);
+                binding.homeFriendsJoin.setVisibility(View.VISIBLE);
+                binding.homeFriendsCard.setOnClickListener(v -> entry.requestEntry());
+            } else {
+                binding.homeFriendsDot.setVisibility(View.VISIBLE);
+                binding.homeFriendsAvatars.setVisibility(View.VISIBLE);
+                binding.homeFriendsJoin.setVisibility(View.GONE);
+                binding.homeFriendsCard.setOnClickListener(null);
+                binding.homeFriendsCard.setClickable(false);
+                SocialFeature.applyVisibility(binding.homeFriendsCard);
+                // La maqueta pisó el título con la llamada a la acción: repintarla.
+                renderFriends(homeViewModel.getSocialSnapshot().getValue());
+            }
+        });
+    }
 
     // PLACEHOLDER(ui-placeholders#social-home-friends): maqueta (MockSocialRepository).
     private void renderFriends(SocialSnapshot snapshot) {

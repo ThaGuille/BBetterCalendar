@@ -123,6 +123,10 @@ final class ProfileUi {
                 return R.string.profile_error_network;
             case INVALID:
                 return R.string.profile_error_invalid;
+            case BAD_PASSWORD:
+                return R.string.delete_error_bad_password;
+            case REAUTH_FAILED:
+                return R.string.delete_error_reauth;
             default:
                 return R.string.profile_error_generic;
         }

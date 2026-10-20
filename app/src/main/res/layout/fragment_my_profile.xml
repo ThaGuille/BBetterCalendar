@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- F1-u5 · My profile: avatar, edit name + colour, rename the @username (once, then every 30 days),
-     sign out. F1-u7 adds Delete account under Sign out. -->
+     sign out, delete account (F1-u7). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -161,7 +161,13 @@
                 android:layout_marginTop="@dimen/spacing_xl"
                 android:text="@string/my_profile_sign_out" />
 
-            <!-- F1-u7: the Delete account button goes right here, below Sign out. -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/mpDeleteButton"
+                style="@style/Widget.BBetter.Button.Danger"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/my_profile_delete" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

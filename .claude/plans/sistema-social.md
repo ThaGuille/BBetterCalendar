@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F1-u5 hecha)
+**Last updated:** 2026-10-20 (F1-u7 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -18,7 +18,7 @@
 - **Fase activa:** **F1** (Cuenta) · plan [`social-f1-cuenta.md`](social-f1-cuenta.md) (`in progress`).
   F0 hecha · plan [`social-f0-base.md`](social-f0-base.md) (`merged`).
 - **Siguiente paso:** F1-u1 (reglas), F1-u2 (núcleo de cuenta), F1-u3 (datos del perfil), F1-u4 (UI de entrada) y
-  F1-u5 (Crear perfil y Mi perfil) y F1-u6 (`deleteAccount`) hechas. Siguen u7 (borrar cuenta en la app) y u8 (Home); después u9.
+  F1-u5 (Crear perfil y Mi perfil) y F1-u6 (`deleteAccount`) hechas. F1-u7 (borrar cuenta en la app) hecha. Sigue u8 (Home); después u9.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -68,7 +68,7 @@ en el diario.
   términos; `HandleValidator` con lista de palabras prohibidas; renombrar el `@usuario` una vez cada 30
   días (D-019) — 02 §3, 04 §6
 - [x] **F1.5** Mi perfil (ver y editar) — 02 §3
-- [ ] **F1.6** Borrar cuenta: `deleteAccount` + página web — 03 §7, 04 §2
+- [x] **F1.6** Borrar cuenta: `deleteAccount` + página web — 03 §7, 04 §2
 - [ ] **F1.7** Saludo y avatar de Home desde el perfil (o un nombre local sin cuenta) — 02 §9
 - [ ] **F1.8** Crear `.claude/docs/systems/social.md` (as-built) + fila en la tabla de system docs de
   CLAUDE.md
@@ -153,6 +153,11 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-20 (14)** · F1-u7 hecha: «Borrar cuenta» en Mi perfil con confirmación, re-autenticación si el servidor la pide
+  (contraseña o selector de Google) y llamada a la callable `deleteAccount`; al terminar cierra sesión y vuelve a «sin
+  cuenta» sin tocar Room, el año ni el nombre local. Probado en api36 con el Emulator Suite (Auth, `users/`, `profiles/` y
+  `handles/` a cero; el `@usuario` vuelve a estar libre). Commit «F1-u7: borrar cuenta desde Mi perfil (confirmación,
+  re-autenticación y callable)». **Siguiente:** F1-u8 (saludo y avatar de Home) y después F1-u9.
 - **2026-10-20 (13)** · F1-u5 hecha: Crear perfil (nombre, `@usuario` con validación en vivo y disponibilidad con 400 ms de
   retardo, 8 colores `bb_avatar_0..7`, términos) y Mi perfil (editar nombre y color, renombrar con la regla de 30 días,
   cerrar sesión); el router lleva a Crear perfil o a Mi perfil tras iniciar sesión. Probado en api36 con el Emulator

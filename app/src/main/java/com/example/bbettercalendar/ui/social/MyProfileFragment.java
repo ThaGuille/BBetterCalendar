@@ -1,9 +1,11 @@
 package com.example.bbettercalendar.ui.social;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,7 +33,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 /**
  * F1-u5: Mi perfil. Enseña el perfil propio (en vivo), deja editar nombre y color, renombrar el
  * {@code @usuario} (la primera vez libre y luego una vez cada 30 días, D-019 / D-022: mientras no
- * toque, el botón queda deshabilitado con la fecha) y cerrar sesión. F1-u7 añade Borrar cuenta.
+ * toque, el botón queda deshabilitado con la fecha), cerrar sesión y (F1-u7) borrar la cuenta: confirmación,
+ * re-autenticación si el servidor la pide (contraseña o selector de Google) y llamada a la callable.
  */
 @AndroidEntryPoint
 public class MyProfileFragment extends Fragment {
@@ -52,6 +55,7 @@ public class MyProfileFragment extends Fragment {
     private EditText renameInput;
     private TextView renameStatus;
     private MaterialButton renameButton;
+    private MaterialButton deleteButton;
 
     @Nullable private Profile current;
     private boolean initialized;
@@ -60,6 +64,8 @@ public class MyProfileFragment extends Fragment {
     @Nullable private ProfileViewModel.HandleStatus renameCheck;
     private int restoredColor = -1;
     private boolean left;
+    // Mientras se borra la cuenta, el perfil que desaparece no debe llevarnos a Crear perfil.
+    private boolean deleting;
 
     public MyProfileFragment() {
         super(R.layout.fragment_my_profile);
@@ -86,6 +92,7 @@ public class MyProfileFragment extends Fragment {
         renameInput = view.findViewById(R.id.mpRenameInput);
         renameStatus = view.findViewById(R.id.mpRenameStatus);
         renameButton = view.findViewById(R.id.mpRenameButton);
+        deleteButton = view.findViewById(R.id.mpDeleteButton);
 
         if (savedInstanceState != null) {
             restoredColor = savedInstanceState.getInt(STATE_COLOR, -1);
@@ -118,6 +125,10 @@ public class MyProfileFragment extends Fragment {
             viewModel.rename(renameInput.getText().toString());
         });
         view.findViewById(R.id.mpSignOutButton).setOnClickListener(v -> viewModel.signOut());
+        deleteButton.setOnClickListener(v -> {
+            hideMessage();
+            showDeleteConfirmation();
+        });
 
         viewModel.getProfile().observe(getViewLifecycleOwner(), this::onProfileState);
         viewModel.getHandleStatus().observe(getViewLifecycleOwner(), s -> {
@@ -141,7 +152,16 @@ public class MyProfileFragment extends Fragment {
                     renameInput.setText("");
                     showMessage(R.string.my_profile_renamed, false);
                     break;
+                case DELETED:
+                    // La sesión ya está cerrada: el observador de AccountState saca esta pantalla.
+                    Toast.makeText(requireContext().getApplicationContext(), R.string.delete_done,
+                            Toast.LENGTH_LONG).show();
+                    break;
+                case NEEDS_REAUTH:
+                    showReauthentication();
+                    break;
                 default:
+                    deleting = false;
                     showMessage(ProfileUi.failureText(outcome.failure), true);
                     break;
             }
@@ -173,7 +193,7 @@ public class MyProfileFragment extends Fragment {
                 }
                 break;
             case NONE:
-                if (!left) {
+                if (!left && !deleting) {
                     // Con sesión pero sin perfil: toca crearlo.
                     left = true;
                     NavHostFragment.findNavController(this).navigate(R.id.navigation_create_profile, null,
@@ -181,6 +201,9 @@ public class MyProfileFragment extends Fragment {
                 }
                 break;
             case ERROR:
+                if (deleting) {
+                    break;
+                }
                 current = null;
                 content.setVisibility(View.GONE);
                 status.setText(R.string.my_profile_error);
@@ -236,6 +259,7 @@ public class MyProfileFragment extends Fragment {
         save.setEnabled(!busy && nameValid && changed);
         nameInput.setEnabled(!busy);
         picker.setEnabled(!busy);
+        deleteButton.setEnabled(!busy);
 
         renameInput.setEnabled(renameAllowed && !busy);
         String typed = renameInput.getText().toString();
@@ -252,6 +276,45 @@ public class MyProfileFragment extends Fragment {
         }
         renameButton.setEnabled(renameAllowed && !busy && !same && renameCheck != null
                 && renameCheck.kind == ProfileViewModel.HandleStatus.Kind.FREE);
+    }
+
+    /** Paso 1 de Borrar cuenta: qué se pierde y qué se queda en el dispositivo. */
+    private void showDeleteConfirmation() {
+        new AlertDialog.Builder(requireContext(), R.style.RoundedDialog)
+                .setTitle(R.string.delete_confirm_title)
+                .setMessage(R.string.delete_confirm_message)
+                .setNegativeButton(R.string.delete_cancel, null)
+                .setPositiveButton(R.string.delete_confirm_action, (d, which) -> {
+                    deleting = true;
+                    viewModel.deleteAccount();
+                })
+                .show();
+    }
+
+    /** Paso 2, solo si el servidor lo pide: la contraseña (email) o el selector de Google otra vez. */
+    private void showReauthentication() {
+        if (viewModel.needsPasswordToReauthenticate()) {
+            View form = getLayoutInflater().inflate(R.layout.dialog_reauth_password, null);
+            EditText password = form.findViewById(R.id.reauthPasswordInput);
+            new AlertDialog.Builder(requireContext(), R.style.RoundedDialog)
+                    .setTitle(R.string.delete_reauth_title)
+                    .setMessage(R.string.delete_reauth_password_message)
+                    .setView(form)
+                    .setNegativeButton(R.string.delete_cancel, (d, which) -> deleting = false)
+                    .setPositiveButton(R.string.delete_reauth_continue, (d, which) ->
+                            viewModel.reauthenticateAndDelete(null, password.getText().toString()))
+                    .setOnCancelListener(d -> deleting = false)
+                    .show();
+        } else {
+            new AlertDialog.Builder(requireContext(), R.style.RoundedDialog)
+                    .setTitle(R.string.delete_reauth_title)
+                    .setMessage(R.string.delete_reauth_google_message)
+                    .setNegativeButton(R.string.delete_cancel, (d, which) -> deleting = false)
+                    .setPositiveButton(R.string.delete_reauth_continue, (d, which) ->
+                            viewModel.reauthenticateAndDelete(requireActivity(), null))
+                    .setOnCancelListener(d -> deleting = false)
+                    .show();
+        }
     }
 
     private void showMessage(@StringRes int text, boolean isError) {

@@ -99,4 +99,19 @@
     <string name="my_profile_renamed">Username changed.</string>
     <string name="my_profile_sign_out">Sign out</string>
     <string name="profile_color_picker_description">Avatar colour %1$d of %2$d</string>
+
+    <!-- F1-u7 · Delete account -->
+    <string name="my_profile_delete">Delete account</string>
+    <string name="delete_confirm_title">Delete your account?</string>
+    <string name="delete_confirm_message">This permanently deletes your account, profile and username from our servers. You cannot undo it.\n\nYour data on this device stays: your events, tasks and focus history are not deleted.</string>
+    <string name="delete_confirm_action">Delete account</string>
+    <string name="delete_cancel">Cancel</string>
+    <string name="delete_reauth_title">Confirm it is you</string>
+    <string name="delete_reauth_password_message">Type your password to delete your account.</string>
+    <string name="delete_reauth_google_message">Choose your Google account again to delete your account.</string>
+    <string name="delete_reauth_password_hint">Password</string>
+    <string name="delete_reauth_continue">Continue</string>
+    <string name="delete_error_bad_password">That password is not correct.</string>
+    <string name="delete_error_reauth">We could not confirm it is you. Try again.</string>
+    <string name="delete_done">Your account has been deleted.</string>
 </resources>

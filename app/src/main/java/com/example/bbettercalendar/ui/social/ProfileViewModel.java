@@ -1,5 +1,6 @@
 package com.example.bbettercalendar.ui.social;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -19,6 +20,8 @@ import com.example.bbettercalendar.social.profile.Profile;
 import com.example.bbettercalendar.social.profile.ProfileRepository;
 import com.example.bbettercalendar.social.profile.ProfileState;
 import com.google.firebase.FirebaseNetworkException;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.Date;
@@ -60,11 +63,11 @@ public class ProfileViewModel extends ViewModel {
     }
 
     /** Qué falló al guardar, sin texto: la pantalla elige la cadena. */
-    public enum Failure { HANDLE_TAKEN, RENAME_TOO_SOON, NETWORK, INVALID, GENERIC }
+    public enum Failure { HANDLE_TAKEN, RENAME_TOO_SOON, NETWORK, INVALID, BAD_PASSWORD, REAUTH_FAILED, GENERIC }
 
     /** Resultado de guardar, de un solo uso (ver {@link #consumeOutcome()}). */
     public static final class Outcome {
-        public enum Kind { CREATED, UPDATED, RENAMED, FAILED }
+        public enum Kind { CREATED, UPDATED, RENAMED, DELETED, NEEDS_REAUTH, FAILED }
 
         @NonNull public final Kind kind;
         @Nullable public final Failure failure;
@@ -204,6 +207,93 @@ public class ProfileViewModel extends ViewModel {
 
     public void signOut() {
         account.signOut();
+    }
+
+    // ---- borrar cuenta (F1-u7) -------------------------------------------------------------------------
+
+    /** true si re-autenticar pide la contraseña (email); si no, el selector de Google. */
+    public boolean needsPasswordToReauthenticate() {
+        return account.usesPassword();
+    }
+
+    /**
+     * Pide al servidor borrar la cuenta. Si el login es antiguo (FAILED_PRECONDITION) el resultado es
+     * NEEDS_REAUTH; la pantalla re-autentica ({@link #reauthenticateAndDelete}) y se repite una vez.
+     */
+    public void deleteAccount() {
+        busy.setValue(true);
+        callDelete(false);
+    }
+
+    /** Re-autentica y, si sale bien, repite el borrado (una sola vez). */
+    public void reauthenticateAndDelete(@Nullable Activity activity, @Nullable String password) {
+        busy.setValue(true);
+        account.reauthenticate(activity, password, new AccountRepository.Callback() {
+            @Override
+            public void onSuccess() {
+                callDelete(true);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable error) {
+                finish(new Outcome(Outcome.Kind.FAILED, mapReauth(error)));
+            }
+        });
+    }
+
+    private void callDelete(boolean afterReauth) {
+        account.deleteAccount(new AccountRepository.Callback() {
+            @Override
+            public void onSuccess() {
+                finish(new Outcome(Outcome.Kind.DELETED, null));
+            }
+
+            @Override
+            public void onError(@NonNull Throwable error) {
+                if (!afterReauth && isStaleLogin(error)) {
+                    finish(new Outcome(Outcome.Kind.NEEDS_REAUTH, null));
+                } else {
+                    finish(new Outcome(Outcome.Kind.FAILED, mapDelete(error)));
+                }
+            }
+        });
+    }
+
+    /** Pura: el servidor pide un login más reciente (auth_time de más de 5 minutos). */
+    static boolean isStaleLogin(@NonNull Throwable error) {
+        return error instanceof FirebaseFunctionsException
+                && ((FirebaseFunctionsException) error).getCode()
+                == FirebaseFunctionsException.Code.FAILED_PRECONDITION;
+    }
+
+    /** Pura: fallo de la callable sin texto. */
+    @NonNull
+    static Failure mapDelete(@NonNull Throwable error) {
+        if (error instanceof FirebaseNetworkException) {
+            return Failure.NETWORK;
+        }
+        if (error instanceof FirebaseFunctionsException) {
+            switch (((FirebaseFunctionsException) error).getCode()) {
+                case UNAVAILABLE:
+                case DEADLINE_EXCEEDED:
+                    return Failure.NETWORK;
+                default:
+                    return Failure.GENERIC;
+            }
+        }
+        return Failure.GENERIC;
+    }
+
+    /** Pura: fallo al re-autenticar (contraseña mala, otra cuenta de Google, selector cancelado...). */
+    @NonNull
+    static Failure mapReauth(@NonNull Throwable error) {
+        if (error instanceof FirebaseAuthInvalidCredentialsException) {
+            return Failure.BAD_PASSWORD;
+        }
+        if (error instanceof FirebaseNetworkException) {
+            return Failure.NETWORK;
+        }
+        return Failure.REAUTH_FAILED;
     }
 
     private ProfileRepository.Callback callback(@NonNull Outcome.Kind success) {

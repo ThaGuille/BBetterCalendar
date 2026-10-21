@@ -1,0 +1,38 @@
+# Contrato del repo para el toolkit AI-kit (schema: AI-kit/schema/profile.schema.json).
+# big-task y review-branch leen la copia COMMITEADA en la rama base: un cambio aquí cuenta desde que está en main.
+language: java
+build: "./gradlew.bat assembleDebug"
+test: "./gradlew.bat testDebugUnitTest"
+docs:
+  root: .claude/docs/
+capabilities: [code-auditing]
+
+bigTask:
+  # 2 unidades a la vez: cada una compila con su propio daemon de Gradle (~1,5-2 GB) y hay 1-2 emuladores.
+  # Las unidades que usan emulador declaran @emulator en touches y nunca coinciden; el lease lo da
+  # .claude/scripts/emulator-lease.ps1.
+  parallel: 2
+  slots: 2
+  slotCommands: [gradlew, gradle]
+  # Sin local.properties una worktree nueva depende de ANDROID_HOME; con él compila igual que el checkout.
+  worktreeCopy: [local.properties]
+  forbid:
+    - match: '\bpm\s+clear\b'
+      why: "borra la base de datos Room de la app en el emulador; para resetear un flujo, run-as rm del fichero de SharedPreferences concreto"
+    - match: 'firebaseEmulator=false'
+      why: "crearía usuarios reales en el proyecto Firebase; las fases sociales se prueban contra el Emulator Suite (D-021)"
+    - match: '\bfirebase\s+deploy\b'
+      why: "desplegar reglas o funciones es una decisión del usuario, nunca de una unidad"
+
+review:
+  rules: [CLAUDE.md, .claude/docs/style_guide.md, .claude/docs/architectural_patterns.md]
+  codemap: .claude/docs/architecture.md
+  gate: "./gradlew.bat assembleDebug testDebugUnitTest"
+  paths:
+    guards: [".claude/hooks/**", ".claude/settings*.json", ".github/workflows/**", "firebase/firestore.rules", "firebase/database.rules.json"]
+    keys: ["app/google-services.json", "firebase/firebase.json", "app/build.gradle"]
+    migration: ["app/src/main/java/com/example/bbettercalendar/database/**", "app/schemas/**"]
+    docs: ["docs/**", "**/*.md", ".claude/plans/**"]
+  pushGate:
+    mode: once
+    minLines: 40

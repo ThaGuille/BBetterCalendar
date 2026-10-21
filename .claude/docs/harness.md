@@ -1,6 +1,6 @@
 # The BBetter AI Harness — what it is and how to use it
 
-**Last updated:** 2026-06-07
+**Last updated:** 2026-10-21
 
 This is the single reference for the Claude Code "harness" built into this repo: the skills,
 subagents, hooks, and code-intelligence index — plus the reusable plugin that
@@ -115,11 +115,28 @@ Plan mode) and `/save-plan` it if it should outlive the conversation. Then imple
 - `/code-review` for the heavier pass (`/code-review high`, or `/code-review ultra` for the
   cloud multi-agent review — billed, user-triggered).
 
+### Before you push (AI-kit's review-branch)
+
+- A `git push` from Claude that would publish ≥ 40 lines of unreviewed code is stopped once by the **push gate**, which
+  asks for `/review-branch` (on `main` it reviews what is not on `origin/main` yet; later reviews are deltas). Pushing
+  the same commit again passes, so you can always say "push without review". Settings: `review.*` in
+  [`.agents/profile.yml`](../../.agents/profile.yml) (lenses get `CLAUDE.md`, `style_guide.md` and
+  `architectural_patterns.md` as rules; the gate builds and runs the unit tests).
+
+### Long tasks (AI-kit's `/big-task`)
+
+- `/big-task "<goal>"` → you approve the plan once; the chat then orchestrates by itself and stops only for what its
+  policy escalates. Up to **2 units run at once** (`bigTask.parallel`), each in its own worktree under
+  `.claude/worktrees/`; Gradle builds share 2 machine-wide slots; units that drive the emulator say `@emulator` and never
+  overlap (lease: `.claude/scripts/emulator-lease.ps1`). It closes by merging into `main` and pushing.
+- Its telemetry (and review-branch's) is the **Telemetry** tab of the Bench Log.
+
 ### Things that happen automatically (don't type anything)
 
 - Session start → rule reminders injected.
 - Any edit → legacy-palette warn check.
 - Any architecture/trace question → CodeGraph is consulted before grep.
+- `git push` from Claude → push gate (above).
 
 ---
 

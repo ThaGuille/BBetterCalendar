@@ -15,6 +15,8 @@ import com.example.bbettercalendar.social.common.ProcessForeground;
 import com.example.bbettercalendar.social.common.Scheduler;
 import com.example.bbettercalendar.social.common.SerialExecutor;
 import com.example.bbettercalendar.social.common.WatchedListener;
+import com.example.bbettercalendar.social.invite.InviteCodes;
+import com.example.bbettercalendar.social.invite.InviteWrites;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -256,7 +258,8 @@ public class ProfileRepository {
      * Renombra el {@code @usuario} (D-019): en un lote, el perfil apunta al nuevo con
      * {@code handleChangedAt = serverTimestamp()}, se reserva {@code handles/{nuevo}} y se libera
      * {@code handles/{viejo}}. El límite de 30 días se mira aquí para dar un error claro, pero quien
-     * manda son las reglas (hora del servidor).
+     * manda son las reglas (hora del servidor). F2-u6: si {@code users/me.inviteCode} existe, el mismo
+     * lote actualiza {@code invites/{inviteCode}.handle} (si no, el enlace caducaría al renombrar).
      */
     public void rename(@Nullable String rawNewHandle, @NonNull Callback callback) {
         String newHandle = HandleValidator.normalizeHandle(rawNewHandle);
@@ -273,12 +276,25 @@ public class ProfileRepository {
                 callback.onError(new ProfileException(ProfileException.Code.RENAME_TOO_SOON));
                 return;
             }
-            WriteBatch batch = db.batch();
-            batch.update(profileRef(current.uid), ProfileWrites.profileRename(newHandle));
-            batch.set(handleRef(newHandle),
-                    ProfileWrites.handleCreate(current.uid, current.displayName, current.avatarColor));
-            batch.delete(handleRef(current.handle));
-            commit(batch, callback);
+            // F2-u6: si hay código de invitación, invites/{código}.handle sigue al perfil en el mismo lote
+            // (las reglas lo comparan con el perfil final). users/me.inviteCode implica que invites/{código}
+            // existe y es mío: las reglas solo dejan poner el código junto a su invites/ y solo borrar
+            // invites/ cuando users/ ya no apunta a él.
+            userRef(current.uid).get(Source.SERVER)
+                    .addOnSuccessListener(ioExecutor, user -> {
+                        String inviteCode = user.exists() ? user.getString(InviteWrites.INVITE_CODE) : null;
+                        WriteBatch batch = db.batch();
+                        batch.update(profileRef(current.uid), ProfileWrites.profileRename(newHandle));
+                        batch.set(handleRef(newHandle),
+                                ProfileWrites.handleCreate(current.uid, current.displayName, current.avatarColor));
+                        batch.delete(handleRef(current.handle));
+                        if (InviteCodes.isValid(inviteCode)) {
+                            batch.update(db.document(InviteWrites.invitePath(inviteCode)),
+                                    InviteWrites.inviteHandleUpdate(newHandle));
+                        }
+                        commit(batch, callback);
+                    })
+                    .addOnFailureListener(ioExecutor, callback::onError);
         });
     }
 

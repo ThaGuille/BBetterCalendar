@@ -25,7 +25,7 @@ npm --prefix functions run build; firebase emulators:exec --only auth,firestore,
 
 # Emuladores para la app de Android (debug): con el id REAL, porque singleProjectMode exige que coincida
 # con el de google-services.json. No tocan el proyecto real; el AVD llega por 10.0.2.2 (USE_FIREBASE_EMULATOR).
-# Todos los emuladores (auth, firestore, database, functions): la app usa los cuatro. Functions compiladas antes.
+# Todos los emuladores (auth, firestore, database, functions y hosting desde F2-u6). Functions compiladas antes.
 npm --prefix functions run build; firebase emulators:start --project bbetter-dbcda   # UI en http://localhost:4000
 
 # Móvil físico por USB (D-026): host 127.0.0.1 + adb reverse. Solo 127.0.0.1, nunca la IP de la red local.
@@ -54,6 +54,34 @@ con esos dos emuladores, `delete-account.test.js` y `friends-functions.test.js` 
 Las Functions solo se ejecutan en el emulador (D-021, D-025): no se despliegan hasta el gate L.7. Con el emulador de
 Functions en marcha, `onFriendRequestAccepted` también se dispara con los casos de aceptar de `friends-rules.test.js`;
 la transacción vuelve a leer la solicitud, así que tras `clearFirestore` no hace nada.
+
+### Invitaciones y Hosting (F2-u6)
+
+`firebase.json` sirve `hosting/public` (puerto 5000 en el emulador) con el rewrite `/i/** → /i/index.html` y un
+`ignore` explícito **sin `**/.*`** (con el de por defecto, `.well-known/` no se sirve). Nada se despliega hasta L.7
+(D-025): el dominio `bbetter-dbcda.web.app` solo existe en el emulador.
+
+- `hosting/public/.well-known/assetlinks.json`: `handle_all_urls` para `io.github.thaguille.bbettercalendar` (el
+  `applicationId`, no el namespace) con el SHA-256 del keystore de debug (`.\gradlew.bat signingReport`). El de release
+  se añade en L.
+- `hosting/public/i/index.html`: la página de `https://bbetter-dbcda.web.app/i/<código>` cuando la app no está
+  instalada: el código, la alternativa del `@usuario` (Amigos → Añadir) y el enlace a Play con
+  `referrer=invite%3D<código>` (lo lee `InstallReferrerReader`), marcado `[CONFIRM en L: la ficha de Play aún no existe]`.
+
+```powershell
+# Comprobar lo que sirve el emulador de Hosting (con firebase emulators:start en marcha)
+Invoke-WebRequest http://127.0.0.1:5000/.well-known/assetlinks.json
+Invoke-WebRequest http://127.0.0.1:5000/i/ABCD2345
+
+# App Link en el AVD (debug): la verificación automática falla sin el dominio desplegado; se aprueba a mano
+adb shell pm set-app-links-user-selection --user cur --package io.github.thaguille.bbettercalendar true bbetter-dbcda.web.app
+adb shell pm get-app-links --user cur io.github.thaguille.bbettercalendar
+adb shell am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://bbetter-dbcda.web.app/i/ABCD2345"
+```
+
+El intent-filter (`autoVerify`, `https`, `bbetter-dbcda.web.app`, `/i/`) vive solo en `app/src/debug/AndroidManifest.xml`
+y apunta a `InviteLinkActivity`, que guarda el código como invitación pendiente y abre la app con el intent del launcher.
+`scripts/adb-reverse.ps1` ya incluye el puerto de Hosting.
 
 ### `tests/tools/actor.js`: la segunda identidad (F2-u4)
 

@@ -10,6 +10,7 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.bbettercalendar.notifications.NotificationChannels;
+import com.example.bbettercalendar.social.invite.InstallReferrerReader;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
@@ -27,6 +28,8 @@ public class DBMigration extends Application {
     // inyección de campos en la propia clase Application, disponible antes de onCreate().
     @Inject AppRuleDAO appRuleDao;
     @Inject @IoExecutor ExecutorService ioExecutor;
+    // F2-u6: invitación por Install Referrer; solo con FEATURE_SOCIAL y una vez por instalación.
+    @Inject InstallReferrerReader installReferrerReader;
 
     @Override
     public void onCreate() {
@@ -37,6 +40,7 @@ public class DBMigration extends Application {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         NotificationChannels.createAll(this);
         armUsageLimitScheduler();
+        installReferrerReader.readOnce();
     }
 
     // Arma el chequeo periódico de límites en cada arranque en frío. BootReceiver hace lo mismo

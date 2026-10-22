@@ -152,4 +152,9 @@ dependencies {
     implementation 'androidx.credentials:credentials-play-services-auth:1.5.0'
     implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
 
+    // F2-u6: invitaciones. QR del enlace (solo ZXing core, sin la librería de Android: QrMatrix es puro y la
+    // UI monta el Bitmap) e Install Referrer de Play (invitación pendiente al instalar desde /i/<código>).
+    implementation 'com.google.zxing:core:3.5.3'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+
 }

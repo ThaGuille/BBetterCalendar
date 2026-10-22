@@ -1,0 +1,75 @@
+<!doctype html>
+<!--
+  F2-u6 (plan social-f2-amigos.md, D-018, D-028 §3): página de una invitación https://bbetter-dbcda.web.app/i/<código>.
+  Con la app instalada y el App Link aprobado, Android abre InviteLinkActivity y esta página no se ve.
+  Sin la app: enseña el código, la alternativa del @usuario y el enlace a Play con referrer=invite%3D<código>
+  (InstallReferrerReader lo lee al primer arranque). Firebase lo sirve con el rewrite /i/** de firebase.json.
+  Solo se sirve en el emulador de Hosting hasta L.7 (D-025). Sin recursos externos ni lecturas de Firestore.
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>BBetter · Invitación</title>
+  <style>
+    :root { color-scheme: light dark; --bg: #f6f5f2; --fg: #1d1c1a; --muted: #5d5a54; --accent: #2f6f5e; --card: #ffffff; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #151514; --fg: #ecebe7; --muted: #a9a59c; --accent: #7cc4ad; --card: #201f1d; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+           padding: 24px 16px; background: var(--bg); color: var(--fg);
+           font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { width: 100%; max-width: 420px; background: var(--card); border-radius: 16px; padding: 28px 24px; }
+    h1 { font-size: 1.4rem; margin: 0 0 8px; }
+    p { margin: 0 0 16px; color: var(--muted); }
+    .code { font: 600 1.3rem/1.2 ui-monospace, "Cascadia Mono", Menlo, monospace; letter-spacing: .12em;
+            color: var(--fg); margin: 0 0 20px; }
+    .play { display: block; text-align: center; padding: 12px 16px; border-radius: 12px; background: var(--accent);
+            color: var(--bg); font-weight: 600; text-decoration: none; margin: 0 0 20px; }
+    .hint { font-size: .95rem; }
+    [hidden] { display: none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1 id="title">Te han invitado a BBetter</h1>
+  <p id="lead">Instala BBetter para añadir a tu amigo o amiga. El enlace guarda la invitación.</p>
+  <p class="code" id="code" hidden></p>
+  <!-- [CONFIRM en L: la ficha de Play aún no existe] El enlace a Play con referrer=invite%3D<código> se valida
+       cuando exista la ficha (gate L). Install Referrer solo funciona instalando desde Play. -->
+  <a class="play" id="play" href="https://play.google.com/store/apps/details?id=io.github.thaguille.bbettercalendar&amp;referrer=invite%3D">Descargar en Google Play</a>
+  <p class="hint" id="hint">¿Ya tienes la app? Ábrela, ve a Amigos → Añadir y escribe el @usuario de quien te invita.</p>
+  <p class="hint" id="bad" hidden>Este enlace de invitación no es válido. Pide a tu amigo o amiga su @usuario y añádelo desde Amigos → Añadir.</p>
+</main>
+<script>
+  (function () {
+    var PLAY = 'https://play.google.com/store/apps/details?id=io.github.thaguille.bbettercalendar';
+    var en = !/^es\b/i.test(navigator.language || '');
+    if (en) {
+      document.documentElement.lang = 'en';
+      document.title = 'BBetter · Invitation';
+      document.getElementById('title').textContent = "You've been invited to BBetter";
+      document.getElementById('lead').textContent = 'Install BBetter to add your friend. The link keeps the invitation.';
+      document.getElementById('play').textContent = 'Get it on Google Play';
+      document.getElementById('hint').textContent = 'Already have the app? Open it, go to Friends → Add and type the @username of who invited you.';
+      document.getElementById('bad').textContent = "This invitation link isn't valid. Ask your friend for their @username and add them from Friends → Add.";
+    }
+    // Mismo alfabeto que InviteCodes y las reglas de invites/: 8 caracteres sin I, L, O, 0 ni 1.
+    var m = /^\/i\/([A-Za-z0-9]{8})\/?$/.exec(location.pathname);
+    var code = m ? m[1].toUpperCase() : '';
+    var play = document.getElementById('play');
+    if (/^[A-HJKMNP-Z2-9]{8}$/.test(code)) {
+      var el = document.getElementById('code');
+      el.textContent = code;
+      el.hidden = false;
+      play.href = PLAY + '&referrer=' + encodeURIComponent('invite=' + code);
+    } else {
+      play.href = PLAY;
+      document.getElementById('bad').hidden = false;
+    }
+  })();
+</script>
+</body>
+</html>

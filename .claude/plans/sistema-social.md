@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-22 (F2-u5 hecha)
+**Last updated:** 2026-10-23 (F2-u6 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -20,8 +20,9 @@
   el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
 - **Siguiente paso:** olas 1 y 2 de F2 hechas: u1 (endurecer F1), u2 (host del emulador configurable, D-026) y u3 (reglas
   de F2); de la ola 3, u4 (Functions `onFriendRequestAccepted` y `removeFriend`, `actor.js`) y u5 (datos de amigos y
-  reportes: `social/friends/`) hechas. Queda u6 (invitaciones); después u7 (UI Amigos sobre `FriendsRepository` y
-  `ReportRepository`, con `actor.js` como segunda identidad).
+  reportes: `social/friends/`) y u6 (invitaciones: Hosting en el emulador, `social/invite/`, App Link) hechas. Siguen
+  u7 (UI Amigos sobre `FriendsRepository` y `ReportRepository`, con `actor.js` como segunda identidad) y u8 (hoja
+  Invitar, «Añadir a X» y campana).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -162,6 +163,13 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-23 (23)** · F2-u6 hecha: Hosting en el emulador (`firebase.json` con `hosting/public`, `assetlinks.json` de
+  debug y la página `/i/` con Play y `referrer=invite%3D<código>`), `social/invite/` (`InviteCodes`, `InviteLinkFactory`,
+  `QrMatrix` con ZXing core, `InviteRepository` con `ensureMyCode` y `resolve`, `InstallReferrerReader`), invitación
+  pendiente en `SocialPrefs` (7 días), `ProfileRepository.rename` actualiza `invites/` y el App Link de debug con
+  `InviteLinkActivity` (en `api36`: abre la app sin una segunda MainActivity y guarda el código). Commit «F2-u6:
+  invitaciones (Hosting en el emulador, invites/, App Link con InviteLinkActivity, Install Referrer y QR)».
+  **Siguiente:** u7 (UI Amigos) y después u8 (hoja Invitar, «Añadir a X» y campana).
 - **2026-10-22 (22)** · F2-u5 hecha: `social/friends/` con `FriendsRepository` (amigos con un listener de perfil por amigo;
   `PERMISSION_DENIED` o perfil ausente → oculto y `removeFriend`; recibidas, enviadas y `pendingIncomingCount()`;
   `lookupHandle`, `send` en un lote con el contador de `RequestQuota`, `accept`, `decline`, `cancel`, `remove`) y

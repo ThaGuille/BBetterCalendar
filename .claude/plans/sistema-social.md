@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-22 (F2-u2 hecha)
+**Last updated:** 2026-10-22 (F2-u3 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -18,7 +18,8 @@
 - **Fase activa:** **F2** (Amigos) · plan [`social-f2-amigos.md`](social-f2-amigos.md) (`in progress`, 9 unidades
   en 5 olas). F0 y F1 hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md));
   el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** ola 1 de F2: u1 (endurecer F1) y u2 (host del emulador configurable, D-026) hechas. Después, u3.
+- **Siguiente paso:** olas 1 y 2 de F2 hechas: u1 (endurecer F1), u2 (host del emulador configurable, D-026) y u3 (reglas
+  de F2). Después, la ola 3: u4 (Functions y `actor.js`), u5 (datos de amigos) y u6 (invitaciones).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -159,6 +160,12 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-22 (20)** · F2-u3 hecha: reglas de F2 en `firestore.rules` (`friendRequests/{from_to}` con tarjetas de `handles/`,
+  contador diario `reqDay`/`reqCount`/`reqLastTo` en `users/` con `validRequestCounter`, `inviteCode`, `users/*/friends` de
+  solo lectura, `profiles/` para amigos con `isFriend`, `reports/` solo crear, `invites/`) y RTDB `friends/$uid`; tests nuevos
+  `friends-rules.test.js` e `invites-reports.test.js`, `deny-all.test.js` ajustado. 75 en verde con firestore,database y 6/6
+  mutantes muertos. Commit «F2-u3: reglas de F2 (friendRequests, contador, friends, isFriend, reports, invites, RTDB friends) y sus tests».
+  **Siguiente:** ola 3: u4 (Functions y `actor.js`), u5 (datos de amigos) y u6 (invitaciones).
 - **2026-10-22 (19)** · F2-u2 hecha: `BuildConfig.FIREBASE_EMULATOR_HOST` (`-PfirebaseEmulatorHost`, por defecto `10.0.2.2`;
   release `""`) en los cuatro clientes de `FirebaseModule`; `127.0.0.1` en la red de debug; `firebase/scripts/adb-reverse.ps1`;
   README y `systems/social.md` («Probar en un móvil físico»). Humo en `api36` con el host `127.0.0.1` y el script: entrar y

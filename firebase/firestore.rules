@@ -10,6 +10,10 @@ rules_version = '2';
 // escriben con serverTimestamp(): aquí se comparan con request.time. Las palabras prohibidas NO se miran
 // aquí (cliente, HandleValidator; moderación de verdad en L.4). Borrar users/ o profiles/ solo lo hace la
 // callable deleteAccount (Admin SDK): así no quedan @usuario huérfanos.
+//
+// F2-u3 abre friendRequests/{from_to}, users/{uid}/friends/{f} (solo lectura del dueño; escriben las Functions),
+// el contador diario y el inviteCode de users/{uid}, profiles/{uid} para los amigos (isFriend), reports/ (solo
+// crear) e invites/{código} (plan social-f2-amigos.md, F2-u3; D-027, D-028). Bloquear no existe (D-027).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -31,6 +35,28 @@ service cloud.firestore {
 
     function handlePath(h) {
       return /databases/$(database)/documents/handles/$(h);
+    }
+
+    function requestPath(from, to) {
+      return /databases/$(database)/documents/friendRequests/$(from + '_' + to);
+    }
+
+    function friendPath(uid, f) {
+      return /databases/$(database)/documents/users/$(uid)/friends/$(f);
+    }
+
+    function invitePath(code) {
+      return /databases/$(database)/documents/invites/$(code);
+    }
+
+    // F2-u3 (03 §6): tú eres amigo de uid si users/{uid}/friends/{tú} existe (lo escriben las Functions).
+    function isFriend(uid) {
+      return signedIn() && exists(friendPath(uid, request.auth.uid));
+    }
+
+    // Código de invitación: 8 caracteres sin I, L, O, 0 ni 1 (InviteCodes, F2-u6).
+    function validInviteCode(code) {
+      return code is string && code.matches('^[A-HJKMNP-Z2-9]{8}$');
     }
 
     function validDisplayName(n) {
@@ -57,15 +83,58 @@ service cloud.firestore {
       return validUser(d) && d.createdAt == request.time && d.termsAcceptedAt == request.time;
     }
 
+    // F2-u3: después del alta, users/{uid} admite además el contador diario de solicitudes (reqDay, reqCount,
+    // reqLastTo; D-028 §2) y el código de invitación (inviteCode; D-028 §3). El alta no cambia.
+    function validUserFields(d) {
+      return d.keys().hasOnly(['createdAt', 'ageBand', 'termsVersion', 'termsAcceptedAt',
+                               'reqDay', 'reqCount', 'reqLastTo', 'inviteCode'])
+          && d.keys().hasAll(['createdAt', 'ageBand', 'termsVersion', 'termsAcceptedAt'])
+          && d.createdAt is timestamp
+          && d.ageBand in ['14-17', '18+']
+          && d.termsVersion is int && d.termsVersion >= 1
+          && d.termsAcceptedAt is timestamp
+          && (!('reqDay' in d) || d.reqDay is int)
+          && (!('reqCount' in d) || (d.reqCount is int && d.reqCount >= 1))
+          && (!('reqLastTo' in d) || d.reqLastTo is string)
+          && (!('inviteCode' in d) || validInviteCode(d.inviteCode));
+    }
+
+    // Contador diario de solicitudes salientes (D-028 §2), del estado anterior (before) al final del lote
+    // (after): reqDay es el día UTC de request.time, reqCount sube 1 (o vuelve a 1 si cambió el día) hasta 20
+    // como mucho, y reqLastTo es el destinatario de la única solicitud que paga ese incremento. Lo usan el
+    // create de friendRequests y el update de users/ (FriendRequestWrites + RequestQuota, F2-u5).
+    function validRequestCounter(before, after, to) {
+      let today = math.floor(request.time.toMillis() / 86400000);
+      let prev = before.get('reqDay', -1) == today ? before.get('reqCount', 0) : 0;
+      return after.get('reqDay', -1) == today
+          && after.get('reqCount', -1) == prev + 1
+          && after.reqCount <= 20
+          && after.reqLastTo == to;
+    }
+
+    // Cambiar el código: el nuevo invites/ es mío en el estado final y el viejo ya no existe (mismo patrón
+    // de lote que handles/). Quitar el código sin poner otro no se puede.
+    function validInviteCodeChange(uid, old, d) {
+      return 'inviteCode' in d
+          && getAfter(invitePath(d.inviteCode)).data.uid == uid
+          && (!('inviteCode' in old) || !existsAfter(invitePath(old.inviteCode)));
+    }
+
     // Re-aceptar términos: termsVersion no baja y termsAcceptedAt, si cambia, es request.time.
     // F2-u1: ageBand no cambia nunca (el año se pregunta una sola vez, D-024).
-    function validUserUpdate() {
+    // F2-u3: si cambia el contador, tiene que existir al final del lote la solicitud {uid}_{reqLastTo}.
+    function validUserUpdate(uid) {
       let d = request.resource.data;
-      return validUser(d)
+      let changed = d.diff(resource.data).affectedKeys();
+      return validUserFields(d)
           && d.createdAt == resource.data.createdAt
           && d.ageBand == resource.data.ageBand
           && d.termsVersion >= resource.data.termsVersion
-          && (d.termsAcceptedAt == resource.data.termsAcceptedAt || d.termsAcceptedAt == request.time);
+          && (d.termsAcceptedAt == resource.data.termsAcceptedAt || d.termsAcceptedAt == request.time)
+          && (!changed.hasAny(['reqDay', 'reqCount', 'reqLastTo'])
+              || (validRequestCounter(resource.data, d, d.reqLastTo)
+                  && existsAfter(requestPath(uid, d.reqLastTo))))
+          && (!changed.hasAny(['inviteCode']) || validInviteCodeChange(uid, resource.data, d));
     }
 
     // ---- profiles/{uid} -------------------------------------------------------------------------------
@@ -161,16 +230,131 @@ service cloud.firestore {
               || getAfter(profilePath(request.auth.uid)).data.handle != h);
     }
 
+    // ---- friendRequests/{from_to} (F2-u3, D-028 §1) ---------------------------------------------------
+
+    // Las tarjetas (fromHandle/Name/Color, toHandle/Name/Color) están desnormalizadas porque el destinatario
+    // no puede leer el perfil del remitente; cuadran con las de handles/ en el momento de enviar.
+    function validRequestFields(d) {
+      return d.keys().hasOnly(['from', 'to', 'status', 'createdAt', 'fromHandle', 'fromName', 'fromColor',
+                               'toHandle', 'toName', 'toColor'])
+          && d.keys().hasAll(['from', 'to', 'status', 'createdAt', 'fromHandle', 'fromName', 'fromColor',
+                              'toHandle', 'toName', 'toColor']);
+    }
+
+    function cardMatches(handle, uid, name, color) {
+      let c = get(handlePath(handle)).data;
+      return c.uid == uid && c.displayName == name && c.avatarColor == color;
+    }
+
+    // Accesos get/exists de este create: 6 (límite 10 por documento): handles/fromHandle, handles/toHandle,
+    // friendRequests/{to}_{from}, users/{from}/friends/{to}, users/{from} (get) y users/{from} (getAfter).
+    // El lote de envío (solicitud + users/{from}) suma 1 más en el update de users/ (existsAfter de la
+    // solicitud): 7 de los 20 por lote.
+    function validRequestCreate(id) {
+      let d = request.resource.data;
+      let me = request.auth.uid;
+      return signedIn()
+          && validRequestFields(d)
+          && d.from == me
+          && d.to is string
+          && d.to != me
+          && id == me + '_' + d.to
+          && d.status == 'pending'
+          && d.createdAt == request.time
+          && cardMatches(d.fromHandle, me, d.fromName, d.fromColor)
+          && cardMatches(d.toHandle, d.to, d.toName, d.toColor)
+          && !exists(requestPath(d.to, me))
+          && !exists(friendPath(me, d.to))
+          && validRequestCounter(get(userPath(me)).data, getAfter(userPath(me)).data, d.to);
+    }
+
+    // Aceptar: solo el destinatario, solo de pending a accepted y sin tocar nada más. failed (con failReason)
+    // solo lo escribe onFriendRequestAccepted (Admin SDK); accepted solo lo borra esa Function.
+    function validRequestAccept() {
+      return signedIn()
+          && resource.data.to == request.auth.uid
+          && resource.data.status == 'pending'
+          && request.resource.data.status == 'accepted'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+    }
+
+    // Cancelar (from) o rechazar (to) borra la solicitud: no hay estado declined (D-028 §1).
+    function validRequestDelete() {
+      return signedIn()
+          && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid)
+          && resource.data.status in ['pending', 'failed'];
+    }
+
+    // ---- reports/{reporter_reported} (F2-u3, D-028 §4) ------------------------------------------------
+
+    // Uno por pareja, solo crear, sin texto libre. Hace falta relación: amigo, o una solicitud que el
+    // reportado te envió (con context = request el rechazo va en el mismo lote; exists ve el estado previo).
+    function validReportCreate(id) {
+      let d = request.resource.data;
+      let me = request.auth.uid;
+      return signedIn()
+          && d.keys().hasOnly(['reporter', 'reported', 'reportedHandle', 'reason', 'context', 'createdAt'])
+          && d.keys().hasAll(['reporter', 'reported', 'reportedHandle', 'reason', 'context', 'createdAt'])
+          && d.reporter == me
+          && d.reported is string
+          && d.reported != me
+          && id == me + '_' + d.reported
+          && d.reportedHandle is string && d.reportedHandle.matches('^[a-z0-9_.]{3,20}$')
+          && d.reason in ['offensive_name', 'impersonation', 'harassment', 'other']
+          && d.context in ['friend', 'request']
+          && d.createdAt == request.time
+          && (exists(friendPath(me, d.reported)) || exists(requestPath(d.reported, me)));
+    }
+
+    // ---- invites/{code} (F2-u3, D-028 §3) -------------------------------------------------------------
+
+    // Un código por persona: se crea en el mismo lote que users/{uid}.inviteCode, con el @usuario del perfil.
+    function validInviteCreate(code) {
+      let d = request.resource.data;
+      return signedIn()
+          && validInviteCode(code)
+          && d.keys().hasOnly(['uid', 'handle', 'createdAt'])
+          && d.keys().hasAll(['uid', 'handle', 'createdAt'])
+          && d.uid == request.auth.uid
+          && d.createdAt == request.time
+          && d.handle == getAfter(profilePath(request.auth.uid)).data.handle
+          && getAfter(userPath(request.auth.uid)).data.get('inviteCode', '') == code;
+    }
+
+    // Renombrar (ProfileRepository.rename, F2-u6) copia el @usuario nuevo del perfil final.
+    function validInviteUpdate() {
+      let d = request.resource.data;
+      return signedIn()
+          && resource.data.uid == request.auth.uid
+          && d.diff(resource.data).affectedKeys().hasOnly(['handle'])
+          && d.handle == getAfter(profilePath(request.auth.uid)).data.handle;
+    }
+
+    // Solo el dueño, y solo cuando users/{uid}.inviteCode ya no apunta a él al final del lote.
+    function validInviteDelete(code) {
+      return signedIn()
+          && resource.data.uid == request.auth.uid
+          && (!existsAfter(userPath(request.auth.uid))
+              || getAfter(userPath(request.auth.uid)).data.get('inviteCode', '') != code);
+    }
+
     match /users/{uid} {
       allow read: if isOwner(uid);
       allow create: if isOwner(uid) && validUserCreate();
-      allow update: if isOwner(uid) && validUserUpdate();
+      allow update: if isOwner(uid) && validUserUpdate(uid);
       allow delete: if false;
+
+      // F2-u3: la lista de amigos la lee el dueño; la escriben solo las Functions (onFriendRequestAccepted,
+      // removeFriend, deleteAccount).
+      match /friends/{f} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
     }
 
-    // F1: solo el dueño lee; los amigos llegan en F2 (isFriend, 03 §6).
+    // F2-u3: el dueño y sus amigos (isFriend, 03 §6).
     match /profiles/{uid} {
-      allow read: if isOwner(uid);
+      allow read: if isOwner(uid) || isFriend(uid);
       allow create: if isOwner(uid) && validProfileCreate();
       allow update: if isOwner(uid) && validProfileUpdate();
       allow delete: if false;
@@ -182,6 +366,31 @@ service cloud.firestore {
       allow create: if validHandleCreate(h);
       allow update: if validHandleUpdate();
       allow delete: if validHandleDelete(h);
+    }
+
+    // Leer solo from o to. Las consultas filtran where to == uid o where from == uid (sin índices compuestos;
+    // se ordena en el cliente); una consulta sin ese filtro se deniega.
+    match /friendRequests/{id} {
+      allow read: if signedIn()
+          && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow create: if validRequestCreate(id);
+      allow update: if validRequestAccept();
+      allow delete: if validRequestDelete();
+    }
+
+    // Nadie lee, cambia ni borra un reporte (se revisan en la consola): un segundo reporte es un update.
+    match /reports/{id} {
+      allow create: if validReportCreate(id);
+      allow read, update, delete: if false;
+    }
+
+    // get con sesión (resolver un enlace de invitación); listar, nunca.
+    match /invites/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if validInviteCreate(code);
+      allow update: if validInviteUpdate();
+      allow delete: if validInviteDelete(code);
     }
 
     match /{document=**} {

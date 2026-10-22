@@ -1,26 +1,30 @@
 // F0-u3: «todo denegado». Lo que ninguna fase ha abierto sigue cerrado para cualquier cliente (anónimo o con
 // sesión), en Firestore y en RTDB. Lo corre `firebase emulators:exec` (ver firebase/README.md).
-// F1-u1 abre users/{uid}, profiles/{uid} y handles/{h} (sus casos están en profiles-handles.test.js); aquí
-// se comprueba que el resto sigue denegado: stats/, friendRequests/, blocks/, reports/, las subcolecciones de
-// users/ (friends, inbox), cualquier otra colección y todo RTDB.
+// F1-u1 abre users/{uid}, profiles/{uid} y handles/{h} (sus casos están en profiles-handles.test.js).
+// F2-u3 abre friendRequests/, users/{uid}/friends, reports/ (solo crear), invites/ y RTDB friends/ (sus casos
+// están en friends-rules.test.js e invites-reports.test.js). Aquí se comprueba que el resto sigue denegado:
+// stats/, blocks/, users/{uid}/inbox, cualquier otra colección y RTDB salvo friends/ (status/, presence/, la raíz).
 const fs = require("fs");
 const path = require("path");
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require("@firebase/rules-unit-testing");
 
 const read = (file) => fs.readFileSync(path.join(__dirname, "..", file), "utf8");
-// BB_FIRESTORE_RULES: la prueba de mutación de F1-u1 pasa aquí una copia alterada de las reglas.
+// BB_FIRESTORE_RULES / BB_DATABASE_RULES: la prueba de mutación pasa aquí una copia alterada de las reglas.
 const firestoreRules = process.env.BB_FIRESTORE_RULES
   ? fs.readFileSync(process.env.BB_FIRESTORE_RULES, "utf8")
   : read("firestore.rules");
+const databaseRules = process.env.BB_DATABASE_RULES
+  ? fs.readFileSync(process.env.BB_DATABASE_RULES, "utf8")
+  : read("database.rules.json");
 
-describe("reglas: todo denegado salvo lo que abre F1", () => {
+describe("reglas: todo denegado salvo lo que abren F1 y F2", () => {
   let env;
 
   before(async () => {
     env = await initializeTestEnvironment({
       projectId: "demo-bbetter",
       firestore: { rules: firestoreRules },
-      database: { rules: read("database.rules.json") },
+      database: { rules: databaseRules },
     });
   });
 
@@ -46,27 +50,24 @@ describe("reglas: todo denegado salvo lo que abre F1", () => {
     "con sesión": () => env.authenticatedContext("alice"),
   };
 
-  // Rutas que F1 no abre, aunque sean del propio uid «alice».
+  // Rutas que ni F1 ni F2 abren, aunque sean del propio uid «alice». blocks/ no se abre nunca (D-027).
   const closedDocs = [
     "stats/alice",
-    "friendRequests/alice_bob",
     "blocks/alice/blocked/bob",
-    "reports/r1",
-    "users/alice/friends/bob",
     "users/alice/inbox/n1",
     "probe/x",
   ];
 
   for (const [who, ctx] of Object.entries(contexts)) {
-    it(`Firestore: ${who} no puede leer ni escribir lo que F1 no abre`, async () => {
+    it(`Firestore: ${who} no puede leer ni escribir lo que F1 y F2 no abren`, async () => {
       const db = ctx().firestore();
       for (const p of closedDocs) {
         await assertFails(db.doc(p).get());
         await assertFails(db.doc(p).set({ x: 1 }));
       }
       await assertFails(db.collection("stats").get());
-      await assertFails(db.collection("friendRequests").get());
-      await assertFails(db.collection("users/alice/friends").get());
+      await assertFails(db.collection("blocks").get());
+      await assertFails(db.collection("users/alice/inbox").get());
     });
 
     it(`Firestore: ${who} no puede leer ni escribir datos ajenos de users/ y profiles/`, async () => {
@@ -77,12 +78,12 @@ describe("reglas: todo denegado salvo lo que abre F1", () => {
       await assertFails(db.doc("profiles/bob").set({ name: "Bob" }));
     });
 
-    it(`RTDB: ${who} no puede leer ni escribir`, async () => {
+    it(`RTDB: ${who} no puede leer ni escribir fuera de friends/ (F2-u3)`, async () => {
       const db = ctx().database();
       await assertFails(db.ref("presence/alice").get());
       await assertFails(db.ref("presence/alice").set({ state: "focus" }));
+      await assertFails(db.ref("status/alice").get());
       await assertFails(db.ref("status/alice").set({ state: "focus" }));
-      await assertFails(db.ref("friends/alice/bob").set(true));
       await assertFails(db.ref("/").get());
     });
   }

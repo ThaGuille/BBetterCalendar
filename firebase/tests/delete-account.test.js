@@ -27,11 +27,13 @@ const PROJECT = "demo-bbetter";
 const REGION = "europe-west1";
 
 const read = (file) => fs.readFileSync(path.join(__dirname, "..", file), "utf8");
-// BB_FIRESTORE_RULES: la prueba de mutación de F1-u1 pasa aquí una copia alterada de las reglas.
+// BB_FIRESTORE_RULES / BB_DATABASE_RULES: la prueba de mutación pasa aquí una copia alterada de las reglas.
 const firestoreRules = process.env.BB_FIRESTORE_RULES
   ? fs.readFileSync(process.env.BB_FIRESTORE_RULES, "utf8")
   : read("firestore.rules");
-const databaseRules = read("database.rules.json");
+const databaseRules = process.env.BB_DATABASE_RULES
+  ? fs.readFileSync(process.env.BB_DATABASE_RULES, "utf8")
+  : read("database.rules.json");
 
 const splitHost = (hostPort) => {
   const i = hostPort.lastIndexOf(":");

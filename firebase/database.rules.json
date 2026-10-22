@@ -1,6 +1,12 @@
 {
   "rules": {
     ".read": false,
-    ".write": false
+    ".write": false,
+    "friends": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    }
   }
 }

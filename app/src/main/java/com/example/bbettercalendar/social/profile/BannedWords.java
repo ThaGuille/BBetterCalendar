@@ -34,10 +34,19 @@ public final class BannedWords {
             "cagarro", "bandarra",
             // EN
             "fuck", "shit", "bitch", "bastard", "asshole", "whore", "slut", "nigger", "nigga",
-            "faggot", "retard", "wanker", "twat", "pussy", "dildo", "jizz", "porn", "rapist",
+            // F2-u1: la forma larga, no la raíz: en catalán «retard» es retraso y «retardat», retrasado.
+            "faggot", "retarded", "wanker", "twat", "pussy", "dildo", "jizz", "porn", "rapist",
             "pedophile", "paedophile", "pedofilo",
             // Odio (todas las lenguas)
             "hitler", "nazis", "neonazi", "kkk"));
+
+    /**
+     * F2-u1: palabras inocentes que contienen una prohibida («therapist» contiene {@code rapist}). Se
+     * quitan del texto plegado antes de buscar (cambiadas por un espacio, para no unir lo de los lados),
+     * así que {@code therapist_rapist} sigue cayendo. Ya plegadas; las largas antes que sus prefijos.
+     */
+    static final List<String> EXCEPTIONS = Collections.unmodifiableList(Arrays.asList(
+            "therapists", "therapist", "terapist"));
 
     private static final Pattern MARKS = Pattern.compile("\\p{M}+");
     private static final Pattern SEPARATORS = Pattern.compile("[._*\\-]+");
@@ -54,10 +63,13 @@ public final class BannedWords {
         return SEPARATORS.matcher(noMarks.toLowerCase(Locale.ROOT)).replaceAll("");
     }
 
-    /** true si el texto contiene, como subcadena, alguna palabra de la lista. */
+    /** true si el texto (sin sus {@link #EXCEPTIONS}) contiene, como subcadena, alguna palabra de la lista. */
     public static boolean containsBanned(@Nullable String text) {
         String folded = fold(text);
-        if (folded.isEmpty()) {
+        for (String exception : EXCEPTIONS) {
+            folded = folded.replace(exception, " ");
+        }
+        if (folded.trim().isEmpty()) {
             return false;
         }
         for (String word : WORDS) {

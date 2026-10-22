@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-20 (F2 abierta)
+**Last updated:** 2026-10-22 (F2-u1 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -18,7 +18,7 @@
 - **Fase activa:** **F2** (Amigos) · plan [`social-f2-amigos.md`](social-f2-amigos.md) (`in progress`, 9 unidades
   en 5 olas). F0 y F1 hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md));
   el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** ola 1 de F2: u1 (endurecer F1) y u2 (host del emulador configurable, D-026).
+- **Siguiente paso:** ola 1 de F2: u1 (endurecer F1) hecha; u2 (host del emulador configurable, D-026). Después, u3.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -159,6 +159,12 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-22 (18)** · F2-u1 hecha: `social/common/` (`SerialExecutor`, `WatchedListener` con `Backoff` y `Scheduler`)
+  y `ProfileRepository` sin `LOADING` colgado ni `READY` tras `SIGNED_OUT`; `@usuario` `__x__` reservado; `BannedWords` con
+  `retarded` y excepciones (`therapist`); reglas con `ageBand` inmutable y perfil solo con `users/`; Mockito 4.11.0 en los
+  tests. Humo en `api36` en verde. El mutante del `__x__` en las reglas sobrevive (el emulador rechaza el id antes de las
+  reglas; ver la nota de u1). Commit «F2-u1: SerialExecutor, WatchedListener con Backoff, @usuario reservados, BannedWords y
+  reglas». **Siguiente:** u2 (host del emulador) y, tras u1, u3 (reglas de F2).
 - **2026-10-20 (17)** · **F2 abierta:** plan [`social-f2-amigos.md`](social-f2-amigos.md) (9 unidades en 5 olas). Q-03
   cerrada (D-015 aceptada). Decisiones del usuario: D-025 (F2 solo en el emulador; App Links en el AVD), D-026 (móvil
   físico por USB) y D-027 (sin bloquear: añadir y eliminar, reportar aparte → DIF-11, L.7 nuevo); D-028 propuesta (modelo

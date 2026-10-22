@@ -25,6 +25,10 @@ service cloud.firestore {
       return /databases/$(database)/documents/profiles/$(uid);
     }
 
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
     function handlePath(h) {
       return /databases/$(database)/documents/handles/$(h);
     }
@@ -54,21 +58,25 @@ service cloud.firestore {
     }
 
     // Re-aceptar términos: termsVersion no baja y termsAcceptedAt, si cambia, es request.time.
+    // F2-u1: ageBand no cambia nunca (el año se pregunta una sola vez, D-024).
     function validUserUpdate() {
       let d = request.resource.data;
       return validUser(d)
           && d.createdAt == resource.data.createdAt
+          && d.ageBand == resource.data.ageBand
           && d.termsVersion >= resource.data.termsVersion
           && (d.termsAcceptedAt == resource.data.termsAcceptedAt || d.termsAcceptedAt == request.time);
     }
 
     // ---- profiles/{uid} -------------------------------------------------------------------------------
 
+    // F2-u1: un @usuario __x__ sería un id reservado de Firestore (handles/__x__); HandleValidator igual.
     function validProfile(d) {
       return d.keys().hasOnly(['displayName', 'handle', 'avatarColor', 'createdAt', 'handleChangedAt'])
           && d.keys().hasAll(['displayName', 'handle', 'avatarColor', 'createdAt'])
           && validDisplayName(d.displayName)
           && d.handle is string && d.handle.matches('^[a-z0-9_.]{3,20}$')
+          && !d.handle.matches('^__.*__$')
           && validAvatarColor(d.avatarColor)
           && d.createdAt is timestamp;
     }
@@ -79,11 +87,13 @@ service cloud.firestore {
     }
 
     // D-022: el perfil se crea sin handleChangedAt, así el primer renombrado es libre.
+    // F2-u1: y nunca sin users/{uid} en el estado final del lote (ageBand y términos aceptados).
     function validProfileCreate() {
       let d = request.resource.data;
       return validProfile(d)
           && !('handleChangedAt' in d)
           && d.createdAt == request.time
+          && existsAfter(userPath(request.auth.uid))
           && ownsHandleAfter(d.handle);
     }
 

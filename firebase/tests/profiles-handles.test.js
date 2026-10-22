@@ -1,6 +1,7 @@
 // F1-u1: reglas de users/{uid}, profiles/{uid} y handles/{h} (03 §5 §6, D-019, D-022). Un caso por camino
 // de abuso: si alguien abre una regla, su test tiene que fallar (prueba de mutación de F1-u1). Los lotes
 // imitan lo que escribe ProfileRepository (F1-u3): crear, renombrar y liberar en un solo WriteBatch.
+// F2-u1: ageBand inmutable, perfil solo con users/ en el estado final del lote y @usuario __x__ rechazado.
 const fs = require("fs");
 const path = require("path");
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require("@firebase/rules-unit-testing");
@@ -170,6 +171,47 @@ describe("reglas F1: users/, profiles/ y handles/", () => {
     await assertFails(updateDoc(doc(db, "users", "alice"), { termsVersion: 1 }));
     await assertFails(updateDoc(doc(db, "users", "alice"), { createdAt: serverTimestamp() }));
     await assertFails(updateDoc(doc(db, "users", "alice"), { fcmTokens: ["x"] }));
+  });
+
+  it("users/: ageBand no se puede cambiar después del alta (F2-u1, D-024)", async () => {
+    await seedAlice();
+    const db = as("alice");
+    await assertFails(updateDoc(doc(db, "users", "alice"), { ageBand: "14-17" }));
+    await assertFails(updateDoc(doc(db, "users", "alice"), { ageBand: "14-17", termsVersion: 2, termsAcceptedAt: serverTimestamp() }));
+    // Control: la misma actualización sin tocar ageBand pasa.
+    await assertSucceeds(updateDoc(doc(db, "users", "alice"), { ageBand: "18+", termsVersion: 2, termsAcceptedAt: serverTimestamp() }));
+  });
+
+  it("profiles/: el perfil no se crea sin users/ en el estado final del lote (F2-u1)", async () => {
+    const db = as("alice");
+    const b = writeBatch(db);
+    b.set(doc(db, "profiles", "alice"), profileDoc("alice"));
+    b.set(doc(db, "handles", "alice"), card("alice"));
+    await assertFails(b.commit());
+    // Con users/ creado antes (otro lote) sí: lo que cuenta es el estado final.
+    await assertSucceeds(setDoc(doc(db, "users", "alice"), userDoc()));
+    const b2 = writeBatch(db);
+    b2.set(doc(db, "profiles", "alice"), profileDoc("alice"));
+    b2.set(doc(db, "handles", "alice"), card("alice"));
+    await assertSucceeds(b2.commit());
+  });
+
+  it("profiles/: un @usuario __ab__ (id reservado de Firestore) se rechaza (F2-u1)", async () => {
+    // El emulador rechaza handles/__ab__ como id reservado (INVALID_ARGUMENT) ANTES de evaluar las reglas,
+    // así que el lote falla con invalid-argument o permission-denied; validProfile lo repite por si acaso.
+    const db = as("alice");
+    let error = null;
+    try {
+      await createBatch(db, "alice", "__ab__").commit();
+    } catch (e) {
+      error = e;
+    }
+    if (!error || !["permission-denied", "invalid-argument"].includes(error.code)) {
+      throw new Error("expected the __ab__ batch to be rejected, got " + (error ? error.code : "success"));
+    }
+    if ((await getDoc(doc(db, "users", "alice"))).exists()) throw new Error("partial batch written");
+    // Control: guiones bajos que no envuelven todo el @usuario, sí.
+    await assertSucceeds(createBatch(db, "alice", "__ab").commit());
   });
 
   it("profiles/: se rechaza un campo de más", async () => {

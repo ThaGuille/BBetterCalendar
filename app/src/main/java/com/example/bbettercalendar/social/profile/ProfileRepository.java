@@ -7,20 +7,25 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.social.account.AgeGate;
+import com.example.bbettercalendar.social.common.FirestoreDocumentSource;
+import com.example.bbettercalendar.social.common.ListenerException;
+import com.example.bbettercalendar.social.common.ListenerSource;
+import com.example.bbettercalendar.social.common.MainLooperScheduler;
+import com.example.bbettercalendar.social.common.ProcessForeground;
+import com.example.bbettercalendar.social.common.Scheduler;
+import com.example.bbettercalendar.social.common.SerialExecutor;
+import com.example.bbettercalendar.social.common.WatchedListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.Date;
-import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -32,9 +37,13 @@ import javax.inject.Singleton;
  * <p>Contrato con {@code firebase/firestore.rules} (F1-u1): crear, renombrar y liberar van en un solo
  * {@link WriteBatch} y las reglas leen el estado final; los mapas salen de {@link ProfileWrites}.
  *
- * <p>Regla #3: el listener de Firestore y los de cada tarea corren en el {@code @IoExecutor}; el estado se
- * publica con {@code postValue}. Los {@link Callback} llegan en ese hilo de E/S: quien los reciba debe
- * usar {@code postValue}.
+ * <p>Regla #3: el listener de Firestore y los de cada tarea corren en un {@link SerialExecutor} propio
+ * encima del {@code @IoExecutor} (F2-u1: uno por repositorio); el estado se publica con {@code postValue}.
+ * Los {@link Callback} llegan en ese hilo de E/S: quien los reciba debe usar {@code postValue}.
+ *
+ * <p>F2-u1: el perfil propio se escucha con un {@link WatchedListener} (generación + reenganche), así
+ * que un evento de una sesión anterior nunca pisa el {@code SIGNED_OUT} ni deja un {@code LOADING}
+ * colgado, y tras un error el listener vuelve solo (espera creciente, o al volver a primer plano).
  */
 @Singleton
 public class ProfileRepository {
@@ -79,23 +88,29 @@ public class ProfileRepository {
 
     private final FirebaseAuth auth;
     private final FirebaseFirestore db;
-    private final ExecutorService ioExecutor;
+    /** F2-u1: un solo {@link SerialExecutor} por repositorio para el listener y los callbacks. */
+    private final Executor ioExecutor;
     private final MutableLiveData<ProfileState> mine;
-
-    // Guardados por "this": el AuthStateListener (hilo principal) y el listener (E/S) los leen.
-    @Nullable
-    private String watchedUid;
-    @Nullable
-    private ListenerRegistration registration;
+    private final WatchedListener<String, DocumentSnapshot> watcher;
 
     @Inject
     public ProfileRepository(FirebaseAuth auth, FirebaseFirestore db,
                              @IoExecutor ExecutorService ioExecutor) {
+        this(auth, db, new SerialExecutor(ioExecutor), new MainLooperScheduler(),
+                new FirestoreDocumentSource(uid -> db.collection(ProfileWrites.PROFILES).document(uid)));
+        // Tras un error no reintentable, el listener vuelve a engancharse al volver a primer plano.
+        ProcessForeground.observe(watcher::onForeground);
+    }
+
+    /** Para tests: el listener del perfil llega por la interfaz propia {@link ListenerSource}. */
+    ProfileRepository(@NonNull FirebaseAuth auth, @NonNull FirebaseFirestore db, @NonNull Executor serial,
+                      @NonNull Scheduler scheduler, @NonNull ListenerSource<String, DocumentSnapshot> source) {
         this.auth = auth;
         this.db = db;
-        this.ioExecutor = ioExecutor;
+        this.ioExecutor = serial;
         this.mine = new MutableLiveData<>(auth.getCurrentUser() == null
                 ? ProfileState.signedOut() : ProfileState.loading());
+        this.watcher = new WatchedListener<>(serial, scheduler, source, new ProfileSink());
         // Se dispara al registrarse y en cada cambio de sesión: desengancha y vuelve a enganchar.
         auth.addAuthStateListener(a -> watch(a.getCurrentUser()));
     }
@@ -107,45 +122,43 @@ public class ProfileRepository {
         return mine;
     }
 
-    private synchronized void watch(@Nullable FirebaseUser user) {
-        String uid = user == null ? null : user.getUid();
-        if (Objects.equals(uid, watchedUid)) {
-            return;
+    private void watch(@Nullable FirebaseUser user) {
+        if (user == null) {
+            watcher.detach();
+        } else {
+            watcher.attach(user.getUid()); // misma sesión ya enganchada: no hace nada
         }
-        if (registration != null) {
-            registration.remove();
-            registration = null;
-        }
-        watchedUid = uid;
-        if (uid == null) {
-            mine.postValue(ProfileState.signedOut());
-            return;
-        }
-        mine.postValue(ProfileState.loading());
-        // INCLUDE: sin él no llega el «sigue sin existir» del servidor tras un «no existe» de la caché.
-        registration = profileRef(uid).addSnapshotListener(ioExecutor, MetadataChanges.INCLUDE,
-                (snap, error) -> onSnapshot(uid, snap, error));
     }
 
-    private void onSnapshot(@NonNull String uid, @Nullable DocumentSnapshot snap,
-                            @Nullable FirebaseFirestoreException error) {
-        synchronized (this) {
-            if (!uid.equals(watchedUid)) {
-                return; // listener de una sesión anterior
-            }
-        }
-        if (error != null) {
-            mine.postValue(ProfileState.error(error));
-        } else if (snap == null) {
+    /** Traduce los estados del {@link WatchedListener} a {@link ProfileState}; corre en el serial. */
+    private final class ProfileSink implements WatchedListener.Sink<DocumentSnapshot> {
+
+        @Override
+        public void onLoading() {
             mine.postValue(ProfileState.loading());
-        } else if (snap.exists()) {
-            Profile p = toProfile(uid, snap);
-            mine.postValue(p == null ? ProfileState.error(new IllegalStateException("malformed profile"))
-                    : ProfileState.ready(p));
-        } else if (snap.getMetadata().isFromCache()) {
-            mine.postValue(ProfileState.loading()); // la caché no sabe; esperamos al servidor
-        } else {
-            mine.postValue(ProfileState.none());
+        }
+
+        @Override
+        public void onDetached() {
+            mine.postValue(ProfileState.signedOut());
+        }
+
+        @Override
+        public void onError(@NonNull ListenerException error) {
+            mine.postValue(ProfileState.error(error.original()));
+        }
+
+        @Override
+        public void onValue(@NonNull DocumentSnapshot snap) {
+            if (snap.exists()) {
+                Profile p = toProfile(snap.getId(), snap);
+                mine.postValue(p == null ? ProfileState.error(new IllegalStateException("malformed profile"))
+                        : ProfileState.ready(p));
+            } else if (snap.getMetadata().isFromCache()) {
+                mine.postValue(ProfileState.loading()); // la caché no sabe; esperamos al servidor
+            } else {
+                mine.postValue(ProfileState.none());
+            }
         }
     }
 

@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
  *
  * <ul>
  *   <li>{@code @usuario}: se recorta, se quita una {@code @} inicial y se pasa a minúsculas; luego
- *       {@code ^[a-z0-9_.]{3,20}$} (lo mismo que exige {@code firestore.rules}), sin reservados y sin
- *       palabras de {@link BannedWords} dentro.</li>
+ *       {@code ^[a-z0-9_.]{3,20}$} (lo mismo que exige {@code firestore.rules}), sin reservados (también
+ *       los ids {@code __.*__} de Firestore, F2-u1) y sin palabras de {@link BannedWords} dentro.</li>
  *   <li>Nombre visible: se recorta; 1–30 caracteres (unidades UTF-16 de Java, que nunca son menos que
  *       los caracteres que cuenta {@code size()} en las reglas) y sin palabras prohibidas.</li>
  * </ul>
- * Las reglas de Firestore repiten el formato y las longitudes; los reservados y las palabras prohibidas
- * solo viven aquí (moderación de verdad en L.4).
+ * Las reglas de Firestore repiten el formato, las longitudes y los ids {@code __.*__}; el resto de
+ * reservados y las palabras prohibidas solo viven aquí (moderación de verdad en L.4).
  */
 public final class HandleValidator {
 
@@ -33,6 +33,12 @@ public final class HandleValidator {
     private static final Pattern HANDLE_CHARS = Pattern.compile("^[a-z0-9_.]+$");
     /** El formato completo de 02 §3, igual que en firestore.rules. */
     static final Pattern HANDLE_FORMAT = Pattern.compile("^[a-z0-9_.]{3,20}$");
+
+    /**
+     * F2-u1: ids reservados de Firestore ({@code __.*__}): {@code handles/__x__} no se puede crear. Las
+     * reglas repiten la comprobación en {@code validProfile}.
+     */
+    static final Pattern FIRESTORE_RESERVED_ID = Pattern.compile("^__.*__$");
 
     /** Marca de la app: ningún {@code @usuario} puede contenerla (suplantación). */
     private static final String BRAND = "bbetter";
@@ -85,7 +91,7 @@ public final class HandleValidator {
         if (h.length() > HANDLE_MAX) {
             return HandleResult.TOO_LONG;
         }
-        if (RESERVED.contains(h) || h.contains(BRAND)) {
+        if (RESERVED.contains(h) || h.contains(BRAND) || FIRESTORE_RESERVED_ID.matcher(h).matches()) {
             return HandleResult.RESERVED;
         }
         if (BannedWords.containsBanned(h)) {

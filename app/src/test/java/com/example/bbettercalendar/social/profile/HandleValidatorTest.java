@@ -87,6 +87,19 @@ public class HandleValidatorTest {
     }
 
     @Test
+    public void firestoreReservedIdsAreRejected() {
+        // F2-u1: handles/__x__ no se puede crear en Firestore (ids reservados ^__.*__$).
+        assertEquals(HandleResult.RESERVED, HandleValidator.checkHandle("__x__"));
+        assertEquals(HandleResult.RESERVED, HandleValidator.checkHandle("__ab__"));
+        assertEquals(HandleResult.RESERVED, HandleValidator.checkHandle("@__Name__"));
+        // Solo con dos guiones bajos a cada lado.
+        assertEquals(HandleResult.OK, HandleValidator.checkHandle("_ab_"));
+        assertEquals(HandleResult.OK, HandleValidator.checkHandle("__ab"));
+        assertEquals(HandleResult.OK, HandleValidator.checkHandle("ab__"));
+        assertEquals(HandleResult.OK, HandleValidator.checkHandle("a__b"));
+    }
+
+    @Test
     public void handleContainingTheBrandIsReserved() {
         assertEquals(HandleResult.RESERVED, HandleValidator.checkHandle("bbetter_team"));
         assertEquals(HandleResult.RESERVED, HandleValidator.checkHandle("the.bbetter.app"));
@@ -155,6 +168,9 @@ public class HandleValidatorTest {
     public void bannedListIsBasicButNotTrivial() {
         assertTrue(BannedWords.WORDS.size() >= 30);
         for (String w : BannedWords.WORDS) {
+            assertEquals(w, BannedWords.fold(w), w);
+        }
+        for (String w : BannedWords.EXCEPTIONS) {
             assertEquals(w, BannedWords.fold(w), w);
         }
     }

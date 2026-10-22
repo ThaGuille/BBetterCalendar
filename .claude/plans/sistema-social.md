@@ -162,8 +162,8 @@ Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo si
 - **2026-10-22 (18)** · F2-u1 hecha: `social/common/` (`SerialExecutor`, `WatchedListener` con `Backoff` y `Scheduler`)
   y `ProfileRepository` sin `LOADING` colgado ni `READY` tras `SIGNED_OUT`; `@usuario` `__x__` reservado; `BannedWords` con
   `retarded` y excepciones (`therapist`); reglas con `ageBand` inmutable y perfil solo con `users/`; Mockito 4.11.0 en los
-  tests. Humo en `api36` en verde. El mutante del `__x__` en las reglas sobrevive (el emulador rechaza el id antes de las
-  reglas; ver la nota de u1). Commit «F2-u1: SerialExecutor, WatchedListener con Backoff, @usuario reservados, BannedWords y
+  tests. Humo en `api36` en verde. El mutante del `__x__` en las reglas no se puede matar (el emulador rechaza el id antes
+  de las reglas) y el replan lo quitó: 2/2 mutantes muertos; ver la nota de u1. Commit «F2-u1: SerialExecutor, WatchedListener con Backoff, @usuario reservados, BannedWords y
   reglas». **Siguiente:** u2 (host del emulador) y, tras u1, u3 (reglas de F2).
 - **2026-10-20 (17)** · **F2 abierta:** plan [`social-f2-amigos.md`](social-f2-amigos.md) (9 unidades en 5 olas). Q-03
   cerrada (D-015 aceptada). Decisiones del usuario: D-025 (F2 solo en el emulador; App Links en el AVD), D-026 (móvil

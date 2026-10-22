@@ -85,7 +85,12 @@ public class WatchedListenerTest {
 
     /** Como Firestore: el evento se entrega por el ejecutor que recibió {@code listen} (el serial). */
     private void fire(ListenerSource.Events<String> e, String value, ListenerException error) {
-        serial.execute(() -> e.onEvent(value, error));
+        serial.execute(() -> e.onEvent(value, false, error));
+    }
+
+    /** Un valor de la caché local (fromCache): lo primero que entrega Firestore al reenganchar. */
+    private void fireCached(ListenerSource.Events<String> e, String value) {
+        serial.execute(() -> e.onEvent(value, true, null));
     }
 
     private static ListenerException err(String code) {
@@ -205,6 +210,79 @@ public class WatchedListenerTest {
         assertEquals(afterRetries + 1, listenCount());
         // Los reintentos no vuelven a publicar LOADING (se queda el ERROR hasta el primer evento bueno).
         verify(sink, times(1)).onLoading();
+    }
+
+    /**
+     * Regresión (verify u1, Medium): al reenganchar, Firestore entrega primero el documento de la caché y
+     * luego el error del servidor. El valor de la caché se publica, pero no reinicia la espera: 1, 2, 4 s.
+     */
+    @Test
+    public void cachedValueBeforeRetryableErrorDoesNotResetBackoff() {
+        watcher.attach("alice");
+        io.drain();
+        fireCached(events(0), "alice-cache");
+        fire(events(0), null, err("UNAVAILABLE"));
+        io.drain();
+        assertEquals(1_000L, clock.pending().get(0).delay);
+        for (int i = 1; i <= 2; i++) {
+            clock.advance(Backoff.delayFor(i - 1));
+            io.drain();
+            ListenerSource.Events<String> e = events(listenCount() - 1);
+            fireCached(e, "alice-cache");
+            fire(e, null, err("UNAVAILABLE"));
+            io.drain();
+            assertEquals(Backoff.delayFor(i), clock.pending().get(0).delay);
+        }
+        // El valor de la caché sí se publica cada vez (se ve el perfil sin conexión).
+        verify(sink, times(3)).onValue("alice-cache");
+    }
+
+    /**
+     * Misma familia: con un valor de la caché antes de cada error, el tope de 6 intentos se alcanza y se
+     * espera a primer plano; y un valor del servidor (no de la caché) sí reinicia la espera.
+     */
+    @Test
+    public void cachedValuesStillReachTheAttemptCapAndServerValueResets() {
+        watcher.attach("alice");
+        io.drain();
+        for (int i = 0; i < Backoff.MAX_ATTEMPTS; i++) {
+            ListenerSource.Events<String> e = events(listenCount() - 1);
+            fireCached(e, "alice-cache");
+            fire(e, null, err("RESOURCE_EXHAUSTED"));
+            io.drain();
+            assertEquals(Backoff.delayFor(i), clock.pending().get(0).delay);
+            clock.advance(Backoff.delayFor(i));
+            io.drain();
+        }
+        int afterRetries = listenCount();
+        assertEquals(1 + Backoff.MAX_ATTEMPTS, afterRetries);
+        ListenerSource.Events<String> last = events(afterRetries - 1);
+        fireCached(last, "alice-cache");
+        fire(last, null, err("UNAVAILABLE"));
+        io.drain();
+        assertTrue(clock.pending().isEmpty());
+        clock.advance(10 * 60_000L);
+        io.drain();
+        assertEquals(afterRetries, listenCount());
+
+        // Primer plano: reengancha con la espera a cero; la caché no la reinicia (1 s, 2 s), el servidor sí.
+        watcher.onForeground();
+        io.drain();
+        for (int i = 0; i < 2; i++) {
+            ListenerSource.Events<String> e = events(listenCount() - 1);
+            fireCached(e, "alice-cache");
+            fire(e, null, err("UNAVAILABLE"));
+            io.drain();
+            assertEquals(Backoff.delayFor(i), clock.pending().get(0).delay);
+            clock.advance(Backoff.delayFor(i));
+            io.drain();
+        }
+        ListenerSource.Events<String> fresh = events(listenCount() - 1);
+        fire(fresh, "alice-server", null);
+        fire(fresh, null, err("UNAVAILABLE"));
+        io.drain();
+        verify(sink).onValue("alice-server");
+        assertEquals(1_000L, clock.pending().get(0).delay);
     }
 
     @Test

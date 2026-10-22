@@ -94,7 +94,7 @@ Modelo: opus para u1, u3, u4, u5 y u6 (reglas, Functions y capa de datos); sonne
   - **Generación:** `attach` y `detach` suben un contador en el hilo que llama. Cada evento y cada cambio de estado (también el `SIGNED_OUT` y el `LOADING` de `watch()`) pasa por el mismo `SerialExecutor` y se descarta si su generación ya no es la actual.
   - Con eso desaparecen los dos fallos de F1: el `LOADING` colgado por eventos desordenados y el `READY` publicado después de `SIGNED_OUT`.
   - **Error no terminal:**
-    - Con un código reintentable (`UNAVAILABLE`, `INTERNAL`, `UNKNOWN`, `RESOURCE_EXHAUSTED`), se publica `ERROR` y se reengancha con `Backoff`: 1, 2, 4… hasta 60 s, como mucho 6 intentos, y se reinicia con el primer evento bueno.
+    - Con un código reintentable (`UNAVAILABLE`, `INTERNAL`, `UNKNOWN`, `RESOURCE_EXHAUSTED`), se publica `ERROR` y se reengancha con `Backoff`: 1, 2, 4… hasta 60 s, como mucho 6 intentos, y se reinicia con el primer evento bueno del servidor (no con uno de la caché).
     - Con uno no reintentable (`PERMISSION_DENIED`, `FAILED_PRECONDITION`), se espera a un cambio de sesión o a que la app vuelva a primer plano (`ProcessLifecycleOwner` `ON_START`; `lifecycle-process` ya está en las dependencias).
     - En la práctica, el SDK de Firestore reintenta solo los cortes de red, así que lo habitual es lo segundo.
   - `Backoff` es puro y el programador de reintentos va detrás de una interfaz (`Scheduler`) para probarlo con un reloj falso.
@@ -339,6 +339,7 @@ Modelo: opus para u1, u3, u4, u5 y u6 (reglas, Functions y capa de datos); sonne
 
 - Nuevo `social/common/`: `SerialExecutor`, `WatchedListener` (generación + reenganche), `Backoff`, `Scheduler` (+ `MainLooperScheduler`), `ListenerSource`/`ListenerException` (interfaz propia; `FirestoreDocumentSource` es el único que toca Firestore) y `ProcessForeground` (`ON_START`).
 - `ProfileRepository` usa un `SerialExecutor` propio para el listener y todos los callbacks; API pública igual. Los reintentos no vuelven a publicar `LOADING`: se queda `ERROR` hasta el primer evento bueno.
+- Revisión (Medium): solo un valor del servidor reinicia el `Backoff`. `ListenerSource.Events.onEvent` lleva `fromCache`; antes, el documento de la caché que Firestore entrega al reenganchar (`MetadataChanges.INCLUDE`) lo reiniciaba y un error reintentable persistente volvía a 1 s sin llegar nunca al tope de 6. Dos tests de regresión en `WatchedListenerTest`.
 - Códigos fuera de las dos listas del plan (p. ej. `UNAUTHENTICATED`) se tratan como no reintentables; agotados los 6 intentos, también se espera a sesión o primer plano.
 - `HandleValidator` rechaza `^__.*__$` como `RESERVED`; `BannedWords`: `retarded` y `EXCEPTIONS` (cambiadas por un espacio antes de buscar).
 - Reglas: `ageBand` inmutable, `existsAfter(userPath(...))` al crear el perfil y `!d.handle.matches('^__.*__$')`. Tests nuevos en `profiles-handles.test.js` (39 en verde con firestore,database).

@@ -36,6 +36,7 @@ public final class FirestoreDocumentSource implements ListenerSource<String, Doc
         ListenerRegistration registration = refFor.ref(key).addSnapshotListener(executor,
                 MetadataChanges.INCLUDE,
                 (snap, error) -> events.onEvent(snap,
+                        snap != null && snap.getMetadata().isFromCache(),
                         error == null ? null : new ListenerException(error.getCode().name(), error)));
         return registration::remove;
     }

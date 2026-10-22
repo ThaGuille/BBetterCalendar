@@ -16,8 +16,12 @@ import java.util.concurrent.Executor;
 public interface ListenerSource<K, T> {
 
     interface Events<T> {
-        /** Un valor nuevo ({@code error == null}) o el error que termina este listener. */
-        void onEvent(@Nullable T value, @Nullable ListenerException error);
+        /**
+         * Un valor nuevo ({@code error == null}) o el error que termina este listener. {@code fromCache}
+         * es true si el valor sale de la caché local y no del servidor (Firestore entrega primero el de
+         * la caché al reenganchar): no prueba que la conexión funcione.
+         */
+        void onEvent(@Nullable T value, boolean fromCache, @Nullable ListenerException error);
     }
 
     /** Quita el listener; puede llamarse más de una vez. */

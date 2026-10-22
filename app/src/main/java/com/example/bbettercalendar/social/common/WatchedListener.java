@@ -20,8 +20,8 @@ import java.util.concurrent.Executor;
  *       {@code onDetached} de {@code detach}) pasa por el mismo {@link SerialExecutor} y se descarta si su
  *       generación ya no es la actual.</li>
  *   <li><b>Error reintentable</b> ({@link #RETRYABLE}): publica el error y se reengancha con
- *       {@link Backoff} (1, 2, 4… s hasta 60 s, como mucho 6 intentos; el primer evento bueno lo
- *       reinicia). Agotados los intentos, espera como en el caso siguiente.</li>
+ *       {@link Backoff} (1, 2, 4… s hasta 60 s, como mucho 6 intentos; el primer evento bueno del
+ *       servidor lo reinicia, no uno de la caché). Agotados los intentos, espera como en el caso siguiente.</li>
  *   <li><b>Error no reintentable</b> ({@code PERMISSION_DENIED}, {@code FAILED_PRECONDITION} y cualquier
  *       otro código): publica el error y espera a un cambio de sesión ({@link #attach} con otra clave, o
  *       {@code detach} + {@code attach}) o a que la app vuelva a primer plano ({@link #onForeground()},
@@ -160,11 +160,11 @@ public final class WatchedListener<K, T> {
     }
 
     private void registerLocked(@NonNull K k, long gen) {
-        registration = source.listen(k, serial, (value, error) -> deliver(gen, value, error));
+        registration = source.listen(k, serial, (value, fromCache, error) -> deliver(gen, value, fromCache, error));
     }
 
     /** En el {@link SerialExecutor}. */
-    private void deliver(long gen, @Nullable T value, @Nullable ListenerException error) {
+    private void deliver(long gen, @Nullable T value, boolean fromCache, @Nullable ListenerException error) {
         synchronized (this) {
             if (gen != generation) {
                 return; // de una generación anterior: otra clave, otra sesión o un reintento posterior
@@ -173,7 +173,11 @@ public final class WatchedListener<K, T> {
                 if (value == null) {
                     return;
                 }
-                backoff.reset();
+                // Solo un valor del servidor prueba que la conexión va: el de la caché llega antes del
+                // error al reenganchar, y si reiniciara la espera los reintentos irían a 1 s para siempre.
+                if (!fromCache) {
+                    backoff.reset();
+                }
             } else {
                 onErrorLocked(gen, error);
             }

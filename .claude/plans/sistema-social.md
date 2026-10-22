@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-22 (F2-u4 hecha)
+**Last updated:** 2026-10-22 (F2-u5 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -19,8 +19,9 @@
   en 5 olas). F0 y F1 hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md));
   el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
 - **Siguiente paso:** olas 1 y 2 de F2 hechas: u1 (endurecer F1), u2 (host del emulador configurable, D-026) y u3 (reglas
-  de F2); de la ola 3, u4 (Functions `onFriendRequestAccepted` y `removeFriend`, `actor.js`) hecha. Quedan u5 (datos de
-  amigos) y u6 (invitaciones); después u7 (UI Amigos, que ya puede usar `actor.js` como segunda identidad).
+  de F2); de la ola 3, u4 (Functions `onFriendRequestAccepted` y `removeFriend`, `actor.js`) y u5 (datos de amigos y
+  reportes: `social/friends/`) hechas. Queda u6 (invitaciones); después u7 (UI Amigos sobre `FriendsRepository` y
+  `ReportRepository`, con `actor.js` como segunda identidad).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -161,6 +162,13 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-22 (22)** · F2-u5 hecha: `social/friends/` con `FriendsRepository` (amigos con un listener de perfil por amigo;
+  `PERMISSION_DENIED` o perfil ausente → oculto y `removeFriend`; recibidas, enviadas y `pendingIncomingCount()`;
+  `lookupHandle`, `send` en un lote con el contador de `RequestQuota`, `accept`, `decline`, `cancel`, `remove`) y
+  `ReportRepository` (reporte + rechazo en un lote; `PERMISSION_DENIED` = ya reportado). Firebase solo por la interfaz
+  propia `FriendsBackend` (+ `ListenerSource`); JUnit de mapas, cuota y mapeo, y Mockito para los dos repositorios.
+  Commit «F2-u5: datos de amigos y reportes (FriendsRepository, FriendRequestWrites, RequestQuota y ReportRepository)».
+  **Siguiente:** u6 (invitaciones) y después u7 (UI Amigos).
 - **2026-10-22 (21)** · F2-u4 hecha: `functions/src/friends.ts` con `onFriendRequestAccepted` (transacción: relee la
   solicitud, `failed`/`gone` sin `users/`, `failed`/`cap` con 50 amigos, si no los dos lados y borra; después el espejo RTDB; `retry: true`)
   y la callable `removeFriend` (idempotente, limpia amistades fantasma); `deleteAccount` borra también `invites/` y deja

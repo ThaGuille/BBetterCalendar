@@ -86,8 +86,11 @@ export async function applyAcceptedRequest(requestId: string): Promise<{ outcome
   });
 }
 
+// retry: true — si la transacción lanza (error transitorio), la solicitud se queda en 'accepted' y las reglas no
+// dejan salir de ahí al cliente (ni borrar, ni volver a aceptar, ni reenviar al par): solo un reintento la saca.
+// Reintentar es seguro porque la transacción relee la solicitud. El fallo del espejo RTDB no lanza (se registra).
 export const onFriendRequestAccepted = onDocumentUpdated(
-  { document: "friendRequests/{id}", region: "europe-west1" },
+  { document: "friendRequests/{id}", region: "europe-west1", retry: true },
   async (event) => {
     const before = event.data?.before;
     const after = event.data?.after;

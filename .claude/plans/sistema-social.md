@@ -162,10 +162,10 @@ en el diario.
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
 - **2026-10-22 (21)** · F2-u4 hecha: `functions/src/friends.ts` con `onFriendRequestAccepted` (transacción: relee la
-  solicitud, `failed`/`gone` sin `users/`, `failed`/`cap` con 50 amigos, si no los dos lados y borra; después el espejo RTDB)
+  solicitud, `failed`/`gone` sin `users/`, `failed`/`cap` con 50 amigos, si no los dos lados y borra; después el espejo RTDB; `retry: true`)
   y la callable `removeFriend` (idempotente, limpia amistades fantasma); `deleteAccount` borra también `invites/` y deja
-  `reports/`. Tests `friends-functions.test.js` (9) y el caso de borrado con invitación y amistad del trigger; suite completa
-  con los cuatro emuladores: 88 en verde. `firebase/tests/tools/actor.js` (segunda identidad, solo `127.0.0.1`). F2.9 marcado.
+  `reports/`. Tests `friends-functions.test.js` (9, más 2 que comprueban `retry: true` en el endpoint) y el caso de borrado con invitación y amistad del trigger; suite completa
+  con los cuatro emuladores: 90 en verde. `firebase/tests/tools/actor.js` (segunda identidad, solo `127.0.0.1`). F2.9 marcado.
   Commit «F2-u4: Functions onFriendRequestAccepted y removeFriend, deleteAccount borra invites/, tests de integración y actor.js».
   **Siguiente:** u5 y u6 (ola 3); después u7.
 - **2026-10-22 (20)** · F2-u3 hecha: reglas de F2 en `firestore.rules` (`friendRequests/{from_to}` con tarjetas de `handles/`,

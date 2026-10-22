@@ -361,3 +361,37 @@ describe("F2-u4: Functions de amistad (auth, firestore, database, functions)", f
     });
   });
 });
+
+// Reintentos: si la transacción de onFriendRequestAccepted lanza (error transitorio de Firestore), la solicitud se
+// queda en 'accepted' y las reglas no dejan salir de ahí (ni borrar, ni volver a aceptar, ni reenviar al par). Solo
+// un reintento del trigger la saca; el handler ya es idempotente (relee la solicitud). El emulador de Functions no
+// reintenta, así que se comprueba la declaración que lee el despliegue: el endpoint compilado en functions/lib (lo
+// construye `npm --prefix functions run build` antes de la suite). No hace falta ningún emulador.
+describe("F2-u4: onFriendRequestAccepted y los demás triggers declaran retry (sin emuladores)", () => {
+  const fnLib = path.join(__dirname, "..", "functions", "lib", "index.js");
+  let fns;
+
+  before(() => {
+    assert.ok(fs.existsSync(fnLib), `falta ${fnLib}: construye las Functions (npm --prefix functions run build)`);
+    fns = require(fnLib);
+  });
+
+  it("onFriendRequestAccepted se despliega con retry: true (un fallo de la transacción se reintenta)", () => {
+    const trigger = fns.onFriendRequestAccepted.__endpoint.eventTrigger;
+    assert.ok(trigger, "onFriendRequestAccepted no es un trigger de eventos");
+    assert.strictEqual(trigger.retry, true, "sin retry, una solicitud en 'accepted' se queda así para siempre");
+  });
+
+  it("todo trigger de eventos exportado (no solo el de aceptar) declara retry: true; las callables no tienen", () => {
+    const names = Object.keys(fns).filter((n) => fns[n] && fns[n].__endpoint);
+    assert.ok(names.includes("removeFriend") && names.includes("deleteAccount"), names.join(","));
+    const events = names.filter((n) => fns[n].__endpoint.eventTrigger);
+    assert.ok(events.includes("onFriendRequestAccepted"), events.join(","));
+    for (const n of events) {
+      assert.strictEqual(fns[n].__endpoint.eventTrigger.retry, true, `${n} sin retry: true`);
+    }
+    for (const n of names.filter((x) => !events.includes(x))) {
+      assert.ok(fns[n].__endpoint.callableTrigger, `${n} no es callable ni trigger de eventos`);
+    }
+  });
+});

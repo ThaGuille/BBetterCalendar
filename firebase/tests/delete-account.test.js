@@ -5,6 +5,9 @@
 // Cada caso crea un usuario real en el emulador de Auth (email y contraseña), crea su perfil con el mismo lote
 // que ProfileRepository (F1-u3) bajo las reglas de F1-u1 y siembra, con las reglas desactivadas, lo que en F2
 // escribirán las Functions y el cliente (amistades, solicitudes, bloqueos, stats, inbox, estado y espejo RTDB).
+// F2-u4: el caso de borrado añade una invitación creada con el lote de ensureMyCode() (invites/ + inviteCode, bajo
+// las reglas de F2-u3) y una amistad hecha de verdad por onFriendRequestAccepted (la cuenta acepta una solicitud);
+// los reports/ (de la cuenta y sobre ella) se conservan.
 const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
@@ -17,11 +20,26 @@ const {
   connectFirestoreEmulator,
   doc,
   writeBatch,
+  updateDoc,
   serverTimestamp,
   setLogLevel,
 } = require("firebase/firestore");
 
 setLogLevel("error");
+
+// Los triggers del emulador son asíncronos (onFriendRequestAccepted): esperar con tiempo límite.
+async function waitFor(pred, timeoutMs = 15000, everyMs = 200) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    if (await pred()) return;
+    if (Date.now() > deadline) throw new Error(`waitFor: no se cumplió en ${timeoutMs} ms`);
+    await new Promise((r) => setTimeout(r, everyMs));
+  }
+}
+
+// Código de invitación de la cuenta y el de otra persona (^[A-HJKMNP-Z2-9]{8}$).
+const INVITE = "ABCD2345";
+const OTHER_INVITE = "BOBB2345";
 
 const PROJECT = "demo-bbetter";
 const REGION = "europe-west1";
@@ -179,6 +197,16 @@ describe("deleteAccount (callable, europe-west1)", function () {
       await db.doc(`friendRequests/${uid}_carol`).set({ from: uid, to: "carol", createdAt: now, status: "pending" });
       await db.doc(`friendRequests/carol_${uid}`).set({ from: "carol", to: uid, createdAt: now, status: "pending" });
       await db.doc("friendRequests/carol_bob").set({ from: "carol", to: "bob", createdAt: now, status: "pending" });
+      // F2-u4: la invitación de bob y los reportes (hechos por la cuenta y sobre ella) se quedan.
+      await db.doc(`invites/${OTHER_INVITE}`).set({ uid: "bob", handle: "bob", createdAt: now });
+      await db.doc(`reports/${uid}_carol`).set({ reporter: uid, reported: "carol", reportedHandle: "carol", reason: "other", context: "friend", createdAt: now });
+      await db.doc(`reports/carol_${uid}`).set({ reporter: "carol", reported: uid, reportedHandle: "alice_1", reason: "offensive_name", context: "request", createdAt: now });
+      // erin le envía una solicitud que la cuenta aceptará (amistad hecha por el trigger).
+      await db.doc("users/erin").set({ createdAt: now, ageBand: "18+", termsVersion: 1, termsAcceptedAt: now });
+      await db.doc(`friendRequests/erin_${uid}`).set({
+        from: "erin", to: uid, status: "pending", createdAt: now,
+        fromHandle: "erin", fromName: "Erin", fromColor: 2, toHandle: "alice_1", toName: "Alice", toColor: 3,
+      });
       const rtdb = ctx.database();
       await rtdb.ref().update({
         [`status/${uid}`]: { state: "focus", since: 1, sessionStart: 1 },
@@ -210,9 +238,12 @@ describe("deleteAccount (callable, europe-west1)", function () {
         requestSent: await exists(`friendRequests/${uid}_carol`),
         requestReceived: await exists(`friendRequests/carol_${uid}`),
         bobSide: await exists(`users/bob/friends/${uid}`),
+        erinSide: await exists(`users/erin/friends/${uid}`),
+        invite: await exists(`invites/${INVITE}`),
         statusRtdb: await has(`status/${uid}`),
         friendsRtdb: await has(`friends/${uid}`),
         mirrorRtdb: await has(`friends/bob/${uid}`),
+        erinMirror: await has(`friends/erin/${uid}`),
         // De otros: tiene que seguir ahí.
         bobProfile: await exists("profiles/bob"),
         bobStats: await exists("stats/bob"),
@@ -220,6 +251,9 @@ describe("deleteAccount (callable, europe-west1)", function () {
         otherRequest: await exists("friendRequests/carol_bob"),
         bobStatus: await has("status/bob"),
         bobOtherMirror: await has("friends/bob/carol"),
+        otherInvite: await exists(`invites/${OTHER_INVITE}`),
+        reportBy: await exists(`reports/${uid}_carol`),
+        reportOn: await exists(`reports/carol_${uid}`),
       };
     });
     return out;
@@ -232,14 +266,48 @@ describe("deleteAccount (callable, europe-west1)", function () {
     otherRequest: true,
     bobStatus: true,
     bobOtherMirror: true,
+    otherInvite: true,
+    reportBy: true,
+    reportOn: true,
   };
+
+  // F2-u4: el lote de ensureMyCode() (F2-u6) bajo las reglas: invites/{código} + users/{uid}.inviteCode.
+  async function createInvite(c, uid, handle) {
+    const b = writeBatch(c.db);
+    b.set(doc(c.db, "invites", INVITE), { uid, handle, createdAt: serverTimestamp() });
+    b.update(doc(c.db, "users", uid), { inviteCode: INVITE });
+    await b.commit();
+  }
+
+  // F2-u4: la cuenta acepta la solicitud de erin (reglas) y onFriendRequestAccepted crea la amistad.
+  async function acceptErin(c, uid) {
+    await updateDoc(doc(c.db, "friendRequests", `erin_${uid}`), { status: "accepted" });
+    await waitFor(async () => {
+      let done = false;
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const db = ctx.firestore();
+        done =
+          !(await db.doc(`friendRequests/erin_${uid}`).get()).exists &&
+          (await db.doc(`users/${uid}/friends/erin`).get()).exists &&
+          (await db.doc(`users/erin/friends/${uid}`).get()).exists &&
+          (await ctx.database().ref(`friends/erin/${uid}`).get()).exists();
+      });
+      return done;
+    });
+  }
 
   it("con sesión reciente borra todos los datos de la cuenta y, al final, su usuario de Auth; el @usuario queda libre", async () => {
     const c = client();
     const uid = await signUp(c, "alice");
     await createProfile(c, uid, "alice_1");
     await seedSocialData(uid);
-    assert.strictEqual((await snapshot(uid)).handle, true);
+    await createInvite(c, uid, "alice_1");
+    await acceptErin(c, uid);
+    const seeded = await snapshot(uid);
+    assert.strictEqual(seeded.handle, true);
+    assert.strictEqual(seeded.invite, true);
+    assert.strictEqual(seeded.erinSide, true);
+    assert.strictEqual(seeded.erinMirror, true);
 
     const res = await c.deleteAccount({});
     assert.deepStrictEqual(res.data, { deleted: true });
@@ -255,9 +323,12 @@ describe("deleteAccount (callable, europe-west1)", function () {
       requestSent: false,
       requestReceived: false,
       bobSide: false,
+      erinSide: false,
+      invite: false,
       statusRtdb: false,
       friendsRtdb: false,
       mirrorRtdb: false,
+      erinMirror: false,
       ...OTHERS_KEPT,
     });
     assert.strictEqual(await authUserExists(uid), false, "el usuario de Auth sigue existiendo");

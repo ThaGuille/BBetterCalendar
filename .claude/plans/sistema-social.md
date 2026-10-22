@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-22 (F2-u3 hecha)
+**Last updated:** 2026-10-22 (F2-u4 hecha)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -19,7 +19,8 @@
   en 5 olas). F0 y F1 hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md));
   el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
 - **Siguiente paso:** olas 1 y 2 de F2 hechas: u1 (endurecer F1), u2 (host del emulador configurable, D-026) y u3 (reglas
-  de F2). Después, la ola 3: u4 (Functions y `actor.js`), u5 (datos de amigos) y u6 (invitaciones).
+  de F2); de la ola 3, u4 (Functions `onFriendRequestAccepted` y `removeFriend`, `actor.js`) hecha. Quedan u5 (datos de
+  amigos) y u6 (invitaciones); después u7 (UI Amigos, que ya puede usar `actor.js` como segunda identidad).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -87,7 +88,7 @@ en el diario.
   02 §4, 04 §2
 - [ ] **F2.7** Campana: bandeja de solicitudes — 02 §9
 - [ ] **F2.8** Límites: 50 amigos (D-015) y 20 solicitudes al día — 02 §4
-- [ ] **F2.9** Tests de reglas (`friendRequests`, `friends`, `profiles`, `reports`, `invites`, `handles`, RTDB `/friends`)
+- [x] **F2.9** Tests de reglas (`friendRequests`, `friends`, `profiles`, `reports`, `invites`, `handles`, RTDB `/friends`)
   y de Functions (`onFriendRequestAccepted`, `removeFriend`) en el emulador — 03 §6, §13
 - [ ] **F2.10** Endurecer F1 (listener en serie y con reenganche, `@usuario` reservados, falsos positivos, reglas de
   `ageBand` y de `users/`) y probar en un móvil físico por USB (D-026) — plan F2-u1, F2-u2
@@ -160,6 +161,13 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-22 (21)** · F2-u4 hecha: `functions/src/friends.ts` con `onFriendRequestAccepted` (transacción: relee la
+  solicitud, `failed`/`gone` sin `users/`, `failed`/`cap` con 50 amigos, si no los dos lados y borra; después el espejo RTDB)
+  y la callable `removeFriend` (idempotente, limpia amistades fantasma); `deleteAccount` borra también `invites/` y deja
+  `reports/`. Tests `friends-functions.test.js` (9) y el caso de borrado con invitación y amistad del trigger; suite completa
+  con los cuatro emuladores: 88 en verde. `firebase/tests/tools/actor.js` (segunda identidad, solo `127.0.0.1`). F2.9 marcado.
+  Commit «F2-u4: Functions onFriendRequestAccepted y removeFriend, deleteAccount borra invites/, tests de integración y actor.js».
+  **Siguiente:** u5 y u6 (ola 3); después u7.
 - **2026-10-22 (20)** · F2-u3 hecha: reglas de F2 en `firestore.rules` (`friendRequests/{from_to}` con tarjetas de `handles/`,
   contador diario `reqDay`/`reqCount`/`reqLastTo` en `users/` con `validRequestCounter`, `inviteCode`, `users/*/friends` de
   solo lectura, `profiles/` para amigos con `isFriend`, `reports/` solo crear, `invites/`) y RTDB `friends/$uid`; tests nuevos

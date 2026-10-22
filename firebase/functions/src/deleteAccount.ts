@@ -8,6 +8,7 @@
 //      - el lado opuesto de cada amistad: users/{amigo}/friends/{uid} y el espejo RTDB friends/{amigo}/{uid};
 //      - friendRequests con from == uid o to == uid;
 //      - el handles/ del perfil (solo si su tarjeta apunta a este uid) y cualquier otro handles/ con uid == uid;
+//      - F2-u4: los invites/{código} con uid == uid (el enlace de invitación deja de resolverse);
 //      - profiles/{uid}, stats/{uid} y blocks/{uid} (con su subcolección blocked);
 //      - recursiveDelete(users/{uid}): el documento con sus subcolecciones friends e inbox;
 //      - RTDB status/{uid} y friends/{uid}.
@@ -15,7 +16,8 @@
 //
 // En F1 solo existen users/, profiles/ y handles/; lo de F2 (amistades, solicitudes, bloqueos, stats,
 // RTDB) está cubierto aquí y el test lo siembra a mano. Fuera de alcance: los bloqueos que OTROS hicieron a
-// este uid (blocks/{otro}/blocked/{uid}) son datos de esos otros y se quedan.
+// este uid (blocks/{otro}/blocked/{uid}) son datos de esos otros y se quedan. Los reports/ (hechos por la
+// cuenta o sobre ella) también se quedan, como dice el borrador de borrado (docs/legal/delete-account-draft.md).
 import { onCall, HttpsError, CallableRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import { initializeApp, getApps } from "firebase-admin/app";
@@ -78,13 +80,14 @@ async function handleRefs(db: Firestore, uid: string): Promise<DocumentReference
 }
 
 /** Borra todos los datos de la cuenta en Firestore y RTDB. No toca Auth. */
-export async function deleteAccountData(uid: string): Promise<{ friends: number; requests: number; handles: number }> {
+export async function deleteAccountData(uid: string): Promise<{ friends: number; requests: number; handles: number; invites: number }> {
   const db = getFirestore();
   const friends = await friendIds(db, uid);
   const handles = await handleRefs(db, uid);
-  const [sent, received] = await Promise.all([
+  const [sent, received, invites] = await Promise.all([
     db.collection("friendRequests").where("from", "==", uid).get(),
     db.collection("friendRequests").where("to", "==", uid).get(),
+    db.collection("invites").where("uid", "==", uid).get(),
   ]);
   const requests = new Map<string, DocumentReference>();
   [...sent.docs, ...received.docs].forEach((d) => requests.set(d.ref.path, d.ref));
@@ -98,6 +101,7 @@ export async function deleteAccountData(uid: string): Promise<{ friends: number;
   friends.forEach((f) => ops.push(writer.delete(db.collection("users").doc(f).collection("friends").doc(uid))));
   requests.forEach((ref) => ops.push(writer.delete(ref)));
   handles.forEach((ref) => ops.push(writer.delete(ref)));
+  invites.docs.forEach((d) => ops.push(writer.delete(d.ref)));
   ops.push(writer.delete(db.collection("profiles").doc(uid)));
   ops.push(writer.delete(db.collection("stats").doc(uid)));
   const settled = Promise.allSettled(ops);
@@ -119,7 +123,7 @@ export async function deleteAccountData(uid: string): Promise<{ friends: number;
   });
   await getDatabase().ref().update(rtdb);
 
-  return { friends: friends.size, requests: requests.size, handles: handles.length };
+  return { friends: friends.size, requests: requests.size, handles: handles.length, invites: invites.size };
 }
 
 export const deleteAccount = onCall({ region: "europe-west1" }, async (request): Promise<DeleteAccountResult> => {

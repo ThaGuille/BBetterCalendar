@@ -29,8 +29,11 @@ import dagger.hilt.components.SingletonComponent;
 @InstallIn(SingletonComponent.class)
 public class FirebaseModule {
 
-    /** El emulador de Android ve el localhost del PC en esta dirección. */
-    static final String EMULATOR_HOST = "10.0.2.2";
+    /**
+     * Host del Emulator Suite (F2-u2, D-026): {@code 10.0.2.2} (AVD) por defecto, {@code 127.0.0.1} con
+     * {@code -PfirebaseEmulatorHost=127.0.0.1} + {@code firebase/scripts/adb-reverse.ps1} (móvil físico).
+     */
+    static final String EMULATOR_HOST = BuildConfig.FIREBASE_EMULATOR_HOST;
     static final int AUTH_PORT = 9099;
     static final int FIRESTORE_PORT = 8080;
     static final int DATABASE_PORT = 9000;

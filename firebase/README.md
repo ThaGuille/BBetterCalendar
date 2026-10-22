@@ -23,8 +23,14 @@ firebase emulators:exec --only firestore,database --project demo-bbetter "npm --
 npm --prefix functions run build; firebase emulators:exec --only auth,firestore,database,functions --project demo-bbetter "npm --prefix tests test"
 
 # Emuladores para la app de Android (debug): con el id REAL, porque singleProjectMode exige que coincida
-# con el de google-services.json. No tocan el proyecto real; la app llega por 10.0.2.2 (USE_FIREBASE_EMULATOR).
-firebase emulators:start --only firestore,database --project bbetter-dbcda   # UI en http://localhost:4000
+# con el de google-services.json. No tocan el proyecto real; el AVD llega por 10.0.2.2 (USE_FIREBASE_EMULATOR).
+# Todos los emuladores (auth, firestore, database, functions): la app usa los cuatro. Functions compiladas antes.
+npm --prefix functions run build; firebase emulators:start --project bbetter-dbcda   # UI en http://localhost:4000
+
+# Móvil físico por USB (D-026): host 127.0.0.1 + adb reverse. Solo 127.0.0.1, nunca la IP de la red local.
+.\gradlew.bat installDebug -PfirebaseEmulatorHost=127.0.0.1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\adb-reverse.ps1 [-Serial <serie>]   # -Remove los quita
+# Sin la propiedad el host es 10.0.2.2 (AVD); el release no lleva host ni emuladores.
 
 # Compilar las Functions
 npm --prefix functions run build

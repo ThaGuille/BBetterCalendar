@@ -81,8 +81,16 @@ stored year and the local name stay on the device. Not deployed (D-021); decided
 ## Emulator Suite workflow
 Commands live in [`firebase/README.md`](../../../firebase/README.md) (JDK 21 for the CLI).
 - **Tests** (project `demo-bbetter`): `firebase emulators:exec --only auth,firestore,database,functions --project demo-bbetter "npm --prefix tests test"` after `npm --prefix functions run build`. Files: `deny-all.test.js` (with a positive control), `profiles-handles.test.js`, `delete-account.test.js`. They read the rules from `BB_FIRESTORE_RULES` when set (used by the mutation check: open a rule and its test must fail).
-- **App in debug**: `firebase emulators:start --project bbetter-dbcda` (the real id, because `singleProjectMode` has to match `google-services.json`); the emulator AVD reaches it on `10.0.2.2`. The data is visible in the Emulator UI (`http://localhost:4000`).
+- **App in debug**: `firebase emulators:start --project bbetter-dbcda` (the real id, because `singleProjectMode` has to match `google-services.json`; all emulators, not `--only`); the emulator AVD reaches it on `10.0.2.2` (`BuildConfig.FIREBASE_EMULATOR_HOST`, default). The data is visible in the Emulator UI (`http://localhost:4000`).
 - Google sign-in against the Auth emulator works with a Google account on the AVD; the emulator does not verify the token.
+
+## Probar en un móvil físico
+D-026. The debug build reads the emulator host from `BuildConfig.FIREBASE_EMULATOR_HOST` (`-PfirebaseEmulatorHost=<host>`, default `10.0.2.2` for the AVD; release `""`). A phone cannot see `10.0.2.2`, so it goes through `adb reverse` and `127.0.0.1` (the debug `network_security_config.xml` allows cleartext to `10.0.2.2`, `127.0.0.1` and `localhost`; the release one is untouched).
+1. Start all the emulators (`firebase/README.md`) and connect the phone by USB with debugging on.
+2. `.\gradlew.bat installDebug -PfirebaseEmulatorHost=127.0.0.1`
+3. `powershell -NoProfile -ExecutionPolicy Bypass -File firebase\scripts\adb-reverse.ps1 [-Serial <serial>]` — reads the ports from `firebase/firebase.json` and runs `adb reverse tcp:P tcp:P` for each; `-Remove` undoes it. It exits non-zero naming the serial when the device is missing, and asks for `-Serial` when several are attached.
+- Only `127.0.0.1` through `adb reverse`: never the LAN IP of the PC (cleartext is not allowed to it). The same flow works on the AVD.
+- The `adb reverse` rules disappear when the device reboots or adb restarts; run the script again.
 
 ## Invariants
 - Disk and network off the main thread; `postValue` from callbacks; `getViewLifecycleOwner()` in fragments (rule #3).

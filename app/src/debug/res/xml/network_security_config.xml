@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Solo debug (F0-u4): el Emulator Suite de Firebase habla HTTP en claro. Se permite únicamente hacia
-     el PC visto desde el emulador de Android (10.0.2.2) y localhost; el resto del tráfico sigue en TLS. -->
+     el PC visto desde el emulador de Android (10.0.2.2), 127.0.0.1 (adb reverse, F2-u2) y localhost; el resto del tráfico sigue en TLS. -->
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
         <domain includeSubdomains="false">localhost</domain>
     </domain-config>
 </network-security-config>

@@ -55,11 +55,16 @@ android {
             buildConfigField "boolean", "FEATURE_SOCIAL", "true"
             buildConfigField "boolean", "USE_FIREBASE_EMULATOR",
                     (project.findProperty("firebaseEmulator") ?: "true").toString()
+            // F2-u2 (D-026): host del Emulator Suite. 10.0.2.2 = el AVD; 127.0.0.1 + firebase/scripts/adb-reverse.ps1
+            // = móvil físico (o AVD): .\gradlew.bat installDebug -PfirebaseEmulatorHost=127.0.0.1
+            buildConfigField "String", "FIREBASE_EMULATOR_HOST",
+                    "\"" + (project.findProperty("firebaseEmulatorHost") ?: "10.0.2.2").toString() + "\""
         }
         release {
             buildConfigField "boolean", "FEATURE_SOCIAL_MOCK", "false"
             buildConfigField "boolean", "FEATURE_SOCIAL", "false"
             buildConfigField "boolean", "USE_FIREBASE_EMULATOR", "false"
+            buildConfigField "String", "FIREBASE_EMULATOR_HOST", "\"\""
             // minifyEnabled se queda en false para la 1ª release: Hilt/Room/Gson usan reflexión y las
             // reglas ProGuard no están probadas. Revisar más adelante para reducir el tamaño del APK.
             minifyEnabled false

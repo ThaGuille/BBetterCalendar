@@ -49,6 +49,12 @@ public class JoinFriendsSheet extends BottomSheetDialogFragment {
         googleButton = view.findViewById(R.id.joinGoogleButton);
         error = view.findViewById(R.id.joinError);
 
+        // F2-u8: una invitación (App Link / referrer) guardada espera a que haya cuenta y perfil.
+        View waiting = view.findViewById(R.id.joinInviteWaiting);
+        new ViewModelProvider(requireActivity()).get(PendingInviteViewModel.class).getInviteWaiting()
+                .observe(getViewLifecycleOwner(), w ->
+                        waiting.setVisibility(Boolean.TRUE.equals(w) ? View.VISIBLE : View.GONE));
+
         googleButton.setOnClickListener(v -> {
             error.setVisibility(View.GONE);
             viewModel.signInWithGoogle(requireActivity());

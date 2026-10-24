@@ -11,5 +11,7 @@ public enum EntryTarget {
     /** La lista de Amigos: la tarjeta de Home y la cabecera del bloque social de Focus. */
     FRIENDS,
     /** Amigos, subido hasta las solicitudes (la campana de Home, en u8). */
-    FRIEND_REQUESTS
+    FRIEND_REQUESTS,
+    /** F2-u8: la hoja Invitar (el botón de Focus). Quien atiende {@code DESTINATION} la abre; no es una pantalla del grafo. */
+    INVITE
 }

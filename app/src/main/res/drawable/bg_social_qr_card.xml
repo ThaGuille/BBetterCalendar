@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F2-u8 · Light plate behind the invitation QR: dark modules on light also in the dark theme. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_qr_background" />
+    <corners android:radius="@dimen/radius_card" />
+</shape>

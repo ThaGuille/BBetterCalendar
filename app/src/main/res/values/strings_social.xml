@@ -183,4 +183,40 @@
     <!-- F2-u7 · My profile -> Friends -->
     <string name="my_profile_friends_row">Friends (%1$d)</string>
 
+    <!-- F2-u8 · Invite sheet -->
+    <string name="invite_title">Invite friends</string>
+    <string name="invite_body">Share your link or let them scan the code. They will still need your approval to be friends.</string>
+    <string name="invite_handle_label">Your username</string>
+    <string name="invite_link_label">Your link</string>
+    <string name="invite_copy_handle">Copy username</string>
+    <string name="invite_copy_link">Copy link</string>
+    <string name="invite_copied">Copied</string>
+    <string name="invite_share">Share link</string>
+    <string name="invite_share_text">Add me on BBetter: %1$s</string>
+    <string name="invite_share_chooser">Share your invitation</string>
+    <string name="invite_qr_description">QR code of your invitation link</string>
+    <string name="invite_loading">Creating your link…</string>
+    <string name="invite_error">Could not create your link. Check your connection and try again.</string>
+    <string name="invite_retry">Try again</string>
+
+    <!-- F2-u8 · Invitation received (App Link / Play referrer) -->
+    <string name="accept_invite_title">Add %1$s, \@%2$s</string>
+    <string name="accept_invite_body">They will have to accept your request.</string>
+    <string name="accept_invite_send">Send request</string>
+    <string name="accept_invite_not_now">Not now</string>
+    <string name="accept_invite_close">Close</string>
+    <string name="accept_invite_already_friends_title">You are already friends</string>
+    <string name="accept_invite_already_friends_body">%1$s is already in your friends.</string>
+    <string name="accept_invite_self_title">This is your own link</string>
+    <string name="accept_invite_self_body">Share it with a friend so they can add you.</string>
+    <string name="accept_invite_expired_title">Link expired</string>
+    <string name="accept_invite_expired_body">This invitation is no longer valid. Ask your friend for a new link.</string>
+    <string name="accept_invite_already_sent_title">Request already sent</string>
+    <string name="accept_invite_already_sent_body">You already sent a request to %1$s. Now they have to accept it.</string>
+    <string name="accept_invite_they_sent_title">%1$s already asked you</string>
+    <string name="accept_invite_they_sent_body">Accept their request in Requests.</string>
+    <string name="accept_invite_see_requests">See requests</string>
+    <string name="accept_invite_error">Could not check the invitation. Open the app again to retry.</string>
+    <string name="join_sheet_invite_waiting">An invitation is waiting for you. Join to see it.</string>
+
 </resources>

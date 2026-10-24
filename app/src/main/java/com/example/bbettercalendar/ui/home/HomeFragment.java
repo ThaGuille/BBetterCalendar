@@ -136,6 +136,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             homeViewModel.getSocialSnapshot().observe(getViewLifecycleOwner(), this::renderFriends);
         }
         setUpSocialEntry();
+        // F2-u8: el punto de la campana. Sin perfil (o en release) queda fijo, como antes.
+        homeViewModel.getBellRequests().observe(getViewLifecycleOwner(), requests -> {
+            if (binding == null) {
+                return;
+            }
+            boolean legacy = requests == null || requests == HomeViewModel.BELL_LEGACY;
+            binding.homeBellDot.setVisibility(legacy || requests > 0 ? View.VISIBLE : View.GONE);
+        });
 
         homeViewModel.getNextUp().observe(getViewLifecycleOwner(), this::renderNextUp);
 
@@ -486,8 +494,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         } else if (id == R.id.homeCycleChip) {
             showTimerSettings();
         } else if (id == R.id.homeBellButton) {
-            // PLACEHOLDER(ui-placeholders#home-notification-centre)
-            Toast.makeText(requireContext(), R.string.home_notifications_soon, Toast.LENGTH_SHORT).show();
+            Integer requests = homeViewModel.getBellRequests().getValue();
+            if (socialEntry != null && requests != null && requests != HomeViewModel.BELL_LEGACY) {
+                // F2-u8: con perfil, la campana lleva a Amigos subido hasta las solicitudes.
+                socialEntry.requestEntry(EntryTarget.FRIEND_REQUESTS);
+            } else {
+                // PLACEHOLDER(ui-placeholders#home-notification-centre): sin cuenta o en release.
+                Toast.makeText(requireContext(), R.string.home_notifications_soon, Toast.LENGTH_SHORT).show();
+            }
         } else if (id == R.id.homeNextUpCard) {
             openCalendarTab();
         } else if (id == R.id.homeAddTaskButton) {

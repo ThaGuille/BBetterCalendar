@@ -4,6 +4,7 @@ package com.example.bbettercalendar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -11,9 +12,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.notifications.PermissionGate;
+import com.example.bbettercalendar.social.SocialFeature;
+import com.example.bbettercalendar.ui.social.AcceptInviteSheet;
+import com.example.bbettercalendar.ui.social.PendingInviteViewModel;
 import com.example.bbettercalendar.stats.StatsDAO;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -81,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private StatsDAO statsDao;
     private ExecutorService executorService;
     private NavController navController;
+    @androidx.annotation.Nullable private PendingInviteViewModel pendingInvite;
 
     @Inject PermissionGate permissionGate;
 
@@ -134,6 +140,32 @@ public class MainActivity extends AppCompatActivity {
 
         openProjectFromIntent(getIntent());
         handleDebugNav(getIntent());
+        setUpPendingInvite();
+    }
+
+    /**
+     * F2-u8: la invitación que dejó el App Link o el referrer de Play. El ViewModel (ámbito de esta actividad)
+     * la resuelve cuando hay perfil y aquí sale la hoja «Añadir a X» (o su callejón sin salida). Se vuelve a
+     * mirar en cada {@link #onResume()}. Sin cuenta habilitada (release) no hace nada.
+     */
+    private void setUpPendingInvite() {
+        if (!SocialFeature.isAccountEnabled()) return;
+        pendingInvite = new ViewModelProvider(this).get(PendingInviteViewModel.class);
+        pendingInvite.getUi().observe(this, ui -> {
+            if (ui == null) return;
+            pendingInvite.consumeUi();
+            if (ui.kind == PendingInviteViewModel.Ui.Kind.ERROR) {
+                Toast.makeText(getApplicationContext(), R.string.accept_invite_error, Toast.LENGTH_LONG).show();
+            } else if (getSupportFragmentManager().findFragmentByTag(AcceptInviteSheet.TAG) == null) {
+                new AcceptInviteSheet().show(getSupportFragmentManager(), AcceptInviteSheet.TAG);
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (pendingInvite != null) pendingInvite.check();
     }
 
     /**

@@ -125,5 +125,8 @@
     <color name="bb_sanct_button_glow">@color/amber_400_a25</color>
     <color name="bb_sanct_glow_start">@color/amber_400_a18</color>
     <color name="bb_sanct_glow_end">@color/amber_400_a00</color>
+    <!-- F2-u8: el QR de invitación va oscuro sobre claro también en tema oscuro (un lector necesita ese contraste); sin variante night. -->
+    <color name="bb_qr_foreground">@color/sanct_pine_ink</color>
+    <color name="bb_qr_background">@color/birch_50</color>
 
 </resources>

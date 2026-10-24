@@ -30,7 +30,6 @@
             android:layout_weight="1"
             android:text="@string/friends_add" />
 
-        <!-- Hidden until the invite sheet exists (F2-u8). -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/friendsInviteButton"
             style="@style/Widget.BBetter.Button.Secondary"
@@ -38,8 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_sm"
             android:layout_weight="1"
-            android:text="@string/friends_invite"
-            android:visibility="gone" />
+            android:text="@string/friends_invite" />
     </LinearLayout>
 
     <TextView
@@ -107,14 +105,12 @@
             android:layout_marginTop="@dimen/spacing_lg"
             android:text="@string/friends_add" />
 
-        <!-- Hidden until the invite sheet exists (F2-u8). -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/friendsEmptyInvite"
             style="@style/Widget.BBetter.Button.Secondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_sm"
-            android:text="@string/friends_invite"
-            android:visibility="gone" />
+            android:text="@string/friends_invite" />
     </LinearLayout>
 </LinearLayout>

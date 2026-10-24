@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F2-u8 · "Add X" from an invitation (App Link / Play referrer) and its dead ends (already friends, own link,
+     expired, request pending). No background on the root: Widget.BBetter.BottomSheet paints it. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_lg">
+
+        <com.example.bbettercalendar.ui.common.widget.AvatarView
+            android:id="@+id/acceptAvatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:avatarSize="@dimen/social_avatar_preview" />
+
+        <TextView
+            android:id="@+id/acceptTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:textAppearance="@style/TextAppearance.BBetter.Headline"
+            tools:text="Add Alice, \@alice" />
+
+        <TextView
+            android:id="@+id/acceptBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+            tools:text="They will have to accept your request." />
+
+        <TextView
+            android:id="@+id/acceptMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:textAppearance="@style/TextAppearance.BBetter.SocialError"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/acceptSendButton"
+            style="@style/Widget.BBetter.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:text="@string/accept_invite_send" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/acceptCloseButton"
+            style="@style/Widget.BBetter.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="@string/accept_invite_not_now" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

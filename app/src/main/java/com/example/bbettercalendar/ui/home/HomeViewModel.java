@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
@@ -28,6 +29,7 @@ import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialRepository;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.SocialPrefs;
+import com.example.bbettercalendar.social.friends.FriendsRepository;
 import com.example.bbettercalendar.social.profile.Profile;
 import com.example.bbettercalendar.social.profile.ProfileRepository;
 import com.example.bbettercalendar.social.profile.ProfileState;
@@ -61,6 +63,10 @@ public class HomeViewModel extends AndroidViewModel {
     private final MutableLiveData<String> localName = new MutableLiveData<>();
     private final SocialPrefs socialPrefs;
     private final LiveData<ProfileState> profileState;
+    /** F2-u8: valor de {@link #getBellRequests()} cuando la campana va «como antes» (sin perfil o en release). */
+    public static final int BELL_LEGACY = -1;
+    // Solicitudes de amistad pendientes si hay perfil; BELL_LEGACY si no (punto fijo y aviso «pronto»).
+    private final MediatorLiveData<Integer> bellRequests = new MediatorLiveData<>();
     // Los contadores de hoy viven en FocusSessionRepository (singleton): los escribe la sesión de
     // pomodoro (FocusSessionViewModel, ámbito de actividad) aunque Home no esté en pantalla.
     private final LiveData<String> todayFailsText;
@@ -109,6 +115,7 @@ public class HomeViewModel extends AndroidViewModel {
                          ProjectDAO projectDao,
                          SocialRepository socialRepository,
                          ProfileRepository profileRepository,
+                         FriendsRepository friendsRepository,
                          SocialPrefs socialPrefs,
                          @IoExecutor ExecutorService ioExecutor,
                          @DbWriteExecutor ExecutorService dbWriteExecutor) {
@@ -116,6 +123,12 @@ public class HomeViewModel extends AndroidViewModel {
         this.socialPrefs = socialPrefs;
         // Sin cuenta habilitada (release) el perfil no se observa: solo manda el nombre local.
         this.profileState = SocialFeature.isAccountEnabled() ? profileRepository.observeMine() : null;
+        bellRequests.setValue(BELL_LEGACY);
+        if (profileState != null) {
+            LiveData<Integer> pending = friendsRepository.pendingIncomingCount();
+            bellRequests.addSource(profileState, state -> recomputeBell(state, pending.getValue()));
+            bellRequests.addSource(pending, count -> recomputeBell(profileState.getValue(), count));
+        }
         greeting.setValue(GreetingResolver.resolve(null, 0, null));
         greeting.addSource(localName, name -> recomputeGreeting());
         if (profileState != null) {
@@ -449,6 +462,20 @@ public class HomeViewModel extends AndroidViewModel {
     /** Nombre local actual (null si no hay), para rellenar el diálogo. */
     public String getLocalName() {
         return localName.getValue();
+    }
+
+    /** F2-u8: con perfil listo, cuántas solicitudes hay; si no, BELL_LEGACY. */
+    private void recomputeBell(@Nullable ProfileState state, @Nullable Integer count) {
+        boolean hasProfile = state != null && state.status == ProfileState.Status.READY;
+        int value = hasProfile ? (count == null ? 0 : count) : BELL_LEGACY;
+        if (!Integer.valueOf(value).equals(bellRequests.getValue())) {
+            bellRequests.setValue(value);
+        }
+    }
+
+    /** Campana de Home (F2-u8): nº de solicitudes de amistad pendientes, o {@link #BELL_LEGACY}. */
+    public LiveData<Integer> getBellRequests() {
+        return bellRequests;
     }
 
     private void recomputeGreeting() {

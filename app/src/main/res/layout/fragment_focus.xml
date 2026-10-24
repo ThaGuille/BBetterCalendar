@@ -425,7 +425,7 @@
                 android:layout_weight="1"
                 android:minHeight="@dimen/spacing_md" />
 
-            <!-- PLACEHOLDER(ui-placeholders#social-focus-invite): inerte (toast). -->
+            <!-- F2-u8: abre la hoja Invitar (con perfil) o el router (sin cuenta o sin perfil). -->
             <FrameLayout
                 android:id="@+id/focusInviteButton"
                 android:layout_width="match_parent"

@@ -71,7 +71,9 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
         View.OnClickListener add = v -> showAddSheet();
         view.findViewById(R.id.friendsAddButton).setOnClickListener(add);
         view.findViewById(R.id.friendsEmptyAdd).setOnClickListener(add);
-        // Invitar (friendsInviteButton / friendsEmptyInvite) sigue oculto hasta la hoja de F2-u8.
+        View.OnClickListener invite = v -> showInviteSheet();
+        view.findViewById(R.id.friendsInviteButton).setOnClickListener(invite);
+        view.findViewById(R.id.friendsEmptyInvite).setOnClickListener(invite);
 
         viewModel.getScreen().observe(getViewLifecycleOwner(), this::render);
         viewModel.getEvent().observe(getViewLifecycleOwner(), event -> {
@@ -142,6 +144,13 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
         if (getChildFragmentManager().findFragmentByTag(TAG_ADD) == null) {
             viewModel.resetAdd();
             new AddFriendSheet().show(getChildFragmentManager(), TAG_ADD);
+        }
+    }
+
+    /** F2-u8: la hoja Invitar (enlace, QR y @usuario). */
+    private void showInviteSheet() {
+        if (getChildFragmentManager().findFragmentByTag(InviteSheet.TAG) == null) {
+            new InviteSheet().show(getChildFragmentManager(), InviteSheet.TAG);
         }
     }
 

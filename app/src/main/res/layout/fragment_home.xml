@@ -63,8 +63,9 @@
                     tools:text="Saturday, Oct 3" />
             </LinearLayout>
 
-            <!-- PLACEHOLDER(ui-placeholders#home-notification-centre): sin centro de notificaciones;
-                 el punto ámbar de "no leídas" del diseño es fijo (no hay datos). -->
+            <!-- PLACEHOLDER(ui-placeholders#home-notification-centre): sin centro de notificaciones.
+                 F2-u8: con perfil, el punto (homeBellDot) sale solo con solicitudes de amistad pendientes y
+                 el toque abre Amigos en Solicitudes; sin cuenta o en release, punto fijo y aviso "pronto". -->
             <FrameLayout
                 android:layout_width="@dimen/home_header_icon_button"
                 android:layout_height="@dimen/home_header_icon_button">
@@ -81,6 +82,7 @@
                     app:tint="@color/bb_on_surface_muted" />
 
                 <View
+                    android:id="@+id/homeBellDot"
                     android:layout_width="@dimen/spacing_sm"
                     android:layout_height="@dimen/spacing_sm"
                     android:layout_gravity="top|end"

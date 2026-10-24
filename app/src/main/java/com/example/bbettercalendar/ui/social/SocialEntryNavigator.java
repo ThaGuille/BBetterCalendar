@@ -60,7 +60,8 @@ public final class SocialEntryNavigator {
                 // F1-u5: Mi perfil es el destino de la cuenta. ACCEPT_TERMS no puede darse mientras
                 // TERMS_VERSION sea 1; su pantalla de re-aceptación queda para cuando suba.
                 destination = R.id.navigation_my_profile;
-                if (step == SocialEntryRouter.Step.DESTINATION && target != EntryTarget.MY_PROFILE) {
+                if (step == SocialEntryRouter.Step.DESTINATION
+                        && (target == EntryTarget.FRIENDS || target == EntryTarget.FRIEND_REQUESTS)) {
                     // F2-u7: Amigos; FRIEND_REQUESTS sube hasta las solicitudes (argumento section).
                     destination = R.id.navigation_friends;
                     args = new Bundle();

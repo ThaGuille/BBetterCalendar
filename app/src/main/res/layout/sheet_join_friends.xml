@@ -40,6 +40,15 @@
             android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
 
         <TextView
+            android:id="@+id/joinInviteWaiting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="@string/join_sheet_invite_waiting"
+            android:textAppearance="@style/TextAppearance.BBetter.SocialOk"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/joinError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

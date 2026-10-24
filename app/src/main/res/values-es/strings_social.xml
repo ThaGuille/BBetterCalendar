@@ -183,4 +183,40 @@
     <!-- F2-u7 · Mi perfil -> Amigos -->
     <string name="my_profile_friends_row">Amigos (%1$d)</string>
 
+    <!-- F2-u8 · Hoja Invitar -->
+    <string name="invite_title">Invita a tus amigos</string>
+    <string name="invite_body">Comparte tu enlace o deja que escaneen el código. Aun así necesitarán tu aprobación para ser amigos.</string>
+    <string name="invite_handle_label">Tu usuario</string>
+    <string name="invite_link_label">Tu enlace</string>
+    <string name="invite_copy_handle">Copiar usuario</string>
+    <string name="invite_copy_link">Copiar enlace</string>
+    <string name="invite_copied">Copiado</string>
+    <string name="invite_share">Compartir enlace</string>
+    <string name="invite_share_text">Añádeme en BBetter: %1$s</string>
+    <string name="invite_share_chooser">Comparte tu invitación</string>
+    <string name="invite_qr_description">Código QR de tu enlace de invitación</string>
+    <string name="invite_loading">Creando tu enlace…</string>
+    <string name="invite_error">No se pudo crear tu enlace. Revisa tu conexión y vuelve a intentarlo.</string>
+    <string name="invite_retry">Reintentar</string>
+
+    <!-- F2-u8 · Invitación recibida (App Link / referrer de Play) -->
+    <string name="accept_invite_title">Añadir a %1$s, \@%2$s</string>
+    <string name="accept_invite_body">Tendrá que aceptar tu solicitud.</string>
+    <string name="accept_invite_send">Enviar solicitud</string>
+    <string name="accept_invite_not_now">Ahora no</string>
+    <string name="accept_invite_close">Cerrar</string>
+    <string name="accept_invite_already_friends_title">Ya sois amigos</string>
+    <string name="accept_invite_already_friends_body">%1$s ya está en tus amigos.</string>
+    <string name="accept_invite_self_title">Es tu propio enlace</string>
+    <string name="accept_invite_self_body">Compártelo con un amigo para que pueda añadirte.</string>
+    <string name="accept_invite_expired_title">Enlace caducado</string>
+    <string name="accept_invite_expired_body">Esta invitación ya no es válida. Pide un enlace nuevo a tu amigo.</string>
+    <string name="accept_invite_already_sent_title">Solicitud ya enviada</string>
+    <string name="accept_invite_already_sent_body">Ya enviaste una solicitud a %1$s. Ahora tiene que aceptarla.</string>
+    <string name="accept_invite_they_sent_title">%1$s ya te ha escrito</string>
+    <string name="accept_invite_they_sent_body">Acepta su solicitud en Solicitudes.</string>
+    <string name="accept_invite_see_requests">Ver solicitudes</string>
+    <string name="accept_invite_error">No se pudo comprobar la invitación. Abre la app de nuevo para reintentar.</string>
+    <string name="join_sheet_invite_waiting">Tienes una invitación esperando. Entra para verla.</string>
+
 </resources>

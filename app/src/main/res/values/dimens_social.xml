@@ -19,5 +19,9 @@
     <dimen name="social_friend_avatar">44dp</dimen>
     <dimen name="social_friend_row_padding">12dp</dimen>
     <dimen name="social_friend_menu_target">48dp</dimen>
+    <!-- F2-u8 · Invite sheet -->
+    <dimen name="social_qr_size">200dp</dimen>
+    <dimen name="social_qr_padding">12dp</dimen>
+    <dimen name="social_copy_target">48dp</dimen>
 
 </resources>

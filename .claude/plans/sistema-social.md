@@ -21,7 +21,7 @@
 - **Siguiente paso:** olas 1 y 2 de F2 hechas: u1 (endurecer F1), u2 (host del emulador configurable, D-026) y u3 (reglas
   de F2); de la ola 3, u4 (Functions `onFriendRequestAccepted` y `removeFriend`, `actor.js`) y u5 (datos de amigos y
   reportes: `social/friends/`), u6 (invitaciones: Hosting en el emulador, `social/invite/`, App Link) y u7 (UI Amigos)
-  hechas. Siguen u8 (hoja Invitar, «Añadir a X» y campana) y u9 (cierre).
+  y u8 (UI de invitar y campana) hechas. Sigue u9 (cierre de F2).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -80,14 +80,14 @@ en el diario.
 - [x] **F2.1** Solicitudes (enviar, aceptar, rechazar, cancelar) + `onFriendRequestAccepted` (los dos
   lados + espejo RTDB) — 02 §4, 03 §7
 - [x] **F2.2** Añadir por `@usuario` exacto — 02 §4
-- [ ] **F2.3** Enlace de invitación: App Links (`assetlinks.json` en el emulador de Hosting, probado en el AVD),
+- [x] **F2.3** Enlace de invitación: App Links (`assetlinks.json` en el emulador de Hosting, probado en el AVD),
   Install Referrer (código + JUnit; prueba real en L.7) y QR — 03 §11, D-025
 - [x] **F2.4** Pantalla Amigos (lista y solicitudes) como destino secundario, con entradas desde Home,
   Focus y el avatar (D-012) — 02 §9
-- [ ] **F2.5** «Invitar» de Focus real — 02 §9
+- [x] **F2.5** «Invitar» de Focus real — 02 §9
 - [x] **F2.6** Eliminar amigo y reportar (controles separados) + `removeFriend`; sin bloquear (D-027) —
   02 §4, 04 §2
-- [ ] **F2.7** Campana: bandeja de solicitudes — 02 §9
+- [x] **F2.7** Campana: bandeja de solicitudes — 02 §9
 - [x] **F2.8** Límites: 50 amigos (D-015) y 20 solicitudes al día — 02 §4
 - [x] **F2.9** Tests de reglas (`friendRequests`, `friends`, `profiles`, `reports`, `invites`, `handles`, RTDB `/friends`)
   y de Functions (`onFriendRequestAccepted`, `removeFriend`) en el emulador — 03 §6, §13
@@ -162,6 +162,9 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-24 (23)** · F2-u8 hecha: hoja Invitar (`InviteSheet`: `@usuario`, enlace con copiar y compartir, QR oscuro sobre claro con `bb_qr_*`; `ensureMyCode()` al abrir) desde Focus y Amigos, hoja «Añadir a X» (`AcceptInviteSheet` + `PendingInviteViewModel`: App Link o referrer, antes o después de iniciar sesión; ya sois amigos, enlace propio, caducado, ya enviada) y campana de Home con punto solo con solicitudes que abre Solicitudes. En `api36` con el Emulator Suite y `actor.js`: enlace, QR, selector de compartir, App Link con y sin sesión hasta la solicitud enviada, campana con y sin solicitudes; 0 `FATAL EXCEPTION`. F2.3, F2.5 y F2.7 marcados.
+  Commit «F2-u8: hojas Invitar y Añadir a X desde una invitación, y punto de la campana».
+  **Siguiente:** u9 (cierre de F2: documentación, [CONFIRM] legales, re-autenticación y tablero).
 - **2026-10-23 (23)** · F2-u6 hecha: Hosting en el emulador (`firebase.json` con `hosting/public`, `assetlinks.json` de
   debug y la página `/i/` con Play y `referrer=invite%3D<código>`), `social/invite/` (`InviteCodes`, `InviteLinkFactory`,
   `QrMatrix` con ZXing core, `InviteRepository` con `ensureMyCode` y `resolve`, `InstallReferrerReader`), invitación

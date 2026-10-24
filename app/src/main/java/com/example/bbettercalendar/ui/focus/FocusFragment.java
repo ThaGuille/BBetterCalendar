@@ -37,7 +37,9 @@ import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
+import com.example.bbettercalendar.social.account.SocialEntryRouter;
 import com.example.bbettercalendar.ui.social.EntryTarget;
+import com.example.bbettercalendar.ui.social.InviteSheet;
 import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
 import com.example.bbettercalendar.ui.social.SocialEntryViewModel;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
@@ -136,9 +138,6 @@ public class FocusFragment extends Fragment
         SocialFeature.applyVisibility(socialBlock, invite);
         if (SocialFeature.isEnabled()) {
             viewModel.getSocialSnapshot().observe(getViewLifecycleOwner(), this::renderFriends);
-            // PLACEHOLDER(ui-placeholders#social-focus-invite): no hay backend social.
-            invite.setOnClickListener(v -> Toast.makeText(requireContext(),
-                    R.string.focus_invite_soon, Toast.LENGTH_SHORT).show());
         }
         setUpSocialEntry(view, socialBlock, invite);
 
@@ -183,6 +182,13 @@ public class FocusFragment extends Fragment
                 return;
             }
             entry.consumeEntryStep();
+            if (step == SocialEntryRouter.Step.DESTINATION && entry.getEntryTarget() == EntryTarget.INVITE) {
+                // F2-u8: la hoja Invitar no es un destino del grafo.
+                if (getChildFragmentManager().findFragmentByTag(InviteSheet.TAG) == null) {
+                    new InviteSheet().show(getChildFragmentManager(), InviteSheet.TAG);
+                }
+                return;
+            }
             SocialEntryNavigator.go(this, step, entry.getEntryTarget());
         });
         View.OnClickListener join = v -> entry.requestEntry();
@@ -206,10 +212,9 @@ public class FocusFragment extends Fragment
                 cta.setOnClickListener(null);
                 inviteLabel.setText(R.string.focus_invite_friends);
                 SocialFeature.applyVisibility(socialBlock, invite);
-                // PLACEHOLDER(ui-placeholders#social-focus-invite): no hay backend social.
+                // F2-u8: con perfil abre la hoja Invitar; con sesión y sin perfil, el router (Crear perfil).
                 invite.setOnClickListener(SocialFeature.isEnabled()
-                        ? v -> Toast.makeText(requireContext(), R.string.focus_invite_soon,
-                                Toast.LENGTH_SHORT).show()
+                        ? v -> entry.requestEntry(EntryTarget.INVITE)
                         : null);
             }
         });

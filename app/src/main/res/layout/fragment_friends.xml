@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F2-u7 · Friends: one scrolling list with three sections (Requests, Friends, Sent). Operate mode:
+     the two actions sit at the top, the list is the screen. No presence is shown (F3). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/friendsScreen"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface"
+    android:orientation="vertical"
+    tools:context=".ui.social.FriendsFragment">
+
+    <include layout="@layout/view_top_bar" />
+
+    <LinearLayout
+        android:id="@+id/friendsActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_sm">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/friendsAddButton"
+            style="@style/Widget.BBetter.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/friends_add" />
+
+        <!-- Hidden until the invite sheet exists (F2-u8). -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/friendsInviteButton"
+            style="@style/Widget.BBetter.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_weight="1"
+            android:text="@string/friends_invite"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/friendsStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_md"
+        android:text="@string/friends_loading"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/friendsList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_lg"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/friendsEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_xl"
+        android:paddingEnd="@dimen/spacing_md"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/social_hero_tile"
+            android:layout_height="@dimen/social_hero_tile"
+            android:background="@drawable/bg_social_hero_tile"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no"
+            android:padding="@dimen/social_hero_icon_padding"
+            android:src="@drawable/ic_group_add_24"
+            android:tint="@color/bb_on_primary_container" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:gravity="center_horizontal"
+            android:text="@string/friends_empty_title"
+            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:gravity="center_horizontal"
+            android:text="@string/friends_empty_body"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/friendsEmptyAdd"
+            style="@style/Widget.BBetter.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:text="@string/friends_add" />
+
+        <!-- Hidden until the invite sheet exists (F2-u8). -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/friendsEmptyInvite"
+            style="@style/Widget.BBetter.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="@string/friends_invite"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

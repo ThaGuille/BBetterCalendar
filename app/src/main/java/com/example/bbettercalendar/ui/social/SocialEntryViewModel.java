@@ -65,6 +65,8 @@ public class SocialEntryViewModel extends ViewModel {
     private final MutableLiveData<Boolean> busy = new MutableLiveData<>(false);
     private final MutableLiveData<Outcome> outcome = new MutableLiveData<>();
     private volatile boolean entryPending;
+    // F2-u7: destino final pedido; lo lee quien atiende el paso (SocialEntryNavigator).
+    private volatile EntryTarget entryTarget = EntryTarget.MY_PROFILE;
 
     @Inject
     public SocialEntryViewModel(AccountRepository account, SocialPrefs prefs, ProfileRepository profiles) {
@@ -92,10 +94,16 @@ public class SocialEntryViewModel extends ViewModel {
 
     /** Lee el año guardado (E/S) y publica el paso del router. Ignora toques mientras espera. */
     public void requestEntry() {
+        requestEntry(EntryTarget.MY_PROFILE);
+    }
+
+    /** F2-u7: como {@link #requestEntry()}, pero con un destino final distinto de Mi perfil. */
+    public void requestEntry(@NonNull EntryTarget target) {
         if (entryPending) {
             return;
         }
         entryPending = true;
+        entryTarget = target;
         prefs.readBirthYear(birthYear -> {
             // La sesión se mira en FirebaseAuth (síncrono), no en el LiveData: justo tras iniciar
             // sesión el LiveData aún puede decir SIGNED_OUT.
@@ -121,6 +129,12 @@ public class SocialEntryViewModel extends ViewModel {
                 }
             });
         });
+    }
+
+    /** El destino de la última petición; con {@code DESTINATION} dice si es Mi perfil o Amigos. */
+    @NonNull
+    public EntryTarget getEntryTarget() {
+        return entryTarget;
     }
 
     /** Llamar al atender el paso (hilo principal). */

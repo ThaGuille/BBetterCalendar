@@ -148,5 +148,18 @@
         android:name="com.example.bbettercalendar.ui.social.MyProfileFragment"
         android:label="@string/my_profile_top_title"
         tools:layout="@layout/fragment_my_profile" />
+    <!-- ===== F2-u7: Amigos. Lo abren Home, Focus y Mi perfil (SocialEntryNavigator) y, en u8, la campana.
+         section=requests (opcional) es lo que ya se ve al entrar; hoy la lista siempre se enseña entera
+         y el argumento solo sube hasta las solicitudes. ===== -->
+    <fragment
+        android:id="@+id/navigation_friends"
+        android:name="com.example.bbettercalendar.ui.social.FriendsFragment"
+        android:label="@string/friends_top_title"
+        tools:layout="@layout/fragment_friends">
+        <argument
+            android:name="section"
+            android:defaultValue=""
+            app:argType="string" />
+    </fragment>
 
 </navigation>

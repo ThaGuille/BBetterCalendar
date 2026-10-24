@@ -37,6 +37,7 @@ import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
+import com.example.bbettercalendar.ui.social.EntryTarget;
 import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
 import com.example.bbettercalendar.ui.social.SocialEntryViewModel;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
@@ -182,7 +183,7 @@ public class FocusFragment extends Fragment
                 return;
             }
             entry.consumeEntryStep();
-            SocialEntryNavigator.go(this, step);
+            SocialEntryNavigator.go(this, step, entry.getEntryTarget());
         });
         View.OnClickListener join = v -> entry.requestEntry();
         entry.getAccountState().observe(getViewLifecycleOwner(), state -> {
@@ -190,6 +191,7 @@ public class FocusFragment extends Fragment
                 socialBlock.setVisibility(View.VISIBLE);
                 invite.setVisibility(View.VISIBLE);
                 header.setVisibility(View.GONE);
+                header.setOnClickListener(null);
                 friendsGrid.setVisibility(View.GONE);
                 cta.setVisibility(View.VISIBLE);
                 inviteLabel.setText(R.string.social_cta_button);
@@ -197,6 +199,8 @@ public class FocusFragment extends Fragment
                 invite.setOnClickListener(join);
             } else {
                 header.setVisibility(View.VISIBLE);
+                // F2-u7: con sesión, la cabecera del bloque social abre Amigos.
+                header.setOnClickListener(v -> entry.requestEntry(EntryTarget.FRIENDS));
                 friendsGrid.setVisibility(View.VISIBLE);
                 cta.setVisibility(View.GONE);
                 cta.setOnClickListener(null);

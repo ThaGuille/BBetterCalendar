@@ -61,6 +61,15 @@
                 android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
                 tools:text="@laia" />
 
+            <!-- F2-u7: entrada a Amigos desde el perfil (las altas que acaban aquí también llegan a Amigos). -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/mpFriendsRow"
+                style="@style/Widget.BBetter.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:text="@string/my_profile_friends_row" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

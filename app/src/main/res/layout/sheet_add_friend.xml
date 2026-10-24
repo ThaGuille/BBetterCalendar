@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F2-u7 · Add a friend by @username: field -> Find -> card preview -> Send request. No background on
+     the root: Widget.BBetter.BottomSheet paints it. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_lg"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_lg">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/friends_add_title"
+            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:text="@string/friends_add_body"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+        <EditText
+            android:id="@+id/addHandleInput"
+            style="@style/Widget.BBetter.Social.Input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:hint="@string/friends_add_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="textNoSuggestions|textVisiblePassword"
+            android:maxLength="21" />
+
+        <TextView
+            android:id="@+id/addMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:textAppearance="@style/TextAppearance.BBetter.SocialError"
+            android:visibility="gone"
+            tools:text="No one has that username." />
+
+        <LinearLayout
+            android:id="@+id/addPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:background="@drawable/bg_card"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/social_friend_row_padding"
+            android:visibility="gone">
+
+            <com.example.bbettercalendar.ui.common.widget.AvatarView
+                android:id="@+id/addPreviewAvatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:avatarSize="@dimen/social_friend_avatar" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_card_gap"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/addPreviewName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+                    tools:text="Bob" />
+
+                <TextView
+                    android:id="@+id/addPreviewHandle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                    tools:text="\@bob" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/addFindButton"
+            style="@style/Widget.BBetter.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:enabled="false"
+            android:text="@string/friends_add_find" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/addSendButton"
+            style="@style/Widget.BBetter.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="@string/friends_add_send"
+            android:visibility="gone" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

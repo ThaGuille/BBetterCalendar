@@ -1,5 +1,7 @@
 package com.example.bbettercalendar.ui.social;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -20,18 +22,25 @@ public final class SocialEntryNavigator {
 
     /** Navega desde un bloque social (Focus / Home): el origen se queda en la pila. */
     public static void go(@NonNull Fragment from, @NonNull SocialEntryRouter.Step step) {
-        navigate(NavHostFragment.findNavController(from), step, 0);
+        navigate(NavHostFragment.findNavController(from), step, 0, EntryTarget.MY_PROFILE);
+    }
+
+    /** F2-u7: igual, pero {@code DESTINATION} lleva a donde pidió {@code target} (Mi perfil o Amigos). */
+    public static void go(@NonNull Fragment from, @NonNull SocialEntryRouter.Step step,
+                          @NonNull EntryTarget target) {
+        navigate(NavHostFragment.findNavController(from), step, 0, target);
     }
 
     /** Navega desde una pantalla de entrada, que se retira de la pila. */
     public static void goReplacing(@NonNull Fragment from, @NonNull SocialEntryRouter.Step step,
                                    int currentDestinationId) {
-        navigate(NavHostFragment.findNavController(from), step, currentDestinationId);
+        navigate(NavHostFragment.findNavController(from), step, currentDestinationId, EntryTarget.MY_PROFILE);
     }
 
     private static void navigate(@NonNull NavController nav, @NonNull SocialEntryRouter.Step step,
-                                 int popUpToInclusive) {
+                                 int popUpToInclusive, @NonNull EntryTarget target) {
         int destination;
+        Bundle args = null;
         switch (step) {
             case AGE_GATE:
                 destination = R.id.navigation_age_gate;
@@ -51,10 +60,16 @@ public final class SocialEntryNavigator {
                 // F1-u5: Mi perfil es el destino de la cuenta. ACCEPT_TERMS no puede darse mientras
                 // TERMS_VERSION sea 1; su pantalla de re-aceptación queda para cuando suba.
                 destination = R.id.navigation_my_profile;
+                if (step == SocialEntryRouter.Step.DESTINATION && target != EntryTarget.MY_PROFILE) {
+                    // F2-u7: Amigos; FRIEND_REQUESTS sube hasta las solicitudes (argumento section).
+                    destination = R.id.navigation_friends;
+                    args = new Bundle();
+                    args.putString("section", target == EntryTarget.FRIEND_REQUESTS ? "requests" : "");
+                }
                 break;
         }
         NavOptions options = popUpToInclusive == 0 ? null
                 : new NavOptions.Builder().setPopUpTo(popUpToInclusive, true).build();
-        nav.navigate(destination, null, options);
+        nav.navigate(destination, args, options);
     }
 }

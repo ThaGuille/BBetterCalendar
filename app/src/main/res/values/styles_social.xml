@@ -23,4 +23,15 @@
     <style name="TextAppearance.BBetter.SocialOk" parent="TextAppearance.BBetter.Caption">
         <item name="android:textColor">@color/bb_primary_bright</item>
     </style>
+    <!-- F2-u7: radio row of the report reasons (48dp touch target, Body text). -->
+    <style name="Widget.BBetter.Social.Radio" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Body</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+        <item name="android:buttonTint">@color/bb_primary</item>
+        <item name="android:paddingStart">@dimen/spacing_sm</item>
+    </style>
+
 </resources>

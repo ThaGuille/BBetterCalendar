@@ -15,4 +15,9 @@
     <dimen name="social_picker_swatch">40dp</dimen>
     <dimen name="social_picker_ring">2dp</dimen>
     <dimen name="social_picker_cell_height">56dp</dimen>
+    <!-- F2-u7 · Friends -->
+    <dimen name="social_friend_avatar">44dp</dimen>
+    <dimen name="social_friend_row_padding">12dp</dimen>
+    <dimen name="social_friend_menu_target">48dp</dimen>
+
 </resources>

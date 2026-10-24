@@ -42,6 +42,7 @@ import com.example.bbettercalendar.ui.focus.FocusSessionEventPresenter;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
 import com.example.bbettercalendar.ui.social.AvatarPalette;
+import com.example.bbettercalendar.ui.social.EntryTarget;
 import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
 import com.example.bbettercalendar.ui.social.SocialEntryViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -353,7 +354,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 return;
             }
             entry.consumeEntryStep();
-            SocialEntryNavigator.go(this, step);
+            SocialEntryNavigator.go(this, step, entry.getEntryTarget());
         });
         entry.getAccountState().observe(getViewLifecycleOwner(), state -> {
             if (binding == null) {
@@ -371,8 +372,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 binding.homeFriendsDot.setVisibility(View.VISIBLE);
                 binding.homeFriendsAvatars.setVisibility(View.VISIBLE);
                 binding.homeFriendsJoin.setVisibility(View.GONE);
-                binding.homeFriendsCard.setOnClickListener(null);
-                binding.homeFriendsCard.setClickable(false);
+                // F2-u7: con sesión, tocar la tarjeta abre Amigos (la maqueta de F4 sigue dentro).
+                binding.homeFriendsCard.setOnClickListener(v -> entry.requestEntry(EntryTarget.FRIENDS));
                 SocialFeature.applyVisibility(binding.homeFriendsCard);
                 // La maqueta pisó el título con la llamada a la acción: repintarla.
                 renderFriends(homeViewModel.getSocialSnapshot().getValue());

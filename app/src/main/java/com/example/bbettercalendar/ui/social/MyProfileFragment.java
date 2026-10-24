@@ -125,6 +125,14 @@ public class MyProfileFragment extends Fragment {
             viewModel.rename(renameInput.getText().toString());
         });
         view.findViewById(R.id.mpSignOutButton).setOnClickListener(v -> viewModel.signOut());
+        // F2-u7: fila «Amigos (N)»; el número sale del mismo FriendsRepository que la pantalla Amigos.
+        MaterialButton friendsRow = view.findViewById(R.id.mpFriendsRow);
+        friendsRow.setText(getString(R.string.my_profile_friends_row, 0));
+        friendsRow.setOnClickListener(v -> NavHostFragment.findNavController(this)
+                .navigate(R.id.navigation_friends));
+        new ViewModelProvider(this).get(FriendsViewModel.class).getFriendCount()
+                .observe(getViewLifecycleOwner(), count -> friendsRow.setText(
+                        getString(R.string.my_profile_friends_row, count == null ? 0 : count)));
         deleteButton.setOnClickListener(v -> {
             hideMessage();
             showDeleteConfirmation();

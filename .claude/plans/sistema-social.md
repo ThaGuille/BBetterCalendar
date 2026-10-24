@@ -20,9 +20,8 @@
   el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
 - **Siguiente paso:** olas 1 y 2 de F2 hechas: u1 (endurecer F1), u2 (host del emulador configurable, D-026) y u3 (reglas
   de F2); de la ola 3, u4 (Functions `onFriendRequestAccepted` y `removeFriend`, `actor.js`) y u5 (datos de amigos y
-  reportes: `social/friends/`) y u6 (invitaciones: Hosting en el emulador, `social/invite/`, App Link) hechas. Siguen
-  u7 (UI Amigos sobre `FriendsRepository` y `ReportRepository`, con `actor.js` como segunda identidad) y u8 (hoja
-  Invitar, «Añadir a X» y campana).
+  reportes: `social/friends/`), u6 (invitaciones: Hosting en el emulador, `social/invite/`, App Link) y u7 (UI Amigos)
+  hechas. Siguen u8 (hoja Invitar, «Añadir a X» y campana) y u9 (cierre).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -78,18 +77,18 @@ en el diario.
   CLAUDE.md
 
 ### F2 · Amigos
-- [ ] **F2.1** Solicitudes (enviar, aceptar, rechazar, cancelar) + `onFriendRequestAccepted` (los dos
+- [x] **F2.1** Solicitudes (enviar, aceptar, rechazar, cancelar) + `onFriendRequestAccepted` (los dos
   lados + espejo RTDB) — 02 §4, 03 §7
-- [ ] **F2.2** Añadir por `@usuario` exacto — 02 §4
+- [x] **F2.2** Añadir por `@usuario` exacto — 02 §4
 - [ ] **F2.3** Enlace de invitación: App Links (`assetlinks.json` en el emulador de Hosting, probado en el AVD),
   Install Referrer (código + JUnit; prueba real en L.7) y QR — 03 §11, D-025
-- [ ] **F2.4** Pantalla Amigos (lista y solicitudes) como destino secundario, con entradas desde Home,
+- [x] **F2.4** Pantalla Amigos (lista y solicitudes) como destino secundario, con entradas desde Home,
   Focus y el avatar (D-012) — 02 §9
 - [ ] **F2.5** «Invitar» de Focus real — 02 §9
-- [ ] **F2.6** Eliminar amigo y reportar (controles separados) + `removeFriend`; sin bloquear (D-027) —
+- [x] **F2.6** Eliminar amigo y reportar (controles separados) + `removeFriend`; sin bloquear (D-027) —
   02 §4, 04 §2
 - [ ] **F2.7** Campana: bandeja de solicitudes — 02 §9
-- [ ] **F2.8** Límites: 50 amigos (D-015) y 20 solicitudes al día — 02 §4
+- [x] **F2.8** Límites: 50 amigos (D-015) y 20 solicitudes al día — 02 §4
 - [x] **F2.9** Tests de reglas (`friendRequests`, `friends`, `profiles`, `reports`, `invites`, `handles`, RTDB `/friends`)
   y de Functions (`onFriendRequestAccepted`, `removeFriend`) en el emulador — 03 §6, §13
 - [ ] **F2.10** Endurecer F1 (listener en serie y con reenganche, `@usuario` reservados, falsos positivos, reglas de
@@ -177,6 +176,9 @@ Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo si
   propia `FriendsBackend` (+ `ListenerSource`); JUnit de mapas, cuota y mapeo, y Mockito para los dos repositorios.
   Commit «F2-u5: datos de amigos y reportes (FriendsRepository, FriendRequestWrites, RequestQuota y ReportRepository)».
   **Siguiente:** u6 (invitaciones) y después u7 (UI Amigos).
+- **2026-10-24 (22)** · F2-u7 hecha: pantalla Amigos (`navigation_friends`, `FriendsFragment`) con Solicitudes, Amigos y Enviadas, hoja Añadir por `@usuario` (con vista previa y un mensaje por cada resultado, límite diario y tope de 50), hoja Reportar (4 motivos; desde la lista ofrece eliminar, desde una solicitud la rechaza) y entradas desde Home, Focus y la fila «Amigos (N)» de Mi perfil (`EntryTarget`). En `api36` con los cuatro emuladores y `actor.js`: solicitudes en los dos sentidos, aceptar, rechazar, reenviar, cancelar, eliminar, 21.ª solicitud rechazada, `failed/cap`, reportes con id determinista y el paseo con dos identidades; 0 `FATAL EXCEPTION`. F2.1, F2.2, F2.4, F2.6 y F2.8 marcados.
+  Commit «F2-u7: UI Amigos (lista, solicitudes, añadir por @usuario, eliminar y reportar; entradas desde Home, Focus y Mi perfil)».
+  **Siguiente:** u8 (hoja Invitar, «Añadir a X» desde una invitación y punto de la campana) y después u9.
 - **2026-10-22 (21)** · F2-u4 hecha: `functions/src/friends.ts` con `onFriendRequestAccepted` (transacción: relee la
   solicitud, `failed`/`gone` sin `users/`, `failed`/`cap` con 50 amigos, si no los dos lados y borra; después el espejo RTDB; `retry: true`)
   y la callable `removeFriend` (idempotente, limpia amistades fantasma); `deleteAccount` borra también `invites/` y deja

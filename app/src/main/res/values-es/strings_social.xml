@@ -114,4 +114,73 @@
     <string name="delete_error_bad_password">Esa contraseña no es correcta.</string>
     <string name="delete_error_reauth">No hemos podido confirmar que eres tú. Inténtalo de nuevo.</string>
     <string name="delete_done">Tu cuenta se ha borrado.</string>
+    <!-- F2-u7 · Amigos -->
+    <string name="friends_top_title">Amigos</string>
+    <string name="friends_add">Añadir</string>
+    <string name="friends_invite">Invitar</string>
+    <string name="friends_loading">Cargando tus amigos…</string>
+    <string name="friends_error">No pudimos cargar tus amigos. Revisa tu conexión y vuelve.</string>
+    <string name="friends_empty_title">Aún no tienes amigos</string>
+    <string name="friends_empty_body">Añade a alguien por su usuario para estudiar a la vez.</string>
+    <string name="friends_menu_description">Más opciones</string>
+    <string name="friends_section_requests">Solicitudes (%1$d)</string>
+    <string name="friends_section_friends">Amigos (%1$d)</string>
+    <string name="friends_section_sent">Enviadas (%1$d)</string>
+    <string name="friends_accept">Aceptar</string>
+    <string name="friends_decline">Rechazar</string>
+    <string name="friends_cancel_request">Cancelar solicitud</string>
+    <string name="friends_dismiss">Descartar</string>
+    <string name="friends_report">Reportar</string>
+    <string name="friends_remove">Eliminar de amigos</string>
+    <string name="friends_sent_note">Esperando respuesta</string>
+    <string name="friends_failed_cap">No se añadió: uno de los dos ya tiene 50 amigos.</string>
+    <string name="friends_failed_gone">No se añadió: esa cuenta ya no existe.</string>
+    <string name="friends_failed_other">No se añadió. Inténtalo más tarde.</string>
+    <string name="friends_remove_title">¿Eliminar a %1$s?</string>
+    <string name="friends_remove_message">Dejaréis de aparecer en la lista de amigos del otro. Podéis volver a añadiros más tarde.</string>
+    <string name="friends_remove_confirm">Eliminar</string>
+    <string name="friends_cancel">Cancelar</string>
+    <string name="friends_toast_accepted">%1$s ya es tu amigo.</string>
+    <string name="friends_toast_declined">Solicitud rechazada.</string>
+    <string name="friends_toast_cancelled">Solicitud cancelada.</string>
+    <string name="friends_toast_removed">%1$s ya no está en tus amigos.</string>
+    <string name="friends_toast_reported">Reporte enviado. Gracias.</string>
+    <string name="friends_toast_already_reported">Ya reportaste a esta persona.</string>
+    <string name="friends_toast_sent">Solicitud enviada a %1$s.</string>
+    <string name="friends_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="friends_error_network">Sin conexión. Revisa tu internet e inténtalo de nuevo.</string>
+    <string name="friends_error_own_cap">Ya tienes 50 amigos, el máximo.</string>
+    <string name="friends_error_daily_limit">Hoy ya enviaste 20 solicitudes. Inténtalo mañana.</string>
+    <string name="friends_error_no_profile">Crea primero tu perfil.</string>
+
+    <!-- F2-u7 · Añadir un amigo -->
+    <string name="friends_add_title">Añadir un amigo</string>
+    <string name="friends_add_body">Escribe su usuario. Tendrá que aceptar tu solicitud.</string>
+    <string name="friends_add_hint">\@usuario</string>
+    <string name="friends_add_find">Buscar</string>
+    <string name="friends_add_send">Enviar solicitud</string>
+    <string name="friends_add_not_found">Nadie tiene ese usuario.</string>
+    <string name="friends_add_self">Ese es tu propio usuario.</string>
+    <string name="friends_add_already_friends">Ya sois amigos.</string>
+    <string name="friends_add_already_sent">Ya enviaste una solicitud a esta persona.</string>
+    <string name="friends_add_they_sent">Esta persona ya te envió una solicitud. Acéptala en Solicitudes.</string>
+
+    <!-- F2-u7 · Reportar -->
+    <string name="report_title">Reportar a %1$s</string>
+    <string name="report_body_friend">Solo lo ve el equipo de BBetter. %1$s sigue en tus amigos salvo que lo elimines.</string>
+    <string name="report_body_request">Solo lo ve el equipo de BBetter. Esto también rechaza la solicitud de %1$s.</string>
+    <string name="report_send_friend">Enviar reporte</string>
+    <string name="report_send_request">Reportar y rechazar solicitud</string>
+    <string name="report_reason_offensive_name">Nombre o usuario ofensivo</string>
+    <string name="report_reason_impersonation">Se hace pasar por otra persona</string>
+    <string name="report_reason_harassment">Acoso o maltrato</string>
+    <string name="report_reason_other">Otro motivo</string>
+    <string name="report_remove_title">¿Eliminar también a %1$s?</string>
+    <string name="report_remove_message">Tu reporte se envió. También puedes eliminarlo de tus amigos.</string>
+    <string name="report_remove_yes">Eliminar de amigos</string>
+    <string name="report_remove_no">Mantener como amigo</string>
+
+    <!-- F2-u7 · Mi perfil -> Amigos -->
+    <string name="my_profile_friends_row">Amigos (%1$d)</string>
+
 </resources>

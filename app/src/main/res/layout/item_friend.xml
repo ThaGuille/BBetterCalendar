@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F2-u7 · A person in Friends: avatar, name, @username (+ a line of status), overflow menu, and an
+     optional row of actions (Accept / Decline, Cancel, Dismiss). Same card for the three sections. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/friendRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="@dimen/social_friend_row_padding">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.example.bbettercalendar.ui.common.widget.AvatarView
+            android:id="@+id/friendAvatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:avatarSize="@dimen/social_friend_avatar" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_card_gap"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/friendName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+                tools:text="Bob" />
+
+            <TextView
+                android:id="@+id/friendHandle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                tools:text="\@bob" />
+
+            <TextView
+                android:id="@+id/friendNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:textAppearance="@style/TextAppearance.BBetter.SocialError"
+                android:visibility="gone"
+                tools:text="You already have 50 friends." />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/friendMenu"
+            android:layout_width="@dimen/social_friend_menu_target"
+            android:layout_height="@dimen/social_friend_menu_target"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/friends_menu_description"
+            android:src="@drawable/ic_more_vert_24" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/friendActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/friendSecondary"
+            style="@style/Widget.BBetter.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/friends_decline" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/friendPrimary"
+            style="@style/Widget.BBetter.Button.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:text="@string/friends_accept" />
+    </LinearLayout>
+</LinearLayout>

@@ -114,4 +114,73 @@
     <string name="delete_error_bad_password">That password is not correct.</string>
     <string name="delete_error_reauth">We could not confirm it is you. Try again.</string>
     <string name="delete_done">Your account has been deleted.</string>
+    <!-- F2-u7 · Friends -->
+    <string name="friends_top_title">Friends</string>
+    <string name="friends_add">Add</string>
+    <string name="friends_invite">Invite</string>
+    <string name="friends_loading">Loading your friends…</string>
+    <string name="friends_error">We could not load your friends. Check your connection and come back.</string>
+    <string name="friends_empty_title">No friends yet</string>
+    <string name="friends_empty_body">Add someone by their username to study side by side.</string>
+    <string name="friends_menu_description">More options</string>
+    <string name="friends_section_requests">Requests (%1$d)</string>
+    <string name="friends_section_friends">Friends (%1$d)</string>
+    <string name="friends_section_sent">Sent (%1$d)</string>
+    <string name="friends_accept">Accept</string>
+    <string name="friends_decline">Decline</string>
+    <string name="friends_cancel_request">Cancel request</string>
+    <string name="friends_dismiss">Dismiss</string>
+    <string name="friends_report">Report</string>
+    <string name="friends_remove">Remove from friends</string>
+    <string name="friends_sent_note">Waiting for a reply</string>
+    <string name="friends_failed_cap">Not added: one of you already has 50 friends.</string>
+    <string name="friends_failed_gone">Not added: that account no longer exists.</string>
+    <string name="friends_failed_other">Not added. Try again later.</string>
+    <string name="friends_remove_title">Remove %1$s?</string>
+    <string name="friends_remove_message">You will disappear from each other\'s friends list. You can add each other again later.</string>
+    <string name="friends_remove_confirm">Remove</string>
+    <string name="friends_cancel">Cancel</string>
+    <string name="friends_toast_accepted">%1$s is now your friend.</string>
+    <string name="friends_toast_declined">Request declined.</string>
+    <string name="friends_toast_cancelled">Request cancelled.</string>
+    <string name="friends_toast_removed">%1$s removed from your friends.</string>
+    <string name="friends_toast_reported">Report sent. Thank you.</string>
+    <string name="friends_toast_already_reported">You already reported this person.</string>
+    <string name="friends_toast_sent">Request sent to %1$s.</string>
+    <string name="friends_error_generic">Something went wrong. Try again.</string>
+    <string name="friends_error_network">No connection. Check your internet and try again.</string>
+    <string name="friends_error_own_cap">You already have 50 friends, the maximum.</string>
+    <string name="friends_error_daily_limit">You have sent 20 requests today. Try again tomorrow.</string>
+    <string name="friends_error_no_profile">Create your profile first.</string>
+
+    <!-- F2-u7 · Add a friend -->
+    <string name="friends_add_title">Add a friend</string>
+    <string name="friends_add_body">Type their username. They will have to accept your request.</string>
+    <string name="friends_add_hint">\@username</string>
+    <string name="friends_add_find">Find</string>
+    <string name="friends_add_send">Send request</string>
+    <string name="friends_add_not_found">No one has that username.</string>
+    <string name="friends_add_self">That is your own username.</string>
+    <string name="friends_add_already_friends">You are already friends.</string>
+    <string name="friends_add_already_sent">You already sent a request to this person.</string>
+    <string name="friends_add_they_sent">This person already sent you a request. Accept it in Requests.</string>
+
+    <!-- F2-u7 · Report -->
+    <string name="report_title">Report %1$s</string>
+    <string name="report_body_friend">Only the BBetter team sees it. %1$s stays in your friends unless you remove them.</string>
+    <string name="report_body_request">Only the BBetter team sees it. This also declines the request from %1$s.</string>
+    <string name="report_send_friend">Send report</string>
+    <string name="report_send_request">Report and decline request</string>
+    <string name="report_reason_offensive_name">Offensive name or username</string>
+    <string name="report_reason_impersonation">Pretending to be someone else</string>
+    <string name="report_reason_harassment">Harassment or abuse</string>
+    <string name="report_reason_other">Something else</string>
+    <string name="report_remove_title">Remove %1$s too?</string>
+    <string name="report_remove_message">Your report was sent. You can also remove them from your friends.</string>
+    <string name="report_remove_yes">Remove from friends</string>
+    <string name="report_remove_no">Keep as friend</string>
+
+    <!-- F2-u7 · My profile -> Friends -->
+    <string name="my_profile_friends_row">Friends (%1$d)</string>
+
 </resources>

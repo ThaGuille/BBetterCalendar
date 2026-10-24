@@ -1,6 +1,6 @@
 # Sistema social — guía
 
-> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-20
+> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-24
 > **¿Dónde estamos?** → [tablero](../../.claude/plans/sistema-social.md) (fases, entregables, diferidos,
 > preguntas abiertas, diario). El progreso **no** vive en esta carpeta.
 
@@ -150,3 +150,4 @@ el usuario, también se registra una `D-xxx`.
 | 2026-10-20 | Q-03 cerrada: tope de 50 amigos confirmado | D-015 |
 | 2026-10-20 | F2 solo en el emulador (App Links en el AVD, Install Referrer en L) y pruebas en un móvil físico por USB; 03 §3 y §11 | D-025, D-026 |
 | 2026-10-20 | Sin bloquear: amistad mutua con añadir y eliminar, reportar aparte; 02 §4 y §9, 03 §3–§7 y 04 §2 | D-027 |
+| 2026-10-24 | D-028 aceptada al cerrar F2: 03 §5 (`friendRequests` con tarjetas y sin `declined`, contador e `inviteCode` en `users/`, `invites/`, ids de los reportes), §6 (reglas de F2), §7 y §11 (`InviteLinkActivity`, Install Referrer, Hosting) describen lo construido | D-028 |

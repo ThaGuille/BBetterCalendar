@@ -120,7 +120,7 @@ Per-runtime-subsystem living docs (intent, async/manifest wiring, invariants, co
 | Startup & config | [`startup-config.md`](.claude/docs/systems/startup-config.md) | `SplashActivity` boot sequence, `ConfigurationManager` |
 | Projects | [`projects.md`](.claude/docs/systems/projects.md) | `Project` entity, `projectId` on `CalendarEntry`, Projects tab + detail screen |
 | UI placeholders | [`ui-placeholders.md`](.claude/docs/systems/ui-placeholders.md) | Ledger of designed UI that shows mock/approximate data (`PLACEHOLDER(ui-placeholders#id)` markers); social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK` (`social/`) |
-| Social (accounts) | [`social.md`](.claude/docs/systems/social.md) | Age gate, sign-in (Google / email), profile + `@usuario`, `deleteAccount`, Firestore rules, flags, Emulator Suite workflow (F1) |
+| Social (accounts + friends) | [`social.md`](.claude/docs/systems/social.md) | Age gate, sign-in (Google / email), profile + `@usuario`, `deleteAccount`, Firestore rules, flags, Emulator Suite workflow (F1); friends, requests, invitations (link / QR / App Link), reports, Functions, `actor.js`, physical phone (F2) |
 
 Excluded (owned elsewhere): `popups`/`helpers`/`feedback` (see `architectural_patterns.md`). **Code wins on conflict** — if a doc drifts, fix it and bump its `Last verified:` date.
 
@@ -194,8 +194,8 @@ with e.g. "use the code-reviewer subagent".
 | `app/src/main/java/.../usage/` | Usage measurement (`UsageStatsRepository`) + `limits/` (alarm-based warn pipeline) |
 | `app/src/main/java/.../blocking/` | Accessibility-service enforcement (cover overlay / bounce-to-home) |
 | `app/src/main/java/.../notifications/` | Channels, `BBetterNotifier`, permission gate + per-feature notifiers (`focus/`, `usage/`, `event/`) |
-| `app/src/main/java/.../social/` | Social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK`: `SocialFeature`, `SocialRepository` (mock / empty), Hilt `SocialModule`; F1 accounts behind `FEATURE_SOCIAL` in `account/` and `profile/` (see `systems/social.md`); `firebase/FirebaseModule` (Hilt, 4 Firebase clients, emulator switch) |
-| `firebase/` | Backend of the social system (D-016): rules (deny-all), Functions skeleton, rules tests, Emulator Suite config. Commands in its `README.md` (needs JDK 21 for the CLI) |
+| `app/src/main/java/.../social/` | Social mock behind `BuildConfig.FEATURE_SOCIAL_MOCK`: `SocialFeature`, `SocialRepository` (mock / empty), Hilt `SocialModule`; F1 accounts behind `FEATURE_SOCIAL` in `account/` and `profile/`; F2 friends in `common/` (`SerialExecutor`, `WatchedListener`, `Backoff`), `friends/` (`FriendsRepository`, `ReportRepository`, `*Writes`) and `invite/` (`InviteRepository`, `InviteCodes`, `QrMatrix`, `InstallReferrerReader`) (see `systems/social.md`); `firebase/FirebaseModule` (Hilt, 4 Firebase clients, emulator switch, `FIREBASE_EMULATOR_HOST`) |
+| `firebase/` | Backend of the social system (D-016): Firestore / RTDB rules (F1 + F2), Functions (`deleteAccount`, `onFriendRequestAccepted`, `removeFriend`), rules and integration tests, `tests/tools/actor.js`, Hosting emulator files, `scripts/adb-reverse.ps1`, Emulator Suite config. Commands in its `README.md` (needs JDK 21 for the CLI) |
 | `app/src/main/java/.../helpers/` | `FormatHelper`, `ScreenHelper`, `ToolbarHelper`, toolbar listener interfaces |
 | `app/src/main/java/.../popups/` | `PopupHelper` base + 6 concrete dialog fragments |
 | `app/src/main/java/.../feedback/` | `HapticFeedback`, `SoundFeedback` |

@@ -1,6 +1,6 @@
 # 03 · Arquitectura
 
-> **Última revisión:** 2026-10-20 · Guía: [README](README.md) · Producto: [02](02-producto.md)
+> **Última revisión:** 2026-10-24 · Guía: [README](README.md) · Producto: [02](02-producto.md)
 >
 > Cómo se monta. Es el diseño objetivo: lo que ya existe se documenta en
 > `.claude/docs/systems/social.md` a partir de F1. Las secciones se citan como `03 §N`.
@@ -65,13 +65,14 @@ Nadie lee tu Room. Tú publicas agregados y presencia, y tus amigos los escuchan
 
 | Ruta | Campos | Lee | Escribe |
 |---|---|---|---|
-| `users/{uid}` (privado) | `createdAt`, `ageBand` (`14-17`/`18+`), `termsVersion`, `termsAcceptedAt`, `fcmTokens[]` (F5) | Dueño | Dueño |
+| `users/{uid}` (privado) | `createdAt`, `ageBand` (`14-17`/`18+`, inmutable), `termsVersion`, `termsAcceptedAt`, y desde F2 el contador diario de solicitudes `reqDay` (día UTC desde epoch), `reqCount` (1..20), `reqLastTo` (uid del último destinatario) y `inviteCode` (código de invitación propio); `fcmTokens[]` (F5) | Dueño | Dueño (el contador solo en el mismo lote que la solicitud; `inviteCode` solo en el lote que crea `invites/{código}`) |
 | `profiles/{uid}` | `displayName`, `handle`, `avatarColor` (0–7), `createdAt`, `handleChangedAt` (ausente hasta el primer renombrado) | Dueño + amigos | Dueño |
 | `handles/{handle}` | `uid`, `displayName`, `avatarColor` (tarjeta pública mínima) | Cualquier usuario con sesión, **solo `get`** (sin `list`) | Dueño; crear solo si no existe (unicidad) |
-| `friendRequests/{fromUid_toUid}` | `from`, `to`, `createdAt`, `status` (`pending`/`accepted`/`declined`) | `from` y `to` | `from` crea y borra (cancelar); `to` cambia el estado. El id determinista evita duplicados |
+| `friendRequests/{fromUid_toUid}` | `from`, `to`, `status` (`pending`/`accepted`/`failed`, sin `declined`), `createdAt`, y las tarjetas desnormalizadas `fromHandle`, `fromName`, `fromColor`, `toHandle`, `toName`, `toColor` (10 campos exactos; `failReason` `cap`/`gone` solo lo añade una Function al marcar `failed`) | `from` y `to` | `from` crea (con el contador de `users/{from}` en el mismo lote) y borra (cancelar); `to` pasa `pending` a `accepted` y borra (rechazar). Rechazar o cancelar borra la solicitud (D-028). El id determinista evita duplicados |
 | `users/{uid}/friends/{friendUid}` | `since` | Dueño | **Solo Functions** |
 | `stats/{uid}` | `dayKey`, `weekKey`, `minutesToday`, `minutesWeekCapped`, `daysThisWeek`, `weeklyGoal`, `weekStreak`, `bestWeekStreak`, `totalMinutes`, `updatedAt` | Dueño + amigos | Dueño (con rangos validados) |
-| `reports/{autoId}` | `reporter`, `reported`, `reason` (enum), `createdAt` | Nadie (consola) | Crear: cualquier usuario con sesión, con `reporter == auth.uid` |
+| `invites/{código}` | `uid`, `handle`, `createdAt`; el código son 8 caracteres de `[A-HJKMNP-Z2-9]` y cada persona tiene uno (`users/{uid}.inviteCode`) | Cualquier usuario con sesión, **solo `get`** (sin `list`) | Dueño, en el mismo lote que fija `users/{uid}.inviteCode`; el renombrado actualiza `handle` |
+| `reports/{reporter_reported}` | `reporter`, `reported`, `reportedHandle`, `reason` (`offensive_name`/`impersonation`/`harassment`/`other`), `context` (`friend`/`request`), `createdAt` | Nadie (consola) | Solo crear, con `reporter == auth.uid` y una relación (amigo o solicitud de esa persona); el id determinista hace que un segundo reporte sea una actualización y se deniegue |
 | `users/{uid}/inbox/{id}` (F5) | `type` (`request`/`cheer`/`nudge`), `from`, `createdAt`, `read` | Dueño | Functions; el dueño marca `read` |
 
 No hay campos para fallos, calendario, tareas, proyectos ni tiempo de pantalla (P5). No aparecen en el
@@ -101,7 +102,16 @@ match /handles/{h}      { allow get: if signedIn(); allow list: if false;
                           allow create: if request.resource.data.uid == request.auth.uid;
                           allow delete: if resource.data.uid == request.auth.uid; }
 match /users/{uid}/friends/{f} { allow read: if request.auth.uid == uid; allow write: if false; }
-match /reports/{id}     { allow create: if request.resource.data.reporter == request.auth.uid; allow read, update, delete: if false; }
+match /reports/{id}     { allow create: if validReportCreate(id); allow read, update, delete: if false; }
+                          // F2: id == reporter_reported, campos y enums exactos, y relación (amigo o solicitud)
+match /friendRequests/{id} { allow create: if validRequestCreate(id);   // 10 campos, tarjetas = handles/, sin cruzada,
+                                                                        // contador de users/ en el mismo lote (≤ 20/día)
+                             allow update: if validRequestAccept();     // solo `to`, pending → accepted, solo `status`
+                             allow delete: if validRequestDelete();     // from o to, pending o failed
+                             allow read: if resource.data.from == request.auth.uid || resource.data.to == request.auth.uid; }
+match /invites/{code}   { allow get: if signedIn(); allow list: if false;
+                          allow create: if validInviteCreate(code); allow update: if validInviteUpdate();
+                          allow delete: if validInviteDelete(code); }
 
 // RTDB
 "status": { "$uid": { ".read":  "auth.uid === $uid || root.child('friends').child($uid).child(auth.uid).exists()",
@@ -117,8 +127,8 @@ tests son parte del «hecho cuando» de F2 y F3.
 | Function | Disparador | Qué hace | Fase |
 |---|---|---|---|
 | `deleteAccount` | Callable | Borra perfil, handle, stats, solicitudes, amistades (los dos lados), espejo, estado, inbox y bloqueos, y por último el usuario de Auth | F1 |
-| `onFriendRequestAccepted` | Firestore: `friendRequests` pasa a `accepted` | En un batch: `users/A/friends/B`, `users/B/friends/A`, espejo RTDB y borrar la solicitud. Comprueba el tope de 50 | F2 |
-| `removeFriend` | Callable | Borra los dos lados y el espejo | F2 |
+| `onFriendRequestAccepted` | Firestore: `friendRequests` pasa de `pending` a `accepted` | En una transacción: relee la solicitud, marca `failed` (`gone` si falta `users/A` o `users/B`, `cap` con 50 amigos, D-015) o escribe `users/A/friends/B` y `users/B/friends/A` y borra la solicitud; después el espejo RTDB. Idempotente y con `retry: true` | F2 (hecha) |
+| `removeFriend` | Callable | Borra los dos lados y el espejo; idempotente y limpia amistades de un solo lado. `deleteAccount` borra además los `invites/` de la cuenta | F2 (hecha) |
 | `sendCheer` / `sendNudge` | Callable | Comprueba la amistad y el límite diario, escribe en el inbox y manda push FCM | F5 |
 | `onFriendRequestCreated` | Firestore | Escribe en el inbox y manda push | F5 (sin push en F2: solo inbox) |
 
@@ -215,6 +225,22 @@ ui/social/         age gate, hoja de login, crear perfil, mi perfil, amigos, añ
   no está publicada (D-018). El enlace de Play se añade al publicar y el de invitación con código llega en F2.
 - **En F2 (D-025):** `assetlinks.json` y la página se sirven con el emulador de Hosting; el App Link se
   prueba en el AVD aprobando el dominio a mano. Install Referrer solo con JUnit hasta el gate L.
+- **Construido en F2 (D-028):**
+  - **Código:** `invites/{código}` (`uid`, `handle`, `createdAt`), uno por persona (`users/{uid}.inviteCode`),
+    creado con `InviteRepository.ensureMyCode()` en el mismo lote que fija `inviteCode`. Se resuelve con una
+    lectura de Firestore (`get`), sin desplegar nada: `resolve(code)` lee `invites/` y comprueba `handles/{handle}`;
+    si el `uid` ya no cuadra, la invitación ha caducado.
+  - **Enlace y QR:** `https://bbetter-dbcda.web.app/i/<código>` (`InviteLinkFactory`); el QR es el mismo enlace
+    (`QrMatrix`, ZXing `core`, corrección M).
+  - **App Link:** el intent-filter `autoVerify` vive solo en el manifiesto de debug hasta L.7 y apunta a
+    `ui/social/InviteLinkActivity` (sin interfaz, `noHistory`), que guarda el código en `SocialPrefs`
+    (`pending_invite`, caduca a los 7 días) y abre el intent del launcher; nunca pasa por `SplashActivity`, porque
+    un VIEW sobre ella crearía una segunda `MainActivity`. `PendingInviteViewModel` lo recoge en
+    `MainActivity.onResume` y, con perfil, abre «Añadir a X».
+  - **Install Referrer:** `InstallReferrerReader.readOnce()` al arrancar, solo con cuentas activas, y deja la misma
+    invitación pendiente. Solo se prueba el parser con JUnit hasta el gate L.
+  - **Hosting:** `firebase/hosting/public/` con `.well-known/assetlinks.json` y `/i/index.html`, servidos por el
+    emulador en el puerto 5000.
 - El dominio propio de GitHub Pages (`thaguille.github.io/BBetterCalendar/`) **no sirve** para App
   Links, porque `assetlinks.json` tiene que estar en la raíz del dominio. Por eso se usa Hosting.
 

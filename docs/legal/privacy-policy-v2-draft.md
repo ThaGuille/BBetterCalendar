@@ -72,10 +72,11 @@ year itself is never uploaded; only the age band (14–17 or 18+) is stored with
 | Email address and sign-in identifiers (Google or email sign-in) | To create and secure your account | Nobody else |
 | Display name, @username, avatar colour | So your friends can recognise you | Your friends; anyone who types your exact @username sees only name and avatar |
 | Age band (14–17 or 18+) | Age rules and safety | Nobody else |
-| Friend list, friend requests, blocks | To run Friends | You (and the other person in each request) |
+| Friend list and friend requests (sent, received, and the daily request counter) | To run Friends | You (and the other person in each request) |
+| Your invite code (a random 8-character code tied to your @username) | To let someone add you from a link or a QR code | Anyone who has the link or code sees your display name and @username only |
 | **Summary** focus statistics: minutes today and this week (capped at 4 h per day), focus days this week, weekly goal, weekly streak, best streak, total minutes | Shared ranking and friend profiles | Your friends |
 | "Studying now" status (focusing, on a break, or not studying) and when the current session started | Live presence | Your friends |
-| Reports you send about another user | Moderation | Only us |
+| Reports you send about another user (who reported whom, the reason you chose, the date; no free text) | Moderation | Only us |
 | Notification token (when interactions are enabled) | To deliver friend requests and cheers | Nobody else |
 
 ### What is never shared, with or without an account
@@ -155,7 +156,7 @@ Questions and requests: yonkiporki@gmail.com
 | Terms + policy acceptance at account creation | [CONFIRM] Create profile screen (F1.4) → `users/{uid}.termsVersion` |
 | Account deletion (in app) | [CONFIRM] My profile → `deleteAccount` callable (F1.6) |
 | Account deletion (web) | `docs/legal/delete-account.md` [CONFIRM] |
-| Report / block | [CONFIRM] Friend profile (F2.6) |
+| Report | Friends list and friend requests (F2.6); from a friend's profile with F3 [CONFIRM when F3 ships] |
 
 > **Invariant kept from v1:** phone and app-usage data is processed **only on the device**. Friends
 > adds a server, but only for the data in the table above. Adding usage or screen-time data to it

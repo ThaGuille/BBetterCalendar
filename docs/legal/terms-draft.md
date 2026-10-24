@@ -71,12 +71,15 @@ cannot be registered, and a basic word filter in Spanish, English and Catalan is
 
 If you accept someone as a friend they can see your display name, avatar colour, **summary** focus
 statistics and "studying now" status, as described in the Privacy Policy. Your phone and app usage,
-screen time, calendar, tasks and projects are never shared. You can remove or block a friend at any
-time; blocking hides everything in both directions.
+screen time, calendar, tasks and projects are never shared. You can remove a friend at any time:
+you disappear from each other's list and they can no longer read your profile. There is no blocking
+feature at this stage; you can report a user instead (section 5).
 
 ## 5. Reports and moderation
 
-- You can **report** and **block** any user from their profile. [CONFIRM: Friend profile, F2.6]
+- You can **report** a user from your friends list and from a friend request you received, choosing
+  a reason (offensive name, impersonation, harassment or other). Reporting a request also declines it.
+  Reporting from a friend's profile arrives with that screen. [CONFIRM when the friend profile ships, F3]
 - Reports are reviewed by the developer from the Firebase console. [CONFIRM review frequency, set at
   gate L.4] Reports of harassment, especially involving users aged 14 to 17, are handled first.
 - Possible actions: asking you to change a name, renaming it ourselves, a warning, suspending the

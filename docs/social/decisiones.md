@@ -38,7 +38,7 @@
 | D-025 | F2 también solo contra el Emulator Suite; los App Links se prueban en el AVD | aceptada | 2026-10-20 |
 | D-026 | Probar lo social en un móvil físico por USB | aceptada | 2026-10-20 |
 | D-027 | Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene | aceptada | 2026-10-20 |
-| D-028 | Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja | propuesta | 2026-10-20 |
+| D-028 | Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja | aceptada | 2026-10-24 |
 
 ---
 
@@ -244,8 +244,8 @@
   `blocks/` (inofensivo; se puede simplificar).
 
 ### D-028 · Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja
-- **Estado:** propuesta (Claude, 2026-10-20, en el plan [`social-f2-amigos.md`](../../.claude/plans/social-f2-amigos.md)).
-  Se acepta al cerrar F2, cuando 03 §5, §6 y §11 se corrijan con lo construido.
+- **Estado:** aceptada (propuesta de Claude el 2026-10-20 en el plan [`social-f2-amigos.md`](../../.claude/plans/social-f2-amigos.md);
+  aceptada el 2026-10-24 al cerrar F2, con 03 §5, §6, §7 y §11 corregidas con lo construido).
 - **Decisión:**
   1. Rechazar o cancelar borra la solicitud: no hay estado `declined`. Volver a enviar es crear otra vez
      el id `fromUid_toUid`. `status` es `pending`, `accepted` o `failed` (solo Functions: `cap` o `gone`).

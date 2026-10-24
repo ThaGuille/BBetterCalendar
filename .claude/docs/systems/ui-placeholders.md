@@ -1,6 +1,6 @@
 # System — UI placeholders (functional-debt ledger)
 
-**Last verified:** 2026-10-20 (DB v14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-24 (DB v14, F2 closed) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Stitch visual migration (`.claude/plans/migracion-visual-stitch.md`) builds every designed
 element whose data already exists in the DB, and **registers the rest here** instead of bumping
@@ -46,9 +46,8 @@ debug, false in release**) through `social/SocialFeature`:
 | `social-rank` | Cycle complete (u15) | `cycleBestTile` ("Best · 2nd among friends") | Fixed `SocialRank(2, 9)` | Rank computed from the user's real focus time vs friends' (needs `social-backend`) | P2 (hidden in release) |
 | `social-home-friends` | Home (u13/u13b) | `homeFriendsCard` ("3 friends studying now · Maya, Alex, Leo") | Mock studying friends (avatars + names) | Real presence (`social-backend`); tap target / friends screen | P2 (hidden in release) |
 | `social-focus-studying` | Focus (u14) | `focusSocialBlock` (`focusStudyingHeader` "5 / 8", `focusFriendsGrid`) | Mock friends, static times, crown on the first | Live presence + ticking session times (`social-backend`) | P2 (hidden in release) |
-| `social-focus-invite` | Focus (u14) | `focusInviteButton` | Inert button (toast "Inviting friends is coming soon") | Invite flow (share link, deep link, accounts) | P2 (hidden in release) |
 | `social-celebration-strip` | Cycle complete (u15) | `cycleFriendsStrip` ("Laia and 3 others still studying · Live") | Mock top friend + count (`getCelebrationSnapshot()`) | Real presence (`social-backend`) | P2 (hidden in release) |
-| `home-notification-centre` | Home (u13) | `homeBellButton` | Bell with a fixed honey dot; tap shows a "coming soon" toast | Notification centre / inbox screen + unread state for the dot | P2 |
+| `home-notification-centre` (partial) | Home (u13) | `homeBellButton` / `homeBellDot` | Signed in with a profile (F2-u8): the dot shows only when there are received friend requests and a tap opens Friends at Requests. Without an account or in release: the fixed honey dot and the "coming soon" toast | The notification centre / inbox (F5): cheers, nudges and push; until then the bell only knows friend requests | P2 |
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
 | `projects-streak-chip` | Projects (u16) | `projectsStreakChip` | The **global** streak (hidden at 0), not a per-project streak | `focus_event` does not attribute a streak per project | P2 |
 | `progress-tasks-done-approx` | Progress (u17) | `progressTileTasks` | Counts done tasks whose start date falls in the range | A completion timestamp on `CalendarEntry` (schema change + real `Migration`) | P2 |
@@ -64,6 +63,7 @@ debug, false in release**) through `social/SocialFeature`:
 | `cycle-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
 | `progress-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
 | `home-user-name` | 2026-10-20 | F1-u8: `GreetingResolver` (profile name, else local name in `SocialPrefs`, else generic greeting) |
+| `social-focus-invite` | 2026-10-24 | F2-u8: `focusInviteButton` opens `InviteSheet` (`@usuario`, link with copy and share, QR) when signed in with a profile, or the entry router otherwise; markers removed from Java and layout |
 
 ## History
 | Date | Change | Ref |
@@ -73,3 +73,4 @@ debug, false in release**) through `social/SocialFeature`:
 | 2026-10-13 | Rows of u13b–u20 consolidated; social data sets split per design | u24 (migracion-visual-stitch-cont) |
 | 2026-10-19 | `cycle-share` and `progress-share` resolved: image card + FileProvider + ACTION_SEND (text only, Q-06) | F0-u5 (social-f0-base) |
 | 2026-10-20 | `home-user-name` resolved: Home greeting and avatar come from the profile or a local name; markers and `home_user_name_placeholder` removed | F1-u8 (social-f1-cuenta) |
+| 2026-10-24 | `social-focus-invite` resolved (invite sheet); `home-notification-centre` stays open but partial: the bell dot and tap are real for friend requests when signed in with a profile; the Focus/Home friend mock keeps its rows until F4 | F2-u8, closed in F2-u9 (social-f2-amigos) |

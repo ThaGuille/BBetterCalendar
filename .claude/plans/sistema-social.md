@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-23 (F2-u6 hecha)
+**Last updated:** 2026-10-24 (F2 cerrada)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,13 +15,11 @@
 
 ## Ahora
 
-- **Fase activa:** **F2** (Amigos) · plan [`social-f2-amigos.md`](social-f2-amigos.md) (`in progress`, 9 unidades
-  en 5 olas). F0 y F1 hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md));
-  el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** olas 1 y 2 de F2 hechas: u1 (endurecer F1), u2 (host del emulador configurable, D-026) y u3 (reglas
-  de F2); de la ola 3, u4 (Functions `onFriendRequestAccepted` y `removeFriend`, `actor.js`) y u5 (datos de amigos y
-  reportes: `social/friends/`), u6 (invitaciones: Hosting en el emulador, `social/invite/`, App Link) y u7 (UI Amigos)
-  y u8 (UI de invitar y campana) hechas. Sigue u9 (cierre de F2).
+- **Fase activa:** ninguna abierta: **F2** (Amigos) está **hecha** ([`social-f2-amigos.md`](social-f2-amigos.md), `merged`). F0, F1 y F2
+  hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md)); el estado as-built está en
+  [`systems/social.md`](../docs/systems/social.md).
+- **Siguiente paso:** abrir **F3** (Stats y ranking: `StatsPublisher`, reglas de `stats/`, perfil de amigo, ranking semanal) con su
+  plan `social-f3-*.md`, siguiendo el protocolo del README de la guía. F3 no está abierta.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -31,7 +29,7 @@
 |---|---|---|---|---|
 | **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | hecha | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
 | **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | hecha | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
-| **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, eliminar y reportar (sin bloquear, D-027) | activa | [`social-f2-amigos.md`](social-f2-amigos.md) | `social-focus-invite`, `home-notification-centre` (parcial) |
+| **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, eliminar y reportar (sin bloquear, D-027) | hecha | [`social-f2-amigos.md`](social-f2-amigos.md) | `social-focus-invite`, `home-notification-centre` (parcial) |
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | pendiente | — | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | pendiente | — | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
 | **F5** Interacción | Ánimo, empujón, push, bandeja | pendiente | — | `home-notification-centre` |
@@ -91,7 +89,7 @@ en el diario.
 - [x] **F2.8** Límites: 50 amigos (D-015) y 20 solicitudes al día — 02 §4
 - [x] **F2.9** Tests de reglas (`friendRequests`, `friends`, `profiles`, `reports`, `invites`, `handles`, RTDB `/friends`)
   y de Functions (`onFriendRequestAccepted`, `removeFriend`) en el emulador — 03 §6, §13
-- [ ] **F2.10** Endurecer F1 (listener en serie y con reenganche, `@usuario` reservados, falsos positivos, reglas de
+- [x] **F2.10** Endurecer F1 (listener en serie y con reenganche, `@usuario` reservados, falsos positivos, reglas de
   `ageBand` y de `users/`) y probar en un móvil físico por USB (D-026) — plan F2-u1, F2-u2
 
 ### F3 · Stats y ranking
@@ -162,6 +160,9 @@ en el diario.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-24 (24)** · F2-u9 hecha, **F2 cerrada**: `systems/social.md` y CLAUDE.md describen el F2 construido; `social-focus-invite` pasa a *Resolved* y `home-notification-centre` sigue abierta (parcial); resueltos los `[CONFIRM]` legales de F2 (sin bloquear; reportar desde la lista y las solicitudes; borrado limpia amigos e invitación); 03 §5, §6, §7 y §11 corregidas y D-028 aceptada. En `api36`: re-autenticación al borrar la cuenta con email (más de 5 minutos → contraseña → borrada) y con Google (selector → borrada). F2.1-F2.10 marcados. Ley 121/000052 (04 §5): sin aprobar según lo último localizado (enmiendas al articulado en comisión, dic-2025); no se pudo confirmar el estado de oct-2026, hay que mirar la ficha del Congreso; sin cambios para F2 (`SOCIAL_MIN_AGE` sigue en 14).
+  Commit «F2-u9: cierre de la fase F2 (documentación, [CONFIRM] legales, D-028 aceptada y re-autenticación probada)».
+  **Siguiente:** abrir F3 (Stats y ranking); push y fusión de `bt/social-f2-amigos` en `main` por la sesión principal.
 - **2026-10-24 (23)** · F2-u8 hecha: hoja Invitar (`InviteSheet`: `@usuario`, enlace con copiar y compartir, QR oscuro sobre claro con `bb_qr_*`; `ensureMyCode()` al abrir) desde Focus y Amigos, hoja «Añadir a X» (`AcceptInviteSheet` + `PendingInviteViewModel`: App Link o referrer, antes o después de iniciar sesión; ya sois amigos, enlace propio, caducado, ya enviada) y campana de Home con punto solo con solicitudes que abre Solicitudes. En `api36` con el Emulator Suite y `actor.js`: enlace, QR, selector de compartir, App Link con y sin sesión hasta la solicitud enviada, campana con y sin solicitudes; 0 `FATAL EXCEPTION`. F2.3, F2.5 y F2.7 marcados.
   Commit «F2-u8: hojas Invitar y Añadir a X desde una invitación, y punto de la campana».
   **Siguiente:** u9 (cierre de F2: documentación, [CONFIRM] legales, re-autenticación y tablero).

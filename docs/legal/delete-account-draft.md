@@ -52,11 +52,13 @@ When your account is deleted we remove:
 - your sign-in account (email and sign-in identifiers);
 - your profile: display name, @username, avatar colour and age band;
 - your shared summary focus statistics and your "studying now" status;
-- your friend list, friend requests sent and received, and your blocks;
+- your friend list, friend requests sent and received, and your invitation link;
 - your notification token and pending notifications. [CONFIRM when notifications ship, F5]
 
 Deletion from Firestore and the Realtime Database is immediate. Your @username is released at the same
-time and can be claimed again. [CONFIRM: cleanup of friends' lists and presence, tested in F2]
+time and can be claimed again. You are also removed from your friends' lists and the invitation
+link stops working; this is covered by the automated tests of the account deletion. Live presence
+does not exist yet. [CONFIRM presence cleanup when it ships, F4]
 
 ## What may be kept
 
@@ -71,7 +73,7 @@ Deleting your account does **not** erase anything stored on your phone: focus se
 statistics, calendar entries, tasks, projects and app limits stay in the app's local database and the
 app keeps working without an account. To remove them too, clear the app's data in Android Settings or
 uninstall BBetter. Your friends only see you disappear from their list; they keep nothing about you.
-[CONFIRM friends' view after deletion]
+They can no longer read your profile.
 
 ## Contact
 

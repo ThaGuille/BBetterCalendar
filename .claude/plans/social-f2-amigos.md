@@ -1,11 +1,11 @@
 # Social F2 — Amigos
 
-**Status:** in progress
+**Status:** merged
 **Created:** 2026-10-20
-**Last updated:** 2026-10-24 (F2-u8 hecha)
+**Last updated:** 2026-10-24 (F2-u9 hecha; F2 cerrada)
 
 > Tablero: [sistema-social.md](sistema-social.md) · Guía: 02 §4, §9 · 03 §5, §6, §7, §11, §13 · 04 §2, §6
-> Decisiones que aplica: D-001, D-009, D-011, D-012, D-015, D-018, D-020, D-024, D-025, D-026, D-027 y D-028 (propuesta: ver abajo) · Preguntas que debe cerrar: ninguna
+> Decisiones que aplica: D-001, D-009, D-011, D-012, D-015, D-018, D-020, D-024, D-025, D-026, D-027 y D-028 (aceptada al cerrar F2) · Preguntas que debe cerrar: ninguna
 
 ## Objetivo
 
@@ -32,9 +32,9 @@ Antes de copiar los patrones de F1, la fase empieza corrigiendo sus fallos conoc
 
 Con sesión, `focusSocialBlock` (rejilla «Estudiando ahora») y `homeFriendsCard` («3 amigos estudiando») siguen pintando `MockSocialRepository`. Solo pasa en debug, con `FEATURE_SOCIAL_MOCK`, y sus marcadores `PLACEHOLDER` siguen abiertos. Lo que cambia en F2 son los toques: la tarjeta de Home y la cabecera del bloque de Focus abren la pantalla Amigos real, e «Invitar» abre la hoja real. La lista de Amigos sale siempre de Firestore y no muestra presencia: se ordena alfabéticamente, porque «primero quien estudia» necesita F4. Esto se dice en `systems/social.md`.
 
-### D-028 (propuesta) · Modelo de datos de F2
+### D-028 (aceptada) · Modelo de datos de F2
 
-Recoge lo que D-025 y D-027 dejan a elección de la implementación. Registrada en `docs/social/decisiones.md` como propuesta; se acepta con este plan:
+Recoge lo que D-025 y D-027 dejan a elección de la implementación. Registrada en `docs/social/decisiones.md`; aceptada al cerrar F2 (u9):
 
 1. **Rechazar borra la solicitud.**
    - No hay estado `declined`. Volver a enviar es crear de nuevo el mismo id determinista `fromUid_toUid`, y lo limita el contador diario.
@@ -71,7 +71,7 @@ Recoge lo que D-025 y D-027 dejan a elección de la implementación. Registrada 
 | **F2-u6** | Invitaciones, parte técnica: Hosting (`assetlinks.json` y página `/i/`), `invites/` en la app, App Link con un `InviteLinkActivity` intermedio, Install Referrer y QR | `firebase/firebase.json` (hosting + puerto 5000), `firebase/hosting/public/.well-known/assetlinks.json`, `firebase/hosting/public/i/index.html` (nuevos); `social/invite/InviteRepository`, `InviteCodes`, `InviteLinkFactory`, `InstallReferrerReader`, `QrMatrix` (nuevos); `ui/social/InviteLinkActivity` (nuevo); `app/src/debug/AndroidManifest.xml`; `social/account/SocialPrefs` (invitación pendiente); `ProfileRepository.rename`; `app/build.gradle` (+ `zxing:core`, `installreferrer`) | JUnit `InviteCodesTest`, `InviteLinkFactoryTest` y `QrMatrixTest` (ida y vuelta con el `QRCodeReader` de ZXing); `Invoke-WebRequest` al emulador de Hosting; en `api36`: `pm set-app-links-user-selection` + `am start -d https://bbetter-dbcda.web.app/i/<código>` abre la app y guarda el código | u1, u3 | opus | hecha |
 | **F2-u7** | UI Amigos (F2.4, la parte de UI de F2.6 y F2.8): lista, solicitudes recibidas y enviadas, añadir por `@usuario`, eliminar y reportar; entradas desde Home, Focus y Mi perfil | `ui/social/FriendsFragment`, `FriendsViewModel`, `FriendsAdapter`, `AddFriendSheet`, `ReportSheet` (nuevos), `ui/social/SocialEntryNavigator` y `SocialEntryViewModel` (+ `EntryTarget`), `MyProfileFragment` (fila «Amigos»), `ui/home/HomeFragment`, `ui/focus/FocusFragment`, `res/navigation/mobile_navigation.xml`, `layout/fragment_friends.xml`, `item_friend*.xml`, `sheet_add_friend.xml`, `sheet_report.xml`, `strings_social.xml` (+es), `dimens_social.xml`, `styles_social.xml` | adb-ui-test en `api36` con el Emulator Suite y dos identidades (ver «Dos identidades»): solicitudes en los dos sentidos, aceptar, rechazar, volver a enviar, cancelar, eliminar, tope diario, tope de 50 y reportar; 0 `FATAL EXCEPTION` | u5 (y u4 para verificar) | sonnet + `impeccable` | hecha |
 | **F2-u8** | UI de invitar y campana (F2.3 en la UI, F2.5 y F2.7): hoja «Invitar» de Focus (enlace, QR, `@usuario`); hoja «Añadir a X» desde una invitación pendiente; la campana abre las solicitudes y el punto sale si hay alguna | `ui/social/InviteSheet`, `AcceptInviteSheet`, `PendingInviteViewModel` (nuevos), `MainActivity` (observador de la invitación pendiente), `ui/focus/FocusFragment` (fuera los marcadores `social-focus-invite`), `ui/home/HomeFragment` y `HomeViewModel` (campana), `layout/fragment_focus.xml`, `layout/fragment_home.xml`, `sheet_invite.xml`, `sheet_accept_invite.xml`, `values/colors.xml` (+ `bb_qr_*`), `strings_social.xml` (+es) | adb-ui-test en `api36`: Invitar enseña el enlace, el QR y el `@usuario`; compartir abre el selector; el App Link con sesión → «Añadir a Alice» → solicitud; el App Link sin sesión → puerta de entrada → al tener perfil aparece la hoja; punto de la campana con solicitudes y sin ellas; 0 `FATAL EXCEPTION` | u6, u7 | sonnet + `impeccable` | hecha |
-| **F2-u9** | Cierre: `systems/social.md`, CLAUDE.md, `ui-placeholders.md`, `[CONFIRM]` legales de F2, guía (03 §5, §6, §11) y tablero; pruebas pendientes de F1 en el dispositivo (re-autenticación al borrar la cuenta) | `.claude/docs/systems/social.md`, `CLAUDE.md`, `.claude/docs/systems/ui-placeholders.md`, `docs/legal/terms-draft.md`, `privacy-policy-v2-draft.md`, `delete-account-draft.md`, `docs/social/03-arquitectura.md`, `docs/social/README.md` (Historial), `.claude/plans/sistema-social.md` | `test assembleDebug assembleRelease` y la suite completa de Firebase en verde; `grep PLACEHOLDER(ui-placeholders#social-focus-invite)` vacío; `check_pages.py` solo publica la v1; re-autenticación en `api36` tras más de 5 minutos | todas | sonnet | pendiente |
+| **F2-u9** | Cierre: `systems/social.md`, CLAUDE.md, `ui-placeholders.md`, `[CONFIRM]` legales de F2, guía (03 §5, §6, §11) y tablero; pruebas pendientes de F1 en el dispositivo (re-autenticación al borrar la cuenta) | `.claude/docs/systems/social.md`, `CLAUDE.md`, `.claude/docs/systems/ui-placeholders.md`, `docs/legal/terms-draft.md`, `privacy-policy-v2-draft.md`, `delete-account-draft.md`, `docs/social/03-arquitectura.md`, `docs/social/README.md` (Historial), `.claude/plans/sistema-social.md` | `test assembleDebug assembleRelease` y la suite completa de Firebase en verde; `grep PLACEHOLDER(ui-placeholders#social-focus-invite)` vacío; `check_pages.py` solo publica la v1; re-autenticación en `api36` tras más de 5 minutos | todas | sonnet | hecha |
 
 **Orden y paralelismo.** Cada unidad: implementar → `.\gradlew.bat test assembleDebug` (y la suite de Firebase si toca `firebase/`) → un commit.
 - **Ola 1:** u1 ∥ u2 (u1 toca `ProfileRepository`, las reglas y los tests; u2 toca Gradle, `FirebaseModule`, la configuración de red y el script).
@@ -318,18 +318,18 @@ Modelo: opus para u1, u3, u4, u5 y u6 (reglas, Functions y capa de datos); sonne
 
 ## Hecho cuando
 
-- [ ] `.\gradlew.bat test assembleDebug assembleRelease` en verde.
-- [ ] Suite completa de Firebase en verde con `firebase emulators:exec --only auth,firestore,database,functions --project demo-bbetter` (reglas de F1 y F2, `deleteAccount`, `onFriendRequestAccepted` y `removeFriend`); la mutación de las reglas de u3 las mata todas.
-- [ ] u1: eventos del perfil en orden, sin `READY` después de `SIGNED_OUT`; reenganche con espera creciente y al volver a primer plano (JUnit); `__x__`, «therapist» y «retard» (CA) bien tratados; `ageBand` inmutable y perfil sin `users/` denegado.
-- [ ] u2: `-PfirebaseEmulatorHost=127.0.0.1` + `adb-reverse.ps1` funcionan en `api36`; documentado en `systems/social.md` y en `firebase/README.md`.
-- [ ] En `api36` con el Emulator Suite: enviar por `@usuario`, aceptar (los dos lados y el espejo en la UI del emulador), rechazar y volver a enviar, cancelar, eliminar (los dos lados fuera, perfil ya no legible), la solicitud 21.ª del día rechazada, el tope de 50 (`failed/cap` visible), reportar desde la lista y desde una solicitud (`reports/` con el id determinista).
-- [ ] Invitar: enlace, QR y `@usuario` en la hoja; el App Link aprobado a mano abre «Añadir a X» con sesión y después de iniciarla; `assetlinks.json` y `/i/` servidos por el emulador de Hosting; `InstallReferrerReader` con su JUnit.
-- [ ] Campana: punto solo con solicitudes recibidas; tocarla abre Solicitudes.
-- [ ] Entradas a Amigos desde la tarjeta de Home, el bloque de Focus y Mi perfil (D-012).
-- [ ] Verificación en `api36` sin `FATAL EXCEPTION` (regla #7) en u7 y u8.
-- [ ] Rama de re-autenticación al borrar la cuenta probada en `api36` (sesión de más de 5 minutos).
-- [ ] `systems/social.md`, CLAUDE.md, `ui-placeholders.md` (`social-focus-invite` en *Resolved*), `[CONFIRM]` de F2.6 resueltos, guía (03 §5, §6, §11) con su fila de Historial y D-028 aceptada.
-- [ ] Tablero: F2 hecha, F2.1 – F2.9 marcados, diario al día (con el estado de la ley 121/000052).
+- [x] `.\gradlew.bat test assembleDebug assembleRelease` en verde.
+- [x] Suite completa de Firebase en verde con `firebase emulators:exec --only auth,firestore,database,functions --project demo-bbetter` (reglas de F1 y F2, `deleteAccount`, `onFriendRequestAccepted` y `removeFriend`); la mutación de las reglas de u3 las mata todas.
+- [x] u1: eventos del perfil en orden, sin `READY` después de `SIGNED_OUT`; reenganche con espera creciente y al volver a primer plano (JUnit); `__x__`, «therapist» y «retard» (CA) bien tratados; `ageBand` inmutable y perfil sin `users/` denegado.
+- [x] u2: `-PfirebaseEmulatorHost=127.0.0.1` + `adb-reverse.ps1` funcionan en `api36`; documentado en `systems/social.md` y en `firebase/README.md`.
+- [x] En `api36` con el Emulator Suite: enviar por `@usuario`, aceptar (los dos lados y el espejo en la UI del emulador), rechazar y volver a enviar, cancelar, eliminar (los dos lados fuera, perfil ya no legible), la solicitud 21.ª del día rechazada, el tope de 50 (`failed/cap` visible), reportar desde la lista y desde una solicitud (`reports/` con el id determinista).
+- [x] Invitar: enlace, QR y `@usuario` en la hoja; el App Link aprobado a mano abre «Añadir a X» con sesión y después de iniciarla; `assetlinks.json` y `/i/` servidos por el emulador de Hosting; `InstallReferrerReader` con su JUnit.
+- [x] Campana: punto solo con solicitudes recibidas; tocarla abre Solicitudes.
+- [x] Entradas a Amigos desde la tarjeta de Home, el bloque de Focus y Mi perfil (D-012).
+- [x] Verificación en `api36` sin `FATAL EXCEPTION` (regla #7) en u7 y u8.
+- [x] Rama de re-autenticación al borrar la cuenta probada en `api36` (sesión de más de 5 minutos).
+- [x] `systems/social.md`, CLAUDE.md, `ui-placeholders.md` (`social-focus-invite` en *Resolved*), `[CONFIRM]` de F2.6 resueltos, guía (03 §5, §6, §11) con su fila de Historial y D-028 aceptada.
+- [x] Tablero: F2 hecha, F2.1 – F2.9 marcados, diario al día (con el estado de la ley 121/000052).
 
 ## Notas de unidades
 
@@ -415,3 +415,13 @@ Modelo: opus para u1, u3, u4, u5 y u6 (reglas, Functions y capa de datos); sonne
 - Campana: `HomeViewModel.getBellRequests()` (`pendingIncomingCount()` con perfil `READY`, `BELL_LEGACY` si no); el punto (`homeBellDot`) sale solo con solicitudes y tocarla abre Amigos con `section=requests`; sin cuenta o en release, punto fijo y toast como antes.
 - Probado en `api36` con el Emulator Suite: enlace, QR, `@usuario`, selector de compartir, App Link con y sin sesión (hasta el envío de la solicitud), enlace propio y «ya enviada», campana con y sin solicitudes; 0 `FATAL EXCEPTION`. `actor.js` no crea invitaciones: los códigos de Bob y Carol se escribieron por REST del emulador.
 - Pendiente: el referrer de Play se lee una vez al arrancar; si termina después del primer `onResume`, la hoja sale en el siguiente (no hay prueba real hasta L.7).
+
+### F2-u9 · Cierre de F2: systems/social.md, CLAUDE.md, placeholders, [CONFIRM] legales, guía 03, D-028, tablero y re-autenticación — commit «F2-u9: cierre de la fase F2 (documentación, [CONFIRM] legales, D-028 aceptada y re-autenticación probada)»
+
+- `systems/social.md` describe el F2 construido (`social/common`, `friends`, `invite`, reglas y rutas, Functions, `actor.js`, móvil físico, convivencia con la maqueta, invariantes: un `SerialExecutor` por repositorio y lotes que coinciden con las reglas) y las filas de `social/` y `firebase/` de CLAUDE.md nombran los paquetes nuevos.
+- `ui-placeholders.md`: `social-focus-invite` a *Resolved* con fila de Historial; `home-notification-centre` sigue abierta (parcial) con su texto nuevo; no queda ningún marcador `social-focus-invite` en `app/src`.
+- Legales: resueltos los `[CONFIRM]` de la tabla de u9 (términos §4 y §5, privacidad v2 «Report», borrado «tus bloqueos», limpieza de amigos y vista de los amigos); siguen `terms:80` (L.4), F3 (reportar desde el perfil de amigo), F4, F5, retención, URLs y revisión legal. La v2 menciona invitaciones y reportes; Pages solo publica `legal/privacy-policy.md`.
+- Guía: 03 §5, §6, §7 y §11 describen lo construido; D-028 `aceptada`; fila en el Historial del README.
+- Re-autenticación en `api36` (evidencia `f2u9-emulator.txt`): email tras más de 5 minutos → diálogo de contraseña → borrada; Google → selector → borrada (el primer intento dio un timeout del Credential Manager; el segundo funcionó).
+- Ley 121/000052: sin aprobar según lo último que se pudo localizar (enmiendas al articulado, dic-2025); no se pudo confirmar el estado de oct-2026, se revisa en la ficha del Congreso.
+- Pendiente: nada de F2; sigue F3.

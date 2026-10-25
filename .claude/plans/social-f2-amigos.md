@@ -425,3 +425,7 @@ Modelo: opus para u1, u3, u4, u5 y u6 (reglas, Functions y capa de datos); sonne
 - Re-autenticación en `api36` (evidencia `f2u9-emulator.txt`): email tras más de 5 minutos → diálogo de contraseña → borrada; Google → selector → borrada (el primer intento dio un timeout del Credential Manager; el segundo funcionó).
 - Ley 121/000052: sin aprobar según lo último que se pudo localizar (enmiendas al articulado, dic-2025); no se pudo confirmar el estado de oct-2026, se revisa en la ficha del Congreso.
 - Pendiente: nada de F2; sigue F3.
+
+### F2-u10 · Mockito en los tests de F2-u1 y F2-u5 — commit «F2-u10: Mockito en los tests de F2-u1 y F2-u5 (dependencia y uso comprobados)»
+
+- `testImplementation 'org.mockito:mockito-core:4.11.0'` ya estaba en `app/build.gradle` (añadida en u1); `WatchedListenerTest` y `FriendsRepositoryTest` ya importan `org.mockito`. u10 solo deja comprobadas la dependencia y el uso; no cambia código.

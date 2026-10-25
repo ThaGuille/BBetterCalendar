@@ -3,3 +3,5 @@ node_modules/
 *-debug.log
 firebase-export-*/
 functions/lib/
+# firebase.json con los puertos desplazados que genera scripts/run-tests.sh (uno por bloque)
+firebase.emu-*.json

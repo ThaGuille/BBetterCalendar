@@ -45,8 +45,22 @@ const PEOPLE = {
   carol: { handle: "carol", displayName: "Carol", avatarColor: 5 },
 };
 
+// ¿Corre el emulador de Functions? Se pregunta al hub de emulators:exec (como friends-functions.test.js); sin él
+// (--only firestore,database) aceptar no dispara nada.
+async function functionsRunning() {
+  const hub = process.env.FIREBASE_EMULATOR_HUB;
+  if (!hub) return false;
+  try {
+    const info = (await (await fetch(`http://${hub}/emulators`)).json()).functions;
+    return !!(info && info.port);
+  } catch (e) {
+    return false;
+  }
+}
+
 describe("reglas F2: friendRequests/, contador diario, users/*/friends, isFriend y RTDB friends/", () => {
   let env;
+  let triggers = false;
 
   before(async () => {
     env = await initializeTestEnvironment({
@@ -54,6 +68,7 @@ describe("reglas F2: friendRequests/, contador diario, users/*/friends, isFriend
       firestore: { rules: firestoreRules },
       database: { rules: databaseRules },
     });
+    triggers = await functionsRunning();
   });
 
   after(async () => {
@@ -65,6 +80,42 @@ describe("reglas F2: friendRequests/, contador diario, users/*/friends, isFriend
     await env.clearDatabase();
     await seedPeople();
   });
+
+  // Con el emulador de Functions, un caso que acepta dispara onFriendRequestAccepted: su transacción (y el espejo RTDB
+  // que escribe después) tiene que acabar antes del clearFirestore del caso siguiente, que si no espera su bloqueo hasta
+  // «Transaction lock timeout» (409 ABORTED). Ninguna solicitud en accepted = el trigger ya la sacó de ahí.
+  afterEach(async () => {
+    if (!triggers) return;
+    const deadline = Date.now() + 15000;
+    for (;;) {
+      let pending = 0;
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        pending = (await getDocs(query(collection(ctx.firestore(), "friendRequests"), where("status", "==", "accepted")))).size;
+      });
+      if (pending === 0) break;
+      if (Date.now() > deadline) throw new Error("onFriendRequestAccepted no terminó en 15 s");
+      await new Promise((r) => setTimeout(r, 200));
+    }
+  });
+
+  // Tras aceptar alice_bob con Functions en marcha: espera a la amistad entera (solicitud borrada y espejo RTDB de los
+  // dos lados), lo último que escribe el trigger.
+  async function waitAccepted(a, b) {
+    if (!triggers) return;
+    const deadline = Date.now() + 15000;
+    for (;;) {
+      let done = false;
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        done =
+          !(await getDoc(doc(ctx.firestore(), "friendRequests", `${a}_${b}`))).exists() &&
+          (await ctx.database().ref(`friends/${a}/${b}`).get()).exists() &&
+          (await ctx.database().ref(`friends/${b}/${a}`).get()).exists();
+      });
+      if (done) return;
+      if (Date.now() > deadline) throw new Error(`onFriendRequestAccepted no creó la amistad ${a}_${b} en 15 s`);
+      await new Promise((r) => setTimeout(r, 200));
+    }
+  }
 
   const as = (uid) => env.authenticatedContext(uid).firestore();
   const anon = () => env.unauthenticatedContext().firestore();
@@ -275,6 +326,7 @@ describe("reglas F2: friendRequests/, contador diario, users/*/friends, isFriend
     await assertFails(updateDoc(doc(as("bob"), "friendRequests", "alice_bob"), { status: "pending" }));
     await assertFails(deleteDoc(doc(as("bob"), "friendRequests", "alice_bob")));
     await assertFails(deleteDoc(doc(as("alice"), "friendRequests", "alice_bob")));
+    await waitAccepted("alice", "bob");
   });
 
   it("failed: solo desde Functions (Admin SDK); los clientes no lo escriben, pero sí lo descartan", async () => {

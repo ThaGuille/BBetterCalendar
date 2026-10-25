@@ -3,7 +3,7 @@
   "private": true,
   "description": "Tests de reglas de Firestore y RTDB (arnés de F2.9 y F3.2) y de integración de las Functions (F1-u6: deleteAccount, con el SDK cliente firebase: auth, firestore, functions)",
   "scripts": {
-    "test": "mocha --timeout 20000 \"*.test.js\""
+    "test": "mocha --exit --timeout 20000 \"*.test.js\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",

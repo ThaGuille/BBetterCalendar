@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+# Suite de firebase/tests contra el Emulator Suite, con JDK 21 solo para este proceso (Gradle y Android Studio siguen
+# con su java). Desde cualquier carpeta del repo o de una worktree:
+#   bash firebase/scripts/run-tests.sh [--only auth,firestore,database,functions] [--block auto|<n>] [--timeout <s>] [--no-retry]
+# --block: cada bloque desplaza todos los puertos del emulador +10·n (0 = los de firebase.json). auto (por defecto) toma
+#   el primer bloque libre y lo reserva mientras corre, así dos worktrees corren la suite a la vez sin compartir puertos.
+# --timeout: tope de la ejecución entera (300 s por defecto); al pasarlo mata TODO el árbol de procesos (los emuladores
+#   son procesos java hijos) y sale con 124, sin dejar ningún puerto ocupado.
+# Un solo reintento, y solo para los fallos conocidos del emulador (Transaction lock timeout, emuladores que no arrancan).
+# Salida: 0 la suite pasa, 1 falla, 124 tope de tiempo, 2 uso. La última línea siempre es «run-tests: exit <código>».
+set -u
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FB="$(cd "$HERE/.." && pwd)"
+ONLY="auth,firestore,database,functions"
+BLOCK="auto"
+TIMEOUT="${BB_FB_TIMEOUT:-300}"
+RETRY=1
+BLOCKS="${BB_FB_BLOCKS:-4}"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --only) ONLY="${2:?--only <lista>}"; shift 2 ;;
+    --block) BLOCK="${2:?--block auto|<n>}"; shift 2 ;;
+    --timeout) TIMEOUT="${2:?--timeout <s>}"; shift 2 ;;
+    --no-retry) RETRY=0; shift ;;
+    # Compatible con el helper de F2: un primer argumento suelto es la lista de --only.
+    [a-z]*) ONLY="$1"; shift ;;
+    *) echo "run-tests: argumento desconocido $1" >&2; echo "run-tests: exit 2"; exit 2 ;;
+  esac
+done
+case "$TIMEOUT" in ''|*[!0-9]*) echo "run-tests: --timeout tiene que ser un número de segundos"; echo "run-tests: exit 2"; exit 2 ;; esac
+
+JDK="${BB_JAVA21_HOME:-C:/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot}"
+if [ -d "$JDK" ]; then
+  export JAVA_HOME="$JDK"
+  PATH="$(cygpath -u "$JDK" 2>/dev/null || echo "$JDK")/bin:$PATH"
+  export PATH
+fi
+
+# Puertos base de firebase.json y los que el CLI elige solo (hub, logging, eventarc, tasks, websocket de Firestore).
+# Separados de 10 en 10 no chocan entre bloques: ningún par de puertos base difiere en un múltiplo de 10 (5000/5001
+# difieren en 1), y con hasta 4 bloques ninguno llega al siguiente puerto base.
+BASE_PORTS="4400 4500 5000 5001 8080 9000 9099 9150 9299 9499"
+# "<puerto> <pid>" de cada socket que escucha. netstat de una pasada: un connect a un puerto cerrado tarda 2 s en Windows.
+listeners() {
+  if command -v netstat >/dev/null 2>&1 && netstat -ano >/dev/null 2>&1; then
+    netstat -ano 2>/dev/null | awk '$1 == "TCP" && $4 ~ /LISTEN|ESCUCHA/ { n = split($2, a, ":"); print a[n], $5 }'
+  elif command -v ss >/dev/null 2>&1; then
+    ss -ltnpH 2>/dev/null | awk '{ n = split($4, a, ":"); p = $0; sub(/.*pid=/, "", p); sub(/,.*/, "", p); print a[n], p }'
+  fi
+}
+block_free() { # n
+  local l p; l=" $(listeners | awk '{print $1}' | tr '\n' ' ') "
+  for p in $BASE_PORTS; do case "$l" in *" $((p + 10 * $1)) "*) return 1 ;; esac; done
+  return 0
+}
+
+# Reserva: un directorio por bloque con el pid del dueño; uno muerto se recupera.
+LEASES="${BB_FB_LEASE_DIR:-${TMPDIR:-/tmp}/bbetter-fbemu}"
+mkdir -p "$LEASES" 2>/dev/null
+LEASE=""
+take_block() { # n -> 0 si queda reservado
+  local d="$LEASES/$1.d" owner
+  if ! mkdir "$d" 2>/dev/null; then
+    owner=$(cat "$d/pid" 2>/dev/null)
+    if [ -n "$owner" ] && kill -0 "$owner" 2>/dev/null; then return 1; fi
+    rm -rf "$d"; mkdir "$d" 2>/dev/null || return 1
+  fi
+  echo $$ >"$d/pid"
+  if ! block_free "$1"; then rm -rf "$d"; return 1; fi
+  LEASE="$d"; return 0
+}
+if [ "$BLOCK" = auto ]; then
+  deadline=$(( $(date +%s) + TIMEOUT ))
+  while [ -z "$LEASE" ]; do
+    for b in $(seq 0 $((BLOCKS - 1))); do take_block "$b" && { BLOCK=$b; break; }; done
+    [ -n "$LEASE" ] && break
+    if [ "$(date +%s)" -ge "$deadline" ]; then echo "run-tests: ningún bloque de puertos libre en ${TIMEOUT} s"; echo "run-tests: exit 124"; exit 124; fi
+    sleep 3
+  done
+else
+  case "$BLOCK" in ''|*[!0-9]*) echo "run-tests: --block tiene que ser auto o un número"; echo "run-tests: exit 2"; exit 2 ;; esac
+  take_block "$BLOCK" || { echo "run-tests: el bloque $BLOCK está ocupado (otra ejecución o los emuladores de la app)"; echo "run-tests: exit 1"; exit 1; }
+fi
+OFF=$((10 * BLOCK))
+
+# firebase.json con los puertos desplazados, al lado del original para que sus rutas relativas sigan valiendo.
+CFG="$FB/firebase.emu-$BLOCK.json"
+node -e '
+const fs = require("fs"); const [src, dst, off] = process.argv.slice(1); const o = Number(off);
+const c = JSON.parse(fs.readFileSync(src, "utf8")); const e = c.emulators || {};
+for (const k of ["auth", "functions", "firestore", "database", "hosting"]) if (e[k] && e[k].port) e[k] = { ...e[k], port: e[k].port + o };
+e.firestore = { ...(e.firestore || {}), websocketPort: 9150 + o };
+e.hub = { port: 4400 + o }; e.logging = { port: 4500 + o }; e.eventarc = { port: 9299 + o }; e.tasks = { port: 9499 + o };
+e.ui = { enabled: false };
+c.emulators = e; fs.writeFileSync(dst, JSON.stringify(c, null, 2));
+' "$FB/firebase.json" "$CFG" "$OFF" || { echo "run-tests: no se pudo escribir $CFG"; echo "run-tests: exit 2"; exit 2; }
+
+PID=""
+kill_tree() { # pid
+  [ -n "$1" ] || return 0
+  if [ -e "/proc/$1/winpid" ] && command -v taskkill >/dev/null 2>&1; then
+    # Un fork de cygwin no siempre es hijo de Windows de su padre: se recorre el árbol de MSYS y se hace taskkill /T del
+    # pid de Windows de cada uno (eso llega a los hijos nativos, como el java de los emuladores).
+    local all="$1" grew=1 n w
+    while [ "$grew" = 1 ]; do
+      grew=0
+      for n in $(ps -ef 2>/dev/null | awk -v set=" $all " 'NR > 1 && index(set, " " $3 " ") && !index(set, " " $2 " ") {print $2}'); do all="$all $n"; grew=1; done
+    done
+    for n in $all; do
+      w=$(cat "/proc/$n/winpid" 2>/dev/null)
+      [ -n "$w" ] && taskkill //PID "$w" //T //F >/dev/null 2>&1
+      kill -KILL "$n" 2>/dev/null
+    done
+    return 0
+  fi
+  pkill -TERM -P "$1" 2>/dev/null; kill -TERM "$1" 2>/dev/null
+}
+# Lo que quede escuchando en los puertos del bloque es nuestro: el bloque estaba libre al reservarlo.
+free_ports() {
+  local want=" " p port pid
+  for p in $BASE_PORTS; do want="$want$((p + OFF)) "; done
+  listeners | while read -r port pid; do
+    case "$want" in *" $port "*) ;; *) continue ;; esac
+    [ -n "$pid" ] && [ "$pid" != 0 ] || continue
+    if command -v taskkill >/dev/null 2>&1; then taskkill //PID "$pid" //T //F >/dev/null 2>&1; else kill -9 "$pid" 2>/dev/null; fi
+  done
+}
+cleanup() { kill_tree "$PID"; free_ports; rm -f "$CFG"; [ -n "$LEASE" ] && rm -rf "$LEASE"; }
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+cd "$FB" || exit 2
+if [ ! -d tests/node_modules ]; then npm --prefix tests ci >/dev/null || { echo "run-tests: exit 2"; exit 2; }; fi
+if [ ! -d functions/node_modules ]; then npm --prefix functions ci >/dev/null || { echo "run-tests: exit 2"; exit 2; }; fi
+npm --prefix functions run build || { echo "run-tests: tsc de las Functions falló"; echo "run-tests: exit 1"; exit 1; }
+
+LOG="$(mktemp 2>/dev/null || echo "$FB/.run-tests.$$.log")"
+# Con la máquina cargada (un Gradle a la vez) el emulador de Functions no carga las definiciones en sus 10 s por defecto
+# y todos los casos de Functions fallan: 60 s, y si aun así pasa, es un fallo de arranque que vale un reintento.
+export FUNCTIONS_DISCOVERY_TIMEOUT="${FUNCTIONS_DISCOVERY_TIMEOUT:-60}"
+FLAKY='Transaction lock timeout|Failed to load function definition|Could not start .* [Ee]mulator|emulators failed to start|EADDRINUSE|port .* (is )?(taken|not open)|Timed out waiting for .* to start'
+attempt=1
+while :; do
+  start=$(date +%s)
+  echo "run-tests: bloque $BLOCK (puertos +$OFF), intento $attempt, tope ${TIMEOUT} s: emulators:exec --only $ONLY"
+  : >"$LOG"
+  firebase emulators:exec --config "$CFG" --only "$ONLY" --project demo-bbetter "npm --prefix tests test" >"$LOG" 2>&1 &
+  PID=$!
+  code=""
+  while kill -0 "$PID" 2>/dev/null; do
+    if [ $(( $(date +%s) - start )) -ge "$TIMEOUT" ]; then
+      kill_tree "$PID"; free_ports; code=124; break
+    fi
+    sleep 1
+  done
+  if [ -z "$code" ]; then wait "$PID"; code=$?; [ "$code" -ne 0 ] && code=1; fi
+  PID=""
+  cat "$LOG"
+  took=$(( $(date +%s) - start ))
+  [ "$code" = 124 ] && echo "run-tests: tope de ${TIMEOUT} s superado; árbol de procesos y puertos del bloque $BLOCK liberados"
+  echo "run-tests: intento $attempt acabó con $code en ${took} s"
+  if [ "$code" != 0 ] && [ "$RETRY" = 1 ] && [ "$attempt" = 1 ] && grep -Eq "$FLAKY" "$LOG"; then
+    echo "run-tests: fallo conocido del emulador ($(grep -Eo "$FLAKY" "$LOG" | head -1)); un reintento"
+    attempt=2; continue
+  fi
+  break
+done
+rm -f "$LOG"
+echo "run-tests: exit $code"
+exit "$code"

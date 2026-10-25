@@ -1,11 +1,14 @@
 ---
 name: bb-build
-description: Build, lint, or test the BBetterCalendar Android app from PowerShell using the right `gradlew.bat` invocation. Use when the user asks to "build the app", "run gradle", "run tests", "lint", "assemble", or "make a debug APK". Picks the correct Windows-style command and handles the common failure modes (stuck daemon, OneDrive lock).
+description: Build, lint, or test the BBetterCalendar Android app with the right gradle wrapper for the OS (`.\gradlew.bat` on Windows, `./gradlew` on Linux/macOS). Use when the user asks to "build the app", "run gradle", "run tests", "lint", "assemble", or "make a debug APK". Picks the correct command for the OS and handles the common failure modes (stuck daemon, OneDrive lock).
 ---
 
 # bb-build
 
-Invoke gradle on this repo correctly from PowerShell.
+Invoke gradle on this repo correctly. **Windows** (PowerShell / Git Bash): the commands below as written.
+**Linux/macOS** (bash): replace `.\gradlew.bat` with `./gradlew` and `\` with `/` in paths; chain with `&&`.
+`adb` is often not on PATH there: use `python3 .claude/skills/adb-ui-test/scripts/bbadb.py adb <args>`, which
+finds it through `$ANDROID_HOME`, `local.properties` (`sdk.dir`) or `~/Android/Sdk`.
 
 ## When to use
 
@@ -30,9 +33,10 @@ Run gradle commands via the **Bash tool** (the project already allow-lists `Bash
 ## When it goes wrong
 
 1. **Build hangs** → `.\gradlew.bat --stop`, then retry.
-2. **`Could not delete …` on clean** → OneDrive locking files. Ask the user to pause OneDrive briefly, then retry.
+2. **`Could not delete …` on clean** (Windows) → OneDrive locking files. Ask the user to pause OneDrive briefly, then retry.
 3. **`Unsupported class file major version …`** → Wrong JDK. Need JDK 17 (Android Studio's bundled JBR works). See [`.claude/docs/common_errors.md`](../../docs/common_errors.md) §Build.
-4. **Build fails citing `material` 1.10+** → Someone bumped it. Revert to `1.9.0` ([`app/build.gradle:47`](../../../app/build.gradle#L47) has the warning comment).
+4. **`./gradlew: Permission denied`** (Linux/macOS) → the execute bit got lost (a commit from Windows): `chmod +x gradlew && git update-index --chmod=+x gradlew`.
+5. **Build fails citing `material` 1.10+** → Someone bumped it. Revert to `1.9.0` ([`app/build.gradle:47`](../../../app/build.gradle#L47) has the warning comment).
 
 ## After a successful build
 

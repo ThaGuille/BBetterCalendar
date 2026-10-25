@@ -13,6 +13,11 @@ Authoritative procedure: the [`adb-ui-test`](../skills/adb-ui-test/SKILL.md) ski
 Selectors/device facts: [`bbetter-selectors.md`](../skills/adb-ui-test/references/bbetter-selectors.md).
 Read those first; don't re-derive ids or commands.
 
+Pick the command set for the OS you run on (the adb-ui-test skill has the full mapping):
+**Windows** → PowerShell scripts below as written. **Linux/macOS** → `python3 .claude/skills/adb-ui-test/scripts/bbadb.py`
+(`find-node --id X --tap`, `record S --tap X`, `replay S`, `capture --label L`, and `adb <args>` because adb is
+usually not on PATH there) and `./gradlew` instead of `.\gradlew.bat`.
+
 How to work:
 1. Confirm a device: `adb devices` (expect `emulator-5554 device`). If none, STOP and report
    that an operator must boot/create an AVD — you cannot.

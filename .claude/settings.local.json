@@ -89,7 +89,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\check-legacy-palette.ps1\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.js\" check-legacy-palette"
           }
         ]
       }
@@ -99,7 +99,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\session-context.ps1\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.js\" session-context"
           }
         ]
       }
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\guill\\Documents\\Proyectos\\BBetter\\BBetterCalendar\\.claude\\hooks\\verify-ui-reminder.ps1\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.js\" verify-ui-reminder",
             "timeout": 30
           }
         ]

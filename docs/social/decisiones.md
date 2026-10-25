@@ -39,6 +39,7 @@
 | D-026 | Probar lo social en un móvil físico por USB | aceptada | 2026-10-20 |
 | D-027 | Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene | aceptada | 2026-10-20 |
 | D-028 | Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja | aceptada | 2026-10-24 |
+| D-029 | Notas y diario de cada unidad en su propio fichero; el cierre de fase los pliega | aceptada | 2026-10-25 |
 
 ---
 
@@ -256,3 +257,15 @@
   4. Los reportes tienen id `{reporter}_{reported}`: uno por pareja y solo se crean.
 - **Por qué:** es lo que D-025 y D-027 dejan a la implementación. Rechazar = borrar evita una transición
   `declined` → `pending` en las reglas; el contador evita una Function solo para contar.
+
+### D-029 · Notas y diario de cada unidad en su propio fichero; el cierre de fase los pliega
+- **Estado:** aceptada (usuario, 2026-10-25, en la tarea de acelerar las fases F3–F5 con big-task). Precisa D-014.
+- **Decisión:** cada unidad escribe su nota de unidad y su línea de diario en
+  `.claude/plans/social-fN/notes/uN.md`, un fichero solo suyo. Solo la unidad que cierra la fase los pliega en
+  la sección «Notas de unidades» del plan de fase y en el diario del tablero. Ninguna otra unidad toca el plan
+  de fase ni el tablero.
+- **Por qué:** en F2 las diez unidades apuntaban en los mismos dos ficheros (`social-f2-amigos.md` y
+  `sistema-social.md`), así que big-task los ponía en los `touches` de todas y las corría de una en una: unas
+  5,6 h de trabajo en serie que con unidades independientes podían ir en paralelo.
+- **Consecuencias:** se corrige el protocolo del [README](README.md) («Durante la fase» y «Cerrar una fase») y su
+  plantilla; `.agents/profile.yml` lo dice al planificador de big-task (`bigTask.planNotes`).

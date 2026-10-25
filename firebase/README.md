@@ -10,6 +10,35 @@ y tests, el Emulator Suite. Plan: [`.claude/plans/social-f0-base.md`](../.claude
 | Functions (TypeScript, Node 22, `europe-west1`; F1: callable `deleteAccount`; F2: trigger `onFriendRequestAccepted` y callable `removeFriend`) | `functions/` |
 | Tests de reglas (`@firebase/rules-unit-testing`) y de integración de las Functions | `tests/` |
 | Segunda identidad para las pruebas manuales con la app (F2-u4) | `tests/tools/actor.js` |
+| La suite con tope de tiempo, reintento y bloques de puertos (big-task y a mano) | `scripts/run-tests.sh` |
+
+## La suite de tests: `scripts/run-tests.sh`
+
+La forma normal de correr la suite (a mano, en checks y en big-task). Desde cualquier carpeta del repo o de una
+worktree, con Git Bash (`bash` en PowerShell vale igual):
+
+```bash
+bash firebase/scripts/run-tests.sh                                  # auth, firestore, database y functions
+bash firebase/scripts/run-tests.sh --only firestore,database        # solo reglas (las Functions quedan pendientes)
+bash firebase/scripts/run-tests.sh --timeout 600 --block 2 --no-retry
+```
+
+- **JDK 21 solo para su proceso** (`BB_JAVA21_HOME` cambia la ruta); Gradle y Android Studio siguen con su java.
+  Compila las Functions (`tsc`) antes e instala `node_modules` si faltan.
+- **Tope de tiempo** (`--timeout`, 300 s por defecto, `BB_FB_TIMEOUT`): al pasarlo mata todo el árbol de procesos
+  (los emuladores son procesos java hijos de node; `taskkill /T /F` de cada uno) y libera los puertos del bloque;
+  sale con 124. Nada se queda escuchando.
+- **Un reintento**, solo para los fallos conocidos del emulador: `Transaction lock timeout`, las Functions que no
+  cargan sus definiciones (`Failed to load function definition`, con la máquina cargada; además sube
+  `FUNCTIONS_DISCOVERY_TIMEOUT` a 60 s) y emuladores que no arrancan o puertos ocupados. Un test que falla de verdad
+  no se repite. Con reintento el tope vale para cada intento.
+- **Bloques de puertos** (`--block auto`, por defecto): el bloque `n` desplaza todos los puertos +10·n (hub,
+  logging, eventarc, tasks y el websocket de Firestore incluidos) en un `firebase.emu-<n>.json` generado al lado de
+  `firebase.json` (ignorado por git) y lo reserva en `%TEMP%/bbetter-fbemu/<n>.d` mientras corre. `auto` toma el
+  primero libre, así que dos worktrees (o la suite y los emuladores de la app en los puertos base) corren a la vez.
+  Los tests leen los hosts de las variables que pone `emulators:exec` (`FIRESTORE_EMULATOR_HOST`,
+  `FIREBASE_AUTH_EMULATOR_HOST`, `FIREBASE_EMULATOR_HUB`...), nunca puertos fijos.
+- Salida: 0 pasa, 1 falla, 124 tope, 2 uso; la última línea siempre es `run-tests: exit <código>`.
 
 ## Comandos (desde `firebase/`, en PowerShell)
 
@@ -52,8 +81,10 @@ El comando de las reglas es el de arriba (`firebase emulators:exec --only firest
 con esos dos emuladores, `delete-account.test.js` y `friends-functions.test.js` quedan como pendientes. Para que también corran, la suite completa:
 `npm --prefix functions run build` y después `firebase emulators:exec --only auth,firestore,database,functions --project demo-bbetter "npm --prefix tests test"`.
 Las Functions solo se ejecutan en el emulador (D-021, D-025): no se despliegan hasta el gate L.7. Con el emulador de
-Functions en marcha, `onFriendRequestAccepted` también se dispara con los casos de aceptar de `friends-rules.test.js`;
-la transacción vuelve a leer la solicitud, así que tras `clearFirestore` no hace nada.
+Functions en marcha, `onFriendRequestAccepted` también se dispara con el caso de aceptar de `friends-rules.test.js`: ese
+caso espera a la amistad entera (solicitud borrada y espejo RTDB) y un `afterEach` espera a que no quede ninguna solicitud
+en `accepted` antes del `clearFirestore` siguiente, que si no espera el bloqueo de la transacción hasta `Transaction lock
+timeout`. Mocha corre con `--exit`.
 
 ### Invitaciones y Hosting (F2-u6)
 

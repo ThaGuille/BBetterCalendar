@@ -1,3 +1,3 @@
-# Los scripts de bash fallan con CRLF ($'': command not found): siempre LF, también con core.autocrlf=true.
+# Los scripts de bash fallan con CRLF («$'\r': command not found»): siempre LF, también con core.autocrlf=true.
 *.sh text eol=lf
 gradlew text eol=lf

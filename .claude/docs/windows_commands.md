@@ -78,7 +78,8 @@ These tools live under the Android SDK; on most setups that's `%LOCALAPPDATA%\An
 | Take a screenshot | `adb exec-out screencap -p > screen.png` |
 | Pump a deep link | `adb shell am start -W -a android.intent.action.VIEW -d "<url>"` |
 | List AVDs | `emulator -list-avds` |
-| Start an AVD | `emulator -avd Pixel_6_API_34 -no-snapshot-load` |
+| Get a ready AVD (reuse a running one, else boot `api36` from its `bt_quick` snapshot) | `powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1` (`-Clean` = cold boot with `-no-snapshot`, only when a test needs a clean device) |
+| Start an AVD by hand | `emulator -avd api36 -snapshot bt_quick -no-snapshot-save` (reuse ~1.5 s, snapshot ~10-30 s, cold `-no-snapshot` ~50-60 s) |
 
 > Use the foreground service notification channel name `pomodoro_channel` when filtering notification logs.
 

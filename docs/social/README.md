@@ -1,6 +1,6 @@
 # Sistema social — guía
 
-> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-24
+> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-25
 > **¿Dónde estamos?** → [tablero](../../.claude/plans/sistema-social.md) (fases, entregables, diferidos,
 > preguntas abiertas, diario). El progreso **no** vive en esta carpeta.
 
@@ -75,23 +75,28 @@ decisión que lo aplazó.
 ### Durante la fase (cada unidad)
 
 1. Implementar → `.\gradlew.bat test assembleDebug` → commit.
-2. Escribir una **nota de unidad** en el plan de fase, de 10 líneas como máximo: desviaciones, APIs
-   nuevas y lo que queda pendiente.
-3. Añadir una línea al **diario** del tablero y marcar los entregables terminados.
+2. Escribir la **nota de unidad** en su propio fichero, `.claude/plans/social-fN/notes/uN.md` (D-029), de 10
+   líneas como máximo: desviaciones, APIs nuevas y lo que queda pendiente. Debajo, una línea `Diario:` con la
+   entrada para el diario del tablero y los entregables `FN.x` que deja terminados.
+3. No tocar el plan de fase ni el tablero: los pliega la unidad que cierra la fase.
 
-Las notas de unidad se quedan en el plan de su fase y no en un fichero común que crezca sin límite
-(lección de `migracion-visual-stitch-impl.md`, que llegó a 1179 líneas). Lo que las fases siguientes
-necesiten saber, como APIs o invariantes, pasa al doc de sistema.
+Así ninguna unidad comparte un fichero con otra solo para apuntar, y big-task puede correr a la vez las que no
+dependen unas de otras (en F2, los dos ficheros comunes en todas las unidades las pusieron en fila). Las notas
+no van a un fichero común que crezca sin límite (lección de `migracion-visual-stitch-impl.md`, que llegó a
+1179 líneas). Lo que las fases siguientes necesiten saber, como APIs o invariantes, pasa al doc de sistema.
 
 ### Cerrar una fase
 
 1. Comprobar los criterios de «hecho cuando» del plan.
-2. Verificar en el emulador con el subagente `ui-tester` (regla #7).
-3. Poner al día `systems/social.md` con lo que existe ahora.
-4. Mover a *Resolved* en `ui-placeholders.md` las filas resueltas y quitar sus marcadores.
-5. Si la fase cambió el diseño, actualizar la guía (con su `D-xxx`).
-6. Pasar el plan a `Status: merged` y marcar la fase como hecha en el tablero.
-7. Opcional: un informe de cierre en el Bench Log.
+2. Plegar las notas: copiar cada `.claude/plans/social-fN/notes/uN.md` a «Notas de unidades» del plan de
+   fase (en orden de unidad), su línea `Diario:` al diario del tablero, y marcar ahí los entregables. Las notas
+   sueltas se quedan en `notes/` como copia.
+3. Verificar en el emulador con el subagente `ui-tester` (regla #7).
+4. Poner al día `systems/social.md` con lo que existe ahora.
+5. Mover a *Resolved* en `ui-placeholders.md` las filas resueltas y quitar sus marcadores.
+6. Si la fase cambió el diseño, actualizar la guía (con su `D-xxx`).
+7. Pasar el plan a `Status: merged` y marcar la fase como hecha en el tablero.
+8. Opcional: un informe de cierre en el Bench Log.
 
 ### Cambiar la guía
 
@@ -134,8 +139,17 @@ el usuario, también se registra una `D-xxx`.
 ## Riesgos
 ## Hecho cuando
 ## Notas de unidades
+<!-- Las pliega la unidad de cierre desde .claude/plans/social-f<N>/notes/u<n>.md (D-029) -->
 ### F<N>-u1 · <título> — `<commit>`
 <≤10 líneas: desviaciones, APIs nuevas, pendientes>
+```
+
+Y cada `.claude/plans/social-f<N>/notes/u<n>.md`:
+
+```markdown
+### F<N>-u<n> · <título> — `<commit>`
+<≤10 líneas: desviaciones, APIs nuevas, pendientes>
+Diario: <fecha> · F<N>-u<n> <qué quedó hecho> (F<N>.x, F<N>.y)
 ```
 
 ## Historial
@@ -150,4 +164,5 @@ el usuario, también se registra una `D-xxx`.
 | 2026-10-20 | Q-03 cerrada: tope de 50 amigos confirmado | D-015 |
 | 2026-10-20 | F2 solo en el emulador (App Links en el AVD, Install Referrer en L) y pruebas en un móvil físico por USB; 03 §3 y §11 | D-025, D-026 |
 | 2026-10-20 | Sin bloquear: amistad mutua con añadir y eliminar, reportar aparte; 02 §4 y §9, 03 §3–§7 y 04 §2 | D-027 |
+| 2026-10-25 | Protocolo: la nota y la línea de diario de cada unidad van a su propio fichero (`social-fN/notes/uN.md`) y solo el cierre de fase las pliega, para que big-task pueda correr unidades en paralelo | D-029 |
 | 2026-10-24 | D-028 aceptada al cerrar F2: 03 §5 (`friendRequests` con tarjetas y sin `declined`, contador e `inviteCode` en `users/`, `invites/`, ids de los reportes), §6 (reglas de F2), §7 y §11 (`InviteLinkActivity`, Install Referrer, Hosting) describen lo construido | D-028 |

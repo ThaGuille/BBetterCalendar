@@ -18,11 +18,16 @@ re-derive ids.
 ## Preconditions
 
 - An emulator/device must be attached. Check: `adb devices` → expect `emulator-5554 device`.
-  - No device? An **operator** must create/boot an AVD once (Android Studio Device Manager).
-    If an AVD already exists you may boot it headless:
-    `& "C:\Users\guill\AppData\Local\Android\Sdk\emulator\emulator.exe" -avd <name> -no-window`
-    (list with `-list-avds`). You **cannot** create an AVD, accept SDK licenses, or authorize
-    a physical device's "Allow USB debugging" prompt yourself.
+  - No device, or not sure? Run `powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1`.
+    It **reuses** a running emulator (~1.5 s), else boots `api36` headless from its `bt_quick` snapshot
+    (~10-30 s; it creates the snapshot on the first cold boot), and prints `AVD READY <serial> (...)`.
+    Add `-Clean` only when a check needs a clean boot (`-no-snapshot`, ~50-60 s cold). Never boot the
+    emulator through `bt-run.sh` (it would hold the worktree's build lock), and never kill a running one
+    another unit leases (`.claude\scripts\emulator-lease.ps1 -Status`). The AVD's own `default_boot`
+    snapshot was broken (every "quick boot" fell back to a cold one), hence the named snapshot.
+    Measured 2026-10-25: reuse 1.4 s, `bt_quick` 10-30 s, cold boot 49-61 s.
+    You **cannot** create an AVD, accept SDK licenses, or authorize a physical device's
+    "Allow USB debugging" prompt yourself (list AVDs with `emulator -list-avds`).
 - Run scripts from the skill's `scripts\` dir (or pass full paths).
 - **Targets the emulator, never the phone, by default.** Every script resolves `-Serial`
   through [`_device.ps1`](scripts/_device.ps1): if you don't pass `-Serial` explicitly, it

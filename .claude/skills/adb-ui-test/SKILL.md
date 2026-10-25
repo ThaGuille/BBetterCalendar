@@ -98,6 +98,8 @@ re-derive ids.
    ```powershell
    adb -s emulator-5554 shell pm clear io.github.thaguille.bbettercalendar
    ```
+   `pm clear` revokes runtime grants: re-run the step-2 `pm grant POST_NOTIFICATIONS` after it,
+   or the permission dialog comes back on the next launch.
 
 ## Record once, replay cheap
 

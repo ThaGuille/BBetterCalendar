@@ -16,6 +16,7 @@ if printf '%s' "$input" | grep -Eq '"stop_hook_active"[[:space:]]*:[[:space:]]*t
 
 lines_threshold="${BB_UI_VERIFY_LINES:-50}"
 files_threshold="${BB_UI_VERIFY_FILES:-4}"
+case "$lines_threshold$files_threshold" in *[!0-9]*) exit 0 ;; esac   # like the ps1 [int] cast failing in its try
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" || exit 0
 marker="${TMPDIR:-/tmp}/bb-ui-verify.flag"
 

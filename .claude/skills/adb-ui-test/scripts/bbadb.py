@@ -71,9 +71,18 @@ def adb_path():
     return 'adb'  # fails loudly on the first call
 
 
+def _no_adb():
+    print('adb not found: set $ADB or ANDROID_HOME (SDK in ~/Android/Sdk)', file=sys.stderr)
+    raise SystemExit(2)
+
+
 def adb(*args, serial=None, binary=False, check=False):
     cmd = [adb_path()] + (['-s', serial] if serial else []) + [str(a) for a in args]
-    r = subprocess.run(cmd, capture_output=True, text=not binary)
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=not binary,
+                           errors=None if binary else 'replace')
+    except FileNotFoundError:
+        _no_adb()
     if check and r.returncode != 0:
         raise SystemExit(f'adb {" ".join(map(str, args))} failed: {(r.stderr or "").strip()}')
     return r
@@ -268,7 +277,7 @@ def record(a):
     if a.init:
         log.write_text(f'# scenario: {a.scenario}\n'
                        f'# recorded: {datetime.now(timezone.utc).isoformat()}  serial={serial} pkg={a.pkg}\n',
-                       encoding='utf-8')
+                       encoding='utf-8-sig')  # BOM: PowerShell 5.1 replay.ps1 reads BOM-less files as ANSI
         adb('logcat', '-c', '-b', 'crash', serial=serial)
         adb('logcat', '-c', serial=serial)
         print(f'Initialized recording: {log}')
@@ -353,7 +362,10 @@ def replay(a):
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if argv[:1] == ['adb']:  # passed through untouched: argparse would read `-s` as its own flag
-        return subprocess.call([adb_path()] + argv[1:])
+        try:
+            return subprocess.call([adb_path()] + argv[1:])
+        except FileNotFoundError:
+            _no_adb()
     p = argparse.ArgumentParser(description=__doc__.split('\n\n')[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest='cmd', required=True)
 

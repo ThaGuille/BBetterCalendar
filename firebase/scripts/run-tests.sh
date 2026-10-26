@@ -173,7 +173,8 @@ while :; do
   took=$(( $(date +%s) - start ))
   [ "$code" = 124 ] && echo "run-tests: tope de ${TIMEOUT} s superado; árbol de procesos y puertos del bloque $BLOCK liberados"
   echo "run-tests: intento $attempt acabó con $code en ${took} s"
-  if [ "$code" != 0 ] && [ "$RETRY" = 1 ] && [ "$attempt" = 1 ] && grep -Eq "$FLAKY" "$LOG"; then
+  # Solo tras un fallo (1) con firma conocida: un tope (124) no se reintenta, porque otro intento entero pasaría del plazo.
+  if [ "$code" = 1 ] && [ "$RETRY" = 1 ] && [ "$attempt" = 1 ] && grep -Eq "$FLAKY" "$LOG"; then
     echo "run-tests: fallo conocido del emulador ($(grep -Eo "$FLAKY" "$LOG" | head -1)); un reintento"
     attempt=2; continue
   fi

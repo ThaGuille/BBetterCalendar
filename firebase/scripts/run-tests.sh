@@ -54,18 +54,32 @@ block_free() { # n
   return 0
 }
 
-# Reserva: un directorio por bloque con el pid del dueño; uno muerto se recupera.
+# Reserva: un directorio por bloque con el pid del dueño. Se toma de forma atómica: el pid se escribe en un directorio
+# propio («<n>.d.<pid>») y ese directorio se renombra a «<n>.d» con mv -T, que falla si el destino existe (el rename de
+# un directorio sobre otro con contenido da ENOTEMPTY), así que nadie ve nunca un lease sin pid a medio crear. Un lease
+# con el pid vacío o ausente cuenta como ocupado salvo que tenga más de 60 s. Uno de un dueño muerto se aparta con otro
+# rename atómico, a «<n>.d.stale.<pid muerto>»: ese nombre es también la reclamación (un segundo rename sobre él falla),
+# así que solo gana quien consigue apartarlo, y nadie puede apartar por error el lease vivo que el ganador pone después.
+# Por eso el ganador conserva el directorio apartado hasta cleanup; uno de más de 60 s es de una ejecución caída y se purga.
 LEASES="${BB_FB_LEASE_DIR:-${TMPDIR:-/tmp}/bbetter-fbemu}"
 mkdir -p "$LEASES" 2>/dev/null
 LEASE=""
+STALES=""
 take_block() { # n -> 0 si queda reservado
-  local d="$LEASES/$1.d" owner
-  if ! mkdir "$d" 2>/dev/null; then
+  local d="$LEASES/$1.d" tmp="$LEASES/$1.d.$$" owner stale
+  rm -rf "$tmp"; mkdir "$tmp" 2>/dev/null || return 1
+  echo $$ >"$tmp/pid"
+  # Un destino que ya existe pero está vacío lo reemplazaría el rename: por eso se mira antes si existe.
+  if [ -e "$d" ] || ! mv -T "$tmp" "$d" 2>/dev/null; then
     owner=$(cat "$d/pid" 2>/dev/null)
-    if [ -n "$owner" ] && kill -0 "$owner" 2>/dev/null; then return 1; fi
-    rm -rf "$d"; mkdir "$d" 2>/dev/null || return 1
+    if [ -n "$owner" ]; then
+      if kill -0 "$owner" 2>/dev/null; then rm -rf "$tmp"; return 1; fi
+    elif [ -n "$(find "$d" -maxdepth 0 -mmin -1 2>/dev/null)" ]; then rm -rf "$tmp"; return 1; fi
+    stale="$LEASES/$1.d.stale.${owner:-none}"
+    [ -n "$(find "$stale" -maxdepth 0 -mmin +1 2>/dev/null)" ] && rm -rf "$stale"
+    if mv -T "$d" "$stale" 2>/dev/null; then STALES="$STALES $stale"; fi
+    mv -T "$tmp" "$d" 2>/dev/null || { rm -rf "$tmp"; return 1; }
   fi
-  echo $$ >"$d/pid"
   if ! block_free "$1"; then rm -rf "$d"; return 1; fi
   LEASE="$d"; return 0
 }
@@ -125,7 +139,7 @@ free_ports() {
     if command -v taskkill >/dev/null 2>&1; then taskkill //PID "$pid" //T //F >/dev/null 2>&1; else kill -9 "$pid" 2>/dev/null; fi
   done
 }
-cleanup() { kill_tree "$PID"; free_ports; rm -f "$CFG"; [ -n "$LEASE" ] && rm -rf "$LEASE"; }
+cleanup() { kill_tree "$PID"; free_ports; rm -f "$CFG"; [ -n "$LEASE" ] && rm -rf "$LEASE"; for s in $STALES; do rm -rf "$s"; done; }
 trap cleanup EXIT
 trap 'exit 130' INT TERM
 

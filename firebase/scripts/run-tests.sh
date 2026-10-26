@@ -18,15 +18,23 @@ BLOCK="auto"
 TIMEOUT="${BB_FB_TIMEOUT:-300}"
 RETRY=1
 BLOCKS="${BB_FB_BLOCKS:-4}"
+usage() { # mensaje opcional
+  [ -n "${1:-}" ] && echo "run-tests: $1" >&2
+  echo "uso: bash firebase/scripts/run-tests.sh [--only <lista>] [--block auto|<n>] [--timeout <s>] [--no-retry]"
+  echo "run-tests: exit 2"; exit 2
+}
 while [ $# -gt 0 ]; do
   case "$1" in
-    --only) ONLY="${2:?--only <lista>}"; shift 2 ;;
-    --block) BLOCK="${2:?--block auto|<n>}"; shift 2 ;;
-    --timeout) TIMEOUT="${2:?--timeout <s>}"; shift 2 ;;
+    --only|--block|--timeout) [ $# -ge 2 ] || usage "$1 necesita un valor" ;;
+  esac
+  case "$1" in
+    --only) ONLY="$2"; shift 2 ;;
+    --block) BLOCK="$2"; shift 2 ;;
+    --timeout) TIMEOUT="$2"; shift 2 ;;
     --no-retry) RETRY=0; shift ;;
     # Compatible con el helper de F2: un primer argumento suelto es la lista de --only.
     [a-z]*) ONLY="$1"; shift ;;
-    *) echo "run-tests: argumento desconocido $1" >&2; echo "run-tests: exit 2"; exit 2 ;;
+    *) usage "argumento desconocido $1" ;;
   esac
 done
 case "$TIMEOUT" in ''|*[!0-9]*) echo "run-tests: --timeout tiene que ser un número de segundos"; echo "run-tests: exit 2"; exit 2 ;; esac
@@ -151,9 +159,10 @@ free_ports() {
     if command -v taskkill >/dev/null 2>&1; then taskkill //PID "$pid" //T //F >/dev/null 2>&1; else kill -9 "$pid" 2>/dev/null; fi
   done
 }
-cleanup() { kill_tree "$PID"; free_ports; rm -f "$CFG"; [ -n "$LEASE" ] && rm -rf "$LEASE"; for s in $STALES; do rm -rf "$s"; done; }
+LOG=""
+cleanup() { kill_tree "$PID"; free_ports; rm -f "$CFG"; [ -n "$LOG" ] && rm -f "$LOG"; [ -n "$LEASE" ] && rm -rf "$LEASE"; for s in $STALES; do rm -rf "$s"; done; }
 trap cleanup EXIT
-trap 'exit 130' INT TERM
+trap 'echo "run-tests: exit 130"; exit 130' INT TERM
 
 cd "$FB" || exit 2
 if [ ! -d tests/node_modules ]; then npm --prefix tests ci >/dev/null || { echo "run-tests: exit 2"; exit 2; }; fi

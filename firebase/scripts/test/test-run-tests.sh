@@ -155,7 +155,7 @@ t_docs() {
   check "cabecera de run-tests.sh: tope por intento" "$(grep -q 'tope de cada intento' "$SRC"; echo $?)"
   check "README: tope por intento" "$(grep -q 'por intento' "$REPO/firebase/README.md"; echo $?)"
   local note; note=$(grep -m1 -A1 'planNotes:' "$REPO/.agents/profile.yml" | tail -n 1)
-  check "profile.yml: primera planNote por intento y menos de 600 caracteres" "$(printf '%s' "$note" | grep -q 'por intento' && [ "${#note}" -lt 600 ]; echo $?)"
+  check "profile.yml: primera planNote por intento y menos de 600 caracteres" "$(printf '%s' "$note" | grep -q 'por intento' && [ "$(printf '%s' "$note" | wc -c)" -lt 600 ]; echo $?)"
 }
 
 ALL="t_lease_midtake t_lease_race t_no_retry_after_timeout t_block_auto t_listeners t_usage t_term t_docs"

@@ -25,13 +25,15 @@ bash firebase/scripts/run-tests.sh --timeout 600 --block 2 --no-retry
 
 - **JDK 21 solo para su proceso** (`BB_JAVA21_HOME` cambia la ruta); Gradle y Android Studio siguen con su java.
   Compila las Functions (`tsc`) antes e instala `node_modules` si faltan.
-- **Tope de tiempo** (`--timeout`, 300 s por defecto, `BB_FB_TIMEOUT`): al pasarlo mata todo el árbol de procesos
-  (los emuladores son procesos java hijos de node; `taskkill /T /F` de cada uno) y libera los puertos del bloque;
-  sale con 124. Nada se queda escuchando.
+- **Tope de tiempo** (`--timeout`, 300 s por defecto, `BB_FB_TIMEOUT`) **por intento**: si un intento lo pasa mata todo
+  el árbol de procesos (los emuladores son procesos java hijos de node; `taskkill /T /F` de cada uno), libera los
+  puertos del bloque y sale con 124. Nada se queda escuchando. La espera de un bloque libre (`--block auto`) se acota
+  con el mismo valor, y `npm ci` y `tsc` corren antes y fuera de él. Peor caso: unos 2 × el tope más la compilación;
+  un check que envuelva el script tiene que dejar ese margen.
 - **Un reintento**, solo para los fallos conocidos del emulador: `Transaction lock timeout`, las Functions que no
   cargan sus definiciones (`Failed to load function definition`, con la máquina cargada; además sube
   `FUNCTIONS_DISCOVERY_TIMEOUT` a 60 s) y emuladores que no arrancan o puertos ocupados. Un test que falla de verdad
-  no se repite. Con reintento el tope vale para cada intento.
+  no se repite. Como mucho uno, y nunca tras un tope (124): otro intento entero pasaría del plazo.
 - **Bloques de puertos** (`--block auto`, por defecto): el bloque `n` desplaza todos los puertos +10·n (hub,
   logging, eventarc, tasks y el websocket de Firestore incluidos) en un `firebase.emu-<n>.json` generado al lado de
   `firebase.json` (ignorado por git) y lo reserva en `%TEMP%/bbetter-fbemu/<n>.d` mientras corre. `auto` toma el

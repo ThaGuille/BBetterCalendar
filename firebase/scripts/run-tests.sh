@@ -6,9 +6,12 @@
 #   el primer bloque libre entre el 1 y el BB_FB_BLOCKS (4) y lo reserva mientras corre, así dos worktrees corren la suite a
 #   la vez sin compartir puertos. El 0 son los puertos fijos del Emulator Suite de la app (adb-reverse.ps1, actor.js,
 #   FirebaseModule): auto no lo toma; solo con --block 0.
-# --timeout: tope de la ejecución entera (300 s por defecto); al pasarlo mata TODO el árbol de procesos (los emuladores
-#   son procesos java hijos) y sale con 124, sin dejar ningún puerto ocupado.
-# Un solo reintento, y solo para los fallos conocidos del emulador (Transaction lock timeout, emuladores que no arrancan).
+# --timeout: tope de cada intento de emulators:exec (300 s por defecto), no de la ejecución entera; al pasarlo mata TODO el
+#   árbol de procesos (los emuladores son procesos java hijos) y sale con 124, sin dejar ningún puerto ocupado. La espera de
+#   un bloque libre con --block auto se acota con el mismo valor; npm ci y tsc corren antes y fuera de él. Peor caso: unos
+#   2 × el tope más la compilación.
+# Como mucho un reintento, y solo tras un fallo (exit 1) con una firma conocida del emulador (Transaction lock timeout,
+# emuladores que no arrancan); nunca tras un tope de tiempo.
 # Salida: 0 la suite pasa, 1 falla, 124 tope de tiempo, 2 uso. La última línea siempre es «run-tests: exit <código>».
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

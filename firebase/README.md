@@ -35,7 +35,10 @@ bash firebase/scripts/run-tests.sh --timeout 600 --block 2 --no-retry
 - **Bloques de puertos** (`--block auto`, por defecto): el bloque `n` desplaza todos los puertos +10·n (hub,
   logging, eventarc, tasks y el websocket de Firestore incluidos) en un `firebase.emu-<n>.json` generado al lado de
   `firebase.json` (ignorado por git) y lo reserva en `%TEMP%/bbetter-fbemu/<n>.d` mientras corre. `auto` toma el
-  primero libre, así que dos worktrees (o la suite y los emuladores de la app en los puertos base) corren a la vez.
+  primero libre de 1 a `BB_FB_BLOCKS` (4 por defecto: bloques 1 a 4) y espera si están todos ocupados; el bloque 0 son
+  los puertos fijos del Emulator Suite de la app (`adb-reverse.ps1`, `actor.js`, `FirebaseModule`) y no lo toma `auto`,
+  solo `--block 0`. Así dos worktrees corren a la vez, y la suite y los emuladores de la app también, arranquen en el
+  orden que arranquen.
   Los tests leen los hosts de las variables que pone `emulators:exec` (`FIRESTORE_EMULATOR_HOST`,
   `FIREBASE_AUTH_EMULATOR_HOST`, `FIREBASE_EMULATOR_HUB`...), nunca puertos fijos.
 - Salida: 0 pasa, 1 falla, 124 tope, 2 uso; la última línea siempre es `run-tests: exit <código>`.

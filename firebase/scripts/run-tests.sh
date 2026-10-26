@@ -3,7 +3,9 @@
 # con su java). Desde cualquier carpeta del repo o de una worktree:
 #   bash firebase/scripts/run-tests.sh [--only auth,firestore,database,functions] [--block auto|<n>] [--timeout <s>] [--no-retry]
 # --block: cada bloque desplaza todos los puertos del emulador +10·n (0 = los de firebase.json). auto (por defecto) toma
-#   el primer bloque libre y lo reserva mientras corre, así dos worktrees corren la suite a la vez sin compartir puertos.
+#   el primer bloque libre entre el 1 y el BB_FB_BLOCKS (4) y lo reserva mientras corre, así dos worktrees corren la suite a
+#   la vez sin compartir puertos. El 0 son los puertos fijos del Emulator Suite de la app (adb-reverse.ps1, actor.js,
+#   FirebaseModule): auto no lo toma; solo con --block 0.
 # --timeout: tope de la ejecución entera (300 s por defecto); al pasarlo mata TODO el árbol de procesos (los emuladores
 #   son procesos java hijos) y sale con 124, sin dejar ningún puerto ocupado.
 # Un solo reintento, y solo para los fallos conocidos del emulador (Transaction lock timeout, emuladores que no arrancan).
@@ -86,7 +88,7 @@ take_block() { # n -> 0 si queda reservado
 if [ "$BLOCK" = auto ]; then
   deadline=$(( $(date +%s) + TIMEOUT ))
   while [ -z "$LEASE" ]; do
-    for b in $(seq 0 $((BLOCKS - 1))); do take_block "$b" && { BLOCK=$b; break; }; done
+    for b in $(seq 1 "$BLOCKS"); do take_block "$b" && { BLOCK=$b; break; }; done
     [ -n "$LEASE" ] && break
     if [ "$(date +%s)" -ge "$deadline" ]; then echo "run-tests: ningún bloque de puertos libre en ${TIMEOUT} s"; echo "run-tests: exit 124"; exit 124; fi
     sleep 3

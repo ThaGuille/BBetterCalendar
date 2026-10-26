@@ -43,12 +43,22 @@ fi
 # difieren en 1), y con hasta 4 bloques ninguno llega al siguiente puerto base.
 BASE_PORTS="4400 4500 5000 5001 8080 9000 9099 9150 9299 9499"
 # "<puerto> <pid>" de cada socket que escucha. netstat de una pasada: un connect a un puerto cerrado tarda 2 s en Windows.
+# Se prueba netstat (Windows: TCP en mayúsculas y 5 columnas; Linux con net-tools: tcp en minúsculas, sin pid con -ano), y
+# si no lista nada ss y por último lsof (macOS, que no trae ninguno de los dos).
 listeners() {
+  local out=""
   if command -v netstat >/dev/null 2>&1 && netstat -ano >/dev/null 2>&1; then
-    netstat -ano 2>/dev/null | awk '$1 == "TCP" && $4 ~ /LISTEN|ESCUCHA/ { n = split($2, a, ":"); print a[n], $5 }'
-  elif command -v ss >/dev/null 2>&1; then
-    ss -ltnpH 2>/dev/null | awk '{ n = split($4, a, ":"); p = $0; sub(/.*pid=/, "", p); sub(/,.*/, "", p); print a[n], p }'
+    out=$(netstat -ano 2>/dev/null | awk 'tolower($1) ~ /^tcp/ && $0 ~ /LISTEN|ESCUCHA/ { if (NF == 5) { n = split($2, a, ":"); print a[n], $5 } else { n = split($4, a, ":"); print a[n], 0 } }')
   fi
+  if [ -z "$out" ] && command -v ss >/dev/null 2>&1; then
+    out=$(ss -ltnpH 2>/dev/null | awk '{ n = split($4, a, ":"); p = $0; sub(/.*pid=/, "", p); sub(/,.*/, "", p); print a[n], p }')
+  fi
+  if [ -z "$out" ] && command -v lsof >/dev/null 2>&1; then
+    out=$(lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null | awk 'NR > 1 { n = split($9, a, ":"); print a[n], $2 }')
+  fi
+  [ -n "$out" ] && printf '%s
+' "$out"
+  return 0
 }
 block_free() { # n
   local l p; l=" $(listeners | awk '{print $1}' | tr '\n' ' ') "

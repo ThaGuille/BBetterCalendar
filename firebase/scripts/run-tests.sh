@@ -92,52 +92,9 @@ mkdir -p "$LEASES" 2>/dev/null
 find "$LEASES" -maxdepth 1 -name '*.d.stale.*' -mmin +60 -exec rm -rf {} + 2>/dev/null
 LEASE=""
 STALES=""
-take_block() { # n -> 0 si queda reservado
-  local d="$LEASES/$1.d" tmp="$LEASES/$1.d.$$" owner stale
-  rm -rf "$tmp"; mkdir "$tmp" 2>/dev/null || return 1
-  echo $$ >"$tmp/pid"
-  # Un destino que ya existe pero está vacío lo reemplazaría el rename: por eso se mira antes si existe.
-  if [ -e "$d" ] || ! mv -T "$tmp" "$d" 2>/dev/null; then
-    owner=$(cat "$d/pid" 2>/dev/null)
-    if [ -n "$owner" ]; then
-      if kill -0 "$owner" 2>/dev/null; then rm -rf "$tmp"; return 1; fi
-    elif [ -n "$(find "$d" -maxdepth 0 -mmin -1 2>/dev/null)" ]; then rm -rf "$tmp"; return 1; fi
-    stale="$LEASES/$1.d.stale.${owner:-none}"
-    # Nunca se purga aquí una reclamación por antigüedad: el rename conserva la fecha del lease muerto y la de otro que
-    # acaba de ganar parecería vieja. Quien la gana la marca fresca (un fichero dentro actualiza la fecha del directorio).
-    if mv -T "$d" "$stale" 2>/dev/null; then STALES="$STALES $stale"; : >"$stale/claimed.$$"; fi
-    mv -T "$tmp" "$d" 2>/dev/null || { rm -rf "$tmp"; return 1; }
-  fi
-  if ! block_free "$1"; then rm -rf "$d"; return 1; fi
-  LEASE="$d"; return 0
-}
-if [ "$BLOCK" = auto ]; then
-  deadline=$(( $(date +%s) + TIMEOUT ))
-  while [ -z "$LEASE" ]; do
-    for b in $(seq 1 "$BLOCKS"); do take_block "$b" && { BLOCK=$b; break; }; done
-    [ -n "$LEASE" ] && break
-    if [ "$(date +%s)" -ge "$deadline" ]; then echo "run-tests: ningún bloque de puertos libre en ${TIMEOUT} s"; echo "run-tests: exit 124"; exit 124; fi
-    sleep 3
-  done
-else
-  case "$BLOCK" in ''|*[!0-9]*) echo "run-tests: --block tiene que ser auto o un número"; echo "run-tests: exit 2"; exit 2 ;; esac
-  take_block "$BLOCK" || { echo "run-tests: el bloque $BLOCK está ocupado (otra ejecución o los emuladores de la app)"; echo "run-tests: exit 1"; exit 1; }
-fi
-OFF=$((10 * BLOCK))
-
-# firebase.json con los puertos desplazados, al lado del original para que sus rutas relativas sigan valiendo.
-CFG="$FB/firebase.emu-$BLOCK.json"
-node -e '
-const fs = require("fs"); const [src, dst, off] = process.argv.slice(1); const o = Number(off);
-const c = JSON.parse(fs.readFileSync(src, "utf8")); const e = c.emulators || {};
-for (const k of ["auth", "functions", "firestore", "database", "hosting"]) if (e[k] && e[k].port) e[k] = { ...e[k], port: e[k].port + o };
-e.firestore = { ...(e.firestore || {}), websocketPort: 9150 + o };
-e.hub = { port: 4400 + o }; e.logging = { port: 4500 + o }; e.eventarc = { port: 9299 + o }; e.tasks = { port: 9499 + o };
-e.ui = { enabled: false };
-c.emulators = e; fs.writeFileSync(dst, JSON.stringify(c, null, 2));
-' "$FB/firebase.json" "$CFG" "$OFF" || { echo "run-tests: no se pudo escribir $CFG"; echo "run-tests: exit 2"; exit 2; }
-
 PID=""
+CFG=""
+OFF=""
 kill_tree() { # pid
   [ -n "$1" ] || return 0
   if [ -e "/proc/$1/winpid" ] && command -v taskkill >/dev/null 2>&1; then
@@ -168,9 +125,64 @@ free_ports() {
   done
 }
 LOG=""
-cleanup() { kill_tree "$PID"; free_ports; rm -f "$CFG"; [ -n "$LOG" ] && rm -f "$LOG"; [ -n "$LEASE" ] && rm -rf "$LEASE"; for s in $STALES; do rm -rf "$s"; done; }
+# Vale con el estado a medias (sin lease, sin config, sin pid): cada trozo solo actúa si ya existe. free_ports solo con
+# lease propio: sin él OFF no está fijado y el bloque no es nuestro.
+cleanup() {
+  [ -n "$PID" ] && kill_tree "$PID"
+  [ -n "$LEASE" ] && free_ports
+  [ -n "$CFG" ] && rm -f "$CFG"
+  [ -n "$LOG" ] && rm -f "$LOG"
+  [ -n "$LEASE" ] && rm -rf "$LEASE"
+  for s in $STALES; do rm -rf "$s"; done
+  rm -rf "$LEASES"/[0-9]*.d."$$"
+}
 trap cleanup EXIT
 trap 'echo "run-tests: exit 130"; exit 130' INT TERM
+
+take_block() { # n -> 0 si queda reservado
+  local d="$LEASES/$1.d" tmp="$LEASES/$1.d.$$" owner stale
+  rm -rf "$tmp"; mkdir "$tmp" 2>/dev/null || return 1
+  echo $$ >"$tmp/pid"
+  # Un destino que ya existe pero está vacío lo reemplazaría el rename: por eso se mira antes si existe.
+  if [ -e "$d" ] || ! mv -T "$tmp" "$d" 2>/dev/null; then
+    owner=$(cat "$d/pid" 2>/dev/null)
+    if [ -n "$owner" ]; then
+      if kill -0 "$owner" 2>/dev/null; then rm -rf "$tmp"; return 1; fi
+    elif [ -n "$(find "$d" -maxdepth 0 -mmin -1 2>/dev/null)" ]; then rm -rf "$tmp"; return 1; fi
+    stale="$LEASES/$1.d.stale.${owner:-none}"
+    # Nunca se purga aquí una reclamación por antigüedad: el rename conserva la fecha del lease muerto y la de otro que
+    # acaba de ganar parecería vieja. Quien la gana la marca fresca (un fichero dentro actualiza la fecha del directorio).
+    if mv -T "$d" "$stale" 2>/dev/null; then STALES="$STALES $stale"; : >"$stale/claimed.$$"; fi
+    mv -T "$tmp" "$d" 2>/dev/null || { rm -rf "$tmp"; return 1; }
+  fi
+  if ! block_free "$1"; then rm -rf "$d"; return 1; fi
+  OFF=$((10 * $1)); LEASE="$d"; return 0
+}
+if [ "$BLOCK" = auto ]; then
+  deadline=$(( $(date +%s) + TIMEOUT ))
+  while [ -z "$LEASE" ]; do
+    for b in $(seq 1 "$BLOCKS"); do take_block "$b" && { BLOCK=$b; break; }; done
+    [ -n "$LEASE" ] && break
+    if [ "$(date +%s)" -ge "$deadline" ]; then echo "run-tests: ningún bloque de puertos libre en ${TIMEOUT} s"; echo "run-tests: exit 124"; exit 124; fi
+    sleep 3
+  done
+else
+  case "$BLOCK" in ''|*[!0-9]*) echo "run-tests: --block tiene que ser auto o un número"; echo "run-tests: exit 2"; exit 2 ;; esac
+  take_block "$BLOCK" || { echo "run-tests: el bloque $BLOCK está ocupado (otra ejecución o los emuladores de la app)"; echo "run-tests: exit 1"; exit 1; }
+fi
+OFF=$((10 * BLOCK))
+
+# firebase.json con los puertos desplazados, al lado del original para que sus rutas relativas sigan valiendo.
+CFG="$FB/firebase.emu-$BLOCK.json"
+node -e '
+const fs = require("fs"); const [src, dst, off] = process.argv.slice(1); const o = Number(off);
+const c = JSON.parse(fs.readFileSync(src, "utf8")); const e = c.emulators || {};
+for (const k of ["auth", "functions", "firestore", "database", "hosting"]) if (e[k] && e[k].port) e[k] = { ...e[k], port: e[k].port + o };
+e.firestore = { ...(e.firestore || {}), websocketPort: 9150 + o };
+e.hub = { port: 4400 + o }; e.logging = { port: 4500 + o }; e.eventarc = { port: 9299 + o }; e.tasks = { port: 9499 + o };
+e.ui = { enabled: false };
+c.emulators = e; fs.writeFileSync(dst, JSON.stringify(c, null, 2));
+' "$FB/firebase.json" "$CFG" "$OFF" || { echo "run-tests: no se pudo escribir $CFG"; echo "run-tests: exit 2"; exit 2; }
 
 cd "$FB" || exit 2
 if [ ! -d tests/node_modules ]; then npm --prefix tests ci >/dev/null || { echo "run-tests: exit 2"; exit 2; }; fi

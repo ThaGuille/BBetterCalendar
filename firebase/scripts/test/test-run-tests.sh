@@ -94,6 +94,20 @@ t_stale_purge() {
   FAKE_FB_MODE=hold FAKE_FB_HOLD=4 rt --block 1 --timeout 20
   check "tras acabar no queda ni lease ni reclamación" "$([ "$RC" = 0 ] && [ -z "$(ls -A "$T/leases")" ]; echo $?)"
 }
+# F18: la limpieza vale antes de tener lease, config o pid.
+t_cleanup_partial() {
+  setup; echo '{ no es json' >"$T/fb/firebase.json"; mkdir "$T/leases/1.d"; echo 999999 >"$T/leases/1.d/pid"
+  rt --block 1 --timeout 20
+  check "firebase.json roto: exit 2 con la línea final" "$([ "$RC" = 2 ] && last_is 'run-tests: exit 2'; echo $?)"
+  check "firebase.json roto: no queda lease, reclamación ni config" "$([ -z "$(ls -A "$T/leases")" ] && [ ! -e "$T/fb/firebase.emu-1.json" ]; echo $?)"
+  # hermana: el tope de la espera de bloque (124) tampoco deja nada propio
+  setup; sleep 30 & local holder=$!
+  mkdir "$T/leases/1.d"; echo "$holder" >"$T/leases/1.d/pid"
+  BB_FB_BLOCKS=1 rt --timeout 4
+  kill "$holder" 2>/dev/null
+  check "espera de bloque agotada: exit 124 y solo queda el lease ajeno" "$([ "$RC" = 124 ] && [ "$(ls -A "$T/leases")" = 1.d ]; echo $?)"
+}
+
 # F6: tras un tope (124) no se reintenta, aunque el log tenga una firma conocida.
 t_no_retry_after_timeout() {
   setup
@@ -176,7 +190,7 @@ t_docs() {
   check "profile.yml: primera planNote por intento y menos de 600 caracteres" "$(printf '%s' "$note" | grep -q 'por intento' && [ "$(printf '%s' "$note" | wc -c)" -lt 600 ]; echo $?)"
 }
 
-ALL="t_lease_midtake t_lease_race t_stale_purge t_no_retry_after_timeout t_block_auto t_listeners t_usage t_term t_docs"
+ALL="t_lease_midtake t_lease_race t_stale_purge t_cleanup_partial t_no_retry_after_timeout t_block_auto t_listeners t_usage t_term t_docs"
 for t in ${@:-$ALL}; do echo "== $t"; "$t"; done
 if [ "$FAILS" -ne 0 ]; then echo "test-run-tests: $FAILS fallos"; exit 1; fi
 echo "test-run-tests: todo bien"

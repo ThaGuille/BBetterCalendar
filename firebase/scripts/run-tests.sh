@@ -9,7 +9,7 @@
 # --timeout: tope de cada intento de emulators:exec (300 s por defecto), no de la ejecución entera; al pasarlo mata TODO el
 #   árbol de procesos (los emuladores son procesos java hijos) y sale con 124, sin dejar ningún puerto ocupado. La espera de
 #   un bloque libre con --block auto se acota con el mismo valor; npm ci y tsc corren antes y fuera de él. Peor caso: unos
-#   2 × el tope más la compilación.
+#   3 × el tope (la espera del bloque, un primer intento que sale con 1 y el reintento) más npm ci y tsc.
 # Como mucho un reintento, y solo tras un fallo (exit 1) con una firma conocida del emulador (Transaction lock timeout,
 # emuladores que no arrancan); nunca tras un tope de tiempo.
 # Salida: 0 la suite pasa, 1 falla, 124 tope de tiempo, 2 uso. La última línea siempre es «run-tests: exit <código>».

@@ -186,7 +186,11 @@ t_docs() {
   OUT=""
   check "cabecera de run-tests.sh: tope por intento" "$(grep -q 'tope de cada intento' "$SRC"; echo $?)"
   check "README: tope por intento" "$(grep -q 'por intento' "$REPO/firebase/README.md"; echo $?)"
+  # F16: el peor caso real son 3 × el tope, y los tres sitios lo dicen
+  check "cabecera de run-tests.sh: peor caso 3 × el tope" "$(grep -q '3 × el tope' "$SRC"; echo $?)"
+  check "README: peor caso 3 × el tope" "$(grep -q '3 × el tope' "$REPO/firebase/README.md"; echo $?)"
   local note; note=$(grep -m1 -A1 'planNotes:' "$REPO/.agents/profile.yml" | tail -n 1)
+  check "profile.yml: peor caso 3 × el tope" "$(printf '%s' "$note" | grep -q '3 × el tope'; echo $?)"
   check "profile.yml: primera planNote por intento y menos de 600 caracteres" "$(printf '%s' "$note" | grep -q 'por intento' && [ "$(printf '%s' "$note" | wc -c)" -lt 600 ]; echo $?)"
 }
 

@@ -28,8 +28,9 @@ bash firebase/scripts/run-tests.sh --timeout 600 --block 2 --no-retry
 - **Tope de tiempo** (`--timeout`, 300 s por defecto, `BB_FB_TIMEOUT`) **por intento**: si un intento lo pasa mata todo
   el árbol de procesos (los emuladores son procesos java hijos de node; `taskkill /T /F` de cada uno), libera los
   puertos del bloque y sale con 124. Nada se queda escuchando. La espera de un bloque libre (`--block auto`) se acota
-  con el mismo valor, y `npm ci` y `tsc` corren antes y fuera de él. Peor caso: unos 2 × el tope más la compilación;
-  un check que envuelva el script tiene que dejar ese margen.
+  con el mismo valor, y `npm ci` y `tsc` corren antes y fuera de él. Peor caso: unos 3 × el tope (la espera del
+  bloque, un primer intento que sale con 1 y el reintento) más `npm ci` y `tsc`; un check que envuelva el script tiene
+  que dejar ese margen.
 - **Un reintento**, solo para los fallos conocidos del emulador: `Transaction lock timeout`, las Functions que no
   cargan sus definiciones (`Failed to load function definition`, con la máquina cargada; además sube
   `FUNCTIONS_DISCOVERY_TIMEOUT` a 60 s) y emuladores que no arrancan o puertos ocupados. Un test que falla de verdad

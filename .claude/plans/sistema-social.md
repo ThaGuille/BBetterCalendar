@@ -40,8 +40,9 @@ Plan enlaza su `social-fN-*.md`.
 
 ## Entregables
 
-Cada entregable cita la sección de la guía que implementa. Se marca `[x]` al hacer commit y se anota
-en el diario.
+Cada entregable cita la sección de la guía que implementa. Cada unidad escribe su nota y su línea de
+diario en `.claude/plans/social-fN/notes/uN.md` (D-029); la unidad que cierra la fase las pliega en el plan
+de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 ### F0 · Base
 - [x] **F0.1** `minSdk 24`, `targetSdk` y `compileSdk 36` (D-003, D-004). Revisar edge-to-edge y

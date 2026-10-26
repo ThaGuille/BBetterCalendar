@@ -83,9 +83,13 @@ block_free() { # n
 # con el pid vacío o ausente cuenta como ocupado salvo que tenga más de 60 s. Uno de un dueño muerto se aparta con otro
 # rename atómico, a «<n>.d.stale.<pid muerto>»: ese nombre es también la reclamación (un segundo rename sobre él falla),
 # así que solo gana quien consigue apartarlo, y nadie puede apartar por error el lease vivo que el ganador pone después.
-# Por eso el ganador conserva el directorio apartado hasta cleanup; uno de más de 60 s es de una ejecución caída y se purga.
+# Por eso el ganador conserva el directorio apartado hasta cleanup y lo marca fresco al ganarlo; las reclamaciones de ejecuciones
+# caídas sin cleanup solo se purgan al empezar la ejecución, cuando tienen más de 1 h (nunca por antigüedad dentro de take_block).
 LEASES="${BB_FB_LEASE_DIR:-${TMPDIR:-/tmp}/bbetter-fbemu}"
 mkdir -p "$LEASES" 2>/dev/null
+# Reclamaciones de ejecuciones caídas sin cleanup (taskkill): solo aquí, al empezar y antes de cualquier take_block, y solo
+# las de más de 1 h (una viva la marca fresca al ganarla).
+find "$LEASES" -maxdepth 1 -name '*.d.stale.*' -mmin +60 -exec rm -rf {} + 2>/dev/null
 LEASE=""
 STALES=""
 take_block() { # n -> 0 si queda reservado
@@ -99,8 +103,9 @@ take_block() { # n -> 0 si queda reservado
       if kill -0 "$owner" 2>/dev/null; then rm -rf "$tmp"; return 1; fi
     elif [ -n "$(find "$d" -maxdepth 0 -mmin -1 2>/dev/null)" ]; then rm -rf "$tmp"; return 1; fi
     stale="$LEASES/$1.d.stale.${owner:-none}"
-    [ -n "$(find "$stale" -maxdepth 0 -mmin +1 2>/dev/null)" ] && rm -rf "$stale"
-    if mv -T "$d" "$stale" 2>/dev/null; then STALES="$STALES $stale"; fi
+    # Nunca se purga aquí una reclamación por antigüedad: el rename conserva la fecha del lease muerto y la de otro que
+    # acaba de ganar parecería vieja. Quien la gana la marca fresca (un fichero dentro actualiza la fecha del directorio).
+    if mv -T "$d" "$stale" 2>/dev/null; then STALES="$STALES $stale"; : >"$stale/claimed.$$"; fi
     mv -T "$tmp" "$d" 2>/dev/null || { rm -rf "$tmp"; return 1; }
   fi
   if ! block_free "$1"; then rm -rf "$d"; return 1; fi

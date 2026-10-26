@@ -74,8 +74,26 @@ t_lease_race() {
   check "6 ejecuciones a la vez sobre un bloque libre: gana una (ganaron $w)" "$([ "$w" = 1 ]; echo $?)"
   setup; mkdir "$T/leases/1.d"; echo 999999 >"$T/leases/1.d/pid"; OUT=""; w=$(race 6)
   check "6 ejecuciones a la vez sobre un lease muerto: gana una (ganaron $w)" "$([ "$w" = 1 ]; echo $?)"
+  # F17: el rename conserva la fecha del lease muerto; uno de hace 10 min no puede dejar que otro purgue la reclamación.
+  local r bad=0
+  for r in 1 2 3 4; do
+    setup; mkdir "$T/leases/1.d"; echo 999999 >"$T/leases/1.d/pid"; touch -d '10 minutes ago' "$T/leases/1.d"; OUT=""; w=$(race 6)
+    [ "$w" = 1 ] || bad=$((bad + 1))
+  done
+  check "6 ejecuciones sobre un lease muerto de hace 10 min, 4 rondas: siempre gana una (rondas malas: $bad)" "$([ "$bad" = 0 ]; echo $?)"
 }
-
+# F17: las reclamaciones sobrantes de ejecuciones caídas solo se purgan al empezar y con más de 1 h.
+t_stale_purge() {
+  setup; mkdir "$T/leases/1.d.stale.555" "$T/leases/1.d.stale.556"
+  touch -d '2 hours ago' "$T/leases/1.d.stale.555"; touch -d '10 minutes ago' "$T/leases/1.d.stale.556"
+  rt --block 1 --timeout 20
+  check "reclamación sobrante de hace 2 h: se purga" "$([ "$RC" = 0 ] && [ ! -e "$T/leases/1.d.stale.555" ]; echo $?)"
+  check "reclamación de hace 10 min (puede ser de otra ejecución viva): se respeta" "$([ -d "$T/leases/1.d.stale.556" ]; echo $?)"
+  # hermana: la reclamación propia se marca como fresca y se borra al acabar
+  setup; mkdir "$T/leases/1.d"; echo 999999 >"$T/leases/1.d/pid"; touch -d '10 minutes ago' "$T/leases/1.d"
+  FAKE_FB_MODE=hold FAKE_FB_HOLD=4 rt --block 1 --timeout 20
+  check "tras acabar no queda ni lease ni reclamación" "$([ "$RC" = 0 ] && [ -z "$(ls -A "$T/leases")" ]; echo $?)"
+}
 # F6: tras un tope (124) no se reintenta, aunque el log tenga una firma conocida.
 t_no_retry_after_timeout() {
   setup
@@ -158,7 +176,7 @@ t_docs() {
   check "profile.yml: primera planNote por intento y menos de 600 caracteres" "$(printf '%s' "$note" | grep -q 'por intento' && [ "$(printf '%s' "$note" | wc -c)" -lt 600 ]; echo $?)"
 }
 
-ALL="t_lease_midtake t_lease_race t_no_retry_after_timeout t_block_auto t_listeners t_usage t_term t_docs"
+ALL="t_lease_midtake t_lease_race t_stale_purge t_no_retry_after_timeout t_block_auto t_listeners t_usage t_term t_docs"
 for t in ${@:-$ALL}; do echo "== $t"; "$t"; done
 if [ "$FAILS" -ne 0 ]; then echo "test-run-tests: $FAILS fallos"; exit 1; fi
 echo "test-run-tests: todo bien"

@@ -19,9 +19,12 @@ re-derive ids.
 
 - An emulator/device must be attached. Check: `adb devices` → expect `emulator-5554 device`.
   - No device, or not sure? Run `powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1`.
-    It **reuses** a running emulator (~1.5 s), else boots `api36` headless from its `bt_quick` snapshot
+    It **reuses** a running emulator of that AVD (`-Avd`, default `api36`; one of another AVD is left alone) (~1.5 s), else boots `api36` headless from its `bt_quick` snapshot
     (~10-30 s; it creates the snapshot on the first cold boot), and prints `AVD READY <serial> (...)`.
-    Add `-Clean` only when a check needs a clean boot (`-no-snapshot`, ~50-60 s cold). Never boot the
+    If the snapshot boot fails it falls back once to a cold boot. `avd-up` does **not** lease: when several units
+    share emulators, take the lease with `.claude\scripts\emulator-lease.ps1 -Acquire` after it.
+    Add `-Clean` only when a check needs a clean boot (`-no-snapshot`, ~50-60 s cold; it refuses while any emulator
+    is attached: `adb -s <serial> emu kill` it first or lease another). Never boot the
     emulator through `bt-run.sh` (it would hold the worktree's build lock), and never kill a running one
     another unit leases (`.claude\scripts\emulator-lease.ps1 -Status`). The AVD's own `default_boot`
     snapshot was broken (every "quick boot" fell back to a cold one), hence the named snapshot.

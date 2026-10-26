@@ -14,7 +14,7 @@
     El snapshot por defecto (default_boot) del api36 estaba roto («Device 'cache' does not have the requested snapshot»)
     y cada «arranque rápido» acababa en uno en frío; por eso se usa uno con nombre propio.
 
-    Uso:  powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scriptsvd-up.ps1 [-Avd api36] [-Clean] [-Window] [-TimeoutSec 300] [-SnapshotTimeoutSec 90]
+    Uso:  powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1 [-Avd api36] [-Clean] [-Window] [-TimeoutSec 300] [-SnapshotTimeoutSec 90]
     Sin -Window arranca sin ventana (-no-window), como los agentes.
     Imprime «AVD READY <serial> (<cómo>, <s> s)» y sale con 0, o «AVD NOT READY ...» y 1.
 #>

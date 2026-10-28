@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-28 (revisión antes de abrir F3: D-030, Q-08)
+**Last updated:** 2026-10-29 (F3 abierta: plan, D-031)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,12 +15,12 @@
 
 ## Ahora
 
-- **Fase activa:** ninguna abierta: **F2** (Amigos) está **hecha** ([`social-f2-amigos.md`](social-f2-amigos.md), `merged`). F0, F1 y F2
-  hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md)); el estado as-built está en
-  [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** abrir **F3** (Stats y ranking: `StatsPublisher`, reglas de `stats/`, perfil de amigo, ranking semanal) con su
-  plan `social-f3-*.md`, siguiendo el protocolo del README de la guía. F3 no está abierta. Al abrirla, preguntar
-  **Q-08** al usuario (bloquea F3.1) y planificar con D-030 (03 §9 ya corregida).
+- **Fase activa:** **F3** (Stats y ranking), plan [`social-f3-stats.md`](social-f3-stats.md) (`in progress`, 9 unidades). F0, F1 y F2
+  hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md));
+  el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
+- **Siguiente paso:** ejecutar las unidades de F3 con big-task: u2 (reglas de `stats/`), u3 (`RankingCalculator`, `WeekKey` y lectura) y,
+  tras u3, u4 (`StatsPublisher`) y u5 (`RankingRepository`); después la UI (u6 perfil de amigo, u7 pestaña Ranking, u8 «Nº entre amigos»)
+  y u9 cierra la fase. Q-08 está cerrada (D-031).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -31,7 +31,7 @@
 | **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | hecha | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
 | **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | hecha | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
 | **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, eliminar y reportar (sin bloquear, D-027) | hecha | [`social-f2-amigos.md`](social-f2-amigos.md) | `social-focus-invite`, `home-notification-centre` (parcial) |
-| **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | pendiente | — | `social-rank` |
+| **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | activa | [`social-f3-stats.md`](social-f3-stats.md) | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | pendiente | — | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
 | **F5** Interacción | Ánimo, empujón, push, bandeja | pendiente | — | `home-notification-centre` |
 | **L** Lanzamiento | Gate antes de activar lo social en release | pendiente | — | — |
@@ -160,12 +160,17 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 | ~~Q-05~~ | ~~¿Se puede cambiar el `@usuario`?~~ Cerrada (D-019): sí, una vez cada 30 días; el anterior queda libre | — | — |
 | ~~Q-06~~ | ~~¿Qué enlace lleva la tarjeta de compartir mientras la app no está publicada?~~ Cerrada (D-018): ninguno, solo la marca «BBetter»; el enlace de Play se añade al publicar | — | — |
 | ~~Q-07~~ | ~~¿Prórroga del target API?~~ Cerrada: no hay nada publicado, así que no aplica | — | — |
-| Q-08 | La primera publicación de `stats/` (al crear la cuenta), ¿incluye la historia local anterior a la cuenta (`totalMinutes`, `bestWeekStreak`) o empieza en 0? | Incluirla: son agregados que ya existen en el móvil, no añaden ningún campo nuevo y un perfil a 0 desanima a quien lleva meses usando la app; la política v2 debe decir que se comparten los totales desde el primer uso | F3.1 |
+| ~~Q-08~~ | ~~La primera publicación de `stats/` (al crear la cuenta), ¿incluye la historia local anterior a la cuenta (`totalMinutes`, `bestWeekStreak`) o empieza en 0?~~ Cerrada (D-031): incluye toda la historia local (totales y rachas desde el primer uso) | — | — |
 
 ## Diario
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-29 (26)** · **F3 abierta** (F3-u1): plan [`social-f3-stats.md`](social-f3-stats.md) (9 unidades en 5 olas,
+  opus para u4 y u5) y D-031 (Q-08: la primera publicación incluye toda la historia local; 03 §9 y README, Historial).
+  Decisiones del plan: última escritura gana tras reinstalar, Constancia con razón sin tope, perfil de amigo con
+  «3 de 4 días» (sin campo nuevo) y «–» en Cycle complete sin amigos. Commit «F3-u1: abrir F3 (plan de fase, D-031 y tablero)».
+  **Siguiente:** ola 1: u2 (reglas de `stats/`) y u3 (`RankingCalculator`).
 - **2026-10-28 (25)** · Revisión antes de abrir F3: `bt/social-f2-amigos` ya estaba fusionada en `main`; las anclas de
   03 §9 siguen en el código (`recordFocusCompleted`/`recordFail`, `StreakCalculator.Result`, `WeeklyGoalStore`,
   `FocusEventDAO`, `@IoExecutor`, `deleteAccount` borra `stats/`). D-030 (disparadores de publicación, corona con

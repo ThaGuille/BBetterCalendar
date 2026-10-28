@@ -1,6 +1,6 @@
 # 03 · Arquitectura
 
-> **Última revisión:** 2026-10-28 · Guía: [README](README.md) · Producto: [02](02-producto.md)
+> **Última revisión:** 2026-10-29 · Guía: [README](README.md) · Producto: [02](02-producto.md)
 >
 > Cómo se monta. Es el diseño objetivo: lo que ya existe se documenta en
 > `.claude/docs/systems/social.md` a partir de F1. Las secciones se citan como `03 §N`.
@@ -153,6 +153,8 @@ tests son parte del «hecho cuando» de F2 y F3.
   por fecha civil local) con el tope de 240 aplicado por día; la racha y el objetivo salen de
   `StreakCalculator.Result` (`goal`, `daysThisWeek`, `weekStreak`, `bestWeekStreak`) y de
   `WeeklyGoalStore`.
+- La historia no se recorta: `totalMinutes`, `bestWeekStreak` y `weekStreak` se calculan con todo `focus_event`
+  del móvil, también en la primera publicación de una cuenta nueva (D-031).
 - La caché offline de Firestore pone en cola las escrituras sin red. Cada publicación es un `set`
   completo del documento: es idempotente y la última gana.
 - **`RankingCalculator`** es puro y tiene tests JUnit. Su entrada es tu stats más las de tus amigos,

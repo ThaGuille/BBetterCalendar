@@ -284,4 +284,20 @@
   `stats/` hasta la siguiente sesión, y un cambio de objetivo dejaría Constancia desfasada. Sin mirar `dayKey`,
   los minutos de ayer de un amigo que no ha abierto la app hoy le darían la corona.
 - **Abierto:** si la primera publicación incluye la historia anterior a la cuenta (`totalMinutes`,
-  `bestWeekStreak`) → Q-08 del tablero.
+  `bestWeekStreak`) → Q-08 del tablero. Cerrada con D-031.
+
+### D-031 · Q-08: la primera publicación incluye toda la historia local
+- **Estado:** aceptada (usuario, 2026-10-28, al aprobar el plan de F3 [`social-f3-stats.md`](../../.claude/plans/social-f3-stats.md)).
+  Cierra Q-08 y precisa 03 §9.
+- **Decisión:** la primera publicación de `stats/{uid}`, y todas las siguientes, se calcula con **toda la historia
+  local** del móvil: `totalMinutes`, `bestWeekStreak` y `weekStreak` cuentan desde el primer uso de la app, no
+  desde la creación de la cuenta. No hay una fecha de inicio por cuenta ni ningún campo nuevo.
+- **Por qué:** son agregados que ya existen en el móvil y que el usuario ya ve en su pantalla Progreso; un perfil a
+  0 desanima a quien lleva meses usando la app y obligaría a guardar un corte por uid (`SocialPrefs`) y a calcular
+  cada cifra con él.
+- **Consecuencias:**
+  - `StatsPublisher` (F3-u4) lee `focus_event` sin límite inferior; sin baseline en `SocialPrefs`.
+  - La política de privacidad v2 debe decir que los totales compartidos con los amigos se cuentan desde el primer
+    uso (F3-u9, `docs/legal/privacy-policy-v2-draft.md`).
+  - Tras reinstalar o en un segundo móvil la historia local es distinta y la siguiente publicación sobrescribe los
+    totales de la cuenta (la última escritura gana, 03 §9); el plan de F3 lo lista como riesgo.

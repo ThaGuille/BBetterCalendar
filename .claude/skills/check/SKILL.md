@@ -1,6 +1,6 @@
 ---
 name: check
-description: Verify the current changes compile and pass lint, on demand. Use when the user says "/check", "verify my changes build". Replaces an auto-run-gradle-on-stop hook (gradle is too slow to run every turn). Runs lint/compile via gradlew.bat and reports.
+description: Verify the current changes compile and pass lint, on demand. Use when the user says "/check", "verify my changes build". Replaces an auto-run-gradle-on-stop hook (gradle is too slow to run every turn). Runs lint/compile via the gradle wrapper (gradlew.bat on Windows, ./gradlew on Linux/macOS) and reports.
 ---
 
 # check — on-demand build/lint verification
@@ -10,6 +10,8 @@ turn (the Stop-hook option was rejected as too slow). Run this after a change to
 it's clean before committing.
 
 ## What to run (cheapest sufficient check first)
+
+Commands are written for Windows; on Linux/macOS use `./gradlew <task>` (see [`bb-build`](../bb-build/SKILL.md)).
 
 1. **Compile / build** (catches the most, fastest signal for Java changes):
    ```powershell
@@ -24,7 +26,7 @@ it's clean before committing.
    .\gradlew.bat test
    ```
 
-Use the [`bb-build`](../bb-build/SKILL.md) skill for the correct Windows invocation and
+Use the [`bb-build`](../bb-build/SKILL.md) skill for the correct per-OS invocation and
 failure recovery (stuck daemon → `.\gradlew.bat --stop` then retry; OneDrive file lock → retry).
 
 ## Report

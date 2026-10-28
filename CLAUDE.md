@@ -17,12 +17,21 @@ BBetterCalendar is an Android productivity app: Pomodoro timer + habit streaks +
 
 ## Environment
 
-- **OS:** Windows 11
-- **Shell:** PowerShell 5.1 — no `&&` / `||`. Use `; if ($?) { B }` to chain on success.
-- **Path style:** Backslashes in Windows paths (`app\src\main\...`). Forward slashes are accepted by most tools and fine in Markdown/links.
-- **Gradle wrapper:** `.\gradlew.bat <task>` from PowerShell. `./gradlew <task>` via the Bash tool also works (allow-listed), but `.\gradlew.bat` is the canonical form.
+The repo is worked on from **two machines**: check the OS you are on (the session's platform) and use that column. Commands elsewhere in these docs are written for Windows unless they say otherwise.
 
-Full PowerShell / `gradlew.bat` / `adb` reference: [`.claude/docs/windows_commands.md`](.claude/docs/windows_commands.md).
+| | Windows 11 | Linux (Ubuntu) |
+|---|---|---|
+| **Shell** | PowerShell 5.1 — no `&&` / `\|\|`; chain with `; if ($?) { B }` | bash |
+| **Paths** | backslashes (`app\src\main\...`); forward slashes work in most tools | forward slashes |
+| **Gradle** | `.\gradlew.bat <task>` (`./gradlew` via Git Bash also works) | `./gradlew <task>` |
+| **adb** | on PATH | usually not on PATH: `python3 .claude/skills/adb-ui-test/scripts/bbadb.py adb <args>` (SDK in `~/Android/Sdk`) |
+| **adb-ui-test scripts** | `scripts\*.ps1` | `scripts/bbadb.py` (same flows and recordings) |
+| **Emulator lease** | `.claude\scripts\emulator-lease.ps1` | `python3 .claude/scripts/emulator-lease.py` |
+| **Hooks** | `.ps1` | `.sh` / `.py` twin |
+
+Hooks pick their implementation through [`.claude/hooks/run-hook.js`](.claude/hooks/run-hook.js) (`.ps1` on Windows, `.sh`/`.py` elsewhere). When you change a hook or an adb script, change its twin too.
+
+Full PowerShell / `gradlew.bat` / `adb` reference (Windows): [`.claude/docs/windows_commands.md`](.claude/docs/windows_commands.md).
 
 ## Build & Test Commands
 
@@ -176,11 +185,11 @@ with e.g. "use the code-reviewer subagent".
 
 | Event | Script | Behavior |
 |---|---|---|
-| PostToolUse (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**, non-blocking: flags design-token violations added to a `.java`/`.kt`/`.xml` edit (legacy palette, hex in layout/drawable, white/black, literal sp, `@font/`, `fraunces`, `setTheme(`; same categories as `.claude/scripts/token_audit.py`) (rule #2). |
-| SessionStart | `session-context.ps1` | Injects key rule reminders into the session. |
-| Stop | `verify-ui-reminder.ps1` | **Blocking-once**: when the uncommitted runtime diff is *big* (not a small fix) and an emulator is attached, blocks the stop with an instruction to verify via the `ui-tester` subagent (rule #7). Silent on small/clean/no-device; re-arms after commit. |
+| PostToolUse (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` / `.py` | **Warn-only**, non-blocking: flags design-token violations added to a `.java`/`.kt`/`.xml` edit (legacy palette, hex in layout/drawable, white/black, literal sp, `@font/`, `fraunces`, `setTheme(`; same categories as `.claude/scripts/token_audit.py`) (rule #2). |
+| SessionStart | `session-context.ps1` / `.sh` | Injects key rule reminders into the session. |
+| Stop | `verify-ui-reminder.ps1` / `.sh` | **Blocking-once**: when the uncommitted runtime diff is *big* (not a small fix) and an emulator is attached, blocks the stop with an instruction to verify via the `ui-tester` subagent (rule #7). Silent on small/clean/no-device; re-arms after commit. |
 
-> Hook commands use absolute Windows paths in `settings.local.json` (a machine-local file). Generalize them to `$CLAUDE_PROJECT_DIR` when extracting the reusable plugin (roadmap Phase 4).
+> Hook commands in `settings.local.json` (committed) are `node "$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.js" <name>`: one command for both OSes; the dispatcher runs the `.ps1` on Windows and the `.sh`/`.py` twin elsewhere.
 
 ## Key directories
 

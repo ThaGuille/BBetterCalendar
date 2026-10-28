@@ -67,12 +67,14 @@ in a few calls instead of dozens. The local (BBetter) copies are tuned with the 
 ### 2c. Hooks — automatic, you don't invoke these
 
 Configured in [`.claude/settings.local.json`](../settings.local.json), scripts in
-[`.claude/hooks/`](../hooks/).
+[`.claude/hooks/`](../hooks/). Each command is `node "$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.js" <name>`:
+[`run-hook.js`](../hooks/run-hook.js) runs `<name>.ps1` on Windows and the `<name>.sh` / `<name>.py`
+twin on Linux/macOS. Change both twins together.
 
 | Event | Script | What it does |
 |---|---|---|
-| **SessionStart** | `session-context.ps1` | Injects the 4 key rule reminders at the top of every session |
-| **PostToolUse** (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` | **Warn-only**: if an edit adds a design-token violation to a `.java`/`.kt`/`.xml` (legacy palette `azul`/`verde`/`white`…, hex in layout/drawable, `@android:color/white|black`, `Color.WHITE`, literal `sp`, `@font/`, `fraunces`, `setTheme(`), prints a notice. The edit is kept (rule #2). Same categories as the ratchet script `.claude/scripts/token_audit.py`. |
+| **SessionStart** | `session-context.ps1` / `.sh` | Injects the 4 key rule reminders at the top of every session |
+| **PostToolUse** (Edit/Write/MultiEdit) | `check-legacy-palette.ps1` / `.py` | **Warn-only**: if an edit adds a design-token violation to a `.java`/`.kt`/`.xml` (legacy palette `azul`/`verde`/`white`…, hex in layout/drawable, `@android:color/white|black`, `Color.WHITE`, literal `sp`, `@font/`, `fraunces`, `setTheme(`), prints a notice. The edit is kept (rule #2). Same categories as the ratchet script `.claude/scripts/token_audit.py`. |
 
 There is deliberately **no gradle-on-stop hook** — too slow to run every turn. That role is the
 manual `/check` skill instead.
@@ -128,7 +130,7 @@ Plan mode) and `/save-plan` it if it should outlive the conversation. Then imple
 - `/big-task "<goal>"` → you approve the plan once; the chat then orchestrates by itself and stops only for what its
   policy escalates. Up to **2 units run at once** (`bigTask.parallel`), each in its own worktree under
   `.claude/worktrees/`; Gradle builds share 2 machine-wide slots; units that drive the emulator say `@emulator` and never
-  overlap (lease: `.claude/scripts/emulator-lease.ps1`). It closes by merging into `main` and pushing.
+  overlap (lease: `.claude/scripts/emulator-lease.ps1`, on Linux/macOS `emulator-lease.py`). It closes by merging into `main` and pushing.
 - Its telemetry (and review-branch's) is the **Telemetry** tab of the Bench Log.
 
 ### Things that happen automatically (don't type anything)
@@ -216,8 +218,8 @@ The marketplace currently lives inside BBetter. To use it on another machine, co
 |---|---|
 | [`.claude/skills/`](../skills/) | `save-plan`, `check`, `bb-build` |
 | [`.claude/agents/`](../agents/) | explorer, planner, code-reviewer, test-writer |
-| [`.claude/hooks/`](../hooks/) | `session-context.ps1`, `check-legacy-palette.ps1` |
-| [`.claude/settings.local.json`](../settings.local.json) | hook wiring + permission allow-list (machine-local) |
+| [`.claude/hooks/`](../hooks/) | `run-hook.js` (per-OS dispatcher) + `session-context`, `check-legacy-palette`, `verify-ui-reminder` (`.ps1` for Windows, `.sh`/`.py` for Linux/macOS) |
+| [`.claude/settings.local.json`](../settings.local.json) | hook wiring + permission allow-list (committed; the hook commands work on both OSes) |
 | [`.claude/plans/`](../plans/) | saved plans (incl. the harness roadmap) |
 | [`.claude/docs/`](.) | knowledge base (this file included); [`systems/`](systems/) holds the per-runtime-subsystem living docs — `capabilities/` is retired in favor of these |
 | [`.claude/harness-marketplace/`](../harness-marketplace/) | the reusable plugin + marketplace (Phase 4) |

@@ -19,3 +19,7 @@ local.properties
 keystore.properties
 *.jks
 *.keystore
+
+# Python bytecode (Linux harness scripts: bbadb.py, emulator-lease.py)
+__pycache__/
+*.pyc

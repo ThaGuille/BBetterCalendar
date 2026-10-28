@@ -11,6 +11,28 @@ from [skydoves/android-testing-skills](https://github.com/skydoves/android-testi
 (the "find by stable id, not fragile text" doctrine), Windows/PowerShell-ified, with a
 host-side dump locator and a record/replay layer added.
 
+## Windows vs Linux/macOS
+
+The commands below are written for **Windows** (PowerShell, `scripts\*.ps1`). On **Linux/macOS**
+the same flow runs through one Python script, [`scripts/bbadb.py`](scripts/bbadb.py): same
+behaviour, exit codes, recording grammar and `recordings/` / `captures/` folders, so a flow recorded
+on one OS replays on the other. `adb` is often not on PATH there; `bbadb.py adb <args>` runs the one
+it finds (`$ADB`, PATH, `$ANDROID_HOME`, `local.properties` `sdk.dir`, `~/Android/Sdk`).
+
+| Windows (from `scripts\`) | Linux/macOS (from `scripts/`) |
+|---|---|
+| `.\find-node.ps1 -Id X -Tap` / `-Text T` / `-List` | `python3 bbadb.py find-node --id X --tap` / `--text T` / `--list` |
+| `.\bb-adb.ps1 -Scenario S -Init` | `python3 bbadb.py record S --init` |
+| `.\bb-adb.ps1 -Scenario S -Tap X` (`-Start`, `-Grant`, `-Clear`, `-TapText`, `-Type`, `-Key`, `-Swipe`, `-Wait`, `-AssertId X -Expect Y`, `-Shot L`) | `python3 bbadb.py record S --tap X` (`--start`, `--grant`, `--clear`, `--tap-text`, `--type`, `--key`, `--swipe x1 y1 x2 y2 ms`, `--wait`, `--assert-id X --expect Y`, `--shot L`) |
+| `.\replay.ps1 S [-Speed 0.5]` | `python3 bbadb.py replay S [--speed 0.5]` |
+| `.\capture-screen.ps1 -Label L` | `python3 bbadb.py capture --label L` |
+| `adb -s emulator-5554 …` | `python3 bbadb.py adb -s emulator-5554 …` |
+| `.\gradlew.bat assembleDebug`, `app\build\…` | `./gradlew assembleDebug`, `app/build/…` |
+| `& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd <name> -no-window` | `~/Android/Sdk/emulator/emulator -avd <name> -no-window -no-audio` (run in background) |
+| `.claude\scripts\emulator-lease.ps1 -Acquire -Unit u1` | `python3 .claude/scripts/emulator-lease.py --acquire --unit u1` |
+
+`--serial` / `-Serial` behave the same: default is the first attached `emulator-*`, never a phone.
+
 Selectors and device facts live in
 [`references/bbetter-selectors.md`](references/bbetter-selectors.md) — read it first; don't
 re-derive ids.
@@ -84,6 +106,8 @@ re-derive ids.
    ```powershell
    adb -s emulator-5554 shell pm clear io.github.thaguille.bbettercalendar
    ```
+   `pm clear` revokes runtime grants: re-run the step-2 `pm grant POST_NOTIFICATIONS` after it,
+   or the permission dialog comes back on the next launch.
 
 ## Record once, replay cheap
 

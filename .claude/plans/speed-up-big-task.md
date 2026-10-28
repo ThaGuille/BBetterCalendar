@@ -1,8 +1,8 @@
 # Speed up the social big-task phases (F3–F5)
 
-**Status:** in progress
+**Status:** merged
 **Created:** 2026-10-25
-**Last updated:** 2026-10-25
+**Last updated:** 2026-10-28
 
 ## Summary
 
@@ -47,6 +47,13 @@ missing hard timeouts, unfixable checks, the misfiring `pool-underfilled` signal
    per-unit notes and `workMode`.
 6. PushNotification on escalate, plan ready and final stop; document that a run dies with its chat.
 7. Telemetry: stall gaps and bt-run timeouts; `node telemetry/export.mjs --all`.
+
+## Outcome (2026-10-28)
+
+Both branches went through review-branch (AI-kit: 20 findings, BBetterCalendar: 18, all fixed or accepted by the user;
+the user kept the Linux keep-awake path, `gradlew` LF and `parallel: 3`, and chose the attempt marker for `bt equivalent`).
+Measured: fresh-worktree build 80 s -> 23-35 s; Firebase suite 9/10 -> 10/10 plus 2/2 under Gradle load (~55 s, two
+worktrees at once in 63 s); AVD reuse 1.4 s, `bt_quick` snapshot 10-30 s, cold 49-61 s.
 
 ## Open questions
 

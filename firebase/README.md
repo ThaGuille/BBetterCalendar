@@ -76,7 +76,8 @@ npm --prefix functions run build
 
 | Fichero | Qué prueba |
 |---|---|
-| `tests/deny-all.test.js` | Control positivo (con las reglas desactivadas el emulador responde) y que todo lo que ninguna fase ha abierto (`stats/`, `blocks/`, `users/*/inbox`, cualquier otra colección, RTDB `status/`, `presence/` y la raíz) sigue denegado |
+| `tests/deny-all.test.js` | Control positivo (con las reglas desactivadas el emulador responde) y que todo lo que ninguna fase ha abierto (`blocks/`, `users/*/inbox`, cualquier otra colección, RTDB `status/`, `presence/` y la raíz) sigue denegado |
+| `tests/stats-rules.test.js` | F3-u2: `stats/{uid}` — lo lee el dueño y sus amigos, lo escribe solo el dueño (set completo) con las 10 claves exactas y los rangos de `validStats()` (un caso denegado por condición, también el tope `240 * daysThisWeek`); borrar, nunca |
 | `tests/friends-rules.test.js` | F2-u3: `friendRequests/{from_to}` (crear solo con el id `from_to`, las 10 claves, `status` `pending`, `createdAt` del servidor y las tarjetas de `handles/`; ni a uno mismo, ni ya amigos, ni cruzada); el contador diario de `users/{from}` en el mismo lote (20.ª sí y 21.ª no, un día nuevo lo reinicia, dos solicitudes con un incremento no, `reqLastTo` = destinatario); aceptar solo el destinatario; `failed` solo las Functions; cancelar y rechazar borran; consultas con `where to/from == yo`; `users/*/friends` solo lectura del dueño; `profiles/` legible por un amigo (`isFriend`) antes y después de eliminar; RTDB `friends/` lo lee solo el dueño y nadie escribe |
 | `tests/invites-reports.test.js` | F2-u3: `invites/{código}` (`^[A-HJKMNP-Z2-9]{8}$`, `get` con sesión y sin `list`, alta en el mismo lote que `users/{uid}.inviteCode`, cambiar de código borra el viejo, renombrar copia el `@usuario` del perfil final) y `reports/{reporter_reported}` (solo crear, campos y enums exactos, hace falta ser amigo o tener una solicitud del reportado; con `context` `request` el rechazo va en el mismo lote; leer, cambiar, borrar y un segundo reporte, denegados) |
 | `tests/profiles-handles.test.js` | F1-u1: `users/` y `profiles/` solo del dueño con lista blanca de campos; `handles/` (solo `get` con sesión, sin acaparar ni tener dos, liberar solo al renombrar); renombrar cada 30 días con el primero libre (D-019, D-022). F2-u1: `ageBand` no cambia tras el alta (D-024), el perfil no se crea sin `users/{uid}` en el estado final del lote y un `@usuario` `__ab__` se rechaza (el emulador ya rechaza el id `handles/__ab__` con `invalid-argument` antes de las reglas) |
@@ -138,6 +139,9 @@ node tests/tools/actor.js remove bob @alice     # callable removeFriend
 node tests/tools/actor.js list bob              # FRIEND @<handle> · IN @<handle> <status> · OUT @<handle> <status>
 node tests/tools/actor.js seed-friends alice 50 # SIN reglas: 50 amigos inventados (f01_alice...), idempotente (tope de 50)
 node tests/tools/actor.js set-counter alice 20  # SIN reglas: contador de hoy a 20 (la 21.ª se rechaza); 0 lo quita
+node tests/tools/actor.js stats bob minutesToday=90 minutesWeekCapped=300 daysThisWeek=2 weekStreak=1 bestWeekStreak=4 totalMinutes=900
+                                                # F3-u2: set() de stats/{uid} CON reglas (dayKey y weekKey de la fecha local, ISO);
+                                                # omitidos = 0 (weeklyGoal 3); sale con 1 y el error de las reglas si no vale
 ```
 
 Bob también puede entrar en la app por email (`bob@bb.test` / `bbtest-123456`) para el recorrido completo con dos

@@ -338,6 +338,30 @@ service cloud.firestore {
               || getAfter(userPath(request.auth.uid)).data.get('inviteCode', '') != code);
     }
 
+    // ---- stats/{uid} (F3-u2, 03 §5) -------------------------------------------------------------------
+
+    // Las 10 claves exactas. dayKey y weekKey son la fecha civil local y la semana ISO de quien publica (se
+    // comparan como texto, nunca como instantes). minutesToday sin tope por día (0..1440); minutesWeekCapped es
+    // la suma lunes..hoy de min(día, 240) (D-005): como mucho 240 por día de foco y 7 días = 1680.
+    function validStats() {
+      let d = request.resource.data;
+      let keys = ['dayKey', 'weekKey', 'minutesToday', 'minutesWeekCapped', 'daysThisWeek', 'weeklyGoal',
+                  'weekStreak', 'bestWeekStreak', 'totalMinutes', 'updatedAt'];
+      return d.keys().hasOnly(keys)
+          && d.keys().hasAll(keys)
+          && d.dayKey is string && d.dayKey.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && d.weekKey is string && d.weekKey.matches('^[0-9]{4}-W[0-9]{2}$')
+          && d.minutesToday is int && d.minutesToday >= 0 && d.minutesToday <= 1440
+          && d.daysThisWeek is int && d.daysThisWeek >= 0 && d.daysThisWeek <= 7
+          && d.minutesWeekCapped is int && d.minutesWeekCapped >= 0 && d.minutesWeekCapped <= 1680
+          && d.minutesWeekCapped <= 240 * d.daysThisWeek
+          && d.weeklyGoal is int && d.weeklyGoal >= 1 && d.weeklyGoal <= 7
+          && d.weekStreak is int && d.weekStreak >= 0
+          && d.bestWeekStreak is int && d.bestWeekStreak >= d.weekStreak
+          && d.totalMinutes is int && d.totalMinutes >= 0
+          && d.updatedAt is timestamp && d.updatedAt == request.time;
+    }
+
     match /users/{uid} {
       allow read: if isOwner(uid);
       allow create: if isOwner(uid) && validUserCreate();
@@ -357,6 +381,14 @@ service cloud.firestore {
       allow read: if isOwner(uid) || isFriend(uid);
       allow create: if isOwner(uid) && validProfileCreate();
       allow update: if isOwner(uid) && validProfileUpdate();
+      allow delete: if false;
+    }
+
+    // F3-u2 (03 §5 §9, D-030): el dueño y sus amigos leen; escribe solo el dueño, siempre un set() completo
+    // (create y update pasan por la misma validStats). Nunca hay campos de fallos ni de nada más (P5).
+    match /stats/{uid} {
+      allow read: if isOwner(uid) || isFriend(uid);
+      allow create, update: if isOwner(uid) && validStats();
       allow delete: if false;
     }
 

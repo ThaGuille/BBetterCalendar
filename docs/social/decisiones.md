@@ -40,6 +40,7 @@
 | D-027 | Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene | aceptada | 2026-10-20 |
 | D-028 | Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja | aceptada | 2026-10-24 |
 | D-029 | Notas y diario de cada unidad en su propio fichero; el cierre de fase los pliega | aceptada | 2026-10-25 |
+| D-030 | F3: cuándo se publican las stats, la corona mira `dayKey` y acciones del perfil de amigo por fase | aceptada | 2026-10-28 |
 
 ---
 
@@ -269,3 +270,18 @@
   5,6 h de trabajo en serie que con unidades independientes podían ir en paralelo.
 - **Consecuencias:** se corrige el protocolo del [README](README.md) («Durante la fase» y «Cerrar una fase») y su
   plantilla; `.agents/profile.yml` lo dice al planificador de big-task (`bigTask.planNotes`).
+
+### D-030 · F3: cuándo se publican las stats, la corona mira `dayKey` y acciones del perfil de amigo por fase
+- **Estado:** aceptada (revisión de Claude antes de abrir F3; el usuario pidió corregirlo el 2026-10-28).
+  Precisa 02 §6 y §9 y 03 §9.
+- **Decisión:**
+  1. `StatsPublisher` publica también al iniciar sesión o crear el perfil (la primera publicación) y al cambiar
+     el objetivo semanal (`WeeklyGoalStore`), porque Constancia lo usa. Sin sesión o sin perfil no publica nada.
+  2. La corona (el amigo con más minutos **hoy**) solo cuenta `minutesToday` si el `dayKey` del amigo es el de
+     quien mira; si no, cuenta 0, igual que `weekKey` en el ranking semanal. Lo resuelve `RankingCalculator`.
+  3. El perfil de amigo de F3 tiene «eliminar» y «reportar»; «ánimo» llega con F5.
+- **Por qué:** con solo «tras una sesión» y «al arrancar si cambia el día», un perfil recién creado no tendría
+  `stats/` hasta la siguiente sesión, y un cambio de objetivo dejaría Constancia desfasada. Sin mirar `dayKey`,
+  los minutos de ayer de un amigo que no ha abierto la app hoy le darían la corona.
+- **Abierto:** si la primera publicación incluye la historia anterior a la cuenta (`totalMinutes`,
+  `bestWeekStreak`) → Q-08 del tablero.

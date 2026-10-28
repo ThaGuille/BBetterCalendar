@@ -1,6 +1,6 @@
 # 02 · Producto
 
-> **Última revisión:** 2026-10-20 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
+> **Última revisión:** 2026-10-28 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
 >
 > Qué construimos y qué no. Las secciones se citan como `02 §N`.
 
@@ -90,7 +90,8 @@ lo vea, lo eliminas como amigo.
   (`3/4`). Compara a cada uno contra su propio objetivo, así que no gana quien más horas tiene.
 - **Qué se ve:** tu posición destacada y tus vecinos inmediatos. Los empates comparten puesto. No hay
   etiqueta de «último» ni avatares que castiguen (E7). La lista completa está en la pestaña Ranking.
-- **Corona** (Focus, ya diseñada): el amigo con más minutos **hoy**.
+- **Corona** (Focus, ya diseñada): el amigo con más minutos **hoy**. Solo cuentan los minutos de un
+  amigo si su día (`dayKey`) es el tuyo; si no, cuenta 0 (D-030).
 - **«Nº entre amigos»** (Cycle complete, ya diseñado): tu posición en la categoría Minutos de la
   semana.
 - El cálculo es **puro y se hace en el dispositivo de quien mira** (03 §9): `RankingCalculator`, con
@@ -136,7 +137,7 @@ función no esté lista para release, siguen ocultos con el flag (03 §10).
 | Invitar (`focusInviteButton`) | Toast | Hoja con enlace, QR y `@usuario` | F2 |
 | Amigos | — | Lista (primero quien estudia), solicitudes, añadir | F2 |
 | Campana (`homeBellButton`) | Punto fijo | Bandeja: solicitudes (F2), ánimos y empujones (F5) | F2 / F5 |
-| Perfil de amigo | — | Racha semanal, días de la semana, minutos de la semana, mejor racha, total. Acciones: ánimo, eliminar, reportar | F3 |
+| Perfil de amigo | — | Racha semanal, días de la semana, minutos de la semana, mejor racha, total. Acciones: eliminar y reportar (F3); ánimo (F5, D-030) | F3 |
 | Ranking (pestaña dentro de Amigos) | — | Minutos con tope y Constancia; se reinicia el lunes | F3 |
 | Cycle complete «2º entre amigos» (`cycleBestTile`) | `SocialRank(2, 9)` fijo | Posición real | F3 |
 | Focus «Estudiando ahora 5/8» (`focusSocialBlock`) | Mock | Presencia real, tiempo en vivo, corona | F4 |

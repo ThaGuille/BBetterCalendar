@@ -1,6 +1,6 @@
 # 03 · Arquitectura
 
-> **Última revisión:** 2026-10-24 · Guía: [README](README.md) · Producto: [02](02-producto.md)
+> **Última revisión:** 2026-10-28 · Guía: [README](README.md) · Producto: [02](02-producto.md)
 >
 > Cómo se monta. Es el diseño objetivo: lo que ya existe se documenta en
 > `.claude/docs/systems/social.md` a partir de F1. Las secciones se citan como `03 §N`.
@@ -147,7 +147,8 @@ tests son parte del «hecho cuando» de F2 y F3.
 
 - `StatsPublisher` se ejecuta en `@IoExecutor` tras `FocusSessionRepository.recordFocusCompleted`. Con
   `recordFail` solo recalcula: el fallo en sí no se publica (P5). También se ejecuta al arrancar la
-  app si `dayKey` o `weekKey` han cambiado.
+  app si `dayKey` o `weekKey` han cambiado, al iniciar sesión o crear el perfil (la primera publicación)
+  y al cambiar el objetivo semanal en `WeeklyGoalStore` (D-030). Sin sesión o sin perfil no publica.
 - Fuentes locales: los minutos de hoy y de la semana salen de `FocusEventDAO` (sesiones `TYPE_FOCUS`
   por fecha civil local) con el tope de 240 aplicado por día; la racha y el objetivo salen de
   `StreakCalculator.Result` (`goal`, `daysThisWeek`, `weekStreak`, `bestWeekStreak`) y de
@@ -155,8 +156,9 @@ tests son parte del «hecho cuando» de F2 y F3.
 - La caché offline de Firestore pone en cola las escrituras sin red. Cada publicación es un `set`
   completo del documento: es idempotente y la última gana.
 - **`RankingCalculator`** es puro y tiene tests JUnit. Su entrada es tu stats más las de tus amigos,
-  junto con tu `weekKey`; su salida, las posiciones de Minutos y Constancia, con empates y semanas que
-  no coinciden.
+  junto con tu `weekKey` y tu `dayKey`; su salida, las posiciones de Minutos y Constancia, con empates y
+  semanas que no coinciden, y el amigo de la corona (más `minutesToday` entre los que tienen tu `dayKey`;
+  un `dayKey` distinto cuenta 0, D-030).
 
 ## §10 Encaje en el código
 

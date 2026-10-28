@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-24 (F2 cerrada)
+**Last updated:** 2026-10-28 (revisión antes de abrir F3: D-030, Q-08)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -19,7 +19,8 @@
   hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md)); el estado as-built está en
   [`systems/social.md`](../docs/systems/social.md).
 - **Siguiente paso:** abrir **F3** (Stats y ranking: `StatsPublisher`, reglas de `stats/`, perfil de amigo, ranking semanal) con su
-  plan `social-f3-*.md`, siguiendo el protocolo del README de la guía. F3 no está abierta.
+  plan `social-f3-*.md`, siguiendo el protocolo del README de la guía. F3 no está abierta. Al abrirla, preguntar
+  **Q-08** al usuario (bloquea F3.1) y planificar con D-030 (03 §9 ya corregida).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -95,10 +96,13 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 ### F3 · Stats y ranking
 - [ ] **F3.1** `StatsPublisher` enganchado a `FocusSessionRepository` (y al arrancar si cambia el día
-  o la semana) — 03 §9
+  o la semana, al iniciar sesión o crear el perfil y al cambiar el objetivo semanal; nunca sin sesión,
+  D-030) — 03 §9
 - [ ] **F3.2** Reglas de `stats/`: solo amigos y rangos validados + tests — 03 §6
-- [ ] **F3.3** `RankingCalculator` puro + JUnit (tope, empates, semanas que no coinciden) — 02 §6
-- [ ] **F3.4** Perfil de amigo — 02 §9
+- [ ] **F3.3** `RankingCalculator` puro + JUnit (tope, empates, semanas que no coinciden; corona solo
+  con el mismo `dayKey`, D-030) — 02 §6
+- [ ] **F3.4** Perfil de amigo con eliminar y reportar (el reportar que F2 dejó para aquí); el ánimo
+  llega en F5 (D-030) — 02 §9
 - [ ] **F3.5** Pestaña Ranking (Minutos y Constancia) — 02 §6
 - [ ] **F3.6** «Nº entre amigos» real en Cycle complete — 02 §6
 
@@ -156,10 +160,18 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 | ~~Q-05~~ | ~~¿Se puede cambiar el `@usuario`?~~ Cerrada (D-019): sí, una vez cada 30 días; el anterior queda libre | — | — |
 | ~~Q-06~~ | ~~¿Qué enlace lleva la tarjeta de compartir mientras la app no está publicada?~~ Cerrada (D-018): ninguno, solo la marca «BBetter»; el enlace de Play se añade al publicar | — | — |
 | ~~Q-07~~ | ~~¿Prórroga del target API?~~ Cerrada: no hay nada publicado, así que no aplica | — | — |
+| Q-08 | La primera publicación de `stats/` (al crear la cuenta), ¿incluye la historia local anterior a la cuenta (`totalMinutes`, `bestWeekStreak`) o empieza en 0? | Incluirla: son agregados que ya existen en el móvil, no añaden ningún campo nuevo y un perfil a 0 desanima a quien lleva meses usando la app; la política v2 debe decir que se comparten los totales desde el primer uso | F3.1 |
 
 ## Diario
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
+
+- **2026-10-28 (25)** · Revisión antes de abrir F3: `bt/social-f2-amigos` ya estaba fusionada en `main`; las anclas de
+  03 §9 siguen en el código (`recordFocusCompleted`/`recordFail`, `StreakCalculator.Result`, `WeeklyGoalStore`,
+  `FocusEventDAO`, `@IoExecutor`, `deleteAccount` borra `stats/`). D-030 (disparadores de publicación, corona con
+  `dayKey`, ánimo del perfil de amigo en F5) con 02 §6 y §9 y 03 §9 corregidas; Q-08 abierta (historia previa en
+  la primera publicación). Commit «docs(social): revisión previa a F3 (D-030, Q-08)».
+  **Siguiente:** abrir F3 con big-task y preguntar Q-08 al abrirla.
 
 - **2026-10-24 (24)** · F2-u9 hecha, **F2 cerrada**: `systems/social.md` y CLAUDE.md describen el F2 construido; `social-focus-invite` pasa a *Resolved* y `home-notification-centre` sigue abierta (parcial); resueltos los `[CONFIRM]` legales de F2 (sin bloquear; reportar desde la lista y las solicitudes; borrado limpia amigos e invitación); 03 §5, §6, §7 y §11 corregidas y D-028 aceptada. En `api36`: re-autenticación al borrar la cuenta con email (más de 5 minutos → contraseña → borrada) y con Google (selector → borrada). F2.1-F2.10 marcados. Ley 121/000052 (04 §5): sin aprobar según lo último localizado (enmiendas al articulado en comisión, dic-2025); no se pudo confirmar el estado de oct-2026, hay que mirar la ficha del Congreso; sin cambios para F2 (`SOCIAL_MIN_AGE` sigue en 14).
   Commit «F2-u9: cierre de la fase F2 (documentación, [CONFIRM] legales, D-028 aceptada y re-autenticación probada)».

@@ -2,8 +2,9 @@
 // sesión), en Firestore y en RTDB. Lo corre `firebase emulators:exec` (ver firebase/README.md).
 // F1-u1 abre users/{uid}, profiles/{uid} y handles/{h} (sus casos están en profiles-handles.test.js).
 // F2-u3 abre friendRequests/, users/{uid}/friends, reports/ (solo crear), invites/ y RTDB friends/ (sus casos
-// están en friends-rules.test.js e invites-reports.test.js). Aquí se comprueba que el resto sigue denegado:
-// stats/, blocks/, users/{uid}/inbox, cualquier otra colección y RTDB salvo friends/ (status/, presence/, la raíz).
+// están en friends-rules.test.js e invites-reports.test.js). F3-u2 abre stats/{uid} (stats-rules.test.js). Aquí se
+// comprueba que el resto sigue denegado:
+// blocks/, users/{uid}/inbox, cualquier otra colección y RTDB salvo friends/ (status/, presence/, la raíz).
 const fs = require("fs");
 const path = require("path");
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require("@firebase/rules-unit-testing");
@@ -17,7 +18,7 @@ const databaseRules = process.env.BB_DATABASE_RULES
   ? fs.readFileSync(process.env.BB_DATABASE_RULES, "utf8")
   : read("database.rules.json");
 
-describe("reglas: todo denegado salvo lo que abren F1 y F2", () => {
+describe("reglas: todo denegado salvo lo que abren F1, F2 y F3", () => {
   let env;
 
   before(async () => {
@@ -50,9 +51,8 @@ describe("reglas: todo denegado salvo lo que abren F1 y F2", () => {
     "con sesión": () => env.authenticatedContext("alice"),
   };
 
-  // Rutas que ni F1 ni F2 abren, aunque sean del propio uid «alice». blocks/ no se abre nunca (D-027).
+  // Rutas que ni F1, F2 ni F3 abren, aunque sean del propio uid «alice». blocks/ no se abre nunca (D-027).
   const closedDocs = [
-    "stats/alice",
     "blocks/alice/blocked/bob",
     "users/alice/inbox/n1",
     "probe/x",
@@ -65,7 +65,6 @@ describe("reglas: todo denegado salvo lo que abren F1 y F2", () => {
         await assertFails(db.doc(p).get());
         await assertFails(db.doc(p).set({ x: 1 }));
       }
-      await assertFails(db.collection("stats").get());
       await assertFails(db.collection("blocks").get());
       await assertFails(db.collection("users/alice/inbox").get());
     });

@@ -20,6 +20,13 @@
 //   node tests/tools/actor.js seed-friends <nombre> <n>    SIN reglas: n amigos inventados (users/, profiles/,
 //                                                          handles/, los dos lados y el espejo RTDB); idempotente
 //   node tests/tools/actor.js set-counter <nombre> <n>     SIN reglas: contador diario de hoy = n (0 lo quita)
+//   node tests/tools/actor.js stats <nombre> [minutesToday=N] [minutesWeekCapped=N] [daysThisWeek=N] [weeklyGoal=N]
+//                              [weekStreak=N] [bestWeekStreak=N] [totalMinutes=N]
+//                                                          F3-u2: entra como <nombre>@bb.test y escribe stats/{uid}
+//                                                          CON reglas; dayKey y weekKey salen de la fecha local del
+//                                                          equipo (semana ISO), los números omitidos valen 0
+//                                                          (weeklyGoal 3). Sale con 1 y el error de las reglas si el
+//                                                          documento no vale (p. ej. minutesToday=2000)
 //
 // Seguridad (D-021, D-025): los hosts 127.0.0.1 y los puertos de firebase/firebase.json están fijos en el código;
 // antes de crear ningún cliente pregunta al hub del Emulator Suite (127.0.0.1:4400) y se niega a seguir si no
@@ -42,7 +49,8 @@ const HANDLE = /^[a-z0-9_.]{3,20}$/;
 
 const USAGE = `uso: node tests/tools/actor.js <comando> ...
   signup <nombre> | send|accept|decline|cancel|remove <nombre> @usuario | list <nombre>
-  seed-friends <nombre> <n> | set-counter <nombre> <n>`;
+  seed-friends <nombre> <n> | set-counter <nombre> <n>
+  stats <nombre> [minutesToday=N] [minutesWeekCapped=N] [daysThisWeek=N] [weeklyGoal=N] [weekStreak=N] [bestWeekStreak=N] [totalMinutes=N]`;
 
 // Qué emuladores necesita cada comando (además del hub).
 const NEEDS = {
@@ -55,6 +63,18 @@ const NEEDS = {
   list: ["auth", "firestore"],
   "seed-friends": ["auth", "firestore", "database"],
   "set-counter": ["auth", "firestore"],
+  stats: ["auth", "firestore"],
+};
+
+// F3-u2: los siete números de stats/{uid} que se pueden fijar, con su valor por defecto.
+const STATS_DEFAULTS = {
+  minutesToday: 0,
+  minutesWeekCapped: 0,
+  daysThisWeek: 0,
+  weeklyGoal: 3,
+  weekStreak: 0,
+  bestWeekStreak: 0,
+  totalMinutes: 0,
 };
 
 class UsageError extends Error {}
@@ -79,6 +99,32 @@ function checkCount(raw, max) {
   const n = Number(raw);
   if (!Number.isInteger(n) || n < 0 || n > max) throw new UsageError(`n tiene que ser un entero entre 0 y ${max}`);
   return n;
+}
+
+// <clave>=<entero> (las claves de STATS_DEFAULTS); el rango lo juzgan las reglas, no el actor.
+function parseStatsArgs(args) {
+  const values = { ...STATS_DEFAULTS };
+  for (const a of args) {
+    const m = /^([A-Za-z]+)=(-?[0-9]+)$/.exec(a);
+    if (!m || !(m[1] in STATS_DEFAULTS)) {
+      throw new UsageError(`argumento no válido '${a}': usa <clave>=<entero> con ${Object.keys(STATS_DEFAULTS).join(", ")}`);
+    }
+    values[m[1]] = Number(m[2]);
+  }
+  return values;
+}
+
+// dayKey 'YYYY-MM-DD' y weekKey 'YYYY-Www' (semana ISO-8601) de la fecha civil LOCAL del equipo, como WeekKey.java.
+function localKeys(date = new Date()) {
+  const pad = (n, w = 2) => String(n).padStart(w, "0");
+  const dayKey = `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  // El jueves de esta semana decide el año ISO; la semana es cuántos lunes lleva ese año hasta ese jueves.
+  const utc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const dow = new Date(utc).getUTCDay() || 7; // lunes = 1 ... domingo = 7
+  const thursday = new Date(utc + (4 - dow) * DAY);
+  const jan1 = Date.UTC(thursday.getUTCFullYear(), 0, 1);
+  const week = Math.floor((thursday.getTime() - jan1) / DAY / 7) + 1;
+  return { dayKey, weekKey: `${pad(thursday.getUTCFullYear(), 4)}-W${pad(week)}` };
 }
 
 // Se niega a arrancar sin los emuladores: el hub tiene que responder en 127.0.0.1 y listar cada emulador que el
@@ -362,12 +408,27 @@ async function setCounter(name, n) {
   out(`COUNTER @${name} ${n}/${DAILY_LIMIT} hoy`);
 }
 
+// F3-u2: set() completo de stats/{uid} con reglas (como StatsWrites en la app, F3-u4).
+async function stats(name, values) {
+  const { db } = client();
+  const me = await signIn(name);
+  const { dayKey, weekKey } = localKeys();
+  const data = { dayKey, weekKey, ...values, updatedAt: sdk.firestore.serverTimestamp() };
+  try {
+    await sdk.firestore.setDoc(doc(db, "stats", me), data);
+  } catch (e) {
+    throw new Error(`las reglas rechazan stats/${me} (${e.code || e.message}): ${JSON.stringify({ dayKey, weekKey, ...values })}`);
+  }
+  out(`STATS @${name} ${dayKey} ${weekKey} ${Object.entries(values).map(([k, v]) => `${k}=${v}`).join(" ")}`);
+}
+
 // ---- main ---------------------------------------------------------------------------------------------
 
 async function main(argv) {
   const [cmd, name, arg] = argv;
   if (!cmd || !NEEDS[cmd]) throw new UsageError(USAGE);
   checkName(name);
+  const statsValues = cmd === "stats" ? parseStatsArgs(argv.slice(2)) : null;
   const needsHandle = ["send", "accept", "decline", "cancel", "remove"].includes(cmd);
   const handle = needsHandle ? checkHandle(arg) : null;
   const count = cmd === "seed-friends" ? checkCount(arg, 200) : cmd === "set-counter" ? checkCount(arg, DAILY_LIMIT) : null;
@@ -394,6 +455,8 @@ async function main(argv) {
       return seedFriends(name, count);
     case "set-counter":
       return setCounter(name, count);
+    case "stats":
+      return stats(name, statsValues);
     default:
       throw new UsageError(USAGE);
   }

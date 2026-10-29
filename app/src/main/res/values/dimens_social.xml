@@ -24,4 +24,8 @@
     <dimen name="social_qr_padding">12dp</dimen>
     <dimen name="social_copy_target">48dp</dimen>
 
+    <!-- F3-u6 · Friend profile -->
+    <dimen name="social_goal_dot">14dp</dimen>
+    <dimen name="social_goal_dot_gap">6dp</dimen>
+
 </resources>

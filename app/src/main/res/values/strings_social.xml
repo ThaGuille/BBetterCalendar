@@ -219,4 +219,28 @@
     <string name="accept_invite_error">Could not check the invitation. Open the app again to retry.</string>
     <string name="join_sheet_invite_waiting">An invitation is waiting for you. Join to see it.</string>
 
+    <!-- F3-u6 · Friend profile -->
+    <string name="friend_profile_top_title">Friend</string>
+    <string name="friend_profile_loading">Loading…</string>
+    <string name="friend_profile_empty">No stats yet. They will show up after their first focus session.</string>
+    <string name="friend_profile_error">Could not load this profile. Try again in a moment.</string>
+    <string name="friend_profile_streak_label">Weekly streak</string>
+    <string name="friend_profile_week_label">This week</string>
+    <string name="friend_profile_best_label">Best streak</string>
+    <string name="friend_profile_total_label">Total focus</string>
+    <plurals name="friend_profile_weeks">
+        <item quantity="one">%1$d week</item>
+        <item quantity="other">%1$d weeks</item>
+    </plurals>
+    <plurals name="friend_profile_days_of">
+        <item quantity="one">%1$d of %2$d day</item>
+        <item quantity="other">%1$d of %2$d days</item>
+    </plurals>
+    <string name="friend_profile_minutes_week">%1$d min this week</string>
+    <string name="friend_profile_total_hm">%1$d h %2$d min</string>
+    <string name="friend_profile_total_h">%1$d h</string>
+    <string name="friend_profile_total_m">%1$d min</string>
+    <string name="friend_profile_remove">Remove friend</string>
+    <string name="friend_profile_report">Report</string>
+
 </resources>

@@ -179,6 +179,20 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
     }
 
     @Override
+    public void onOpen(@NonNull FriendsViewModel.Row row) {
+        FriendCard card = row.card;
+        if (card == null) {
+            return;
+        }
+        Bundle args = new Bundle();
+        args.putString("uid", card.uid);
+        args.putString("handle", card.handle);
+        args.putString("name", card.displayName);
+        args.putInt("color", card.avatarColor);
+        NavHostFragment.findNavController(this).navigate(R.id.navigation_friend_profile, args);
+    }
+
+    @Override
     public void onMenu(@NonNull View anchor, @NonNull FriendsViewModel.Row row) {
         FriendCard card = row.card;
         if (card == null) {

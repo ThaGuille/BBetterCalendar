@@ -219,4 +219,28 @@
     <string name="accept_invite_error">No se pudo comprobar la invitación. Abre la app de nuevo para reintentar.</string>
     <string name="join_sheet_invite_waiting">Tienes una invitación esperando. Entra para verla.</string>
 
+    <!-- F3-u6 · Perfil de amigo -->
+    <string name="friend_profile_top_title">Amigo</string>
+    <string name="friend_profile_loading">Cargando…</string>
+    <string name="friend_profile_empty">Aún no hay estadísticas. Aparecerán tras su primera sesión de foco.</string>
+    <string name="friend_profile_error">No se pudo cargar este perfil. Inténtalo de nuevo en un momento.</string>
+    <string name="friend_profile_streak_label">Racha semanal</string>
+    <string name="friend_profile_week_label">Esta semana</string>
+    <string name="friend_profile_best_label">Mejor racha</string>
+    <string name="friend_profile_total_label">Foco total</string>
+    <plurals name="friend_profile_weeks">
+        <item quantity="one">%1$d semana</item>
+        <item quantity="other">%1$d semanas</item>
+    </plurals>
+    <plurals name="friend_profile_days_of">
+        <item quantity="one">%1$d de %2$d día</item>
+        <item quantity="other">%1$d de %2$d días</item>
+    </plurals>
+    <string name="friend_profile_minutes_week">%1$d min esta semana</string>
+    <string name="friend_profile_total_hm">%1$d h %2$d min</string>
+    <string name="friend_profile_total_h">%1$d h</string>
+    <string name="friend_profile_total_m">%1$d min</string>
+    <string name="friend_profile_remove">Eliminar amigo</string>
+    <string name="friend_profile_report">Reportar</string>
+
 </resources>

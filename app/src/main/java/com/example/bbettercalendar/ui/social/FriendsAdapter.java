@@ -33,6 +33,9 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         void onCancel(@NonNull FriendRequest request);
 
         void onMenu(@NonNull View anchor, @NonNull FriendsViewModel.Row row);
+
+        /** F3-u6: tocar la fila de un amigo abre su perfil. */
+        void onOpen(@NonNull FriendsViewModel.Row row);
     }
 
     private static final int TYPE_HEADER = 0;
@@ -135,6 +138,12 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             secondary.setVisibility(View.VISIBLE);
             menu.setVisibility(View.VISIBLE);
             menu.setOnClickListener(v -> listener.onMenu(v, row));
+            if (row.type == FriendsViewModel.Row.Type.FRIEND) {
+                itemView.setOnClickListener(v -> listener.onOpen(row));
+            } else {
+                itemView.setOnClickListener(null);
+                itemView.setClickable(false);
+            }
             switch (row.type) {
                 case REQUEST:
                     actions.setVisibility(View.VISIBLE);

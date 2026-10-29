@@ -162,4 +162,28 @@
             app:argType="string" />
     </fragment>
 
+    <!-- ===== F3-u6: perfil de un amigo (02 §9). Se abre desde su fila en Amigos; uid es lo que lee, el resto
+         (handle, name, color) pinta la cabecera al instante. ===== -->
+    <fragment
+        android:id="@+id/navigation_friend_profile"
+        android:name="com.example.bbettercalendar.ui.social.FriendProfileFragment"
+        android:label="@string/friend_profile_top_title"
+        tools:layout="@layout/fragment_friend_profile">
+        <argument
+            android:name="uid"
+            app:argType="string" />
+        <argument
+            android:name="handle"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="name"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="color"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </fragment>
+
 </navigation>

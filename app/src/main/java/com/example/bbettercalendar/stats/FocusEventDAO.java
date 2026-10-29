@@ -55,6 +55,21 @@ public interface FocusEventDAO {
     @Query("SELECT COALESCE(SUM(durationMin), 0) FROM focus_event WHERE entryId = :entryId AND type = 0")
     int sumAttributedMinutes(int entryId);
 
+    // F3-u4 (stats/{uid}, 03 §9): fuentes de StatsPublisher. Solo lectura, sin cambio de esquema (regla #6).
+    // Misma fecha civil local que la racha (date(..., 'localtime')) y solo TYPE_FOCUS: un fallo aporta 0
+    // y nunca se publica (P5). Síncronas: se llaman desde el @IoExecutor.
+
+    /** Minutos de sesiones completadas por día civil local dentro del rango (días sin sesión no salen). */
+    @Query("SELECT date(timestamp / 1000, 'unixepoch', 'localtime') AS day, "
+            + "COALESCE(SUM(durationMin), 0) AS minutes FROM focus_event "
+            + "WHERE type = 0 AND timestamp BETWEEN :start AND :end "
+            + "GROUP BY day ORDER BY day")
+    List<DayMinutes> getFocusMinutesPerDayBetween(long start, long end);
+
+    /** Total de minutos de sesiones completadas desde :since (0 = toda la historia, D-031). */
+    @Query("SELECT COALESCE(SUM(durationMin), 0) FROM focus_event WHERE type = 0 AND timestamp >= :since")
+    int sumFocusMinutesSince(long since);
+
     // Minutos atribuidos agrupados por entryId, en una sola query, para enriquecer una lista de
     // tareas/items sin un SUM por fila. Excluye las sesiones genéricas (entryId = 0). LiveData de
     // Room (repository-layer-consolidation T2, FocusAttributionRepository.enrich()): se invalida

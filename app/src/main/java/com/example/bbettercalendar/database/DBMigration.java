@@ -10,7 +10,9 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.bbettercalendar.notifications.NotificationChannels;
+import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.invite.InstallReferrerReader;
+import com.example.bbettercalendar.social.stats.StatsPublisher;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
@@ -19,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import dagger.hilt.android.HiltAndroidApp;
 
 @HiltAndroidApp
@@ -30,6 +33,8 @@ public class DBMigration extends Application {
     @Inject @IoExecutor ExecutorService ioExecutor;
     // F2-u6: invitación por Install Referrer; solo con FEATURE_SOCIAL y una vez por instalación.
     @Inject InstallReferrerReader installReferrerReader;
+    // F3-u4: publicación de stats/ (03 §9). Lazy: sin FEATURE_SOCIAL (release) nunca se crea ni toca Firebase.
+    @Inject Lazy<StatsPublisher> statsPublisher;
 
     @Override
     public void onCreate() {
@@ -41,6 +46,9 @@ public class DBMigration extends Application {
         NotificationChannels.createAll(this);
         armUsageLimitScheduler();
         installReferrerReader.readOnce();
+        if (SocialFeature.isAccountEnabled()) {
+            statsPublisher.get().start();
+        }
     }
 
     // Arma el chequeo periódico de límites en cada arranque en frío. BootReceiver hace lo mismo

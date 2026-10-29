@@ -2,6 +2,7 @@
 <!-- F2-u7 · Friends: one scrolling list with three sections (Requests, Friends, Sent). Operate mode:
      the two actions sit at the top, the list is the screen. No presence is shown (F3). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/friendsScreen"
     android:layout_width="match_parent"
@@ -12,105 +13,271 @@
 
     <include layout="@layout/view_top_bar" />
 
+    <!-- F3-u7: Amigos (la lista de siempre) y Ranking. -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/friendsTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/bb_primary"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/bb_primary"
+        app:tabTextAppearance="@style/TextAppearance.BBetter.Label"
+        app:tabTextColor="@color/bb_on_surface_muted">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/friends_tab_friends" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/friends_tab_ranking" />
+    </com.google.android.material.tabs.TabLayout>
+
     <LinearLayout
-        android:id="@+id/friendsActions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/spacing_md"
-        android:paddingTop="@dimen/spacing_sm"
-        android:paddingEnd="@dimen/spacing_md"
-        android:paddingBottom="@dimen/spacing_sm">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/friendsAddButton"
-            style="@style/Widget.BBetter.Button.Primary"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/friends_add" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/friendsInviteButton"
-            style="@style/Widget.BBetter.Button.Secondary"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_sm"
-            android:layout_weight="1"
-            android:text="@string/friends_invite" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/friendsStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/spacing_md"
-        android:text="@string/friends_loading"
-        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/friendsList"
+        android:id="@+id/friendsPanel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingStart="@dimen/spacing_md"
-        android:paddingEnd="@dimen/spacing_md"
-        android:paddingBottom="@dimen/spacing_lg"
-        android:visibility="gone" />
+        android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/friendsEmpty"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:paddingStart="@dimen/spacing_md"
-        android:paddingTop="@dimen/spacing_xl"
-        android:paddingEnd="@dimen/spacing_md"
-        android:visibility="gone">
 
-        <ImageView
-            android:layout_width="@dimen/social_hero_tile"
-            android:layout_height="@dimen/social_hero_tile"
-            android:background="@drawable/bg_social_hero_tile"
-            android:contentDescription="@null"
-            android:importantForAccessibility="no"
-            android:padding="@dimen/social_hero_icon_padding"
-            android:src="@drawable/ic_group_add_24"
-            android:tint="@color/bb_on_primary_container" />
-
-        <TextView
+        <LinearLayout
+            android:id="@+id/friendsActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_md"
-            android:gravity="center_horizontal"
-            android:text="@string/friends_empty_title"
-            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingBottom="@dimen/spacing_sm">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/friendsAddButton"
+                style="@style/Widget.BBetter.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/friends_add" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/friendsInviteButton"
+                style="@style/Widget.BBetter.Button.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:text="@string/friends_invite" />
+        </LinearLayout>
 
         <TextView
+            android:id="@+id/friendsStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
-            android:gravity="center_horizontal"
-            android:text="@string/friends_empty_body"
+            android:padding="@dimen/spacing_md"
+            android:text="@string/friends_loading"
             android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/friendsEmptyAdd"
-            style="@style/Widget.BBetter.Button.Primary"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/friendsList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_lg"
-            android:text="@string/friends_add" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingBottom="@dimen/spacing_lg"
+            android:visibility="gone" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/friendsEmptyInvite"
-            style="@style/Widget.BBetter.Button.Secondary"
+        <LinearLayout
+            android:id="@+id/friendsEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_xl"
+            android:paddingEnd="@dimen/spacing_md"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="@dimen/social_hero_tile"
+                android:layout_height="@dimen/social_hero_tile"
+                android:background="@drawable/bg_social_hero_tile"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:padding="@dimen/social_hero_icon_padding"
+                android:src="@drawable/ic_group_add_24"
+                android:tint="@color/bb_on_primary_container" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:gravity="center_horizontal"
+                android:text="@string/friends_empty_title"
+                android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:gravity="center_horizontal"
+                android:text="@string/friends_empty_body"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/friendsEmptyAdd"
+                style="@style/Widget.BBetter.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:text="@string/friends_add" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/friendsEmptyInvite"
+                style="@style/Widget.BBetter.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/friends_invite" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- F3-u7 · Ranking (02 §6): selector Minutos / Constancia, nota de la semana y una fila por persona. -->
+    <LinearLayout
+        android:id="@+id/rankingPanel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/rankingCategoryToggle"
+            style="@style/Widget.BBetter.SegmentedControl"
+            android:layout_marginStart="@dimen/spacing_md"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_md">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/rankingToggleMinutes"
+                style="@style/Widget.BBetter.SegmentedControl.Item"
+                android:text="@string/ranking_category_minutes" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/rankingToggleConsistency"
+                style="@style/Widget.BBetter.SegmentedControl.Item"
+                android:text="@string/ranking_category_consistency" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/rankingCaption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_sm"
-            android:text="@string/friends_invite" />
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingBottom="@dimen/spacing_xs"
+            android:text="@string/ranking_caption_minutes"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/rankingLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/spacing_xl"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/bb_primary" />
+
+        <LinearLayout
+            android:id="@+id/rankingError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_md"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/ranking_error"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rankingRetry"
+                style="@style/Widget.BBetter.Button.Secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:text="@string/ranking_retry" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rankingList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_sm"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingBottom="@dimen/spacing_lg"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/rankingEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_xl"
+            android:paddingEnd="@dimen/spacing_md"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="@dimen/social_hero_tile"
+                android:layout_height="@dimen/social_hero_tile"
+                android:background="@drawable/bg_social_hero_tile"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:padding="@dimen/social_hero_icon_padding"
+                android:src="@drawable/ic_group_add_24"
+                android:tint="@color/bb_on_primary_container" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:gravity="center_horizontal"
+                android:text="@string/ranking_empty_title"
+                android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:gravity="center_horizontal"
+                android:text="@string/ranking_empty_body"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rankingEmptyInvite"
+                style="@style/Widget.BBetter.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:text="@string/friends_invite" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

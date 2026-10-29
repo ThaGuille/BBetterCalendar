@@ -18,6 +18,10 @@ import com.example.bbettercalendar.social.friends.FriendsRepository;
 import com.example.bbettercalendar.social.friends.FriendsState;
 import com.example.bbettercalendar.social.friends.ReportReason;
 import com.example.bbettercalendar.social.friends.ReportRepository;
+import com.example.bbettercalendar.social.profile.ProfileRepository;
+import com.example.bbettercalendar.social.profile.ProfileState;
+import com.example.bbettercalendar.social.stats.RankingRepository;
+import com.example.bbettercalendar.social.stats.RankingState;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
@@ -148,11 +152,24 @@ public class FriendsViewModel extends ViewModel {
     private final MutableLiveData<ReportState> reportState =
             new MutableLiveData<>(new ReportState(ReportState.Step.IDLE, 0));
     private final LiveData<Integer> friendCount;
+    /** F3-u7: pestaña Ranking. Las fuentes solo escuchan mientras el fragmento observa {@link #getRankingRows}. */
+    private final RankingRepository ranking;
+    private final MediatorLiveData<RankingRows> rankingRows = new MediatorLiveData<>();
+    private final MutableLiveData<RankingRows.Category> category =
+            new MutableLiveData<>(RankingRows.Category.MINUTES);
+    private final MutableLiveData<Boolean> rankingTab = new MutableLiveData<>(false);
 
     @Inject
-    public FriendsViewModel(FriendsRepository friends, ReportRepository reports) {
+    public FriendsViewModel(FriendsRepository friends, ReportRepository reports, RankingRepository ranking,
+                            ProfileRepository profiles) {
         this.friends = friends;
         this.reports = reports;
+        this.ranking = ranking;
+        LiveData<RankingState> rankingState = ranking.observeRanking();
+        LiveData<ProfileState> mine = profiles.observeMine();
+        rankingRows.addSource(rankingState, s -> recomputeRanking(rankingState, mine));
+        rankingRows.addSource(mine, s -> recomputeRanking(rankingState, mine));
+        rankingRows.addSource(category, c -> recomputeRanking(rankingState, mine));
         friendsState = friends.observeFriends();
         incomingState = friends.observeIncoming();
         outgoingState = friends.observeOutgoing();
@@ -165,6 +182,47 @@ public class FriendsViewModel extends ViewModel {
 
     public LiveData<Screen> getScreen() {
         return screen;
+    }
+
+    // ---- ranking (F3-u7) --------------------------------------------------------------------------------
+
+    public LiveData<RankingRows> getRankingRows() {
+        return rankingRows;
+    }
+
+    public LiveData<RankingRows.Category> getCategory() {
+        return category;
+    }
+
+    public void setCategory(@NonNull RankingRows.Category value) {
+        category.setValue(value);
+    }
+
+    /** La pestaña elegida (false = Amigos, true = Ranking); sobrevive a un giro de pantalla. */
+    public LiveData<Boolean> isRankingTab() {
+        return rankingTab;
+    }
+
+    public void setRankingTab(boolean ranking) {
+        rankingTab.setValue(ranking);
+    }
+
+    /** «Reintentar» del estado de error del ranking. */
+    public void retryRanking() {
+        ranking.refresh();
+    }
+
+    private void recomputeRanking(@NonNull LiveData<RankingState> state, @NonNull LiveData<ProfileState> mine) {
+        ProfileState p = mine.getValue();
+        String name = null;
+        int color = 0;
+        if (p != null && p.status == ProfileState.Status.READY && p.profile != null) {
+            name = p.profile.displayName;
+            color = p.profile.avatarColor;
+        }
+        RankingRows.Category c = category.getValue();
+        rankingRows.setValue(RankingRows.from(state.getValue(), c == null ? RankingRows.Category.MINUTES : c,
+                name, color));
     }
 
     /** Cuántos amigos hay (0 mientras carga): la fila «Amigos (N)» de Mi perfil. */

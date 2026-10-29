@@ -243,4 +243,20 @@
     <string name="friend_profile_remove">Eliminar amigo</string>
     <string name="friend_profile_report">Reportar</string>
 
+    <!-- F3-u7 · Pestaña Ranking dentro de Amigos (02 sección 6) -->
+    <string name="friends_tab_friends">Amigos</string>
+    <string name="friends_tab_ranking">Ranking</string>
+    <string name="ranking_category_minutes">Minutos</string>
+    <string name="ranking_category_consistency">Constancia</string>
+    <string name="ranking_caption_minutes">Minutos de foco de esta semana, hasta 4 h al día. La semana vuelve a empezar el lunes.</string>
+    <string name="ranking_caption_consistency">Días de foco frente al objetivo semanal de cada uno. La semana vuelve a empezar el lunes.</string>
+    <string name="ranking_me_name">Tú</string>
+    <string name="ranking_value_minutes">%1$d min</string>
+    <string name="ranking_value_days">%1$d/%2$d días</string>
+    <string name="ranking_value_days_nogoal">%1$d días</string>
+    <string name="ranking_position_description">Puesto %1$d</string>
+    <string name="ranking_error">No pudimos cargar el ranking. Revisa tu conexión y vuelve a intentarlo.</string>
+    <string name="ranking_retry">Reintentar</string>
+    <string name="ranking_empty_title">Tu ranking empieza con un amigo</string>
+    <string name="ranking_empty_body">Invita a alguien para comparar vuestras semanas de foco, sin presión.</string>
 </resources>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F3-u7 · A row of the Ranking tab: position, avatar, name (+ @username), value. My row gets the
+     primary container fill; nothing marks the last row. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rankingRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:background="@drawable/bg_card"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/social_ranking_row_min_height"
+    android:orientation="horizontal"
+    android:padding="@dimen/social_friend_row_padding">
+
+    <TextView
+        android:id="@+id/rankingPosition"
+        android:layout_width="@dimen/social_ranking_position_width"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.Title"
+        tools:text="1" />
+
+    <com.example.bbettercalendar.ui.common.widget.AvatarView
+        android:id="@+id/rankingAvatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        app:avatarSize="@dimen/social_friend_avatar" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_card_gap"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/rankingName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+            tools:text="Bob" />
+
+        <TextView
+            android:id="@+id/rankingHandle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+            tools:text="\@bob" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/rankingValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+        tools:text="310 min" />
+</LinearLayout>

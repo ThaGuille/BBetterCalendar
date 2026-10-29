@@ -28,4 +28,7 @@
     <dimen name="social_goal_dot">14dp</dimen>
     <dimen name="social_goal_dot_gap">6dp</dimen>
 
+    <!-- F3-u7 · Ranking tab -->
+    <dimen name="social_ranking_position_width">32dp</dimen>
+    <dimen name="social_ranking_row_min_height">64dp</dimen>
 </resources>

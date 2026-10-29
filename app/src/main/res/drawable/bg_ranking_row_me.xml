@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F3-u7: my row in the Ranking tab. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_primary_container" />
+    <corners android:radius="@dimen/radius_card" />
+</shape>

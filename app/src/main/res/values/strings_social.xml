@@ -243,4 +243,20 @@
     <string name="friend_profile_remove">Remove friend</string>
     <string name="friend_profile_report">Report</string>
 
+    <!-- F3-u7 · Ranking tab inside Friends (02 section 6) -->
+    <string name="friends_tab_friends">Friends</string>
+    <string name="friends_tab_ranking">Ranking</string>
+    <string name="ranking_category_minutes">Minutes</string>
+    <string name="ranking_category_consistency">Consistency</string>
+    <string name="ranking_caption_minutes">Focus minutes this week, up to 4 h a day. The week starts again on Monday.</string>
+    <string name="ranking_caption_consistency">Focus days against each person\'s own weekly goal. The week starts again on Monday.</string>
+    <string name="ranking_me_name">You</string>
+    <string name="ranking_value_minutes">%1$d min</string>
+    <string name="ranking_value_days">%1$d/%2$d days</string>
+    <string name="ranking_value_days_nogoal">%1$d days</string>
+    <string name="ranking_position_description">Position %1$d</string>
+    <string name="ranking_error">We could not load the ranking. Check your connection and try again.</string>
+    <string name="ranking_retry">Retry</string>
+    <string name="ranking_empty_title">Your ranking starts with a friend</string>
+    <string name="ranking_empty_body">Invite someone to compare your focus weeks, with no pressure.</string>
 </resources>

@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-29 (F3 abierta: plan, D-031)
+**Last updated:** 2026-10-29 (F3 cerrada)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,12 +15,11 @@
 
 ## Ahora
 
-- **Fase activa:** **F3** (Stats y ranking), plan [`social-f3-stats.md`](social-f3-stats.md) (`in progress`, 9 unidades). F0, F1 y F2
-  hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md));
-  el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** ejecutar las unidades de F3 con big-task: u2 (reglas de `stats/`), u3 (`RankingCalculator`, `WeekKey` y lectura) y,
-  tras u3, u4 (`StatsPublisher`) y u5 (`RankingRepository`); después la UI (u6 perfil de amigo, u7 pestaña Ranking, u8 «Nº entre amigos»)
-  y u9 cierra la fase. Q-08 está cerrada (D-031).
+- **Fase activa:** ninguna abierta; la siguiente es **F4** (Presencia), sin plan todavía. F0, F1, F2 y F3
+  hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md),
+  [`social-f3-stats.md`](social-f3-stats.md)); el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
+- **Siguiente paso:** abrir F4 por el protocolo del README (plan `social-f4-presencia.md`, solo las secciones 02 §7, 03 §8 y 03 §10
+  que cite). Antes, la sesión principal sube y fusiona `bt/social-f3-stats` en `main`.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -31,7 +30,7 @@
 | **F0** Base | SDK 24/36, Firebase montado, compartir sin backend, borradores legales | hecha | [`social-f0-base.md`](social-f0-base.md) | `cycle-share`, `progress-share` |
 | **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | hecha | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
 | **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, eliminar y reportar (sin bloquear, D-027) | hecha | [`social-f2-amigos.md`](social-f2-amigos.md) | `social-focus-invite`, `home-notification-centre` (parcial) |
-| **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | activa | [`social-f3-stats.md`](social-f3-stats.md) | `social-rank` |
+| **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | hecha | [`social-f3-stats.md`](social-f3-stats.md) | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | pendiente | — | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
 | **F5** Interacción | Ánimo, empujón, push, bandeja | pendiente | — | `home-notification-centre` |
 | **L** Lanzamiento | Gate antes de activar lo social en release | pendiente | — | — |
@@ -95,16 +94,16 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
   `ageBand` y de `users/`) y probar en un móvil físico por USB (D-026) — plan F2-u1, F2-u2
 
 ### F3 · Stats y ranking
-- [ ] **F3.1** `StatsPublisher` enganchado a `FocusSessionRepository` (y al arrancar si cambia el día
+- [x] **F3.1** `StatsPublisher` enganchado a `FocusSessionRepository` (y al arrancar si cambia el día
   o la semana, al iniciar sesión o crear el perfil y al cambiar el objetivo semanal; nunca sin sesión,
   D-030) — 03 §9
-- [ ] **F3.2** Reglas de `stats/`: solo amigos y rangos validados + tests — 03 §6
-- [ ] **F3.3** `RankingCalculator` puro + JUnit (tope, empates, semanas que no coinciden; corona solo
+- [x] **F3.2** Reglas de `stats/`: solo amigos y rangos validados + tests — 03 §6
+- [x] **F3.3** `RankingCalculator` puro + JUnit (tope, empates, semanas que no coinciden; corona solo
   con el mismo `dayKey`, D-030) — 02 §6
-- [ ] **F3.4** Perfil de amigo con eliminar y reportar (el reportar que F2 dejó para aquí); el ánimo
+- [x] **F3.4** Perfil de amigo con eliminar y reportar (el reportar que F2 dejó para aquí); el ánimo
   llega en F5 (D-030) — 02 §9
-- [ ] **F3.5** Pestaña Ranking (Minutos y Constancia) — 02 §6
-- [ ] **F3.6** «Nº entre amigos» real en Cycle complete — 02 §6
+- [x] **F3.5** Pestaña Ranking (Minutos y Constancia) — 02 §6
+- [x] **F3.6** «Nº entre amigos» real en Cycle complete — 02 §6
 
 ### F4 · Presencia
 - [ ] **F4.1** `PresencePublisher` (RTDB, `onDisconnect`) enganchado a las transiciones del timer
@@ -166,6 +165,14 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-29 (34)** · F3-u9 F3 cerrada: notas plegadas, `systems/social.md`, `social-rank` en Resolved, política v2 y paso de punta a punta en api36 sin crashes (ninguno). **Siguiente:** abrir F4 (Presencia); push y fusión de `bt/social-f3-stats` en `main` por la sesión principal.
+- **2026-10-29 (33)** · F3-u8 «Nº entre amigos» real desde RankingRepository y marcador social-rank eliminado (cierra F3.6).
+- **2026-10-29 (32)** · F3-u7 pestaña Ranking dentro de Amigos con Minutos y Constancia, empates y mi fila resaltada (F3.5).
+- **2026-10-29 (31)** · F3-u6 perfil de amigo con racha, semana, mejor racha y total, eliminar y reportar desde Amigos (F3.4).
+- **2026-10-29 (30)** · F3-u5 RankingRepository: ranking en vivo y stats de un amigo con listeners solo mientras se observa y reenganche tras PERMISSION_DENIED (F3.3).
+- **2026-10-29 (29)** · F3-u4 StatsPublisher publica stats/ tras sesión, fallo, objetivo, inicio de sesión y día nuevo, con recorte a las reglas (F3.1).
+- **2026-10-29 (28)** · F3-u3 RankingCalculator puro, WeekKey, FriendStats y StatsMapping con JUnit (ninguno).
+- **2026-10-29 (27)** · F3-u2 reglas de stats/ (solo amigos, campos exactos y rangos) con sus tests y `actor.js stats`; suite de Firebase en verde (F3.2).
 - **2026-10-29 (26)** · **F3 abierta** (F3-u1): plan [`social-f3-stats.md`](social-f3-stats.md) (9 unidades en 5 olas,
   opus para u4 y u5) y D-031 (Q-08: la primera publicación incluye toda la historia local; 03 §9 y README, Historial).
   Decisiones del plan: última escritura gana tras reinstalar, Constancia con razón sin tope, perfil de amigo con

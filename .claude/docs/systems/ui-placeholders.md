@@ -1,6 +1,6 @@
 # System — UI placeholders (functional-debt ledger)
 
-**Last verified:** 2026-10-24 (DB v14, F2 closed) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-29 (DB v14, F3 closed) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Stitch visual migration (`.claude/plans/migracion-visual-stitch.md`) builds every designed
 element whose data already exists in the DB, and **registers the rest here** instead of bumping
@@ -35,15 +35,14 @@ debug, false in release**) through `social/SocialFeature`:
 - Mock data, one set per design (u13b: each screen shows the texts of its Stitch design, so the sets
   are *not* unified any more):
   - `getSnapshot()` — Focus (html 01): 8 friends, 5 studying — Laia (top, 3:12:05), Pau, Marc, Júlia,
-    Noa; away Oriol, Elena, Alex. User rank 2nd of 9.
+    Noa; away Oriol, Elena, Alex. No rank (F3-u8: the rank is real, see `social-rank` in Resolved).
   - `getHomeSnapshot()` — Home (html 04): "3 friends studying now · Maya, Alex, Leo".
-  - `getCelebrationSnapshot()` — Cycle complete (html 02): Laia and 3 others still studying, rank 2nd.
+  - `getCelebrationSnapshot()` — Cycle complete (html 02): Laia and 3 others still studying (no rank since F3-u8).
 
 ## Open placeholders
 | id | Screen | View | Shows today | Missing | Priority |
 |---|---|---|---|---|---|
 | `social-backend` | all social blocks | `MockSocialRepository` | Static fake friends from the Stitch mocks (debug only) | Accounts, friend graph, presence sync, a real `SocialRepository` bound in `SocialModule` | P2 (hidden in release) |
-| `social-rank` | Cycle complete (u15) | `cycleBestTile` ("Best · 2nd among friends") | Fixed `SocialRank(2, 9)` | Rank computed from the user's real focus time vs friends' (needs `social-backend`) | P2 (hidden in release) |
 | `social-home-friends` | Home (u13/u13b) | `homeFriendsCard` ("3 friends studying now · Maya, Alex, Leo") | Mock studying friends (avatars + names) | Real presence (`social-backend`); tap target / friends screen | P2 (hidden in release) |
 | `social-focus-studying` | Focus (u14) | `focusSocialBlock` (`focusStudyingHeader` "5 / 8", `focusFriendsGrid`) | Mock friends, static times, crown on the first | Live presence + ticking session times (`social-backend`) | P2 (hidden in release) |
 | `social-celebration-strip` | Cycle complete (u15) | `cycleFriendsStrip` ("Laia and 3 others still studying · Live") | Mock top friend + count (`getCelebrationSnapshot()`) | Real presence (`social-backend`) | P2 (hidden in release) |
@@ -64,6 +63,7 @@ debug, false in release**) through `social/SocialFeature`:
 | `progress-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
 | `home-user-name` | 2026-10-20 | F1-u8: `GreetingResolver` (profile name, else local name in `SocialPrefs`, else generic greeting) |
 | `social-focus-invite` | 2026-10-24 | F2-u8: `focusInviteButton` opens `InviteSheet` (`@usuario`, link with copy and share, QR) when signed in with a profile, or the entry router otherwise; markers removed from Java and layout |
+| `social-rank` | 2026-10-29 | F3-u8: `cycleBestTile` shows the real position in this week's Minutos ranking (`CycleRank.from(RankingState)` over `RankingRepository.observeRanking()`; needs an account, a profile and at least one friend, else a dash «–» with the same subtitle and no tap); `MOCK_RANK` and the marker removed from `MockSocialRepository` |
 
 ## History
 | Date | Change | Ref |
@@ -74,3 +74,4 @@ debug, false in release**) through `social/SocialFeature`:
 | 2026-10-19 | `cycle-share` and `progress-share` resolved: image card + FileProvider + ACTION_SEND (text only, Q-06) | F0-u5 (social-f0-base) |
 | 2026-10-20 | `home-user-name` resolved: Home greeting and avatar come from the profile or a local name; markers and `home_user_name_placeholder` removed | F1-u8 (social-f1-cuenta) |
 | 2026-10-24 | `social-focus-invite` resolved (invite sheet); `home-notification-centre` stays open but partial: the bell dot and tap are real for friend requests when signed in with a profile; the Focus/Home friend mock keeps its rows until F4 | F2-u8, closed in F2-u9 (social-f2-amigos) |
+| 2026-10-29 | `social-rank` resolved: Cycle complete shows the real «n-th among friends» from `RankingRepository`, or a dash without account, profile or friends; the mock keeps only the friends strip (F4) | F3-u8, closed in F3-u9 (social-f3-stats) |

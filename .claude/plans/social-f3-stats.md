@@ -1,8 +1,8 @@
 # Social F3 — Stats y ranking
 
-**Status:** in progress
+**Status:** merged
 **Created:** 2026-10-29
-**Last updated:** 2026-10-29 (F3-u1 hecha: plan, D-031 y tablero)
+**Last updated:** 2026-10-29 (F3 cerrada: F3-u9, notas plegadas)
 
 > Tablero: [sistema-social.md](sistema-social.md) · Guía: 02 §5, §6, §9 · 03 §5, §6, §9, §10, §13
 > Decisiones que aplica: D-005, D-009, D-015, D-021, D-025, D-027, D-029, D-030 y D-031 · Preguntas que debe cerrar: Q-08 (cerrada con D-031)
@@ -59,14 +59,14 @@ Exactamente 10 claves: `dayKey` (`YYYY-MM-DD`, fecha civil local del que publica
 | Unidad | Qué | Ficheros principales | Verificación | Depende de | Modelo | Estado |
 |---|---|---|---|---|---|---|
 | **F3-u1** | Abrir F3: este plan, D-031 (respuesta a Q-08) y el tablero | `.claude/plans/social-f3-stats.md`, `sistema-social.md`, `docs/social/decisiones.md` (D-031), `03-arquitectura.md` (§9), `README.md` (Historial) | `grep` de D-031, del estado del plan, de las nueve filas y del tablero; un commit `F3-u1: ...` | — | sonnet | hecha |
-| **F3-u2** | Reglas de `stats/` (solo amigos, campos exactos y rangos) con sus tests y `actor.js stats` | `firebase/firestore.rules`, `firebase/tests/stats-rules.test.js` (nuevo), `deny-all.test.js`, `firebase/tests/tools/actor.js`, `firebase/README.md` | `bash firebase/scripts/run-tests.sh` con el describe «reglas F3: stats/» en verde; un caso de denegación por cada condición de `validStats()` | — | sonnet | pendiente |
-| **F3-u3** | `RankingCalculator` puro, `WeekKey` y lectura de `stats/` (`FriendStats`, `StatsMapping`) con JUnit | `social/stats/WeekKey`, `RankingCalculator`, `Ranking`, `FriendStats`, `StatsMapping` (nuevos) y sus tests | JUnit `WeekKeyTest` (≥ 5), `RankingCalculatorTest` (≥ 10), `StatsMappingTest` (≥ 4); `testDebugUnitTest assembleDebug assembleRelease` | — | sonnet | pendiente |
-| **F3-u4** | `StatsPublisher`: calcular y publicar `stats/` con los disparadores de D-030 y la historia de D-031 | `social/stats/StatsPublisher`, `StatsComputer`, `StatsWrites`, `StatsBackend`, `FirestoreStatsBackend`; `stats/FocusSessionRepository`, `WeeklyGoalStore`, `FocusEventDAO`, `DayMinutes`; `database/DBMigration`; `social/account/SocialPrefs` | JUnit `StatsComputerTest`, `StatsWritesTest`, `StatsPublisherTest` y `FocusSessionRepositoryPublishTest`; `AppDatabase` sigue en versión 14; `testDebugUnitTest assembleDebug assembleRelease` | u3 | opus | pendiente |
-| **F3-u5** | `RankingRepository`: escuchar `stats/` propio y de cada amigo y servir el ranking y las stats de un amigo | `social/stats/RankingRepository`, `RankingState`, `StatsReadBackend`, `FirestoreStatsReadBackend` | JUnit `RankingRepositoryTest` (≥ 8, con el reenganche tras `PERMISSION_DENIED`); `testDebugUnitTest assembleDebug assembleRelease` | u3 | opus | pendiente |
-| **F3-u6** | Perfil de amigo (racha, semana, mejor racha, total; eliminar y reportar) desde la lista de Amigos | `ui/social/FriendProfileFragment`, `FriendProfileViewModel`, `FriendProfileUi`, `FriendsFragment`, `FriendsAdapter`, `ReportSheet`; `fragment_friend_profile.xml`, `mobile_navigation.xml`, `*_social.xml` | JUnit `FriendProfileUiTest` (≥ 5); auditoría de tokens; pasada en `api36` con Alice, Bob (con stats) y Carol (sin ellas) y 0 `FATAL EXCEPTION` | u2, u4, u5 | sonnet + `impeccable` | pendiente |
-| **F3-u7** | Pestaña Ranking dentro de Amigos (Minutos y Constancia) | `ui/social/FriendsFragment`, `FriendsViewModel`, `RankingAdapter`, `RankingRows`; `fragment_friends.xml`, `item_ranking_row.xml`, `*_social.xml` | JUnit `RankingRowsTest` (≥ 6); auditoría de tokens; pasada en `api36` con empates y las dos categorías y 0 `FATAL EXCEPTION` | u5, u6 | sonnet + `impeccable` | pendiente |
-| **F3-u8** | «Nº entre amigos» real en Cycle complete y fuera el marcador `social-rank` | `ui/focus/CycleCompleteViewModel`, `CycleCompleteFragment`, `CycleRank` (nuevo); `social/MockSocialRepository` | JUnit `CycleRankTest` (≥ 4) y `MockSocialRepositoryTest`; `grep ui-placeholders#social-rank app/src` vacío | u5 | sonnet | pendiente |
-| **F3-u9** | Cierre de F3: notas, tablero, `systems/social.md`, `ui-placeholders`, legales y paso de punta a punta en `api36` | `social-f3-stats.md`, `sistema-social.md`, `.claude/docs/systems/social.md`, `ui-placeholders.md`, `CLAUDE.md`, `docs/legal/privacy-policy-v2-draft.md`, `docs/social/` | `testDebugUnitTest assembleDebug assembleRelease` y `bash firebase/scripts/run-tests.sh` en verde; pasada de punta a punta con 0 `FATAL EXCEPTION` | u1 – u8 | sonnet | pendiente |
+| **F3-u2** | Reglas de `stats/` (solo amigos, campos exactos y rangos) con sus tests y `actor.js stats` | `firebase/firestore.rules`, `firebase/tests/stats-rules.test.js` (nuevo), `deny-all.test.js`, `firebase/tests/tools/actor.js`, `firebase/README.md` | `bash firebase/scripts/run-tests.sh` con el describe «reglas F3: stats/» en verde; un caso de denegación por cada condición de `validStats()` | — | sonnet | hecha |
+| **F3-u3** | `RankingCalculator` puro, `WeekKey` y lectura de `stats/` (`FriendStats`, `StatsMapping`) con JUnit | `social/stats/WeekKey`, `RankingCalculator`, `Ranking`, `FriendStats`, `StatsMapping` (nuevos) y sus tests | JUnit `WeekKeyTest` (≥ 5), `RankingCalculatorTest` (≥ 10), `StatsMappingTest` (≥ 4); `testDebugUnitTest assembleDebug assembleRelease` | — | sonnet | hecha |
+| **F3-u4** | `StatsPublisher`: calcular y publicar `stats/` con los disparadores de D-030 y la historia de D-031 | `social/stats/StatsPublisher`, `StatsComputer`, `StatsWrites`, `StatsBackend`, `FirestoreStatsBackend`; `stats/FocusSessionRepository`, `WeeklyGoalStore`, `FocusEventDAO`, `DayMinutes`; `database/DBMigration`; `social/account/SocialPrefs` | JUnit `StatsComputerTest`, `StatsWritesTest`, `StatsPublisherTest` y `FocusSessionRepositoryPublishTest`; `AppDatabase` sigue en versión 14; `testDebugUnitTest assembleDebug assembleRelease` | u3 | opus | hecha |
+| **F3-u5** | `RankingRepository`: escuchar `stats/` propio y de cada amigo y servir el ranking y las stats de un amigo | `social/stats/RankingRepository`, `RankingState`, `StatsReadBackend`, `FirestoreStatsReadBackend` | JUnit `RankingRepositoryTest` (≥ 8, con el reenganche tras `PERMISSION_DENIED`); `testDebugUnitTest assembleDebug assembleRelease` | u3 | opus | hecha |
+| **F3-u6** | Perfil de amigo (racha, semana, mejor racha, total; eliminar y reportar) desde la lista de Amigos | `ui/social/FriendProfileFragment`, `FriendProfileViewModel`, `FriendProfileUi`, `FriendsFragment`, `FriendsAdapter`, `ReportSheet`; `fragment_friend_profile.xml`, `mobile_navigation.xml`, `*_social.xml` | JUnit `FriendProfileUiTest` (≥ 5); auditoría de tokens; pasada en `api36` con Alice, Bob (con stats) y Carol (sin ellas) y 0 `FATAL EXCEPTION` | u2, u4, u5 | sonnet + `impeccable` | hecha |
+| **F3-u7** | Pestaña Ranking dentro de Amigos (Minutos y Constancia) | `ui/social/FriendsFragment`, `FriendsViewModel`, `RankingAdapter`, `RankingRows`; `fragment_friends.xml`, `item_ranking_row.xml`, `*_social.xml` | JUnit `RankingRowsTest` (≥ 6); auditoría de tokens; pasada en `api36` con empates y las dos categorías y 0 `FATAL EXCEPTION` | u5, u6 | sonnet + `impeccable` | hecha |
+| **F3-u8** | «Nº entre amigos» real en Cycle complete y fuera el marcador `social-rank` | `ui/focus/CycleCompleteViewModel`, `CycleCompleteFragment`, `CycleRank` (nuevo); `social/MockSocialRepository` | JUnit `CycleRankTest` (≥ 4) y `MockSocialRepositoryTest`; `grep ui-placeholders#social-rank app/src` vacío | u5 | sonnet | hecha |
+| **F3-u9** | Cierre de F3: notas, tablero, `systems/social.md`, `ui-placeholders`, legales y paso de punta a punta en `api36` | `social-f3-stats.md`, `sistema-social.md`, `.claude/docs/systems/social.md`, `ui-placeholders.md`, `CLAUDE.md`, `docs/legal/privacy-policy-v2-draft.md`, `docs/social/` | `testDebugUnitTest assembleDebug assembleRelease` y `bash firebase/scripts/run-tests.sh` en verde; pasada de punta a punta con 0 `FATAL EXCEPTION` | u1 – u8 | sonnet | hecha |
 
 **Orden y paralelismo.** Cada unidad: implementar → sus comprobaciones → un commit en su rama; la tarea las integra con `bt land`.
 
@@ -109,16 +109,99 @@ Exactamente 10 claves: `dayKey` (`YYYY-MM-DD`, fecha civil local del que publica
 
 ## Hecho cuando
 
-- [ ] `stats/{uid}` se publica solo con sesión y perfil `READY`, con las 10 claves y recortes al rango de las reglas, y la suite de reglas lo acepta.
-- [ ] Las reglas dejan leer `stats/` solo al dueño y a sus amigos, y rechazan cada campo fuera de rango, una clave extra o un `updatedAt` del cliente.
-- [ ] `RankingCalculator` y `RankingRepository` siguen la semántica de arriba, con empates compartidos, claves comparadas y corona por `dayKey`.
-- [ ] El perfil de amigo enseña racha, semana, mejor racha y total, con estado vacío, y permite eliminar y reportar.
-- [ ] La pestaña Ranking enseña Minutos y Constancia con las posiciones esperadas y abre el perfil al tocar una fila.
-- [ ] «Nº entre amigos» de Cycle complete es real o un guion, y no queda ningún `PLACEHOLDER(ui-placeholders#social-rank)` en `app/src`.
-- [ ] `testDebugUnitTest assembleDebug assembleRelease` y `bash firebase/scripts/run-tests.sh` en verde; la auditoría de tokens no sube.
-- [ ] Pasada de punta a punta en `api36` con el Emulator Suite y 0 `FATAL EXCEPTION`.
-- [ ] `systems/social.md`, `ui-placeholders.md` (`social-rank` a *Resolved*), el borrador de la política v2 y el tablero al día.
+- [x] `stats/{uid}` se publica solo con sesión y perfil `READY`, con las 10 claves y recortes al rango de las reglas, y la suite de reglas lo acepta. _Evidencia: publicador probado con JUnit (`StatsPublisherTest`, `StatsWritesTest` recorta al rango) y en `api36`: la sesión de Alice dejó su `stats/` con las 10 claves y la suite de reglas lo acepta (F3-u4, F3-u9)._
+- [x] Las reglas dejan leer `stats/` solo al dueño y a sus amigos, y rechazan cada campo fuera de rango, una clave extra o un `updatedAt` del cliente. _Evidencia: `stats-rules.test.js` («reglas F3: stats/») en la suite de 141 en verde (F3-u2, F3-u9)._
+- [x] `RankingCalculator` y `RankingRepository` siguen la semántica de arriba, con empates compartidos, claves comparadas y corona por `dayKey`. _Evidencia: `RankingCalculatorTest` (14), `RankingRepositoryTest` (14) y `WeekKeyTest` (F3-u3, F3-u5)._
+- [x] El perfil de amigo enseña racha, semana, mejor racha y total, con estado vacío, y permite eliminar y reportar. _Evidencia: `FriendProfileUiTest` y pasada en `api36` con Bob (con stats), Carol (sin ellas), reportar y eliminar (F3-u6); perfil de Bob abierto en F3-u9._
+- [x] La pestaña Ranking enseña Minutos y Constancia con las posiciones esperadas y abre el perfil al tocar una fila. _Evidencia: `RankingRowsTest` y pasada en `api36` con empates y las dos categorías (F3-u7); Bob 1.º, Carol 2.ª y Alice 3.ª en F3-u9._
+- [x] «Nº entre amigos» de Cycle complete es real o un guion, y no queda ningún `PLACEHOLDER(ui-placeholders#social-rank)` en `app/src`. _Evidencia: `CycleRankTest`; `grep ui-placeholders#social-rank app/src` vacío; «3rd among friends» real en `api36` (F3-u8, F3-u9)._
+- [x] `testDebugUnitTest assembleDebug assembleRelease` y `bash firebase/scripts/run-tests.sh` en verde; la auditoría de tokens no sube. _Evidencia: `testDebugUnitTest assembleDebug assembleRelease` y `run-tests.sh` en verde; auditoría de tokens en TOTAL 1 (F3-u9)._
+- [x] Pasada de punta a punta en `api36` con el Emulator Suite y 0 `FATAL EXCEPTION`. _Evidencia: nota de F3-u9, «Emulador: api36 · ... APP CRASHES: 0»._
+- [x] `systems/social.md`, `ui-placeholders.md` (`social-rank` a *Resolved*), el borrador de la política v2 y el tablero al día. _Evidencia: `systems/social.md`, `ui-placeholders.md`, política v2 y tablero al día (F3-u9)._
 
 ## Notas de unidades
 
 <!-- Las pliega la unidad de cierre desde .claude/plans/social-f3/notes/u<n>.md (D-029) -->
+
+### F3-u1 · Abrir F3: plan de fase, D-031 y tablero — `F3-u1: abrir F3 (plan de fase, D-031 y tablero)`
+Plan `social-f3-stats.md` con la plantilla del README (9 unidades, 4 olas, riesgos y «Hecho cuando»); decisiones d1–d5 del usuario recogidas.
+D-031 (Q-08): la primera publicación incluye toda la historia local; 03 §9 lo dice, «Última revisión» a 2026-10-29 y fila en el Historial del README.
+Tablero: F3 «activa» con enlace al plan, Q-08 tachada, «Ahora» apunta a F3 y entrada de diario (26).
+Desviación aprobada de D-029: u1 escribe plan y tablero; solo u1 y u9 los tocan.
+Pendiente: u2 a u9 (ver el plan).
+Diario: 2026-10-29 · F3-u1 F3 abierta: plan de fase, D-031 (Q-08) y tablero; esta entrada ya está en el diario del tablero (26) y u9 no la duplica (ninguno)
+
+### F3-u2 · Reglas de stats/ con tests y actor.js stats — `F3-u2: reglas de stats/ (solo amigos, campos exactos y rangos) con tests y actor.js stats`
+`firestore.rules`: `match /stats/{uid}` lee el dueño o un amigo (`isFriend`), crea y actualiza solo el dueño con `validStats()`, borrar nunca (`deleteAccount` borra con el Admin SDK).
+`validStats()`: 10 claves exactas, `dayKey`/`weekKey` por regex, enteros en rango, `minutesWeekCapped <= 240 * daysThisWeek`, `bestWeekStreak >= weekStreak`, `updatedAt == request.time`.
+`tests/stats-rules.test.js` («reglas F3: stats/»): dueño crea/actualiza, amigo lee, no amigo y anónimo no, otro no escribe, borrar denegado y un caso denegado por condición (claves, formas, cada tope, `fails`, `updatedAt` del cliente).
+`deny-all.test.js` ya no lista `stats/` como cerrado (conserva el control positivo).
+`actor.js stats <nombre> [clave=N ...]`: set() con reglas de `stats/{uid}`; `dayKey`/`weekKey` de la fecha local (semana ISO); omitidos 0 (`weeklyGoal` 3); sale con 1 y el error de reglas si no vale. Documentado en la cabecera y en `firebase/README.md`.
+Pendiente: `actor.js stats` contra la app se ejercita en los pasos de emulador de u6, u7 y u9 (necesita el Emulator Suite fijo).
+Diario: 2026-10-29 · F3-u2 reglas de stats/ (solo amigos, campos exactos y rangos) con sus tests y `actor.js stats`; suite de Firebase en verde (F3.2)
+
+### F3-u3 · RankingCalculator puro, WeekKey y lectura de stats/ — `F3-u3: RankingCalculator, WeekKey y lectura de stats/ con JUnit`
+Paquete `social/stats/`: `WeekKey` (dayKey, weekKey ISO, `Keys.of(LocalDate)` con `previousWeek`), `FriendStats` (10 campos, `updatedAtMillis` Long o null), `StatsMapping.fromMap` (null si falta clave, tipo o rango; acepta Long/Integer; updatedAt Timestamp/Date/null).
+`RankingCalculator.compute(myUid, mine, List<FriendInput>, Keys)` → `Ranking` (filas Minutos y Constancia, `crownUid`, `myMinutesPosition`, `groupSize`); Constancia por razón sin tope (d3), empates 1,2,2,4; en empate, yo primero y luego `@usuario`.
+`RankingCalculator.applySemantics(FriendStats, Keys)` aplica la semántica a una persona (para el perfil de amigo, u5/u6): semana y día ajenos a 0, racha solo de esta semana o la anterior.
+Convenciones: sin amigos `myMinutesPosition == Ranking.NO_RANK` (0); mi fila tiene `handle` null; sin documento el objetivo de la fila es 0.
+JUnit: WeekKeyTest 7, StatsMappingTest 7, RankingCalculatorTest 14. Sin cambios de Room ni de reglas.
+Diario: 2026-10-29 · F3-u3 RankingCalculator puro, WeekKey, FriendStats y StatsMapping con JUnit (ninguno)
+
+### F3-u4 · StatsPublisher: calcular y publicar stats/ con los disparadores de D-030 y la historia según D-031 — `F3-u4: StatsPublisher calcula y publica stats/ (disparadores D-030, historia D-031)`
+`StatsPublisher` (@Singleton, `social/stats/`): `start()` (desde `DBMigration.onCreate` solo con FEATURE_SOCIAL) sigue `ProfileRepository.observeMine()`; `requestPublish()` (cualquier hilo) funde ráfagas en un `SerialExecutor` sobre el `@IoExecutor`. Nunca escribe sin flag, sesión y perfil READY del mismo uid; errores solo al log.
+Primer READY de un uid en el proceso: escribe si la huella (`dayKey|weekKey|valores`, `SocialPrefs.readLastStatsPublished/saveLastStatsPublished`) difiere de la última publicada para ese uid; cuenta nueva = siempre. Desviación menor: compara la huella entera, no solo las claves (cubre un set() fallido o sesiones hechas sin sesión iniciada). `requestPublish()` usa la misma huella: un fallo o un `setGoal` al mismo objetivo no reescriben el doc (solo movería `updatedAt` y diría la hora del abandono, P5).
+`StatsComputer.compute(weekDays, totalMinutes, StreakCalculator.Result, goal, today)` puro; `StatsWrites.toMap` (10 claves, `serverTimestamp()`) recorta cada campo al rango de `validStats()` (decisión r1, único sitio); `StatsBackend` / `FirestoreStatsBackend.setStats` hace `set()` de `stats/{uid}`.
+DAO (solo @Query, Room sigue en v14): `getFocusMinutesPerDayBetween(start, end)` → `List<DayMinutes>` y `sumFocusMinutesSince(since)` (0 = toda la historia, D-031 opción A: total y rachas desde el primer uso).
+Ganchos por `dagger.Lazy<StatsPublisher>` tras el flag: `FocusSessionRepository` tras el insert de `recordFocusCompleted` y de `recordFail` (del fallo no se publica nada), `WeeklyGoalStore.setGoal` tras guardar; nuevo `WeeklyGoalStore.getGoalSync()` (@WorkerThread).
+JUnit: StatsComputerTest 7, StatsWritesTest 13, StatsPublisherTest 13, FocusSessionRepositoryPublishTest 3. Sin probar aún en el emulador (lo cubre el paso de punta a punta de u9).
+Diario: 2026-10-29 · F3-u4 StatsPublisher publica stats/ tras sesión, fallo, objetivo, inicio de sesión y día nuevo, con recorte a las reglas (F3.1)
+
+### F3-u5 · RankingRepository: escuchar stats/ propio y de cada amigo y servir ranking y stats de un amigo — `F3-u5: RankingRepository con stats/ propio y de cada amigo, ranking y stats de un amigo`
+`social/stats/`: `RankingRepository` (@Singleton), `RankingState`, `StatsReadBackend` + `FirestoreStatsReadBackend` (lectura de `stats/{uid}` con `MetadataChanges.INCLUDE`); la escritura sigue siendo de u4.
+API para u6/u7/u8: `observeRanking()` → LiveData de `RankingState` (`SIGNED_OUT`, `LOADING`, `READY` con `ranking` y `friends` = las `FriendCard` para nombre y color, `ERROR`); `state.friend(uid)`, `state.hasFriends()`; `refresh()` para «Reintentar».
+`observeFriendStats(uid)` → LiveData de `RankingState.FriendStatsState` (`READY` con `stats` ya pasadas por `applySemantics`, `NO_STATS`, `NOT_FRIEND` tras eliminarlo, `LOADING`, `SIGNED_OUT`, `ERROR`); misma LiveData por uid.
+Listeners solo mientras alguna de esas LiveData tiene observadores (cuenta en onActive/onInactive); se sueltan al dejar de observar, al cerrar sesión y por amigo que sale de la lista.
+El primer `READY` espera a mi documento, a la lista y a la respuesta de cada amigo; luego un amigo nuevo cuenta 0 hasta responder. `ERROR` solo por mi listener o la lista; un amigo denegado, sin documento o malformado cuenta 0.
+`PERMISSION_DENIED` de un amigo: reenganche propio con `Backoff` (1, 2, 4… s, 6 intentos; `WatchedListener` no reintenta ese código); se anula al salir de la lista, al dejar de observar y al cerrar sesión; agotado, lo reanuda primer plano o `refresh()`.
+Pendiente: los consumidores alcanzables en release (u8) deben mirar `SocialFeature.isAccountEnabled()` antes de observar.
+JUnit: `RankingRepositoryTest` 14 casos. Sin cambios de Room, reglas ni dependencias.
+Diario: 2026-10-29 · F3-u5 RankingRepository: ranking en vivo y stats de un amigo con listeners solo mientras se observa y reenganche tras PERMISSION_DENIED (F3.3)
+
+### F3-u6 · Perfil de amigo (racha, semana, mejor racha, total; eliminar y reportar) desde la lista de Amigos — `F3-u6: perfil de amigo con sus stats, eliminar y reportar`
+Nuevo destino `navigation_friend_profile` (args `uid`, `handle`, `name`, `color`): `FriendProfileFragment` + `FriendProfileViewModel` (solo lee `RankingRepository.observeFriendStats`) + `FriendProfileUi` (mapper puro: bloque LOADING/STATS/EMPTY/ERROR/GONE y cifras listas; 9 casos JUnit en `FriendProfileUiTest`).
+Se abre tocando la fila de un amigo (`FriendsAdapter.Listener.onOpen`); el menú «⋮» (Eliminar, Reportar) sigue igual. Solo las filas FRIEND son tocables (no solicitudes ni enviadas).
+Perfil: racha semanal, «N de M días» con M puntos (d4, sin campo nuevo), minutos de la semana (con tope), mejor racha y total en h y min; sin stats todavía → frase, no ceros; sin «ánimo» (F5, D-030).
+Eliminar (misma confirmación que la lista) y Reportar (`ReportSheet` con `FRIEND` y su «¿Eliminar también?») reutilizan `FriendsViewModel` del propio fragmento; tras eliminar, o si deja de ser amigo, o al cerrar sesión, vuelve a Amigos una sola vez. `ReportSheet` no cambió.
+Rule #2: layout con `bb_*` y `TextAppearance.BBetter.*`; cadenas (con plurales) en `strings_social.xml` y `values-es`, dos dimens de puntos en `dimens_social.xml`; el ratchet de tokens sigue en TOTAL 1. Los puntos reutilizan `bg_streak_dot_done` / `bg_streak_dot_pending`.
+Crítica de diseño aplicada: la cabecera pasó de avatar grande en columna a fila (avatar 72dp + nombre y @usuario) para que Eliminar y Reportar queden visibles sin desplazar mucho.
+Emulador: api36 · Emulator Suite de la app; Alice (email, @alice) con Bob (actor.js stats: 2 de 4 días, 300 min, racha 3, mejor 7, 3725 min = 62 h 5 min) y Carol sin stats; abierto el perfil de Bob y el de Carol (estado vacío), reportada Carol (motivo Otro, «¿Eliminar también?» → Mantener) y eliminado Bob desde su perfil (vuelve a Amigos con 1 amigo) · APP CRASHES: 0
+Pendiente: nada propio; la pestaña Ranking que abre este perfil es u7.
+Diario: 2026-10-29 · F3-u6 perfil de amigo con racha, semana, mejor racha y total, eliminar y reportar desde Amigos (F3.4)
+
+### F3-u7 · Pestaña Ranking dentro de Amigos (Minutos y Constancia) — `F3-u7: pestaña Ranking dentro de Amigos (Minutos y Constancia)`
+Amigos gana un `TabLayout` (`friendsTabs`): «Amigos» (la lista de siempre, ahora dentro de `friendsPanel`) y «Ranking» (`rankingPanel`). Entrar con `section=requests` cae siempre en Amigos; la pestaña elegida sobrevive a un giro (guardada en `FriendsViewModel`).
+Ranking: selector `rankingCategoryToggle` (control segmentado del proyecto, no `MaterialButtonToggleGroup`: ver `styles_components.xml`), nota «la semana vuelve a empezar el lunes» y `rankingList` con yo y mis amigos: puesto (empates con el mismo puesto), avatar, nombre y valor (minutos con tope; Constancia «días/objetivo»). Mi fila lleva `bg_ranking_row_me`; sin «último» ni estilo de castigo. Tocar un amigo abre su perfil (u6); mi fila no abre nada.
+`RankingRows` (puro) pasa `RankingState` + categoría + mi perfil a `Status` (HIDDEN, LOADING, ERROR, EMPTY, READY) e `Item`s; `RankingRowsTest` 8 casos. `RankingAdapter` solo pinta.
+Estados: sin amigos, vacío con «Invitar»; cargando, `CircularProgressIndicator`; ERROR, mensaje con «Reintentar» (`RankingRepository.refresh()`).
+`FriendsViewModel` inyecta `RankingRepository` y `ProfileRepository` (mi nombre y color). El ranking solo escucha mientras la pestaña Ranking se ve (el fragmento observa `getRankingRows()` solo entonces), así que los listeners de u5 no corren en la pestaña Amigos.
+Pendiente: mi fila no trae `@usuario` ni objetivo hasta que se publique mi propio stats/ (sin documento: «0 días»); la nota de Minutos fija el tope de 4 h en el texto (D-005).
+Emulador: api36 · Emulator Suite de la app; Alice (@alice) con Bob (300 min, 2/4 días), Carol (300 min, 4/4) y Dave (120 min, 3/3) vía actor.js stats; Minutos: Bob y Carol puesto 1, Dave 3, Alice 4 (resaltada); Constancia: Carol y Dave puesto 1, Bob 3, Alice 4; abierto el perfil de Carol desde su fila · APP CRASHES: 0
+Diario: 2026-10-29 · F3-u7 pestaña Ranking dentro de Amigos con Minutos y Constancia, empates y mi fila resaltada (F3.5)
+
+### F3-u8 · «Nº entre amigos» real en Cycle complete y fuera el marcador social-rank — `F3-u8: Nº entre amigos real en Cycle complete, sin el marcador social-rank`
+
+- `CycleRank.from(RankingState)` (puro): `SocialRank(myMinutesPosition, groupSize)` solo con `READY` y al menos un amigo; si no, null.
+- `CycleCompleteViewModel.getRank()` envuelve `RankingRepository.observeRanking()` (vía `dagger.Lazy`, release no toca Firebase); el fragmento lo observa solo con `SocialFeature.isAccountEnabled()`.
+- Sin cuenta, perfil o amigos el tile muestra «–» con el subtítulo «entre amigos», sin toque (d5); nunca datos de maqueta. Visibilidad del tile (`applyVisibility`) y GONE en release sin cambios.
+- `MockSocialRepository` pierde `MOCK_RANK` y el marcador `social-rank`; sus snapshots llevan rank null. La tira de amigos sigue con la maqueta (F4).
+- Pendiente: `ui-placeholders.md` (mover `social-rank` a Resolved) lo hace u9; el paso de emulador va en u9.
+Diario: 2026-10-29 · F3-u8 «Nº entre amigos» real desde RankingRepository y marcador social-rank eliminado (cierra F3.6)
+
+### F3-u9 · Cierre de F3: notas, tablero, systems/social.md, ui-placeholders, legales y paso de punta a punta en api36 — `F3-u9: cierre de la fase F3 (notas, tablero, systems/social.md, ui-placeholders, legales y paso de punta a punta en api36)`
+F3 cerrada. Notas u1 a u8 plegadas en el plan de fase (`merged`) y sus diarios en el tablero; F3.1 a F3.6 marcados, F3 «hecha» y «Ahora» apunta a F4.
+`systems/social.md` describe F3 construido (`social/stats/`, reglas, `actor.js stats`, perfil de amigo, pestaña Ranking, Cycle complete e invariantes); CLAUDE.md nombra `stats/`; `social-rank` pasa a *Resolved*; la política v2 resuelve el `[CONFIRM]` del reporte desde el perfil y explica D-031 en los totales. Sin cambios en la guía ni nuevas D-xxx.
+Observación: tras reiniciar el Emulator Suite (datos vacíos) con una cuenta ya conocida por `SocialPrefs`, el primer READY no reescribió `stats/` porque la huella era igual a la última publicada; la primera sesión sí lo hizo. Solo ocurre al borrar el servidor (emulador); no se toca.
+Emulador: api36 · Emulator Suite de la app; Alice (email, @alice) con Bob (300 min, 2/4 días) y Carol (120 min, 3/3) vía actor.js stats y aceptadas en Amigos; sesión de 1 min completada → su `stats/` pasó a 3 min (totalMinutes 3, 1 día); Ranking Minutos: Bob 1.º, Carol 2.ª, Alice 3.ª (3 min); perfil de Bob abierto (2 de 4 días, 300 min, mejor 5 semanas, 15 h); Cycle complete «3rd among friends» real · APP CRASHES: 0
+Comprobaciones: `testDebugUnitTest assembleDebug assembleRelease` y `bash firebase/scripts/run-tests.sh` (141 en verde) en verde; ratchet de tokens en TOTAL 1.
+Diario: 2026-10-29 · F3-u9 F3 cerrada: notas plegadas, `systems/social.md`, `social-rank` en Resolved, política v2 y paso de punta a punta en api36 sin crashes (ninguno)

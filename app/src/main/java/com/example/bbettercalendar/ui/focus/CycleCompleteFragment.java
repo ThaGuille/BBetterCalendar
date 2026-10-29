@@ -109,6 +109,11 @@ public class CycleCompleteFragment extends Fragment {
                 view.findViewById(R.id.cycleBestGap), friendsStrip);
 
         viewModel.getStreak().observe(getViewLifecycleOwner(), this::renderStreak);
+        // F3-u8: the Best tile is the real rank (d5: a dash without account, profile or friends).
+        renderRank(null);
+        if (SocialFeature.isAccountEnabled()) {
+            viewModel.getRank().observe(getViewLifecycleOwner(), this::renderRank);
+        }
         if (SocialFeature.isEnabled()) {
             viewModel.getSocial().observe(getViewLifecycleOwner(), this::renderSocial);
         }
@@ -180,15 +185,20 @@ public class CycleCompleteFragment extends Fragment {
         }
     }
 
+    /** «Nº entre amigos»: my position in Minutos this week, or a dash (d5); never mock data. */
+    private void renderRank(@Nullable SocialRank rank) {
+        if (bestValue == null) {
+            return;
+        }
+        bestValue.setText(rank == null ? getString(R.string.cycle_rank_none) : ordinal(rank.getPosition()));
+        bestSub.setText(R.string.cycle_tile_best_sub);
+    }
+
     // PLACEHOLDER(ui-placeholders#social-backend): maqueta (MockSocialRepository).
     private void renderSocial(@Nullable SocialSnapshot snapshot) {
         if (snapshot == null || friendsText == null) {
             return;
         }
-        SocialRank rank = snapshot.getUserRank();
-        bestValue.setText(rank == null ? "-" : ordinal(rank.getPosition()));
-        bestSub.setText(R.string.cycle_tile_best_sub);
-
         List<Friend> studying = snapshot.getStudying();
         if (studying.isEmpty()) {
             friendsStrip.setVisibility(View.GONE);

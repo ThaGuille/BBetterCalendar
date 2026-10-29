@@ -21,9 +21,6 @@ import java.util.Arrays;
 // PLACEHOLDER(ui-placeholders#social-backend)
 public class MockSocialRepository implements SocialRepository {
 
-    // PLACEHOLDER(ui-placeholders#social-rank) — fixed, not computed from the user's real minutes.
-    static final SocialRank MOCK_RANK = new SocialRank(2, 9);
-
     private final MutableLiveData<SocialSnapshot> snapshot =
             new MutableLiveData<>(buildSnapshot());
     private final MutableLiveData<SocialSnapshot> homeSnapshot =
@@ -56,7 +53,7 @@ public class MockSocialRepository implements SocialRepository {
                 friend("maya", "Maya", "MA", Friend.Status.STUDYING, 1, 30, 0),
                 friend("alex_h", "Alex", "AL", Friend.Status.STUDYING, 1, 10, 0),
                 friend("leo", "Leo", "LE", Friend.Status.STUDYING, 0, 45, 0)
-        ), MOCK_RANK);
+        ), null);
     }
 
     /** html 02: Laia plus 3 others studying (avatars L, M, J), the user 2nd among friends. */
@@ -71,7 +68,7 @@ public class MockSocialRepository implements SocialRepository {
                 friend("oriol", "Oriol", "OG", Friend.Status.AWAY, 1, 25, 0),
                 friend("elena", "Elena", "ET", Friend.Status.AWAY, 0, 40, 0),
                 friend("alex", "Alex", "AR", Friend.Status.AWAY, 0, 0, 0)
-        ), MOCK_RANK);
+        ), null);
     }
 
     @NonNull
@@ -85,7 +82,7 @@ public class MockSocialRepository implements SocialRepository {
                 friend("oriol", "Oriol", "OG", Friend.Status.AWAY, 1, 25, 0),
                 friend("elena", "Elena", "ET", Friend.Status.AWAY, 0, 40, 0),
                 friend("alex", "Alex", "AR", Friend.Status.AWAY, 0, 0, 0)
-        ), MOCK_RANK);
+        ), null);
     }
 
     private static Friend friend(String id, String name, String initials, Friend.Status status,

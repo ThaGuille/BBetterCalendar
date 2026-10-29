@@ -34,12 +34,11 @@ public class MockSocialRepositoryTest {
     }
 
     @Test
-    public void mock_userRankIsSecondOfNine() {
-        SocialRank rank = mock.getUserRank();
-        assertNotNull(rank);
-        assertEquals(2, rank.getPosition());
-        assertEquals(9, rank.getGroupSize());
-        assertFalse(rank.isFirst());
+    public void mock_carriesNoRank() {
+        // F3-u8: the rank is real now (RankingRepository -> CycleRank); the mock has none.
+        assertNull(mock.getUserRank());
+        assertNull(new MockSocialRepository().getHomeSnapshot().getValue().getUserRank());
+        assertNull(new MockSocialRepository().getCelebrationSnapshot().getValue().getUserRank());
     }
 
     @Test
@@ -111,8 +110,7 @@ public class MockSocialRepositoryTest {
         assertEquals("Laia", studying.get(0).getName());
         assertEquals("Marc", studying.get(1).getName());
         assertEquals("Júlia", studying.get(2).getName());
-        assertNotNull(celebration.getUserRank());
-        assertEquals(2, celebration.getUserRank().getPosition());
+        assertNull(celebration.getUserRank());
     }
 
     @Test

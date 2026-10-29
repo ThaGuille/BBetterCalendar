@@ -16,6 +16,7 @@
     <string name="cycle_streak_best_format">Best: %1$s</string>
     <string name="cycle_tile_best">Best</string>
     <string name="cycle_tile_best_sub">among friends</string>
+    <string name="cycle_rank_none" translatable="false">–</string>
     <string name="cycle_rank_st">%1$dst</string>
     <string name="cycle_rank_nd">%1$dnd</string>
     <string name="cycle_rank_rd">%1$drd</string>

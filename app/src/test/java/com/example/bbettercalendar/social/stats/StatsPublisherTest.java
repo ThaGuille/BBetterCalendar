@@ -64,6 +64,7 @@ public class StatsPublisherTest {
     private final AtomicReference<LocalDate> today = new AtomicReference<>(WED);
     private boolean writesSucceed = true;
     private boolean enabled = true;
+    private int goal = 3;
 
     @Before
     public void setUp() {
@@ -119,7 +120,7 @@ public class StatsPublisherTest {
 
     /** Un publicador nuevo = un proceso nuevo (comparte las preferencias). */
     private StatsPublisher newPublisher(Executor serial) {
-        return new StatsPublisher(profiles, backend, dao, () -> 3, prefs, serial, today::get, () -> enabled,
+        return new StatsPublisher(profiles, backend, dao, () -> goal, prefs, serial, today::get, () -> enabled,
                 (message, error) -> logged.add(error));
     }
 
@@ -205,8 +206,45 @@ public class StatsPublisherTest {
         StatsPublisher p = started();
         profiles.setValue(READY);
         lastWrite(1);
+        completeSession(75); // recordFocusCompleted: los minutos cambian
         p.requestPublish();
-        lastWrite(2);
+        assertEquals(75, lastWrite(2).get("minutesToday"));
+    }
+
+    /** Lo que ve el publicador tras el insert de una sesión completada: más minutos hoy y en total. */
+    private void completeSession(int minutesToday) {
+        DayMinutes wed = new DayMinutes();
+        wed.day = "2026-10-28";
+        wed.minutes = minutesToday;
+        when(dao.getFocusMinutesPerDayBetween(anyLong(), anyLong())).thenReturn(Collections.singletonList(wed));
+        when(dao.sumFocusMinutesSince(0L)).thenReturn(850 + minutesToday);
+    }
+
+    /**
+     * P5 (revisión u4, hallazgo Medium): un fallo pide publicar pero no cambia ningún valor; reescribir el doc
+     * solo movería {@code updatedAt} y los amigos sabrían a qué hora se abandonó la sesión.
+     */
+    @Test
+    public void aFailWithIdenticalValuesDoesNotWrite() {
+        StatsPublisher p = started();
+        profiles.setValue(READY);
+        lastWrite(1);
+        p.requestPublish(); // recordFail: fila TYPE_FAIL de 0 minutos, nada cambia en lo calculado
+        lastWrite(1);
+    }
+
+    /** La misma familia por la otra ruta: WeeklyGoalStore.setGoal con el objetivo que ya había. */
+    @Test
+    public void setGoalToTheSameGoalDoesNotWriteButANewGoalDoes() {
+        StatsPublisher p = started();
+        profiles.setValue(READY);
+        lastWrite(1);
+        p.requestPublish(); // setGoal(3) con objetivo 3
+        lastWrite(1);
+
+        goal = 5;
+        p.requestPublish();
+        assertEquals(5, lastWrite(2).get("weeklyGoal"));
     }
 
     @Test
@@ -218,15 +256,17 @@ public class StatsPublisherTest {
         drain(queue);
         lastWrite(1);
 
+        completeSession(75);
         p.requestPublish();
         p.requestPublish();
         p.requestPublish();
         drain(queue);
         lastWrite(2);
 
+        completeSession(100);
         p.requestPublish(); // una petición después de la ráfaga vuelve a escribir
         drain(queue);
-        lastWrite(3);
+        assertEquals(100, lastWrite(3).get("minutesToday"));
     }
 
     private static void drain(List<Runnable> queue) {

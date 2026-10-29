@@ -40,7 +40,8 @@ import javax.inject.Singleton;
  * <ul>
  *   <li>{@link #requestPublish()}: tras el insert de {@code FocusSessionRepository.recordFocusCompleted}, tras
  *       {@code recordFail} (solo recalcula: del fallo no se publica nada, P5) y tras
- *       {@code WeeklyGoalStore.setGoal}. Siempre escribe si el perfil está listo.</li>
+ *       {@code WeeklyGoalStore.setGoal}. Escribe si el perfil está listo y lo calculado difiere de lo último
+ *       publicado (la misma huella de abajo): un fallo no mueve ningún valor y no escribe.</li>
  *   <li>Cada vez que el perfil pasa a {@code READY} (primer {@code READY} del proceso al arrancar, al iniciar
  *       sesión o al crear el perfil): escribe solo si lo calculado difiere de lo último publicado para ese uid
  *       ({@link SocialPrefs#readLastStatsPublished}, huella que empieza por {@code dayKey} y {@code weekKey}).
@@ -133,7 +134,7 @@ public class StatsPublisher {
             pending.set(false); // lo que llegue a partir de aquí puede ver datos nuevos: otra tarea
             String uid = readyUid;
             if (uid != null) {
-                publish(uid, false);
+                publish(uid);
             }
         });
     }
@@ -151,10 +152,16 @@ public class StatsPublisher {
             return; // el mismo perfil vuelve a emitir (nombre, color): nada que publicar
         }
         readyUid = uid;
-        publish(uid, true);
+        publish(uid);
     }
 
-    private void publish(@NonNull String uid, boolean onlyIfChanged) {
+    /**
+     * Escribe solo si lo calculado difiere de lo último publicado para ese uid. También en
+     * {@link #requestPublish()}: un fallo (o un {@code setGoal} al mismo objetivo) no cambia ningún valor, y
+     * reescribir el doc solo movería {@code updatedAt}, que diría a los amigos a qué hora se abandonó una
+     * sesión (P5).
+     */
+    private void publish(@NonNull String uid) {
         if (!uid.equals(backend.currentUid())) {
             return; // la sesión ya no es la del perfil (salió o cambió de cuenta)
         }
@@ -166,7 +173,7 @@ public class StatsPublisher {
             return;
         }
         String fingerprint = StatsWrites.fingerprint(values);
-        if (onlyIfChanged && fingerprint.equals(prefs.readLastStatsPublished(uid))) {
+        if (fingerprint.equals(prefs.readLastStatsPublished(uid))) {
             return;
         }
         backend.setStats(uid, StatsWrites.toMap(values), serial, new StatsBackend.Callback() {

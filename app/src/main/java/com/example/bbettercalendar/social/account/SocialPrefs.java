@@ -3,7 +3,9 @@ package com.example.bbettercalendar.social.account;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.social.common.SerialExecutor;
@@ -40,6 +42,9 @@ public class SocialPrefs {
     public static final String KEY_PENDING_INVITE = "pending_invite";
     public static final String KEY_PENDING_INVITE_AT = "pending_invite_at";
     private static final String KEY_REFERRER_CHECKED = "install_referrer_checked";
+    // F3-u4: última publicación de stats/ (una sola cuenta: la de la última publicación)
+    private static final String KEY_STATS_LAST_UID = "stats_last_uid";
+    private static final String KEY_STATS_LAST_PUBLISHED = "stats_last_published";
 
     private final Context appContext;
     private final Executor io;
@@ -139,5 +144,28 @@ public class SocialPrefs {
 
     public void markReferrerChecked() {
         io.execute(() -> prefs().edit().putBoolean(KEY_REFERRER_CHECKED, true).apply());
+    }
+
+    // ---- F3-u4: última publicación de stats/{uid} ----------------------------------------------------------
+
+    /**
+     * Huella de lo último que se publicó en {@code stats/{uid}} para {@code uid} ({@code dayKey|weekKey|valores},
+     * {@code StatsWrites.fingerprint}), o null si nunca se publicó o la última fue de otra cuenta. Síncrona: la
+     * llama {@code StatsPublisher} desde su serial sobre el {@code @IoExecutor}, nunca el hilo principal.
+     */
+    @WorkerThread
+    @Nullable
+    public String readLastStatsPublished(@NonNull String uid) {
+        SharedPreferences p = prefs();
+        return uid.equals(p.getString(KEY_STATS_LAST_UID, null)) ? p.getString(KEY_STATS_LAST_PUBLISHED, null) : null;
+    }
+
+    /** Guarda la huella de la última publicación de {@code uid}. Síncrona como la lectura ({@code apply()}). */
+    @WorkerThread
+    public void saveLastStatsPublished(@NonNull String uid, @NonNull String fingerprint) {
+        prefs().edit()
+                .putString(KEY_STATS_LAST_UID, uid)
+                .putString(KEY_STATS_LAST_PUBLISHED, fingerprint)
+                .apply();
     }
 }

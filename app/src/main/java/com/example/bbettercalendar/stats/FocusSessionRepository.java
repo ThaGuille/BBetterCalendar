@@ -8,12 +8,18 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.social.SocialFeature;
+import com.example.bbettercalendar.social.stats.StatsPublisher;
 
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Write side of a Pomodoro session (migración visual, u2): what {@code HomeViewModel.completeTimer}
@@ -33,6 +39,11 @@ public class FocusSessionRepository {
     private final FocusAttributionRepository focusAttributionRepository;
     private final ExecutorService ioExecutor;
     private final ExecutorService dbWriteExecutor;
+    // F3-u4 (03 §9, D-030): tras guardar la sesión o el fallo, stats/ se recalcula y se publica. Lazy y
+    // detrás del flag: en release (FEATURE_SOCIAL=false) nunca se crea el publicador ni se toca Firebase.
+    private final Lazy<StatsPublisher> statsPublisher;
+    private final BooleanSupplier socialEnabled;
+    private final Consumer<String> infoLog;
 
     private final MutableLiveData<Integer> todayFails = new MutableLiveData<>();
     private final MutableLiveData<Integer> todayTimeStudiedMillis = new MutableLiveData<>();
@@ -44,12 +55,29 @@ public class FocusSessionRepository {
     public FocusSessionRepository(StatsDAO statsDao, FocusEventDAO focusEventDao,
                                   FocusAttributionRepository focusAttributionRepository,
                                   @IoExecutor ExecutorService ioExecutor,
-                                  @DbWriteExecutor ExecutorService dbWriteExecutor) {
+                                  @DbWriteExecutor ExecutorService dbWriteExecutor,
+                                  Lazy<StatsPublisher> statsPublisher) {
+        this(statsDao, focusEventDao, focusAttributionRepository, ioExecutor, dbWriteExecutor, statsPublisher,
+                SocialFeature::isAccountEnabled, message -> Log.i(TAG, message));
+    }
+
+    /**
+     * Para tests: el flag social llega como {@link BooleanSupplier} y el log como {@link Consumer} (en la JVM
+     * {@code android.util.Log} no está implementado).
+     */
+    FocusSessionRepository(StatsDAO statsDao, FocusEventDAO focusEventDao,
+                           FocusAttributionRepository focusAttributionRepository,
+                           ExecutorService ioExecutor, ExecutorService dbWriteExecutor,
+                           Lazy<StatsPublisher> statsPublisher, BooleanSupplier socialEnabled,
+                           Consumer<String> infoLog) {
         this.statsDao = statsDao;
         this.focusEventDao = focusEventDao;
         this.focusAttributionRepository = focusAttributionRepository;
         this.ioExecutor = ioExecutor;
         this.dbWriteExecutor = dbWriteExecutor;
+        this.statsPublisher = statsPublisher;
+        this.socialEnabled = socialEnabled;
+        this.infoLog = infoLog;
     }
 
     /** Re-reads today's fails / time studied from {@code Stats} (old HomeViewModel.setInitialTexts). */
@@ -64,10 +92,11 @@ public class FocusSessionRepository {
     //Cuando el temporizador llega a 0 se actualizan y guardan estadísticas
     public void recordFocusCompleted(int timerTime, int boundEntryId) {
         dbWriteExecutor.execute(() -> {
-            Log.i(TAG, "addTimeStudied( " + timerTime + " )");
+            infoLog.accept("addTimeStudied( " + timerTime + " )");
             statsDao.addTimeStudied(timerTime);
             statsDao.addTasksDone();
             logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime), boundEntryId);
+            requestStatsPublish();
             if (boundEntryId != 0) {
                 focusAttributionRepository.maybeAutoComplete(boundEntryId);
             }
@@ -79,12 +108,21 @@ public class FocusSessionRepository {
     //Cuando el usuario cierra la app a medio contador
     public void recordFail(int boundEntryId) {
         dbWriteExecutor.execute(() -> {
-            Log.i(TAG, "addFails()");
+            infoLog.accept("addFails()");
             statsDao.addFails();
             // El fallo registra la tarea vinculada pero con 0 minutos: no avanza el objetivo.
             logFocusEvent(FocusEvent.TYPE_FAIL, 0, boundEntryId);
+            // Solo recalcula: del fallo no se publica nada (P5); el día o la semana sí pueden haber cambiado.
+            requestStatsPublish();
             todayFails.postValue(statsDao.getTodayFails());
         });
+    }
+
+    /** F3-u4: pide publicar stats/ (se funde con otras peticiones seguidas). Nada sin FEATURE_SOCIAL. */
+    private void requestStatsPublish() {
+        if (socialEnabled.getAsBoolean()) {
+            statsPublisher.get().requestPublish();
+        }
     }
 
     /**

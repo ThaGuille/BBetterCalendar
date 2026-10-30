@@ -4,29 +4,32 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.bbettercalendar.social.presence.Presence;
+
 import java.util.Arrays;
 
 /**
- * Fake social data for the designed screens (debug builds only, BuildConfig.FEATURE_SOCIAL_MOCK).
- * Each screen shows what its Stitch design shows (u13b), so there is one set per design:
- * <ul>
- *   <li>{@link #getSnapshot()} (Focus, html 01): "Studying now 5 / 8" grid, Laia has the crown.</li>
- *   <li>{@link #getHomeSnapshot()} (Home, html 04): "3 friends studying now · Maya, Alex, Leo".</li>
- *   <li>{@link #getCelebrationSnapshot()} (Cycle complete, html 02): "Laia and 3 others still
- *   studying", "Best · 2nd among friends".</li>
- * </ul>
+ * Fake social data (BuildConfig.FEATURE_SOCIAL_MOCK without FEATURE_SOCIAL, and tests). Since F4-u4
+ * it holds ONE snapshot like the real repository: the Focus design (html 01) "Studying now 5 / 8",
+ * Laia with the crown. Each studying friend's session started {@code focusSecondsToday} before the
+ * moment the snapshot was built, so the longest session comes first.
  *
- * Static data — no clock, no I/O — so it is safe on any thread and deterministic in tests.
+ * <p>No I/O; the only clock is the {@code now} the snapshot is built with.
  */
-// PLACEHOLDER(ui-placeholders#social-backend)
 public class MockSocialRepository implements SocialRepository {
 
-    private final MutableLiveData<SocialSnapshot> snapshot =
-            new MutableLiveData<>(buildSnapshot());
-    private final MutableLiveData<SocialSnapshot> homeSnapshot =
-            new MutableLiveData<>(buildHomeSnapshot());
-    private final MutableLiveData<SocialSnapshot> celebrationSnapshot =
-            new MutableLiveData<>(buildCelebrationSnapshot());
+    /** The mock's crown (html 01). */
+    static final String CROWN_UID = "laia";
+
+    private final MutableLiveData<SocialSnapshot> snapshot;
+
+    public MockSocialRepository() {
+        this(System.currentTimeMillis());
+    }
+
+    MockSocialRepository(long nowMs) {
+        snapshot = new MutableLiveData<>(buildSnapshot(nowMs));
+    }
 
     @NonNull
     @Override
@@ -35,58 +38,23 @@ public class MockSocialRepository implements SocialRepository {
     }
 
     @NonNull
-    @Override
-    public LiveData<SocialSnapshot> getHomeSnapshot() {
-        return homeSnapshot;
-    }
-
-    @NonNull
-    @Override
-    public LiveData<SocialSnapshot> getCelebrationSnapshot() {
-        return celebrationSnapshot;
-    }
-
-    /** html 04: three friends studying, shown as avatars M, A, L and "Maya, Alex, Leo". */
-    @NonNull
-    static SocialSnapshot buildHomeSnapshot() {
+    static SocialSnapshot buildSnapshot(long nowMs) {
         return new SocialSnapshot(Arrays.asList(
-                friend("maya", "Maya", "MA", Friend.Status.STUDYING, 1, 30, 0),
-                friend("alex_h", "Alex", "AL", Friend.Status.STUDYING, 1, 10, 0),
-                friend("leo", "Leo", "LE", Friend.Status.STUDYING, 0, 45, 0)
-        ), null);
+                friend(nowMs, "laia", "Laia", 0, true, 3, 12, 5),
+                friend(nowMs, "marc", "Marc", 1, true, 1, 48, 30),
+                friend(nowMs, "pau", "Pau", 2, true, 2, 5, 44),
+                friend(nowMs, "julia", "Júlia", 3, true, 1, 10, 2),
+                friend(nowMs, "noa", "Noa", 4, true, 0, 52, 10),
+                friend(nowMs, "oriol", "Oriol", 5, false, 1, 25, 0),
+                friend(nowMs, "elena", "Elena", 6, false, 0, 40, 0),
+                friend(nowMs, "alex", "Alex", 7, false, 0, 0, 0)
+        ), null, CROWN_UID);
     }
 
-    /** html 02: Laia plus 3 others studying (avatars L, M, J), the user 2nd among friends. */
-    @NonNull
-    static SocialSnapshot buildCelebrationSnapshot() {
-        return new SocialSnapshot(Arrays.asList(
-                friend("laia", "Laia", "LM", Friend.Status.STUDYING, 3, 12, 5),
-                friend("marc", "Marc", "MS", Friend.Status.STUDYING, 1, 48, 30),
-                friend("julia", "Júlia", "JB", Friend.Status.STUDYING, 1, 10, 2),
-                friend("noa", "Noa", "NJ", Friend.Status.STUDYING, 0, 52, 10),
-                friend("pau", "Pau", "PK", Friend.Status.AWAY, 2, 5, 44),
-                friend("oriol", "Oriol", "OG", Friend.Status.AWAY, 1, 25, 0),
-                friend("elena", "Elena", "ET", Friend.Status.AWAY, 0, 40, 0),
-                friend("alex", "Alex", "AR", Friend.Status.AWAY, 0, 0, 0)
-        ), null);
-    }
-
-    @NonNull
-    static SocialSnapshot buildSnapshot() {
-        return new SocialSnapshot(Arrays.asList(
-                friend("laia", "Laia", "LM", Friend.Status.STUDYING, 3, 12, 5),
-                friend("marc", "Marc", "MS", Friend.Status.STUDYING, 1, 48, 30),
-                friend("pau", "Pau", "PK", Friend.Status.STUDYING, 2, 5, 44),
-                friend("julia", "Júlia", "JB", Friend.Status.STUDYING, 1, 10, 2),
-                friend("noa", "Noa", "NJ", Friend.Status.STUDYING, 0, 52, 10),
-                friend("oriol", "Oriol", "OG", Friend.Status.AWAY, 1, 25, 0),
-                friend("elena", "Elena", "ET", Friend.Status.AWAY, 0, 40, 0),
-                friend("alex", "Alex", "AR", Friend.Status.AWAY, 0, 0, 0)
-        ), null);
-    }
-
-    private static Friend friend(String id, String name, String initials, Friend.Status status,
+    private static Friend friend(long nowMs, String id, String name, int color, boolean studying,
                                  int h, int m, int s) {
-        return new Friend(id, name, initials, status, h * 3600L + m * 60L + s);
+        long seconds = h * 3600L + m * 60L + s;
+        Presence presence = studying ? Presence.studying(nowMs - seconds * 1000L, nowMs) : Presence.AWAY;
+        return new Friend(id, id, name, color, presence, 0L, seconds);
     }
 }

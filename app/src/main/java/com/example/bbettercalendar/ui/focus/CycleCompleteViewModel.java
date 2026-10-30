@@ -18,7 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 /**
  * u15: data of the Cycle complete screen that is not in the navigation arguments: the streak
- * (current + best, u3) and the social mock for the strip / Best tile. Fragment-scoped; the session
+ * (current + best, u3) and the social snapshot for the strip / Best tile. Fragment-scoped; the session
  * itself (cycles, length) arrives as arguments from {@link FocusSessionEventPresenter}.
  */
 @HiltViewModel
@@ -49,8 +49,8 @@ public class CycleCompleteViewModel extends ViewModel {
         return Transformations.map(rankingRepository.get().observeRanking(), CycleRank::from);
     }
 
-    // PLACEHOLDER(ui-placeholders#social-backend): maqueta (MockSocialRepository).
+    /** F4-u4: the single social snapshot, for the "still studying" strip — 03 §10. */
     public LiveData<SocialSnapshot> getSocial() {
-        return socialRepository.getCelebrationSnapshot();
+        return socialRepository.getSnapshot();
     }
 }

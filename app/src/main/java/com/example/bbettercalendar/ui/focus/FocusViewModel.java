@@ -36,7 +36,7 @@ public class FocusViewModel extends ViewModel {
         return streak;
     }
 
-    // PLACEHOLDER(ui-placeholders#social-focus-studying): maqueta (MockSocialRepository).
+    /** F4-u4: the single social snapshot (real friends, live presence, crown) — 03 §10. */
     public LiveData<SocialSnapshot> getSocialSnapshot() {
         return socialRepository.getSnapshot();
     }

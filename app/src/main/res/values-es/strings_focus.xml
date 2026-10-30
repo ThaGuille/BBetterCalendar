@@ -7,4 +7,6 @@
     <string name="focus_block_mode_desc_off">Activar el modo bloqueo</string>
     <string name="focus_block_mode_desc_on">Desactivar el modo bloqueo</string>
     <string name="focus_block_mode_desc_pending">El modo bloqueo necesita el permiso de accesibilidad</string>
+    <string name="focus_friend_paused">En pausa</string>
+    <string name="focus_friends_empty">Aún no hay amigos aquí. Invita a alguien a estudiar contigo.</string>
 </resources>

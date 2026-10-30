@@ -42,7 +42,10 @@ public interface PresenceBackend {
     @NonNull
     Object serverTimestamp();
 
-    /** {@code status/{uid}.onDisconnect().setValue(value)}: lo aplica el servidor si se cae el socket. */
+    /**
+     * {@code status/{uid}.onDisconnect().setValue(value)}: lo aplica el servidor si se cae el socket. Se puede
+     * pedir sin conexión: queda encolado hasta conectar y, mientras tanto, mantiene vivo el intento de reconexión.
+     */
     void registerOnDisconnect(@NonNull String uid, @NonNull Map<String, Object> value, @NonNull Executor executor,
                               @NonNull Callback callback);
 

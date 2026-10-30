@@ -33,7 +33,9 @@ import javax.inject.Singleton;
  * <ul>
  *   <li>En cada (re)conexión ({@code .info/connected}) <b>primero</b> registra
  *       {@code onDisconnect().setValue(idle)} y <b>después</b> escribe el estado: si la app muere o pierde la red,
- *       el servidor pone {@code idle} solo.</li>
+ *       el servidor pone {@code idle} solo. Al perder la conexión (o con sesión y aún sin ella) lo pide ya, sin
+ *       esperar: el SDK lo encola, y una operación pendiente es lo único que le impide cortar el socket por
+ *       inactividad a los 60 s y dejar de reconectar.</li>
  *   <li>Escribe solo cuando cambia lo publicado (nada por segundo), con una excepción: mientras corre
  *       {@code focus} o {@code break} reescribe lo mismo (el mismo {@code sessionStart}) cada
  *       {@link #REFRESH_MS} para refrescar {@code since} (regla de 4 h del lector). Una pausa no se refresca.</li>
@@ -263,11 +265,12 @@ public class PresencePublisher {
     private void onConnectedChanged(boolean isConnected) {
         connected = isConnected;
         if (!isConnected) {
-            // El servidor aplica (o aplicará) el onDisconnect: al volver hay que registrarlo y escribir otra vez.
+            // El servidor aplica (o aplicará) el onDisconnect: hay que registrarlo otra vez y reescribir al volver.
+            // publish() lo registra ya, sin conexión (ver armOnDisconnect), para que el SDK no dé el socket por
+            // inactivo y deje de reconectar.
             onDisconnectArmed = false;
             written = null;
             cancelRefresh();
-            return;
         }
         publish();
     }
@@ -282,30 +285,46 @@ public class PresencePublisher {
 
     private void publish() {
         String u = uid;
-        if (!enabled.getAsBoolean() || u == null || !connected || suspended) {
+        if (!enabled.getAsBoolean() || u == null || suspended) {
             return;
         }
-        if (!onDisconnectArmed) {
-            onDisconnectArmed = true;
-            backend.registerOnDisconnect(u, PresenceWrites.idle(backend.serverTimestamp()), serial,
-                    new PresenceBackend.Callback() {
-                        @Override
-                        public void onSuccess() { }
-
-                        @Override
-                        public void onError(@NonNull Throwable error) {
-                            errorLog.log("onDisconnect " + PresenceWrites.STATUS + "/" + u + " failed", error);
-                            if (u.equals(uid)) {
-                                onDisconnectArmed = false; // se reintenta en la próxima publicación
-                            }
-                        }
-                    });
+        armOnDisconnect(u);
+        if (!connected) {
+            return; // se escribe al (re)conectar; el onDisconnect ya está pedido
         }
         OwnPresence target = Boolean.TRUE.equals(sharingOn) ? run : OwnPresence.IDLE;
         if (target.equals(written)) {
             return;
         }
         write(u, target);
+    }
+
+    /**
+     * Registra {@code onDisconnect(idle)} para {@code u} si aún no lo está en esta conexión. Se pide también sin
+     * conexión, a propósito: el SDK lo encola, lo manda al reconectar en la misma ráfaga que lo pendiente (nuestra
+     * escritura sale después de {@code .info/connected}) y, mientras lo tiene, no da el socket por inactivo. Sin
+     * ninguna operación pendiente el SDK corta el socket a los 60 s y solo lo reanuda otra (los listeners de
+     * {@code .info/} son locales y no cuentan): sin esto, iniciar sesión o recuperar la red pasado ese minuto
+     * dejaría {@code .info/connected} en false para siempre y no se publicaría nada.
+     */
+    private void armOnDisconnect(@NonNull String u) {
+        if (onDisconnectArmed) {
+            return;
+        }
+        onDisconnectArmed = true;
+        backend.registerOnDisconnect(u, PresenceWrites.idle(backend.serverTimestamp()), serial,
+                new PresenceBackend.Callback() {
+                    @Override
+                    public void onSuccess() { }
+
+                    @Override
+                    public void onError(@NonNull Throwable error) {
+                        errorLog.log("onDisconnect " + PresenceWrites.STATUS + "/" + u + " failed", error);
+                        if (u.equals(uid)) {
+                            onDisconnectArmed = false; // se reintenta en la próxima publicación
+                        }
+                    }
+                });
     }
 
     private void write(@NonNull String u, @NonNull OwnPresence target) {

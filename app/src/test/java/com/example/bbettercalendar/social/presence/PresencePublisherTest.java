@@ -76,6 +76,13 @@ public class PresencePublisherTest {
     /** Lectura del año retenida (para el caso «aún no leído»); null = se contesta al momento. */
     private List<Consumer<Integer>> heldBirthYearReads;
 
+    // Modelo del socket del SDK de RTDB: sin ninguna operación pendiente lo corta por inactividad a los 60 s
+    // (PersistentConnectionImpl.doIdleCheck) y solo lo reanuda otra operación; los .info/* son locales y no cuentan.
+    /** Operaciones de servidor pedidas al backend (escribir, registrar o cancelar el onDisconnect). */
+    private int ops;
+    /** El SDK cortó el socket por inactividad: {@code .info/connected} no vuelve a true hasta otra operación. */
+    private boolean idleDropped;
+
     @Before
     public void setUp() {
         backend = mock(PresenceBackend.class);
@@ -123,6 +130,11 @@ public class PresencePublisherTest {
     }
 
     private void ack(PresenceBackend.Callback cb) {
+        ops++;
+        if (idleDropped) {
+            idleDropped = false; // la operación reanuda el socket: conecta en cuanto el ejecutor queda libre
+            clock.schedule(0L, () -> server.onConnectedChanged(true));
+        }
         if (autoAck) {
             cb.onSuccess();
         } else {
@@ -294,6 +306,48 @@ public class PresencePublisherTest {
     }
 
     @Test
+    public void aSignInAfterTheSdkDroppedTheIdleSocketWakesItAndPublishes() {
+        // Arranca sin sesión: nada mantiene ocupado el socket y el SDK lo corta a los 60 s.
+        publisher.onTimerState(State.RUNNING, 0L);
+        server.onUidChanged(null);
+        server.onConnectedChanged(false);
+        clock.advance(MIN + 1);
+        idleDropped = true;
+
+        server.onUidChanged("alice"); // inicia sesión más tarde, con el timer en marcha
+        clock.advance(0L);
+
+        InOrder order = inOrder(backend);
+        order.verify(backend).registerOnDisconnect(eq("alice"), eq(idle()), any(), any());
+        order.verify(backend).setStatus(eq("alice"), eq(running("focus", T0)), any(), any());
+        assertEquals(running("focus", T0), seen("alice"));
+    }
+
+    @Test
+    public void aLongNetworkLossWhileSignedInKeepsTheSocketAliveAndRepublishesOnReturn() {
+        signedInAndConnected("alice");
+        publisher.onTimerState(State.RUNNING, 0L);
+        int before = writesFor("alice").size();
+
+        // Se va la red: el servidor aplica el onDisconnect y el SDK olvida los suyos. Si en 60 s no se pide
+        // ninguna operación, corta el socket por inactividad y al volver la red ya no reconecta. Cuenta también
+        // la que se pide en el mismo aviso de la pérdida: el SDK ya ha olvidado los suyos cuando llega
+        // .info/connected = false, así que esa operación es posterior a la pérdida.
+        int opsBeforeLoss = ops;
+        server.onConnectedChanged(false);
+        clock.advance(MIN + 1);
+        if (ops == opsBeforeLoss) {
+            idleDropped = true;
+        } else {
+            server.onConnectedChanged(true); // vuelve la red y el SDK reconecta
+        }
+        clock.advance(0L);
+
+        assertEquals(before + 1, writesFor("alice").size());
+        assertEquals(running("focus", T0), seen("alice"));
+    }
+
+    @Test
     public void theSamePresenceTwiceIsWrittenOnce() {
         signedInAndConnected("alice");
         publisher.onTimerState(State.RUNNING, 0L);
@@ -455,6 +509,20 @@ public class PresencePublisherTest {
         server.onConnectedChanged(true);
         assertEquals("no status write after the callable", before, writesFor("alice").size());
         verify(backend, times(1)).registerOnDisconnect(eq("alice"), anyMap(), any(), any());
+    }
+
+    @Test
+    public void aConnectionLossDuringDeleteAccountDoesNotArmOnDisconnectAgain() {
+        signedInAndConnected("alice");
+        publisher.onTimerState(State.RUNNING, 0L);
+        int before = writesFor("alice").size();
+        publisher.beforeDeleteAccount(() -> { });
+
+        // la red cae mientras corre la Function: un onDisconnect nuevo recrearía status/alice tras borrarlo
+        server.onConnectedChanged(false);
+        server.onConnectedChanged(true);
+        verify(backend, times(1)).registerOnDisconnect(eq("alice"), anyMap(), any(), any());
+        assertEquals(before, writesFor("alice").size());
     }
 
     @Test

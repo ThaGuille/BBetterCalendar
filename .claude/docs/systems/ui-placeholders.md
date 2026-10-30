@@ -1,6 +1,6 @@
 # System — UI placeholders (functional-debt ledger)
 
-**Last verified:** 2026-10-29 (DB v14, F3 closed) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-10-31 (DB v14, F4 closed) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Stitch visual migration (`.claude/plans/migracion-visual-stitch.md`) builds every designed
 element whose data already exists in the DB, and **registers the rest here** instead of bumping
@@ -20,31 +20,24 @@ today. This file is the to-do list for the next phase ("dar funcionalidad real a
   **P3** cosmetic / debug only.
 
 ## Social (feature flag)
-All social blocks are gated by `BuildConfig.FEATURE_SOCIAL_MOCK` (`app/build.gradle`: **true in
-debug, false in release**) through `social/SocialFeature`:
-- `SocialFeature.isEnabled()` — the flag.
+Since F4 the social blocks show **real data** whenever there is an account. Two flags decide which
+repository `social/SocialModule` binds (`FEATURE_SOCIAL` first, see `systems/social.md`):
+- `BuildConfig.FEATURE_SOCIAL` (`app/build.gradle`: true in debug, false in release) through
+  `SocialFeature.isAccountEnabled()` -> `FirebaseSocialRepository` (real friends, live presence, crown).
+- `BuildConfig.FEATURE_SOCIAL_MOCK` (true in debug, false in release) through `SocialFeature.isEnabled()`
+  -> `MockSocialRepository` (tests and a debug build without accounts, one snapshot, no marker).
+- Otherwise `EmptySocialRepository` (`SocialSnapshot.EMPTY`).
 - `SocialFeature.applyVisibility(View...)` — call it on the **root** of each social block; with the
   flag off the block is `GONE` (no gap).
-- `SocialRepository` (Hilt, `social/SocialModule`) is always injectable: `MockSocialRepository` when
-  the flag is on, `EmptySocialRepository` (`SocialSnapshot.EMPTY`) when off. Screens never
-  null-check it, but they hide blocks by the flag, not by an empty snapshot.
-- Model: `Friend` (id, name, initials, `Status` STUDYING/AWAY → `AvatarView.Status`,
-  `focusSecondsToday`), `SocialRank` (1-based position, group size incl. the user),
-  `SocialSnapshot` (friends display-ordered studying-first then by time; `getStudying()`,
-  `getTopFriend()` = crown, `getUserRank()`).
-- Mock data, one set per design (u13b: each screen shows the texts of its Stitch design, so the sets
-  are *not* unified any more):
-  - `getSnapshot()` — Focus (html 01): 8 friends, 5 studying — Laia (top, 3:12:05), Pau, Marc, Júlia,
-    Noa; away Oriol, Elena, Alex. No rank (F3-u8: the rank is real, see `social-rank` in Resolved).
-  - `getHomeSnapshot()` — Home (html 04): "3 friends studying now · Maya, Alex, Leo".
-  - `getCelebrationSnapshot()` — Cycle complete (html 02): Laia and 3 others still studying (no rank since F3-u8).
+- `SocialRepository.getSnapshot()` is the **only** accessor (`getHomeSnapshot` and
+  `getCelebrationSnapshot` disappeared in F4-u4). `Friend` carries uid, handle, avatar colour and the
+  presence fields; `SocialSnapshot` orders studying first (pause included) and exposes the crown uid,
+  `getStudying()`, `getTopFriend()` and `getUserRank()`.
+- No `PLACEHOLDER(ui-placeholders#social-...)` marker remains in `app/src`.
 
 ## Open placeholders
 | id | Screen | View | Shows today | Missing | Priority |
 |---|---|---|---|---|---|
-| `social-backend` | all social blocks | `MockSocialRepository` | Static fake friends from the Stitch mocks (debug only) | Accounts, friend graph, presence sync, a real `SocialRepository` bound in `SocialModule` | P2 (hidden in release) |
-| `social-home-friends` | Home (u13/u13b) | `homeFriendsCard` ("3 friends studying now · Maya, Alex, Leo") | Mock studying friends (avatars + names) | Real presence (`social-backend`); tap target / friends screen | P2 (hidden in release) |
-| `social-celebration-strip` | Cycle complete (u15) | `cycleFriendsStrip` ("Laia and 3 others still studying · Live") | Mock top friend + count (`getCelebrationSnapshot()`) | Real presence (`social-backend`) | P2 (hidden in release) |
 | `home-notification-centre` (partial) | Home (u13) | `homeBellButton` / `homeBellDot` | Signed in with a profile (F2-u8): the dot shows only when there are received friend requests and a tap opens Friends at Requests. Without an account or in release: the fixed honey dot and the "coming soon" toast | The notification centre / inbox (F5): cheers, nudges and push; until then the bell only knows friend requests | P2 |
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
 | `projects-streak-chip` | Projects (u16) | `projectsStreakChip` | The **global** streak (hidden at 0), not a per-project streak | `focus_event` does not attribute a streak per project | P2 |
@@ -64,6 +57,9 @@ debug, false in release**) through `social/SocialFeature`:
 | `social-focus-invite` | 2026-10-24 | F2-u8: `focusInviteButton` opens `InviteSheet` (`@usuario`, link with copy and share, QR) when signed in with a profile, or the entry router otherwise; markers removed from Java and layout |
 | `social-rank` | 2026-10-29 | F3-u8: `cycleBestTile` shows the real position in this week's Minutos ranking (`CycleRank.from(RankingState)` over `RankingRepository.observeRanking()`; needs an account, a profile and at least one friend, else a dash «–» with the same subtitle and no tap); `MOCK_RANK` and the marker removed from `MockSocialRepository` |
 | `social-focus-studying` | 2026-10-30 | F4-u5: `focusSocialBlock` renders the real friends from the single snapshot (`FocusFriendsUi`): studying first with a live time ticking every second while visible, paused as «En pausa», crown on the crown uid, empty state leading to Invite; markers removed from Java and layout |
+| `social-backend` | 2026-10-31 | F4-u4: `FirebaseSocialRepository` (one snapshot: friends from `FriendsRepository`, one RTDB `status/` listener per friend, crown from `RankingRepository`) bound in `SocialModule` when `SocialFeature.isAccountEnabled()`; `getHomeSnapshot` / `getCelebrationSnapshot` and the mock markers removed |
+| `social-home-friends` | 2026-10-31 | F4-u6: `homeFriendsCard` shows «N friends studying now» with the real studying friends' avatars and names (`StudyingSummary`), a calm line when nobody studies, an invite line without friends; tap still opens Friends; markers removed |
+| `social-celebration-strip` | 2026-10-31 | F4-u6: `cycleFriendsStrip` shows «Laia and N others still studying · Live» from the real snapshot and is `GONE` when nobody studies; no code marker existed, the data source changed |
 
 ## History
 | Date | Change | Ref |
@@ -75,3 +71,4 @@ debug, false in release**) through `social/SocialFeature`:
 | 2026-10-20 | `home-user-name` resolved: Home greeting and avatar come from the profile or a local name; markers and `home_user_name_placeholder` removed | F1-u8 (social-f1-cuenta) |
 | 2026-10-24 | `social-focus-invite` resolved (invite sheet); `home-notification-centre` stays open but partial: the bell dot and tap are real for friend requests when signed in with a profile; the Focus/Home friend mock keeps its rows until F4 | F2-u8, closed in F2-u9 (social-f2-amigos) |
 | 2026-10-29 | `social-rank` resolved: Cycle complete shows the real «n-th among friends» from `RankingRepository`, or a dash without account, profile or friends; the mock keeps only the friends strip (F4) | F3-u8, closed in F3-u9 (social-f3-stats) |
+| 2026-10-31 | `social-backend`, `social-home-friends` and `social-celebration-strip` resolved (`social-focus-studying` already by F4-u5): Focus, Home, Cycle complete and Friends show real friends with live presence; the mock keeps one snapshot for tests | F4-u4, u5, u6, closed in F4-u9 (social-f4-presencia) |

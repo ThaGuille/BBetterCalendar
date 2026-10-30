@@ -75,7 +75,7 @@ year itself is never uploaded; only the age band (14–17 or 18+) is stored with
 | Friend list and friend requests (sent, received, and the daily request counter) | To run Friends | You (and the other person in each request) |
 | Your invite code (a random 8-character code tied to your @username) | To let someone add you from a link or a QR code | Anyone who has the link or code sees your display name and @username only |
 | **Summary** focus statistics: minutes today and this week (capped at 4 h per day), focus days this week, weekly goal, weekly streak, best streak, total minutes. Total minutes and best streak count **all the focus history on your phone**, including the time before you created the account (D-031); if you reinstall the app or use another phone, the next publication replaces them with what that phone has | Shared ranking and friend profiles | Your friends |
-| "Studying now" status (focusing, on a break, or not studying) and when the current session started | Live presence | Your friends |
+| "Studying now" status: **studying** (a focus session or its breaks; a break is not shown as such), **paused** (the timer is paused; friends see "Paused" with the time frozen) or **away**, and when the current run of sessions started. Written only while you use the timer and set to away when you stop, sign out or the app closes. You can stop sharing it with the switch **Share my live status** in My profile: it is **on by default for 18+ and off by default for 14–17** (and when your age is unknown); when it is off, your friends always see you as away. The switch is stored on your phone and does not stop you seeing your friends | Live presence | Your friends |
 | Reports you send about another user (who reported whom, the reason you chose, the date; no free text) | Moderation | Only us |
 | Notification token (when interactions are enabled) | To deliver friend requests and cheers | Nobody else |
 
@@ -138,7 +138,7 @@ Questions and requests: yonkiporki@gmail.com
     *Collected*, used for account management and app functionality. Not shared with third parties
     (the processor does not count as sharing).
   - App activity → **Other user-generated content / in-app actions** (summary focus statistics,
-    presence). *Collected*, app functionality. Visible to the user's accepted friends.
+    live presence: studying, paused or away, with the start of the current run). *Collected*, app functionality. Visible to the user's accepted friends.
   - Device or other IDs → **FCM token** [CONFIRM when F5 ships]. App functionality.
 - **Collected on-device only (never transmitted):** app interactions and other app usage (Usage
   access), installed apps.

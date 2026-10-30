@@ -1,23 +1,24 @@
-# System — Social (`social/account/`, `social/profile/`, `social/common/`, `social/friends/`, `social/invite/`, `social/stats/`, `ui/social/`, `firebase/`)
+# System — Social (`social/account/`, `social/profile/`, `social/common/`, `social/friends/`, `social/invite/`, `social/stats/`, `social/presence/`, `ui/social/`, `firebase/`)
 
-Last verified: 2026-10-29 (DB v14, F3 closed; test runner `firebase/scripts/run-tests.sh`) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+Last verified: 2026-10-31 (DB v14, F4 closed; test runner `firebase/scripts/run-tests.sh`) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
-Phases F1, F2 and F3 of the social system. F1: an optional account (age gate, Google or email sign-in,
+Phases F1, F2, F3 and F4 of the social system. F1: an optional account (age gate, Google or email sign-in,
 profile with a unique `@usuario`, sign out, delete account) and the Home greeting. F2: friends (requests
 by `@usuario`, invitation link and QR, list, remove, report), the bell with received requests, and the
 hardening of F1. F3: the phone publishes a small weekly summary (`stats/{uid}`), and there are the friend profile, the Ranking tab of Friends
-(Minutes and Consistency) and the real «n-th among friends» tile of Cycle complete. Everything runs against the Firebase **Emulator Suite** (D-021, D-025); nothing is
-deployed. Presence, cheers and push are **not built yet** (F4 and F5): with an
-account, debug still shows the mock of F4 (see *Coexistence with the mock*). Board:
+(Minutes and Consistency) and the real «n-th among friends» tile of Cycle complete. F4: **live presence**: the phone publishes `status/{uid}` in the
+Realtime Database from the Pomodoro timer, and Focus, Home, Cycle complete and Friends show the real friends studying, with their live time and the crown;
+one global switch in My profile stops sharing it. Everything runs against the Firebase **Emulator Suite** (D-021, D-025); nothing is
+deployed. Cheers, nudges and push are **not built yet** (F5). Board:
 [`sistema-social.md`](../../plans/sistema-social.md) · phase plans: [`social-f1-cuenta.md`](../../plans/social-f1-cuenta.md),
-[`social-f2-amigos.md`](../../plans/social-f2-amigos.md), [`social-f3-stats.md`](../../plans/social-f3-stats.md) · guide: [`docs/social/`](../../../docs/social/README.md)
-(decisions D-008, D-010, D-019 to D-031).
+[`social-f2-amigos.md`](../../plans/social-f2-amigos.md), [`social-f3-stats.md`](../../plans/social-f3-stats.md), [`social-f4-presencia.md`](../../plans/social-f4-presencia.md) · guide: [`docs/social/`](../../../docs/social/README.md)
+(decisions D-008, D-010, D-019 to D-033).
 
 ## Flags
 | Flag | Debug | Release | Effect |
 |---|---|---|---|
 | `BuildConfig.FEATURE_SOCIAL` | true | false | Real accounts: `SocialFeature.isAccountEnabled()`. Off = no age gate, no sign-in, social blocks stay `GONE` |
-| `BuildConfig.FEATURE_SOCIAL_MOCK` | true | false | The F4 mock (`MockSocialRepository`): `SocialFeature.isEnabled()` / `applyVisibility()` |
+| `BuildConfig.FEATURE_SOCIAL_MOCK` | true | false | The mock (`MockSocialRepository`, one snapshot, for tests and a debug build without accounts): `SocialFeature.isEnabled()` / `applyVisibility()`. `FEATURE_SOCIAL` wins over it in `SocialModule` |
 | `BuildConfig.USE_FIREBASE_EMULATOR` | true (`-PfirebaseEmulator=false` turns it off) | false | `FirebaseModule` points the four clients to the PC (`BuildConfig.FIREBASE_EMULATOR_HOST`, ports of `firebase/firebase.json`) |
 | `BuildConfig.FIREBASE_EMULATOR_HOST` | `10.0.2.2` (`-PfirebaseEmulatorHost=127.0.0.1` for a phone) | `""` | Host of the emulators (D-026) |
 
@@ -66,7 +67,7 @@ only decides where `DESTINATION` goes.
 | `ProfileViewModel`, `ProfileUi`, `AvatarPalette`, `AvatarColorPickerView` | `ui/social/` | Profile screens' state; `bb_avatar_0..7` colours; `AvatarView.setFillColor` |
 | `GreetingResolver` | `ui/home/` | Pure: profile («Hola, nombre», initials, colour) > local name > generic greeting. `HomeViewModel.getGreeting()` feeds it; tapping `homeAvatar` opens My profile, Create profile (session without profile) or `LocalNameDialog` (also «Únete a tus amigos» in debug) |
 | `FirebaseModule` | `social/firebase/` | Hilt singletons for Auth, Firestore, Realtime Database and Functions (region `europe-west1`); the only place that calls `useEmulator` |
-| `SocialModule`, `MockSocialRepository`, `EmptySocialRepository` | `social/` | Unchanged from F0: the mock (debug) or the empty snapshot (release). A real `FirebaseSocialRepository` arrives in F4. `social/Friend` belongs to the mock and is **not** the F2 friend model |
+| `SocialModule`, `SocialRepository`, `SocialSnapshot`, `Friend`, `FirebaseSocialRepository`, `MockSocialRepository`, `EmptySocialRepository` | `social/` | **One snapshot** (F4-u4): `SocialRepository.getSnapshot()` is the only accessor (`getHomeSnapshot` / `getCelebrationSnapshot` are gone). `SocialModule` binds `FirebaseSocialRepository` (behind a `Provider`) when `SocialFeature.isAccountEnabled()`, else the mock with `FEATURE_SOCIAL_MOCK`, else the empty one. `FirebaseSocialRepository` (`@Singleton`) merges the friend cards of `FriendsRepository`, one RTDB `status/` listener per friend and the crown / rank of `RankingRepository`; it emits the empty snapshot without a session, listens **only while the snapshot is observed**, releases on sign-out and per removed friend, re-evaluates the 4 h line with the `Scheduler`, and re-attaches a `PERMISSION_DENIED` friend with `Backoff`. `Friend` has uid, handle, name, initials, avatar colour, `isStudying()` (focus, break and pause), `isPaused()`, `getSessionStartMs()` / `getFrozenElapsedMs()` / `getElapsedMs(now)`; `SocialSnapshot` orders studying first (longest session first), then name, and exposes `getCrownUid()`, `getTopFriend()` and `getUserRank()` |
 
 ### `social/common/` (F2-u1, shared by every repository)
 | Class | Role |
@@ -112,6 +113,17 @@ UI (`ui/social/`, `ui/focus/`): the Friends screen has two tabs, **Friends** and
 
 No Room change: `AppDatabase` stays at version 14. Account data lives in Firestore and `SharedPreferences`.
 
+### `social/presence/` (F4)
+| Class | Role |
+|---|---|
+| `PresencePublisher` | `@Singleton`, own `SerialExecutor` on the `@IoExecutor`. Writes `status/{uid}` only with `FEATURE_SOCIAL`, a session and the share switch on. On every `.info/connected` it registers `onDisconnect().setValue(idle)` **first** and writes the state **after**; with a session but offline it asks for the `onDisconnect` right away (the SDK queues it and does not drop the socket). Writes only when the published value changes, plus a re-write of the same `focus` / `break` every 2 h (`REFRESH_MS`, refreshes `since`). Sign-out (`goOfflineForSignOut`) writes `idle`, cancels `onDisconnect` and waits for the ack (or 3 s) before `auth.signOut()`; `beforeDeleteAccount` only cancels, never writes |
+| `PresenceTransitions`, `OwnPresence` | Pure: timer state -> presence. `RUNNING` -> `focus`; `RUNNING_REST` -> `break`; `PAUSED` / `PAUSED_REST` -> `paused` with `pausedAt`; `STOPPED` and `STOPPED_REST` -> `idle`. One `sessionStart` per continuous run (d2): a rest and the auto-started next focus keep it, resuming after a pause moves it forward by the pause length. A `RUNNING` restored after process death starts at `countdown - remaining` |
+| `PresenceWrites`, `PresenceBackend`, `RtdbPresenceBackend` | The exact maps of the wire contract (`state`, `since = ServerValue.TIMESTAMP`, `sessionStart`, `pausedAt`; idle carries neither) pinned by `PresenceWritesTest`; backend port with `RtdbPresenceBackend` the only class that imports `firebase-database` on the write side (`.info/connected`, `.info/serverTimeOffset`) |
+| `PresenceSharing` | The switch: `isSharing(uid)` (cached, false while unknown), `readSharing(uid, cb)`, `setSharing(uid, on)` (writes `idle` at once, or re-publishes the same run). Per device and uid in `SocialPrefs` (`presence_sharing_<uid>`), no Firestore field. Default (d4, D-032): **on for 18+, off for 14-17 and when the birth year is unknown**; the publisher treats «birth year not read yet» as off |
+| `PresenceMapping`, `Presence`, `PresenceReadBackend`, `RtdbPresenceReadBackend` | Reader side. Pure mapping: `focus` / `break` -> STUDYING, `paused` (with `pausedAt >= sessionStart`) -> PAUSED with frozen time, anything else, a malformed map, a `PERMISSION_DENIED` or a `since` older than 4 h -> AWAY (exactly 4 h is still fresh). Live time = server now (device now + `.info/serverTimeOffset`) - `sessionStart`, floored at 0 and computed on the viewer's phone. `RtdbPresenceReadBackend` is the only reader that imports the SDK |
+| `ui/focus/FocusFriendsUi`, `ui/social/StudyingSummary`, `ui/social/FriendPresenceRows` | Pure mappers of the snapshot for Focus (cells, ticking time every second while visible, 8 cells max, crown on the crown uid whatever its status), Home / Cycle complete (count, names, «Laia and N more») and the Friends list («Studying · h:mm», «En pausa · h:mm» frozen; repaints every 30 s) |
+| `ProfileViewModel` + `mpSharePresence` | `SwitchMaterial` «Compartir mi estado en directo» in My profile (strings in `strings_presence.xml` + `values-es`), through `readPresenceSharing` / `setPresenceSharing` |
+
 ## Firestore paths and rules (`firebase/firestore.rules`)
 | Path | Fields (exact allow-list) | Rules |
 |---|---|---|
@@ -124,8 +136,8 @@ No Room change: `AppDatabase` stays at version 14. Account data lives in Firesto
 | `reports/{reporter}_{reported}` | `reporter`, `reported`, `reportedHandle`, `reason` (4 enums), `context` (`friend`/`request`), `createdAt` | Create only, with `reporter == auth.uid` and an existing relation (friend or a request from the reported); read, update and delete denied, so a second report is denied. Reviewed from the Firebase console (gate L.4) |
 | `invites/{code}` | `uid`, `handle`, `createdAt` | Code `^[A-HJKMNP-Z2-9]{8}$`; `get` for signed-in users, no `list`; create by the owner in the batch that sets `users/me.inviteCode`; update only `handle` (rename); delete only when `users/me.inviteCode` no longer points to it |
 
-Realtime Database: `friends/{uid}/{fid}` is a mirror written by the Functions; `.read` only for the owner, `.write` false. `status/`
-(F4) stays closed. Everything else stays denied (catch-all). Create, rename, release, **send a request** (request + counter) and
+Realtime Database: `friends/{uid}/{fid}` is a mirror written by the Functions; `.read` only for the owner, `.write` false.
+**`status/{uid}` (F4-u2)**: `.read` the owner or a friend through the mirror (`root.child('friends').child($uid).child(auth.uid).exists()`), `.write` only the owner, `.validate` the contract: `state` in `focus|break|paused|idle`, `since == now`, `sessionStart` a number > 0 and <= now + 60000 (required except with `idle`, where it must be absent), `pausedAt` only with `paused` (`sessionStart <= pausedAt <= now + 60000`) and `$other` denied; covered by `presence-rules.test.js` («reglas F4: status/», 30 cases, one denial per validation, an owner `onDisconnect().set(idle)` accepted). Everything else stays denied (catch-all). Create, rename, release, **send a request** (request + counter) and
 **create an invite** (invite + `inviteCode`) go in **one** `WriteBatch`; `createdAt`, `termsAcceptedAt` and `handleChangedAt` use
 `FieldValue.serverTimestamp()`. A `create` of `friendRequests` makes 6 `get`/`exists` accesses (limit 10 per document, 20 per batch).
 Banned words are not checked in rules (client only; real moderation is gate L.4). No `blocks/` anywhere (D-027).
@@ -179,15 +191,10 @@ in the app by email).
   (with rules), `remove` (callable), `list <name>` (`FRIEND @h`, `IN @h status`, `OUT @h status`), and without rules for the limits:
   `seed-friends <name> <n>` (complete friends, deterministic ids, repeating adds nothing) and `set-counter <name> <n>`.
 - `stats <name> [minutesToday=N] [minutesWeekCapped=N] [daysThisWeek=N] [weeklyGoal=N] [weekStreak=N] [bestWeekStreak=N] [totalMinutes=N]` (F3-u2) signs in as `<name>@bb.test` and writes `stats/{uid}` **with** the rules; `dayKey` / `weekKey` come from the PC's local date (ISO week), omitted numbers are 0 (goal 3), and it exits 1 with the rules error when the document is not valid. Any command also works for the app's own user (`accept alice @bob`), which is how F3 was driven end to end without a second phone.
+- `presence <name> focus|break|paused|idle [minutes=N]` (F4-u2) signs in as `<name>@bb.test` and sets `status/{uid}` **with** the rules and **without** `onDisconnect` (the state stays until the next write): `sessionStart = now - N minutes`, `paused` writes `pausedAt = now`. `status <name> @user` reads that friend's `status/` with the rules and prints `<state> <minutes|->` (or `denied`); `wait-status <name> @user <state> <seconds>` polls until that state is seen (`SEEN <state> <s>s`, exit 0) or exits 1 on timeout. Note the order: `status bob @alice` is **Bob reading Alice's** state. Near midnight the AVD clock (GMT) and the PC (local) can sit on different days: run `TZ=GMT node ... stats` so the `dayKey` matches the phone's (the crown and the ranking compare keys).
 - `actor.js` has no invite command: write `invites/` by REST when a test needs a code from another person.
 - One full in-app walk: Alice sends to `@bob` → sign out → sign in as Bob by email → accept in Friends → sign out → Alice sees Bob.
 - Inspect data read-only with the task's `fb_dump.py` or the Emulator UI. Evidence stays outside the repo.
-
-## Coexistence with the F4 mock
-With a session in debug, `focusSocialBlock` (the «studying now» grid) and `homeFriendsCard` («3 friends studying now») still draw
-`MockSocialRepository` and keep their `PLACEHOLDER` markers (`social-focus-studying`, `social-home-friends`, `social-backend`). What F2 changed are the
-taps: the Home card and the Focus block header open the **real** Friends screen, and «Invite» opens the real sheet. The Friends list always comes
-from Firestore, shows **no presence** and is sorted alphabetically («studying first» needs F4). Do not read the mock friends as the user's friends.
 
 ## Invariants
 - Disk and network off the main thread; `postValue` from callbacks; `getViewLifecycleOwner()` in fragments (rule #3).
@@ -200,12 +207,20 @@ from Firestore, shows **no presence** and is sorted alphabetically («studying f
 - `profiles/` and `handles/` are written only in one batch built by `ProfileWrites`, which must match the rules allow-lists.
 - **Stats are a summary, never a log.** `stats/{uid}` is published only with `FEATURE_SOCIAL`, a session and a `READY` profile of the same uid; every field is clamped in `StatsWrites` to the range the rules accept; the ranking compares **keys** (`dayKey`, `weekKey`), never times, so a friend in another zone or with a changed clock counts 0 until the key matches; the history is the whole local one (D-031) and a reinstall overwrites the totals (last write wins). No Room change in F3 (`AppDatabase` v14).
 - `RankingRepository` listeners exist only while something observes it and are released on sign-out; a consumer reachable in release must check `SocialFeature.isAccountEnabled()` before observing.
+- **Presence is a state, not a log** (F4). `status/{uid}` holds exactly the contract fields and is written only by the owner; nothing is written per second (the live time is computed on the viewer's phone).
+- **`onDisconnect` before the state**: on every (re)connection the publisher registers `onDisconnect().setValue(idle)` and only then writes `focus` / `break` / `paused`, so a dead app never stays «studying»; the server applies it when the socket closes (killing the app left `idle` in under a second on the emulator).
+- **Idle before sign-out**: the user-initiated sign-out writes `idle`, cancels `onDisconnect` and waits for the ack (3 s at most) before `auth.signOut()`.
+- **Cancel before `deleteAccount`**: `beforeDeleteAccount` cancels `onDisconnect` and never writes `idle`, otherwise the server would re-create `status/{uid}` after the Function removed it; `onDeleteAccountFailed` restores the publisher if the Function fails.
+- **4 h rule**: a friend is STUDYING only with a `since` at most 4 h old; while `focus` / `break` runs the publisher re-writes the same state every 2 h so a long live session does not fall away, and a forgotten pause is never refreshed so it turns away. A state that crosses the line while observed turns away without a new server event.
+- **A break is shown as studying** (Q-04, D-033): `break` is stored, never labelled; only the pause shows «En pausa» with the time frozen (`pausedAt - sessionStart`), and a paused friend still counts as present and ordered with the studying ones.
+- **The switch is not reciprocal** (D-032): switched off you write only `idle` and friends see you away, but you still see theirs; nothing in Firestore or the rules.
+- RTDB listeners (one per friend) exist only while the snapshot is observed (Focus, Home, Cycle complete, the Friends tab); `FriendsViewModel` releases it when the Ranking tab is on.
 - No new palette: `bb_*` tokens, `TextAppearance.BBetter.*`, resources in `strings_social.xml` / `dimens_social.xml` / `styles_social.xml` (+ `values-es`).
 
 ## Still mock or pending
 - F3 end to end on `api36` (F3-u9): Alice (app) finished a 1-minute focus session and her `stats/` document updated (`minutesToday` 1, then 2; goal 3); with Bob (300 min, 2/4 days) and Carol (50 min, 1/1) written by `actor.js stats`, Minutes showed Bob, Carol, Alice, Consistency showed Carol, Bob, Alice, Carol's profile opened and Cycle complete showed «3rd among friends». Not exercised: a second phone, a reinstall, a day or week change while the app stays open.
-- With a session, Focus and Home keep showing the F4 mock friends (`MockSocialRepository`); see *Coexistence with the F4 mock* and `ui-placeholders.md`.
-- Not built: presence and the crown in Focus (F4; F3 only calculates `crownUid`), the cheer on the friend profile (F5), cheers, nudges, inbox and push (F5; the bell only knows friend requests), blocking (D-027, DIF-11, reviewed at L.3).
+- F4 end to end on `api36` (F4-u9, with the app emulators): Alice signed in with Bob studying (12 min, stats) and Carol idle: Home «1 friend studying now» opens Friends, Friends lists Bob first «Studying · 0:12» (paused: «Paused · 0:12» frozen), Focus shows «1 / 2» with Bob first, a ticking 0:12:xx and the crown, Carol away; Bob saw Alice's session as `focus` and `idle` after the app was killed; Cycle complete (debug route) shows «Bob still studying» and no strip with Bob idle. Not exercised: a real second phone, a break (`break`) on the emulator (covered by `PresenceTransitionsTest`), the 4 h line live (covered by `PresenceMappingTest`), the real end of a cycle opening Cycle complete (reached by the debug route), 100 simultaneous RTDB connections (L.5).
+- Not built: the cheer on the friend profile (F5), cheers, nudges, inbox and push (F5; the bell only knows friend requests), blocking (D-027, DIF-11, reviewed at L.3).
 - Nothing is deployed (D-021, D-025): rules, Functions and Hosting run only in the emulators. Deploying the Firestore trigger with the database in `eur3` needs a check of the Eventarc location (L.7).
 - The App Link intent-filter is in the debug manifest only; Android's real verification, the Play link of the invitation page and Install Referrer from a real Play install wait for L.7 (no Play listing yet). Only the referrer parser is tested.
 - The terms page (`.../legal/terms/`, linked from Create profile) answers 404 until gate L.2; the legal drafts are in `docs/legal/` and stay out of GitHub Pages.

@@ -7,6 +7,28 @@
         ".read": "auth != null && auth.uid === $uid",
         ".write": false
       }
+    },
+    "status": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('friends').child($uid).child(auth.uid).exists())",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['state', 'since']) && (newData.child('state').val() === 'idle' ? (!newData.hasChild('sessionStart') && !newData.hasChild('pausedAt')) : (newData.hasChild('sessionStart') && (newData.child('state').val() === 'paused' ? newData.hasChild('pausedAt') : !newData.hasChild('pausedAt'))))",
+        "state": {
+          ".validate": "newData.isString() && (newData.val() === 'focus' || newData.val() === 'break' || newData.val() === 'paused' || newData.val() === 'idle')"
+        },
+        "since": {
+          ".validate": "newData.isNumber() && newData.val() === now"
+        },
+        "sessionStart": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= now + 60000"
+        },
+        "pausedAt": {
+          ".validate": "newData.isNumber() && newData.val() >= newData.parent().child('sessionStart').val() && newData.val() <= now + 60000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }

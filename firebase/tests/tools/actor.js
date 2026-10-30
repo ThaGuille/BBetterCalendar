@@ -27,6 +27,23 @@
 //                                                          equipo (semana ISO), los números omitidos valen 0
 //                                                          (weeklyGoal 3). Sale con 1 y el error de las reglas si el
 //                                                          documento no vale (p. ej. minutesToday=2000)
+//   node tests/tools/actor.js presence <nombre> focus|break|paused|idle [minutes=N]
+//                                                          F4-u2: entra como <nombre>@bb.test y escribe status/{uid}
+//                                                          CON reglas y SIN onDisconnect (el estado se queda hasta la
+//                                                          siguiente escritura): since = hora del servidor,
+//                                                          sessionStart = ahora - N minutos (N=0 por defecto; no en
+//                                                          idle) y, en paused, pausedAt = ahora (tiempo congelado = N)
+//   node tests/tools/actor.js status <nombre> @usuario     F4-u2: lee status/ de ese amigo CON reglas (necesita el
+//                                                          espejo RTDB) y escribe una línea '<state> <minutos|->':
+//                                                          minutos desde sessionStart en focus y break, congelados
+//                                                          (pausedAt - sessionStart) en paused, '-' en idle o sin
+//                                                          nodo ('idle -'); 'denied' si las reglas no lo dejan leer
+//   node tests/tools/actor.js wait-status <nombre> @usuario <state> <segundos>
+//                                                          F4-u2: sondea status/ del amigo (CON reglas) hasta ver
+//                                                          <state> (idle también si no hay nodo): sale con 0 y escribe
+//                                                          'SEEN <state> <s>s'; con 1 y 'TIMEOUT ...' si pasan los
+//                                                          segundos. Un 'denied' pasajero (espejo aún sin escribir)
+//                                                          no corta la espera
 //
 // Seguridad (D-021, D-025): los hosts 127.0.0.1 y los puertos de firebase/firebase.json están fijos en el código;
 // antes de crear ningún cliente pregunta al hub del Emulator Suite (127.0.0.1:4400) y se niega a seguir si no
@@ -50,7 +67,11 @@ const HANDLE = /^[a-z0-9_.]{3,20}$/;
 const USAGE = `uso: node tests/tools/actor.js <comando> ...
   signup <nombre> | send|accept|decline|cancel|remove <nombre> @usuario | list <nombre>
   seed-friends <nombre> <n> | set-counter <nombre> <n>
-  stats <nombre> [minutesToday=N] [minutesWeekCapped=N] [daysThisWeek=N] [weeklyGoal=N] [weekStreak=N] [bestWeekStreak=N] [totalMinutes=N]`;
+  stats <nombre> [minutesToday=N] [minutesWeekCapped=N] [daysThisWeek=N] [weeklyGoal=N] [weekStreak=N] [bestWeekStreak=N] [totalMinutes=N]
+  presence <nombre> focus|break|paused|idle [minutes=N] | status <nombre> @usuario | wait-status <nombre> @usuario <state> <segundos>`;
+
+const PRESENCE_STATES = ["focus", "break", "paused", "idle"];
+const MINUTE = 60000;
 
 // Qué emuladores necesita cada comando (además del hub).
 const NEEDS = {
@@ -64,6 +85,9 @@ const NEEDS = {
   "seed-friends": ["auth", "firestore", "database"],
   "set-counter": ["auth", "firestore"],
   stats: ["auth", "firestore"],
+  presence: ["auth", "database"],
+  status: ["auth", "firestore", "database"],
+  "wait-status": ["auth", "firestore", "database"],
 };
 
 // F3-u2: los siete números de stats/{uid} que se pueden fijar, con su valor por defecto.
@@ -160,6 +184,7 @@ function loadSdk() {
     auth: require("firebase/auth"),
     firestore: require("firebase/firestore"),
     functions: require("firebase/functions"),
+    database: require("firebase/database"),
   };
   sdk.firestore.setLogLevel("error");
 }
@@ -167,14 +192,20 @@ function loadSdk() {
 // Cliente como el de la app, conectado a los emuladores antes de cualquier llamada.
 function client() {
   if (app) return app;
-  const a = sdk.app.initializeApp({ projectId: PROJECT, apiKey: "actor-emulator-only" }, "actor");
+  const a = sdk.app.initializeApp(
+    { projectId: PROJECT, apiKey: "actor-emulator-only", databaseURL: `https://${PROJECT}-default-rtdb.firebaseio.com` },
+    "actor",
+  );
   const auth = sdk.auth.getAuth(a);
   sdk.auth.connectAuthEmulator(auth, `http://${HOST}:${PORTS.auth}`, { disableWarnings: true });
   const db = sdk.firestore.getFirestore(a);
   sdk.firestore.connectFirestoreEmulator(db, HOST, PORTS.firestore);
   const functions = sdk.functions.getFunctions(a, REGION);
   sdk.functions.connectFunctionsEmulator(functions, HOST, PORTS.functions);
-  app = { app: a, auth, db, functions };
+  // RTDB solo si el comando lo necesita (el cliente se conecta al primer uso, no al crearlo).
+  const rtdb = sdk.database.getDatabase(a);
+  sdk.database.connectDatabaseEmulator(rtdb, HOST, PORTS.database);
+  app = { app: a, auth, db, functions, rtdb };
   return app;
 }
 
@@ -422,14 +453,98 @@ async function stats(name, values) {
   out(`STATS @${name} ${dayKey} ${weekKey} ${Object.entries(values).map(([k, v]) => `${k}=${v}`).join(" ")}`);
 }
 
+// F4-u2: set() de status/{uid} con reglas y SIN onDisconnect (como PresenceWrites en la app, F4-u3, menos el
+// onDisconnect: el estado se queda hasta la siguiente escritura). El reloj es el del equipo, que en local es el
+// del emulador.
+async function presence(name, state, minutes) {
+  const { rtdb } = client();
+  const me = await signIn(name);
+  const now = Date.now();
+  const value = { state, since: sdk.database.serverTimestamp() };
+  if (state !== "idle") value.sessionStart = now - minutes * MINUTE;
+  if (state === "paused") value.pausedAt = now;
+  try {
+    await sdk.database.set(sdk.database.ref(rtdb, `status/${me}`), value);
+  } catch (e) {
+    throw new Error(`las reglas rechazan status/${me} (${e.code || e.message}): ${JSON.stringify({ ...value, since: "TIMESTAMP" })}`);
+  }
+  out(`PRESENCE @${name} ${state}${state === "idle" ? "" : ` ${minutes} min`}`);
+}
+
+// Lee status/{uid} del amigo CON reglas: { state, minutes|null } o null si las reglas no dejan leer.
+async function readStatus(uid) {
+  const { rtdb } = client();
+  let snap;
+  try {
+    snap = await sdk.database.get(sdk.database.ref(rtdb, `status/${uid}`));
+  } catch (e) {
+    if (/permission[_ ]denied/i.test(`${e.code} ${e.message}`)) return null;
+    throw e;
+  }
+  const v = snap.val();
+  if (!v || typeof v.state !== "string") return { state: "idle", minutes: null };
+  let minutes = null;
+  if (v.state === "paused" && typeof v.sessionStart === "number" && typeof v.pausedAt === "number") {
+    minutes = Math.max(0, Math.floor((v.pausedAt - v.sessionStart) / MINUTE));
+  } else if (v.state !== "idle" && v.state !== "paused" && typeof v.sessionStart === "number") {
+    minutes = Math.max(0, Math.floor((Date.now() - v.sessionStart) / MINUTE));
+  }
+  return { state: v.state, minutes };
+}
+
+async function status(name, handle) {
+  await signIn(name);
+  const friend = await card(handle);
+  const s = await readStatus(friend.uid);
+  out(s ? `${s.state} ${s.minutes === null ? "-" : s.minutes}` : "denied");
+}
+
+async function waitStatus(name, handle, state, seconds) {
+  await signIn(name);
+  const friend = await card(handle);
+  const start = Date.now();
+  const deadline = start + seconds * 1000;
+  for (;;) {
+    const s = await readStatus(friend.uid);
+    if (s && s.state === state) {
+      out(`SEEN ${state} ${Math.round((Date.now() - start) / 100) / 10}s`);
+      return;
+    }
+    if (Date.now() >= deadline) {
+      throw new Error(`TIMEOUT: @${handle} no llegó a '${state}' en ${seconds}s (último: ${s ? s.state : "denied"})`);
+    }
+    await new Promise((r) => setTimeout(r, 300));
+  }
+}
+
 // ---- main ---------------------------------------------------------------------------------------------
+
+function parsePresenceArgs(args) {
+  const [state, ...rest] = args;
+  if (!PRESENCE_STATES.includes(state)) throw new UsageError(`estado no válido '${state || ""}': ${PRESENCE_STATES.join("|")}`);
+  let minutes = 0;
+  for (const a of rest) {
+    const m = /^minutes=([0-9]+)$/.exec(a);
+    if (!m) throw new UsageError(`argumento no válido '${a}': usa minutes=<entero>`);
+    minutes = Number(m[1]);
+  }
+  if (minutes > 1440) throw new UsageError("minutes tiene que estar entre 0 y 1440");
+  return { state, minutes };
+}
 
 async function main(argv) {
   const [cmd, name, arg] = argv;
   if (!cmd || !NEEDS[cmd]) throw new UsageError(USAGE);
   checkName(name);
+  const presenceArgs = cmd === "presence" ? parsePresenceArgs(argv.slice(2)) : null;
+  const waitState = cmd === "wait-status" ? argv[3] : null;
+  const waitSeconds = cmd === "wait-status" ? Number(argv[4]) : null;
+  if (cmd === "wait-status") {
+    if (!PRESENCE_STATES.includes(waitState)) throw new UsageError(`estado no válido '${waitState || ""}': ${PRESENCE_STATES.join("|")}`);
+    if (!Number.isInteger(waitSeconds) || waitSeconds < 1 || waitSeconds > 3600) throw new UsageError("segundos tiene que ser un entero entre 1 y 3600");
+  }
   const statsValues = cmd === "stats" ? parseStatsArgs(argv.slice(2)) : null;
-  const needsHandle = ["send", "accept", "decline", "cancel", "remove"].includes(cmd);
+  const needsHandle = ["send", "accept", "decline", "cancel", "remove", "status", "wait-status"].includes(cmd);
   const handle = needsHandle ? checkHandle(arg) : null;
   const count = cmd === "seed-friends" ? checkCount(arg, 200) : cmd === "set-counter" ? checkCount(arg, DAILY_LIMIT) : null;
 
@@ -457,6 +572,12 @@ async function main(argv) {
       return setCounter(name, count);
     case "stats":
       return stats(name, statsValues);
+    case "presence":
+      return presence(name, presenceArgs.state, presenceArgs.minutes);
+    case "status":
+      return status(name, handle);
+    case "wait-status":
+      return waitStatus(name, handle, waitState, waitSeconds);
     default:
       throw new UsageError(USAGE);
   }

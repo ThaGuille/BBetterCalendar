@@ -226,8 +226,7 @@
                     app:streakFlame="top" />
             </LinearLayout>
 
-            <!-- Bloque social (maqueta tras FEATURE_SOCIAL_MOCK; GONE sin hueco con el flag apagado).
-                 PLACEHOLDER(ui-placeholders#social-home-friends) -->
+            <!-- Bloque social (datos reales de la instantánea; GONE sin hueco con el flag apagado). -->
             <LinearLayout
                 android:id="@+id/homeFriendsCard"
                 android:layout_width="0dp"
@@ -250,7 +249,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:ellipsize="end"
-                        android:maxLines="1"
+                        android:maxLines="2"
                         android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
                         android:textColor="@color/bb_on_surface"
                         tools:text="5 friends studying now" />
@@ -287,6 +286,17 @@
                         android:textAppearance="@style/TextAppearance.BBetter.Micro"
                         tools:text="Laia, Pau, Marc" />
                 </LinearLayout>
+
+                <!-- F4-u6: sin amigos todavía, una línea que invita. -->
+                <TextView
+                    android:id="@+id/homeFriendsNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    android:textAppearance="@style/TextAppearance.BBetter.Micro"
+                    android:textColor="@color/bb_on_surface_muted"
+                    android:visibility="gone" />
 
                 <!-- F1-u4: estado «sin cuenta» (isAccountEnabled + SIGNED_OUT): sustituye a la
                      fila de avatares; la tarjeta entera lleva al router social. -->

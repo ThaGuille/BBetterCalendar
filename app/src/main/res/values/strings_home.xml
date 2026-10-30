@@ -10,4 +10,10 @@
     <string name="local_name_save">Save</string>
     <string name="local_name_join">Join your friends</string>
     <string name="local_name_avatar_cd">Your name and profile</string>
+
+    <!-- F4-u6 · Friends card with real presence -->
+    <string name="home_friends_nobody">Nobody studying right now</string>
+    <string name="home_friends_invite_title">Study with friends</string>
+    <string name="home_friends_invite_note">Invite someone to see who is studying.</string>
+    <string name="home_friends_names_more">%1$s +%2$d</string>
 </resources>

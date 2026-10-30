@@ -42,6 +42,7 @@ import com.example.bbettercalendar.ui.focus.FocusSessionEventPresenter;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
 import com.example.bbettercalendar.ui.social.AvatarPalette;
+import com.example.bbettercalendar.ui.social.StudyingSummary;
 import com.example.bbettercalendar.ui.social.EntryTarget;
 import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
 import com.example.bbettercalendar.ui.social.SocialEntryViewModel;
@@ -380,10 +381,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 binding.homeFriendsDot.setVisibility(View.VISIBLE);
                 binding.homeFriendsAvatars.setVisibility(View.VISIBLE);
                 binding.homeFriendsJoin.setVisibility(View.GONE);
-                // F2-u7: con sesión, tocar la tarjeta abre Amigos (la maqueta de F4 sigue dentro).
+                // F2-u7: con sesión, tocar la tarjeta abre Amigos (F4-u6: con datos reales).
                 binding.homeFriendsCard.setOnClickListener(v -> entry.requestEntry(EntryTarget.FRIENDS));
                 SocialFeature.applyVisibility(binding.homeFriendsCard);
-                // La maqueta pisó el título con la llamada a la acción: repintarla.
+                // El título lo pisó la llamada a la acción: repintarlo.
                 renderFriends(homeViewModel.getSocialSnapshot().getValue());
             }
         });
@@ -430,38 +431,68 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         }
     }
 
-    // PLACEHOLDER(ui-placeholders#social-home-friends): maqueta (MockSocialRepository).
     private void renderFriends(SocialSnapshot snapshot) {
         if (binding == null || snapshot == null) {
             return;
         }
-        List<Friend> studying = snapshot.getStudying();
-        binding.homeFriendsTitle.setText(getResources().getQuantityString(
-                R.plurals.home_friends_studying, studying.size(), studying.size()));
-
+        // Con la cuenta cerrada manda la llamada a la acción de setUpSocialEntry.
+        if (socialEntry != null
+                && socialEntry.getAccountState().getValue() == AccountState.SIGNED_OUT) {
+            return;
+        }
+        StudyingSummary summary = StudyingSummary.of(snapshot, MAX_FRIEND_AVATARS);
         LinearLayout row = binding.homeFriendsAvatars;
         // Quitar los avatares de una emisión anterior (el último hijo es el texto de nombres).
         while (row.getChildCount() > 1) {
             row.removeViewAt(0);
         }
+        binding.homeFriendsJoin.setVisibility(View.GONE);
+        if (!summary.hasFriends()) {
+            // Sin amigos: una línea que invita (nunca nombres de maqueta).
+            binding.homeFriendsTitle.setText(R.string.home_friends_invite_title);
+            binding.homeFriendsDot.setVisibility(View.GONE);
+            row.setVisibility(View.GONE);
+            binding.homeFriendsNote.setText(R.string.home_friends_invite_note);
+            binding.homeFriendsNote.setVisibility(View.VISIBLE);
+            return;
+        }
+        binding.homeFriendsNote.setVisibility(View.GONE);
+        if (summary.isNobodyStudying()) {
+            // Con amigos pero sin nadie estudiando: una línea tranquila, sin avatares.
+            binding.homeFriendsTitle.setText(R.string.home_friends_nobody);
+            binding.homeFriendsDot.setVisibility(View.GONE);
+            row.setVisibility(View.GONE);
+            return;
+        }
+        int count = summary.getStudyingCount();
+        binding.homeFriendsTitle.setText(getResources().getQuantityString(
+                R.plurals.home_friends_studying, count, count));
+        binding.homeFriendsDot.setVisibility(View.VISIBLE);
+        row.setVisibility(View.VISIBLE);
+
         int size = getResources().getDimensionPixelSize(R.dimen.home_friend_avatar_size);
         int overlap = getResources().getDimensionPixelSize(R.dimen.home_friend_avatar_overlap);
-        int shown = Math.min(MAX_FRIEND_AVATARS, studying.size());
-        List<String> names = new ArrayList<>();
-        for (int i = 0; i < shown; i++) {
-            Friend friend = studying.get(i);
+        List<Friend> shown = summary.getShown();
+        for (int i = 0; i < shown.size(); i++) {
+            Friend friend = shown.get(i);
             AvatarView avatar = new AvatarView(requireContext());
             avatar.setName(friend.getName());
             // html 04: una sola letra en los avatares solapados de 32dp.
-            avatar.setInitials(friend.getName().substring(0, 1));
+            String initials = friend.getInitials();
+            avatar.setInitials(initials.isEmpty() ? "" : initials.substring(0, 1));
+            avatar.setFillColor(AvatarPalette.color(requireContext(), friend.getAvatarColor()));
+            avatar.setInitialsColor(AvatarPalette.onColor(requireContext()));
             avatar.setStatus(AvatarView.Status.STUDYING);
             avatar.setShowPresenceDot(true);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
             lp.setMarginStart(i == 0 ? 0 : overlap);
             row.addView(avatar, i, lp);
-            names.add(friend.getName().split(" ")[0]);
         }
-        binding.homeFriendsNames.setText(TextUtils.join(", ", names));
+        String names = TextUtils.join(", ", summary.getShownFirstNames());
+        if (summary.getMoreCount() > 0) {
+            names = getString(R.string.home_friends_names_more, names, summary.getMoreCount());
+        }
+        binding.homeFriendsNames.setText(names);
     }
 
     /** "Next up": hora (o día + hora si no es hoy) y título del siguiente evento. */

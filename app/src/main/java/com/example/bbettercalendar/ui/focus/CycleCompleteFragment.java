@@ -28,6 +28,8 @@ import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.share.ShareCardRenderer;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.example.bbettercalendar.ui.home.FocusTarget;
+import com.example.bbettercalendar.ui.social.AvatarPalette;
+import com.example.bbettercalendar.ui.social.StudyingSummary;
 
 import java.util.List;
 
@@ -194,29 +196,33 @@ public class CycleCompleteFragment extends Fragment {
         bestSub.setText(R.string.cycle_tile_best_sub);
     }
 
-    // PLACEHOLDER(ui-placeholders#social-backend): maqueta (MockSocialRepository).
+    /** F4-u6: strip "Laia and N others still studying · Live", only while somebody studies. */
     private void renderSocial(@Nullable SocialSnapshot snapshot) {
         if (snapshot == null || friendsText == null) {
             return;
         }
-        List<Friend> studying = snapshot.getStudying();
-        if (studying.isEmpty()) {
+        StudyingSummary summary = StudyingSummary.of(snapshot, avatars.length);
+        if (summary.isNobodyStudying()) {
             friendsStrip.setVisibility(View.GONE);
             return;
         }
         friendsStrip.setVisibility(View.VISIBLE);
+        List<Friend> shown = summary.getShown();
         for (int i = 0; i < avatars.length; i++) {
-            if (i < studying.size()) {
+            if (i < shown.size()) {
+                Friend friend = shown.get(i);
                 avatars[i].setVisibility(View.VISIBLE);
-                avatars[i].setName(studying.get(i).getName());
-                String initials = studying.get(i).getInitials();
-                avatars[i].setInitials(initials == null || initials.isEmpty() ? "" : initials.substring(0, 1));
+                avatars[i].setName(friend.getName());
+                String initials = friend.getInitials();
+                avatars[i].setInitials(initials.isEmpty() ? "" : initials.substring(0, 1));
+                avatars[i].setFillColor(AvatarPalette.color(requireContext(), friend.getAvatarColor()));
+                avatars[i].setInitialsColor(AvatarPalette.onColor(requireContext()));
             } else {
                 avatars[i].setVisibility(View.GONE);
             }
         }
-        String first = studying.get(0).getName();
-        int others = studying.size() - 1;
+        String first = summary.getLeadName();
+        int others = summary.getOthersCount();
         String text = others == 0
                 ? getString(R.string.cycle_friend_one_format, first)
                 : getResources().getQuantityString(R.plurals.cycle_friends_format, others, first, others);

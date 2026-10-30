@@ -2,9 +2,9 @@
 // sesión), en Firestore y en RTDB. Lo corre `firebase emulators:exec` (ver firebase/README.md).
 // F1-u1 abre users/{uid}, profiles/{uid} y handles/{h} (sus casos están en profiles-handles.test.js).
 // F2-u3 abre friendRequests/, users/{uid}/friends, reports/ (solo crear), invites/ y RTDB friends/ (sus casos
-// están en friends-rules.test.js e invites-reports.test.js). F3-u2 abre stats/{uid} (stats-rules.test.js). Aquí se
+// están en friends-rules.test.js e invites-reports.test.js). F3-u2 abre stats/{uid} (stats-rules.test.js). F4-u2 abre RTDB status/{uid} (presence-rules.test.js). Aquí se
 // comprueba que el resto sigue denegado:
-// blocks/, users/{uid}/inbox, cualquier otra colección y RTDB salvo friends/ (status/, presence/, la raíz).
+// blocks/, users/{uid}/inbox, cualquier otra colección y RTDB salvo friends/ y status/ (presence/, la raíz).
 const fs = require("fs");
 const path = require("path");
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require("@firebase/rules-unit-testing");
@@ -77,12 +77,10 @@ describe("reglas: todo denegado salvo lo que abren F1, F2 y F3", () => {
       await assertFails(db.doc("profiles/bob").set({ name: "Bob" }));
     });
 
-    it(`RTDB: ${who} no puede leer ni escribir fuera de friends/ (F2-u3)`, async () => {
+    it(`RTDB: ${who} no puede leer ni escribir fuera de friends/ y status/ (F2-u3, F4-u2)`, async () => {
       const db = ctx().database();
       await assertFails(db.ref("presence/alice").get());
       await assertFails(db.ref("presence/alice").set({ state: "focus" }));
-      await assertFails(db.ref("status/alice").get());
-      await assertFails(db.ref("status/alice").set({ state: "focus" }));
       await assertFails(db.ref("/").get());
     });
   }

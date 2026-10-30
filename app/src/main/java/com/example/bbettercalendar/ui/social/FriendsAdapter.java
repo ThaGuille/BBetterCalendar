@@ -54,6 +54,26 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         notifyDataSetChanged();
     }
 
+    /** Hay alguien estudiando en vivo (no en pausa): el fragmento repinta el tiempo cada minuto. */
+    boolean hasLiveTime() {
+        for (FriendsViewModel.Row r : rows) {
+            if (r.presence != null && r.presence.studying && !r.presence.paused) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Reenlaza solo las filas con tiempo en vivo. */
+    void refreshLiveTimes() {
+        for (int i = 0; i < rows.size(); i++) {
+            FriendPresenceRows.Entry p = rows.get(i).presence;
+            if (p != null && p.studying && !p.paused) {
+                notifyItemChanged(i);
+            }
+        }
+    }
+
     /** Posición de la cabecera de Solicitudes (o -1), para subir hasta ella. */
     int positionOfRequests() {
         for (int i = 0; i < rows.size(); i++) {
@@ -134,6 +154,11 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             name.setText(card.displayName);
             handle.setText("@" + card.handle);
             note.setVisibility(View.GONE);
+            // F4-u7: punto de «estudiando» solo en amigos que estudian; el resto se ve como siempre.
+            FriendPresenceRows.Entry presence = row.presence;
+            boolean studying = presence != null && presence.studying;
+            avatar.setStatus(studying ? AvatarView.Status.STUDYING : AvatarView.Status.NONE);
+            avatar.setShowPresenceDot(studying);
             actions.setVisibility(View.GONE);
             secondary.setVisibility(View.VISIBLE);
             menu.setVisibility(View.VISIBLE);
@@ -170,7 +195,15 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     primary.setText(R.string.friends_cancel_request);
                     primary.setOnClickListener(v -> listener.onCancel(request));
                     break;
-                default: // FRIEND: solo el menú
+                default: // FRIEND: el menú y, si estudia, «Estudiando · h:mm» (o «En pausa · h:mm», congelado)
+                    if (studying) {
+                        String time = FriendPresenceRows.formatElapsed(
+                                presence.elapsedMs(System.currentTimeMillis()));
+                        note.setTextAppearance(R.style.TextAppearance_BBetter_Caption);
+                        note.setText(itemView.getContext().getString(presence.paused
+                                ? R.string.friends_presence_paused : R.string.friends_presence_studying, time));
+                        note.setVisibility(View.VISIBLE);
+                    }
                     break;
             }
         }

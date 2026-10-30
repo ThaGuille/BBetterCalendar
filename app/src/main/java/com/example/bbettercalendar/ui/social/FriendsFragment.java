@@ -31,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 /**
  * F2-u7: Amigos. Una lista con tres secciones: Solicitudes (Aceptar, Rechazar; Reportar en el menú; las
  * {@code failed} con su motivo y Descartar), Amigos (menú: Eliminar de amigos con confirmación y Reportar)
- * y Enviadas (Cancelar). Arriba, Añadir (y, desde u8, Invitar). Sin presencia. El argumento opcional
+ * y Enviadas (Cancelar). Arriba, Añadir (y, desde u8, Invitar). Con presencia (F4-u7). El argumento opcional
  * {@code section=requests} sube hasta las solicitudes.
  */
 @AndroidEntryPoint
@@ -167,6 +167,8 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
 
     private void showTab(boolean ranking) {
         viewModel.setRankingTab(ranking);
+        // F4-u7: la presencia (listeners RTDB) solo se escucha con la pestaña Amigos a la vista.
+        viewModel.setPresenceObserved(!ranking);
         friendsPanel.setVisibility(ranking ? View.GONE : View.VISIBLE);
         rankingPanel.setVisibility(ranking ? View.VISIBLE : View.GONE);
         // El ranking solo escucha a Firestore mientras se ve (la LiveData engancha sus listeners al observarla).
@@ -240,6 +242,42 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
                 scrollToRequestedSection();
                 break;
         }
+    }
+
+    private static final long LIVE_TICK_MS = 30_000L;
+
+    /** F4-u7: repinta el tiempo en vivo de quien estudia mientras la pantalla está a la vista. */
+    private final Runnable liveTick = new Runnable() {
+        @Override
+        public void run() {
+            View v = getView();
+            if (v == null) {
+                return;
+            }
+            if (adapter != null && adapter.hasLiveTime()) {
+                adapter.refreshLiveTimes();
+            }
+            v.postDelayed(this, LIVE_TICK_MS);
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        View v = getView();
+        if (v != null) {
+            v.removeCallbacks(liveTick);
+            v.postDelayed(liveTick, LIVE_TICK_MS);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        View v = getView();
+        if (v != null) {
+            v.removeCallbacks(liveTick);
+        }
+        super.onPause();
     }
 
     private void scrollToRequestedSection() {

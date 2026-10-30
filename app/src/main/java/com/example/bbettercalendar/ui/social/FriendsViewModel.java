@@ -10,6 +10,8 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.social.SocialRepository;
+import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.common.ListenerException;
 import com.example.bbettercalendar.social.friends.FriendCard;
 import com.example.bbettercalendar.social.friends.FriendRequest;
@@ -53,30 +55,33 @@ public class FriendsViewModel extends ViewModel {
         @Nullable public final FriendCard card;
         /** Solicitudes (recibidas, fallidas y enviadas). */
         @Nullable public final FriendRequest request;
+        /** F4-u7: solo en FRIEND, su presencia (estudia / en pausa / ausente). */
+        @Nullable public final FriendPresenceRows.Entry presence;
 
         private Row(@NonNull Type type, int titleRes, int count, @Nullable FriendCard card,
-                    @Nullable FriendRequest request) {
+                    @Nullable FriendRequest request, @Nullable FriendPresenceRows.Entry presence) {
             this.type = type;
             this.titleRes = titleRes;
             this.count = count;
             this.card = card;
             this.request = request;
+            this.presence = presence;
         }
 
         static Row header(@StringRes int title, int count) {
-            return new Row(Type.HEADER, title, count, null, null);
+            return new Row(Type.HEADER, title, count, null, null, null);
         }
 
-        static Row friend(@NonNull FriendCard card) {
-            return new Row(Type.FRIEND, 0, 0, card, null);
+        static Row friend(@NonNull FriendPresenceRows.Entry entry) {
+            return new Row(Type.FRIEND, 0, 0, entry.card, null, entry);
         }
 
         static Row request(@NonNull FriendRequest r, boolean failed) {
-            return new Row(failed ? Type.FAILED : Type.REQUEST, 0, 0, r.from, r);
+            return new Row(failed ? Type.FAILED : Type.REQUEST, 0, 0, r.from, r, null);
         }
 
         static Row sent(@NonNull FriendRequest r) {
-            return new Row(Type.SENT, 0, 0, r.to, r);
+            return new Row(Type.SENT, 0, 0, r.to, r, null);
         }
     }
 
@@ -159,12 +164,17 @@ public class FriendsViewModel extends ViewModel {
             new MutableLiveData<>(RankingRows.Category.MINUTES);
     private final MutableLiveData<Boolean> rankingTab = new MutableLiveData<>(false);
 
+    /** F4-u7: la instantánea social única (presencia). Solo se observa con la pestaña Amigos a la vista. */
+    private final LiveData<SocialSnapshot> snapshot;
+    private boolean presenceObserved;
+
     @Inject
     public FriendsViewModel(FriendsRepository friends, ReportRepository reports, RankingRepository ranking,
-                            ProfileRepository profiles) {
+                            ProfileRepository profiles, SocialRepository social) {
         this.friends = friends;
         this.reports = reports;
         this.ranking = ranking;
+        this.snapshot = social.getSnapshot();
         LiveData<RankingState> rankingState = ranking.observeRanking();
         LiveData<ProfileState> mine = profiles.observeMine();
         rankingRows.addSource(rankingState, s -> recomputeRanking(rankingState, mine));
@@ -182,6 +192,22 @@ public class FriendsViewModel extends ViewModel {
 
     public LiveData<Screen> getScreen() {
         return screen;
+    }
+
+    /**
+     * F4-u7: engancha (o suelta) la instantánea social, que es la que abre los listeners de presencia.
+     * Con la pestaña Ranking a la vista no hace falta: se suelta y las filas conservan el último estado.
+     */
+    public void setPresenceObserved(boolean observed) {
+        if (observed == presenceObserved) {
+            return;
+        }
+        presenceObserved = observed;
+        if (observed) {
+            screen.addSource(snapshot, s -> recompute());
+        } else {
+            screen.removeSource(snapshot);
+        }
     }
 
     // ---- ranking (F3-u7) --------------------------------------------------------------------------------
@@ -275,8 +301,8 @@ public class FriendsViewModel extends ViewModel {
         }
         if (!f.items.isEmpty()) {
             rows.add(Row.header(R.string.friends_section_friends, f.items.size()));
-            for (FriendCard c : f.items) {
-                rows.add(Row.friend(c));
+            for (FriendPresenceRows.Entry e : FriendPresenceRows.from(f.items, snapshot.getValue())) {
+                rows.add(Row.friend(e));
             }
         }
         if (!out.items.isEmpty()) {

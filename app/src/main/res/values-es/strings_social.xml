@@ -259,4 +259,7 @@
     <string name="ranking_retry">Reintentar</string>
     <string name="ranking_empty_title">Tu ranking empieza con un amigo</string>
     <string name="ranking_empty_body">Invita a alguien para comparar vuestras semanas de foco, sin presión.</string>
+    <!-- F4-u7 · presencia en Amigos -->
+    <string name="friends_presence_studying">Estudiando · %1$s</string>
+    <string name="friends_presence_paused">En pausa · %1$s</string>
 </resources>

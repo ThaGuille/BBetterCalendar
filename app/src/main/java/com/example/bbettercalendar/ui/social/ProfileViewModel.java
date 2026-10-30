@@ -10,11 +10,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.account.AccountRepository;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.social.account.AgeGate;
 import com.example.bbettercalendar.social.account.SocialPrefs;
 import com.example.bbettercalendar.social.account.SocialTerms;
+import com.example.bbettercalendar.social.presence.PresencePublisher;
 import com.example.bbettercalendar.social.profile.HandleValidator;
 import com.example.bbettercalendar.social.profile.Profile;
 import com.example.bbettercalendar.social.profile.ProfileRepository;
@@ -28,6 +30,7 @@ import java.util.Date;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 /**
@@ -81,6 +84,8 @@ public class ProfileViewModel extends ViewModel {
     private final ProfileRepository profiles;
     private final AccountRepository account;
     private final SocialPrefs prefs;
+    // F4-u3: presencia en directo; Lazy y tras el flag (en release no se crea).
+    private final Lazy<PresencePublisher> presence;
     private final Handler main = new Handler(Looper.getMainLooper());
 
     private final MutableLiveData<HandleStatus> handleStatus = new MutableLiveData<>(HandleStatus.IDLE);
@@ -92,10 +97,12 @@ public class ProfileViewModel extends ViewModel {
     @Nullable private Runnable pendingCheck;
 
     @Inject
-    public ProfileViewModel(ProfileRepository profiles, AccountRepository account, SocialPrefs prefs) {
+    public ProfileViewModel(ProfileRepository profiles, AccountRepository account, SocialPrefs prefs,
+                            Lazy<PresencePublisher> presence) {
         this.profiles = profiles;
         this.account = account;
         this.prefs = prefs;
+        this.presence = presence;
     }
 
     public LiveData<ProfileState> getProfile() {
@@ -205,8 +212,21 @@ public class ProfileViewModel extends ViewModel {
         profiles.rename(newHandle, callback(Outcome.Kind.RENAMED));
     }
 
+    /**
+     * F4-u3 (03 §8.5): antes de cerrar la sesión de Auth, la presencia escribe {@code idle} y cancela su
+     * {@code onDisconnect}; la sesión se cierra al llegar el acuse (o pasado su tope corto). Sin el flag,
+     * directamente.
+     */
     public void signOut() {
-        account.signOut();
+        if (!SocialFeature.isAccountEnabled()) {
+            account.signOut();
+            return;
+        }
+        busy.setValue(true);
+        presence.get().goOfflineForSignOut(() -> main.post(() -> {
+            account.signOut();
+            busy.setValue(false);
+        }));
     }
 
     // ---- borrar cuenta (F1-u7) -------------------------------------------------------------------------
@@ -241,7 +261,19 @@ public class ProfileViewModel extends ViewModel {
         });
     }
 
+    /**
+     * F4-u3 (03 §8.5): la presencia cancela su {@code onDisconnect} antes de la Function y no vuelve a escribir
+     * (si no, el servidor recrearía {@code status/{uid}} tras borrarlo); si la Function falla, sigue publicando.
+     */
     private void callDelete(boolean afterReauth) {
+        if (SocialFeature.isAccountEnabled()) {
+            presence.get().beforeDeleteAccount(() -> deleteNow(afterReauth));
+        } else {
+            deleteNow(afterReauth);
+        }
+    }
+
+    private void deleteNow(boolean afterReauth) {
         account.deleteAccount(new AccountRepository.Callback() {
             @Override
             public void onSuccess() {
@@ -250,6 +282,9 @@ public class ProfileViewModel extends ViewModel {
 
             @Override
             public void onError(@NonNull Throwable error) {
+                if (SocialFeature.isAccountEnabled()) {
+                    presence.get().onDeleteAccountFailed();
+                }
                 if (!afterReauth && isStaleLogin(error)) {
                     finish(new Outcome(Outcome.Kind.NEEDS_REAUTH, null));
                 } else {

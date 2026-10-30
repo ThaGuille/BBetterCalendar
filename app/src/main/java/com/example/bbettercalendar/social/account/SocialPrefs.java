@@ -45,6 +45,8 @@ public class SocialPrefs {
     // F3-u4: última publicación de stats/ (una sola cuenta: la de la última publicación)
     private static final String KEY_STATS_LAST_UID = "stats_last_uid";
     private static final String KEY_STATS_LAST_PUBLISHED = "stats_last_published";
+    // F4-u3: interruptor «Compartir mi estado en directo», por dispositivo y por uid (D-032)
+    private static final String KEY_PRESENCE_SHARING_PREFIX = "presence_sharing_";
 
     private final Context appContext;
     private final Executor io;
@@ -167,5 +169,24 @@ public class SocialPrefs {
                 .putString(KEY_STATS_LAST_UID, uid)
                 .putString(KEY_STATS_LAST_PUBLISHED, fingerprint)
                 .apply();
+    }
+
+    // ---- F4-u3: interruptor de presencia ----------------------------------------------------------------
+
+    /**
+     * Entrega (en el hilo de E/S) lo que la persona eligió en el interruptor de presencia para {@code uid}, o
+     * null si nunca lo tocó en este móvil (entonces manda el valor por defecto de d4, {@code PresenceSharing}).
+     */
+    public void readPresenceSharing(@NonNull String uid, @NonNull Consumer<Boolean> callback) {
+        io.execute(() -> {
+            SharedPreferences p = prefs();
+            String key = KEY_PRESENCE_SHARING_PREFIX + uid;
+            callback.accept(p.contains(key) ? Boolean.valueOf(p.getBoolean(key, false)) : null);
+        });
+    }
+
+    /** Guarda la elección del interruptor de presencia para {@code uid} en este móvil. */
+    public void savePresenceSharing(@NonNull String uid, boolean on) {
+        io.execute(() -> prefs().edit().putBoolean(KEY_PRESENCE_SHARING_PREFIX + uid, on).apply());
     }
 }

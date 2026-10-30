@@ -21,6 +21,8 @@ import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
 import com.example.bbettercalendar.notifications.focus.FocusFailNotifier;
+import com.example.bbettercalendar.social.SocialFeature;
+import com.example.bbettercalendar.social.presence.PresencePublisher;
 import com.example.bbettercalendar.stats.FocusAttributionRepository;
 import com.example.bbettercalendar.stats.FocusSessionRepository;
 import com.example.bbettercalendar.ui.common.SingleEvent;
@@ -33,6 +35,7 @@ import com.example.bbettercalendar.ui.home.HomeForegroundService;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
@@ -71,6 +74,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private final FocusAttributionRepository focusAttributionRepository;
     private final FocusCompleteNotifier focusCompleteNotifier;
     private final Context appContext;
+    // F4-u3: presencia en directo (03 §8). Lazy y tras el flag: en release nunca se crea ni toca Firebase.
+    private final Lazy<PresencePublisher> presence;
     private final FocusTimerStateMachine machine;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -96,8 +101,10 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
                                  FocusFailNotifier focusFailNotifier,
                                  FocusAttributionRepository focusAttributionRepository,
                                  FocusCompleteNotifier focusCompleteNotifier,
-                                 @ApplicationContext Context appContext) {
+                                 @ApplicationContext Context appContext,
+                                 Lazy<PresencePublisher> presence) {
         this.savedState = savedState;
+        this.presence = presence;
         this.configurationManager = configurationManager;
         this.repository = repository;
         this.focusFailNotifier = focusFailNotifier;
@@ -362,7 +369,21 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         syncBlockState();
         syncForegroundService();
         publish();
+        publishPresence();
         scheduleTick();
+    }
+
+    /**
+     * F4-u3: cuenta el estado del timer a los amigos (status/ en RTDB). El publicador ignora lo que no
+     * cambia, así que se le llama en cada transición; lo transcurrido de la cuenta atrás fija el inicio de
+     * una racha restaurada tras la muerte del proceso.
+     */
+    private void publishPresence() {
+        if (!SocialFeature.isAccountEnabled()) {
+            return;
+        }
+        long elapsed = Math.max(0L, machine.getCountdownMillis() - machine.getRemainingMillis());
+        presence.get().onTimerState(machine.getState(), elapsed);
     }
 
     /**
@@ -484,6 +505,10 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         }
         // Nada podrá volver a apagar el bloqueo total sin un timer vivo (kill-trap): se suelta aquí.
         FocusBlockState.setActive(appContext, false);
+        // F4-u3: sin timer vivo los amigos te ven ausente.
+        if (SocialFeature.isAccountEnabled()) {
+            presence.get().onTimerCleared();
+        }
         super.onCleared();
     }
 }

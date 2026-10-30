@@ -6,8 +6,9 @@
     <!-- Sanctuary redesign (html 01c): rest line under the ring + hint under the controls. -->
     <string name="focus_back_at">Back to focus at %1$s</string>
     <string name="focus_rest_hint">Stretch, drink some water.</string>
-    <string name="focus_friend_time_format" translatable="false">%1$d:%2$02d:%3$02d</string>
     <string name="focus_block_mode_desc_off">Turn on block mode</string>
     <string name="focus_block_mode_desc_on">Turn off block mode</string>
     <string name="focus_block_mode_desc_pending">Block mode needs the accessibility permission</string>
+    <string name="focus_friend_paused">Paused</string>
+    <string name="focus_friends_empty">No friends here yet. Invite someone to study together.</string>
 </resources>

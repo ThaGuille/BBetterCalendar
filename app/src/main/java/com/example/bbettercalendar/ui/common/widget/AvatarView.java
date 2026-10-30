@@ -53,6 +53,8 @@ public class AvatarView extends View {
     @ColorInt private int cutoutColor;
     @ColorInt private int plainFill;
     @ColorInt private int plainInitials;
+    /** F4-u5: a profile colour set in code also paints the inner disc of a STUDYING avatar. */
+    private boolean customFill;
 
     @Nullable private CharSequence name;
     @NonNull private String initials = "";
@@ -152,6 +154,7 @@ public class AvatarView extends View {
     /** Disc colour of a plain ({@link Status#NONE}) avatar, e.g. a profile colour (F1-u5 AvatarPalette). */
     public void setFillColor(@ColorInt int color) {
         plainFill = color;
+        customFill = true;
         invalidate();
     }
 
@@ -195,9 +198,11 @@ public class AvatarView extends View {
                 fill.setColor(ContextCompat.getColor(ctx, R.color.bb_primary_container));
                 canvas.drawCircle(cx, cy, r - ring, fill);
                 canvas.drawCircle(cx, cy, r - ring / 2f, stroke);
-                fill.setColor(ContextCompat.getColor(ctx, R.color.bb_surface_raised));
+                fill.setColor(customFill ? plainFill
+                        : ContextCompat.getColor(ctx, R.color.bb_surface_raised));
                 canvas.drawCircle(cx, cy, r - ring * 2f, fill);
-                initialsColor = ContextCompat.getColor(ctx, R.color.bb_on_surface);
+                initialsColor = customFill ? plainInitials
+                        : ContextCompat.getColor(ctx, R.color.bb_on_surface);
                 text.setTypeface(bold);
                 break;
             case AWAY:

@@ -31,13 +31,13 @@ import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.helpers.FormatHelper;
-import com.example.bbettercalendar.social.Friend;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
 import com.example.bbettercalendar.social.account.SocialEntryRouter;
+import com.example.bbettercalendar.ui.social.AvatarPalette;
 import com.example.bbettercalendar.ui.social.EntryTarget;
 import com.example.bbettercalendar.ui.social.InviteSheet;
 import com.example.bbettercalendar.ui.social.SocialEntryNavigator;
@@ -72,9 +72,7 @@ public class FocusFragment extends Fragment
     private static final String TAG = "FocusFragment";
     private static final String DISCLOSURE_TAG = "accessibility_disclosure";
     private static final int FRIEND_COLUMNS = 4;
-    private static final int MAX_FRIENDS = 8;
     private static final int MAX_CYCLE_DOTS = 12;
-    private static final float AWAY_CELL_ALPHA = 0.4f;
     private static final float DISABLED_ALPHA = 0.4f;
     private static final float PAUSED_DOT_ALPHA = 0.5f;
 
@@ -100,6 +98,11 @@ public class FocusFragment extends Fragment
     private TextView streakWeekText;
     private TextView studyingMeta;
     private LinearLayout friendsGrid;
+    @Nullable private SocialSnapshot lastSnapshot;
+    @Nullable private SocialEntryViewModel socialEntry;
+    private final java.util.List<TextView> timeViews = new java.util.ArrayList<>();
+    private String gridSignature = "";
+    private boolean ticking;
 
     // Último estado pintado: los controles sólo se repintan cuando cambia algo más que el tiempo.
     @Nullable private FocusUiState lastRendered;
@@ -177,6 +180,7 @@ public class FocusFragment extends Fragment
         View cta = view.findViewById(R.id.focusNoAccountCta);
         TextView inviteLabel = view.findViewById(R.id.focusInviteLabel);
         SocialEntryViewModel entry = new ViewModelProvider(this).get(SocialEntryViewModel.class);
+        socialEntry = entry;
         entry.getEntryStep().observe(getViewLifecycleOwner(), step -> {
             if (step == null) {
                 return;
@@ -520,24 +524,43 @@ public class FocusFragment extends Fragment
         }
     }
 
-    // ================================================================== studying now (mock)
+    // ================================================================== studying now (F4-u5)
 
-    // PLACEHOLDER(ui-placeholders#social-focus-studying): maqueta (MockSocialRepository).
     private void renderFriends(@Nullable SocialSnapshot snapshot) {
         if (friendsGrid == null || snapshot == null) {
             return;
         }
-        studyingMeta.setText(getString(R.string.focus_friends_meta,
-                snapshot.getStudyingCount(), snapshot.getFriendCount()));
+        lastSnapshot = snapshot;
+        FocusFriendsUi.Result ui = FocusFriendsUi.map(snapshot, System.currentTimeMillis());
+        studyingMeta.setText(ui.header);
+        buildGrid(ui);
+        scheduleTick();
+    }
 
+    private void buildGrid(@NonNull FocusFriendsUi.Result ui) {
         friendsGrid.removeAllViews();
-        List<Friend> friends = snapshot.getFriends();
-        Friend top = snapshot.getTopFriend();
-        int shown = Math.min(MAX_FRIENDS, friends.size());
+        timeViews.clear();
+        gridSignature = signatureOf(ui);
+        if (ui.empty) {
+            // Sin amigos: estado vacio que lleva a Invitar (nunca nombres inventados).
+            TextView empty = new TextView(requireContext());
+            empty.setText(R.string.focus_friends_empty);
+            empty.setTextAppearance(R.style.TextAppearance_BBetter_Caption);
+            empty.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
+            empty.setOnClickListener(v -> {
+                if (socialEntry != null) {
+                    socialEntry.requestEntry(EntryTarget.INVITE);
+                }
+            });
+            friendsGrid.addView(empty, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            return;
+        }
         int rowGap = getResources().getDimensionPixelSize(R.dimen.focus_sanct_friend_row_gap);
         int colGap = getResources().getDimensionPixelSize(R.dimen.focus_friend_col_gap);
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         LinearLayout row = null;
+        int shown = ui.cells.size();
         for (int i = 0; i < shown; i++) {
             if (i % FRIEND_COLUMNS == 0) {
                 row = new LinearLayout(requireContext());
@@ -550,12 +573,12 @@ public class FocusFragment extends Fragment
                 friendsGrid.addView(row, rowLp);
             }
             View cell = inflater.inflate(R.layout.item_focus_friend, row, false);
-            bindFriend(cell, friends.get(i), friends.get(i) == top);
+            bindFriend(cell, ui.cells.get(i));
             LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) cell.getLayoutParams();
             lp.setMarginStart(i % FRIEND_COLUMNS == 0 ? 0 : colGap);
             row.addView(cell, lp);
         }
-        // Completa la última fila con huecos para que las columnas no se ensanchen.
+        // Completa la ultima fila con huecos para que las columnas no se ensanchen.
         if (row != null) {
             for (int i = shown % FRIEND_COLUMNS; i != 0 && i < FRIEND_COLUMNS; i++) {
                 View filler = new View(requireContext());
@@ -567,30 +590,85 @@ public class FocusFragment extends Fragment
         }
     }
 
-    private void bindFriend(@NonNull View cell, @NonNull Friend friend, boolean isTop) {
+    private void bindFriend(@NonNull View cell, @NonNull FocusFriendsUi.Cell c) {
         AvatarView avatar = cell.findViewById(R.id.focusFriendAvatar);
         TextView name = cell.findViewById(R.id.focusFriendName);
         TextView time = cell.findViewById(R.id.focusFriendTime);
-        avatar.setName(friend.getName());
-        avatar.setInitials(friend.getInitials());
-        name.setText(friend.getName().split(" ")[0]);
-        if (friend.isStudying()) {
-            avatar.setStatus(AvatarView.Status.STUDYING);
-            avatar.setBadgeIcon(isTop ? R.drawable.ic_crown_24 : 0);
-            long s = friend.getFocusSecondsToday();
-            time.setText(getString(R.string.focus_friend_time_format,
-                    (int) (s / 3600), (int) (s / 60 % 60), (int) (s % 60)));
-            cell.setAlpha(1f);
-        } else {
-            // html 01: la CELDA entera al 40 % (avatar, nombre y "away"); AvatarView ya se pone a
-            // 0,4 en AWAY, así que el avatar vuelve a 1 para no quedar al 16 %.
-            avatar.setStatus(AvatarView.Status.AWAY);
-            avatar.setAlpha(1f);
-            avatar.setBadgeIcon(0);
-            name.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
-            time.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
-            time.setText(R.string.focus_friend_away);
-            cell.setAlpha(AWAY_CELL_ALPHA);
+        avatar.setName(c.name);
+        avatar.setInitials(c.initials);
+        avatar.setFillColor(AvatarPalette.color(requireContext(), c.avatarColor));
+        avatar.setInitialsColor(AvatarPalette.onColor(requireContext()));
+        avatar.setBadgeIcon(c.crown ? R.drawable.ic_crown_24 : 0);
+        name.setText(c.name);
+        timeViews.add(c.line == FocusFriendsUi.Line.TIME ? time : null);
+        cell.setAlpha(c.alpha);
+        switch (c.line) {
+            case TIME:
+                avatar.setStatus(AvatarView.Status.STUDYING);
+                time.setText(c.timeText);
+                break;
+            case PAUSED:
+                avatar.setStatus(AvatarView.Status.STUDYING);
+                time.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
+                time.setText(R.string.focus_friend_paused);
+                break;
+            default:
+                // html 01: la CELDA entera al 40 % (avatar, nombre y "away"); AvatarView ya se pone a
+                // 0,4 en AWAY, asi que el avatar vuelve a 1 para no quedar al 16 %.
+                avatar.setStatus(AvatarView.Status.AWAY);
+                avatar.setAlpha(1f);
+                name.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
+                time.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface_muted));
+                time.setText(R.string.focus_friend_away);
+                break;
+        }
+    }
+
+    @NonNull
+    private static String signatureOf(@NonNull FocusFriendsUi.Result ui) {
+        StringBuilder sb = new StringBuilder();
+        for (FocusFriendsUi.Cell c : ui.cells) {
+            sb.append(c.uid).append('|').append(c.line).append('|').append(c.crown).append(';');
+        }
+        return sb.toString();
+    }
+
+    // Tiempo en vivo: una vez por segundo mientras la pantalla es visible (onResume..onPause).
+    private final Runnable tick = new Runnable() {
+        @Override
+        public void run() {
+            ticking = false;
+            if (friendsGrid == null || lastSnapshot == null || !isResumed()) {
+                return;
+            }
+            FocusFriendsUi.Result ui = FocusFriendsUi.map(lastSnapshot, System.currentTimeMillis());
+            if (!signatureOf(ui).equals(gridSignature)) {
+                buildGrid(ui);
+            } else {
+                for (int i = 0; i < timeViews.size() && i < ui.cells.size(); i++) {
+                    TextView t = timeViews.get(i);
+                    if (t != null) {
+                        t.setText(ui.cells.get(i).timeText);
+                    }
+                }
+            }
+            scheduleTick();
+        }
+    };
+
+    private void scheduleTick() {
+        if (friendsGrid == null || ticking || !isResumed() || lastSnapshot == null
+                || lastSnapshot.getStudyingCount() == 0) {
+            return;
+        }
+        ticking = true;
+        friendsGrid.postDelayed(tick, 1000L);
+    }
+
+    private void stopTick() {
+        ticking = false;
+        if (friendsGrid != null) {
+            friendsGrid.removeCallbacks(tick);
         }
     }
 
@@ -605,10 +683,21 @@ public class FocusFragment extends Fragment
         renderBlockMode();
         // Red de seguridad: un resultado que llegó con el estado guardado sigue pendiente.
         sessionEvents.recheck();
+        scheduleTick();
+    }
+
+    @Override
+    public void onPause() {
+        stopTick();
+        super.onPause();
     }
 
     @Override
     public void onDestroyView() {
+        stopTick();
+        lastSnapshot = null;
+        socialEntry = null;
+        timeViews.clear();
         lastRendered = null;
         toolbar = null;
         modeDot = null;

@@ -313,8 +313,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- ============ Studying now (maqueta social) ============ -->
-            <!-- PLACEHOLDER(ui-placeholders#social-focus-studying) -->
+            <!-- ============ Studying now (F4-u5: amigos reales, tiempo en vivo, corona) ============ -->
             <LinearLayout
                 android:id="@+id/focusSocialBlock"
                 android:layout_width="match_parent"
@@ -360,7 +359,7 @@
                         tools:text="5 / 8" />
                 </LinearLayout>
 
-                <!-- Rejilla de 4 columnas: FocusFragment.renderFriends la rellena con filas de
+                <!-- Rejilla de 4 columnas: FocusFragment.buildGrid la rellena con filas de
                      item_focus_friend (html 01b grid-cols-4 gap-y-2, sin caja). -->
                 <LinearLayout
                     android:id="@+id/focusFriendsGrid"

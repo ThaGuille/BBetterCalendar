@@ -44,7 +44,6 @@ debug, false in release**) through `social/SocialFeature`:
 |---|---|---|---|---|---|
 | `social-backend` | all social blocks | `MockSocialRepository` | Static fake friends from the Stitch mocks (debug only) | Accounts, friend graph, presence sync, a real `SocialRepository` bound in `SocialModule` | P2 (hidden in release) |
 | `social-home-friends` | Home (u13/u13b) | `homeFriendsCard` ("3 friends studying now · Maya, Alex, Leo") | Mock studying friends (avatars + names) | Real presence (`social-backend`); tap target / friends screen | P2 (hidden in release) |
-| `social-focus-studying` | Focus (u14) | `focusSocialBlock` (`focusStudyingHeader` "5 / 8", `focusFriendsGrid`) | Mock friends, static times, crown on the first | Live presence + ticking session times (`social-backend`) | P2 (hidden in release) |
 | `social-celebration-strip` | Cycle complete (u15) | `cycleFriendsStrip` ("Laia and 3 others still studying · Live") | Mock top friend + count (`getCelebrationSnapshot()`) | Real presence (`social-backend`) | P2 (hidden in release) |
 | `home-notification-centre` (partial) | Home (u13) | `homeBellButton` / `homeBellDot` | Signed in with a profile (F2-u8): the dot shows only when there are received friend requests and a tap opens Friends at Requests. Without an account or in release: the fixed honey dot and the "coming soon" toast | The notification centre / inbox (F5): cheers, nudges and push; until then the bell only knows friend requests | P2 |
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
@@ -64,6 +63,7 @@ debug, false in release**) through `social/SocialFeature`:
 | `home-user-name` | 2026-10-20 | F1-u8: `GreetingResolver` (profile name, else local name in `SocialPrefs`, else generic greeting) |
 | `social-focus-invite` | 2026-10-24 | F2-u8: `focusInviteButton` opens `InviteSheet` (`@usuario`, link with copy and share, QR) when signed in with a profile, or the entry router otherwise; markers removed from Java and layout |
 | `social-rank` | 2026-10-29 | F3-u8: `cycleBestTile` shows the real position in this week's Minutos ranking (`CycleRank.from(RankingState)` over `RankingRepository.observeRanking()`; needs an account, a profile and at least one friend, else a dash «–» with the same subtitle and no tap); `MOCK_RANK` and the marker removed from `MockSocialRepository` |
+| `social-focus-studying` | 2026-10-30 | F4-u5: `focusSocialBlock` renders the real friends from the single snapshot (`FocusFriendsUi`): studying first with a live time ticking every second while visible, paused as «En pausa», crown on the crown uid, empty state leading to Invite; markers removed from Java and layout |
 
 ## History
 | Date | Change | Ref |

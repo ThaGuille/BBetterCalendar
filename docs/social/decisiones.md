@@ -101,7 +101,7 @@
 - **Lo que se mantiene:** bloquear y reportar (lo exige Play, no es control fino) y el canal de
   Android «Amigos», que el sistema ya permite silenciar sin construir nada.
 - **Precisada por D-027:** bloquear sale de v1; reportar se mantiene.
-- **Abierto:** Q-01 (interruptor global de presencia).
+- **Abierto:** ninguno: Q-01 (interruptor global de presencia) la cierra D-032.
 
 ### D-010 · Menores: puerta de edad y umbral de 14 configurable; por debajo, sin social en v1
 - **Estado:** aceptada (usuario, 2026-10-19: ofrecer la app a menores de 14 si no complica mucho; puede
@@ -301,3 +301,58 @@
     uso (F3-u9, `docs/legal/privacy-policy-v2-draft.md`).
   - Tras reinstalar o en un segundo móvil la historia local es distinta y la siguiente publicación sobrescribe los
     totales de la cuenta (la última escritura gana, 03 §9); el plan de F3 lo lista como riesgo.
+
+### D-032 · Q-01: interruptor global «Compartir mi estado en directo», no recíproco y guardado en el móvil
+- **Estado:** aceptada (usuario, 2026-10-30, al aprobar el plan de F4 [`social-f4-presencia.md`](../../.claude/plans/social-f4-presencia.md)).
+  Cierra Q-01, precisa D-009 y 02 §5.
+- **Decisión:** hay **un** interruptor global, «Compartir mi estado en directo», en Mi perfil (F4.7). **Apagado = ausente
+  siempre**: mientras esté apagado el móvil solo escribe `idle` en `status/{uid}` y nunca `focus` ni `paused`, así que tus
+  amigos te ven ausente aunque estés estudiando. No es **recíproco**: con el interruptor apagado sigues viendo la
+  presencia de tus amigos. Se guarda **en el móvil, por dispositivo y por `uid`** (`SocialPrefs`), no en Firestore, sin
+  campo nuevo ni cambio de reglas. Valor por defecto (decisión d4 del plan): **encendido para mayores de 18 años y
+  apagado para 14–17 y para edad desconocida**; si el año de nacimiento aún no se ha leído, el publicador cuenta el
+  interruptor como apagado.
+- **Por qué:** la presencia revela tu rutina en tiempo real y es especialmente sensible para 14–17 (privacidad por
+  defecto, RGPD art. 25 y la práctica de los códigos para menores), mientras que los adultos reciben la función
+  central (P3, co-presencia) sin dar un paso. Es un control global, no el control fino que D-009 aplaza (DIF-01). Guardarlo
+  en el móvil sigue 03 §10 («ajustes locales en SharedPreferences»); la contrapartida es que reinstalar vuelve al valor
+  por defecto.
+- **Consecuencias:**
+  - 02 §5 deja de decir «pendiente de Q-01» y 03 §8 incluye el interruptor entre los disparadores del publicador.
+  - Al apagarlo con una sesión en marcha se escribe `idle` al instante; al encenderlo con el timer en marcha se
+    republica `focus` (F4-u3, F4-u8).
+  - `PresenceSharing` (F4-u3) lee `SocialPrefs` y `AgeGate`; Mi perfil (F4-u8) lo enseña.
+  - La política de privacidad v2 debe mencionar el interruptor y su valor por defecto (F4-u9).
+
+### D-033 · Q-04: el descanso no se distingue; la pausa se ve como «En pausa» con el tiempo congelado
+- **Estado:** aceptada (usuario, 2026-10-30, al aprobar el plan de F4 [`social-f4-presencia.md`](../../.claude/plans/social-f4-presencia.md)).
+  Cierra Q-04 y precisa 02 §7 y 03 §5, §6 y §8.
+- **Decisión:** **el descanso no se distingue**: un amigo en el descanso entre pomodoros aparece como **estudiando** en
+  todas partes (Focus, Home, Cycle complete y Amigos); no hay etiqueta «en descanso». Las decisiones del plan que lo
+  concretan:
+  - **d1 · el móvil manda el descanso como estado propio.** Como mandaba el usuario («también `descanso` propio»): el
+    descanso se envía y se pinta como estudiando. El contrato de `status/{uid}` tiene cuatro estados: `focus`, `break`,
+    `paused` e `idle` (más «ausente», que es lo que se ve cuando `idle`, obsoleto o ilegible). Durante el descanso en
+    marcha (`RUNNING_REST`) se publica `break`, y todas las pantallas lo cuentan y lo pintan como estudiando.
+  - **d2 · el tiempo en vivo cuenta desde el inicio de la racha continua.** Un único `sessionStart` para todo el ciclo:
+    foco, sus descansos y el siguiente foco que arranca solo. Un parar (`STOPPED`, `STOPPED_REST`) termina la racha;
+    la pausa no la termina (d3).
+  - **d3 · la pausa se ve como «En pausa» y no reinicia el tiempo.** Tal como lo decidió el usuario: pausar un momento
+    para algo rápido no debe reiniciar nada. `PAUSED` y `PAUSED_REST` publican el estado `paused` con `pausedAt`; los
+    amigos ven «En pausa» con el tiempo **congelado** (`pausedAt − sessionStart`); al reanudar, el tiempo sigue
+    (el publicador escribe `focus`, o `break` si era un descanso, con el `sessionStart` desplazado hacia delante lo que duró la pausa). Un amigo en
+    pausa cuenta como presente (grupo de quien estudia, con su orden) y queda bajo la regla de 4 h.
+  - **Resto de casos:** `STOPPED_REST` (el descanso se detuvo) se publica como `idle`. Para que la regla de 4 h no tumbe
+    una sesión larga y viva, mientras corre `focus` o `break` el publicador reescribe cada **2 h** el mismo estado con el mismo
+    `sessionStart` (refresca `since`; es la única excepción a «escribir solo si cambia»), y el lector mide las 4 h desde
+    `since`.
+- **Por qué:** con el descanso «como estudiando» un reloj que se reinicia en cada cuenta atrás delataría los descansos
+  igualmente (d2); enviar un estado propio deja el contrato abierto a enseñarlo más adelante sin cambiar el servidor, y
+  la pausa momentánea es normal en un pomodoro, así que reiniciar el tiempo castigaría a quien la hace.
+- **Consecuencias:**
+  - 03 §5 documenta `status/{uid}` como `{state: focus|break|paused|idle, since, sessionStart?, pausedAt?}` y 03 §6 las
+    validaciones de las reglas (F4-u2); 03 §8 recoge la pausa, el inicio de racha, el refresco de 2 h, el interruptor y el orden
+    al cerrar sesión (primero `idle` con su acuse y cancelar `onDisconnect`, después `signOut`) y al borrar la cuenta
+    (cancelar `onDisconnect` antes de la Function y no escribir `idle`).
+  - Un amigo se ve estudiando con `focus`, `break` o `paused` y un `since` de a lo sumo 4 h; si no, ausente (02 §7).
+  - La política de privacidad v2 lista los estados compartidos (`focus`, `break`, `paused`, `idle`) y la hora de inicio (F4-u9).

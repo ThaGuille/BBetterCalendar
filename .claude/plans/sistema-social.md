@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-29 (F3 cerrada)
+**Last updated:** 2026-10-30 (F4 abierta)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,11 +15,10 @@
 
 ## Ahora
 
-- **Fase activa:** ninguna abierta; la siguiente es **F4** (Presencia), sin plan todavía. F0, F1, F2 y F3
+- **Fase activa:** **F4** (Presencia), plan [`social-f4-presencia.md`](social-f4-presencia.md) (9 unidades). F0, F1, F2 y F3
   hechas ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md),
   [`social-f3-stats.md`](social-f3-stats.md)); el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** abrir F4 por el protocolo del README (plan `social-f4-presencia.md`, solo las secciones 02 §7, 03 §8 y 03 §10
-  que cite). Antes, la sesión principal sube y fusiona `bt/social-f3-stats` en `main`.
+- **Siguiente paso:** F4-u2 (reglas RTDB de `status/`), F4-u3 (`PresencePublisher`) y F4-u4 (`FirebaseSocialRepository`) en paralelo; después u5-u8 y el cierre u9. Q-01 y Q-04 cerradas (D-032, D-033).
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -31,7 +30,7 @@
 | **F1** Cuenta | Puerta de edad, login perezoso, perfil, borrar cuenta | hecha | [`social-f1-cuenta.md`](social-f1-cuenta.md) | `home-user-name` |
 | **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, eliminar y reportar (sin bloquear, D-027) | hecha | [`social-f2-amigos.md`](social-f2-amigos.md) | `social-focus-invite`, `home-notification-centre` (parcial) |
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | hecha | [`social-f3-stats.md`](social-f3-stats.md) | `social-rank` |
-| **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | pendiente | — | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
+| **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | activa | [`social-f4-presencia.md`](social-f4-presencia.md) | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
 | **F5** Interacción | Ánimo, empujón, push, bandeja | pendiente | — | `home-notification-centre` |
 | **L** Lanzamiento | Gate antes de activar lo social en release | pendiente | — | — |
 
@@ -107,14 +106,14 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 ### F4 · Presencia
 - [ ] **F4.1** `PresencePublisher` (RTDB, `onDisconnect`) enganchado a las transiciones del timer
-  (Q-04) — 03 §8
+  (Q-04, D-033) — 03 §8
 - [ ] **F4.2** `FirebaseSocialRepository`: una única instantánea real; los tres accesores se funden —
   03 §10
 - [ ] **F4.3** Focus «Estudiando ahora» real con tiempo en vivo y corona — 02 §7
 - [ ] **F4.4** Home «N amigos estudiando» real; al tocar, abre Amigos — 02 §9
 - [ ] **F4.5** Tira de Cycle complete real — 02 §9
 - [ ] **F4.6** Estado obsoleto (`focus` de más de 4 h → `idle`) + prueba de matar la app — 03 §8
-- [ ] **F4.7** *(si Q-01 = sí)* Interruptor global «Compartir mi estado en directo» — 02 §5
+- [ ] **F4.7** Interruptor global «Compartir mi estado en directo» — 02 §5
 
 ### F5 · Interacción
 - [ ] **F5.1** Ánimo y empujón (1 al día por amigo) + `sendCheer` / `sendNudge` — 02 §8, 03 §7
@@ -152,10 +151,10 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 | ID | Pregunta | Propuesta | Bloquea |
 |---|---|---|---|
-| Q-01 | ¿Hay un interruptor global «Compartir mi estado en directo» en v1, a pesar de D-009? | Sí: la presencia revela tu rutina en tiempo real, cuesta poco y es especialmente sensible para usuarios de 14–17 | F4.7 |
+| ~~Q-01~~ | ~~¿Hay un interruptor global «Compartir mi estado en directo» en v1, a pesar de D-009?~~ Cerrada (D-032): sí, un interruptor global en Mi perfil; apagado = ausente siempre, no recíproco, guardado en el móvil, por defecto encendido a partir de 18 años y apagado a los 14–17 | — | — |
 | Q-02 | ¿Se mide el uso con Firebase Analytics o solo con contadores agregados del backend? | Solo contadores: la política v1 promete «never used for analytics» (04 §4) | Métricas de 02 §11; gate L |
 | ~~Q-03~~ | ~~¿Se confirma D-015 (tope de 50 amigos)?~~ Cerrada: sí, D-015 aceptada (2026-10-20) | — | — |
-| Q-04 | Durante el descanso entre pomodoros, ¿el amigo aparece como estudiando, ausente o con un estado propio? | Estado propio «en descanso» en Focus; cuenta como estudiando en Home | F4.1 |
+| ~~Q-04~~ | ~~Durante el descanso entre pomodoros, ¿el amigo aparece como estudiando, ausente o con un estado propio?~~ Cerrada (D-033): el descanso no se distingue, aparece como estudiando en todas partes; la pausa se ve «En pausa» con el tiempo congelado | — | — |
 | ~~Q-05~~ | ~~¿Se puede cambiar el `@usuario`?~~ Cerrada (D-019): sí, una vez cada 30 días; el anterior queda libre | — | — |
 | ~~Q-06~~ | ~~¿Qué enlace lleva la tarjeta de compartir mientras la app no está publicada?~~ Cerrada (D-018): ninguno, solo la marca «BBetter»; el enlace de Play se añade al publicar | — | — |
 | ~~Q-07~~ | ~~¿Prórroga del target API?~~ Cerrada: no hay nada publicado, así que no aplica | — | — |
@@ -165,6 +164,7 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-10-30 (35)** · F4-u1 F4 abierta: plan de fase `social-f4-presencia.md` (9 unidades), D-032 (Q-01) y D-033 (Q-04) con el contrato `status/` y la guía al día (02 §5 y §7, 03 §5, §6 y §8). **Siguiente:** F4-u2, F4-u3 y F4-u4 en paralelo; luego u5-u8 y el cierre u9.
 - **2026-10-29 (34)** · F3-u9 F3 cerrada: notas plegadas, `systems/social.md`, `social-rank` en Resolved, política v2 y paso de punta a punta en api36 sin crashes (ninguno). **Siguiente:** abrir F4 (Presencia); push y fusión de `bt/social-f3-stats` en `main` por la sesión principal.
 - **2026-10-29 (33)** · F3-u8 «Nº entre amigos» real desde RankingRepository y marcador social-rank eliminado (cierra F3.6).
 - **2026-10-29 (32)** · F3-u7 pestaña Ranking dentro de Amigos con Minutos y Constancia, empates y mi fila resaltada (F3.5).

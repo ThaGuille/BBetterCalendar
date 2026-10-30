@@ -1,6 +1,6 @@
 # Sistema social — guía
 
-> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-25
+> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-30
 > **¿Dónde estamos?** → [tablero](../../.claude/plans/sistema-social.md) (fases, entregables, diferidos,
 > preguntas abiertas, diario). El progreso **no** vive en esta carpeta.
 
@@ -168,3 +168,4 @@ Diario: <fecha> · F<N>-u<n> <qué quedó hecho> (F<N>.x, F<N>.y)
 | 2026-10-25 | Protocolo: la nota y la línea de diario de cada unidad van a su propio fichero (`social-fN/notes/uN.md`) y solo el cierre de fase las pliega, para que big-task pueda correr unidades en paralelo | D-029 |
 | 2026-10-28 | Antes de abrir F3: 03 §9 (publicar al iniciar sesión, crear el perfil y cambiar el objetivo; `RankingCalculator` con `dayKey` y corona), 02 §6 (corona) y 02 §9 (perfil de amigo: ánimo en F5); Q-08 abierta | D-030 |
 | 2026-10-29 | Q-08 cerrada al abrir F3: la primera publicación de `stats/` incluye toda la historia local (`totalMinutes`, `bestWeekStreak` y rachas desde el primer uso); 03 §9 lo dice | D-031 |
+| 2026-10-30 | Q-01 y Q-04 cerradas al abrir F4: interruptor global de presencia (no recíproco, local, por defecto según la edad) y descanso no distinguido, con la pausa «En pausa» y el contrato `status/` `focus`/`break`/`paused`/`idle`; 02 §5 y §7, 03 §5, §6 y §8 | D-032, D-033 |

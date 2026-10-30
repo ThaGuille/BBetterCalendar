@@ -1,6 +1,6 @@
 # 02 · Producto
 
-> **Última revisión:** 2026-10-28 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
+> **Última revisión:** 2026-10-30 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
 >
 > Qué construimos y qué no. Las secciones se citan como `02 §N`.
 
@@ -69,7 +69,7 @@ No hay bio, ni foto, ni enlaces, ni texto libre aparte del nombre (P4).
 | Dato | Visible para | Nota |
 |---|---|---|
 | Nombre, `@usuario`, avatar | Amigos (y búsqueda exacta) | §3 |
-| «Estudiando ahora» + hora de inicio de la sesión | Amigos | Interruptor global en v1: pendiente de **Q-01** |
+| «Estudiando ahora» + hora de inicio de la sesión | Amigos | Interruptor global «Compartir mi estado en directo» en Mi perfil (D-032): apagado, te ven siempre ausente; no es recíproco; por defecto encendido a partir de 18 años y apagado a los 14–17 |
 | Minutos de hoy (con el tope en el ranking) | Amigos | Alimenta la corona de Focus |
 | Minutos de la semana con tope, días de foco esta semana, objetivo semanal | Amigos | Alimenta el ranking y el «Nº entre amigos» |
 | Racha semanal, mejor racha, minutos totales | Amigos | Perfil del amigo |
@@ -99,12 +99,13 @@ lo vea, lo eliminas como amigo.
 
 ## §7 Presencia
 
-- **Estados:** `focus` (sesión de foco en marcha), `break` (descanso dentro de un ciclo) e `idle`.
-  Cómo se pinta `break` está pendiente de **Q-04**.
-- El tiempo «en vivo» se calcula en el móvil de quien mira (`ahora − inicio de sesión`). No se escribe
-  nada cada segundo.
+- **Estados:** `focus` (sesión de foco en marcha), `break` (descanso dentro de un ciclo), `paused` (temporizador en pausa) e `idle`. El descanso **no se distingue** (D-033): `break` se cuenta y se pinta como estudiando, sin etiqueta «en descanso». La pausa se pinta «En pausa» con el tiempo congelado; sigue contando como presente.
+  Un amigo está **estudiando** con `focus`, `break` o `paused`; con `idle`, un estado de más de 4 h, ilegible o ausente, está ausente.
+- El tiempo «en vivo» se calcula en el móvil de quien mira (`ahora − inicio de sesión`, con la hora del servidor). No se escribe
+  nada cada segundo. El inicio es el de la **racha continua**: foco, sus descansos y el siguiente foco que arranca solo comparten
+  un inicio, y parar la termina (D-033, d2). En pausa el tiempo se congela (`pausaEn − inicio`) y al reanudar sigue (d3).
 - Si la app muere o se queda sin red, el servidor pone `idle` por su cuenta (`onDisconnect`, 03 §8). Si
-  un estado `focus` lleva más de 4 h sin actualizarse, el cliente lo trata como `idle`.
+  un estado `focus`, `break` o `paused` lleva más de 4 h sin refrescarse, el cliente lo trata como `idle`.
 
 ## §8 Interacciones y avisos (F5)
 

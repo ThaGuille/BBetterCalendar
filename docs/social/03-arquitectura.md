@@ -1,6 +1,6 @@
 # 03 · Arquitectura
 
-> **Última revisión:** 2026-10-29 · Guía: [README](README.md) · Producto: [02](02-producto.md)
+> **Última revisión:** 2026-10-30 · Guía: [README](README.md) · Producto: [02](02-producto.md)
 >
 > Cómo se monta. Es el diseño objetivo: lo que ya existe se documenta en
 > `.claude/docs/systems/social.md` a partir de F1. Las secciones se citan como `03 §N`.
@@ -81,7 +81,8 @@ esquema y las reglas rechazan cualquier campo que no esté en la lista.
 ### Realtime Database
 
 ```
-/status/{uid}            { state: "focus" | "break" | "idle", since: <ts>, sessionStart: <ts|null> }
+/status/{uid}            { state: "focus" | "break" | "paused" | "idle", since: <ts del servidor>, sessionStart?: <ms>, pausedAt?: <ms> }
+                         ← sessionStart solo con focus / break / paused; pausedAt solo con paused; idle no lleva ninguno (D-033)
 /friends/{uid}/{fid}     true      ← espejo que escriben las Functions (las reglas de RTDB no pueden leer Firestore)
 ```
 
@@ -115,7 +116,18 @@ match /invites/{code}   { allow get: if signedIn(); allow list: if false;
 
 // RTDB
 "status": { "$uid": { ".read":  "auth.uid === $uid || root.child('friends').child($uid).child(auth.uid).exists()",
-                      ".write": "auth.uid === $uid" } },
+                      ".write": "auth.uid === $uid",
+                      // contrato de D-033: solo estas claves; since lo pone el servidor
+                      ".validate": "newData.hasChildren(['state','since']) && ['focus','break','paused','idle'].contains(newData.child('state').val())
+                                    && newData.child('since').val() === now
+                                    && (newData.child('state').val() === 'idle' ? !newData.hasChild('sessionStart')
+                                        : (newData.child('sessionStart').isNumber() && newData.child('sessionStart').val() > 0
+                                           && newData.child('sessionStart').val() <= now + 60000))
+                                    && (newData.child('state').val() === 'paused'
+                                        ? (newData.child('pausedAt').isNumber() && newData.child('pausedAt').val() >= newData.child('sessionStart').val()
+                                           && newData.child('pausedAt').val() <= now + 60000)
+                                        : !newData.hasChild('pausedAt'))",
+                      "$other": { ".validate": false } } },
 "friends": { "$uid": { ".read": "auth.uid === $uid", ".write": false } }
 ```
 
@@ -136,12 +148,22 @@ tests son parte del «hecho cuando» de F2 y F3.
 
 1. Al arrancar sesión, `PresencePublisher` se suscribe a `.info/connected`. En cada reconexión
    **primero** registra `onDisconnect().setValue({state: idle, since: SERVER_TIMESTAMP})` y **después**
-   escribe el estado real. Así no hay carrera si la conexión cae a medias.
-2. Las transiciones del temporizador (`FocusTimerStateMachine`, a través de `FocusSessionViewModel` /
-   `HomeForegroundService`) llaman a `focus(sessionStart)`, `rest()` e `idle()`.
+   escribe el estado real. Así no hay carrera si la conexión cae a medias. Solo escribe con `FEATURE_SOCIAL`, sesión
+   iniciada y el interruptor «Compartir mi estado en directo» encendido (D-032); apagado, escribe `idle` una vez y nunca
+   `focus`, `break` ni `paused`. El `sessionStart` va en hora del servidor (reloj del móvil + `.info/serverTimeOffset`).
+2. Las transiciones del temporizador (`FocusTimerStateMachine`, a través de `FocusSessionViewModel`) se publican así
+   (D-033): `RUNNING` → `focus`; `RUNNING_REST` → `break`; `PAUSED` y `PAUSED_REST` → `paused` con `pausedAt` y el
+   mismo `sessionStart`; `STOPPED` y `STOPPED_REST` → `idle`; al cerrarse el ViewModel → `idle`. El `sessionStart` es el de la
+   racha continua (foco, descansos y foco siguiente comparten uno) y al reanudar de una pausa se desplaza hacia delante
+   lo que duró. Solo se escribe cuando cambia lo publicado, con una excepción: mientras corre `focus` o `break` se reescribe
+   el mismo estado cada 2 h para refrescar `since` (regla de 4 h).
 3. Si la app muere, el servidor aplica `idle` cuando el socket expira (del orden de un minuto). El
    «hecho cuando» de F4 es que matar la app pase a `idle` en menos de 1 minuto en el otro móvil.
-4. Si un estado `focus` lleva más de 4 h sin cambios, el cliente lo trata como `idle` (02 §7).
+4. Si un estado `focus`, `break` o `paused` lleva más de 4 h sin refrescarse (se mide desde `since`), el cliente lo trata
+   como `idle` (02 §7).
+5. Cerrar sesión (Mi perfil): escribir `idle`, esperar el acuse de la escritura (con un tope corto, p. ej. 3 s) y cancelar
+   `onDisconnect` **antes** de `auth.signOut()`. Borrar la cuenta: cancelar `onDisconnect` **antes** de llamar a la Function
+   `deleteAccount` y no escribir `idle`; si no, el servidor recrearía `status/{uid}` tras borrarlo.
 
 ## §9 Publicación de stats
 

@@ -24,6 +24,7 @@ import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -56,6 +57,9 @@ public class MyProfileFragment extends Fragment {
     private TextView renameStatus;
     private MaterialButton renameButton;
     private MaterialButton deleteButton;
+    private SwitchMaterial sharePresence;
+    private boolean bindingShare;
+    private boolean shareLoaded;
 
     @Nullable private Profile current;
     private boolean initialized;
@@ -93,6 +97,7 @@ public class MyProfileFragment extends Fragment {
         renameStatus = view.findViewById(R.id.mpRenameStatus);
         renameButton = view.findViewById(R.id.mpRenameButton);
         deleteButton = view.findViewById(R.id.mpDeleteButton);
+        sharePresence = view.findViewById(R.id.mpSharePresence);
 
         if (savedInstanceState != null) {
             restoredColor = savedInstanceState.getInt(STATE_COLOR, -1);
@@ -133,6 +138,12 @@ public class MyProfileFragment extends Fragment {
         new ViewModelProvider(this).get(FriendsViewModel.class).getFriendCount()
                 .observe(getViewLifecycleOwner(), count -> friendsRow.setText(
                         getString(R.string.my_profile_friends_row, count == null ? 0 : count)));
+        // F4-u8: «Compartir mi estado en directo»; el valor sale de PresenceSharing (lo elegido o el d4).
+        sharePresence.setOnCheckedChangeListener((button, checked) -> {
+            if (!bindingShare && current != null) {
+                viewModel.setPresenceSharing(current.uid, checked);
+            }
+        });
         deleteButton.setOnClickListener(v -> {
             hideMessage();
             showDeleteConfirmation();
@@ -241,6 +252,16 @@ public class MyProfileFragment extends Fragment {
             nameInput.setText(profile.displayName);
             picker.setSelectedColor(restoredColor >= 0 ? restoredColor : profile.avatarColor);
         }
+        if (!shareLoaded) {
+            shareLoaded = true;
+            final SwitchMaterial toggle = sharePresence;
+            viewModel.readPresenceSharing(profile.uid, on -> toggle.post(() -> {
+                bindingShare = true;
+                toggle.setChecked(on);
+                toggle.setEnabled(true);
+                bindingShare = false;
+            }));
+        }
         Date now = new Date();
         Date at = viewModel.canRenameAt(profile);
         renameAllowed = !at.after(now);
@@ -344,5 +365,6 @@ public class MyProfileFragment extends Fragment {
         avatar = null;
         current = null;
         initialized = false;
+        shareLoaded = false;
     }
 }

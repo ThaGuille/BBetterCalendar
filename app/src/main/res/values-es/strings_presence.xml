@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F4-u8 · Mi perfil: interruptor de presencia (D-032). -->
+    <string name="my_profile_share_presence">Compartir mi estado en directo</string>
+    <string name="my_profile_share_presence_desc">Si lo apagas, tus amigos te verán siempre como ausente</string>
+</resources>

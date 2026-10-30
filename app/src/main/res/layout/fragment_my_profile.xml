@@ -162,6 +162,45 @@
                 android:enabled="false"
                 android:text="@string/my_profile_rename_button" />
 
+            <!-- F4-u8: interruptor «Compartir mi estado en directo» (D-032). -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xl"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/my_profile_share_presence"
+                        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:text="@string/my_profile_share_presence_desc"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+                </LinearLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/mpSharePresence"
+                    style="@style/Widget.BBetter.Switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:contentDescription="@string/my_profile_share_presence"
+                    android:enabled="false"
+                    android:thumb="@drawable/bb_switch_thumb_check" />
+            </LinearLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mpSignOutButton"
                 style="@style/Widget.BBetter.Button.Text"

@@ -17,6 +17,7 @@ import com.example.bbettercalendar.social.account.AgeGate;
 import com.example.bbettercalendar.social.account.SocialPrefs;
 import com.example.bbettercalendar.social.account.SocialTerms;
 import com.example.bbettercalendar.social.presence.PresencePublisher;
+import com.example.bbettercalendar.social.presence.PresenceSharing;
 import com.example.bbettercalendar.social.profile.HandleValidator;
 import com.example.bbettercalendar.social.profile.Profile;
 import com.example.bbettercalendar.social.profile.ProfileRepository;
@@ -86,6 +87,8 @@ public class ProfileViewModel extends ViewModel {
     private final SocialPrefs prefs;
     // F4-u3: presencia en directo; Lazy y tras el flag (en release no se crea).
     private final Lazy<PresencePublisher> presence;
+    // F4-u8: el interruptor «Compartir mi estado en directo» (D-032).
+    private final PresenceSharing sharing;
     private final Handler main = new Handler(Looper.getMainLooper());
 
     private final MutableLiveData<HandleStatus> handleStatus = new MutableLiveData<>(HandleStatus.IDLE);
@@ -98,11 +101,12 @@ public class ProfileViewModel extends ViewModel {
 
     @Inject
     public ProfileViewModel(ProfileRepository profiles, AccountRepository account, SocialPrefs prefs,
-                            Lazy<PresencePublisher> presence) {
+                            Lazy<PresencePublisher> presence, PresenceSharing sharing) {
         this.profiles = profiles;
         this.account = account;
         this.prefs = prefs;
         this.presence = presence;
+        this.sharing = sharing;
     }
 
     public LiveData<ProfileState> getProfile() {
@@ -210,6 +214,19 @@ public class ProfileViewModel extends ViewModel {
     public void rename(@NonNull String newHandle) {
         busy.setValue(true);
         profiles.rename(newHandle, callback(Outcome.Kind.RENAMED));
+    }
+
+    /** F4-u8: valor del interruptor de presencia para {@code uid} (lo elegido o el d4); callback en el hilo de E/S o el actual. */
+    public void readPresenceSharing(@NonNull String uid, @NonNull java.util.function.Consumer<Boolean> callback) {
+        sharing.readSharing(uid, callback);
+    }
+
+    /** F4-u8: cambia el interruptor; apagado escribe {@code idle} al instante, encendido republica la racha. */
+    public void setPresenceSharing(@NonNull String uid, boolean on) {
+        if (SocialFeature.isAccountEnabled()) {
+            presence.get(); // asegura que el publicador ya escucha el interruptor
+        }
+        sharing.setSharing(uid, on);
     }
 
     /**

@@ -416,9 +416,9 @@ public class HomeViewModel extends AndroidViewModel {
         return nextUp;
     }
 
-    // PLACEHOLDER(ui-placeholders#social-home-friends): maqueta tras FEATURE_SOCIAL_MOCK.
+    /** F4-u4: the single social snapshot, for "N friends studying now" — 03 §10. */
     public LiveData<SocialSnapshot> getSocialSnapshot() {
-        return socialRepository.getHomeSnapshot();
+        return socialRepository.getSnapshot();
     }
 
     /** Nº de días con pomodoro de este mes, emitido sólo al completar el primero del día. */

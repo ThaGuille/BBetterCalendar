@@ -414,7 +414,5 @@ describe("reglas F2: friendRequests/, contador diario, users/*/friends, isFriend
     await assertFails(alice.ref("friends/alice/bob").remove());
     await assertFails(bob.ref("friends/alice/bob").set(true));
     await assertFails(bob.ref("friends/bob/carol").set(true));
-    // status/ sigue cerrado (F4).
-    await assertFails(alice.ref("status/alice").get());
   });
 });

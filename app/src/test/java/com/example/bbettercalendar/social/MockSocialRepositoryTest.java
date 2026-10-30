@@ -13,7 +13,9 @@ import java.util.List;
 
 public class MockSocialRepositoryTest {
 
-    private final SocialSnapshot mock = new MockSocialRepository().getSnapshot().getValue();
+    private static final long NOW = 1_800_000_000_000L;
+
+    private final SocialSnapshot mock = new MockSocialRepository(NOW).getSnapshot().getValue();
 
     @Test
     public void mock_matchesStitchCounts() {
@@ -26,7 +28,8 @@ public class MockSocialRepositoryTest {
 
     @Test
     public void mock_topFriendIsLaia() {
-        // html 01 crown, html 02 "Laia and 3 others still studying"
+        // html 01 crown; since F4-u4 the crown is a uid, like RankingRepository's crownUid.
+        assertEquals("laia", mock.getCrownUid());
         Friend top = mock.getTopFriend();
         assertNotNull(top);
         assertEquals("Laia", top.getName());
@@ -37,12 +40,10 @@ public class MockSocialRepositoryTest {
     public void mock_carriesNoRank() {
         // F3-u8: the rank is real now (RankingRepository -> CycleRank); the mock has none.
         assertNull(mock.getUserRank());
-        assertNull(new MockSocialRepository().getHomeSnapshot().getValue().getUserRank());
-        assertNull(new MockSocialRepository().getCelebrationSnapshot().getValue().getUserRank());
     }
 
     @Test
-    public void friends_areOrderedStudyingFirstThenByTime() {
+    public void friends_areOrderedStudyingFirstThenLongestSession() {
         List<Friend> friends = mock.getFriends();
         boolean seenAway = false;
         for (int i = 0; i < friends.size(); i++) {
@@ -50,12 +51,14 @@ public class MockSocialRepositoryTest {
             if (!f.isStudying()) seenAway = true;
             assertFalse("studying after away at " + i, seenAway && f.isStudying());
             assertFalse(f.getInitials().isEmpty());
-            if (i > 0 && friends.get(i - 1).isStudying() == f.isStudying()) {
-                assertTrue(friends.get(i - 1).getFocusSecondsToday() >= f.getFocusSecondsToday());
+            if (i > 0 && friends.get(i - 1).isStudying() && f.isStudying()) {
+                assertTrue(friends.get(i - 1).getSessionStartMs() <= f.getSessionStartMs());
             }
         }
         assertEquals("Laia", friends.get(0).getName());
         assertEquals("Pau", friends.get(1).getName());
+        // Laia lleva 3:12:05 en el momento en que se construyó la maqueta.
+        assertEquals((3 * 3600 + 12 * 60 + 5) * 1000L, friends.get(0).getElapsedMs(NOW));
     }
 
     @Test
@@ -83,40 +86,5 @@ public class MockSocialRepositoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void rank_rejectsPositionOutsideGroup() {
         new SocialRank(3, 2);
-    }
-
-    @Test
-    public void home_matchesHtml04() {
-        // html 04: "3 friends studying now" · "Maya, Alex, Leo" (avatars M, A, L)
-        SocialSnapshot home = new MockSocialRepository().getHomeSnapshot().getValue();
-        assertNotNull(home);
-        assertEquals(3, home.getStudyingCount());
-        List<Friend> studying = home.getStudying();
-        assertEquals("Maya", studying.get(0).getName());
-        assertEquals("Alex", studying.get(1).getName());
-        assertEquals("Leo", studying.get(2).getName());
-        for (Friend f : studying) {
-            assertTrue(f.isStudying());
-        }
-    }
-
-    @Test
-    public void celebration_matchesHtml02() {
-        // html 02: "Laia and 3 others still studying", avatars L, M, J, rank 2nd among friends
-        SocialSnapshot celebration = new MockSocialRepository().getCelebrationSnapshot().getValue();
-        assertNotNull(celebration);
-        assertEquals(4, celebration.getStudyingCount());
-        List<Friend> studying = celebration.getStudying();
-        assertEquals("Laia", studying.get(0).getName());
-        assertEquals("Marc", studying.get(1).getName());
-        assertEquals("Júlia", studying.get(2).getName());
-        assertNull(celebration.getUserRank());
-    }
-
-    @Test
-    public void empty_repositoryHasNoDataForEveryScreen() {
-        EmptySocialRepository empty = new EmptySocialRepository();
-        assertSame(SocialSnapshot.EMPTY, empty.getHomeSnapshot().getValue());
-        assertSame(SocialSnapshot.EMPTY, empty.getCelebrationSnapshot().getValue());
     }
 }

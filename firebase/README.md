@@ -142,7 +142,18 @@ node tests/tools/actor.js set-counter alice 20  # SIN reglas: contador de hoy a 
 node tests/tools/actor.js stats bob minutesToday=90 minutesWeekCapped=300 daysThisWeek=2 weekStreak=1 bestWeekStreak=4 totalMinutes=900
                                                 # F3-u2: set() de stats/{uid} CON reglas (dayKey y weekKey de la fecha local, ISO);
                                                 # omitidos = 0 (weeklyGoal 3); sale con 1 y el error de las reglas si no vale
+node tests/tools/actor.js presence bob focus minutes=12   # F4-u2: set() de status/{uid} CON reglas y SIN onDisconnect (se queda
+                                                # hasta la siguiente escritura); focus|break|paused|idle; sessionStart = ahora - N min;
+                                                # paused escribe pausedAt = ahora (tiempo congelado = N min)
+node tests/tools/actor.js status bob @alice     # lee status/ de @alice CON reglas: '<state> <minutos|->' ('paused 7' = congelado),
+                                                # 'idle -' sin nodo y 'denied' sin espejo RTDB (no sois amigos para el servidor)
+node tests/tools/actor.js wait-status bob @alice focus 30   # sondea hasta ver ese estado: 0 y 'SEEN focus 2.2s', o 1 si pasan los segundos
 ```
+
+`status/{uid}` (F4-u2, `presence-rules.test.js`): lee el dueño o un amigo a través del espejo `friends/{uid}/{amigo}`, escribe
+solo el dueño, y los campos son exactos: `state` (`focus`, `break`, `paused`, `idle`), `since` (== hora del servidor),
+`sessionStart` (todo menos `idle`) y `pausedAt` (solo `paused`). El espejo lo escriben solo las Functions: para probar
+`status`/`wait-status` a mano con un amigo hace falta una amistad real (`send` + `accept` con las Functions en marcha).
 
 Bob también puede entrar en la app por email (`bob@bb.test` / `bbtest-123456`) para el recorrido completo con dos
 identidades. Para conservarlas entre arranques: `--import <carpeta fuera del repo> --export-on-exit`.

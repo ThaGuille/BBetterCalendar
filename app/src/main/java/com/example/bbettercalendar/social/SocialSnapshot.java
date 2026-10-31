@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * Everything the social blocks render, in one immutable value: the ONE snapshot every screen uses
- * (F4-u4, 03 §10). Friends are display-ordered (02 §7): studying first (paused friends included);
- * among them the longest session first (earlier session start); then by name.
+ * (F4-u4, 03 §10). Friends are display-ordered (02 §7): studying first, then paused, then away;
+ * among studying (and among paused) the longest session first (earlier session start); then by name.
  * The crown is RankingRepository's {@code crownUid} (F3: most capped minutes today), shown on that
  * friend whatever their status. {@link #EMPTY} is the "no data" value (no session, flag off).
  */
@@ -27,6 +27,9 @@ public final class SocialSnapshot {
                 return a.isStudying() ? -1 : 1;
             }
             if (a.isStudying()) {
+                if (a.isPaused() != b.isPaused()) {
+                    return a.isPaused() ? 1 : -1; // en pausa detrás de quien estudia
+                }
                 int bySession = Long.compare(a.getSessionStartMs(), b.getSessionStartMs());
                 if (bySession != 0) {
                     return bySession;

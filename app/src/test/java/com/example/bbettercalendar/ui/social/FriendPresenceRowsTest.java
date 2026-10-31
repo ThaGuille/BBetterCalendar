@@ -113,10 +113,18 @@ public class FriendPresenceRowsTest {
     }
 
     @Test
-    public void pausedOrdersWithStudyingBySessionStart() {
+    public void pausedGoesAfterActiveStudying_evenWithEarlierSessionStart() {
         List<FriendPresenceRows.Entry> rows = FriendPresenceRows.from(Arrays.asList(ANA, BOB),
                 snap(studying(ANA, 5_000L), paused(BOB, 1_000L, 2_000L)));
-        assertEquals(Arrays.asList("bob", "Ana"), names(rows));
+        assertEquals(Arrays.asList("Ana", "bob"), names(rows));
+    }
+
+    @Test
+    public void amongPaused_longestSessionFirst_andAwayStaysLast() {
+        List<FriendPresenceRows.Entry> rows = FriendPresenceRows.from(Arrays.asList(ANA, BOB, CAROL, DAN),
+                snap(away(ANA), paused(BOB, 3_000L, 4_000L), paused(CAROL, 1_000L, 2_000L),
+                        studying(DAN, 9_000L)));
+        assertEquals(Arrays.asList("Dan", "Carol", "bob", "Ana"), names(rows));
     }
 
     @Test

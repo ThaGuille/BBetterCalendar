@@ -62,6 +62,9 @@ public final class FriendPresenceRows {
                 return a.studying ? -1 : 1;
             }
             if (a.studying) {
+                if (a.paused != b.paused) {
+                    return a.paused ? 1 : -1; // en pausa detrás de quien estudia
+                }
                 int bySession = Long.compare(a.sessionStartMs, b.sessionStartMs);
                 if (bySession != 0) {
                     return bySession;

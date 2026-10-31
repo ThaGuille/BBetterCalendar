@@ -73,14 +73,14 @@ public class SocialSnapshotTest {
     }
 
     @Test
-    public void pausedFriends_stayInTheStudyingGroupOrderedBySessionStart() {
+    public void pausedFriends_stayInTheStudyingGroupButAfterTheActiveOnes() {
         SocialSnapshot s = new SocialSnapshot(Arrays.asList(
                 away("a", "Anna"), studying("b", "Bob", 15), paused("c", "Carol", 60, 5),
                 studying("d", "Dani", 100)), null, null);
 
-        assertEquals(Arrays.asList("Dani", "Carol", "Bob", "Anna"), names(s.getFriends()));
+        assertEquals(Arrays.asList("Dani", "Bob", "Carol", "Anna"), names(s.getFriends()));
         assertEquals(3, s.getStudyingCount());
-        assertEquals(Arrays.asList("Dani", "Carol", "Bob"), names(s.getStudying()));
+        assertEquals(Arrays.asList("Dani", "Bob", "Carol"), names(s.getStudying()));
     }
 
     @Test

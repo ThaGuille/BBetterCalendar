@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- F5-u7 · One inbox row: avatar, who + the predefined text, relative time, and a dot while it is new. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/inboxRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:background="@drawable/bg_card"
+    android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/social_friend_row_padding">
+
+    <com.example.bbettercalendar.ui.common.widget.AvatarView
+        android:id="@+id/inboxAvatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:avatarSize="@dimen/social_friend_avatar" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_card_gap"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/inboxTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+            tools:text="Bob is cheering you on" />
+
+        <TextView
+            android:id="@+id/inboxBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+            tools:text="Keep it up!" />
+
+        <TextView
+            android:id="@+id/inboxAge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            tools:text="5 min ago" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/inboxNewDot"
+        android:layout_width="@dimen/spacing_sm"
+        android:layout_height="@dimen/spacing_sm"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:background="@drawable/bg_dot_primary"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+</LinearLayout>

@@ -186,4 +186,17 @@
             app:argType="integer" />
     </fragment>
 
+    <!-- ===== F5-u7: bandeja de la campana de Home (cheers, nudges, solicitudes). La abre la campana con perfil
+         y el toque de una notificacion de Amigos (MainActivity, EXTRA_OPEN_INBOX_ID); openId es el aviso a marcar leido. ===== -->
+    <fragment
+        android:id="@+id/navigation_inbox"
+        android:name="com.example.bbettercalendar.ui.social.InboxFragment"
+        android:label="@string/inbox_top_title"
+        tools:layout="@layout/fragment_inbox">
+        <argument
+            android:name="openId"
+            android:defaultValue=""
+            app:argType="string" />
+    </fragment>
+
 </navigation>

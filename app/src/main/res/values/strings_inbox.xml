@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F5-u7 · Bandeja de la campana. %1$s = nombre de quien lo envía, %2$s = su @usuario. -->
+    <string name="inbox_top_title">Notifications</string>
+    <string name="inbox_loading">Loading your notifications…</string>
+    <string name="inbox_error">We could not load your notifications. Check your connection and come back.</string>
+    <string name="inbox_empty_title">Nothing new</string>
+    <string name="inbox_empty_body">Cheers, nudges and friend requests from your friends will show up here.</string>
+
+    <string name="inbox_cheer_title">%1$s is cheering you on</string>
+    <string name="inbox_cheer_body">Keep it up! Your friend sent you a cheer.</string>
+    <string name="inbox_nudge_title">%1$s nudged you</string>
+    <string name="inbox_nudge_body">Let\'s go! How about a focus session today?</string>
+    <string name="inbox_request_title">%1$s wants to be your friend</string>
+    <string name="inbox_request_body">\@%2$s sent you a friend request.</string>
+
+    <string name="inbox_age_now">Just now</string>
+    <string name="inbox_age_minutes">%1$d min ago</string>
+    <string name="inbox_age_hours">%1$d h ago</string>
+    <string name="inbox_age_days">%1$d d ago</string>
+</resources>

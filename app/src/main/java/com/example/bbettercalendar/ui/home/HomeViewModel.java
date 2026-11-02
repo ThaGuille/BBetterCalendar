@@ -30,6 +30,8 @@ import com.example.bbettercalendar.social.SocialRepository;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.SocialPrefs;
 import com.example.bbettercalendar.social.friends.FriendsRepository;
+import com.example.bbettercalendar.social.inbox.InboxRepository;
+import com.example.bbettercalendar.ui.social.InboxRows;
 import com.example.bbettercalendar.social.profile.Profile;
 import com.example.bbettercalendar.social.profile.ProfileRepository;
 import com.example.bbettercalendar.social.profile.ProfileState;
@@ -116,6 +118,7 @@ public class HomeViewModel extends AndroidViewModel {
                          SocialRepository socialRepository,
                          ProfileRepository profileRepository,
                          FriendsRepository friendsRepository,
+                         InboxRepository inboxRepository,
                          SocialPrefs socialPrefs,
                          @IoExecutor ExecutorService ioExecutor,
                          @DbWriteExecutor ExecutorService dbWriteExecutor) {
@@ -126,8 +129,13 @@ public class HomeViewModel extends AndroidViewModel {
         bellRequests.setValue(BELL_LEGACY);
         if (profileState != null) {
             LiveData<Integer> pending = friendsRepository.pendingIncomingCount();
-            bellRequests.addSource(profileState, state -> recomputeBell(state, pending.getValue()));
-            bellRequests.addSource(pending, count -> recomputeBell(profileState.getValue(), count));
+            LiveData<Integer> unread = inboxRepository.unreadCount();
+            bellRequests.addSource(profileState,
+                    state -> recomputeBell(state, pending.getValue(), unread.getValue()));
+            bellRequests.addSource(pending,
+                    count -> recomputeBell(profileState.getValue(), count, unread.getValue()));
+            bellRequests.addSource(unread,
+                    count -> recomputeBell(profileState.getValue(), pending.getValue(), count));
         }
         greeting.setValue(GreetingResolver.resolve(null, 0, null));
         greeting.addSource(localName, name -> recomputeGreeting());
@@ -464,16 +472,16 @@ public class HomeViewModel extends AndroidViewModel {
         return localName.getValue();
     }
 
-    /** F2-u8: con perfil listo, cuántas solicitudes hay; si no, BELL_LEGACY. */
-    private void recomputeBell(@Nullable ProfileState state, @Nullable Integer count) {
+    /** F2-u8 / F5-u7: con perfil listo, solicitudes pendientes + avisos sin leer (solo importa si > 0); si no, BELL_LEGACY. */
+    private void recomputeBell(@Nullable ProfileState state, @Nullable Integer pending, @Nullable Integer unread) {
         boolean hasProfile = state != null && state.status == ProfileState.Status.READY;
-        int value = hasProfile ? (count == null ? 0 : count) : BELL_LEGACY;
+        int value = hasProfile ? InboxRows.bellCount(pending, unread) : BELL_LEGACY;
         if (!Integer.valueOf(value).equals(bellRequests.getValue())) {
             bellRequests.setValue(value);
         }
     }
 
-    /** Campana de Home (F2-u8): nº de solicitudes de amistad pendientes, o {@link #BELL_LEGACY}. */
+    /** Campana de Home: solicitudes pendientes + avisos sin leer de la bandeja (F5-u7), o {@link #BELL_LEGACY}. */
     public LiveData<Integer> getBellRequests() {
         return bellRequests;
     }

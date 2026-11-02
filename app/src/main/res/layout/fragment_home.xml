@@ -63,9 +63,9 @@
                     tools:text="Saturday, Oct 3" />
             </LinearLayout>
 
-            <!-- PLACEHOLDER(ui-placeholders#home-notification-centre): sin centro de notificaciones.
-                 F2-u8: con perfil, el punto (homeBellDot) sale solo con solicitudes de amistad pendientes y
-                 el toque abre Amigos en Solicitudes; sin cuenta o en release, punto fijo y aviso "pronto". -->
+            <!-- F5-u7: con perfil, el punto (homeBellDot) sale solo con avisos sin leer en la bandeja o
+                 solicitudes de amistad pendientes (sin numero) y el toque abre la bandeja; sin cuenta o en
+                 release, punto fijo y aviso "pronto". -->
             <FrameLayout
                 android:layout_width="@dimen/home_header_icon_button"
                 android:layout_height="@dimen/home_header_icon_button">

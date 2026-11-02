@@ -17,6 +17,12 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.notifications.PermissionGate;
 import com.example.bbettercalendar.social.SocialFeature;
+import com.example.bbettercalendar.social.inbox.InboxItem;
+import com.example.bbettercalendar.social.push.FriendsPushHandler;
+import com.example.bbettercalendar.social.push.FriendsPushPayload;
+import com.example.bbettercalendar.ui.social.InboxFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.example.bbettercalendar.ui.social.AcceptInviteSheet;
 import com.example.bbettercalendar.ui.social.PendingInviteViewModel;
 import com.example.bbettercalendar.stats.StatsDAO;
@@ -80,6 +86,14 @@ public class MainActivity extends AppCompatActivity {
     /** Solo debug: ARG_CYCLES / ARG_FOCUS_MILLIS de {@code cycle_complete} ({@code --ei} / {@code --el}). */
     public static final String EXTRA_DEBUG_CYCLES = "bb_debug_cycles";
     public static final String EXTRA_DEBUG_FOCUS_MILLIS = "bb_debug_focus_millis";
+    /**
+     * Solo debug (F5-u7): {@code bb_debug_nav friends_push} publica por {@link FriendsPushHandler#show} el mismo aviso
+     * del canal «Amigos» que enseñaría un push real (para el AVD sin FCM): tipo (cheer|nudge|request), nombre de quien
+     * lo envía (y su @usuario) e id del elemento de la bandeja.
+     */
+    public static final String EXTRA_DEBUG_PUSH_TYPE = "bb_debug_push_type";
+    public static final String EXTRA_DEBUG_PUSH_FROM = "bb_debug_push_from";
+    public static final String EXTRA_DEBUG_PUSH_INBOX = "bb_debug_push_inbox";
 
     private final String TAG = "MainActivityTAG";
     private ActivityMainBinding binding;
@@ -139,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         openProjectFromIntent(getIntent());
+        openInboxFromIntent(getIntent());
         handleDebugNav(getIntent());
         setUpPendingInvite();
     }
@@ -212,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         openProjectFromIntent(intent);
+        openInboxFromIntent(intent);
         handleDebugNav(intent);
     }
 
@@ -249,6 +265,9 @@ public class MainActivity extends AppCompatActivity {
                 intent.removeExtra(EXTRA_DEBUG_CYCLES);
                 intent.removeExtra(EXTRA_DEBUG_FOCUS_MILLIS);
                 break;
+            case "friends_push":
+                debugFriendsPush(intent);
+                return;
             case "all_progress": destination = R.id.navigation_all_progress; break;
             case "screen_time": destination = R.id.navigation_screen_time; break;
             case "app_detail":
@@ -259,6 +278,38 @@ public class MainActivity extends AppCompatActivity {
             default: return;
         }
         navController.navigate(destination, args);
+    }
+
+    /** Ruta de depuracion {@code friends_push}: construye el FriendsPushPayload y lo enseña como el servicio real. */
+    private void debugFriendsPush(Intent intent) {
+        String type = intent.getStringExtra(EXTRA_DEBUG_PUSH_TYPE);
+        String from = intent.getStringExtra(EXTRA_DEBUG_PUSH_FROM);
+        String inboxId = intent.getStringExtra(EXTRA_DEBUG_PUSH_INBOX);
+        intent.removeExtra(EXTRA_DEBUG_PUSH_TYPE);
+        intent.removeExtra(EXTRA_DEBUG_PUSH_FROM);
+        intent.removeExtra(EXTRA_DEBUG_PUSH_INBOX);
+        InboxItem.Type parsed = InboxItem.Type.fromWire(type);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (parsed == null || user == null) return;
+        String name = from == null || from.isEmpty() ? "Bob" : from;
+        String id = inboxId == null || inboxId.isEmpty() ? parsed.wire + "_" + name : inboxId;
+        FriendsPushHandler.show(this, new FriendsPushPayload(parsed, user.getUid(), id, name, name.toLowerCase()));
+    }
+
+    /**
+     * F5-u7: el toque de una notificacion del canal «Amigos» ({@link FriendsPushHandler#EXTRA_OPEN_INBOX_ID}) abre la
+     * bandeja con ese aviso leido. El extra se consume: una rotacion no la abre otra vez.
+     */
+    private void openInboxFromIntent(Intent intent) {
+        if (intent == null || navController == null) return;
+        String inboxId = intent.getStringExtra(FriendsPushHandler.EXTRA_OPEN_INBOX_ID);
+        if (inboxId == null) return;
+        intent.removeExtra(FriendsPushHandler.EXTRA_OPEN_INBOX_ID);
+        if (!SocialFeature.isAccountEnabled()) return;
+        Bundle args = new Bundle();
+        args.putString(InboxFragment.ARG_OPEN_ID, inboxId);
+        navController.navigate(R.id.navigation_inbox, args,
+                new androidx.navigation.NavOptions.Builder().setLaunchSingleTop(true).build());
     }
 
     private static int debugTab(String name) {

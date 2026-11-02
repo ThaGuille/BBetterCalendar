@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F5-u7 · Bandeja de la campana. %1$s = nombre de quien lo envía, %2$s = su @usuario. -->
+    <string name="inbox_top_title">Notificaciones</string>
+    <string name="inbox_loading">Cargando tus notificaciones…</string>
+    <string name="inbox_error">No pudimos cargar tus notificaciones. Revisa tu conexión y vuelve.</string>
+    <string name="inbox_empty_title">Nada nuevo</string>
+    <string name="inbox_empty_body">Aquí aparecerán los ánimos, empujones y solicitudes de amistad de tus amigos.</string>
+
+    <string name="inbox_cheer_title">%1$s te anima</string>
+    <string name="inbox_cheer_body">¡Sigue así! Tu amigo te envió un ánimo.</string>
+    <string name="inbox_nudge_title">%1$s te dio un empujón</string>
+    <string name="inbox_nudge_body">¡Vamos! ¿Qué tal una sesión de enfoque hoy?</string>
+    <string name="inbox_request_title">%1$s quiere ser tu amigo</string>
+    <string name="inbox_request_body">\@%2$s te envió una solicitud de amistad.</string>
+
+    <string name="inbox_age_now">Ahora mismo</string>
+    <string name="inbox_age_minutes">hace %1$d min</string>
+    <string name="inbox_age_hours">hace %1$d h</string>
+    <string name="inbox_age_days">hace %1$d d</string>
+</resources>

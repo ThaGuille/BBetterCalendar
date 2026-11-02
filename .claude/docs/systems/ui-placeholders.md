@@ -1,6 +1,6 @@
 # System — UI placeholders (functional-debt ledger)
 
-**Last verified:** 2026-10-31 (DB v14, F4 closed) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-02 (DB v14, F5-u7) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Stitch visual migration (`.claude/plans/migracion-visual-stitch.md`) builds every designed
 element whose data already exists in the DB, and **registers the rest here** instead of bumping
@@ -38,7 +38,6 @@ repository `social/SocialModule` binds (`FEATURE_SOCIAL` first, see `systems/soc
 ## Open placeholders
 | id | Screen | View | Shows today | Missing | Priority |
 |---|---|---|---|---|---|
-| `home-notification-centre` (partial) | Home (u13) | `homeBellButton` / `homeBellDot` | Signed in with a profile (F2-u8): the dot shows only when there are received friend requests and a tap opens Friends at Requests. Without an account or in release: the fixed honey dot and the "coming soon" toast | The notification centre / inbox (F5): cheers, nudges and push; until then the bell only knows friend requests | P2 |
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
 | `projects-streak-chip` | Projects (u16) | `projectsStreakChip` | The **global** streak (hidden at 0), not a per-project streak | `focus_event` does not attribute a streak per project | P2 |
 | `progress-tasks-done-approx` | Progress (u17) | `progressTileTasks` | Counts done tasks whose start date falls in the range | A completion timestamp on `CalendarEntry` (schema change + real `Migration`) | P2 |
@@ -60,6 +59,7 @@ repository `social/SocialModule` binds (`FEATURE_SOCIAL` first, see `systems/soc
 | `social-backend` | 2026-10-31 | F4-u4: `FirebaseSocialRepository` (one snapshot: friends from `FriendsRepository`, one RTDB `status/` listener per friend, crown from `RankingRepository`) bound in `SocialModule` when `SocialFeature.isAccountEnabled()`; `getHomeSnapshot` / `getCelebrationSnapshot` and the mock markers removed |
 | `social-home-friends` | 2026-10-31 | F4-u6: `homeFriendsCard` shows «N friends studying now» with the real studying friends' avatars and names (`StudyingSummary`), a calm line when nobody studies, an invite line without friends; tap still opens Friends; markers removed |
 | `social-celebration-strip` | 2026-10-31 | F4-u6: `cycleFriendsStrip` shows «Laia and N others still studying · Live» from the real snapshot and is `GONE` when nobody studies; no code marker existed, the data source changed |
+| `home-notification-centre` | 2026-11-02 | F5-u7: the Home bell opens the inbox (`navigation_inbox`, `InboxFragment`) when signed in with a profile; `homeBellDot` shows with unread inbox items or pending requests (`InboxRows.bellCount`, no number); without an account or in release the bell keeps the fixed dot and the "coming soon" toast; markers removed |
 
 ## History
 | Date | Change | Ref |

@@ -143,6 +143,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 return;
             }
             boolean legacy = requests == null || requests == HomeViewModel.BELL_LEGACY;
+            // Sin cuenta o en release el punto queda fijo; con perfil, solo con avisos sin leer o solicitudes.
             binding.homeBellDot.setVisibility(legacy || requests > 0 ? View.VISIBLE : View.GONE);
         });
 
@@ -526,11 +527,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             showTimerSettings();
         } else if (id == R.id.homeBellButton) {
             Integer requests = homeViewModel.getBellRequests().getValue();
-            if (socialEntry != null && requests != null && requests != HomeViewModel.BELL_LEGACY) {
-                // F2-u8: con perfil, la campana lleva a Amigos subido hasta las solicitudes.
-                socialEntry.requestEntry(EntryTarget.FRIEND_REQUESTS);
+            if (requests != null && requests != HomeViewModel.BELL_LEGACY) {
+                // F5-u7: con perfil, la campana abre la bandeja (ánimos, empujones y solicitudes).
+                NavHostFragment.findNavController(this).navigate(R.id.navigation_inbox);
             } else {
-                // PLACEHOLDER(ui-placeholders#home-notification-centre): sin cuenta o en release.
+                // Sin cuenta o en release: la campana sigue como antes (aviso «pronto»).
                 Toast.makeText(requireContext(), R.string.home_notifications_soon, Toast.LENGTH_SHORT).show();
             }
         } else if (id == R.id.homeNextUpCard) {

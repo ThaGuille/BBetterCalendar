@@ -6,3 +6,4 @@ setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 export { deleteAccount } from "./deleteAccount";
 export { onFriendRequestAccepted, removeFriend } from "./friends";
+export { sendCheer, sendNudge, onFriendRequestCreated } from "./interactions";

@@ -212,6 +212,9 @@ describe("deleteAccount (callable, europe-west1)", function () {
         from: "erin", to: uid, status: "pending", createdAt: now,
         fromHandle: "erin", fromName: "Erin", fromColor: 2, toHandle: "alice_1", toName: "Alice", toColor: 3,
       });
+      // F5-u3: onFriendRequestCreated escribe request_erin en la bandeja de la cuenta; se espera a que llegue
+      // para que ningún snapshot lo vea aparecer a medias.
+      await waitFor(async () => (await db.doc(`users/${uid}/inbox/request_erin`).get()).exists);
       const rtdb = ctx.database();
       await rtdb.ref().update({
         [`status/${uid}`]: { state: "focus", since: 1, sessionStart: 1 },

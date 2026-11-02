@@ -44,6 +44,19 @@
 //                                                          'SEEN <state> <s>s'; con 1 y 'TIMEOUT ...' si pasan los
 //                                                          segundos. Un 'denied' pasajero (espejo aún sin escribir)
 //                                                          no corta la espera
+//   node tests/tools/actor.js cheer <nombre> @usuario      F5-u3: ánimo con la callable sendCheer (dayKey = fecha local
+//                                                          del equipo; con el AVD en GMT usa TZ=GMT cerca de medianoche).
+//                                                          Escribe sent | already | not-friends @usuario
+//   node tests/tools/actor.js nudge <nombre> @usuario      F5-u3: empujón con sendNudge; igual y además studied-today si el
+//                                                          amigo ya estudió hoy (falla con 1 con cualquier otro error)
+//   node tests/tools/actor.js inbox <nombre>               F5-u3: la bandeja propia (con reglas), la más nueva primero:
+//                                                          '<type> @<handle> read=<true|false>' y 'INBOX @<nombre>: N items'
+//   node tests/tools/actor.js token <nombre> <token>       F5-u3: añade <token> a users/{uid}.fcmTokens (con reglas): quita
+//                                                          los más antiguos hasta dejar 9 y lo añade (máximo 10). Un token
+//                                                          'invalid-...' lo da por inválido el push falso y se quita solo
+//   node tests/tools/actor.js pushes <nombre>              F5-u3: los push que el PushSender falso registró para esa cuenta
+//                                                          (_emulatorPush, SIN reglas): 'PUSH <type> <inboxId> de @<handle>
+//                                                          tokens=<lista>' y 'PUSHES @<nombre>: N'
 //
 // Seguridad (D-021, D-025): los hosts 127.0.0.1 y los puertos de firebase/firebase.json están fijos en el código;
 // antes de crear ningún cliente pregunta al hub del Emulator Suite (127.0.0.1:4400) y se niega a seguir si no
@@ -68,7 +81,8 @@ const USAGE = `uso: node tests/tools/actor.js <comando> ...
   signup <nombre> | send|accept|decline|cancel|remove <nombre> @usuario | list <nombre>
   seed-friends <nombre> <n> | set-counter <nombre> <n>
   stats <nombre> [minutesToday=N] [minutesWeekCapped=N] [daysThisWeek=N] [weeklyGoal=N] [weekStreak=N] [bestWeekStreak=N] [totalMinutes=N]
-  presence <nombre> focus|break|paused|idle [minutes=N] | status <nombre> @usuario | wait-status <nombre> @usuario <state> <segundos>`;
+  presence <nombre> focus|break|paused|idle [minutes=N] | status <nombre> @usuario | wait-status <nombre> @usuario <state> <segundos>
+  cheer|nudge <nombre> @usuario | inbox <nombre> | token <nombre> <token> | pushes <nombre>`;
 
 const PRESENCE_STATES = ["focus", "break", "paused", "idle"];
 const MINUTE = 60000;
@@ -88,6 +102,11 @@ const NEEDS = {
   presence: ["auth", "database"],
   status: ["auth", "firestore", "database"],
   "wait-status": ["auth", "firestore", "database"],
+  cheer: ["auth", "firestore", "functions"],
+  nudge: ["auth", "firestore", "functions"],
+  inbox: ["auth", "firestore"],
+  token: ["auth", "firestore"],
+  pushes: ["auth", "firestore"],
 };
 
 // F3-u2: los siete números de stats/{uid} que se pueden fijar, con su valor por defecto.
@@ -517,6 +536,60 @@ async function waitStatus(name, handle, state, seconds) {
   }
 }
 
+// F5-u3: ánimo y empujón con las callables sendCheer / sendNudge. El dayKey es la fecha local del equipo (como
+// WeekKey.dayKey en la app); cerca de medianoche usa TZ=GMT si el AVD va en GMT.
+async function interact(type, name, handle) {
+  const { functions } = client();
+  await signIn(name);
+  const friend = await card(handle);
+  const call = sdk.functions.httpsCallable(functions, type === "cheer" ? "sendCheer" : "sendNudge");
+  try {
+    const res = await call({ friendUid: friend.uid, dayKey: localKeys().dayKey });
+    out(`${res.data.status === "already" ? "already" : "sent"} @${handle}`);
+  } catch (e) {
+    const code = String(e.code || "").replace(/^functions\//, "");
+    if (code === "permission-denied") return out(`not-friends @${handle}`);
+    if (code === "failed-precondition" && /^studied-today/.test(e.message)) return out(`studied-today @${handle}`);
+    throw new Error(`${type} falló (${code || e.message}${e.message && e.message !== code ? ": " + e.message : ""})`);
+  }
+}
+
+// F5-u3: la bandeja propia (con reglas), una línea por item, el más nuevo primero: '<type> @<handle> read=<bool>'.
+async function inbox(name) {
+  const { db } = client();
+  const me = await signIn(name);
+  const fs = sdk.firestore;
+  const snap = await fs.getDocs(fs.query(collection(db, "users", me, "inbox"), fs.orderBy("createdAt", "desc"), fs.limit(50)));
+  snap.docs.forEach((d) => out(`${d.data().type} @${d.data().fromHandle} read=${d.data().read}`));
+  out(`INBOX @${name}: ${snap.size} items`);
+}
+
+// F5-u3: añade un token a users/{uid}.fcmTokens (con reglas) quitando los más antiguos hasta dejar 9 (máximo 10).
+async function token(name, value) {
+  const { db } = client();
+  const me = await signIn(name);
+  const ref = doc(db, "users", me);
+  const current = ((await sdk.firestore.getDoc(ref)).data() || {}).fcmTokens;
+  const list = (Array.isArray(current) ? current : []).filter((t) => t !== value);
+  const next = [...list.slice(Math.max(0, list.length - 9)), value];
+  try {
+    await sdk.firestore.updateDoc(ref, { fcmTokens: next });
+  } catch (e) {
+    throw new Error(`las reglas rechazan fcmTokens (${e.code || e.message})`);
+  }
+  out(`TOKEN @${name}: ${next.length} tokens`);
+}
+
+// F5-u3: lo que el PushSender falso registró para esta cuenta (_emulatorPush, SIN reglas: el cliente no la lee).
+async function pushes(name) {
+  const me = await signIn(name);
+  const fs = sdk.firestore;
+  const docs = await withoutRules(async (db) => (await fs.getDocs(fs.query(fs.collection(db, "_emulatorPush"), fs.where("to", "==", me)))).docs);
+  const rows = docs.map((d) => d.data()).sort((a, b) => (a.createdAt?.toMillis?.() || 0) - (b.createdAt?.toMillis?.() || 0));
+  rows.forEach((p) => out(`PUSH ${p.data.type} ${p.data.inboxId} de @${p.data.fromHandle} tokens=${p.tokens.join(",")}`));
+  out(`PUSHES @${name}: ${rows.length}`);
+}
+
 // ---- main ---------------------------------------------------------------------------------------------
 
 function parsePresenceArgs(args) {
@@ -544,7 +617,8 @@ async function main(argv) {
     if (!Number.isInteger(waitSeconds) || waitSeconds < 1 || waitSeconds > 3600) throw new UsageError("segundos tiene que ser un entero entre 1 y 3600");
   }
   const statsValues = cmd === "stats" ? parseStatsArgs(argv.slice(2)) : null;
-  const needsHandle = ["send", "accept", "decline", "cancel", "remove", "status", "wait-status"].includes(cmd);
+  const needsHandle = ["send", "accept", "decline", "cancel", "remove", "status", "wait-status", "cheer", "nudge"].includes(cmd);
+  if (cmd === "token" && !/^[A-Za-z0-9_:.-]{1,200}$/.test(arg || "")) throw new UsageError(`token no válido '${arg || ""}'`);
   const handle = needsHandle ? checkHandle(arg) : null;
   const count = cmd === "seed-friends" ? checkCount(arg, 200) : cmd === "set-counter" ? checkCount(arg, DAILY_LIMIT) : null;
 
@@ -578,6 +652,15 @@ async function main(argv) {
       return status(name, handle);
     case "wait-status":
       return waitStatus(name, handle, waitState, waitSeconds);
+    case "cheer":
+    case "nudge":
+      return interact(cmd, name, handle);
+    case "inbox":
+      return inbox(name);
+    case "token":
+      return token(name, arg);
+    case "pushes":
+      return pushes(name);
     default:
       throw new UsageError(USAGE);
   }

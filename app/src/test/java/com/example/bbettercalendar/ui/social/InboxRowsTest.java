@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.example.bbettercalendar.social.friends.FriendCard;
+import com.example.bbettercalendar.social.friends.FriendRequest;
 import com.example.bbettercalendar.social.inbox.InboxItem;
 
 import org.junit.Test;
@@ -123,5 +125,31 @@ public class InboxRowsTest {
         assertTrue(InboxRows.build(Collections.<InboxItem>emptyList(), Collections.<String>emptySet(),
                 Collections.<String>emptySet(), NOW).isEmpty());
         assertTrue(InboxRows.unreadIds(Collections.<InboxItem>emptyList()).isEmpty());
+    }
+
+    private static FriendRequest request(String from, FriendRequest.Status status) {
+        return new FriendRequest(from + "_me", new FriendCard(from, from, from.toUpperCase(), 2),
+                new FriendCard("me", "me", "Me", 1), status, null, new Date(NOW - MIN));
+    }
+
+    @Test
+    public void pendingRequestWithoutInboxRowGetsASyntheticRow() {
+        List<InboxItem> items = InboxRows.withPendingRequests(Collections.<InboxItem>emptyList(),
+                Arrays.asList(request("a", FriendRequest.Status.PENDING)));
+        assertEquals(1, items.size());
+        assertEquals("request_a", items.get(0).id);
+        assertEquals(InboxItem.Type.REQUEST, items.get(0).type);
+        assertTrue(items.get(0).read);
+        List<InboxRows.Row> rows = InboxRows.build(items, Collections.<String>emptySet(),
+                Collections.<String>emptySet(), NOW);
+        assertEquals(InboxRows.Destination.FRIEND_REQUESTS, rows.get(0).destination);
+    }
+
+    @Test
+    public void requestsWithRowOrNotPendingAreNotAdded() {
+        List<InboxItem> base = Arrays.asList(item("request_a", InboxItem.Type.REQUEST, "a", NOW, false));
+        List<InboxItem> items = InboxRows.withPendingRequests(base, Arrays.asList(
+                request("a", FriendRequest.Status.PENDING), request("b", FriendRequest.Status.FAILED)));
+        assertEquals(1, items.size());
     }
 }

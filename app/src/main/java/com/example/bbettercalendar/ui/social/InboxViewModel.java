@@ -7,8 +7,10 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.bbettercalendar.social.friends.FriendCard;
+import com.example.bbettercalendar.social.friends.FriendRequest;
 import com.example.bbettercalendar.social.friends.FriendsRepository;
 import com.example.bbettercalendar.social.friends.FriendsState;
+import com.example.bbettercalendar.social.inbox.InboxItem;
 import com.example.bbettercalendar.social.inbox.InboxRepository;
 import com.example.bbettercalendar.social.inbox.InboxState;
 
@@ -47,6 +49,7 @@ public class InboxViewModel extends ViewModel {
     private final MediatorLiveData<Screen> screen = new MediatorLiveData<>();
     private final LiveData<InboxState> inboxState;
     private final LiveData<FriendsState<FriendCard>> friendsState;
+    private final LiveData<FriendsState<FriendRequest>> incomingState;
     /** Sin leer en algún momento de esta visita. Solo en el hilo principal. */
     private final Set<String> newIds = new HashSet<>();
     private boolean openHandled;
@@ -56,8 +59,10 @@ public class InboxViewModel extends ViewModel {
         this.inbox = inbox;
         this.inboxState = inbox.observeInbox();
         this.friendsState = friends.observeFriends();
+        this.incomingState = friends.observeIncoming();
         screen.addSource(inboxState, s -> recompute());
         screen.addSource(friendsState, s -> recompute());
+        screen.addSource(incomingState, s -> recompute());
     }
 
     @NonNull
@@ -96,7 +101,11 @@ public class InboxViewModel extends ViewModel {
                 friendUids.add(card.uid);
             }
         }
+        // Las solicitudes pendientes (las que encienden el punto) siempre tienen fila, con o sin aviso propio.
+        FriendsState<FriendRequest> incoming = incomingState.getValue();
+        List<InboxItem> items = incoming != null && incoming.status == FriendsState.Status.READY
+                ? InboxRows.withPendingRequests(state.items, incoming.items) : state.items;
         screen.setValue(new Screen(InboxState.Status.READY,
-                InboxRows.build(state.items, friendUids, newIds, System.currentTimeMillis())));
+                InboxRows.build(items, friendUids, newIds, System.currentTimeMillis())));
     }
 }

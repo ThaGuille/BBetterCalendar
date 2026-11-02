@@ -3,6 +3,7 @@ package com.example.bbettercalendar.ui.social;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.bbettercalendar.social.friends.FriendRequest;
 import com.example.bbettercalendar.social.inbox.InboxItem;
 
 import java.util.ArrayList;
@@ -111,6 +112,29 @@ public final class InboxRows {
             return Destination.PROFILE;
         }
         return type == InboxItem.Type.REQUEST ? Destination.FRIEND_REQUESTS : Destination.NONE;
+    }
+
+    /**
+     * Cada solicitud pendiente que enciende el punto de la campana tiene que verse en la bandeja aunque no tenga
+     * su aviso {@code request_<uid>} (anteriores a F5 o ya podados a los 30 días): se añade una fila sintética,
+     * ya leída, con la tarjeta y la hora de la propia solicitud. Las que ya tienen aviso no se duplican.
+     */
+    @NonNull
+    public static List<InboxItem> withPendingRequests(@NonNull List<InboxItem> items,
+                                                      @NonNull List<FriendRequest> incoming) {
+        Set<String> ids = new HashSet<>();
+        for (InboxItem item : items) {
+            ids.add(item.id);
+        }
+        List<InboxItem> out = new ArrayList<>(items);
+        for (FriendRequest r : incoming) {
+            String id = "request_" + r.from.uid;
+            if (r.status == FriendRequest.Status.PENDING && ids.add(id)) {
+                out.add(new InboxItem(id, InboxItem.Type.REQUEST, r.from.uid, r.from.handle, r.from.displayName,
+                        r.from.avatarColor, r.createdAt, true));
+            }
+        }
+        return out;
     }
 
     /** Ids de los avisos sin leer (el acento «nuevo» de una visita, d1). */

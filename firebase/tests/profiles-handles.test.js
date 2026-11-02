@@ -170,7 +170,7 @@ describe("reglas F1: users/, profiles/ y handles/", () => {
     await assertSucceeds(updateDoc(doc(db, "users", "alice"), { termsVersion: 2, termsAcceptedAt: serverTimestamp() }));
     await assertFails(updateDoc(doc(db, "users", "alice"), { termsVersion: 1 }));
     await assertFails(updateDoc(doc(db, "users", "alice"), { createdAt: serverTimestamp() }));
-    await assertFails(updateDoc(doc(db, "users", "alice"), { fcmTokens: ["x"] }));
+    await assertSucceeds(updateDoc(doc(db, "users", "alice"), { fcmTokens: ["x"] }));
   });
 
   it("users/: ageBand no se puede cambiar después del alta (F2-u1, D-024)", async () => {

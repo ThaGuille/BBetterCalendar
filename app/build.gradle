@@ -146,6 +146,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-functions'
+    // F5-u6: push de amigos (FriendsMessagingService, PushTokenRegistrar). Auto-init apagado en el manifest:
+    // sin FEATURE_SOCIAL (release) nunca se pide un token; en emulador el token es falso (D-034 d8).
+    implementation 'com.google.firebase:firebase-messaging'
 
     // F1-u2: Credential Manager + Iniciar sesión con Google (selector de cuentas)
     implementation 'androidx.credentials:credentials:1.5.0'

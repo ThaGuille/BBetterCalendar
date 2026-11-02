@@ -105,6 +105,22 @@
                 android:resource="@xml/blocker_accessibility_config" />
         </service>
 
+        <!-- F5-u6 (D-034): push de amigos (ánimo, empujón, solicitud) en el canal «Amigos». Sin
+             FEATURE_SOCIAL el servicio no hace nada. exported=false: FCM entrega por un receptor propio. -->
+        <service
+            android:name=".social.push.FriendsMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- F5-u6: FCM no registra el dispositivo solo. Solo PushTokenRegistrar pide el token, y solo con
+             FEATURE_SOCIAL (release nunca lo hace) y fuera del Emulator Suite (D-034 d8). -->
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+
         <receiver
             android:name=".notifications.event.EventReminderReceiver"
             android:exported="false" />

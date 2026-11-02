@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F5-u6 · Canal «Amigos» (bb_friends, D-034): el único control para silenciar estos avisos (DIF-01). -->
+    <string name="notif_channel_friends_name">Amigos</string>
+    <string name="notif_channel_friends_desc">Ánimos, empujones y solicitudes de amistad de tus amigos.</string>
+
+    <!-- F5-u6 · Push de amigos (FriendsPushHandler). %1$s = nombre del emisor, %2$s = su @usuario. -->
+    <string name="push_cheer_title">%1$s te anima</string>
+    <string name="push_cheer_body">¡Sigue así! Tu amigo te ha enviado un ánimo.</string>
+    <string name="push_nudge_title">%1$s te da un empujón</string>
+    <string name="push_nudge_body">¡Vamos! ¿Una sesión de foco hoy?</string>
+    <string name="push_request_title">%1$s quiere ser tu amigo</string>
+    <string name="push_request_body">\@%2$s te ha enviado una solicitud de amistad.</string>
+
+    <!-- F5-u6 (d7): versión pública en pantalla de bloqueo segura, sin el nombre del emisor. -->
+    <string name="push_public_title">Tienes un aviso de un amigo</string>
+    <string name="push_public_body">Desbloquea el móvil para verlo.</string>
+</resources>

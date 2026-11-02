@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F5-u6 · Canal «Amigos» (bb_friends, D-034): el único control para silenciar estos avisos (DIF-01). -->
+    <string name="notif_channel_friends_name">Friends</string>
+    <string name="notif_channel_friends_desc">Cheers, nudges and friend requests from your friends.</string>
+
+    <!-- F5-u6 · Push de amigos (FriendsPushHandler). %1$s = nombre del emisor, %2$s = su @usuario. -->
+    <string name="push_cheer_title">%1$s is cheering you on</string>
+    <string name="push_cheer_body">Keep it up! Your friend sent you a cheer.</string>
+    <string name="push_nudge_title">%1$s nudged you</string>
+    <string name="push_nudge_body">Let\'s go! How about a focus session today?</string>
+    <string name="push_request_title">%1$s wants to be your friend</string>
+    <string name="push_request_body">\@%2$s sent you a friend request.</string>
+
+    <!-- F5-u6 (d7): versión pública en pantalla de bloqueo segura, sin el nombre del emisor. -->
+    <string name="push_public_title">You have a notice from a friend</string>
+    <string name="push_public_body">Unlock your phone to see it.</string>
+</resources>

@@ -19,6 +19,12 @@ public final class NotificationSpec {
     @DrawableRes public final int smallIconRes;
     public final PendingIntent contentIntent;
     public final boolean autoCancel;
+    /**
+     * F5-u6 (D-034 d7): texto de la versión pública (pantalla de bloqueo segura). Null = sin versión
+     * pública (el sistema aplica su visibilidad por defecto).
+     */
+    public final String publicTitle;
+    public final String publicBody;
 
     private NotificationSpec(Builder b) {
         this.channelId = b.channelId;
@@ -28,6 +34,8 @@ public final class NotificationSpec {
         this.smallIconRes = b.smallIconRes;
         this.contentIntent = b.contentIntent;
         this.autoCancel = b.autoCancel;
+        this.publicTitle = b.publicTitle;
+        this.publicBody = b.publicBody;
     }
 
     public static final class Builder {
@@ -38,6 +46,8 @@ public final class NotificationSpec {
         @DrawableRes private int smallIconRes = R.drawable.ic_stat_bbetter;
         private PendingIntent contentIntent;
         private boolean autoCancel = true;
+        private String publicTitle;
+        private String publicBody;
 
         public Builder(@NonNull String channelId, int notificationId) {
             this.channelId = channelId;
@@ -49,6 +59,13 @@ public final class NotificationSpec {
         public Builder smallIcon(@DrawableRes int res) { this.smallIconRes = res; return this; }
         public Builder contentIntent(PendingIntent pi) { this.contentIntent = pi; return this; }
         public Builder autoCancel(boolean v) { this.autoCancel = v; return this; }
+
+        /** F5-u6 (d7): lo que se ve con el móvil bloqueado en vez de título y cuerpo (sin datos personales). */
+        public Builder publicVersion(String title, String body) {
+            this.publicTitle = title;
+            this.publicBody = body;
+            return this;
+        }
 
         public Builder openMainActivity(Context context) {
             Intent intent = new Intent(context, MainActivity.class);

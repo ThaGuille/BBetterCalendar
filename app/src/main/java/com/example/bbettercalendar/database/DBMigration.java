@@ -12,6 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import com.example.bbettercalendar.notifications.NotificationChannels;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.invite.InstallReferrerReader;
+import com.example.bbettercalendar.social.push.PushTokenRegistrar;
 import com.example.bbettercalendar.social.stats.StatsPublisher;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
@@ -35,6 +36,8 @@ public class DBMigration extends Application {
     @Inject InstallReferrerReader installReferrerReader;
     // F3-u4: publicación de stats/ (03 §9). Lazy: sin FEATURE_SOCIAL (release) nunca se crea ni toca Firebase.
     @Inject Lazy<StatsPublisher> statsPublisher;
+    // F5-u6: token FCM en users/{uid}.fcmTokens al tener sesión y perfil. Lazy por lo mismo que el anterior.
+    @Inject Lazy<PushTokenRegistrar> pushTokenRegistrar;
 
     @Override
     public void onCreate() {
@@ -48,6 +51,7 @@ public class DBMigration extends Application {
         installReferrerReader.readOnce();
         if (SocialFeature.isAccountEnabled()) {
             statsPublisher.get().start();
+            pushTokenRegistrar.get().start();
         }
     }
 

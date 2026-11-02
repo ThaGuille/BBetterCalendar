@@ -47,6 +47,17 @@ public class BBetterNotifier {
             builder.setContentIntent(spec.contentIntent);
         }
 
+        // F5-u6 (D-034 d7): en pantalla de bloqueo segura se ve la versión pública, sin el contenido privado.
+        if (spec.publicTitle != null) {
+            NotificationCompat.Builder publicVersion = new NotificationCompat.Builder(appContext, spec.channelId)
+                    .setSmallIcon(spec.smallIconRes)
+                    .setColor(ContextCompat.getColor(appContext, R.color.bb_primary))
+                    .setContentTitle(spec.publicTitle)
+                    .setContentText(spec.publicBody);
+            builder.setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                    .setPublicVersion(publicVersion.build());
+        }
+
         NotificationManagerCompat.from(appContext).notify(spec.notificationId, builder.build());
     }
 

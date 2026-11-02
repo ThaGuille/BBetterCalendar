@@ -22,6 +22,7 @@ import com.example.bbettercalendar.social.profile.HandleValidator;
 import com.example.bbettercalendar.social.profile.Profile;
 import com.example.bbettercalendar.social.profile.ProfileRepository;
 import com.example.bbettercalendar.social.profile.ProfileState;
+import com.example.bbettercalendar.social.push.PushTokenRegistrar;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.functions.FirebaseFunctionsException;
@@ -89,6 +90,8 @@ public class ProfileViewModel extends ViewModel {
     private final Lazy<PresencePublisher> presence;
     // F4-u8: el interruptor «Compartir mi estado en directo» (D-032).
     private final PresenceSharing sharing;
+    // F5-u6: el token FCM de este móvil sale de users/{uid}.fcmTokens antes de cerrar sesión o borrar la cuenta.
+    private final Lazy<PushTokenRegistrar> pushTokens;
     private final Handler main = new Handler(Looper.getMainLooper());
 
     private final MutableLiveData<HandleStatus> handleStatus = new MutableLiveData<>(HandleStatus.IDLE);
@@ -101,12 +104,14 @@ public class ProfileViewModel extends ViewModel {
 
     @Inject
     public ProfileViewModel(ProfileRepository profiles, AccountRepository account, SocialPrefs prefs,
-                            Lazy<PresencePublisher> presence, PresenceSharing sharing) {
+                            Lazy<PresencePublisher> presence, PresenceSharing sharing,
+                            Lazy<PushTokenRegistrar> pushTokens) {
         this.profiles = profiles;
         this.account = account;
         this.prefs = prefs;
         this.presence = presence;
         this.sharing = sharing;
+        this.pushTokens = pushTokens;
     }
 
     public LiveData<ProfileState> getProfile() {
@@ -232,7 +237,8 @@ public class ProfileViewModel extends ViewModel {
     /**
      * F4-u3 (03 §8.5): antes de cerrar la sesión de Auth, la presencia escribe {@code idle} y cancela su
      * {@code onDisconnect}; la sesión se cierra al llegar el acuse (o pasado su tope corto). Sin el flag,
-     * directamente.
+     * directamente. F5-u6: antes aún, el token FCM de este móvil sale de {@code users/{uid}.fcmTokens} y se borra
+     * el local (con sesión: las reglas solo dejan escribir al dueño).
      */
     public void signOut() {
         if (!SocialFeature.isAccountEnabled()) {
@@ -240,10 +246,10 @@ public class ProfileViewModel extends ViewModel {
             return;
         }
         busy.setValue(true);
-        presence.get().goOfflineForSignOut(() -> main.post(() -> {
+        pushTokens.get().beforeSignOut(() -> presence.get().goOfflineForSignOut(() -> main.post(() -> {
             account.signOut();
             busy.setValue(false);
-        }));
+        })));
     }
 
     // ---- borrar cuenta (F1-u7) -------------------------------------------------------------------------
@@ -281,10 +287,13 @@ public class ProfileViewModel extends ViewModel {
     /**
      * F4-u3 (03 §8.5): la presencia cancela su {@code onDisconnect} antes de la Function y no vuelve a escribir
      * (si no, el servidor recrearía {@code status/{uid}} tras borrarlo); si la Function falla, sigue publicando.
+     * F5-u6: antes, el token FCM de este móvil sale de la lista y se borra el local; si la Function falla, se
+     * vuelve a registrar.
      */
     private void callDelete(boolean afterReauth) {
         if (SocialFeature.isAccountEnabled()) {
-            presence.get().beforeDeleteAccount(() -> deleteNow(afterReauth));
+            pushTokens.get().beforeDeleteAccount(
+                    () -> presence.get().beforeDeleteAccount(() -> deleteNow(afterReauth)));
         } else {
             deleteNow(afterReauth);
         }
@@ -301,6 +310,7 @@ public class ProfileViewModel extends ViewModel {
             public void onError(@NonNull Throwable error) {
                 if (SocialFeature.isAccountEnabled()) {
                     presence.get().onDeleteAccountFailed();
+                    pushTokens.get().onDeleteAccountFailed();
                 }
                 if (!afterReauth && isStaleLogin(error)) {
                     finish(new Outcome(Outcome.Kind.NEEDS_REAUTH, null));

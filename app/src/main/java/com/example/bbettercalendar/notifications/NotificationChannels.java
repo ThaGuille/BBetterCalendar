@@ -14,6 +14,8 @@ public final class NotificationChannels {
     public static final String CHANNEL_FOCUS_ALERTS = "bb_focus_alerts";
     public static final String CHANNEL_USAGE_LIMITS = "bb_usage_limits";
     public static final String CHANNEL_PROJECT_DEADLINES = "bb_project_deadlines";
+    // F5-u6 (D-034): ánimos, empujones y solicitudes de amigos. Es el único control para silenciarlos (DIF-01).
+    public static final String CHANNEL_FRIENDS = "bb_friends";
 
     public static void createAll(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -54,11 +56,20 @@ public final class NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH);
         projectDeadlines.setDescription(context.getString(R.string.notif_channel_project_deadlines_desc));
 
+        // F5-u6: avisos de amigos (ánimo, empujón, solicitud). Canal propio: el usuario lo silencia en los
+        // ajustes del sistema sin tocar el resto (02 §8, DIF-01).
+        NotificationChannel friends = new NotificationChannel(
+                CHANNEL_FRIENDS,
+                context.getString(R.string.notif_channel_friends_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        friends.setDescription(context.getString(R.string.notif_channel_friends_desc));
+
         nm.createNotificationChannel(foreground);
         nm.createNotificationChannel(events);
         nm.createNotificationChannel(focus);
         nm.createNotificationChannel(usageLimits);
         nm.createNotificationChannel(projectDeadlines);
+        nm.createNotificationChannel(friends);
     }
 
     private NotificationChannels() {}

@@ -10,7 +10,11 @@
 //      - el handles/ del perfil (solo si su tarjeta apunta a este uid) y cualquier otro handles/ con uid == uid;
 //      - F2-u4: los invites/{código} con uid == uid (el enlace de invitación deja de resolverse);
 //      - profiles/{uid}, stats/{uid} y blocks/{uid} (con su subcolección blocked);
-//      - recursiveDelete(users/{uid}): el documento con sus subcolecciones friends e inbox;
+//      - recursiveDelete(users/{uid}): el documento con fcmTokens y sus subcolecciones friends e inbox;
+//      - F5-u4 (D-035, d5): lo que la cuenta dejó en bandejas AJENAS: todo users/*/inbox/* con from == uid
+//        (collectionGroup('inbox'), cubre ánimos y empujones a amigos ya eliminados y solicitudes a quien
+//        las rechazó) y, además, request_{uid} en la bandeja de cada contraparte de sus solicitudes;
+//        lo de otros remitentes se queda;
 //      - RTDB status/{uid} y friends/{uid}.
 //   3. Por último, el usuario de Auth: si se borrase antes y algo fallase, ya no habría sesión para repetir.
 //
@@ -92,6 +96,18 @@ export async function deleteAccountData(uid: string): Promise<{ friends: number;
   const requests = new Map<string, DocumentReference>();
   [...sent.docs, ...received.docs].forEach((d) => requests.set(d.ref.path, d.ref));
 
+  // F5-u4: items enviados por la cuenta en bandejas de otros (collectionGroup) y request_{uid} deterministas
+  // en la bandeja de cada contraparte de sus solicitudes (la bandeja propia cae con recursiveDelete).
+  const authored = new Map<string, DocumentReference>();
+  (await db.collectionGroup("inbox").where("from", "==", uid).get()).docs.forEach((d) => authored.set(d.ref.path, d.ref));
+  sent.docs.forEach((d) => {
+    const to = d.get("to");
+    if (typeof to === "string" && to.length > 0 && to !== uid) {
+      const ref = db.collection("users").doc(to).collection("inbox").doc(`request_${uid}`);
+      authored.set(ref.path, ref);
+    }
+  });
+
   // Documentos sueltos: lado opuesto de las amistades, solicitudes, handles, perfil y stats.
   // writer.close() no rechaza nunca: un fallo definitivo solo llega por la promesa de cada operación.
   // Se recogen todas (allSettled engancha el handler ya, sin rechazos sin atender) y, si alguna
@@ -100,6 +116,7 @@ export async function deleteAccountData(uid: string): Promise<{ friends: number;
   const ops: Promise<unknown>[] = [];
   friends.forEach((f) => ops.push(writer.delete(db.collection("users").doc(f).collection("friends").doc(uid))));
   requests.forEach((ref) => ops.push(writer.delete(ref)));
+  authored.forEach((ref) => ops.push(writer.delete(ref)));
   handles.forEach((ref) => ops.push(writer.delete(ref)));
   invites.docs.forEach((d) => ops.push(writer.delete(d.ref)));
   ops.push(writer.delete(db.collection("profiles").doc(uid)));

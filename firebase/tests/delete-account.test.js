@@ -158,7 +158,12 @@ describe("deleteAccount (callable, europe-west1)", function () {
     connectFirestoreEmulator(db, fsHost.host, fsHost.port);
     const functions = getFunctions(app, REGION);
     connectFunctionsEmulator(functions, fnHost.host, fnHost.port);
-    return { auth, db, deleteAccount: httpsCallable(functions, "deleteAccount") };
+    return {
+      auth,
+      db,
+      deleteAccount: httpsCallable(functions, "deleteAccount"),
+      removeFriend: httpsCallable(functions, "removeFriend"),
+    };
   }
 
   async function signUp(c, name) {
@@ -337,6 +342,61 @@ describe("deleteAccount (callable, europe-west1)", function () {
     const other = client();
     const otherUid = await signUp(other, "dave");
     await createProfile(other, otherUid, "alice_1");
+  });
+
+  // F5-u4 (D-035, d5): inbox y fcmTokens propios caen; lo que la cuenta dejó en bandejas ajenas también.
+  it("deleteAccount F5: inbox y tokens", async () => {
+    const c = client();
+    const uid = await signUp(c, "alice");
+    await createProfile(c, uid, "alice_1");
+    const D = "2026-11-02";
+    const path = (owner, id) => `users/${owner}/inbox/${id}`;
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      const now = new Date();
+      await db.doc(`users/${uid}`).set({ fcmTokens: ["tok-a", "tok-b"] }, { merge: true });
+      await db.doc(path(uid, "cheer_bob_" + D)).set({ type: "cheer", from: "bob", createdAt: now, read: false });
+      // Amigos actuales (bob) y uno que se eliminará con removeFriend (dave).
+      for (const f of ["bob", "dave"]) {
+        await db.doc(`users/${uid}/friends/${f}`).set({ since: now });
+        await db.doc(`users/${f}/friends/${uid}`).set({ since: now });
+        await db.doc(`users/${f}`).set({ createdAt: now });
+      }
+      await db.doc(path("bob", `cheer_${uid}_${D}`)).set({ type: "cheer", from: uid, createdAt: now, read: false });
+      await db.doc(path("dave", `nudge_${uid}_${D}`)).set({ type: "nudge", from: uid, createdAt: now, read: false });
+      // Destino de una solicitud pendiente (carol): item request_<uid> con y sin el campo from.
+      await db.doc(`friendRequests/${uid}_carol`).set({ from: uid, to: "carol", createdAt: now, status: "pending" });
+      await db.doc(path("carol", `request_${uid}`)).set({ type: "request", from: uid, createdAt: now, read: false });
+      // Solicitud ya rechazada (borrada) a frank: el item sigue en su bandeja.
+      await db.doc(path("frank", `request_${uid}`)).set({ type: "request", from: uid, createdAt: now, read: true });
+      // De otro remitente (carol): se queda.
+      await db.doc(path("bob", `cheer_carol_${D}`)).set({ type: "cheer", from: "carol", createdAt: now, read: false });
+      await db.doc(path("dave", `nudge_carol_${D}`)).set({ type: "nudge", from: "carol", createdAt: now, read: false });
+    });
+    // dave se elimina ANTES del borrado: su item (nudge_<uid>) tiene que desaparecer igualmente.
+    await c.removeFriend({ friendUid: "dave" });
+
+    const exists = async (p) => {
+      let e;
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        e = (await ctx.firestore().doc(p).get()).exists;
+      });
+      return e;
+    };
+    assert.strictEqual(await exists(path("dave", `nudge_${uid}_${D}`)), true, "sembrado");
+    assert.strictEqual(await exists(`users/dave/friends/${uid}`), false, "removeFriend");
+
+    await c.deleteAccount({});
+
+    assert.strictEqual(await exists(`users/${uid}`), false, "users/{uid} con fcmTokens");
+    assert.strictEqual(await exists(path(uid, "cheer_bob_" + D)), false, "bandeja propia");
+    assert.strictEqual(await exists(path("bob", `cheer_${uid}_${D}`)), false, "ánimo a amigo actual");
+    assert.strictEqual(await exists(path("dave", `nudge_${uid}_${D}`)), false, "empujón a amigo eliminado");
+    assert.strictEqual(await exists(path("carol", `request_${uid}`)), false, "solicitud al destino");
+    assert.strictEqual(await exists(path("frank", `request_${uid}`)), false, "solicitud rechazada");
+    assert.strictEqual(await exists(path("bob", `cheer_carol_${D}`)), true, "otro remitente (bob)");
+    assert.strictEqual(await exists(path("dave", `nudge_carol_${D}`)), true, "otro remitente (dave)");
+    assert.strictEqual(await authUserExists(uid), false);
   });
 
   it("sin sesión falla con 'unauthenticated' y no borra nada", async () => {

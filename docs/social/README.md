@@ -1,6 +1,6 @@
 # Sistema social — guía
 
-> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-10-30
+> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-11-02
 > **¿Dónde estamos?** → [tablero](../../.claude/plans/sistema-social.md) (fases, entregables, diferidos,
 > preguntas abiertas, diario). El progreso **no** vive en esta carpeta.
 
@@ -169,3 +169,5 @@ Diario: <fecha> · F<N>-u<n> <qué quedó hecho> (F<N>.x, F<N>.y)
 | 2026-10-28 | Antes de abrir F3: 03 §9 (publicar al iniciar sesión, crear el perfil y cambiar el objetivo; `RankingCalculator` con `dayKey` y corona), 02 §6 (corona) y 02 §9 (perfil de amigo: ánimo en F5); Q-08 abierta | D-030 |
 | 2026-10-29 | Q-08 cerrada al abrir F3: la primera publicación de `stats/` incluye toda la historia local (`totalMinutes`, `bestWeekStreak` y rachas desde el primer uso); 03 §9 lo dice | D-031 |
 | 2026-10-30 | Q-01 y Q-04 cerradas al abrir F4: interruptor global de presencia (no recíproco, local, por defecto según la edad) y descanso no distinguido, con la pausa «En pausa» y el contrato `status/` `focus`/`break`/`paused`/`idle`; 02 §5 y §7, 03 §5, §6 y §8 | D-032, D-033 |
+| 2026-11-02 | Al abrir F5: todo contra el Emulator Suite con el push detrás de `PushSender`, empujón solo a quien hoy no ha estudiado y un toque siempre abre la bandeja; 02 §8 y §9 y 03 §5 y §7 | D-034 |
+| 2026-11-02 | Contrato de la bandeja y de `fcmTokens` al abrir F5 (tarjeta del emisor, ids deterministas, un envío al día con el `dayKey` del emisor, 30 días, lectura, tope de 10 tokens, borrado de lo enviado); 03 §5, §6 y §7 | D-035 |

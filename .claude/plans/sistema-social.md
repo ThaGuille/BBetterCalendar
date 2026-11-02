@@ -15,10 +15,10 @@
 
 ## Ahora
 
-- **Fase activa:** ninguna abierta; la siguiente es **F5** (Interacción). F0, F1, F2, F3 y F4 hechas
+- **Fase activa:** **F5** (Interacción), abierta el 2026-11-02 ([`social-f5-interaccion.md`](social-f5-interaccion.md), 9 unidades más la u10). F0, F1, F2, F3 y F4 hechas
   ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md),
   [`social-f3-stats.md`](social-f3-stats.md), [`social-f4-presencia.md`](social-f4-presencia.md)); el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** abrir F5 (ánimo, empujón, push y bandeja). Push y fusión de `bt/social-f4-presencia` en `main` por la sesión principal.
+- **Siguiente paso:** `bt/social-f4-presencia` ya está fusionada en `main`. F5 está abierta: siguen F5-u2 (reglas de la bandeja), F5-u4 (`deleteAccount`), F5-u5 (datos de Android), F5-u6 (push de Android) y F5-u10 (índice) en paralelo; luego F5-u3 (Functions), F5-u7 y F5-u8 (pantallas) y el cierre F5-u9.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -31,7 +31,7 @@
 | **F2** Amigos | Solicitudes, invitar (enlace, QR, `@usuario`), lista, eliminar y reportar (sin bloquear, D-027) | hecha | [`social-f2-amigos.md`](social-f2-amigos.md) | `social-focus-invite`, `home-notification-centre` (parcial) |
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | hecha | [`social-f3-stats.md`](social-f3-stats.md) | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | hecha | [`social-f4-presencia.md`](social-f4-presencia.md) | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
-| **F5** Interacción | Ánimo, empujón, push, bandeja | pendiente | — | `home-notification-centre` |
+| **F5** Interacción | Ánimo, empujón, push, bandeja | activa | [`social-f5-interaccion.md`](social-f5-interaccion.md) | `home-notification-centre` |
 | **L** Lanzamiento | Gate antes de activar lo social en release | pendiente | — | — |
 
 Estados posibles: `pendiente` → `activa` → `hecha` (o `en pausa`). Cuando la fase se abre, la columna
@@ -164,6 +164,7 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-11-02 (44)** · F5-u1 F5 abierta: plan de fase `social-f5-interaccion.md` (9 unidades más la u10), D-034 (todo contra el Emulator Suite con el push detrás de `PushSender`, empujón solo a quien hoy no ha estudiado, un toque abre la bandeja) y D-035 (contrato de la bandeja y de `fcmTokens`) con la guía al día (02 §8 y §9, 03 §5, §6 y §7). **Siguiente:** F5-u2, F5-u4, F5-u5, F5-u6 y F5-u10 en paralelo; luego F5-u3, F5-u7 y F5-u8 y el cierre F5-u9.
 - **2026-10-31 (43)** · F4-u9 F4 cerrada: notas plegadas, `systems/social.md`, ui-placeholders (`social-backend`, `social-home-friends` y `social-celebration-strip` a Resolved), política v2 y paso de punta a punta en api36 sin crashes (ninguno). **Siguiente:** abrir F5 (Interacción); push y fusión de `bt/social-f4-presencia` en `main` por la sesión principal.
 - **2026-10-31 (42)** · F4-u8 interruptor en Mi perfil y pasada de presencia propia en api36: pausa, interruptor, cierre de sesión y matar la app (F4.6, F4.7)
 - **2026-10-30 (41)** · F4-u7 Amigos ordenada por presencia con «Estudiando · h:mm» y «En pausa · h:mm» (ninguno)

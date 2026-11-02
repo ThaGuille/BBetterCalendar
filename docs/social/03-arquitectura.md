@@ -1,6 +1,6 @@
 # 03 · Arquitectura
 
-> **Última revisión:** 2026-10-30 · Guía: [README](README.md) · Producto: [02](02-producto.md)
+> **Última revisión:** 2026-11-02 · Guía: [README](README.md) · Producto: [02](02-producto.md)
 >
 > Cómo se monta. Es el diseño objetivo: lo que ya existe se documenta en
 > `.claude/docs/systems/social.md` a partir de F1. Las secciones se citan como `03 §N`.
@@ -73,7 +73,8 @@ Nadie lee tu Room. Tú publicas agregados y presencia, y tus amigos los escuchan
 | `stats/{uid}` | `dayKey`, `weekKey`, `minutesToday`, `minutesWeekCapped`, `daysThisWeek`, `weeklyGoal`, `weekStreak`, `bestWeekStreak`, `totalMinutes`, `updatedAt` | Dueño + amigos | Dueño (con rangos validados) |
 | `invites/{código}` | `uid`, `handle`, `createdAt`; el código son 8 caracteres de `[A-HJKMNP-Z2-9]` y cada persona tiene uno (`users/{uid}.inviteCode`) | Cualquier usuario con sesión, **solo `get`** (sin `list`) | Dueño, en el mismo lote que fija `users/{uid}.inviteCode`; el renombrado actualiza `handle` |
 | `reports/{reporter_reported}` | `reporter`, `reported`, `reportedHandle`, `reason` (`offensive_name`/`impersonation`/`harassment`/`other`), `context` (`friend`/`request`), `createdAt` | Nadie (consola) | Solo crear, con `reporter == auth.uid` y una relación (amigo o solicitud de esa persona); el id determinista hace que un segundo reporte sea una actualización y se deniegue |
-| `users/{uid}/inbox/{id}` (F5) | `type` (`request`/`cheer`/`nudge`), `from`, `createdAt`, `read` | Dueño | Functions; el dueño marca `read` |
+| `users/{uid}/inbox/{id}` (F5, D-035) | `type` (`request`/`cheer`/`nudge`), `from` (uid), `fromHandle`, `fromName`, `fromColor` (0–7; la tarjeta del emisor, copiada por la Function de `profiles/` o de los campos `from*` de la solicitud), `createdAt` (servidor), `read`. Ids: `cheer_<from>_<dayKey>`, `nudge_<from>_<dayKey>`, `request_<from>` (una solicitud reenviada sobrescribe con `read=false`); retención de 30 días (la Function borra los más antiguos al escribir) | Dueño (`get` y `list`; el cliente lista los 50 más recientes) | **Solo Functions** crean y borran; el dueño solo pasa `read` de `false` a `true` |
+| `users/{uid}.fcmTokens` (F5, D-035) | lista opcional de a lo sumo 10 cadenas (token FCM del móvil); al llegar a 10 el registrador quita el más antiguo antes de añadir | Dueño y Functions | Dueño (una Function quita con `arrayRemove` los tokens que FCM da por no registrados) |
 
 No hay campos para fallos, calendario, tareas, proyectos ni tiempo de pantalla (P5). No aparecen en el
 esquema y las reglas rechazan cualquier campo que no esté en la lista.
@@ -110,6 +111,12 @@ match /friendRequests/{id} { allow create: if validRequestCreate(id);   // 10 ca
                              allow update: if validRequestAccept();     // solo `to`, pending → accepted, solo `status`
                              allow delete: if validRequestDelete();     // from o to, pending o failed
                              allow read: if resource.data.from == request.auth.uid || resource.data.to == request.auth.uid; }
+match /users/{uid}/inbox/{id} { allow get, list: if request.auth.uid == uid;       // F5 (D-035)
+                                allow create, delete: if false;                     // solo Functions
+                                allow update: if request.auth.uid == uid            // solo read: false -> true
+                                  && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+                                  && resource.data.read == false && request.resource.data.read == true; }
+// users/{uid}.fcmTokens (F5): validUserFields admite `fcmTokens` solo como lista con size() <= 10; solo el dueño la escribe
 match /invites/{code}   { allow get: if signedIn(); allow list: if false;
                           allow create: if validInviteCreate(code); allow update: if validInviteUpdate();
                           allow delete: if validInviteDelete(code); }
@@ -141,8 +148,12 @@ tests son parte del «hecho cuando» de F2 y F3.
 | `deleteAccount` | Callable | Borra perfil, handle, stats, solicitudes, amistades (los dos lados), espejo, estado, inbox y bloqueos, y por último el usuario de Auth | F1 |
 | `onFriendRequestAccepted` | Firestore: `friendRequests` pasa de `pending` a `accepted` | En una transacción: relee la solicitud, marca `failed` (`gone` si falta `users/A` o `users/B`, `cap` con 50 amigos, D-015) o escribe `users/A/friends/B` y `users/B/friends/A` y borra la solicitud; después el espejo RTDB. Idempotente y con `retry: true` | F2 (hecha) |
 | `removeFriend` | Callable | Borra los dos lados y el espejo; idempotente y limpia amistades de un solo lado. `deleteAccount` borra además los `invites/` de la cuenta | F2 (hecha) |
-| `sendCheer` / `sendNudge` | Callable | Comprueba la amistad y el límite diario, escribe en el inbox y manda push FCM | F5 |
-| `onFriendRequestCreated` | Firestore | Escribe en el inbox y manda push | F5 (sin push en F2: solo inbox) |
+| `sendCheer` / `sendNudge` | Callable (`europe-west1`) | Entrada `{friendUid, dayKey}` (`dayKey` = fecha local del emisor, a ±1 día de la fecha UTC del servidor). Errores: `unauthenticated`, `invalid-argument` (uid, uno mismo, `dayKey`), `permission-denied` `not-friends`, `failed-precondition` `no-profile` o, solo `sendNudge`, `studied-today` (`stats/` del amigo con `minutesToday > 0` y `dayKey` igual al del emisor o al siguiente; sin stats o con otro `dayKey`, 0). En una transacción crea `users/{amigo}/inbox/<tipo>_<emisor>_<dayKey>`: si ya existía responde `{status:'already'}` y no envía nada; si no, `{status:'sent'}` y luego el push (un fallo del push se registra, nunca se lanza). Tras escribir borra los elementos de esa bandeja de más de 30 días (D-035) | F5 |
+| `onFriendRequestCreated` | Firestore: `friendRequests/{id}` al crearse | Escribe `users/{to}/inbox/request_<from>` con la tarjeta de la solicitud y manda push; no hace nada si falta `users/{to}`; idempotente ante reintentos y una solicitud reenviada tras un rechazo vuelve a avisar. Borra los elementos de más de 30 días de esa bandeja | F5 (sin push en F2: solo inbox) |
+
+**`PushSender` (F5, D-034, `firebase/functions/src/push.ts`).** Interfaz con dos implementaciones: FCM (`sendEachForMulticast`, mensaje **solo de datos** con prioridad alta y las claves `type`, `inboxId`, `fromName`, `fromHandle` y `to`, el uid del destinatario, que el cliente comprueba para descartar un push de otra cuenta) fuera del emulador, y un falso en el emulador (`process.env.FUNCTIONS_EMULATOR === 'true'`) que escribe `_emulatorPush/{auto}` y trata los tokens `invalid-…` como no registrados para probar su limpieza. Sin tokens no se envía ni se registra nada. Ninguna Function se dispara por cambios de RTDB (no hay «tu amigo empezó a estudiar»).
+
+**`deleteAccount` (F5, D-035).** Además de `users/{uid}` con `fcmTokens` y su bandeja, borra lo que la cuenta envió a bandejas ajenas con `collectionGroup('inbox').where('from','==',uid)` y los `request_<uid>`; en producción pide una exención de índice de `inbox.from`.
 
 ## §8 Presencia
 

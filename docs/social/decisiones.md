@@ -41,6 +41,11 @@
 | D-028 | Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja | aceptada | 2026-10-24 |
 | D-029 | Notas y diario de cada unidad en su propio fichero; el cierre de fase los pliega | aceptada | 2026-10-25 |
 | D-030 | F3: cuándo se publican las stats, la corona mira `dayKey` y acciones del perfil de amigo por fase | aceptada | 2026-10-28 |
+| D-031 | Q-08: la primera publicación incluye toda la historia local | aceptada | 2026-10-29 |
+| D-032 | Q-01: interruptor global «Compartir mi estado en directo», no recíproco y guardado en el móvil | aceptada | 2026-10-30 |
+| D-033 | Q-04: el descanso no se distingue; la pausa se ve como «En pausa» con el tiempo congelado | aceptada | 2026-10-30 |
+| D-034 | F5: todo contra el Emulator Suite con el push detrás de `PushSender`; empujón solo a quien hoy no ha estudiado; un toque abre la bandeja | aceptada | 2026-11-02 |
+| D-035 | F5: contrato de la bandeja (`users/{uid}/inbox`) y de `fcmTokens`: tarjeta del emisor, ids deterministas, un envío al día, retención, lectura y borrado | aceptada | 2026-11-02 |
 
 ---
 
@@ -356,3 +361,78 @@
     (cancelar `onDisconnect` antes de la Function y no escribir `idle`).
   - Un amigo se ve estudiando con `focus`, `break` o `paused` y un `since` de a lo sumo 4 h; si no, ausente (02 §7).
   - La política de privacidad v2 lista los estados compartidos (`focus`, `break`, `paused`, `idle`) y la hora de inicio (F4-u9).
+
+### D-034 · F5: todo contra el Emulator Suite con el push detrás de `PushSender`; empujón solo a quien hoy no ha estudiado; un toque abre la bandeja
+- **Estado:** aceptada (usuario, 2026-11-02, al planificar y aprobar el plan de F5 [`social-f5-interaccion.md`](../../.claude/plans/social-f5-interaccion.md)).
+  Precisa D-021, D-025, 02 §8 y §9 y 03 §7.
+- **Decisión:** tres respuestas del usuario y tres decisiones del plan.
+  1. **Push.** Se prueba todo contra el Emulator Suite: bandeja, Functions y el canal de Android «Amigos». El envío por FCM
+     queda detrás de una interfaz `PushSender`, con un falso que registra lo que enviaría (`_emulatorPush`) en el emulador y
+     en los tests. El push real se verifica en L.7 con un móvil. Nada se despliega (D-021, D-025).
+  2. **Empujón.** Solo se ofrece a un amigo que hoy no ha estudiado: el botón sale solo si las `stats/` del amigo dan 0
+     minutos hoy, y `sendNudge` valida lo mismo en el servidor (`failed-precondition` `studied-today`).
+  3. **Tocar un aviso.** Siempre abre la bandeja de la campana con ese elemento marcado como leído; desde la bandeja se
+     va al perfil del amigo. Un solo destino para ánimo, empujón y solicitud.
+  4. **d3 · Focus.** Tocar a un amigo en «Estudiando ahora» abre su perfil, donde están los botones (un solo lugar).
+  5. **d7 · pantalla de bloqueo.** El aviso lleva el nombre del emisor con el móvil desbloqueado y una versión pública sin
+     nombre en pantalla de bloqueo segura (`setPublicVersion`).
+  6. **d8 · token en emulador.** Las compilaciones de emulador usan un token falso estable `emulator-<aleatorio>`, así
+     que solo se ejercita la escritura de `fcmTokens`; el `getToken()` real corre solo con `-PfirebaseEmulator=false` (L.7).
+- **Por qué:** FCM no se emula, así que lo comprobable en local es la interfaz y todo lo que la rodea; ofrecer el empujón
+  solo a quien no ha estudiado evita presionar a quien ya cumplió (02 §10); un solo destino al tocar el aviso reduce la
+  navegación a una pantalla que el usuario ya conoce; el token falso mantiene cada ejecución de F5 fuera del proyecto real
+  (D-021).
+- **Consecuencias:**
+  - 02 §8 pasa a decir «en su perfil» (y Focus lleva al perfil), la regla del empujón y que un toque abre la bandeja;
+    03 §7 describe `PushSender`.
+  - El canal «Amigos» (`bb_friends`) es el único control para silenciar (DIF-01); no hay silenciado por amigo.
+  - L.7 gana la prueba de un push real; hasta entonces `_emulatorPush` es la prueba de que se envió.
+
+### D-035 · F5: contrato de la bandeja (`users/{uid}/inbox`) y de `fcmTokens`: tarjeta del emisor, ids deterministas, un envío al día, retención, lectura y borrado
+- **Estado:** aceptada (usuario, 2026-11-02: respuestas d1, d2, d4, d5 y d6 y la aplicación de las siete correcciones de la
+  revisión del plan de F5 [`social-f5-interaccion.md`](../../.claude/plans/social-f5-interaccion.md)). Precisa 02 §8 y §9 y 03 §5, §6 y §7.
+- **Decisión:**
+  1. **Documento.** `users/{uid}/inbox/{id}` lleva exactamente `type` (`request`/`cheer`/`nudge`), `from` (uid),
+     `fromHandle`, `fromName`, `fromColor` (0–7), `createdAt` (hora del servidor) y `read` (bool). La tarjeta del emisor va
+     copiada por la Function (de `profiles/`, o de los campos `from*` de la solicitud) porque quien envía una solicitud
+     aún no es amigo y `profiles/` solo lo leen los amigos.
+  2. **Ids deterministas.** `cheer_<from>_<dayKey>`, `nudge_<from>_<dayKey>`, `request_<from>`. El servidor limita así a
+     un ánimo y un empujón por amigo y día (una segunda llamada responde `already` y no envía nada); una solicitud
+     reenviada sobrescribe su elemento con `read=false`.
+  3. **Día (d6).** El `dayKey` es la fecha local del emisor (`WeekKey.dayKey`), aceptada a ±1 día de la fecha UTC del
+     servidor. **Entre zonas**, un amigo cuenta como «ha estudiado hoy» si y solo si `stats.minutesToday > 0` y
+     `stats.dayKey` es el `dayKey` del emisor o el día siguiente (el amigo va por delante); un amigo que va un día por
+     detrás cuenta como 0 (límite documentado). Misma regla en servidor y cliente. **Residual aceptado:** la tolerancia de
+     ±1 día permite que un cliente con el reloj cambiado envíe hasta 3 ánimos o empujones por día real y amigo; no hay
+     marca por pareja en el servidor.
+  4. **Permisos.** Solo las Functions crean y borran elementos. El dueño puede `get` y `list` y solo puede cambiar `read`
+     de `false` a `true`. El cliente lista los 50 más recientes por `createdAt` descendente.
+  5. **Lectura (d1).** Abrir la bandeja marca todo como leído; lo que estaba sin leer lleva un acento «nuevo» durante esa
+     visita. El punto de la campana (sin número) sale con elementos sin leer o solicitudes pendientes.
+  6. **Retención (d2).** 30 días: la Function borra los elementos más antiguos de esa bandeja cada vez que escribe uno
+     nuevo (sin tarea programada, Spark).
+  7. **Solicitudes (d4).** El elemento `request` queda como historial aunque la solicitud se acepte, rechace o cancele; el
+     toque abre el perfil si ya sois amigos y, si no, Amigos en Solicitudes. `onFriendRequestCreated` es idempotente ante
+     reintentos y una solicitud reenviada tras un rechazo vuelve a avisar.
+  8. **`fcmTokens`.** Lista opcional en `users/{uid}` de como mucho 10 cadenas; la escribe solo el dueño y la leen el dueño
+     y las Functions. El registrador, con 10 ya guardados, quita el más antiguo antes de añadir (el tope de 10 se respeta
+     siempre); registra tras tener perfil y al arrancar la app, y quita el token propio antes de cerrar sesión y antes de
+     `deleteAccount`. Una Function quita con `arrayRemove` los tokens que FCM da por no registrados.
+  9. **Push.** Solo datos: `type`, `inboxId`, `fromName`, `fromHandle` y `to` (uid del destinatario); el cliente descarta
+     el push dirigido a otro uid (un token viejo en un móvil compartido).
+  10. **Registro local.** El registro de «enviado hoy» del móvil (SharedPreferences, clave: mi uid + amigo + tipo +
+      `dayKey`) se purga de otros días y otros uids y expone `clearLocalLog()`; la respuesta `ALREADY_SENT` del servidor
+      es la autoridad.
+  11. **Borrar cuenta (d5).** `deleteAccount` borra la cuenta con su bandeja y `fcmTokens` (ya lo hacía con
+      `recursiveDelete` de `users/{uid}`) y además los elementos que esa cuenta dejó en bandejas ajenas, con
+      `collectionGroup('inbox').where('from','==',uid)` más los ids `request_<uid>`, así que lo enviado a amigos y a
+      destinos ya eliminados o que rechazaron también desaparece. En producción la consulta pide una exención de índice
+      (`firestore.indexes.json`), que se declara sin desplegar.
+- **Por qué:** con la tarjeta copiada la bandeja se pinta sin leer `profiles/`; el id determinista da el límite diario con
+  una transacción y sin contadores; 30 días bastan para volver a ver un ánimo y son pocos para minimizar datos (P5);
+  borrar lo enviado cumple la política de «todos tus datos se borran» y el tope de 10 tokens acota la lista.
+- **Consecuencias:**
+  - 03 §5 (filas de `users/{uid}/inbox` y `fcmTokens`), §6 (reglas) y §7 (Functions, `PushSender`) describen este contrato.
+  - La política de privacidad v2 y la página de borrado dicen: token FCM, elementos de la bandeja, retención de 30 días y
+    su borrado (F5-u9).
+  - El control del usuario sobre los avisos es el canal «Amigos» (D-034), sin interruptor propio.

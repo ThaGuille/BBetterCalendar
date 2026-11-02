@@ -1,6 +1,6 @@
 # 02 · Producto
 
-> **Última revisión:** 2026-10-30 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
+> **Última revisión:** 2026-11-02 · Guía: [README](README.md) · Evidencia: [01](01-investigacion.md)
 >
 > Qué construimos y qué no. Las secciones se citan como `02 §N`.
 
@@ -111,13 +111,15 @@ lo vea, lo eliminas como amigo.
 
 | Interacción | Regla |
 |---|---|
-| **Ánimo** | Un toque sobre un amigo (en su perfil o en el bloque de Focus). Máximo 1 al día por amigo. Llega como aviso y a la bandeja. No hay contador público |
-| **Empujón** | «¡Vamos!» a un amigo que hoy no ha estudiado. Máximo 1 al día por amigo |
-| **Solicitud** | Aviso + bandeja |
+| **Ánimo** | Un toque en el perfil del amigo; tocar a un amigo en el bloque «Estudiando ahora» de Focus abre ese perfil (D-034). Texto predefinido, sin texto libre. Máximo 1 al día por amigo, que el servidor impone con un id determinista por día del emisor (D-035). Llega como aviso y a la bandeja. No hay contador público |
+| **Empujón** | «¡Vamos!» solo a un amigo que hoy no ha estudiado: el botón sale únicamente si sus stats dan 0 minutos hoy y `sendNudge` lo valida en el servidor. Entre zonas horarias, «ha estudiado hoy» es `minutesToday > 0` con el `dayKey` del emisor o el siguiente (D-035). Máximo 1 al día por amigo |
+| **Solicitud** | Aviso + bandeja (el elemento queda como historial) |
+| **Tocar un aviso** | Siempre abre la bandeja de la campana con ese elemento leído; desde ahí se va al perfil del amigo (D-034) |
 | «Tu amigo empezó a estudiar» | **No existe en v1.** Sería spam (antipatrones, §10) |
 
-Los avisos van por un **canal de Android propio, «Amigos»**. El usuario lo puede silenciar desde los
-ajustes del sistema, y eso basta como control mínimo mientras no haya silenciado por amigo (DIF-01).
+Los avisos van por un **canal de Android propio, «Amigos»** (`bb_friends`). El usuario lo puede silenciar desde los
+ajustes del sistema, y eso basta como control mínimo mientras no haya silenciado por amigo (DIF-01). Con el móvil
+bloqueado el aviso no enseña el nombre del emisor (versión pública, D-034).
 
 ## §9 Pantallas y puntos de entrada
 
@@ -137,7 +139,7 @@ función no esté lista para release, siguen ocultos con el flag (03 §10).
 | Crear perfil / Mi perfil | — | Nombre, `@usuario`, color y términos; cerrar sesión; borrar cuenta | F1 |
 | Invitar (`focusInviteButton`) | Toast | Hoja con enlace, QR y `@usuario` | F2 |
 | Amigos | — | Lista (primero quien estudia), solicitudes, añadir | F2 |
-| Campana (`homeBellButton`) | Punto fijo | Bandeja: solicitudes (F2), ánimos y empujones (F5) | F2 / F5 |
+| Campana (`homeBellButton`) | Punto fijo | Bandeja (`users/{uid}/inbox`): solicitudes, ánimos y empujones, los 50 más recientes; abrirla marca todo leído (acento «nuevo» durante esa visita); el punto no lleva número y sale con elementos sin leer o solicitudes pendientes; cada fila abre el perfil del amigo (una solicitud de alguien que aún no es amigo, Amigos en Solicitudes) (D-034, D-035) | F2 / F5 |
 | Perfil de amigo | — | Racha semanal, días de la semana, minutos de la semana, mejor racha, total. Acciones: eliminar y reportar (F3); ánimo (F5, D-030) | F3 |
 | Ranking (pestaña dentro de Amigos) | — | Minutos con tope y Constancia; se reinicia el lunes | F3 |
 | Cycle complete «2º entre amigos» (`cycleBestTile`) | `SocialRank(2, 9)` fijo | Posición real | F3 |

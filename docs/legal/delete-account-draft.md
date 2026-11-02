@@ -53,7 +53,10 @@ When your account is deleted we remove:
 - your profile: display name, @username, avatar colour and age band;
 - your shared summary focus statistics and your "studying now" status;
 - your friend list, friend requests sent and received, and your invitation link;
-- your notification token and pending notifications. [CONFIRM when notifications ship, F5]
+- your notification token (FCM) and your inbox: the friend requests, cheers and nudges you received;
+- the cheers, nudges and requests your account sent, which are also removed from other people's inboxes.
+
+Inbox items never live longer than 30 days even without deleting the account.
 
 Deletion from Firestore and the Realtime Database is immediate. Your @username is released at the same
 time and can be claimed again. You are also removed from your friends' lists and the invitation

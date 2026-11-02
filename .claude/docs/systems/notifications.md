@@ -1,6 +1,6 @@
 # System — Notifications infra (`notifications/`)
 
-**Last verified:** 2026-10-13 · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-02 · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Shared notification plumbing every feature-specific notifier builds on: channel definitions, the
 actual `NotificationManagerCompat` wrapper, a spec builder, and `POST_NOTIFICATIONS` runtime
@@ -17,7 +17,7 @@ permission gating with a backoff schedule. The four feature notifiers (`focus`, 
 ## Files
 | Class | Path | Role |
 |---|---|---|
-| `NotificationChannels` | `notifications/NotificationChannels.java` | Defines + creates all 5 channels: foreground-service (legacy literal `"channelId"`), event reminders, focus alerts, usage limits, project deadlines (`bb_project_deadlines`, `IMPORTANCE_HIGH`) |
+| `NotificationChannels` | `notifications/NotificationChannels.java` | Defines + creates all 6 channels: foreground-service (legacy literal `"channelId"`), event reminders, focus alerts, usage limits, project deadlines (`bb_project_deadlines`, `IMPORTANCE_HIGH`), friends (`bb_friends` «Amigos»/«Friends», F5: cheers, nudges and requests, posted by `social/push/FriendsPushHandler`; the channel is the only mute, DIF-01) |
 | `BBetterNotifier` | `notifications/BBetterNotifier.java` | Thin wrapper over `NotificationManagerCompat` — `notify(spec)`/`cancel(id)`, checks `canPost()` before posting |
 | `NotificationSpec` | `notifications/NotificationSpec.java` | Builder: channel, notification id, title/body, auto-cancel, optional `PendingIntent` — `openMainActivity()` plus `openProjectDetail(context, projectId)`, which adds `MainActivity.EXTRA_OPEN_PROJECT_ID` to the same intent/flags so a tap deep-links instead of just opening the app |
 | `PermissionGate` | `notifications/PermissionGate.java` | Decides *when* to auto-request `POST_NOTIFICATIONS`: backoff schedule (7d after 1st deny, 14d after 2nd), capped at 3 auto-asks total |
@@ -37,7 +37,7 @@ permission gating with a backoff schedule. The four feature notifiers (`focus`, 
 
 ## Invariants & gotchas
 
-- **Notification ID ranges are manually partitioned to avoid collisions** — focus alerts use `50_001`, usage-limit warn/reached use `60_000`/`61_000` bases + a per-package hash, project deadlines use `70_000 + projectId * 10 + offsetIndex`, event reminders use a separate `100_000+` range (see `calendar.md`/`popups`). Adding a new notifier means claiming an unused range, not reusing one.
+- **Notification ID ranges are manually partitioned to avoid collisions** — focus alerts use `50_001`, usage-limit warn/reached use `60_000`/`61_000` bases + a per-package hash, project deadlines use `70_000 + projectId * 10 + offsetIndex`, friends notifications (`bb_friends`) use `40_000 + floorMod(inboxId.hashCode(), 10_000)`, i.e. the range `[40_000, 49_999]`, and carry a public version without the sender's name for a secure lock screen (`NotificationSpec.publicVersion`); event reminders use a separate `100_000+` range (see `calendar.md`/`popups`). Adding a new notifier means claiming an unused range, not reusing one.
 - **The partitions are arithmetic, not enforced — and their headroom is uneven.** Each base is only as safe as the gap to the next one: the project-deadline id space (`70_000`) runs into the event-reminder space at `projectId >= 3_000`, while its *request-code* space (`500_000`) has ~50_000 of headroom. Nothing clamps either at runtime; the only guard is `ReminderNamespaceTest`, which asserts disjointness up to a test-side `ID_CEILING = 2_000`. Widen the gap before adding a sixth range rather than squeezing one in.
 - **A `RequestCodeNamespace` is a *separate* id space from the notification id.** Both are derived per (entity, offset), but the request code identifies the `PendingIntent` (get it wrong and cancelling one feature's alarm kills another's) while the notification id identifies the posted notification (get it wrong and one notification overwrites another). `ProjectDeadlineScheduler` keeps both formulas side by side for exactly this reason.
 - **`requiresRuntimePostNotificationsPermission()` returning false below API 33 doesn't mean notifications always show** — `PermissionHelper.notificationsGranted()` still checks `NotificationManagerCompat.areNotificationsEnabled()` on those versions (user can disable notifications app-wide pre-33 too).
@@ -51,4 +51,5 @@ permission gating with a backoff schedule. The four feature notifiers (`focus`, 
 |---|---|---|
 | 2026-07-04 | `CHANNEL_USAGE_LIMITS` added for Phase 3 warn/reached notifications | — |
 | 2026-07-17 | Alarm-scheduling mechanics extracted into reusable `AlarmReminderCore` (receiver + disjoint request-code namespace + offsets, parameterized); `EventReminderScheduler` is now a thin client reproducing the original `entityId * 10 + offsetIndex` request-code formula exactly (zero behavior change). `NotificationOffsets` moved `popups/` → `notifications/` (dependency-smell fix, roadmap finding F7); no wrapper kept, single UI caller (`AddEventActivity`) repointed. | — |
+| 2026-11-02 | Sixth channel `bb_friends` for the F5 friends push (id range `[40_000, 49_999]`, `setPublicVersion` for the lock screen); see `social.md` | F5-u6 |
 | 2026-09-01 | Project deadlines become `AlarmReminderCore`'s second client: new `CHANNEL_PROJECT_DEADLINES` (5th channel), new `70_000`/`500_000` id partitions, and `NotificationSpec.Builder.openProjectDetail()` — the first notification in the app that deep-links to a specific destination rather than just opening `MainActivity`. | — |

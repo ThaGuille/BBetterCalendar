@@ -77,7 +77,8 @@ year itself is never uploaded; only the age band (14–17 or 18+) is stored with
 | **Summary** focus statistics: minutes today and this week (capped at 4 h per day), focus days this week, weekly goal, weekly streak, best streak, total minutes. Total minutes and best streak count **all the focus history on your phone**, including the time before you created the account (D-031); if you reinstall the app or use another phone, the next publication replaces them with what that phone has | Shared ranking and friend profiles | Your friends |
 | "Studying now" status: **studying** (a focus session or its breaks; a break is not shown as such), **paused** (the timer is paused; friends see "Paused" with the time frozen) or **away**, and when the current run of sessions started. Written only while you use the timer and set to away when you stop, sign out or the app closes. You can stop sharing it with the switch **Share my live status** in My profile: it is **on by default for 18+ and off by default for 14–17** (and when your age is unknown); when it is off, your friends always see you as away. The switch is stored on your phone and does not stop you seeing your friends | Live presence | Your friends |
 | Reports you send about another user (who reported whom, the reason you chose, the date; no free text) | Moderation | Only us |
-| Notification token (when interactions are enabled) | To deliver friend requests and cheers | Nobody else |
+| Notification token (FCM token of your phone, kept in your account; up to 10, and removed when you sign out or delete the account) | To deliver friend notifications (requests, cheers and nudges) to your phone | Nobody else |
+| Inbox items: the friend requests, **cheers** and **nudges** you receive (type, who sent it with their name, @username and avatar colour, when, and whether you read it). A cheer or a nudge is a fixed message, never free text, and each friend can send you at most one of each per day. A nudge is offered only to a friend who has not studied today | To show your inbox (the bell) and the "Friends" notifications | You, and the sender of each item (their own sent items) |
 
 ### What is never shared, with or without an account
 
@@ -99,7 +100,10 @@ We process this data to provide the Friends service that you request when you cr
 ### How long we keep it
 
 As long as your account exists. When you delete your account we delete your profile, @username,
-statistics, presence, friendships, requests, blocks and notifications immediately. Google's backups
+statistics, presence, friendships, requests, blocks, your notification token and your inbox
+immediately, and we also delete the cheers, nudges and requests your account sent that are still in
+other people's inboxes. While the account exists, inbox items are kept for **30 days** and older ones
+are deleted when a new item arrives in that inbox. Google's backups
 expire on Google's own schedule. Reports about other users may be kept as long as needed for safety
 and abuse prevention.
 
@@ -139,7 +143,8 @@ Questions and requests: yonkiporki@gmail.com
     (the processor does not count as sharing).
   - App activity → **Other user-generated content / in-app actions** (summary focus statistics,
     live presence: studying, paused or away, with the start of the current run). *Collected*, app functionality. Visible to the user's accepted friends.
-  - Device or other IDs → **FCM token** [CONFIRM when F5 ships]. App functionality.
+  - Device or other IDs → **FCM token** (only with a Friends account, removed on sign-out and on account deletion). App functionality.
+  - App activity → **Other user-generated content / in-app actions** also covers the inbox items (friend requests, cheers and nudges; fixed messages, no free text), kept 30 days and deleted with the account.
 - **Collected on-device only (never transmitted):** app interactions and other app usage (Usage
   access), installed apps.
 - **Encrypted in transit:** Yes.

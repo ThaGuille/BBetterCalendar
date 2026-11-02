@@ -223,13 +223,20 @@ export async function processRequestCreated(
   const inboxId = `request_${from}`;
   const userRef: DocumentReference = db.collection("users").doc(to);
   const inboxRef = userRef.collection("inbox").doc(inboxId);
+  // Un evento tardío o reintentado no resucita nada: si deleteAccount ya barrió al remitente (users/{from}) no se
+  // escribe ni se avisa. Lectura fuera de la transacción: dentro, su bloqueo de lectura choca con las escrituras de
+  // users/{from} (contador diario de solicitudes) y da «Transaction lock timeout» en el emulador.
+  if (!(await db.collection("users").doc(from).get()).exists) {
+    return "skipped";
+  }
   const outcome = await db.runTransaction(async (tx): Promise<RequestOutcome> => {
     const [user, existing] = await Promise.all([tx.get(userRef), tx.get(inboxRef)]);
     if (!user.exists) {
       return "no-user";
     }
+    // Un evento igual o más viejo que el aviso vigente (reintento, solicitud reenviada) no lo pisa.
     const prev = existing.exists ? existing.get("createdAt") : undefined;
-    if (prev instanceof Timestamp && prev.isEqual(createdAt)) {
+    if (prev instanceof Timestamp && prev.toMillis() >= createdAt.toMillis()) {
       return "skipped";
     }
     tx.set(inboxRef, { type: "request", from, fromHandle: handle, fromName: name, fromColor: color, createdAt, read: false });

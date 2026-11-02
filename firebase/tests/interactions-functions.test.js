@@ -481,6 +481,41 @@ describe("Functions F5: sendCheer, sendNudge y onFriendRequestCreated", function
       assert.strictEqual(item.read, false);
     });
 
+    it("un evento tardío tras deleteAccount del remitente no escribe aviso ni push (review F3)", async () => {
+      process.env.FUNCTIONS_EMULATOR = "true";
+      process.env.GCLOUD_PROJECT = PROJECT;
+      const fn = path.join(__dirname, "..", "functions");
+      const { processRequestCreated } = require(path.join(fn, "lib", "interactions.js"));
+      const { Timestamp: AdminTimestamp } = require("module").createRequire(path.join(fn, "package.json"))("firebase-admin/firestore");
+      const a = await person("ana", 2);
+      const b = await person("beto", 3);
+      const ghost = freshId("late");
+      const createdAt = AdminTimestamp.now();
+      const data = { from: ghost, to: b.uid, status: "pending", createdAt, fromHandle: "ghost_h", fromName: "Ghost", fromColor: 1 };
+      // Ni users/{ghost} ni la solicitud existen (deleteAccount ya las barrió): el evento ya capturado no debe escribir.
+      assert.strictEqual(await processRequestCreated(data), "skipped");
+      assert.strictEqual(await inboxItem(b.uid, `request_${ghost}`), null);
+      assert.deepStrictEqual(await pushesTo(b.uid), []);
+    });
+
+    it("el reintento de un evento viejo no pisa el aviso de una solicitud reenviada (review F3)", async () => {
+      process.env.FUNCTIONS_EMULATOR = "true";
+      process.env.GCLOUD_PROJECT = PROJECT;
+      const fn = path.join(__dirname, "..", "functions");
+      const { processRequestCreated } = require(path.join(fn, "lib", "interactions.js"));
+      const { Timestamp: AdminTimestamp } = require("module").createRequire(path.join(fn, "package.json"))("firebase-admin/firestore");
+      const a = await person("ana", 2);
+      const b = await person("beto", 3);
+      await sendRequest(a, b);
+      const id = `request_${a.uid}`;
+      const current = await waitFor(() => inboxItem(b.uid, id));
+      const old = { from: a.uid, to: b.uid, status: "pending", createdAt: AdminTimestamp.fromMillis(current.createdAt.toMillis() - 60000),
+        fromHandle: a.handle, fromName: "Ana", fromColor: 2 };
+      assert.strictEqual(await processRequestCreated(old), "skipped");
+      const after = await inboxItem(b.uid, id);
+      assert.ok(after.createdAt.isEqual(current.createdAt), "sigue el createdAt de la solicitud vigente");
+    });
+
     it("una solicitud reenviada tras un rechazo trae otro createdAt: sobrescribe con read=false y avisa otra vez", async () => {
       const a = await person("ana", 2);
       const b = await person("beto", 3);

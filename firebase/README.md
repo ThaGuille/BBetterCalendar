@@ -148,6 +148,12 @@ node tests/tools/actor.js presence bob focus minutes=12   # F4-u2: set() de stat
 node tests/tools/actor.js status bob @alice     # lee status/ de @alice CON reglas: '<state> <minutos|->' ('paused 7' = congelado),
                                                 # 'idle -' sin nodo y 'denied' sin espejo RTDB (no sois amigos para el servidor)
 node tests/tools/actor.js wait-status bob @alice focus 30   # sondea hasta ver ese estado: 0 y 'SEEN focus 2.2s', o 1 si pasan los segundos
+node tests/tools/actor.js cheer bob @alice      # F5-u3: ánimo (callable sendCheer): sent | already | not-friends; nudge igual y además
+                                                # studied-today. El dayKey es la fecha local del equipo (TZ=GMT cerca de medianoche en el AVD)
+node tests/tools/actor.js nudge bob @alice      # F5-u3: empujón (callable sendNudge), solo si @alice no ha estudiado hoy
+node tests/tools/actor.js inbox bob             # F5-u3: la bandeja de bob (con reglas): '<type> @<handle> read=<bool>', la más nueva primero
+node tests/tools/actor.js token bob tok-1       # F5-u3: añade un token a fcmTokens (con reglas; deja 9 y añade, máximo 10); 'invalid-...' se quita al enviar
+node tests/tools/actor.js pushes bob            # F5-u3: los push que el PushSender falso registró en _emulatorPush para bob (SIN reglas)
 ```
 
 `status/{uid}` (F4-u2, `presence-rules.test.js`): lee el dueño o un amigo a través del espejo `friends/{uid}/{amigo}`, escribe

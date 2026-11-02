@@ -23,6 +23,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
@@ -600,6 +601,8 @@ public class FocusFragment extends Fragment
         avatar.setInitialsColor(AvatarPalette.onColor(requireContext()));
         avatar.setBadgeIcon(c.crown ? R.drawable.ic_crown_24 : 0);
         name.setText(c.name);
+        // F5-u8 (d3): tocar a un amigo abre su perfil (alli van el animo y el empujon).
+        cell.setOnClickListener(v -> openFriendProfile(c));
         timeViews.add(c.line == FocusFriendsUi.Line.TIME ? time : null);
         cell.setAlpha(c.alpha);
         switch (c.line) {
@@ -622,6 +625,14 @@ public class FocusFragment extends Fragment
                 time.setText(R.string.focus_friend_away);
                 break;
         }
+    }
+
+    private void openFriendProfile(@NonNull FocusFriendsUi.Cell c) {
+        Bundle args = new Bundle();
+        args.putString("uid", c.uid);
+        args.putString("name", c.name);
+        args.putInt("color", c.avatarColor);
+        NavHostFragment.findNavController(this).navigate(R.id.navigation_friend_profile, args);
     }
 
     @NonNull

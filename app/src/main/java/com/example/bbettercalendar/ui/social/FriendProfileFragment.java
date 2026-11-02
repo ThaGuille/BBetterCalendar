@@ -17,10 +17,15 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.social.friends.FriendCard;
 import com.example.bbettercalendar.social.friends.ReportReason;
+import com.example.bbettercalendar.social.interaction.InteractionType;
 import com.example.bbettercalendar.social.stats.RankingState;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
+
+import com.google.android.material.button.MaterialButton;
+
+import java.time.LocalDate;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -28,7 +33,7 @@ import dagger.hilt.android.AndroidEntryPoint;
  * F3-u6: el perfil de un amigo (02 §9): avatar, nombre y {@code @usuario}; racha semanal, días de esta semana
  * frente a su objetivo, minutos de la semana, mejor racha y total, de {@code RankingRepository.observeFriendStats}.
  * Sin stats todavía: una frase, no ceros. Eliminar (con la misma confirmación que la lista) y Reportar (con su
- * «¿Eliminar también?») usan {@link FriendsViewModel}; tras eliminar vuelve a Amigos. Sin «ánimo» (F5, D-030).
+ * «¿Eliminar también?») usan {@link FriendsViewModel}; tras eliminar vuelve a Amigos. Con ánimo y empujón (F5-u8).
  * Argumentos: {@code uid} y, para pintar la cabecera al instante, {@code handle}, {@code name} y {@code color}.
  */
 @AndroidEntryPoint
@@ -55,6 +60,13 @@ public class FriendProfileFragment extends Fragment {
     private TextView minutes;
     private TextView best;
     private TextView total;
+    private View interaction;
+    private MaterialButton cheerButton;
+    private MaterialButton nudgeButton;
+    private TextView interactionMessage;
+    private FriendInteractionViewModel interactionViewModel;
+    private RankingState.FriendStatsState lastState;
+    private FriendInteractionViewModel.State interactionState;
 
     public FriendProfileFragment() {
         super(R.layout.fragment_friend_profile);
@@ -84,6 +96,10 @@ public class FriendProfileFragment extends Fragment {
         minutes = view.findViewById(R.id.fpMinutes);
         best = view.findViewById(R.id.fpBest);
         total = view.findViewById(R.id.fpTotal);
+        interaction = view.findViewById(R.id.fpInteraction);
+        cheerButton = view.findViewById(R.id.fpCheerButton);
+        nudgeButton = view.findViewById(R.id.fpNudgeButton);
+        interactionMessage = view.findViewById(R.id.fpInteractionMessage);
         paintHeader();
 
         view.findViewById(R.id.fpRemoveButton).setOnClickListener(v -> confirmRemove());
@@ -93,6 +109,14 @@ public class FriendProfileFragment extends Fragment {
             goBack();
             return;
         }
+        interactionViewModel = new ViewModelProvider(this).get(FriendInteractionViewModel.class);
+        cheerButton.setOnClickListener(v -> interactionViewModel.send(InteractionType.CHEER, uid));
+        nudgeButton.setOnClickListener(v -> interactionViewModel.send(InteractionType.NUDGE, uid));
+        interactionViewModel.load(uid);
+        interactionViewModel.getState().observe(getViewLifecycleOwner(), st -> {
+            interactionState = st;
+            renderInteraction();
+        });
         viewModel.observe(uid).observe(getViewLifecycleOwner(), this::render);
         friendsViewModel.getEvent().observe(getViewLifecycleOwner(), event -> {
             if (event == null) {
@@ -124,6 +148,8 @@ public class FriendProfileFragment extends Fragment {
     }
 
     private void render(@Nullable RankingState.FriendStatsState state) {
+        lastState = state;
+        renderInteraction();
         if (state != null && state.card != null) {
             card = FriendProfileViewModel.cardOrFallback(state, card);
             paintHeader();
@@ -140,6 +166,26 @@ public class FriendProfileFragment extends Fragment {
         status.setText(ui.showError() ? R.string.friend_profile_error : R.string.friend_profile_loading);
         if (ui.showStats()) {
             bindStats(ui);
+        }
+    }
+
+    /** F5-u8: ánimo siempre, empujón solo si no ha estudiado hoy; «enviado hoy» deshabilitado. Sin contadores. */
+    private void renderInteraction() {
+        FriendInteractionViewModel.State st = interactionState;
+        if (interaction == null || st == null) {
+            return;
+        }
+        FriendInteractionUi ui = FriendInteractionUi.from(lastState, LocalDate.now(), st.cheerSent, st.nudgeSent,
+                st.lastType, st.lastResult);
+        interaction.setVisibility(ui.cheerVisible() ? View.VISIBLE : View.GONE);
+        cheerButton.setText(ui.cheerText());
+        cheerButton.setEnabled(ui.cheer == FriendInteractionUi.Button.ENABLED);
+        nudgeButton.setVisibility(ui.nudgeVisible() ? View.VISIBLE : View.GONE);
+        nudgeButton.setText(ui.nudgeText());
+        nudgeButton.setEnabled(ui.nudge == FriendInteractionUi.Button.ENABLED);
+        interactionMessage.setVisibility(ui.hasMessage() ? View.VISIBLE : View.GONE);
+        if (ui.hasMessage()) {
+            interactionMessage.setText(ui.message);
         }
     }
 

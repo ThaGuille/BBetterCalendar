@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F5-u8 · Ánimo y empujón en el perfil de un amigo (02 §8). Predefinidos, sin texto libre ni contadores. -->
+    <string name="interaction_cheer">Enviar ánimo</string>
+    <string name="interaction_cheer_sent">Ánimo enviado hoy</string>
+    <string name="interaction_nudge">Enviar empujón</string>
+    <string name="interaction_nudge_sent">Empujón enviado hoy</string>
+    <string name="interaction_msg_not_friends">Ya no sois amigos.</string>
+    <string name="interaction_msg_error">No se pudo enviar. Inténtalo más tarde.</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F5-u8 · Cheer and nudge on the friend profile (02 §8). Predefined, no free text, no counters. -->
+    <string name="interaction_cheer">Send a cheer</string>
+    <string name="interaction_cheer_sent">Cheer sent today</string>
+    <string name="interaction_nudge">Send a nudge</string>
+    <string name="interaction_nudge_sent">Nudge sent today</string>
+    <string name="interaction_msg_not_friends">You are no longer friends.</string>
+    <string name="interaction_msg_error">Could not send it. Try again later.</string>
+</resources>

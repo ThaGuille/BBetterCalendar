@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- F3-u6 · Friend profile (02 §9): avatar, name and @username, then the streak, this week against the goal,
      minutes this week, best streak and total. A friend with no stats yet gets a sentence, not zeros.
-     No cheer control (F5, D-030). Remove and Report sit at the bottom. -->
+     Cheer and nudge (F5-u8) sit under the header. Remove and Report sit at the bottom. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -69,6 +69,40 @@
                         android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
                         tools:text="\@bob" />
                 </LinearLayout>
+            </LinearLayout>
+
+            <!-- F5-u8: cheer (always) and nudge (only if the friend has not studied today). -->
+            <LinearLayout
+                android:id="@+id/fpInteraction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/fpCheerButton"
+                    style="@style/Widget.BBetter.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interaction_cheer" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/fpNudgeButton"
+                    style="@style/Widget.BBetter.Button.Secondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:text="@string/interaction_nudge"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/fpInteractionMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <TextView

@@ -46,6 +46,22 @@ bash firebase/scripts/run-tests.sh --timeout 600 --block 2 --no-retry
   `FIREBASE_AUTH_EMULATOR_HOST`, `FIREBASE_EMULATOR_HUB`...), nunca puertos fijos.
 - Salida: 0 pasa, 1 falla, 124 tope, 2 uso; la última línea siempre es `run-tests: exit <código>`.
 
+### App Check en las Functions (L-u4, D-036)
+
+- `functions/src/callable.ts` exporta `callableOptions = { region: "europe-west1", enforceAppCheck }`; toda callable se
+  declara en una línea como `onCall(callableOptions, ...)` (deleteAccount, removeFriend, sendCheer, sendNudge). Los
+  triggers no cambian.
+- `enforceAppCheck` es `true` en producción. En el emulador (`FUNCTIONS_EMULATOR === 'true'`) solo es `true` con
+  `BB_ENFORCE_APP_CHECK=1`, que fija `functions/.env.demo-bbetter`: lo carga el emulador solo con el proyecto
+  `demo-bbetter`, el de la suite. El emulador de la app (`bbetter-dbcda`: app debug y `actor.js`) no fuerza nada.
+- Los tests mandan un token falso: `tests/app-check-helper.js` da `fakeAppCheckToken()` (JWT sin firmar, `alg: none`,
+  `sub` = appId; el emulador de Functions lo decodifica sin verificar) y `withAppCheck(app)`, que lo instala en el
+  `FirebaseApp` del cliente para que `httpsCallable` lo mande en `X-Firebase-AppCheck`. Todo test que llame a una
+  callable lo usa. `tests/app-check.test.js` (`Functions L: App Check`) prueba por cada callable que sin la cabecera
+  responde `unauthenticated` sin cambiar nada y que con ella responde como siempre.
+- En producción forzar App Check son dos cosas: el código (esto, en las Functions) y la consola (Firestore y RTDB, paso
+  del usuario, L.1 (b)); la consola no se toca desde el repo. Orden de despliegue: ver D-036 y `DEPLOY.md`.
+
 ## Comandos (desde `firebase/`, en PowerShell)
 
 ```powershell

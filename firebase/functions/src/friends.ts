@@ -18,6 +18,7 @@
 // No hay bloquear (D-027): eliminar y reportar son los únicos controles.
 import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { callableOptions } from "./callable";
 import * as logger from "firebase-functions/logger";
 import { initializeApp, getApps } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
@@ -126,7 +127,7 @@ export function parseFriendUid(data: unknown, me: string): string {
   return friendUid;
 }
 
-export const removeFriend = onCall({ region: "europe-west1" }, async (request): Promise<RemoveFriendResult> => {
+export const removeFriend = onCall(callableOptions, async (request): Promise<RemoveFriendResult> => {
   const me = request.auth?.uid;
   if (!me) {
     throw new HttpsError("unauthenticated", "Hace falta una sesión para eliminar un amigo.");

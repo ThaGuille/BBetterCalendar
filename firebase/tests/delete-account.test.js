@@ -15,6 +15,7 @@ const { initializeTestEnvironment } = require("@firebase/rules-unit-testing");
 const { initializeApp, deleteApp } = require("firebase/app");
 const { getAuth, connectAuthEmulator, createUserWithEmailAndPassword, signOut } = require("firebase/auth");
 const { getFunctions, connectFunctionsEmulator, httpsCallable } = require("firebase/functions");
+const { withAppCheck, fakeAppCheckToken } = require("./app-check-helper");
 const {
   getFirestore,
   connectFirestoreEmulator,
@@ -156,6 +157,7 @@ describe("deleteAccount (callable, europe-west1)", function () {
     const db = getFirestore(app);
     const fsHost = splitHost(process.env.FIRESTORE_EMULATOR_HOST);
     connectFirestoreEmulator(db, fsHost.host, fsHost.port);
+    withAppCheck(app);
     const functions = getFunctions(app, REGION);
     connectFunctionsEmulator(functions, fnHost.host, fnHost.port);
     return {
@@ -429,7 +431,7 @@ describe("deleteAccount (callable, europe-west1)", function () {
     const stale = withAuthTime(await c.auth.currentUser.getIdToken(), Math.floor(Date.now() / 1000) - 6 * 60);
     const res = await fetch(`http://${fnHost.host}:${fnHost.port}/${PROJECT}/${REGION}/deleteAccount`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${stale}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${stale}`, "X-Firebase-AppCheck": fakeAppCheckToken() },
       body: JSON.stringify({ data: {} }),
     });
     const body = await res.json();
@@ -448,7 +450,7 @@ describe("deleteAccount (callable, europe-west1)", function () {
     const recent = withAuthTime(await c.auth.currentUser.getIdToken(), Math.floor(Date.now() / 1000) - 4 * 60);
     const res = await fetch(`http://${fnHost.host}:${fnHost.port}/${PROJECT}/${REGION}/deleteAccount`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${recent}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${recent}`, "X-Firebase-AppCheck": fakeAppCheckToken() },
       body: JSON.stringify({ data: {} }),
     });
     const body = await res.json();

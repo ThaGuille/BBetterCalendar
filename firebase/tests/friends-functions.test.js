@@ -16,6 +16,7 @@ const { initializeTestEnvironment } = require("@firebase/rules-unit-testing");
 const { initializeApp, deleteApp } = require("firebase/app");
 const { getAuth, connectAuthEmulator, createUserWithEmailAndPassword, signOut } = require("firebase/auth");
 const { getFunctions, connectFunctionsEmulator, httpsCallable } = require("firebase/functions");
+const { withAppCheck, fakeAppCheckToken } = require("./app-check-helper");
 const {
   getFirestore,
   connectFirestoreEmulator,
@@ -125,6 +126,7 @@ describe("F2-u4: Functions de amistad (auth, firestore, database, functions)", f
     const db = getFirestore(app);
     const fsHost = splitHost(process.env.FIRESTORE_EMULATOR_HOST);
     connectFirestoreEmulator(db, fsHost.host, fsHost.port);
+    withAppCheck(app);
     const functions = getFunctions(app, REGION);
     connectFunctionsEmulator(functions, fnHost.host, fnHost.port);
     return { auth, db, removeFriend: httpsCallable(functions, "removeFriend") };

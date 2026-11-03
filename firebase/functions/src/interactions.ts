@@ -21,6 +21,7 @@
 // Function se dispara con RTDB: no hay «tu amigo empezó a estudiar».
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onCall, HttpsError, CallableRequest } from "firebase-functions/v2/https";
+import { callableOptions } from "./callable";
 import * as logger from "firebase-functions/logger";
 import { initializeApp, getApps } from "firebase-admin/app";
 import { getFirestore, FieldValue, Timestamp, DocumentReference, Firestore } from "firebase-admin/firestore";
@@ -189,11 +190,11 @@ export async function handleInteraction(
   return done.result;
 }
 
-export const sendCheer = onCall({ region: "europe-west1" }, (request): Promise<InteractionResult> =>
+export const sendCheer = onCall(callableOptions, (request): Promise<InteractionResult> =>
   handleInteraction("cheer", request),
 );
 
-export const sendNudge = onCall({ region: "europe-west1" }, (request): Promise<InteractionResult> =>
+export const sendNudge = onCall(callableOptions, (request): Promise<InteractionResult> =>
   handleInteraction("nudge", request),
 );
 

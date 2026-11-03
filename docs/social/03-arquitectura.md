@@ -1,6 +1,6 @@
 # 03 · Arquitectura
 
-> **Última revisión:** 2026-11-02 · Guía: [README](README.md) · Producto: [02](02-producto.md)
+> **Última revisión:** 2026-11-03 · Guía: [README](README.md) · Producto: [02](02-producto.md)
 >
 > Cómo se monta. Es el diseño objetivo: lo que ya existe se documenta en
 > `.claude/docs/systems/social.md` a partir de F1. Las secciones se citan como `03 §N`.
@@ -31,7 +31,7 @@
 | **Cloud Functions** (TypeScript, plan Blaze) | Lo que el cliente no puede hacer solo: aceptar y eliminar amistad (los dos lados), borrar cuenta, push | F1, F2, F5 |
 | **FCM** | Push de solicitudes, ánimos y empujones | F5 |
 | **Hosting** | `/.well-known/assetlinks.json` para los App Links de invitación + página de aterrizaje del enlace | F2 en el emulador (D-025); despliegue en L |
-| **App Check** (Play Integrity) | Que solo nuestra app hable con el backend | Gate L.1 |
+| **App Check** (Play Integrity) | Que solo nuestra app hable con el backend: `enforceAppCheck` en cada callable (`callableOptions`; forzado en la suite, libre en el emulador de la app) y, en el cliente, Play Integrity en release, proveedor debug solo en debug contra el proyecto real y nada contra el emulador; el enforce de Firestore y RTDB es un paso de consola (D-036) | Gate L.1 |
 
 **Región** (D-013, propuesta): todo en la UE. Firestore en `eur3`, RTDB en `europe-west1` y
 Functions en `europe-west1`. **La región de Firestore no se puede cambiar después de crear la base.**

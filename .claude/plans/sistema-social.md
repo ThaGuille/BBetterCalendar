@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-10-31 (F4 hecha)
+**Last updated:** 2026-11-03 (L abierta)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -15,10 +15,10 @@
 
 ## Ahora
 
-- **Fase activa:** ninguna: F0, F1, F2, F3, F4 y F5 hechas (F5 cerrada el 2026-11-02, [`social-f5-interaccion.md`](social-f5-interaccion.md)). El siguiente trabajo es el gate **L** (Lanzamiento).
+- **Fase activa:** **L** (Lanzamiento), abierta el 2026-11-03: [`social-l-lanzamiento.md`](social-l-lanzamiento.md). F0, F1, F2, F3, F4 y F5 hechas (F5 cerrada el 2026-11-02, [`social-f5-interaccion.md`](social-f5-interaccion.md)).
   ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md),
   [`social-f3-stats.md`](social-f3-stats.md), [`social-f4-presencia.md`](social-f4-presencia.md), [`social-f5-interaccion.md`](social-f5-interaccion.md)); el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** el gate **L** (App Check, política v2 y página de borrado publicadas, Data safety, y L.7: desplegar reglas, Functions e índices, push real de FCM en un móvil). `bt/social-f5-interaccion` está pendiente de fusionarse en `main` por la sesión principal.
+- **Siguiente paso:** el plan de L, parte (a) (L-u2 a L-u14: App Check, despliegue preparado, bloquear, lint de API 24, textos y checklist) y, al cerrarla, la guía (b) que solo puedes hacer tú (L-u14). `FEATURE_SOCIAL` sigue en `false` en release hasta que cierres L.6.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -32,7 +32,7 @@
 | **F3** Stats | Publicar agregados, perfil de amigo, ranking semanal | hecha | [`social-f3-stats.md`](social-f3-stats.md) | `social-rank` |
 | **F4** Presencia | «Estudiando ahora» real en Focus, Home y Cycle | hecha | [`social-f4-presencia.md`](social-f4-presencia.md) | `social-backend`, `social-focus-studying`, `social-home-friends`, `social-celebration-strip` |
 | **F5** Interacción | Ánimo, empujón, push, bandeja | hecha | [`social-f5-interaccion.md`](social-f5-interaccion.md) | `home-notification-centre` |
-| **L** Lanzamiento | Gate antes de activar lo social en release | pendiente | — | — |
+| **L** Lanzamiento | Gate antes de activar lo social en release | activa | [`social-l-lanzamiento.md`](social-l-lanzamiento.md) | — |
 
 Estados posibles: `pendiente` → `activa` → `hecha` (o `en pausa`). Cuando la fase se abre, la columna
 Plan enlaza su `social-fN-*.md`.
@@ -144,8 +144,8 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 | DIF-07 | Grupos de estudio, reto cooperativo, racha compartida | 05 §3 | Tras F5, con datos de uso |
 | DIF-08 | Exportación automática de datos (portabilidad) | 04 §3 | En el gate L, si se considera necesaria |
 | DIF-09 | Pestaña propia de Amigos en la barra inferior | D-012 | Si el uso lo justifica |
-| DIF-11 | Bloquear y desbloquear usuarios | D-027 (usuario): solo añadir y eliminar amigos; reportar se mantiene | En el gate L.3, si la revisión UGC de Play lo exige, o si hay acoso con solicitudes repetidas |
-| DIF-10 | Ejecutar la app en API 24 (`minSdk`) y probar el overlay de bloqueo | D-020 (usuario): montar un AVD API 24 cuesta mucho; mientras, se verifica en `api36` | En el gate L, antes de activar lo social en release |
+| DIF-11 | Bloquear y desbloquear usuarios. Decidido (D-038): entra en L (L-u8 a L-u10) y sustituye en parte a D-027; reportar sigue aparte | D-027 lo aplazó; D-038 (usuario) lo trae porque la política UGC de Play pide bloquear en la interacción 1:1 | Cuando L-u10 esté hecha |
+| DIF-10 | Ejecutar la app en API 24 (`minSdk`) y probar el overlay de bloqueo. Decidido (D-037): `lintDebug` sin errores como puerta en L-u11 y la pasada real en API 24 en tu guía (b) | D-020 (usuario): montar un AVD API 24 cuesta mucho; D-037 mantiene `minSdk 24` | Antes de activar lo social en release |
 
 ## Preguntas abiertas
 

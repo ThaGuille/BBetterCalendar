@@ -37,7 +37,7 @@
 | D-024 | La puerta de edad pide solo el año y calcula la edad mínima posible | aceptada | 2026-10-19 |
 | D-025 | F2 también solo contra el Emulator Suite; los App Links se prueban en el AVD | aceptada | 2026-10-20 |
 | D-026 | Probar lo social en un móvil físico por USB | aceptada | 2026-10-20 |
-| D-027 | Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene | aceptada | 2026-10-20 |
+| D-027 | Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene | sustituida en parte por D-038 | 2026-10-20 |
 | D-028 | Modelo de datos de F2: rechazar borra, contador diario, `invites/`, un reporte por pareja | aceptada | 2026-10-24 |
 | D-029 | Notas y diario de cada unidad en su propio fichero; el cierre de fase los pliega | aceptada | 2026-10-25 |
 | D-030 | F3: cuándo se publican las stats, la corona mira `dayKey` y acciones del perfil de amigo por fase | aceptada | 2026-10-28 |
@@ -46,6 +46,9 @@
 | D-033 | Q-04: el descanso no se distingue; la pausa se ve como «En pausa» con el tiempo congelado | aceptada | 2026-10-30 |
 | D-034 | F5: todo contra el Emulator Suite con el push detrás de `PushSender`; empujón solo a quien hoy no ha estudiado; un toque abre la bandeja | aceptada | 2026-11-02 |
 | D-035 | F5: contrato de la bandeja (`users/{uid}/inbox`) y de `fcmTokens`: tarjeta del emisor, ids deterministas, un envío al día, retención, lectura y borrado | aceptada | 2026-11-02 |
+| D-036 | Gate L: la separación (a) aquí / (b) solo el usuario y el diseño de App Check (cliente, Functions, suite, build de la pista interna, App Link en release) | aceptada | 2026-11-03 |
+| D-037 | DIF-10: minSdk 24 con `lintDebug` como puerta; la pasada real en API 24 queda en la guía del usuario | aceptada | 2026-11-03 |
+| D-038 | DIF-11: bloquear usuarios entra antes del lanzamiento (sustituye en parte a D-027); reportar sigue aparte | aceptada | 2026-11-03 |
 
 ---
 
@@ -236,7 +239,7 @@
 - **Consecuencias:** el proyecto real sigue sin tocarse (D-021, D-025).
 
 ### D-027 · Sin bloquear: amistad mutua con añadir y eliminar; reportar se mantiene
-- **Estado:** aceptada (usuario, 2026-10-20, al abrir F2: «no block and no unblock, there is just… add to
+- **Estado:** sustituida en parte por D-038 (2026-11-03: bloquear entra; reportar sigue aparte). Aceptada (usuario, 2026-10-20, al abrir F2: «no block and no unblock, there is just… add to
   friends and remove from friends»). Mantiene D-001; precisa D-009.
 - **Decisión:** la amistad sigue siendo mutua (una solicitud que el otro acepta). Las acciones son enviar,
   aceptar, rechazar, cancelar y eliminar amigo. No hay bloquear ni desbloquear, ni `blocks/` ni
@@ -436,3 +439,66 @@
   - La política de privacidad v2 y la página de borrado dicen: token FCM, elementos de la bandeja, retención de 30 días y
     su borrado (F5-u9).
   - El control del usuario sobre los avisos es el canal «Amigos» (D-034), sin interruptor propio.
+
+### D-036 · Gate L: la separación (a) aquí / (b) solo el usuario y el diseño de App Check
+- **Estado:** aceptada (usuario, 2026-11-03, al aprobar el plan de L [`social-l-lanzamiento.md`](../../.claude/plans/social-l-lanzamiento.md):
+  revisión del orden de despliegue y respuestas d3, d6 y d7). Precisa D-013, D-016, D-021 y D-025 y 03 §3.
+- **Decisión:**
+  1. **Separación (a)/(b).** Lo que se puede hacer y comprobar aquí (código, tests contra el Emulator Suite, lint, textos)
+     es la parte (a) y la cierran las unidades L-u1 a L-u14. Lo que solo puede hacer el usuario es la parte (b): Play Console,
+     publicar, desplegar en `bbetter-dbcda`, el enforce de Firestore y RTDB en la consola, las alertas de Blaze, la semana
+     con 3 o más usuarios y decidir quién modera. Ninguna unidad despliega, toca el proyecto real ni publica. L.1-L.7 solo
+     se marcan cuando el usuario cierra su parte (b); la fase L sigue «activa» hasta entonces.
+  2. **App Check en las Functions (d6).** Cada callable se declara con `callableOptions`
+     (`{ region: 'europe-west1', enforceAppCheck }`), con `enforceAppCheck = FUNCTIONS_EMULATOR !== 'true' || BB_ENFORCE_APP_CHECK === '1'`.
+     La suite de tests (proyecto `demo-bbetter`) fuerza el enforce y manda un JWT falso sin firma en `X-Firebase-AppCheck`;
+     el emulador de la app (`bbetter-dbcda`) no fuerza, así que la app debug y `actor.js` siguen sirviendo para probar a mano.
+  3. **App Check en el cliente.** `AppCheckPolicy`: `NONE` sin `FEATURE_SOCIAL` o con `USE_FIREBASE_EMULATOR`; `DEBUG` en un debug
+     contra el proyecto real; `PLAY_INTEGRITY` en release. Se instala una vez antes de usar cualquier cliente de Firebase.
+     `firebase-appcheck-debug` solo va en el APK debug.
+  4. **Firestore y RTDB.** Su enforce es un interruptor de la consola (parte (b)): se activa solo después de comprobar las métricas.
+  5. **Orden de despliegue (revisión del plan).** Primero registrar la app con Play Integrity, instalar la build de la pista
+     interna y comprobar las métricas de App Check; solo después desplegar las Functions con enforce, con vuelta atrás. Así el
+     enforce no bloquea todas las callables antes de que la app mande token.
+  6. **Build de la pista interna (d3).** `-PfeatureSocial=true` en un release que solo se sube a la pista de pruebas internas:
+     usa Play Integrity de verdad y el release por defecto sigue con `FEATURE_SOCIAL = false`.
+  7. **App Link (d7).** El `intent-filter` de `InviteLinkActivity` pasa de `app/src/debug` a `app/src/main`; con lo social apagado
+     el enlace solo abre la app y no guarda nada.
+- **Por qué:** el usuario es el único que puede publicar o tocar el proyecto real; separar (a) de (b) deja todo lo verificable
+  hecho y una guía exacta de lo que falta. Forzar App Check en la suite prueba de verdad el rechazo sin token sin romper el
+  emulador manual.
+- **Consecuencias:**
+  - 03 §3 describe `enforceAppCheck` en cada callable y los proveedores del cliente.
+  - Las decisiones d3, d6 y d7 del plan de L (y la del orden de despliegue) quedan recogidas aquí; el plan de L las lleva.
+  - `FEATURE_SOCIAL` sigue en `false` en release hasta que el usuario cierre L.6.
+
+### D-037 · DIF-10: minSdk 24 con `lintDebug` como puerta; la pasada real en API 24 queda en la guía del usuario
+- **Estado:** aceptada (usuario, 2026-11-03, decisión d2 del plan de L). Precisa D-003 y D-020.
+- **Decisión:** se mantiene `minSdk 24`. La puerta de L es `./gradlew.bat lintDebug` sin errores (L-u11): nada por encima de API 24
+  se usa sin guarda. No se instala una imagen de API 24; la pasada real de la app y del overlay de bloqueo en un dispositivo
+  API 24 es un paso del usuario antes de activar lo social (parte (b)).
+- **Por qué:** el lint estático ya encontró un fallo real (`WeekKey` usa `IsoFields`, API 26, que rompería las stats y el ranking
+  en API 24-25) sin descargar ~1 GB; subir el `minSdk` a 26 se descartó para no perder móviles.
+- **Consecuencias:**
+  - DIF-10 del tablero cita esta decisión; la guía del usuario (L-u14) lleva la pasada en API 24.
+  - L-u11 arregla los errores de lint (`NewApi`, `UseAppTint`, `StringFormat`) y el desugar sube a 2.1.5 en L-u2.
+
+### D-038 · DIF-11: bloquear usuarios entra antes del lanzamiento (sustituye en parte a D-027)
+- **Estado:** aceptada (usuario, 2026-11-03, decisión d1 del plan de L y aprobación del plan). **Sustituye en parte a D-027:**
+  bloquear entra; reportar sigue siendo un control aparte y el resto de D-027 (amistad mutua, rechazo sin aviso) se mantiene.
+- **Decisión:** bloqueo mínimo.
+  1. **Modelo.** `blocks/{uid}/blocked/{other}` = `{ since, handle, displayName, avatarColor }`; el dueño hace `get`, `list` y `delete`;
+     nadie crea ni actualiza desde el cliente. `friendRequests` no se puede crear mientras cualquiera de los dos bloquee al otro.
+  2. **Callable `blockUser({uid})`** → `{status:'blocked'}`, idempotente; errores `unauthenticated` e `invalid-argument`. Quita la amistad
+     por los dos lados y el espejo RTDB, los dos ids de `friendRequests` y los elementos de la bandeja del que bloquea que vienen de ese
+     uid, y escribe el bloqueo. Desbloquear es borrar el documento (el dueño).
+  3. **Sin aviso.** El bloqueado no se entera: su solicitud simplemente falla. Se acepta la carrera rara en la que una amistad vuelve
+     tras bloquear (solo se deniega crear solicitudes y se borra la amistad; usuario, revisión del plan).
+  4. **Reportar** sigue siendo un control separado y con su etiqueta (04 §2). `deleteAccount` ya borra `blocks/{uid}`.
+  5. **UI mínima.** «Bloquear» en el perfil de amigo y en las solicitudes, y «Usuarios bloqueados» con «Desbloquear» en Mi perfil.
+- **Por qué:** la política UGC de Play (support.google.com/googleplay/android-developer/answer/9876937) pide bloquear donde hay
+  interacción 1:1; los ánimos, empujones y solicitudes por `@usuario` lo son, y sin bloquear la revisión UGC puede rechazar la ficha.
+- **Consecuencias:**
+  - Unidades L-u8 (servidor), L-u9 (datos) y L-u10 (UI); L-u12 y L-u13 lo describen en las respuestas UGC y en los términos.
+  - 02 §4 y §9 y 03 §5-§7 se ponen al día cuando se construya (L-u14 cierra); 04 §2 ya dice qué se decidió.
+  - DIF-11 del tablero cita esta decisión.

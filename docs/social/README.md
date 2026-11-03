@@ -1,6 +1,6 @@
 # Sistema social — guía
 
-> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-11-02
+> **Estado:** en curso · **Creado:** 2026-10-19 · **Última revisión:** 2026-11-03
 > **¿Dónde estamos?** → [tablero](../../.claude/plans/sistema-social.md) (fases, entregables, diferidos,
 > preguntas abiertas, diario). El progreso **no** vive en esta carpeta.
 
@@ -171,3 +171,4 @@ Diario: <fecha> · F<N>-u<n> <qué quedó hecho> (F<N>.x, F<N>.y)
 | 2026-10-30 | Q-01 y Q-04 cerradas al abrir F4: interruptor global de presencia (no recíproco, local, por defecto según la edad) y descanso no distinguido, con la pausa «En pausa» y el contrato `status/` `focus`/`break`/`paused`/`idle`; 02 §5 y §7, 03 §5, §6 y §8 | D-032, D-033 |
 | 2026-11-02 | Al abrir F5: todo contra el Emulator Suite con el push detrás de `PushSender`, empujón solo a quien hoy no ha estudiado y un toque siempre abre la bandeja; 02 §8 y §9 y 03 §5 y §7 | D-034 |
 | 2026-11-02 | Contrato de la bandeja y de `fcmTokens` al abrir F5 (tarjeta del emisor, ids deterministas, un envío al día con el `dayKey` del emisor, 30 días, lectura, tope de 10 tokens, borrado de lo enviado); 03 §5, §6 y §7 | D-035 |
+| 2026-11-03 | Al abrir L: separación (a)/(b) y diseño de App Check (03 §3); `minSdk 24` con `lintDebug` como puerta (DIF-10); bloquear entra y sustituye en parte a D-027 (04 §2, §6) | D-036, D-037, D-038 |

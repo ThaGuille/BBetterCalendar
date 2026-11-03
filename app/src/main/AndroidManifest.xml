@@ -105,6 +105,31 @@
                 android:resource="@xml/blocker_accessibility_config" />
         </service>
 
+        <!-- F2-u6: App Link de invitación https://bbetter-dbcda.web.app/i/<código>. En el manifest principal desde L-u6 (L.7);
+             inerte sin FEATURE_SOCIAL. El assetlinks.json de firebase/hosting lleva el SHA-256 de debug
+             hasta que el usuario añada el de release. En el AVD la verificación no puede pasar: se aprueba a mano con
+             adb shell pm set-app-links-user-selection (comando completo en firebase/README.md, «Invitaciones
+             y Hosting»). Sin UI: guarda el código y relanza la app con el intent
+             del launcher (nunca un VIEW sobre SplashActivity). taskAffinity vacío: no se mete en la tarea
+             de la app, así el intent del launcher encuentra la tarea viva o crea una nueva. -->
+        <activity
+            android:name="com.example.bbettercalendar.ui.social.InviteLinkActivity"
+            android:exported="true"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="bbetter-dbcda.web.app"
+                    android:pathPrefix="/i/" />
+            </intent-filter>
+        </activity>
+
         <!-- F5-u6 (D-034): push de amigos (ánimo, empujón, solicitud) en el canal «Amigos». Sin
              FEATURE_SOCIAL el servicio no hace nada. exported=false: FCM entrega por un receptor propio. -->
         <service

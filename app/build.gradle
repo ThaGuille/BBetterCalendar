@@ -62,7 +62,8 @@ android {
         }
         release {
             buildConfigField "boolean", "FEATURE_SOCIAL_MOCK", "false"
-            buildConfigField "boolean", "FEATURE_SOCIAL", "false"
+            // L-u2: solo para la pista interna de pruebas de L.6 (decisión d3): -PfeatureSocial=true. Sin la propiedad, false.
+            buildConfigField "boolean", "FEATURE_SOCIAL", (project.findProperty("featureSocial") ?: "false").toString()
             buildConfigField "boolean", "USE_FIREBASE_EMULATOR", "false"
             buildConfigField "String", "FIREBASE_EMULATOR_HOST", "\"\""
             // minifyEnabled se queda en false para la 1ª release: Hilt/Room/Gson usan reflexión y las
@@ -129,7 +130,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.9.1'
 
     // Java 8+ APIs (java.time) on minSdk 21
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
     // Calendario mensual (kizitonwose) — 2.5.4 mantiene compileSdk 33 (fallback per plan R1)
     implementation 'com.kizitonwose.calendar:view:2.5.4'
@@ -149,6 +150,10 @@ dependencies {
     // F5-u6: push de amigos (FriendsMessagingService, PushTokenRegistrar). Auto-init apagado en el manifest:
     // sin FEATURE_SOCIAL (release) nunca se pide un token; en emulador el token es falso (D-034 d8).
     implementation 'com.google.firebase:firebase-messaging'
+    // L-u2: App Check con Play Integrity como proveedor de release (L.1); sin versión, la fija el BoM.
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
+    // L-u2: App Check de depuración (token registrable en la consola); solo en el APK de debug.
+    debugImplementation 'com.google.firebase:firebase-appcheck-debug'
 
     // F1-u2: Credential Manager + Iniciar sesión con Google (selector de cuentas)
     implementation 'androidx.credentials:credentials:1.5.0'

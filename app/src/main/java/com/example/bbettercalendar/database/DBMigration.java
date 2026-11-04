@@ -11,6 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.bbettercalendar.notifications.NotificationChannels;
 import com.example.bbettercalendar.social.SocialFeature;
+import com.example.bbettercalendar.social.firebase.AppCheckInstaller;
 import com.example.bbettercalendar.social.invite.InstallReferrerReader;
 import com.example.bbettercalendar.social.push.PushTokenRegistrar;
 import com.example.bbettercalendar.social.stats.StatsPublisher;
@@ -41,6 +42,8 @@ public class DBMigration extends Application {
 
     @Override
     public void onCreate() {
+        // L-u3: App Check antes de cualquier cliente de Firebase (antes de la inyeccion de Hilt); sin FEATURE_SOCIAL o con emulador no hace nada.
+        AppCheckInstaller.installOnce(this);
         super.onCreate();
         // App solo oscura (plan migracion-visual-stitch, u5): los tokens oscuros viven en values/ y
         // Theme.BBetter hereda de DayNight. Forzarlo aquí, antes de crear cualquier actividad, hace

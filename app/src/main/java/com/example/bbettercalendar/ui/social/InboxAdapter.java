@@ -72,16 +72,16 @@ final class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.Holder> {
             ProfileUi.paintAvatar(avatar, row.fromName, row.fromColor);
             switch (row.type) {
                 case CHEER:
-                    title.setText(context.getString(R.string.inbox_cheer_title, row.fromName, row.fromHandle));
-                    body.setText(context.getString(R.string.inbox_cheer_body, row.fromName, row.fromHandle));
+                    title.setText(context.getString(R.string.inbox_cheer_title, row.fromName));
+                    body.setText(context.getString(R.string.inbox_cheer_body));
                     break;
                 case NUDGE:
-                    title.setText(context.getString(R.string.inbox_nudge_title, row.fromName, row.fromHandle));
-                    body.setText(context.getString(R.string.inbox_nudge_body, row.fromName, row.fromHandle));
+                    title.setText(context.getString(R.string.inbox_nudge_title, row.fromName));
+                    body.setText(context.getString(R.string.inbox_nudge_body));
                     break;
                 case REQUEST:
                 default:
-                    title.setText(context.getString(R.string.inbox_request_title, row.fromName, row.fromHandle));
+                    title.setText(context.getString(R.string.inbox_request_title, row.fromName));
                     body.setText(context.getString(R.string.inbox_request_body, row.fromName, row.fromHandle));
                     break;
             }

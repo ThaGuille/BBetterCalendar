@@ -130,17 +130,20 @@ public class InboxRepository {
         if (ids.isEmpty()) {
             return;
         }
-        backend.markRead(uid, ids, serial, new InboxBackend.Result() {
-            @Override
-            public void onSuccess() {
-                // El listener publica el cambio.
-            }
+        // Una escritura por aviso (L-u7): uno borrado, podado o rechazado no frena a los demás.
+        for (String id : ids) {
+            backend.markRead(uid, id, serial, new InboxBackend.Result() {
+                @Override
+                public void onSuccess() {
+                    // El listener publica el cambio.
+                }
 
-            @Override
-            public void onError(@NonNull Throwable error) {
-                // Sin consecuencias: seguirá sin leer y se reintenta al volver a abrir la bandeja.
-            }
-        });
+                @Override
+                public void onError(@NonNull Throwable error) {
+                    // Sin consecuencias: seguirá sin leer y se reintenta al volver a abrir la bandeja.
+                }
+            });
+        }
     }
 
     // ---- observadores activos (hilo principal) ----------------------------------------------------------

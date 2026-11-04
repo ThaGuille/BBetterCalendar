@@ -147,3 +147,56 @@ describe("reglas F5: inbox y fcmTokens", () => {
     });
   });
 });
+
+describe("reglas L: marcar leído idempotente", () => {
+  let env;
+
+  before(async () => {
+    env = await initializeTestEnvironment({ projectId: "demo-bbetter", firestore: { rules: firestoreRules } });
+  });
+
+  after(async () => {
+    await env.cleanup();
+  });
+
+  beforeEach(async () => {
+    await env.clearFirestore();
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      for (const uid of ["alice", "bob"]) {
+        await setDoc(doc(db, "users", uid), {
+          createdAt: Timestamp.now(),
+          ageBand: "18+",
+          termsVersion: 1,
+          termsAcceptedAt: Timestamp.now(),
+        });
+      }
+      await setDoc(doc(db, "users", "alice", "inbox", "read1"), item({ read: true }));
+      await setDoc(doc(db, "users", "alice", "inbox", "new1"), item());
+    });
+  });
+
+  const as = (uid) => env.authenticatedContext(uid).firestore();
+  const mine = (db, id = "read1") => doc(db, "users", "alice", "inbox", id);
+
+  it("true a true se permite", async () => {
+    await assertSucceeds(updateDoc(mine(as("alice")), { read: true }));
+  });
+
+  it("false a true se sigue permitiendo", async () => {
+    await assertSucceeds(updateDoc(mine(as("alice"), "new1"), { read: true }));
+  });
+
+  it("true a false se deniega", async () => {
+    await assertFails(updateDoc(mine(as("alice")), { read: false }));
+  });
+
+  it("otro campo se deniega aunque read siga true", async () => {
+    await assertFails(updateDoc(mine(as("alice")), { read: true, fromName: "X" }));
+    await assertFails(updateDoc(mine(as("alice")), { fromName: "X" }));
+  });
+
+  it("otro usuario no marca, ni en true a true", async () => {
+    await assertFails(updateDoc(mine(as("bob")), { read: true }));
+  });
+});

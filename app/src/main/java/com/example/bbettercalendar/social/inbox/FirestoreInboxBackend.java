@@ -15,7 +15,6 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,15 +77,11 @@ public class FirestoreInboxBackend implements InboxBackend {
     }
 
     @Override
-    public void markRead(@NonNull String uid, @NonNull List<String> ids, @NonNull Executor executor,
+    public void markRead(@NonNull String uid, @NonNull String id, @NonNull Executor executor,
                          @NonNull Result result) {
-        WriteBatch batch = db.batch();
-        for (String id : ids) {
-            // Solo ese campo: las reglas rechazan cualquier otro cambio.
-            batch.update(db.collection(ProfileWrites.USERS).document(uid).collection(INBOX).document(id),
-                    InboxMapping.READ, true);
-        }
-        batch.commit()
+        // Solo ese campo: las reglas rechazan cualquier otro cambio.
+        db.collection(ProfileWrites.USERS).document(uid).collection(INBOX).document(id)
+                .update(InboxMapping.READ, true)
                 .addOnSuccessListener(executor, v -> result.onSuccess())
                 .addOnFailureListener(executor, e -> result.onError(e instanceof FirebaseFirestoreException
                         ? new ListenerException(((FirebaseFirestoreException) e).getCode().name(), e) : e));

@@ -13,6 +13,7 @@ import com.example.bbettercalendar.notifications.NotificationChannels;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.firebase.AppCheckInstaller;
 import com.example.bbettercalendar.social.invite.InstallReferrerReader;
+import com.example.bbettercalendar.social.push.FriendsNotificationsCleaner;
 import com.example.bbettercalendar.social.push.PushTokenRegistrar;
 import com.example.bbettercalendar.social.stats.StatsPublisher;
 import com.example.bbettercalendar.stats.AppRuleDAO;
@@ -39,6 +40,8 @@ public class DBMigration extends Application {
     @Inject Lazy<StatsPublisher> statsPublisher;
     // F5-u6: token FCM en users/{uid}.fcmTokens al tener sesión y perfil. Lazy por lo mismo que el anterior.
     @Inject Lazy<PushTokenRegistrar> pushTokenRegistrar;
+    // L-u7: quita los avisos de Amigos de la bandeja al perder la sesion.
+    @Inject Lazy<FriendsNotificationsCleaner> friendsNotificationsCleaner;
 
     @Override
     public void onCreate() {
@@ -55,6 +58,7 @@ public class DBMigration extends Application {
         if (SocialFeature.isAccountEnabled()) {
             statsPublisher.get().start();
             pushTokenRegistrar.get().start();
+            friendsNotificationsCleaner.get().start();
         }
     }
 

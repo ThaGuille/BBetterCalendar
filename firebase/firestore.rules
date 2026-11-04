@@ -369,10 +369,10 @@ service cloud.firestore {
           && d.updatedAt is timestamp && d.updatedAt == request.time;
     }
 
-    // F5-u2: marcar leído = cambiar únicamente read, de false a true.
+    // F5-u2: marcar leído = cambiar únicamente read, de false a true. L-u7 (d4): idempotente, también vale
+    // true -> true (no cambia nada); true -> false sigue denegado.
     function validInboxRead() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
-          && resource.data.read == false
           && request.resource.data.read == true;
     }
 

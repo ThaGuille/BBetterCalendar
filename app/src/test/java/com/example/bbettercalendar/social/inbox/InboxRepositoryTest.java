@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -221,9 +220,24 @@ public class InboxRepositoryTest {
         observe();
         emit(doc("a", "cheer", 1_000L, true), doc("b", "nudge", 3_000L, false), doc("c", "request", 2_000L, false));
         repo.markAllRead();
-        ArgumentCaptor<List<String>> ids = ArgumentCaptor.forClass(List.class);
-        verify(backend).markRead(eq("me"), ids.capture(), any(Executor.class), any(InboxBackend.Result.class));
-        assertEquals(new java.util.HashSet<>(Arrays.asList("b", "c")), new java.util.HashSet<>(ids.getValue()));
+        ArgumentCaptor<String> ids = ArgumentCaptor.forClass(String.class);
+        verify(backend, times(2)).markRead(eq("me"), ids.capture(), any(Executor.class),
+                any(InboxBackend.Result.class));
+        assertEquals(new java.util.HashSet<>(Arrays.asList("b", "c")), new java.util.HashSet<>(ids.getAllValues()));
+    }
+
+    @Test
+    public void markAllReadWritesEachIdEvenIfOneFails() {
+        observe();
+        emit(doc("a", "cheer", 1_000L, false), doc("b", "nudge", 3_000L, false), doc("c", "request", 2_000L, false));
+        org.mockito.Mockito.doAnswer(inv -> {
+            ((InboxBackend.Result) inv.getArgument(3)).onError(new RuntimeException("PERMISSION_DENIED"));
+            return null;
+        }).when(backend).markRead(eq("me"), eq("b"), any(Executor.class), any(InboxBackend.Result.class));
+        repo.markAllRead();
+        for (String id : Arrays.asList("a", "b", "c")) {
+            verify(backend).markRead(eq("me"), eq(id), any(Executor.class), any(InboxBackend.Result.class));
+        }
     }
 
     @Test
@@ -231,19 +245,19 @@ public class InboxRepositoryTest {
         observe();
         emit(doc("a", "cheer", 1_000L, true));
         repo.markAllRead();
-        verify(backend, never()).markRead(anyString(), anyList(), any(Executor.class), any(InboxBackend.Result.class));
+        verify(backend, never()).markRead(anyString(), anyString(), any(Executor.class), any(InboxBackend.Result.class));
     }
 
     @Test
     public void markReadWritesThatIdEvenBeforeTheListFirstArrivesButNotForAKnownReadOne() {
         observe();
         repo.markRead("cheer_uidAna_2026-11-02");
-        verify(backend).markRead(eq("me"), eq(Collections.singletonList("cheer_uidAna_2026-11-02")),
+        verify(backend).markRead(eq("me"), eq("cheer_uidAna_2026-11-02"),
                 any(Executor.class), any(InboxBackend.Result.class));
 
         emit(doc("done", "cheer", 1_000L, true));
         repo.markRead("done");
-        verify(backend, never()).markRead(anyString(), eq(Collections.singletonList("done")),
+        verify(backend, never()).markRead(anyString(), eq("done"),
                 any(Executor.class), any(InboxBackend.Result.class));
     }
 
@@ -253,7 +267,7 @@ public class InboxRepositoryTest {
         build();
         repo.markRead("x");
         repo.markAllRead();
-        verify(backend, never()).markRead(anyString(), anyList(), any(Executor.class), any(InboxBackend.Result.class));
+        verify(backend, never()).markRead(anyString(), anyString(), any(Executor.class), any(InboxBackend.Result.class));
     }
 
     @Test

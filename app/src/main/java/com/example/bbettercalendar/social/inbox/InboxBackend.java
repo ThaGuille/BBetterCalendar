@@ -65,9 +65,8 @@ public interface InboxBackend {
     ListenerSource<String, DocList> inbox();
 
     /**
-     * Pone {@code read = true} en esos avisos de {@code users/{uid}/inbox}, en un solo lote y escribiendo
-     * únicamente ese campo (las reglas solo dejan pasar de {@code false} a {@code true}).
+     * Pone {@code read = true} en ese aviso de {@code users/{uid}/inbox}, con su propia escritura y únicamente ese
+     * campo (L-u7, d4: un aviso que falla no tumba a los demás; las reglas aceptan false o true antes).
      */
-    void markRead(@NonNull String uid, @NonNull List<String> ids, @NonNull Executor executor,
-                  @NonNull Result result);
+    void markRead(@NonNull String uid, @NonNull String id, @NonNull Executor executor, @NonNull Result result);
 }

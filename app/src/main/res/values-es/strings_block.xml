@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- L-u10 · Bloquear usuarios: el control Bloquear (perfil de amigo, solicitudes recibidas), su confirmación
+     y la pantalla «Usuarios bloqueados» de Mi perfil. Mismos nombres que values/strings_block.xml. -->
+<resources>
+    <string name="block_action">Bloquear</string>
+    <string name="block_confirm_title">¿Bloquear a %1$s?</string>
+    <string name="block_confirm_message">%1$s dejará de ser tu amigo y no podrá enviarte solicitudes de amistad, ánimos ni empujones. No se le avisa. Puedes desbloquearlo cuando quieras desde Mi perfil.</string>
+    <string name="block_confirm_action">Bloquear</string>
+    <string name="block_cancel">Cancelar</string>
+    <string name="block_toast_blocked">%1$s bloqueado</string>
+    <string name="block_error">No pudimos bloquearlo. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="block_unblock">Desbloquear</string>
+    <string name="block_toast_unblocked">%1$s desbloqueado</string>
+    <string name="block_unblock_error">No pudimos desbloquearlo. Inténtalo de nuevo.</string>
+    <string name="my_profile_blocked_row">Usuarios bloqueados</string>
+    <string name="blocked_top_title">Usuarios bloqueados</string>
+    <string name="blocked_loading">Cargando usuarios bloqueados…</string>
+    <string name="blocked_error">No pudimos cargar tus usuarios bloqueados. Revisa tu conexión y vuelve.</string>
+    <string name="blocked_empty_title">No tienes usuarios bloqueados</string>
+    <string name="blocked_empty_body">Las personas que bloquees aparecerán aquí para que puedas desbloquearlas.</string>
+</resources>

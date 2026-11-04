@@ -30,6 +30,9 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         void onDecline(@NonNull FriendRequest request);
 
+        /** L-u10: bloquear a quien envio una solicitud recibida (pide confirmacion el fragmento). */
+        void onBlock(@NonNull FriendRequest request);
+
         void onCancel(@NonNull FriendRequest request);
 
         void onMenu(@NonNull View anchor, @NonNull FriendsViewModel.Row row);
@@ -134,6 +137,7 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         final View actions;
         final MaterialButton primary;
         final MaterialButton secondary;
+        final MaterialButton block;
 
         PersonHolder(@NonNull View itemView) {
             super(itemView);
@@ -145,6 +149,7 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             actions = itemView.findViewById(R.id.friendActions);
             primary = itemView.findViewById(R.id.friendPrimary);
             secondary = itemView.findViewById(R.id.friendSecondary);
+            block = itemView.findViewById(R.id.friendBlock);
         }
 
         void bind(@NonNull FriendsViewModel.Row row, @NonNull Listener listener) {
@@ -161,6 +166,7 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             avatar.setShowPresenceDot(studying);
             actions.setVisibility(View.GONE);
             secondary.setVisibility(View.VISIBLE);
+            block.setVisibility(View.GONE);
             menu.setVisibility(View.VISIBLE);
             menu.setOnClickListener(v -> listener.onMenu(v, row));
             if (row.type == FriendsViewModel.Row.Type.FRIEND) {
@@ -172,6 +178,8 @@ final class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             switch (row.type) {
                 case REQUEST:
                     actions.setVisibility(View.VISIBLE);
+                    block.setVisibility(View.VISIBLE);
+                    block.setOnClickListener(v -> listener.onBlock(request));
                     secondary.setText(R.string.friends_decline);
                     secondary.setOnClickListener(v -> listener.onDecline(request));
                     primary.setText(R.string.friends_accept);

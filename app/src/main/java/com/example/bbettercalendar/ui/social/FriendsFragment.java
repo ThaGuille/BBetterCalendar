@@ -43,6 +43,7 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
     static final String TAG_REPORT = "friends-report";
 
     private FriendsViewModel viewModel;
+    private BlockViewModel blockViewModel;
     private FriendsAdapter adapter;
     private RecyclerView list;
     private TextView status;
@@ -71,6 +72,7 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(FriendsViewModel.class);
+        blockViewModel = new ViewModelProvider(this).get(BlockViewModel.class);
         TopBarHelper.bind(this, view, R.string.friends_top_title);
         list = view.findViewById(R.id.friendsList);
         status = view.findViewById(R.id.friendsStatus);
@@ -105,6 +107,15 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
             if (event.offerRemove != null) {
                 offerRemoveAfterReport(event.offerRemove);
             }
+        });
+        blockViewModel.getEvent().observe(getViewLifecycleOwner(), event -> {
+            if (event == null) {
+                return;
+            }
+            blockViewModel.consumeEvent();
+            Toast.makeText(requireContext().getApplicationContext(),
+                    event.arg == null ? getString(event.message) : getString(event.message, event.arg),
+                    Toast.LENGTH_SHORT).show();
         });
         new ViewModelProvider(this).get(ProfileViewModel.class).getAccountState()
                 .observe(getViewLifecycleOwner(), state -> {
@@ -324,6 +335,12 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
     @Override
     public void onDecline(@NonNull FriendRequest request) {
         viewModel.decline(request);
+    }
+
+    @Override
+    public void onBlock(@NonNull FriendRequest request) {
+        BlockUi.confirm(requireContext(), request.from, () ->
+                blockViewModel.block(request.from.uid, request.from.displayName));
     }
 
     @Override

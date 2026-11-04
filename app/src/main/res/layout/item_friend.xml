@@ -79,6 +79,14 @@
         android:visibility="gone">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/friendBlock"
+            style="@style/Widget.BBetter.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/block_action"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/friendSecondary"
             style="@style/Widget.BBetter.Button.Text"
             android:layout_width="wrap_content"

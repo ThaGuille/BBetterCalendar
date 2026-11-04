@@ -186,6 +186,13 @@
             app:argType="integer" />
     </fragment>
 
+    <!-- ===== L-u10: usuarios bloqueados (desde Mi perfil), con Desbloquear. ===== -->
+    <fragment
+        android:id="@+id/navigation_blocked_users"
+        android:name="com.example.bbettercalendar.ui.social.BlockedUsersFragment"
+        android:label="@string/blocked_top_title"
+        tools:layout="@layout/fragment_blocked_users" />
+
     <!-- ===== F5-u7: bandeja de la campana de Home (cheers, nudges, solicitudes). La abre la campana con perfil
          y el toque de una notificacion de Amigos (MainActivity, EXTRA_OPEN_INBOX_ID); openId es el aviso a marcar leido. ===== -->
     <fragment

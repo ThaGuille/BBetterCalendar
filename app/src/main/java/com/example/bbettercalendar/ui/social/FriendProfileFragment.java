@@ -104,6 +104,21 @@ public class FriendProfileFragment extends Fragment {
 
         view.findViewById(R.id.fpRemoveButton).setOnClickListener(v -> confirmRemove());
         view.findViewById(R.id.fpReportButton).setOnClickListener(v -> showReportSheet());
+        BlockViewModel blockViewModel = new ViewModelProvider(this).get(BlockViewModel.class);
+        view.findViewById(R.id.fpBlockButton).setOnClickListener(v ->
+                BlockUi.confirm(requireContext(), card, () -> blockViewModel.block(card.uid, card.displayName)));
+        blockViewModel.getEvent().observe(getViewLifecycleOwner(), event -> {
+            if (event == null) {
+                return;
+            }
+            blockViewModel.consumeEvent();
+            Toast.makeText(requireContext().getApplicationContext(),
+                    event.arg == null ? getString(event.message) : getString(event.message, event.arg),
+                    Toast.LENGTH_SHORT).show();
+            if (event.blocked) {
+                goBack();
+            }
+        });
 
         if (uid.isEmpty()) {
             goBack();

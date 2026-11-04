@@ -138,6 +138,8 @@ public class MyProfileFragment extends Fragment {
         new ViewModelProvider(this).get(FriendsViewModel.class).getFriendCount()
                 .observe(getViewLifecycleOwner(), count -> friendsRow.setText(
                         getString(R.string.my_profile_friends_row, count == null ? 0 : count)));
+        view.findViewById(R.id.mpBlockedRow).setOnClickListener(v -> NavHostFragment.findNavController(this)
+                .navigate(R.id.navigation_blocked_users));
         // F4-u8: «Compartir mi estado en directo»; el valor sale de PresenceSharing (lo elegido o el d4).
         sharePresence.setOnCheckedChangeListener((button, checked) -> {
             if (!bindingShare && current != null) {

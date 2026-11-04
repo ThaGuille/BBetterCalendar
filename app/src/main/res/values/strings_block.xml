@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- L-u10 · Block users: the Block control (friend profile, incoming requests), its confirmation and the
+     "Blocked users" screen of My profile. Same names in values-es/strings_block.xml. -->
+<resources>
+    <string name="block_action">Block</string>
+    <string name="block_confirm_title">Block %1$s?</string>
+    <string name="block_confirm_message">%1$s will stop being your friend and will not be able to send you friend requests, cheers or nudges. They are not told. You can unblock them any time from My profile.</string>
+    <string name="block_confirm_action">Block</string>
+    <string name="block_cancel">Cancel</string>
+    <string name="block_toast_blocked">%1$s blocked</string>
+    <string name="block_error">We could not block them. Check your connection and try again.</string>
+    <string name="block_unblock">Unblock</string>
+    <string name="block_toast_unblocked">%1$s unblocked</string>
+    <string name="block_unblock_error">We could not unblock them. Try again.</string>
+    <string name="my_profile_blocked_row">Blocked users</string>
+    <string name="blocked_top_title">Blocked users</string>
+    <string name="blocked_loading">Loading blocked users…</string>
+    <string name="blocked_error">We could not load your blocked users. Check your connection and come back.</string>
+    <string name="blocked_empty_title">No blocked users</string>
+    <string name="blocked_empty_body">People you block will show up here so you can unblock them.</string>
+</resources>

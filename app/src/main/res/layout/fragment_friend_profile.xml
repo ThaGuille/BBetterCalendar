@@ -267,6 +267,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_xs"
                 android:text="@string/friend_profile_report" />
+
+            <!-- L-u10: Block is its own control, apart from Remove and Report. -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fpBlockButton"
+                style="@style/Widget.BBetter.Button.Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_lg"
+                android:text="@string/block_action" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

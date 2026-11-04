@@ -4,7 +4,7 @@
   Con la app instalada y el App Link aprobado, Android abre InviteLinkActivity y esta página no se ve.
   Sin la app: enseña el código, la alternativa del @usuario y el enlace a Play con referrer=invite%3D<código>
   (InstallReferrerReader lo lee al primer arranque). Firebase lo sirve con el rewrite /i/** de firebase.json.
-  Solo se sirve en el emulador de Hosting hasta L.7 (D-025). Sin recursos externos ni lecturas de Firestore.
+  L-u5 (L.7): versión final; se despliega con Hosting tras DEPLOY.md. Sin recursos externos ni lecturas de Firestore.
 -->
 <html lang="es">
 <head>
@@ -37,8 +37,7 @@
   <h1 id="title">Te han invitado a BBetter</h1>
   <p id="lead">Instala BBetter para añadir a tu amigo o amiga. El enlace guarda la invitación.</p>
   <p class="code" id="code" hidden></p>
-  <!-- [CONFIRM en L: la ficha de Play aún no existe] El enlace a Play con referrer=invite%3D<código> se valida
-       cuando exista la ficha (gate L). Install Referrer solo funciona instalando desde Play. -->
+  <!-- El enlace a Play lleva referrer=invite%3D<código>; Install Referrer solo funciona instalando desde Play. -->
   <a class="play" id="play" href="https://play.google.com/store/apps/details?id=io.github.thaguille.bbettercalendar&amp;referrer=invite%3D">Descargar en Google Play</a>
   <p class="hint" id="hint">¿Ya tienes la app? Ábrela, ve a Amigos → Añadir y escribe el @usuario de quien te invita.</p>
   <p class="hint" id="bad" hidden>Este enlace de invitación no es válido. Pide a tu amigo o amiga su @usuario y añádelo desde Amigos → Añadir.</p>

@@ -2,7 +2,7 @@
 
 **Status:** in progress
 **Created:** 2026-10-19
-**Last updated:** 2026-11-03 (L abierta)
+**Last updated:** 2026-11-05 (parte (a) de L cerrada)
 
 > **Punto de entrada del sistema social.** Aquí está dónde estamos y qué sigue. El *porqué* y el
 > *qué* están en la guía, [`docs/social/`](../../docs/social/README.md): investigación, producto,
@@ -18,7 +18,7 @@
 - **Fase activa:** **L** (Lanzamiento), abierta el 2026-11-03: [`social-l-lanzamiento.md`](social-l-lanzamiento.md). F0, F1, F2, F3, F4 y F5 hechas (F5 cerrada el 2026-11-02, [`social-f5-interaccion.md`](social-f5-interaccion.md)).
   ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md),
   [`social-f3-stats.md`](social-f3-stats.md), [`social-f4-presencia.md`](social-f4-presencia.md), [`social-f5-interaccion.md`](social-f5-interaccion.md)); el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** el plan de L, parte (a) (L-u2 a L-u14: App Check, despliegue preparado, bloquear, lint de API 24, textos y checklist) y, al cerrarla, la guía (b) que solo puedes hacer tú (L-u14). `FEATURE_SOCIAL` sigue en `false` en release hasta que cierres L.6.
+- **Siguiente paso:** la parte (b) de L, que solo puedes hacer tú: sigue la guía paso a paso «Guía para ti» de [`social-l-lanzamiento.md`](social-l-lanzamiento.md) (L.1 a L.7). La parte (a) está hecha y comprobada. `FEATURE_SOCIAL` sigue en `false` en release hasta que cierres L.6.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -122,14 +122,28 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 ### L · Gate de lanzamiento (antes de `FEATURE_SOCIAL = true` en release)
 - [ ] **L.1** App Check (Play Integrity) en modo enforce — 03 §3
+  - [x] (a) App Check en el cliente (L-u3), en las Functions con `enforceAppCheck` (L-u4) y dependencias (L-u2)
+  - [ ] (b) Registrar la app con Play Integrity, revisar las métricas y activar enforce en Firestore/RTDB y las Functions (guía L.1)
 - [ ] **L.2** Política v2, términos y página de borrado publicados; Data safety actualizado; enlace de
   borrado en Play Console — 04 §2, §4
+  - [x] (a) Política v2, términos y página de borrado listos (L-u13) y borrador de Data safety (L-u12)
+  - [ ] (b) Publicar en Pages, rellenar Data safety y poner la URL de borrado en Play Console (guía L.2)
 - [ ] **L.3** Público objetivo declarado (13+) y revisión UGC (reportar funciona; ¿Play exige bloquear? → DIF-11) — 04 §1, §2
+  - [x] (a) Bloquear en servidor, datos y UI (L-u8, L-u9, L-u10, D-038) y respuestas de UGC y público (L-u12)
+  - [ ] (b) Declarar 13+ y pasar la revisión UGC de Play (guía L.3)
 - [ ] **L.4** Proceso de moderación acordado: quién revisa `reports/`, cada cuánto y cómo se banea — 04 §6
+  - [x] (a) Checklist de moderación con pasos manuales (L-u12)
+  - [ ] (b) Decidir quién modera y calendarizar la revisión (guía L.4)
 - [ ] **L.5** Alertas de presupuesto en Blaze — 03 §12
+  - [x] (a) Importes propuestos para las alertas (L-u14)
+  - [ ] (b) Crear los presupuestos y alertas en Blaze (guía L.5)
 - [ ] **L.6** Prueba con 3 o más usuarios reales durante una semana
+  - [x] (a) Interruptor `-PfeatureSocial` del build de la pista interna (L-u2) y gate de lint para API 24 (L-u11)
+  - [ ] (b) La semana con 3 o más usuarios reales, la pasada real en API 24 y el cambio de `FEATURE_SOCIAL` (guía L.6)
 - [ ] **L.7** Desplegar Hosting (`assetlinks.json` con el SHA-256 de release), reglas y Functions; App Link verificado
   de verdad e Install Referrer probado instalando desde Play (D-025)
+  - [x] (a) Despliegue preparado (L-u5), App Link en release (L-u6) y hallazgos bajos de F5 (L-u7)
+  - [ ] (b) SHA-256 de release, preflight, deploy y verificar App Link e Install Referrer desde Play (guía L.7)
 
 ## Diferidos
 
@@ -164,6 +178,7 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-11-05 (54)** · L-u14 parte (a) de L cerrada: notas de L-u1 a L-u13 plegadas en el plan, «Guía para ti» (L.1-L.7 con «Comprobar después»), tablero con (a)/(b), `systems/social.md` con App Check, bloquear, despliegue y arreglos de la bandeja, y paso de punta a punta en api36 sin crashes (ninguno). **L sigue «activa».** **Siguiente:** tu parte (b) según la guía del plan de L.
 - **2026-11-02 (53)** · F5-u9 F5 cerrada: notas plegadas, `systems/social.md`, `notifications.md`, `home-notification-centre` en Resolved con su History, política v2 y página de borrado al día, y paso de punta a punta en api36 sin crashes (ninguno). **F5.1-F5.3 marcadas.** **Siguiente:** gate L; push y fusión de `bt/social-f5-interaccion` en `main` por la sesión principal.
 - **2026-11-02 (52)** · F5-u10 índice de collection group `inbox.from` declarado en `firestore.indexes.json`, sin desplegar (ninguno). **Siguiente:** F5-u9.
 - **2026-11-02 (51)** · F5-u8 ánimo y empujón en el perfil de amigo y entrada desde Focus (F5.3) (ninguno). **Siguiente:** F5-u9.

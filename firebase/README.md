@@ -135,8 +135,8 @@ adb shell pm get-app-links --user cur io.github.thaguille.bbettercalendar
 adb shell am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://bbetter-dbcda.web.app/i/ABCD2345"
 ```
 
-El intent-filter (`autoVerify`, `https`, `bbetter-dbcda.web.app`, `/i/`) vive solo en `app/src/debug/AndroidManifest.xml`
-y apunta a `InviteLinkActivity`, que guarda el código como invitación pendiente y abre la app con el intent del launcher.
+El intent-filter (`autoVerify`, `https`, `bbetter-dbcda.web.app`, `/i/`) vive en `app/src/main/AndroidManifest.xml` (L-u6; inerte sin
+`FEATURE_SOCIAL`) y apunta a `InviteLinkActivity`, que guarda el código como invitación pendiente y abre la app con el intent del launcher.
 `scripts/adb-reverse.ps1` ya incluye el puerto de Hosting.
 
 ### `tests/tools/actor.js`: la segunda identidad (F2-u4)

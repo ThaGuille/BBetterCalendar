@@ -13,6 +13,10 @@
 //   node tests/tools/actor.js decline <nombre> @usuario    rechaza (borra) la solicitud recibida (con reglas)
 //   node tests/tools/actor.js cancel <nombre> @usuario     cancela (borra) la solicitud enviada (con reglas)
 //   node tests/tools/actor.js remove <nombre> @usuario     elimina al amigo con la callable removeFriend
+//   node tests/tools/actor.js block <nombre> @usuario      L-u8: bloquea con la callable blockUser (quita amistad y
+//                                                          solicitudes; BLOCKED @usuario)
+//   node tests/tools/actor.js unblock <nombre> @usuario    L-u8: borra su bloqueo (con reglas; UNBLOCKED @usuario)
+//   node tests/tools/actor.js blocked <nombre>             L-u8: la lista de bloqueados (con reglas): BLOCK @<handle>
 //   node tests/tools/actor.js list <nombre>                una línea por amigo y por solicitud:
 //                                                            FRIEND @<handle>
 //                                                            IN @<handle> <status> [failReason]   (recibidas)
@@ -78,7 +82,7 @@ const DAILY_LIMIT = 20;
 const HANDLE = /^[a-z0-9_.]{3,20}$/;
 
 const USAGE = `uso: node tests/tools/actor.js <comando> ...
-  signup <nombre> | send|accept|decline|cancel|remove <nombre> @usuario | list <nombre>
+  signup <nombre> | send|accept|decline|cancel|remove|block|unblock <nombre> @usuario | list|blocked <nombre>
   seed-friends <nombre> <n> | set-counter <nombre> <n>
   stats <nombre> [minutesToday=N] [minutesWeekCapped=N] [daysThisWeek=N] [weeklyGoal=N] [weekStreak=N] [bestWeekStreak=N] [totalMinutes=N]
   presence <nombre> focus|break|paused|idle [minutes=N] | status <nombre> @usuario | wait-status <nombre> @usuario <state> <segundos>
@@ -95,6 +99,9 @@ const NEEDS = {
   decline: ["auth", "firestore"],
   cancel: ["auth", "firestore"],
   remove: ["auth", "firestore", "functions"],
+  block: ["auth", "firestore", "functions"],
+  unblock: ["auth", "firestore"],
+  blocked: ["auth", "firestore"],
   list: ["auth", "firestore"],
   "seed-friends": ["auth", "firestore", "database"],
   "set-counter": ["auth", "firestore"],
@@ -382,6 +389,36 @@ async function remove(name, handle) {
   out(`REMOVED @${handle}`);
 }
 
+// L-u8: bloquear con la callable blockUser; desbloquear borra blocks/{yo}/blocked/{otro} con reglas; blocked lista.
+async function block(name, handle) {
+  const { functions } = client();
+  const me = await signIn(name);
+  const other = await card(handle);
+  if (other.uid === me) throw new Error("SELF: no puedes bloquearte a ti mismo");
+  try {
+    await sdk.functions.httpsCallable(functions, "blockUser")({ uid: other.uid });
+  } catch (e) {
+    throw new Error(`blockUser falló (${e.code || e.message})`);
+  }
+  out(`BLOCKED @${handle}`);
+}
+
+async function unblock(name, handle) {
+  const { db } = client();
+  const me = await signIn(name);
+  const other = await card(handle);
+  await sdk.firestore.deleteDoc(doc(db, "blocks", me, "blocked", other.uid));
+  out(`UNBLOCKED @${handle}`);
+}
+
+async function blocked(name) {
+  const { db } = client();
+  const me = await signIn(name);
+  const snap = await sdk.firestore.getDocs(collection(db, "blocks", me, "blocked"));
+  snap.docs.map((d) => `BLOCK @${d.data().handle || "?"} ${d.id}`).sort().forEach(out);
+  out(`BLOCKED-LIST @${name}: ${snap.size} bloqueados`);
+}
+
 async function list(name) {
   const { db } = client();
   const me = await signIn(name);
@@ -617,7 +654,7 @@ async function main(argv) {
     if (!Number.isInteger(waitSeconds) || waitSeconds < 1 || waitSeconds > 3600) throw new UsageError("segundos tiene que ser un entero entre 1 y 3600");
   }
   const statsValues = cmd === "stats" ? parseStatsArgs(argv.slice(2)) : null;
-  const needsHandle = ["send", "accept", "decline", "cancel", "remove", "status", "wait-status", "cheer", "nudge"].includes(cmd);
+  const needsHandle = ["send", "accept", "decline", "cancel", "remove", "block", "unblock", "status", "wait-status", "cheer", "nudge"].includes(cmd);
   if (cmd === "token" && !/^[A-Za-z0-9_:.-]{1,200}$/.test(arg || "")) throw new UsageError(`token no válido '${arg || ""}'`);
   const handle = needsHandle ? checkHandle(arg) : null;
   const count = cmd === "seed-friends" ? checkCount(arg, 200) : cmd === "set-counter" ? checkCount(arg, DAILY_LIMIT) : null;
@@ -638,6 +675,12 @@ async function main(argv) {
       return removeRequest(name, handle, false);
     case "remove":
       return remove(name, handle);
+    case "block":
+      return block(name, handle);
+    case "unblock":
+      return unblock(name, handle);
+    case "blocked":
+      return blocked(name);
     case "list":
       return list(name);
     case "seed-friends":

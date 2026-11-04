@@ -4,7 +4,7 @@
 // F2-u3 abre friendRequests/, users/{uid}/friends, reports/ (solo crear), invites/ y RTDB friends/ (sus casos
 // están en friends-rules.test.js e invites-reports.test.js). F3-u2 abre stats/{uid} (stats-rules.test.js). F4-u2 abre RTDB status/{uid} (presence-rules.test.js). Aquí se
 // comprueba que el resto sigue denegado:
-// blocks/, users/{uid}/inbox de otro (la del dueño la abre F5-u2, inbox-rules.test.js), cualquier otra colección y RTDB salvo friends/ y status/ (presence/, la raíz).
+// blocks/ de otro (el del dueño lo abre L-u8), users/{uid}/inbox de otro (la del dueño la abre F5-u2, inbox-rules.test.js), cualquier otra colección y RTDB salvo friends/ y status/ (presence/, la raíz).
 const fs = require("fs");
 const path = require("path");
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require("@firebase/rules-unit-testing");
@@ -51,9 +51,9 @@ describe("reglas: todo denegado salvo lo que abren F1, F2 y F3", () => {
     "con sesión": () => env.authenticatedContext("alice"),
   };
 
-  // Rutas que ni F1, F2 ni F3 abren, aunque sean del propio uid «alice». blocks/ no se abre nunca (D-027).
+  // Rutas que ni F1, F2 ni F3 abren, aunque sean del propio uid «alice». blocks/ de otro sigue cerrado; el del dueño lo abre L-u8 (blocks-rules.test.js).
   const closedDocs = [
-    "blocks/alice/blocked/bob",
+    "blocks/bob/blocked/alice",
     "probe/x",
   ];
 
@@ -65,6 +65,7 @@ describe("reglas: todo denegado salvo lo que abren F1, F2 y F3", () => {
         await assertFails(db.doc(p).set({ x: 1 }));
       }
       await assertFails(db.collection("blocks").get());
+      await assertFails(db.collection("blocks/bob/blocked").get());
     });
 
     it(`Firestore: ${who} no puede leer ni escribir la bandeja de otro (F5-u2)`, async () => {

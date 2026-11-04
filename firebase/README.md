@@ -6,8 +6,8 @@ y tests, el Emulator Suite. Plan: [`.claude/plans/social-f0-base.md`](../.claude
 
 | Qué | Dónde |
 |---|---|
-| Reglas (todo denegado salvo lo que abre cada fase; F1: `users/`, `profiles/`, `handles/`; F2: `friendRequests/`, `users/*/friends`, `reports/`, `invites/`, RTDB `friends/`) | `firestore.rules`, `database.rules.json` |
-| Functions (TypeScript, Node 22, `europe-west1`; F1: callable `deleteAccount`; F2: trigger `onFriendRequestAccepted` y callable `removeFriend`) | `functions/` |
+| Reglas (todo denegado salvo lo que abre cada fase; F1: `users/`, `profiles/`, `handles/`; F2: `friendRequests/`, `users/*/friends`, `reports/`, `invites/`, RTDB `friends/`; L-u8: `blocks/{uid}/blocked/{otro}`, que solo lee y borra el dueño y escribe `blockUser`) | `firestore.rules`, `database.rules.json` |
+| Functions (TypeScript, Node 22, `europe-west1`; F1: callable `deleteAccount`; F2: trigger `onFriendRequestAccepted` y callable `removeFriend`; L-u8: callable `blockUser`, `blocks/`) | `functions/` |
 | Tests de reglas (`@firebase/rules-unit-testing`) y de integración de las Functions | `tests/` |
 | Segunda identidad para las pruebas manuales con la app (F2-u4) | `tests/tools/actor.js` |
 | La suite con tope de tiempo, reintento y bloques de puertos (big-task y a mano) | `scripts/run-tests.sh` |
@@ -93,6 +93,8 @@ npm --prefix functions run build
 | Fichero | Qué prueba |
 |---|---|
 | `tests/deny-all.test.js` | Control positivo (con las reglas desactivadas el emulador responde) y que todo lo que ninguna fase ha abierto (`blocks/`, `users/*/inbox`, cualquier otra colección, RTDB `status/`, `presence/` y la raíz) sigue denegado |
+| `tests/blocks-rules.test.js` | L-u8 (`reglas L: blocks`): el dueño lee (get y list) y borra su bloqueo; nadie crea ni cambia uno desde un cliente; otros, el bloqueado y el anónimo no leen; una solicitud se deniega en los dos sentidos mientras alguno bloquee al otro y vuelve a pasar tras desbloquear |
+| `tests/blocks-functions.test.js` | L-u8 (`Functions L: blockUser`): `unauthenticated`, `invalid-argument` (uid mal formado o el propio), amigo o solicitante o desconocido (amistad, espejo RTDB, las dos solicitudes y los avisos del bloqueado fuera; bloqueo con `since`, `handle`, `displayName` y `avatarColor`, vacíos sin perfil), repetir no cambia nada, solicitud denegada y permitida tras desbloquear, ánimo y empujón `not-friends`, `deleteAccount` borra `blocks/{uid}` |
 | `tests/stats-rules.test.js` | F3-u2: `stats/{uid}` — lo lee el dueño y sus amigos, lo escribe solo el dueño (set completo) con las 10 claves exactas y los rangos de `validStats()` (un caso denegado por condición, también el tope `240 * daysThisWeek`); borrar, nunca |
 | `tests/friends-rules.test.js` | F2-u3: `friendRequests/{from_to}` (crear solo con el id `from_to`, las 10 claves, `status` `pending`, `createdAt` del servidor y las tarjetas de `handles/`; ni a uno mismo, ni ya amigos, ni cruzada); el contador diario de `users/{from}` en el mismo lote (20.ª sí y 21.ª no, un día nuevo lo reinicia, dos solicitudes con un incremento no, `reqLastTo` = destinatario); aceptar solo el destinatario; `failed` solo las Functions; cancelar y rechazar borran; consultas con `where to/from == yo`; `users/*/friends` solo lectura del dueño; `profiles/` legible por un amigo (`isFriend`) antes y después de eliminar; RTDB `friends/` lo lee solo el dueño y nadie escribe |
 | `tests/invites-reports.test.js` | F2-u3: `invites/{código}` (`^[A-HJKMNP-Z2-9]{8}$`, `get` con sesión y sin `list`, alta en el mismo lote que `users/{uid}.inviteCode`, cambiar de código borra el viejo, renombrar copia el `@usuario` del perfil final) y `reports/{reporter_reported}` (solo crear, campos y enums exactos, hace falta ser amigo o tener una solicitud del reportado; con `context` `request` el rechazo va en el mismo lote; leer, cambiar, borrar y un segundo reporte, denegados) |
@@ -152,6 +154,9 @@ node tests/tools/actor.js send bob @alice       # solicitud + contador diario en
 node tests/tools/actor.js accept bob @alice     # acepta la de @alice (con reglas); la amistad la crea onFriendRequestAccepted
 node tests/tools/actor.js decline bob @alice    # rechaza (borra) la recibida · cancel bob @alice: cancela la enviada
 node tests/tools/actor.js remove bob @alice     # callable removeFriend
+node tests/tools/actor.js block bob @alice      # L-u8: callable blockUser: quita amistad y solicitudes de los dos y guarda el bloqueo (BLOCKED @alice); repetir da lo mismo
+node tests/tools/actor.js unblock bob @alice    # L-u8: borra el bloqueo con reglas (UNBLOCKED @alice); después ya se pueden enviar solicitudes
+node tests/tools/actor.js blocked bob           # L-u8: la lista de bloqueados de bob con reglas: 'BLOCK @<handle> <uid>' y un resumen
 node tests/tools/actor.js list bob              # FRIEND @<handle> · IN @<handle> <status> · OUT @<handle> <status>
 node tests/tools/actor.js seed-friends alice 50 # SIN reglas: 50 amigos inventados (f01_alice...), idempotente (tope de 50)
 node tests/tools/actor.js set-counter alice 20  # SIN reglas: contador de hoy a 20 (la 21.ª se rechaza); 0 lo quita

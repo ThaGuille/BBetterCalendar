@@ -45,6 +45,11 @@ service cloud.firestore {
       return /databases/$(database)/documents/users/$(uid)/friends/$(f);
     }
 
+    // L-u8 (D-038): blocks/{uid}/blocked/{other}; solo la escribe blockUser (Admin SDK).
+    function blockPath(uid, other) {
+      return /databases/$(database)/documents/blocks/$(uid)/blocked/$(other);
+    }
+
     function invitePath(code) {
       return /databases/$(database)/documents/invites/$(code);
     }
@@ -253,10 +258,11 @@ service cloud.firestore {
       return c.uid == uid && c.displayName == name && c.avatarColor == color;
     }
 
-    // Accesos get/exists de este create: 6 (límite 10 por documento): handles/fromHandle, handles/toHandle,
-    // friendRequests/{to}_{from}, users/{from}/friends/{to}, users/{from} (get) y users/{from} (getAfter).
+    // Accesos get/exists de este create: 8 (límite 10 por documento): handles/fromHandle, handles/toHandle,
+    // friendRequests/{to}_{from}, users/{from}/friends/{to}, users/{from} (get) y users/{from} (getAfter) y los
+    // dos blocks/ (L-u8: denegada si cualquiera de los dos bloqueó al otro).
     // El lote de envío (solicitud + users/{from}) suma 1 más en el update de users/ (existsAfter de la
-    // solicitud): 7 de los 20 por lote.
+    // solicitud): 9 de los 20 por lote.
     function validRequestCreate(id) {
       let d = request.resource.data;
       let me = request.auth.uid;
@@ -272,6 +278,8 @@ service cloud.firestore {
           && cardMatches(d.toHandle, d.to, d.toName, d.toColor)
           && !exists(requestPath(d.to, me))
           && !exists(friendPath(me, d.to))
+          && !exists(blockPath(d.to, me))
+          && !exists(blockPath(me, d.to))
           && validRequestCounter(get(userPath(me)).data, getAfter(userPath(me)).data, d.to);
     }
 
@@ -445,6 +453,14 @@ service cloud.firestore {
       allow create: if validInviteCreate(code);
       allow update: if validInviteUpdate();
       allow delete: if validInviteDelete(code);
+    }
+
+    // L-u8 (D-038): la lista de bloqueados. Lee (get y list) y borra (desbloquear) solo el dueño; crear o
+    // cambiar solo lo hace la callable blockUser (Admin SDK).
+    match /blocks/{uid}/blocked/{other} {
+      allow read: if isOwner(uid);
+      allow delete: if isOwner(uid);
+      allow create, update: if false;
     }
 
     match /{document=**} {

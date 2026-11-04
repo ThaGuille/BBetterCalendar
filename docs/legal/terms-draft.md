@@ -4,11 +4,18 @@ permalink: /legal/terms-draft/
 ---
 
 <!--
-DRAFT — NOT PUBLISHED. Excluded from GitHub Pages in docs/_config.yml.
-Goes live at the social launch gate (board L.2, .claude/plans/sistema-social.md), together with
-privacy-policy-v2-draft.md. At L.2: rename to terms.md, set permalink /legal/terms/, remove the draft
-markers and the exclude entry, set "Last updated", and check every [CONFIRM] marker against the
-shipped code.
+READY TO PUBLISH AT L.2 — NOT PUBLISHED YET. Excluded from GitHub Pages in docs/_config.yml
+(entry legal/terms-draft.md). Goes live at the social launch gate (board L.2,
+.claude/plans/sistema-social.md), together with privacy-policy-v2-draft.md.
+Publish steps (the user, at L.2, in the same commit to main as the policy and the deletion page):
+ 1. Rename: `git mv docs/legal/terms-draft.md docs/legal/terms.md`.
+ 2. In the renamed file set the front matter to `title: BBetter — Terms of Use` and
+    `permalink: /legal/terms/`, and delete this comment block.
+ 3. Remove the line `legal/terms-draft.md` from the `exclude:` list of docs/_config.yml.
+ 4. Change "Version: 1 (ready to publish at L.2)" to "Version: 1" and set "Last updated" to the real
+    publication date. The app's `SocialTerms` version must match the published version.
+Written 2026-11-04 against the shipped code. Legal wording the code cannot settle (minors, liability,
+jurisdiction) is listed in .claude/plans/social-l/notes/u13.md for the user's review. Not legal advice.
 
 Design source: docs/social/04-cumplimiento.md §1 (age, D-010), §2 (user-generated content) and §6
 (moderation). Not legal advice: have the text reviewed before L.2.
@@ -18,8 +25,8 @@ Acceptance: the terms are shown, and must be accepted, when the user creates the
 
 # BBetter — Terms of Use
 
-**Version:** 1 (draft) · **Last updated:** [CONFIRM at launch]
-**Public URL:** <https://thaguille.github.io/BBetterCalendar/legal/terms/> [CONFIRM URL]
+**Version:** 1 (ready to publish at L.2) · **Last updated:** 2026-11-04
+**Public URL:** <https://thaguille.github.io/BBetterCalendar/legal/terms/>
 
 ## Summary
 
@@ -37,7 +44,7 @@ accounts that break these rules.
   The year is stored once on your device and is not asked again. (In code: `SOCIAL_MIN_AGE = 14`;
   it may rise to 16 if Spanish law changes, see board DIF-02.)
 - Users aged 14 to 17 are expected to have read these terms with the help of a parent or guardian
-  where appropriate. [CONFIRM wording with legal review]
+  where appropriate.
 
 ## 2. Your account
 
@@ -72,16 +79,22 @@ cannot be registered, and a basic word filter in Spanish, English and Catalan is
 If you accept someone as a friend they can see your display name, avatar colour, **summary** focus
 statistics and "studying now" status, as described in the Privacy Policy. Your phone and app usage,
 screen time, calendar, tasks and projects are never shared. You can remove a friend at any time:
-you disappear from each other's list and they can no longer read your profile. There is no blocking
-feature at this stage; you can report a user instead (section 5).
+you disappear from each other's list and they can no longer read your profile.
+
+You can also **block** a user, from their friend profile or from a friend request you received.
+Blocking ends the friendship, and the blocked person can no longer send you friend requests, cheers or
+nudges. We do not tell them; a request of theirs just fails. You can see and undo your blocks in
+*My profile → Blocked users*. Blocking is a control for you and is **separate from reporting**
+(section 5): blocking does not tell us anything about the other user, and reporting does not block
+them. You can use either, or both.
 
 ## 5. Reports and moderation
 
-- You can **report** a user from your friends list and from a friend request you received, choosing
-  a reason (offensive name, impersonation, harassment or other). Reporting a request also declines it.
-  Reporting from a friend's profile arrives with that screen. [CONFIRM when the friend profile ships, F3]
-- Reports are reviewed by the developer from the Firebase console. [CONFIRM review frequency, set at
-  gate L.4] Reports of harassment, especially involving users aged 14 to 17, are handled first.
+- You can **report** a user from your friends list, from a friend's profile and from a friend request
+  you received, choosing a reason (offensive name, impersonation, harassment or other). Reporting a
+  request also declines it. A report does not block the user; to stop contact, block them (section 4).
+- Reports are reviewed by the developer from the Firebase console **at least once a week**. Reports of
+  harassment involving users aged 14 to 17 are handled within **48 hours**.
 - Possible actions: asking you to change a name, renaming it ourselves, a warning, suspending the
   account, or deleting the account and its Friends data.
 
@@ -98,14 +111,13 @@ Suspending a Friends account never affects the on-device app: your local data st
 the app keeps working. If you think we made a mistake, write to the contact below.
 
 You can delete your account yourself at any time. See the account deletion page:
-<https://thaguille.github.io/BBetterCalendar/legal/delete-account/> [CONFIRM URL].
+<https://thaguille.github.io/BBetterCalendar/legal/delete-account/>.
 
 ## 7. The service as is
 
 BBetter is a free app made by an individual developer. Friends is provided "as is": we try to keep it
 available and accurate but do not guarantee uninterrupted service, and we may change or discontinue
 features. Nothing in these terms limits rights you have as a consumer under applicable law.
-[CONFIRM liability wording with legal review]
 
 ## 8. Changes to these terms
 
@@ -115,7 +127,7 @@ the app before you continue using Friends. The version you accepted is stored wi
 
 ## 9. Law
 
-These terms are governed by Spanish law. [CONFIRM jurisdiction wording with legal review]
+These terms are governed by Spanish law.
 
 ## Contact
 

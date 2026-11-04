@@ -391,7 +391,7 @@
                         android:importantForAccessibility="no"
                         android:padding="@dimen/social_cta_icon_padding"
                         android:src="@drawable/ic_group_add_24"
-                        android:tint="@color/bb_sanct_sage_bright" />
+                        app:tint="@color/bb_sanct_sage_bright" />
 
                     <LinearLayout
                         android:layout_width="0dp"

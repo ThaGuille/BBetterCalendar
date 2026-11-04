@@ -27,7 +27,7 @@
             android:paddingEnd="@dimen/spacing_md"
             android:paddingBottom="@dimen/spacing_lg">
 
-            <ImageView
+            <ImageView xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="@dimen/social_hero_tile"
                 android:layout_height="@dimen/social_hero_tile"
                 android:background="@drawable/bg_social_hero_tile"
@@ -35,7 +35,7 @@
                 android:importantForAccessibility="no"
                 android:padding="@dimen/social_hero_icon_padding"
                 android:src="@drawable/ic_calendar_24"
-                android:tint="@color/bb_on_primary_container" />
+                app:tint="@color/bb_on_primary_container" />
 
             <TextView
                 android:layout_width="match_parent"

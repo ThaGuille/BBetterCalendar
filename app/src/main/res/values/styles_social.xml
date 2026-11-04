@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- F1-u4 · Social entry screens. -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Single-line text field of the social forms: card fill, hairline outline, 52dp. -->
     <style name="Widget.BBetter.Social.Input" parent="">
         <item name="android:background">@drawable/bg_social_input</item>
@@ -10,7 +10,7 @@
         <item name="android:textAppearance">@style/TextAppearance.BBetter.Body</item>
         <item name="android:textColor">@color/bb_on_surface</item>
         <item name="android:textColorHint">@color/bb_on_surface_muted</item>
-        <item name="android:importantForAutofill">no</item>
+        <item name="android:importantForAutofill" tools:targetApi="26">no</item>
         <item name="android:maxLines">1</item>
     </style>
 

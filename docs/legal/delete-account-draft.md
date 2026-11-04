@@ -4,12 +4,20 @@ permalink: /legal/delete-account-draft/
 ---
 
 <!--
-DRAFT — NOT PUBLISHED. Excluded from GitHub Pages in docs/_config.yml.
-Goes live at the social launch gate (board L.2, .claude/plans/sistema-social.md), together with
-privacy-policy-v2-draft.md. At L.2: rename to delete-account.md, set permalink /legal/delete-account/,
-remove the draft markers and the exclude entry, set "Last updated", and check every [CONFIRM] marker
-against the shipped code. The final URL goes in the Play Console "Data deletion" field and in the
-Data safety form.
+READY TO PUBLISH AT L.2 — NOT PUBLISHED YET. Excluded from GitHub Pages in docs/_config.yml
+(entry legal/delete-account-draft.md). Goes live at the social launch gate (board L.2,
+.claude/plans/sistema-social.md), together with privacy-policy-v2-draft.md and terms-draft.md.
+Publish steps (the user, at L.2, in the same commit to main as the policy and the terms):
+ 1. Rename: `git mv docs/legal/delete-account-draft.md docs/legal/delete-account.md`.
+ 2. In the renamed file set the front matter to `title: BBetter — Delete your account` and
+    `permalink: /legal/delete-account/`, and delete this comment block.
+ 3. Remove the line `legal/delete-account-draft.md` from the `exclude:` list of docs/_config.yml.
+ 4. Change "Version: 1 (ready to publish at L.2)" to "Version: 1" and set "Last updated" to the real
+    publication date.
+ 5. After Pages builds, put the final URL in the Play Console "Data deletion" field and in the Data
+    safety form.
+Written 2026-11-04 against deleteAccount.ts. What is left for the user's guide is in
+.claude/plans/social-l/notes/u13.md.
 
 Design source: docs/social/04-cumplimiento.md §2 (Google Play account deletion: in the app AND on the
 web, deleting also the associated data; deactivating or freezing does not count) and §3 (GDPR).
@@ -17,8 +25,8 @@ web, deleting also the associated data; deactivating or freezing does not count)
 
 # BBetter — Delete your account
 
-**Version:** 1 (draft) · **Last updated:** [CONFIRM at launch]
-**Public URL:** <https://thaguille.github.io/BBetterCalendar/legal/delete-account/> [CONFIRM URL]
+**Version:** 1 (ready to publish at L.2) · **Last updated:** 2026-11-04
+**Public URL:** <https://thaguille.github.io/BBetterCalendar/legal/delete-account/>
 
 ## Summary
 
@@ -43,7 +51,7 @@ out.
 If you no longer have the app, or cannot sign in, write to **yonkiporki@gmail.com** from the email
 address linked to your account, with the subject "Delete my BBetter account", and include your
 @username if you remember it. We will confirm the request and delete the account
-[CONFIRM response time, e.g. within 30 days, the GDPR maximum].
+within **30 days** of your request (the GDPR maximum is one month).
 
 ## What is deleted
 
@@ -53,6 +61,7 @@ When your account is deleted we remove:
 - your profile: display name, @username, avatar colour and age band;
 - your shared summary focus statistics and your "studying now" status;
 - your friend list, friend requests sent and received, and your invitation link;
+- your list of blocked users (`blocks/`), which only you could see;
 - your notification token (FCM) and your inbox: the friend requests, cheers and nudges you received;
 - the cheers, nudges and requests your account sent, which are also removed from other people's inboxes.
 
@@ -60,15 +69,17 @@ Inbox items never live longer than 30 days even without deleting the account.
 
 Deletion from Firestore and the Realtime Database is immediate. Your @username is released at the same
 time and can be claimed again. You are also removed from your friends' lists and the invitation
-link stops working; this is covered by the automated tests of the account deletion. Live presence
-does not exist yet. [CONFIRM presence cleanup when it ships, F4]
+link stops working; this is covered by the automated tests of the account deletion. Your live
+presence ("studying now") is removed too.
 
 ## What may be kept
 
 - **Reports** you made or that were made about you may be kept as long as needed for safety and abuse
-  prevention. [CONFIRM retention window]
+  prevention; we do not keep them for longer than that purpose requires.
+- **Blocks that other people made about you** are their own data: they stay in their lists (invisible
+  to you) until they unblock you or delete their account.
 - **Backups** held by Google (our processor) expire on Google's own schedule; the data is not used
-  and is not restored. [CONFIRM backup window]
+  and is not restored. They are overwritten or removed within **180 days** of the deletion.
 
 ## What stays on your device
 

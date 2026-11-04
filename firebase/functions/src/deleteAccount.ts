@@ -23,6 +23,7 @@
 // este uid (blocks/{otro}/blocked/{uid}) son datos de esos otros y se quedan. Los reports/ (hechos por la
 // cuenta o sobre ella) también se quedan, como dice el borrador de borrado (docs/legal/delete-account-draft.md).
 import { onCall, HttpsError, CallableRequest } from "firebase-functions/v2/https";
+import { callableOptions } from "./callable";
 import * as logger from "firebase-functions/logger";
 import { initializeApp, getApps } from "firebase-admin/app";
 import { getFirestore, DocumentReference, Firestore } from "firebase-admin/firestore";
@@ -143,7 +144,7 @@ export async function deleteAccountData(uid: string): Promise<{ friends: number;
   return { friends: friends.size, requests: requests.size, handles: handles.length, invites: invites.size };
 }
 
-export const deleteAccount = onCall({ region: "europe-west1" }, async (request): Promise<DeleteAccountResult> => {
+export const deleteAccount = onCall(callableOptions, async (request): Promise<DeleteAccountResult> => {
   const uid = requireFreshAuth(request, Date.now());
   const counts = await deleteAccountData(uid);
   try {

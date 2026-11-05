@@ -1,5 +1,5 @@
 // L-u4 (D-036): App Check en las callables. La suite corre con enforceAppCheck activo (functions/.env.demo-bbetter fija
-// BB_ENFORCE_APP_CHECK=1). Por cada callable (deleteAccount, removeFriend, sendCheer, sendNudge): sin X-Firebase-AppCheck
+// BB_ENFORCE_APP_CHECK=1). Por cada callable (deleteAccount, removeFriend, blockUser, sendCheer, sendNudge): sin X-Firebase-AppCheck
 // responde 'unauthenticated' y no cambia nada; la misma llamada con el token falso (app-check-helper.js) responde como
 // siempre. Las llamadas son HTTP crudo con un ID token real, para controlar la cabecera.
 const assert = require("assert");
@@ -119,6 +119,22 @@ describe("Functions L: App Check", function () {
     const ok = await call("removeFriend", a.token, { friendUid: b.uid }, true);
     assert.deepStrictEqual(ok, { result: { removed: true } });
     assert.deepStrictEqual(await bothSides(a.uid, b.uid), [false, false]);
+  });
+
+  it("blockUser: sin token 'unauthenticated' (con argumentos buenos o malos) y no bloquea; con token bloquea", async () => {
+    const { a, b } = await friends();
+    const blockDoc = `blocks/${a.uid}/blocked/${b.uid}`;
+    const denied = await call("blockUser", a.token, { uid: b.uid }, false);
+    assert.strictEqual(status(denied), "UNAUTHENTICATED", JSON.stringify(denied));
+    assert.strictEqual(await exists(blockDoc), false);
+    assert.deepStrictEqual(await bothSides(a.uid, b.uid), [true, true]);
+    // El App Check se comprueba antes que los argumentos: un cuerpo inválido sin token tampoco llega a la callable.
+    const deniedBad = await call("blockUser", a.token, {}, false);
+    assert.strictEqual(status(deniedBad), "UNAUTHENTICATED", JSON.stringify(deniedBad));
+
+    const ok = await call("blockUser", a.token, { uid: b.uid }, true);
+    assert.deepStrictEqual(ok, { result: { status: "blocked" } });
+    assert.strictEqual(await exists(blockDoc), true);
   });
 
   for (const type of ["sendCheer", "sendNudge"]) {

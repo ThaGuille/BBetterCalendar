@@ -25,11 +25,15 @@ copy_fb() { # copia mínima de firebase/
 count_fp() { node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));const n=j[0].target.sha256_cert_fingerprints.filter(x=>x===process.argv[2]).length;console.log(n)' "$1" "$2"; }
 fp_line() { printf '%s\n' "$OUT" | grep -E '^(OK|FAIL) assetlinks fingerprint'; }
 
-# 1. El repositorio tal cual: exit 1 y solo falla la huella
-OUT=$(bash "$FB/scripts/deploy-preflight.sh" 2>&1); RC=$?
+# 1. Copia con assetlinks.json solo con la huella de debug (independiente del estado del repo: tras el paso
+#    3.6 de DEPLOY.md el repo real ya lleva la de release): exit 1 y solo falla la huella (la copia no lleva
+#    node_modules, así que "functions build" se ignora aquí)
+copy_fb
+node -e 'const fs=require("fs");const f=process.argv[1];const j=JSON.parse(fs.readFileSync(f,"utf8"));j[0].target.sha256_cert_fingerprints=[process.argv[2]];fs.writeFileSync(f,JSON.stringify(j,null,2))' "$AL" "$DEBUG"
+OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1); RC=$?
 check "repo tal cual: exit 1" "$([ "$RC" = 1 ]; echo $?)"
 check "repo tal cual: FAIL en la huella" "$(printf '%s\n' "$OUT" | grep -q '^FAIL assetlinks fingerprint'; echo $?)"
-check "repo tal cual: ningun otro FAIL" "$(printf '%s\n' "$OUT" | grep '^FAIL' | grep -vq 'fingerprint'; [ $? = 1 ]; echo $?)"
+check "repo tal cual: ningun otro FAIL" "$(printf '%s\n' "$OUT" | grep '^FAIL' | grep -v 'functions build' | grep -vq 'fingerprint'; [ $? = 1 ]; echo $?)"
 
 # 2. Tras set-release-fingerprint el punto pasa
 copy_fb
@@ -99,5 +103,17 @@ export const ping3 = onCall<{ a: string }>(callableOptions, async () => ({ ok: t
 ' >"$T/fb/functions/src/ping3.ts"
 OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
 check "callableOptions: onCall<T>(callableOptions, ...) tipado = OK" "$(co_line | grep -q '^OK'; echo $?)"
+copy_fb
+printf 'import { onCall } from "firebase-functions/v2/https";
+export const ping4 = onCall ({ region: "europe-west1" }, async () => ({ ok: true }));
+' >"$T/fb/functions/src/ping4.ts"
+OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
+check "callableOptions: onCall ({region}) con espacio = FAIL" "$(co_line | grep -q '^FAIL.*ping4.ts'; echo $?)"
+copy_fb
+printf 'import { onCall as showCall } from "firebase-functions/v2/https";
+export const ping5 = showCall	({ region: "europe-west1" }, async () => ({ ok: true }));
+' >"$T/fb/functions/src/ping5.ts"
+OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
+check "callableOptions: alias con tabulador antes del paréntesis sin callableOptions = FAIL" "$(co_line | grep -q '^FAIL.*ping5.ts'; echo $?)"
 
 if [ "$FAILS" = 0 ]; then echo "test-deploy-preflight: ok"; else echo "test-deploy-preflight: $FAILS fallo(s)"; exit 1; fi

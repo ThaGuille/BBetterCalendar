@@ -71,8 +71,8 @@ for (const f of walk(process.argv[2])) {
   const lines = src.split("\n");
   const names = new Set(["onCall"]);
   for (const m of src.matchAll(/\bonCall\s+as\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
-  const alt = [...names].map((n) => n.replace(/\$/g, "\$")).join("|");
-  const re = new RegExp("(?<![\w$])(?:" + alt + ")\s*(?=[<(])", "g");
+  const alt = [...names].map((n) => n.replace(/\$/g, "\\$$")).join("|");
+  const re = new RegExp("(?<![\\w$])(?:" + alt + ")\\s*(?=[<(])", "g");
   let m;
   while ((m = re.exec(src))) {
     const line = src.slice(0, m.index).split("\n").length;

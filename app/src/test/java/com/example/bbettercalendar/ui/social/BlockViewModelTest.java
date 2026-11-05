@@ -5,13 +5,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import androidx.arch.core.executor.ArchTaskExecutor;
 import androidx.arch.core.executor.TaskExecutor;
@@ -23,9 +26,14 @@ import com.example.bbettercalendar.social.friends.FriendCard;
 import com.example.bbettercalendar.social.friends.ReportReason;
 import com.example.bbettercalendar.social.friends.ReportRepository;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
 /**
@@ -38,6 +46,8 @@ public class BlockViewModelTest {
     private BlockRepository blocks;
     private ReportRepository reports;
     private BlockViewModel vm;
+    private ScheduledExecutorService timer;
+    private Runnable timeoutTask;
 
     @Before
     public void setUp() {
@@ -63,7 +73,12 @@ public class BlockViewModelTest {
             ((BlockRepository.Callback) inv.getArgument(1)).onResult(BlockResult.BLOCKED);
             return null;
         }).when(blocks).block(anyString(), any(BlockRepository.Callback.class));
-        vm = new BlockViewModel(blocks, reports);
+        timer = mock(ScheduledExecutorService.class);
+        when(timer.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class))).thenAnswer(inv -> {
+            timeoutTask = inv.getArgument(0);
+            return mock(ScheduledFuture.class);
+        });
+        vm = new BlockViewModel(blocks, reports, timer, 12_000L);
     }
 
     @After
@@ -118,5 +133,44 @@ public class BlockViewModelTest {
         verify(reports, never()).report(anyString(), anyString(), any(ReportReason.class),
                 any(ReportReason.Context.class), any(ReportRepository.Callback.class));
         verify(blocks).block(eq("bob"), any(BlockRepository.Callback.class));
+    }
+
+    private ReportRepository.Callback captureReportCallback() {
+        ArgumentCaptor<ReportRepository.Callback> cap = ArgumentCaptor.forClass(ReportRepository.Callback.class);
+        verify(reports).report(anyString(), anyString(), any(ReportReason.class),
+                any(ReportReason.Context.class), cap.capture());
+        return cap.getValue();
+    }
+
+    @Test
+    public void anUnacknowledgedReportTimesOutWithoutBlocking() {
+        vm.block(bob, ReportReason.OTHER, ReportReason.Context.FRIEND);
+        assertNotNull(timeoutTask);
+        timeoutTask.run();
+        verify(blocks, never()).block(anyString(), any(BlockRepository.Callback.class));
+        assertEquals(R.string.block_report_failed, vm.getEvent().getValue().message);
+        assertFalse(vm.getBusy().getValue());
+    }
+
+    @Test
+    public void aLateAckAfterTheTimeoutDoesNotBlock() {
+        vm.block(bob, ReportReason.OTHER, ReportReason.Context.FRIEND);
+        ReportRepository.Callback cb = captureReportCallback();
+        timeoutTask.run();
+        cb.onReported(false);
+        verify(blocks, never()).block(anyString(), any(BlockRepository.Callback.class));
+    }
+
+    @Test
+    public void aSecondBlockWhilePendingIsIgnored() {
+        vm.block(bob, ReportReason.OTHER, ReportReason.Context.FRIEND);
+        assertTrue(vm.getBusy().getValue());
+        vm.block(bob, ReportReason.OTHER, ReportReason.Context.FRIEND);
+        ReportRepository.Callback cb = captureReportCallback();
+        cb.onReported(false);
+        verify(reports, times(1)).report(anyString(), anyString(), any(ReportReason.class),
+                any(ReportReason.Context.class), any(ReportRepository.Callback.class));
+        verify(blocks, times(1)).block(eq("bob"), any(BlockRepository.Callback.class));
+        assertFalse(vm.getBusy().getValue());
     }
 }

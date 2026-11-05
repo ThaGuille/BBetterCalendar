@@ -15,6 +15,12 @@ import com.example.bbettercalendar.social.friends.FriendCard;
 import com.example.bbettercalendar.social.friends.ReportReason;
 import com.example.bbettercalendar.social.friends.ReportRepository;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -39,14 +45,38 @@ public class BlockViewModel extends ViewModel {
         }
     }
 
+    /** L-review F1: espera máxima a que el reporte se confirme antes de darlo por fallido (offline no resuelve). */
+    static final long REPORT_TIMEOUT_MS = 12_000L;
+
     private final BlockRepository blocks;
     private final ReportRepository reports;
+    private final ScheduledExecutorService timer;
+    private final long reportTimeoutMs;
     private final MutableLiveData<Event> event = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> busy = new MutableLiveData<>(false);
+    /** L-review F2: true mientras un bloqueo (con su reporte) está en curso. */
+    private final AtomicBoolean inFlight = new AtomicBoolean(false);
 
     @Inject
     public BlockViewModel(BlockRepository blocks, ReportRepository reports) {
+        this(blocks, reports, Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "block-report-timeout");
+            t.setDaemon(true);
+            return t;
+        }), REPORT_TIMEOUT_MS);
+    }
+
+    BlockViewModel(BlockRepository blocks, ReportRepository reports, ScheduledExecutorService timer,
+                   long reportTimeoutMs) {
         this.blocks = blocks;
         this.reports = reports;
+        this.timer = timer;
+        this.reportTimeoutMs = reportTimeoutMs;
+    }
+
+    /** True mientras hay un bloqueo en curso: la UI puede desactivar la entrada «Bloquear». */
+    public LiveData<Boolean> getBusy() {
+        return busy;
     }
 
     /** La lista de bloqueados; solo hay listener mientras se observa. */
@@ -70,27 +100,63 @@ public class BlockViewModel extends ViewModel {
      */
     public void block(@NonNull FriendCard person, @Nullable ReportReason reason,
                       @NonNull ReportReason.Context context) {
-        if (reason == null) {
-            block(person.uid, person.displayName);
+        if (!inFlight.compareAndSet(false, true)) {
             return;
         }
+        busy.postValue(true);
+        if (reason == null) {
+            blockNow(person.uid, person.displayName);
+            return;
+        }
+        // L-review F1: offline el commit del reporte solo resuelve con el ack del servidor; se acota la espera
+        // y una confirmación tardía (ya fallado) no bloquea.
+        AtomicBoolean settled = new AtomicBoolean(false);
+        ScheduledFuture<?> timeout = timer.schedule(() -> {
+            if (settled.compareAndSet(false, true)) {
+                failReport();
+            }
+        }, reportTimeoutMs, TimeUnit.MILLISECONDS);
         reports.report(person.uid, person.handle, reason, context, new ReportRepository.Callback() {
             @Override
             public void onReported(boolean alreadyReported) {
-                block(person.uid, person.displayName);
+                if (settled.compareAndSet(false, true)) {
+                    timeout.cancel(false);
+                    blockNow(person.uid, person.displayName);
+                }
             }
 
             @Override
             public void onError(@NonNull Throwable error) {
-                event.postValue(new Event(R.string.block_report_failed, null, false));
+                if (settled.compareAndSet(false, true)) {
+                    timeout.cancel(false);
+                    failReport();
+                }
             }
         });
     }
 
+    private void failReport() {
+        inFlight.set(false);
+        busy.postValue(false);
+        event.postValue(new Event(R.string.block_report_failed, null, false));
+    }
+
     public void block(@NonNull String uid, @NonNull String displayName) {
-        blocks.block(uid, result -> event.postValue(result == BlockResult.BLOCKED
-                ? new Event(R.string.block_toast_blocked, displayName, true)
-                : new Event(R.string.block_error, null, false)));
+        if (!inFlight.compareAndSet(false, true)) {
+            return;
+        }
+        busy.postValue(true);
+        blockNow(uid, displayName);
+    }
+
+    private void blockNow(String uid, String displayName) {
+        blocks.block(uid, result -> {
+            inFlight.set(false);
+            busy.postValue(false);
+            event.postValue(result == BlockResult.BLOCKED
+                    ? new Event(R.string.block_toast_blocked, displayName, true)
+                    : new Event(R.string.block_error, null, false));
+        });
     }
 
     public void unblock(@NonNull String uid, @NonNull String displayName) {

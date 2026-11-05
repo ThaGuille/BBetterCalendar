@@ -18,4 +18,6 @@
     <string name="blocked_error">No pudimos cargar tus usuarios bloqueados. Revisa tu conexión y vuelve.</string>
     <string name="blocked_empty_title">No tienes usuarios bloqueados</string>
     <string name="blocked_empty_body">Las personas que bloquees aparecerán aquí para que puedas desbloquearlas.</string>
+    <string name="block_also_report">Reportar también a esta persona</string>
+    <string name="block_report_failed">No se pudo enviar el reporte, así que no la hemos bloqueado. Revisa tu conexión y vuelve a intentarlo.</string>
 </resources>

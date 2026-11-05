@@ -11,6 +11,9 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.social.block.BlockRepository;
 import com.example.bbettercalendar.social.block.BlockResult;
 import com.example.bbettercalendar.social.block.BlockState;
+import com.example.bbettercalendar.social.friends.FriendCard;
+import com.example.bbettercalendar.social.friends.ReportReason;
+import com.example.bbettercalendar.social.friends.ReportRepository;
 
 import javax.inject.Inject;
 
@@ -37,11 +40,13 @@ public class BlockViewModel extends ViewModel {
     }
 
     private final BlockRepository blocks;
+    private final ReportRepository reports;
     private final MutableLiveData<Event> event = new MutableLiveData<>();
 
     @Inject
-    public BlockViewModel(BlockRepository blocks) {
+    public BlockViewModel(BlockRepository blocks, ReportRepository reports) {
         this.blocks = blocks;
+        this.reports = reports;
     }
 
     /** La lista de bloqueados; solo hay listener mientras se observa. */
@@ -56,6 +61,30 @@ public class BlockViewModel extends ViewModel {
     /** Llamar al atender el aviso (hilo principal). */
     public void consumeEvent() {
         event.setValue(null);
+    }
+
+    /**
+     * L-review F5: bloquear y, si {@code reason != null}, reportar a la vez. Reportar a alguien ya bloqueado
+     * lo deniegan las reglas, así que el reporte va PRIMERO y {@code blockUser} solo corre cuando se guardó
+     * (o ya existía). Si el reporte falla no se bloquea y el fallo se ve ({@code block_report_failed}).
+     */
+    public void block(@NonNull FriendCard person, @Nullable ReportReason reason,
+                      @NonNull ReportReason.Context context) {
+        if (reason == null) {
+            block(person.uid, person.displayName);
+            return;
+        }
+        reports.report(person.uid, person.handle, reason, context, new ReportRepository.Callback() {
+            @Override
+            public void onReported(boolean alreadyReported) {
+                block(person.uid, person.displayName);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable error) {
+                event.postValue(new Event(R.string.block_report_failed, null, false));
+            }
+        });
     }
 
     public void block(@NonNull String uid, @NonNull String displayName) {

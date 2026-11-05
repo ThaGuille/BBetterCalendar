@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- L-review F5 · Block confirmation extras: "Also report" checkbox and, once ticked, the four report reasons
+     (same strings as the report sheet). Reporting happens before blocking: afterwards the rules deny it. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingEnd="@dimen/spacing_md">
+
+    <CheckBox
+        android:id="@+id/blockAlsoReport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:buttonTint="@color/bb_primary"
+        android:text="@string/block_also_report"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
+        android:textColor="@color/bb_on_surface" />
+
+    <RadioGroup
+        android:id="@+id/blockReportReasons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <RadioButton
+            android:id="@+id/blockReasonOffensive"
+            style="@style/Widget.BBetter.Social.Radio"
+            android:text="@string/report_reason_offensive_name" />
+
+        <RadioButton
+            android:id="@+id/blockReasonImpersonation"
+            style="@style/Widget.BBetter.Social.Radio"
+            android:text="@string/report_reason_impersonation" />
+
+        <RadioButton
+            android:id="@+id/blockReasonHarassment"
+            style="@style/Widget.BBetter.Social.Radio"
+            android:text="@string/report_reason_harassment" />
+
+        <RadioButton
+            android:id="@+id/blockReasonOther"
+            style="@style/Widget.BBetter.Social.Radio"
+            android:text="@string/report_reason_other" />
+    </RadioGroup>
+</LinearLayout>

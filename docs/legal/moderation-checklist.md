@@ -28,6 +28,7 @@ desde la consola de Firebase (decisión r3 del gate L). Fuente: `docs/social/04-
 4. Para cada reporte, abre `profiles/<reported>` (nombre, `handle`, `avatarColor`) y `users/<reported>`
    (`ageBand`) y decide. Un segundo reporte del mismo par no existe (el id es determinista): para ver
    reincidencia filtra `reports` por `reported == <uid>` y cuenta documentos.
+   Nota: quien bloquea a alguien ya no puede reportarlo (las reglas lo deniegan sin amistad ni solicitud). Por eso el diálogo de Bloquear tiene «Reportar también», que envía el reporte antes de bloquear; si el reporte falla, no se bloquea. Un reporte de alguien ya bloqueado no llega a `reports/`.
 5. Un reporte ya atendido: apunta en tu registro (ver §6) la decisión. No borres el documento: se
    conserva para prevención de abuso (política de privacidad v2). Si quieres marcar hecho, hazlo en tu
    registro, no en la base.

@@ -339,8 +339,8 @@ public class FriendsFragment extends Fragment implements FriendsAdapter.Listener
 
     @Override
     public void onBlock(@NonNull FriendRequest request) {
-        BlockUi.confirm(requireContext(), request.from, () ->
-                blockViewModel.block(request.from.uid, request.from.displayName));
+        BlockUi.confirm(requireContext(), request.from, reason ->
+                blockViewModel.block(request.from, reason, ReportReason.Context.REQUEST));
     }
 
     @Override

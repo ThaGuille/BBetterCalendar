@@ -18,4 +18,6 @@
     <string name="blocked_error">We could not load your blocked users. Check your connection and come back.</string>
     <string name="blocked_empty_title">No blocked users</string>
     <string name="blocked_empty_body">People you block will show up here so you can unblock them.</string>
+    <string name="block_also_report">Also report this person</string>
+    <string name="block_report_failed">The report could not be sent, so we did not block them. Check your connection and try again.</string>
 </resources>

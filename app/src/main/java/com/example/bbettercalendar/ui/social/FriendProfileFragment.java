@@ -106,7 +106,8 @@ public class FriendProfileFragment extends Fragment {
         view.findViewById(R.id.fpReportButton).setOnClickListener(v -> showReportSheet());
         BlockViewModel blockViewModel = new ViewModelProvider(this).get(BlockViewModel.class);
         view.findViewById(R.id.fpBlockButton).setOnClickListener(v ->
-                BlockUi.confirm(requireContext(), card, () -> blockViewModel.block(card.uid, card.displayName)));
+                BlockUi.confirm(requireContext(), card, reason ->
+                        blockViewModel.block(card, reason, ReportReason.Context.FRIEND)));
         blockViewModel.getEvent().observe(getViewLifecycleOwner(), event -> {
             if (event == null) {
                 return;

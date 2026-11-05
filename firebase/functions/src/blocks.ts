@@ -74,16 +74,19 @@ export const blockUser = onCall(callableOptions, async (request): Promise<BlockU
   await getDatabase().ref().update({ [`friends/${me}/${uid}`]: null, [`friends/${uid}/${me}`]: null });
 
   const profile = await db.collection("profiles").doc(uid).get();
-  // avatarColor del perfil es el índice de color (número): se copia tal cual; si no hay perfil, cadena vacía.
-  const str = (field: string): string | number => {
+  // handle/displayName vacíos si no hay perfil; avatarColor es el índice de color (número) y, sin perfil,
+  // 0 (el cliente exige un número para listar el bloqueo y poder desbloquearlo).
+  const str = (field: string): string => {
     const v = profile.exists ? profile.get(field) : undefined;
-    return typeof v === "string" || typeof v === "number" ? v : "";
+    return typeof v === "string" ? v : "";
   };
+  const colorValue = profile.exists ? profile.get("avatarColor") : undefined;
+  const color = typeof colorValue === "number" ? colorValue : 0;
   await blockRef.set({
     since: FieldValue.serverTimestamp(),
     handle: str("handle"),
     displayName: str("displayName"),
-    avatarColor: str("avatarColor"),
+    avatarColor: color,
   });
   logger.info("blockUser: bloqueado", { me, uid });
   return { status: "blocked" };

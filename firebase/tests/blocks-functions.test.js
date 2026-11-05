@@ -254,7 +254,7 @@ describe("Functions L: blockUser", function () {
     const card = await getData("blocks", a.uid, "blocked", ghost);
     assert.strictEqual(card.handle, "");
     assert.strictEqual(card.displayName, "");
-    assert.strictEqual(card.avatarColor, "");
+    assert.strictEqual(card.avatarColor, 0);
     assert.ok(card.since);
   });
 

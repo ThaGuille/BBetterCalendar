@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Puro (L-u9): la respuesta de {@code blockUser} a {@link BlockResult} y los documentos de
  * {@code blocks/{me}/blocked} a {@link BlockedCard}. {@code {status: 'blocked'}} → BLOCKED; cualquier otra
- * cosa → ERROR. Un documento ilegible o malformado se descarta (null) y nunca lanza.
+ * cosa → ERROR. Un color ausente o no numérico se lee como 0 (el bloqueo sigue listado y se puede quitar). Un documento ilegible o malformado se descarta (null) y nunca lanza.
  */
 public final class BlockMapping {
 
@@ -46,13 +46,13 @@ public final class BlockMapping {
             Object name = d.get(DISPLAY_NAME);
             Object color = d.get(AVATAR_COLOR);
             Object since = d.get(SINCE);
-            if (!(handle instanceof String) || !(name instanceof String) || !(color instanceof Number)) {
+            if (!(handle instanceof String) || !(name instanceof String)) {
                 return null;
             }
             if (since != null && !(since instanceof Timestamp) && !(since instanceof Date)) {
                 return null;
             }
-            return new BlockedCard(doc.id, (String) handle, (String) name, ((Number) color).intValue(),
+            return new BlockedCard(doc.id, (String) handle, (String) name, color instanceof Number ? ((Number) color).intValue() : 0,
                     date(since));
         } catch (RuntimeException e) {
             return null;

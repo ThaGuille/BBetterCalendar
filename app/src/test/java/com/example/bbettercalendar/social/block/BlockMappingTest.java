@@ -1,6 +1,7 @@
 package com.example.bbettercalendar.social.block;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import com.google.firebase.Timestamp;
@@ -66,13 +67,24 @@ public class BlockMappingTest {
     public void malformedOrMissingDocumentsAreDropped() {
         Map<String, Object> noHandle = fields(new Timestamp(new Date(1L)));
         noHandle.remove("handle");
-        Map<String, Object> badColor = fields(new Timestamp(new Date(1L)));
-        badColor.put("avatarColor", "x");
         Map<String, Object> badSince = fields("yesterday");
         assertNull(BlockMapping.card(new BlockBackend.Doc("gone", null)));
         assertNull(BlockMapping.card(new BlockBackend.Doc("a", noHandle)));
-        assertNull(BlockMapping.card(new BlockBackend.Doc("b", badColor)));
         assertNull(BlockMapping.card(new BlockBackend.Doc("c", badSince)));
+    }
+
+    @Test
+    public void aMissingOrNonNumericColorFallsBackToZeroInsteadOfDroppingTheRow() {
+        Map<String, Object> stringColor = fields(new Timestamp(new Date(1L)));
+        stringColor.put("avatarColor", "");
+        Map<String, Object> noColor = fields(new Timestamp(new Date(1L)));
+        noColor.remove("avatarColor");
+        BlockedCard a = BlockMapping.card(new BlockBackend.Doc("a", stringColor));
+        BlockedCard b = BlockMapping.card(new BlockBackend.Doc("b", noColor));
+        assertNotNull(a);
+        assertEquals(0, a.avatarColor);
+        assertNotNull(b);
+        assertEquals(0, b.avatarColor);
     }
 
     @Test

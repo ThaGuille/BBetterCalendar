@@ -74,6 +74,13 @@ public class BlockViewModel extends ViewModel {
         this.reportTimeoutMs = reportTimeoutMs;
     }
 
+    /** L-review F4: el hilo del temporizador no sobrevive al ViewModel. */
+    @Override
+    protected void onCleared() {
+        timer.shutdownNow();
+        super.onCleared();
+    }
+
     /** True mientras hay un bloqueo en curso: la UI puede desactivar la entrada «Bloquear». */
     public LiveData<Boolean> getBusy() {
         return busy;

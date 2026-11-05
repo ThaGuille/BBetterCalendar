@@ -52,21 +52,51 @@ fi
 # (3) las Functions compilan y toda callable usa callableOptions
 if [ ! -d "$FB/functions/node_modules" ]; then
   bad "functions build" "faltan dependencias: npm ci --prefix firebase/functions"
+elif B=$(npm --prefix "$FB/functions" run build 2>&1); then
+  ok "functions build"
 else
-  if B=$(npm --prefix "$FB/functions" run build 2>&1); then
-    BAD=$(grep -nE 'onCall\s*[<(]' "$FB"/functions/src/*.ts | grep -vE '^[^:]+:[0-9]+:\s*(//|\*)' | grep -vE 'import ' | grep -vE 'onCall\(callableOptions,' || true)
-    N=$(grep -nE 'onCall\s*[<(]' "$FB"/functions/src/*.ts | grep -vE '^[^:]+:[0-9]+:\s*(//|\*)' | grep -vE 'import ' | grep -cE 'onCall\(callableOptions,' || true)
-    if [ -n "$BAD" ]; then
-      bad "functions callableOptions" "onCall sin callableOptions: $(printf '%s' "$BAD" | head -n 1)"
-    elif [ "${N:-0}" -lt 1 ]; then
-      bad "functions callableOptions" "no se encontró ninguna callable"
-    else
-      ok "functions build and callableOptions ($N callables)"
-    fi
-  else
-    bad "functions build" "tsc falla: $(printf '%s' "$B" | tail -n 1)"
-  fi
+  bad "functions build" "tsc falla: $(printf '%s' "$B" | tail -n 1)"
 fi
+# Recorre src/ entero (subcarpetas incluidas), quita comentarios y exige que el primer argumento de cada onCall
+# (con o sin genericos <T>, o importada con alias) sea callableOptions.
+CO=$(node - "$FB/functions/src" <<'JS' 2>&1
+const fs = require("fs");
+const path = require("path");
+const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) =>
+  e.isDirectory() ? (e.name === "node_modules" ? [] : walk(path.join(d, e.name))) : (/\.ts$/.test(e.name) ? [path.join(d, e.name)] : []));
+let good = 0;
+const bad = [];
+for (const f of walk(process.argv[2])) {
+  const src = fs.readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/\/\/[^\n]*/g, "");
+  const lines = src.split("\n");
+  const names = new Set(["onCall"]);
+  for (const m of src.matchAll(/\bonCall\s+as\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
+  const alt = [...names].map((n) => n.replace(/\$/g, "\$")).join("|");
+  const re = new RegExp("(?<![\w$])(?:" + alt + ")\s*(?=[<(])", "g");
+  let m;
+  while ((m = re.exec(src))) {
+    const line = src.slice(0, m.index).split("\n").length;
+    if (/^\s*import\b/.test(lines[line - 1])) continue;
+    let i = m.index + m[0].length;
+    if (src[i] === "<") { // salta los genericos (anidados)
+      let depth = 0;
+      for (; i < src.length; i++) { if (src[i] === "<") depth++; else if (src[i] === ">" && --depth === 0) { i++; break; } }
+      while (/\s/.test(src[i])) i++;
+    }
+    if (src[i] !== "(") continue;
+    if (/^\(\s*callableOptions\s*,/.test(src.slice(i))) good++;
+    else bad.push(path.relative(process.argv[2], f).split(path.sep).join("/") + ":" + line);
+  }
+}
+if (bad.length) console.log("BAD " + bad[0]); else console.log("GOOD " + good);
+JS
+)
+case "$CO" in
+  BAD*) bad "functions callableOptions" "onCall sin callableOptions: ${CO#BAD }" ;;
+  "GOOD 0") bad "functions callableOptions" "no se encontró ninguna callable" ;;
+  GOOD*) ok "functions callableOptions (${CO#GOOD } callables)" ;;
+  *) bad "functions callableOptions" "no se pudo comprobar: $CO" ;;
+esac
 
 # (4) índices de Firestore
 IDX="$FB/firestore.indexes.json"

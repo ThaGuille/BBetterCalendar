@@ -73,4 +73,31 @@ echo 'BB_ENFORCE_APP_CHECK=0' >"$T/fb/functions/.env.bbetter-dbcda"
 OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
 check "preflight: .env que apaga App Check = FAIL app check env" "$(printf '%s\n' "$OUT" | grep -q '^FAIL app check env'; echo $?)"
 
+# 7. callableOptions (F3): subcarpeta, import con alias y onCall<T> tipado
+co_line() { printf '%s
+' "$OUT" | grep -E '^(OK|FAIL) functions callableOptions'; }
+copy_fb
+OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
+check "callableOptions: el repo tal cual da OK" "$(co_line | grep -q '^OK'; echo $?)"
+copy_fb
+mkdir -p "$T/fb/functions/src/admin"
+printf 'import { onCall } from "firebase-functions/v2/https";
+export const ping = onCall({ region: "europe-west1" }, async () => ({ ok: true }));
+' >"$T/fb/functions/src/admin/ping.ts"
+OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
+check "callableOptions: onCall({region}) en src/admin/ = FAIL" "$(co_line | grep -q '^FAIL.*admin/ping.ts'; echo $?)"
+copy_fb
+printf 'import { onCall as callable } from "firebase-functions/v2/https";
+export const ping2 = callable({ region: "europe-west1" }, async () => ({ ok: true }));
+' >"$T/fb/functions/src/ping2.ts"
+OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
+check "callableOptions: import con alias sin callableOptions = FAIL" "$(co_line | grep -q '^FAIL.*ping2.ts'; echo $?)"
+copy_fb
+printf 'import { onCall } from "firebase-functions/v2/https";
+import { callableOptions } from "./callable";
+export const ping3 = onCall<{ a: string }>(callableOptions, async () => ({ ok: true }));
+' >"$T/fb/functions/src/ping3.ts"
+OUT=$(bash "$T/fb/scripts/deploy-preflight.sh" 2>&1)
+check "callableOptions: onCall<T>(callableOptions, ...) tipado = OK" "$(co_line | grep -q '^OK'; echo $?)"
+
 if [ "$FAILS" = 0 ]; then echo "test-deploy-preflight: ok"; else echo "test-deploy-preflight: $FAILS fallo(s)"; exit 1; fi

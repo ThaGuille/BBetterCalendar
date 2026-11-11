@@ -9,6 +9,7 @@
     <dimen name="screen_time_row_icon">36dp</dimen>
     <dimen name="screen_time_row_lock">14dp</dimen>
     <dimen name="screen_time_chip_icon">22dp</dimen>
+    <dimen name="screen_time_chip_height">40dp</dimen>
     <dimen name="screen_time_legend_dot">10dp</dimen>
     <dimen name="screen_time_hairline">1dp</dimen>
 </resources>

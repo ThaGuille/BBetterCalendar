@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen time (mejora-visual u10). -->
+<resources>
+
+    <!-- "Always allowed" chip (mockup 21): raised pill, real app icon (untinted) + name, "x" removes. -->
+    <style name="Widget.BBetter.Chip.Allowed" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="android:stateListAnimator">@animator/bb_press</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="chipBackgroundColor">@color/bb_surface_raised</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipMinHeight">@dimen/screen_time_chip_height</item>
+        <!-- Same 40dp as the "Add" chip beside it. With the 48dp touch-target inset the ChipGroup
+             measured the chip at 40dp and clipped the bottom of its inset background. -->
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.ChipLabel</item>
+        <item name="android:textColor">@color/bb_on_surface</item>
+        <item name="android:checkable">false</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="chipIconVisible">true</item>
+        <item name="chipIconSize">@dimen/screen_time_chip_icon</item>
+        <item name="chipIconTint">@null</item>
+        <item name="closeIconVisible">true</item>
+        <item name="closeIconTint">@color/bb_on_surface_muted</item>
+        <item name="rippleColor">@color/bb_ripple_primary</item>
+    </style>
+</resources>

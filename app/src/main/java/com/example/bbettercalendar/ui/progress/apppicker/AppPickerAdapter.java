@@ -21,6 +21,12 @@ import java.util.List;
 public class AppPickerAdapter extends RecyclerView.Adapter<AppPickerAdapter.VH> {
 
     private List<AppPickItem> items = Collections.emptyList();
+    // Descripcion de la casilla (cambia con el modo del picker: seguir / permitir siempre).
+    private CharSequence checkDescription;
+
+    public void setCheckDescription(CharSequence description) {
+        this.checkDescription = description;
+    }
 
     public void submit(@NonNull List<AppPickItem> newItems) {
         this.items = newItems;
@@ -45,6 +51,8 @@ public class AppPickerAdapter extends RecyclerView.Adapter<AppPickerAdapter.VH> 
         holder.icon.setImageDrawable(item.icon);
         holder.label.setText(item.label);
         holder.check.setChecked(item.checked);
+        if (checkDescription != null) holder.check.setContentDescription(checkDescription);
+        holder.suggested.setVisibility(item.suggested ? View.VISIBLE : View.GONE);
         holder.itemView.setOnClickListener(v -> {
             item.checked = !item.checked;
             holder.check.setChecked(item.checked);
@@ -60,12 +68,14 @@ public class AppPickerAdapter extends RecyclerView.Adapter<AppPickerAdapter.VH> 
         final ImageView icon;
         final TextView label;
         final CheckBox check;
+        final TextView suggested;
 
         VH(@NonNull View itemView) {
             super(itemView);
             icon = itemView.findViewById(R.id.app_pick_icon);
             label = itemView.findViewById(R.id.app_pick_label);
             check = itemView.findViewById(R.id.app_pick_check);
+            suggested = itemView.findViewById(R.id.app_pick_suggested);
         }
     }
 }

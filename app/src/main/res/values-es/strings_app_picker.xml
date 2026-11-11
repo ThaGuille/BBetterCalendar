@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Selector de apps, modo "siempre permitidas" (mejora-visual u10). Las cadenas base siguen en strings.xml. -->
+<resources>
+    <string name="app_picker_title_allowlist">Apps siempre permitidas</string>
+    <string name="app_picker_check_allowlist">Permitir siempre esta app</string>
+    <string name="app_picker_suggested">Sugerida</string>
+</resources>

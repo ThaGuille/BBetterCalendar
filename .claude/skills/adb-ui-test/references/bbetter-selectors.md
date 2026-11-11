@@ -148,7 +148,7 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 ## Screen time (u19)
 
 - `screenTimeScreen`, `topBar`, `screenTimeScroll`.
-- (u9) `screenTimeShieldCard`, `screenTimeShieldSwitch`, `screenTimeAllowedRow` (`screenTimeAllowedCount`, `screenTimeAllowedEdit`); `screenTimePeriod` (Semana / Mes); `screenTimeUsageCard` (`screenTimeUsageSubtitle`, `screenTimeAvgValue`, `screenTimeAvgDelta`, `screenTimeAppRows` with rows `appUsageIcon/Name/LockIcon/Suggested/Text/Bar`, `screenTimeAppsEmpty`, `screenTimeUsageLegend`, `screenTimeBlockNew` = "Limitar otra app"); `screenTimeDailyCard` (`screenTimeDailyChart`, `screenTimeDailyLegend`, `screenTimeDailySentence`); `screenTimeBeforeAfterCard` (`screenTimeBeforeAfterRows`, `screenTimeBeforeAfterEmpty`, `screenTimeBeforeAfterSentence`); `screenTimeAllowedCard` (`screenTimeAllowedChips`, `screenTimeAllowedAdd`).
+- (u9) `screenTimeShieldCard`, `screenTimeShieldSwitch`, `screenTimeAllowedRow` (`screenTimeAllowedCount`, `screenTimeAllowedEdit`); `screenTimePeriod` (Semana / Mes); `screenTimeUsageCard` (`screenTimeUsageSubtitle`, `screenTimeAvgValue`, `screenTimeAvgDelta`, `screenTimeAppRows` with rows `appUsageIcon/Name/LockIcon/Suggested/Text/Bar`, `screenTimeAppsEmpty`, `screenTimeUsageLegend`, `screenTimeBlockNew` = "Limitar otra app"); `screenTimeDailyCard` (`screenTimeDailyChart`, `screenTimeDailyLegend`, `screenTimeDailySentence`); `screenTimeBeforeAfterCard` (`screenTimeBeforeAfterRows`, `screenTimeBeforeAfterEmpty`, `screenTimeBeforeAfterSentence`); `screenTimeAllowedCard` (`screenTimeAllowedChips`, `screenTimeAllowedAdd`). (u10) `screenTimeAllowedRow` and `screenTimeAllowedAdd` open the picker in allowlist mode; `screenTimeAllowedChips` holds one Chip per allowed app (no id; text = app name, desc "<app>, siempre permitida..."; close icon or long press removes it).
 - `screenTimeFooter`, `screenTimeFooterIcon`, `screenTimeFooterText`.
 
 ## App detail (u20)
@@ -173,6 +173,7 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 ## Splash, AppPicker, block cover (u23)
 
 - Sin ids nuevos. Existentes: `splash_logo`, `app_picker_close`, `app_picker_save`, `app_picker_list`, `app_pick_icon/label/check`, `block_cover_app_label/title/subtitle/close`.
+- (mejora-visual u10) `app_picker_title` ("Añadir apps" / "Apps siempre permitidas" with extra `mode=allowlist`), `app_pick_suggested` ("Sugerida" badge, first allowlist opening only). Block cover: uiautomator does not see the accessibility overlay, and every uiautomator dump rebinds accessibility services (the service clears `FocusBlockState` on reconnect): verify the shield with `screencap` + `input tap` only.
 
 ## Home additions (u13b)
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App picker, "always allowed" mode (mejora-visual u10). The base picker strings stay in strings.xml. -->
+<resources>
+    <string name="app_picker_title_allowlist">Always allowed apps</string>
+    <string name="app_picker_check_allowlist">Always allow this app</string>
+    <string name="app_picker_suggested">Suggested</string>
+</resources>

@@ -35,7 +35,8 @@ public final class BlockingSettings {
         prefs(context).edit().putBoolean(KEY_FOCUS_SHIELD, enabled).apply();
     }
 
-    private static SharedPreferences prefs(Context context) {
+    // Paquete-privado: FocusAllowlist (mejora-visual u10) guarda su lista en este mismo fichero.
+    static SharedPreferences prefs(Context context) {
         return context.getApplicationContext()
                 .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }

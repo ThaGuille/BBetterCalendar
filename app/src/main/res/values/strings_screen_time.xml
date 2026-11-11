@@ -43,6 +43,8 @@
     <string name="screen_time_allowed_title">Always allowed</string>
     <string name="screen_time_allowed_subtitle">The focus shield does not cover them</string>
     <string name="screen_time_allowed_add">Add</string>
+    <string name="screen_time_allowed_remove_cd">Remove %1$s from always allowed</string>
+    <string name="screen_time_allowed_chip_cd">%1$s, always allowed. Long press to remove it</string>
 
     <string name="screen_time_footer_usage_on">Usage access granted</string>
     <string name="screen_time_footer_usage_off">Usage access needed</string>

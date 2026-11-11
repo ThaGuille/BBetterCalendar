@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -41,6 +42,8 @@ import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.progress.UsageDisclosureDialog;
 import com.example.bbettercalendar.ui.progress.apppicker.AppPickerActivity;
 import com.example.bbettercalendar.usage.UsageAccess;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.time.DayOfWeek;
@@ -55,7 +58,8 @@ import dagger.hilt.android.AndroidEntryPoint;
  * Screen time ({@code navigation_screen_time}, mockups 20 and 21), in this order: focus shield (with the
  * "N apps always allowed" row), Week / Month, usage per app ({@link AppUsageRowView} rows; tap = app detail,
  * "Limit another app" = picker), day by day ({@link StackedBarsView}), before and after the limit
- * ({@link DumbbellRowView}), always allowed (content in the allow-list step) and the permissions footer.
+ * ({@link DumbbellRowView}), always allowed (one chip per app of {@code FocusAllowlist}; "Edit" / "Add" open
+ * the picker in allow-list mode) and the permissions footer.
  * Top bar with back; no bottom nav (MainActivity hides it).
  */
 @AndroidEntryPoint
@@ -73,6 +77,8 @@ public class ScreenTimeFragment extends Fragment
 
     private SwitchMaterial shieldSwitch;
     private TextView allowedCount;
+    private ChipGroup allowedChips;
+    private View allowedAdd;
     private SegmentedControlView period;
     private TextView usageSubtitle;
     private TextView avgValue;
@@ -130,8 +136,14 @@ public class ScreenTimeFragment extends Fragment
         footerIcon = view.findViewById(R.id.screenTimeFooterIcon);
         footerText = view.findViewById(R.id.screenTimeFooterText);
 
+        allowedChips = view.findViewById(R.id.screenTimeAllowedChips);
+        allowedAdd = view.findViewById(R.id.screenTimeAllowedAdd);
+
         view.findViewById(R.id.screenTimeBlockNew).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), AppPickerActivity.class)));
+        // u10: "Editar" (fila del escudo) y "Añadir" abren el picker en modo siempre permitidas.
+        view.findViewById(R.id.screenTimeAllowedRow).setOnClickListener(v -> openAllowlistPicker());
+        allowedAdd.setOnClickListener(v -> openAllowlistPicker());
         shieldSwitch.setOnCheckedChangeListener((b, checked) -> {
             if (!bindingShield) onShieldToggled(checked);
         });
@@ -140,6 +152,7 @@ public class ScreenTimeFragment extends Fragment
         period.setSelectedIndex(viewModel.isMonth() ? 1 : 0);
 
         viewModel.getState().observe(getViewLifecycleOwner(), this::render);
+        viewModel.getAllowed().observe(getViewLifecycleOwner(), this::renderAllowed);
     }
 
     @Override
@@ -155,8 +168,7 @@ public class ScreenTimeFragment extends Fragment
 
     private void render(@Nullable ScreenTimeState s) {
         if (s == null || getView() == null) return;
-        allowedCount.setText(getResources().getQuantityString(
-                R.plurals.screen_time_allowed_count, s.allowedCount, s.allowedCount));
+        // El contador "N apps siempre permitidas" lo pinta renderAllowed (lista viva de FocusAllowlist).
         renderUsage(s);
         renderDaily(s);
         renderBeforeAfter(s);
@@ -340,6 +352,48 @@ public class ScreenTimeFragment extends Fragment
         }
     }
 
+    // ---- 6. Siempre permitidas (u10)
+
+    private void openAllowlistPicker() {
+        startActivity(AppPickerActivity.allowlistIntent(requireContext()));
+    }
+
+    // Un chip por app (icono real + nombre + "×") delante del chip "Añadir". Quitar (× o pulsación
+    // larga) retira el chip al momento y guarda en el executor; la escucha de FocusAllowlist recarga.
+    private void renderAllowed(@Nullable List<AllowedApp> apps) {
+        if (apps == null || allowedChips == null) return;
+        int count = apps.size();
+        allowedCount.setText(getResources().getQuantityString(
+                R.plurals.screen_time_allowed_count, count, count));
+
+        for (int i = allowedChips.getChildCount() - 1; i >= 0; i--) {
+            if (allowedChips.getChildAt(i) != allowedAdd) allowedChips.removeViewAt(i);
+        }
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        int index = 0;
+        for (AllowedApp app : apps) {
+            Chip chip = (Chip) inflater.inflate(R.layout.view_screen_time_allowed_chip,
+                    allowedChips, false);
+            chip.setText(app.label);
+            chip.setChipIcon(app.icon);
+            chip.setContentDescription(getString(R.string.screen_time_allowed_chip_cd, app.label));
+            chip.setCloseIconContentDescription(getString(R.string.screen_time_allowed_remove_cd,
+                    app.label));
+            View.OnClickListener remove = v -> removeAllowed(chip, app.packageName);
+            chip.setOnCloseIconClickListener(remove);
+            chip.setOnLongClickListener(v -> {
+                remove.onClick(v);
+                return true;
+            });
+            allowedChips.addView(chip, index++);
+        }
+    }
+
+    private void removeAllowed(Chip chip, String packageName) {
+        if (allowedChips != null) allowedChips.removeView(chip);
+        viewModel.removeAllowed(packageName);
+    }
+
     // ---------------------------------------------------------------- Focus shield
 
     // Semantica (app-limits.md): el escudo es la preferencia persistente "cada sesion de
@@ -428,6 +482,8 @@ public class ScreenTimeFragment extends Fragment
         super.onDestroyView();
         shieldSwitch = null;
         allowedCount = null;
+        allowedChips = null;
+        allowedAdd = null;
         period = null;
         usageSubtitle = null;
         avgValue = null;

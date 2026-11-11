@@ -1,6 +1,6 @@
 # System — App usage limits (`usage/` + `usage/limits/` + `blocking/`)
 
-**Last verified:** 2026-10-13 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (mejora-visual u10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Measure → warn → enforce pipeline for per-app daily usage limits. Reads real usage via
 `UsageStatsManager` (special-access permission, no runtime dialog), lets the user set a daily
@@ -32,6 +32,7 @@ the app full-screen via an `AccessibilityService` once the limit is crossed. UI:
 | `BlockerAccessibilityService` | `blocking/BlockerAccessibilityService.java` | Handles `TYPE_WINDOW_STATE_CHANGED`; on foreground event, asks `BlockDecisionEngine`; shows cover / `GLOBAL_ACTION_HOME` fallback |
 | `BlockDecisionEngine` | `blocking/BlockDecisionEngine.java` | In-memory `observeEnforced()` cache + TTL-cached decision + blocked-until-midnight latch per package |
 | `BlockingSettings` | `blocking/BlockingSettings.java` | Master "enforce app limits" off-switch (disables enforcement without touching OS grants) |
+| `FocusAllowlist` | `blocking/FocusAllowlist.java` | (u10) "Always allowed" packages: a string set in the `BlockingSettings` prefs file (`focus_allowlist`), `get`/`set`/`observe` (preference listener, returns a `Subscription`), plus the one-shot suggestion flag. Only exempts from focus block mode; no DB column |
 | `FocusBlockState` | `blocking/FocusBlockState.java` | `SharedPreferences`-backed boolean "pomodoro focus block is live right now" — independent feature from `BlockingSettings`/`AppRule`; written by `HomeFragment` (`pomodoro-timer.md`), read by `BlockDecisionEngine`, reset by `BlockerAccessibilityService.onServiceConnected()` as a kill-trap safety net |
 
 ## Flow — non-obvious hops only
@@ -40,7 +41,7 @@ the app full-screen via an `AccessibilityService` once the limit is crossed. UI:
 2. **Reboot:** `BootReceiver` (shared with `calendar.md`'s event reminders) re-arms `UsageLimitScheduler.arm()` in the same `goAsync()` executor block that reschedules calendar reminders.
 3. **Warn-only poll:** `UsageLimitReceiver` (`AlarmManager`, exact-with-inexact-fallback) → `goAsync()` → `UsageLimitChecker.run()` on an executor → `UsageStatsRepository.foregroundMillis()` (expensive `queryEvents` call) → `UsageLimitNotifier` (see `notifications.md`) → re-arm via `UsageLimitScheduler`.
 4. **Live enforcement:** `BlockerAccessibilityService` receives `TYPE_WINDOW_STATE_CHANGED` for every foreground app change (not just tracked ones) → `BlockDecisionEngine.decide(pkg)` → cover overlay or `GLOBAL_ACTION_HOME` if the overlay can't attach. This path **never** goes through the alarm poll — it's a live per-event decision with its own TTL/latch cache specifically so it doesn't call `UsageStatsRepository.queryEvents()` on every window event.
-4b. **Pomodoro "focus block mode" pre-empts the per-app logic.** `decide()` checks `FocusBlockState.isActive()` *first*, before the master-switch/`enforcedByPkg` path: if active and `pkg` isn't our own package or in the focus-exempt set, it returns `block=true, focusMode=true` regardless of any `AppRule`. The exempt set (resolved once in `onServiceConnected()` via `PackageManager.resolveActivity(MATCH_DEFAULT_ONLY)`, not `queryIntentActivities`) covers the default launcher (`HOME` intent) and the default assistant (`ASSIST` intent, e.g. the Pixel search widget) — `resolveActivity` was required over enumeration because the latter also matched `com.android.settings`'s `FallbackHome`, silently exempting all of Settings. See `pomodoro-timer.md` for how `HomeFragment` arms/clears this flag.
+4b. **Pomodoro "focus block mode" pre-empts the per-app logic.** `decide()` checks `FocusBlockState.isActive()` *first*, before the master-switch/`enforcedByPkg` path: if active and `pkg` isn't our own package or in the focus-exempt set, it returns `block=true, focusMode=true` regardless of any `AppRule`. The exempt set (resolved once in `onServiceConnected()` via `PackageManager.resolveActivity(MATCH_DEFAULT_ONLY)`, not `queryIntentActivities`) covers the default launcher (`HOME` intent) and the default assistant (`ASSIST` intent, e.g. the Pixel search widget) — `resolveActivity` was required over enumeration because the latter also matched `com.android.settings`'s `FallbackHome`, silently exempting all of Settings. Since mejora-visual u10 the exempt set is that launcher + assistant set **union the user's `FocusAllowlist`** (`FocusAllowlist.focusExemptPackages`); the service observes the list while connected and pushes the recomputed set on every change, so removing an app blocks it again without a reconnect. An exempt app is not returned early: it falls through to the per-app limit path, so an always-allowed app over its daily limit is still covered by its limit (`focusMode=false`, D4). Empty list = the old behaviour. Picked in `AppPickerActivity` with extra `mode=allowlist` (never touches `AppRule`; first opening with an empty list pre-checks the default dialer and maps app, saved only on Save); the Screen time chips remove with the close icon or a long press. See `pomodoro-timer.md` for how `HomeFragment` arms/clears this flag.
 5. **Rule cache refresh:** `BlockerAccessibilityService` observes `AppRuleDAO.observeEnforced()` (`LiveData`) on the main thread and pushes the list into `BlockDecisionEngine.setEnforcedRules()` — the engine's `decide()` call (on the executor) reads a volatile snapshot, never the DAO directly.
 
 ## Contracts
@@ -78,6 +79,7 @@ three tiles (tracked apps today vs the previous 7-day daily average, sum of dail
 | 2026-07-04 | Phase 4a — soft blocking (accessibility service, cover overlay, enforce toggle) | — |
 | 2026-07-05 | Pomodoro "focus block mode" — `FocusBlockState` pre-empts `decide()` to cover every app but the launcher/assistant while a concentration run is active; kill-trap reset on service reconnect | — |
 | 2026-10-13 | u19 — Screen time & blocking screen, `UsageStatsRepository.foregroundMillisByHour`, Focus shield preference (`BlockingSettings`) | `.claude/plans/migracion-visual-stitch/notes/u19.md` |
+| 2026-11-11 | mejora-visual u10 — always-allowed apps (`FocusAllowlist`) exempt from focus block mode only; `BlockDecisionEngine.Env` seam + `BlockDecisionEngineTest` | `.claude/plans/mejora-visual/notes/u10.md` |
 
 ## Per-app detail (u20)
 

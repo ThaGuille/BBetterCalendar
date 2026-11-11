@@ -3,13 +3,16 @@ package com.example.bbettercalendar.ui.progress.apppicker;
 import android.graphics.drawable.Drawable;
 
 // Fila del picker de apps: paquete + etiqueta + icono y el estado de selección. wasTracked guarda
-// si la app ya estaba seguida al abrir, para no reescribir filas innecesariamente al guardar.
+// si la app ya estaba seguida al abrir (en modo allowlist: si ya estaba en la lista), para no
+// reescribir filas innecesariamente al guardar.
 public class AppPickItem {
     public final String packageName;
     public final String label;
     public final Drawable icon;
     public boolean checked;
     public final boolean wasTracked;
+    // u10 (modo allowlist): pre-marcada por la sugerencia inicial (marcador / mapas), sin guardar aun.
+    public boolean suggested;
 
     public AppPickItem(String packageName, String label, Drawable icon, boolean checked, boolean wasTracked) {
         this.packageName = packageName;

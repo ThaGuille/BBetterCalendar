@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen time (mejora-visual u10): one "always allowed" app chip (icon + name + x). ScreenTimeFragment
+     inflates one per app of FocusAllowlist, before the "Add" chip. -->
+<com.google.android.material.chip.Chip xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.BBetter.Chip.Allowed"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />

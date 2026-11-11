@@ -1,6 +1,8 @@
 package com.example.bbettercalendar.ui.screentime;
 
 import android.app.Application;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -9,6 +11,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.bbettercalendar.blocking.FocusAllowlist;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
@@ -62,6 +65,8 @@ public class ScreenTimeViewModel extends AndroidViewModel {
     private final ConsentRecordDAO consentRecordDao;
     private final UsageStatsRepository usageRepo;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final MutableLiveData<List<AllowedApp>> allowed = new MutableLiveData<>();
+    private final FocusAllowlist.Subscription allowlistSubscription;
 
     private volatile boolean month;
 
@@ -75,6 +80,8 @@ public class ScreenTimeViewModel extends AndroidViewModel {
         this.consentRecordDao = consentRecordDao;
         this.executor = executor;
         usageRepo = new UsageStatsRepository(application);
+        // Cualquier cambio de la lista (picker, "×" de un chip) recarga los chips y el contador.
+        allowlistSubscription = FocusAllowlist.observe(application, packages -> loadAllowed());
     }
 
     public LiveData<ScreenTimeState> getState() {
@@ -94,6 +101,46 @@ public class ScreenTimeViewModel extends AndroidViewModel {
     /** Recalcula todo (onResume: al volver de Ajustes, del picker o del detalle no hay callback). */
     public void refresh() {
         executor.execute(this::compute);
+        loadAllowed();
+    }
+
+    // ---- Siempre permitidas (u10)
+
+    /** Apps siempre permitidas (FocusAllowlist) ordenadas por nombre, con nombre e icono. */
+    public LiveData<List<AllowedApp>> getAllowed() {
+        return allowed;
+    }
+
+    /** Quita una app de la lista; la escucha de FocusAllowlist recarga los chips. */
+    public void removeAllowed(String packageName) {
+        executor.execute(() -> {
+            Set<String> next = new HashSet<>(FocusAllowlist.get(getApplication()));
+            if (next.remove(packageName)) FocusAllowlist.set(getApplication(), next);
+        });
+    }
+
+    private void loadAllowed() {
+        executor.execute(() -> {
+            PackageManager pm = getApplication().getPackageManager();
+            List<AllowedApp> out = new ArrayList<>();
+            for (String pkg : FocusAllowlist.get(getApplication())) {
+                Drawable icon;
+                try {
+                    icon = pm.getApplicationIcon(pkg);
+                } catch (PackageManager.NameNotFoundException e) {
+                    icon = null; // desinstalada: se sigue mostrando para poder quitarla
+                }
+                out.add(new AllowedApp(pkg, usageRepo.labelFor(pkg), icon));
+            }
+            Collections.sort(out, (a, b) -> a.label.compareToIgnoreCase(b.label));
+            allowed.postValue(out);
+        });
+    }
+
+    @Override
+    protected void onCleared() {
+        allowlistSubscription.cancel();
+        super.onCleared();
     }
 
     /** La divulgacion de Usage Access solo hace falta si aun no hay consentimiento vigente. */
@@ -240,7 +287,8 @@ public class ScreenTimeViewModel extends AndroidViewModel {
         }
 
         state.postValue(new ScreenTimeState(access, isMonth, total, hasDelta, delta, apps,
-                firstDay, daily, topNames, peak, peak < 0 ? 0f : weekdayAvg[peak], ba, recovered, 0));
+                firstDay, daily, topNames, peak, peak < 0 ? 0f : weekdayAvg[peak], ba, recovered,
+                FocusAllowlist.get(getApplication()).size()));
     }
 
     private ScreenTimeState.AppRow row(String pkg, float avg, AppRule rule, boolean suggested) {

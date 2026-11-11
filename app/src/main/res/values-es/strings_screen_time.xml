@@ -43,6 +43,8 @@
     <string name="screen_time_allowed_title">Siempre permitidas</string>
     <string name="screen_time_allowed_subtitle">El escudo de enfoque no las cubre</string>
     <string name="screen_time_allowed_add">Añadir</string>
+    <string name="screen_time_allowed_remove_cd">Quitar %1$s de siempre permitidas</string>
+    <string name="screen_time_allowed_chip_cd">%1$s, siempre permitida. Mantén pulsado para quitarla</string>
 
     <string name="screen_time_footer_usage_on">Acceso de uso concedido</string>
     <string name="screen_time_footer_usage_off">Falta el acceso de uso</string>

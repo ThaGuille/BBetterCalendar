@@ -48,15 +48,28 @@ public class BlockDecisionEngine {
         }
     }
 
-    private final Context appContext;
-    private final UsageStatsRepository usageRepo;
+    // Lo que decide() lee del sistema (mejora-visual u10): el estado del modo bloqueo total, el
+    // interruptor maestro, nuestro paquete y el uso de hoy. Separado para que BlockDecisionEngineTest
+    // pruebe la decisión en la JVM sin Robolectric; en la app lo implementa ContextEnv.
+    interface Env {
+        boolean isFocusBlockActive();
+
+        boolean isEnforcementEnabled();
+
+        String ownPackageName();
+
+        long usageTodayMillis(String packageName);
+    }
+
+    private final Env env;
 
     // Reglas a hacer cumplir, refrescadas por observeEnforced() desde el servicio (hilo principal);
     // leídas en decide() (executor) -> mapa concurrente y referencia volátil.
     private volatile Map<String, AppRule> enforcedByPkg = new HashMap<>();
 
-    // Paquetes exentos del modo bloqueo total (launcher/home), resueltos una vez por
-    // BlockerAccessibilityService.onServiceConnected() y leídos en decide() (executor).
+    // Paquetes exentos del modo bloqueo total: launcher/home + asistente (resueltos por
+    // BlockerAccessibilityService.onServiceConnected()) ∪ apps siempre permitidas del usuario
+    // (FocusAllowlist, u10; el servicio lo recalcula cuando la lista cambia). Leído en decide().
     private volatile Set<String> focusExemptPackages = Collections.emptySet();
 
     // Caché de la última comprobación negativa por paquete (timestamp) y latch de "bloqueado hoy".
@@ -65,8 +78,11 @@ public class BlockDecisionEngine {
     private volatile String dayKey = LocalDate.now().toString();
 
     public BlockDecisionEngine(Context context) {
-        this.appContext = context.getApplicationContext();
-        this.usageRepo = new UsageStatsRepository(appContext);
+        this(new ContextEnv(context.getApplicationContext()));
+    }
+
+    BlockDecisionEngine(Env env) {
+        this.env = env;
     }
 
     // Sustituye la caché de reglas a hacer cumplir (lista de observeEnforced()).
@@ -78,9 +94,10 @@ public class BlockDecisionEngine {
         this.enforcedByPkg = map;
     }
 
-    // Sustituye el conjunto de paquetes exentos del modo bloqueo total (launcher/home).
+    // Sustituye el conjunto de paquetes exentos del modo bloqueo total (launcher/home/asistente ∪
+    // apps siempre permitidas; ver FocusAllowlist.focusExemptPackages). null = ninguno.
     public void setFocusExemptPackages(Set<String> packages) {
-        this.focusExemptPackages = packages;
+        this.focusExemptPackages = packages == null ? Collections.<String>emptySet() : packages;
     }
 
     public Decision decide(String packageName) {
@@ -90,14 +107,16 @@ public class BlockDecisionEngine {
 
         // Modo bloqueo total del pomodoro: independiente del interruptor maestro de límites por-app
         // (BlockingSettings) y de cualquier AppRule — cubre TODO salvo nuestra propia app y el
-        // launcher/home (para que "cerrar -> ir a inicio" siga siendo una salida real).
-        if (FocusBlockState.isActive(appContext)
-                && !appContext.getPackageName().equals(packageName)
+        // launcher/home (para que "cerrar -> ir a inicio" siga siendo una salida real) y las apps
+        // siempre permitidas. Una app exenta NO sale aquí: sigue a la comprobación de su límite
+        // diario de abajo, así que si lo superó queda bloqueada por el límite (D4, u10).
+        if (env.isFocusBlockActive()
+                && !env.ownPackageName().equals(packageName)
                 && !focusExemptPackages.contains(packageName)) {
             return new Decision(true, 0L, true);
         }
 
-        if (!BlockingSettings.isEnforcementEnabled(appContext)) return new Decision(false, 0L);
+        if (!env.isEnforcementEnabled()) return new Decision(false, 0L);
 
         AppRule rule = enforcedByPkg.get(packageName);
         if (rule == null || rule.dailyLimitMinutes <= 0) return new Decision(false, 0L);
@@ -126,11 +145,42 @@ public class BlockDecisionEngine {
 
     // Uso de HOY (desde medianoche) del paquete, en ms. Consulta cara -> sólo desde decide().
     private long usageTodayMillis(String packageName) {
-        ZoneId zone = ZoneId.systemDefault();
-        long begin = LocalDate.now().atStartOfDay(zone).toInstant().toEpochMilli();
-        long end = System.currentTimeMillis();
-        Long millis = usageRepo.foregroundMillis(begin, end).get(packageName);
-        return millis == null ? 0L : millis;
+        return env.usageTodayMillis(packageName);
+    }
+
+    // Env de la app: preferencias reales y UsageStatsRepository (sin caché, caro).
+    private static final class ContextEnv implements Env {
+        private final Context appContext;
+        private final UsageStatsRepository usageRepo;
+
+        ContextEnv(Context appContext) {
+            this.appContext = appContext;
+            this.usageRepo = new UsageStatsRepository(appContext);
+        }
+
+        @Override
+        public boolean isFocusBlockActive() {
+            return FocusBlockState.isActive(appContext);
+        }
+
+        @Override
+        public boolean isEnforcementEnabled() {
+            return BlockingSettings.isEnforcementEnabled(appContext);
+        }
+
+        @Override
+        public String ownPackageName() {
+            return appContext.getPackageName();
+        }
+
+        @Override
+        public long usageTodayMillis(String packageName) {
+            ZoneId zone = ZoneId.systemDefault();
+            long begin = LocalDate.now().atStartOfDay(zone).toInstant().toEpochMilli();
+            long end = System.currentTimeMillis();
+            Long millis = usageRepo.foregroundMillis(begin, end).get(packageName);
+            return millis == null ? 0L : millis;
+        }
     }
 
     // Barre el latch + la caché al cruzar medianoche (auto-reset, sin cablear al reset del Splash).

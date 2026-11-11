@@ -34,6 +34,15 @@
         <intent>
             <action android:name="android.intent.action.ASSIST" />
         </intent>
+        <!-- Apps siempre permitidas (mejora-visual u10): la sugerencia inicial del selector resuelve
+             el marcador y la app de mapas por defecto. -->
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
     </queries>
 
     <application

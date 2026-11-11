@@ -95,6 +95,9 @@
                     android:id="@+id/screenTimeAllowedRow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:gravity="center_vertical"
                     android:minHeight="48dp"
                     android:orientation="horizontal">
@@ -389,7 +392,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- ============ 6. Always allowed (content: step u10) ============ -->
+            <!-- ============ 6. Always allowed (u10: one chip per FocusAllowlist app, then "Add") ============ -->
             <LinearLayout
                 android:id="@+id/screenTimeAllowedCard"
                 android:layout_width="match_parent"
@@ -424,6 +427,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_screen_time_add_chip"
+                        android:clickable="true"
+                        android:focusable="true"
                         android:gravity="center_vertical"
                         android:minHeight="40dp"
                         android:paddingStart="@dimen/spacing_md"

@@ -74,6 +74,12 @@ public class BlockerAccessibilityService extends AccessibilityService {
     // el usuario haya cambiado de app — se ignoran (ver isNoise). Se resuelven una vez al conectar.
     private Set<String> imePackages = Collections.emptySet();
 
+    // Launcher + asistente resueltos al conectar; base del conjunto exento del modo bloqueo total.
+    private Set<String> systemExemptPackages = Collections.emptySet();
+    // Escucha de FocusAllowlist (u10). Retiene el listener (SharedPreferences lo guarda débil);
+    // se cancela en teardown().
+    private FocusAllowlist.Subscription allowlistSubscription;
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
@@ -116,7 +122,16 @@ public class BlockerAccessibilityService extends AccessibilityService {
         if (resolvedAssist != null && resolvedAssist.activityInfo != null) {
             homePackages.add(resolvedAssist.activityInfo.packageName);
         }
-        engine.setFocusExemptPackages(homePackages);
+        // u10: exentos = launcher + asistente (los de arriba) ∪ apps siempre permitidas del usuario
+        // (FocusAllowlist). La lista se escucha mientras el servicio está conectado y el conjunto se
+        // recalcula en cada cambio, así que quitar una app la vuelve a bloquear sin reconectar.
+        systemExemptPackages = Collections.unmodifiableSet(homePackages);
+        engine.setFocusExemptPackages(FocusAllowlist.focusExemptPackages(
+                systemExemptPackages, FocusAllowlist.get(this)));
+        if (allowlistSubscription != null) allowlistSubscription.cancel();
+        allowlistSubscription =FocusAllowlist.observe(this, allowed ->
+                engine.setFocusExemptPackages(FocusAllowlist.focusExemptPackages(
+                        systemExemptPackages, allowed)));
 
         // El servicio comparte proceso con la app (sin android:process): si el proceso muere con el
         // modo bloqueo total armado, no queda ningún timer vivo para desarmarlo -> "kill-trap" que
@@ -323,6 +338,10 @@ public class BlockerAccessibilityService extends AccessibilityService {
         if (enforcedRules != null && enforcedObserver != null) {
             enforcedRules.removeObserver(enforcedObserver);
             enforcedObserver = null;
+        }
+        if (allowlistSubscription != null) {
+            allowlistSubscription.cancel();
+            allowlistSubscription = null;
         }
         removeCover();
         // executor es el @IoExecutor compartido de la app (Hilt @Singleton) -- no se cierra aquí,

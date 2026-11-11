@@ -59,7 +59,7 @@ public final class ScreenTimeState {
     public final float peakWeekdayMinutes;
     public final List<BeforeAfterRow> beforeAfter;
     public final float recoveredMinutesPerDay;
-    public final int allowedCount;             // apps siempre permitidas (las cablea la unidad u10)
+    public final int allowedCount;             // apps siempre permitidas (FocusAllowlist, u10)
 
     public ScreenTimeState(boolean usageAccess, boolean month, float avgMinutesPerDay,
                            boolean hasDelta, int deltaPercent, List<AppRow> apps,

@@ -1,6 +1,6 @@
 # System — Pomodoro timer (`ui/home/` + `notifications/focus/`)
 
-**Last verified:** 2026-10-07 (DB v14, u14) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (mejora-visual u6: ring button family, `RingStateMapper`) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The focus timer — the app's core feature. A pure 6-state machine (stopped/running/paused ×
 normal/rest, `ui/focus/FocusTimerStateMachine`) owned by an **activity-scoped**
@@ -27,6 +27,8 @@ to `navigation_focus`); the Focus screen (`FocusFragment`, u14) owns the running
 | `FocusBackgroundObserver` | `ui/focus/FocusBackgroundObserver.java` | Process-level `DefaultLifecycleObserver` (`ProcessLifecycleOwner`): ON_STOP → `onAppBackgrounded()`, ON_START → `onAppForegrounded()` to every listener (one per live session VM). JUnit: `BackgroundGraceTest` |
 | `BackgroundGrace` | `ui/focus/BackgroundGrace.java` | Pure-Java grace timeout with an injectable `Scheduler` (main Handler in production, virtual clock in `BackgroundGraceTest`): arm / cancel / fire once |
 | `FocusFragment` | `ui/focus/FocusFragment.java` | Running-session screen; `@AndroidEntryPoint`, activity-scoped session VM + fragment-scoped `FocusViewModel` (streak, social snapshot) |
+| `RingStateMapper` | `ui/focus/RingStateMapper.java` | mejora-visual u6. Pure: `FocusUiState` → ring (`RingState` IDLE / RUNNING / PAUSED / REST, remaining fraction, rest palette) + `justStarted()`. Home's `homePlayButton`, Focus's `focusPlayButton` and `focusRing` all read it, so they show the same fraction. No timer logic. JUnit: `RingStateMapperTest` |
+| `RingPainter` / `RingButtonView` | `ui/common/widget/` | mejora-visual u6. The one ring painter (track + amber→sage arc, start sweep 700 ms) shared by `FocusRingView` and the play button family (`RingButtonView`: Home 84dp, Focus 72dp, task row 36dp; play↔pause morph 280 ms) |
 | `FocusSessionEventPresenter` | `ui/focus/FocusSessionEventPresenter.java` | The single translator of one-shot outcomes into UI, used by both Home and Focus (all cycles → `navigation_cycle_complete`, fail → `AlertPopup`, first focus of the day, auto-completed task) |
 | `FocusSessionRepository` | `stats/FocusSessionRepository.java` | `@Singleton` write side of a session (ex-`HomeViewModel.completeTimer`/`addFails`): `Stats`, `FocusEvent`, auto-complete, first-focus-of-day; publishes today's fails / time studied |
 | `SingleEvent` | `ui/common/SingleEvent.java` | One-shot LiveData payload (consume once) |

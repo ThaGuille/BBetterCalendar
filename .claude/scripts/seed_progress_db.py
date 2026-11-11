@@ -6,7 +6,9 @@ What it seeds (all dates are RELATIVE TO TODAY, in the device's local time zone)
                   Carries elapsedMin / pauseCount (v15). Today only gets sessions already "past".
   * daily_stat    one row per day for those 90 days (focus minutes, fails, tasks done, phone minutes).
   * project       3 projects, 6-10 tasks each (calendarEntry type=2); some done with completedAtMillis,
-                  one pending task due in 3 days (project 1's soft deadline is that day too).
+                  one pending task due in 3 days (project 1's soft deadline is that day too); plus three
+                  tasks dated TODAY for Home's "Hoy" card (one with a 60 min target and 25 min already
+                  focused, one at 18:00, one done).
   * app_usage_daily  30 full days (ending yesterday) for 6 packages present on the device.
   * app_rule      the same 6 packages tracked; 2 with a daily limit and limitSinceMillis = 10 days ago
                   (usage drops after that day, so "before / after the limit" has something to show).
@@ -113,16 +115,25 @@ def clear_seeded(c, packages):
     c.executemany("DELETE FROM app_rule WHERE packageName = ?", [(p,) for p in packages])
 
 
-def insert_task(c, title, project_id, done, completed_ms, start_ms):
+def insert_task(c, title, project_id, done, completed_ms, start_ms, target=0):
     hidden = 0 if start_ms else 1
     c.execute(
         "INSERT INTO calendarEntry(title,description,limitDate,startDayAndHour,endDayAndHour,startMillis,"
         "endMillis,notifications,repetition,repetitionInterval,repetitionDays,duration,targetMinutes,isDone,"
         "completedAtMillis,isTemplate,templateId,materializedUntilMillis,isDismissed,projectId,hiddenInCalendar,type) "
-        "VALUES(?,'',NULL,NULL,NULL,?,?,NULL,0,0,0,0,0,?,?,0,0,0,0,?,?,2)",
-        (title, start_ms, start_ms + (30 * 60000 if start_ms else 0), 1 if done else 0, completed_ms,
+        "VALUES(?,'',NULL,NULL,NULL,?,?,NULL,0,0,0,0,?,?,?,0,0,0,0,?,?,2)",
+        (title, start_ms, start_ms + (30 * 60000 if start_ms else 0), target, 1 if done else 0, completed_ms,
          project_id, hidden))
     return c.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+
+# Home's "Hoy" card (mejora-visual u6, M/40-home.png): three project tasks dated today.
+# (title, project index, hour or None for "no time", target minutes, done, minutes already attributed)
+TODAY_TASKS = [
+    ("Repasar el tema 4", 1, None, 60, False, 25),
+    ("Entregar la práctica", 0, 18, 0, False, 0),
+    ("Leer el capítulo 2", 0, None, 0, True, 0),
+]
 
 
 def seed(c, packages, tz, now, rng):
@@ -135,6 +146,7 @@ def seed(c, packages, tz, now, rng):
 
     # ---- projects and tasks
     task_ids, done_by_day = [], {}
+    project_ids = []
     n_tasks = 0
     for idx, (name, color, titles, n_done) in enumerate(PROJECTS):
         deadline = ms(at(today + dt.timedelta(days=3), 18)) if idx == 0 else 0
@@ -142,6 +154,7 @@ def seed(c, packages, tz, now, rng):
         c.execute("INSERT INTO project(name,notes,status,softDeadlineMillis,colorIndex,createdAtMillis,"
                   "completedAtMillis) VALUES(?,'',0,?,?,?,0)", (name, deadline, color, created))
         pid = c.execute("SELECT last_insert_rowid()").fetchone()[0]
+        project_ids.append(pid)
         for t_i, title in enumerate(titles):
             done = t_i < n_done
             due = 0
@@ -155,6 +168,18 @@ def seed(c, packages, tz, now, rng):
             tid = insert_task(c, title, pid, done, completed, due)
             task_ids.append(tid)
             n_tasks += 1
+
+    # ---- today's tasks (Home); minutes already focused on one of them come as a focus_event of today
+    today_attributed = []
+    for title, p_idx, hour, target, done, attributed in TODAY_TASKS:
+        start = ms(at(today, hour if hour is not None else 0))
+        completed = ms(max(at(today, 0, 5), now - dt.timedelta(hours=1))) if done else 0
+        tid = insert_task(c, title, project_ids[p_idx], done, completed, start, target)
+        if done:
+            done_by_day[today.isoformat()] = done_by_day.get(today.isoformat(), 0) + 1
+        if attributed:
+            today_attributed.append((tid, attributed))
+        n_tasks += 1
 
     # ---- app usage (30 full days ending yesterday) and rules
     usage_rows = 0
@@ -208,6 +233,12 @@ def seed(c, packages, tz, now, rng):
         if back > 0:  # today is not in daily_stat until the day rolls over (like the app does)
             c.execute("INSERT OR REPLACE INTO daily_stat(day,focusMinutes,fails,tasksDone,phoneUsageMinutes) "
                       "VALUES(?,?,?,?,?)", (d.isoformat(), mins, fails, done_by_day.get(d.isoformat(), 0), phone))
+
+    # The minutes already focused on today's tasks ("25 / 60 min"): one finished session earlier today.
+    for tid, minutes in today_attributed:
+        ts = ms(max(at(today, 0, 30), now - dt.timedelta(hours=2)))
+        c.execute("INSERT INTO focus_event(timestamp,type,durationMin,entryId,elapsedMin,pauseCount) "
+                  "VALUES(?,0,?,?,?,0)", (ts, minutes, tid, minutes))
 
     return counts(c)
 

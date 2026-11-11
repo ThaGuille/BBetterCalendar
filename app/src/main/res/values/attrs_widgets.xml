@@ -180,4 +180,15 @@
         <attr name="emptyActionText" format="string" />
     </declare-styleable>
 
+    <!-- mejora-visual u6 · RingButtonView: primary = Home play (glossy disc at rest, raised while it
+         ticks), focus = Focus play (glossy disc except during a rest), compact = task row (raised disc,
+         play, ring = minutes done / target). -->
+    <declare-styleable name="RingButtonView">
+        <attr name="ringVariant" format="enum">
+            <enum name="primary" value="0" />
+            <enum name="focus" value="1" />
+            <enum name="compact" value="2" />
+        </attr>
+    </declare-styleable>
+
 </resources>

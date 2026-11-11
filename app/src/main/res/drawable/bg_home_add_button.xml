@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u6 · "+" of the Home tasks card (M/40-home.png): raised disc with a light rim. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/bb_ripple_primary">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_surface_raised" />
+            <stroke android:width="@dimen/card_lit_rim" android:color="@color/bb_card_lit_edge" />
+        </shape>
+    </item>
+</ripple>

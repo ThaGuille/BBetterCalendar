@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u6 · pause -> play morph of RingButtonView (reverse of avd_play_to_pause). -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <path
+                android:name="left"
+                android:fillColor="@color/bb_on_primary"
+                android:pathData="M7,5.5 L10.5,5.5 L10.5,18.5 L7,18.5 Z"
+                android:strokeColor="@color/bb_on_primary"
+                android:strokeLineJoin="round"
+                android:strokeWidth="1.5" />
+            <path
+                android:name="right"
+                android:fillColor="@color/bb_on_primary"
+                android:pathData="M13.5,5.5 L17,5.5 L17,18.5 L13.5,18.5 Z"
+                android:strokeColor="@color/bb_on_primary"
+                android:strokeLineJoin="round"
+                android:strokeWidth="1.5" />
+        </vector>
+    </aapt:attr>
+    <target android:name="left">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="@integer/bb_motion_icon_morph"
+                android:interpolator="@interpolator/bb_standard"
+                android:propertyName="pathData"
+                android:valueFrom="M7,5.5 L10.5,5.5 L10.5,18.5 L7,18.5 Z"
+                android:valueTo="M8.5,5.5 L13.5,8.75 L13.5,15.25 L8.5,18.5 Z"
+                android:valueType="pathType" />
+        </aapt:attr>
+    </target>
+    <target android:name="right">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="@integer/bb_motion_icon_morph"
+                android:interpolator="@interpolator/bb_standard"
+                android:propertyName="pathData"
+                android:valueFrom="M13.5,5.5 L17,5.5 L17,18.5 L13.5,18.5 Z"
+                android:valueTo="M13.5,8.75 L18.5,12 L18.5,12 L13.5,15.25 Z"
+                android:valueType="pathType" />
+        </aapt:attr>
+    </target>
+</animated-vector>

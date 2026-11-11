@@ -1,6 +1,8 @@
 package com.example.bbettercalendar.ui.home;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -327,6 +329,30 @@ public class HomeViewModel extends AndroidViewModel {
         }
         long[] range = todayRange.getValue();
         overdueBefore.setValue(range != null ? range[0] : null);
+    }
+
+    /**
+     * u6 (Doherty): la fila ya cambió en pantalla (TodayTaskAdapter); el guardado espera a que la casilla
+     * termine de dibujarse, para que la re-emisión de Room (que reordena la lista) no la corte.
+     */
+    static final long TASK_SAVE_DELAY_MILLIS = 400L;
+    @Nullable private Handler mainHandler;
+    // u6: la entrada escalonada de Home se ve una vez por fragment (no al volver de Focus).
+    private boolean entranceShown;
+
+    /** True the first time only: the screen plays its entrance (Motion.staggerIn) then. */
+    public boolean consumeEntrance() {
+        boolean first = !entranceShown;
+        entranceShown = true;
+        return first;
+    }
+
+    /** Marca/desmarca una tarea: la UI ya cambió; guarda tras {@link #TASK_SAVE_DELAY_MILLIS}. */
+    public void setTaskDoneSoon(CalendarEntry entry, boolean done) {
+        if (mainHandler == null) {
+            mainHandler = new Handler(Looper.getMainLooper());
+        }
+        mainHandler.postDelayed(() -> setTaskDone(entry, done), TASK_SAVE_DELAY_MILLIS);
     }
 
     public void setTaskDone(CalendarEntry entry, boolean done) {

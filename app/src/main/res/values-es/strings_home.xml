@@ -16,4 +16,29 @@
     <string name="home_friends_invite_title">Estudia con amigos</string>
     <string name="home_friends_invite_note">Invita a alguien para ver quién estudia.</string>
     <string name="home_friends_names_more">%1$s +%2$d</string>
+
+    <!-- mejora-visual u6 · Home rehecha (M/40-home.png) -->
+    <string name="home_timer_now">Ahora: %1$s</string>
+    <string name="home_timer_next">Siguiente: %1$s</string>
+    <string name="home_streak_label">Racha</string>
+    <plurals name="home_streak_days_goal">
+        <item quantity="one">%1$d de %2$d día</item>
+        <item quantity="many">%1$d de %2$d días</item>
+        <item quantity="other">%1$d de %2$d días</item>
+    </plurals>
+    <string name="home_friends_label">Amigos</string>
+    <plurals name="home_friends_studying_short">
+        <item quantity="one">%d estudiando ahora</item>
+        <item quantity="many">%d estudiando ahora</item>
+        <item quantity="other">%d estudiando ahora</item>
+    </plurals>
+    <string name="home_tasks_today">Hoy</string>
+    <plurals name="home_tasks_progress">
+        <item quantity="one">%1$d de %2$d tarea</item>
+        <item quantity="many">%1$d de %2$d tareas</item>
+        <item quantity="other">%1$d de %2$d tareas</item>
+    </plurals>
+    <string name="home_tasks_empty_title">Nada para hoy</string>
+    <string name="home_tasks_empty_message">Añade una tarea y ponla en marcha.</string>
+    <string name="home_next_up_when">A continuación · %1$s</string>
 </resources>

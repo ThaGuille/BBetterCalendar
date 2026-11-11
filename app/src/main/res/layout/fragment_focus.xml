@@ -161,18 +161,16 @@
                     android:src="@drawable/ic_stop_24"
                     app:tint="@color/bb_sanct_sage_bright" />
 
-                <ImageButton
+                <!-- u6: botón de la familia del anillo (RingButtonView, 72dp, variante focus): disco
+                     salvia con brillo + el mismo anillo y fracción que focusRing (RingStateMapper). -->
+                <com.example.bbettercalendar.ui.common.widget.RingButtonView
                     android:id="@+id/focusPlayButton"
-                    android:layout_width="@dimen/focus_sanct_play_box"
-                    android:layout_height="@dimen/focus_sanct_play_box"
-                    android:layout_marginStart="@dimen/focus_sanct_control_gap"
-                    android:layout_marginEnd="@dimen/focus_sanct_control_gap"
-                    android:background="@drawable/bg_sanct_play"
-                    android:contentDescription="@string/focus_pause"
-                    android:padding="@dimen/focus_sanct_play_icon_padding"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_pause_v2_filled_24"
-                    app:tint="@color/bb_sanct_on_primary" />
+                    android:layout_width="@dimen/focus_ring_button_size"
+                    android:layout_height="@dimen/focus_ring_button_size"
+                    android:layout_marginStart="@dimen/focus_ring_button_gap"
+                    android:layout_marginEnd="@dimen/focus_ring_button_gap"
+                    android:contentDescription="@string/focus_start"
+                    app:ringVariant="focus" />
 
                 <ImageButton
                     android:id="@+id/focusSkipButton"

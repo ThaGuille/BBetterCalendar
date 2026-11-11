@@ -13,4 +13,9 @@
     <integer name="bb_motion_chart_stagger">40</integer>
     <integer name="bb_motion_count_up">600</integer>
     <integer name="bb_motion_celebrate">900</integer>
+    <!-- u6 · ring button family: play <-> pause morph, ring sweep 0 -> full on start, and the Focus
+         glow breathing (one way; a full breath in + out is twice this, 4 s). -->
+    <integer name="bb_motion_icon_morph">280</integer>
+    <integer name="bb_motion_ring_sweep">700</integer>
+    <integer name="bb_motion_breathe_half">2000</integer>
 </resources>

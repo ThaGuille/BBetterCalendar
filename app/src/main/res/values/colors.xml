@@ -105,6 +105,8 @@
     <!-- Skeleton loading blocks. -->
     <color name="bb_skeleton_base">@color/pine_800</color>
     <color name="bb_skeleton_shine">@color/birch_50_a10</color>
+    <!-- mejora-visual u6: soft highlight on the glossy disc of RingButtonView (top-left). -->
+    <color name="bb_ring_disc_gloss">@color/birch_50_a10</color>
 
     <!-- F1-u5: the 8 profile avatar colours (profiles/{uid}.avatarColor 0-7, AvatarPalette). Aliases of
          the existing ramps, never hex; initials on them are bb_on_reward (pine_950). -->

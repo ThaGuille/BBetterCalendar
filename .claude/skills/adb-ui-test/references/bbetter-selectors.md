@@ -28,23 +28,29 @@ Tab labels (for `-Text` fallback): Home · Progress · Calendar · Projects.
 `nav_view` (and `nav_divider`) is **only present on top-level destinations** (the 4 tabs +
 Calendar week). On every secondary destination it is GONE → `find-node -Id nav_view` exits 1.
 
-## Home (u13, `fragment_home.xml`)
+## Home (u13, rehecha en mejora-visual u6, `fragment_home.xml`)
 
 | Id | What |
 |---|---|
-| `homePlayButton` | Idle: start session + open Focus (desc "Start timer"). Session alive: opens Focus (desc "Open focus session") |
-| `homeTimerCard` | Clickable only while a session is alive → Focus |
-| `homeTimerText` / `homeTimerTypeText` | Countdown / mode chip text |
-| `homeCycleChip` (`homeCycleText`) | "Cycle x of N · Next: …" → timer settings popup |
-| `homeStreakButton` (`homeStreakWeek`) | Streak card → `FocusStreakPopup` |
-| `homeFriendsCard` | Social mock block (debug only) |
+| `homePlayButton` | `RingButtonView` (canvas: no text in the dump). Idle: start session + open Focus (desc "Start timer"). Session alive: opens Focus (desc "Open focus session") |
+| `homeTimerCard` | Clickable only while a session is alive → Focus (`homeTimerHalo` = amber glow inside) |
+| `homeTimerText` / `homeTimerTypeText` | Countdown / chip text «Concentración · 1 de 3» |
+| `homeCycleChip` | The chip above the countdown (dot + `homeTimerTypeText`) → timer settings popup |
+| `homeCycleText` | Under the ring: «Ahora: <tarea>» / «Siguiente: <tarea>»; GONE without a task |
+| `homeStreakButton` (`homeStreakValue`, `homeStreakStrip`, `homeStreakGoal`) | Streak card «Racha / 2 semanas / 7 pills / 2 de 3 días» → `FocusStreakPopup` |
+| `homeFriendsCard` (`homeFriendsLabel`, `homeFriendsAvatars`, `homeFriendsTitle`, `homeFriendsNote`, `homeFriendsJoin`) | Friends card; signed out = join call |
+| `homeTasksCount`, `homeTasksProgress`, `homeTasksSkeleton`, `homeTasksEmpty` | «2 de 5 tareas», bar, skeleton until the first emission, `EmptyStateView` (action = quick add) |
 | `homeAddTaskButton`, `homeTodayTaskList`, `homeShowOverdueButton`, `homeOverdueTaskList` | Tasks card |
-| row ids: `taskDoneCheckbox`, `taskTitleText`, `taskProjectChip`, `taskTimeText`, `taskFocusButton`, `taskRemoveButton` | Task rows |
-| `homeNextUpCard` (`homeNextUpText`) | Next event → Calendar tab |
+| row ids: `taskRow`, `taskDoneCheckbox`, `taskTitleText`, `taskTimeText`, `taskFocusButton`, `taskRemoveButton` | Task rows; `taskTimeText` = «25 / 60 min · Proyecto», «18:00 · Proyecto» or «Hecha»; `taskFocusButton` = small `RingButtonView` |
+| `homeNextUpCard` (`homeNextUpLabel`, `homeNextUpText`) | «A continuación · 16:30» + title → Calendar tab |
 | `homeBellButton` | Placeholder (toast); inside a FrameLayout since u13b (same id) |
 
 Removed in u13 (moved to Focus in u14, see below): `homeCancelButton`, `homeSkipRestButton`, `homeBlockModeButton`,
 `homeFailsChip`, `homeTimerSettingsButton`, `homeFocusBanner`, `homeStreakCount`, `homeTodayTimeText`.
+Removed in mejora-visual u6: `homeModeChip` (the chip is `homeCycleChip`), `homeStreakWeek`, `homeFriendsDot`,
+`homeFriendsNames` (names now in the avatars row content-desc), `homeTasksEmptyText` (now `homeTasksEmpty`),
+`taskDivider`, `taskMetaRow`, `taskProgressText`, `taskProjectChip` (all in `taskTimeText`).
+Recording: `mv-u6-home` (rest, tasks card, start, Focus, Home running, pause, resume, stop).
 
 ## Secondary destinations (u12)
 
@@ -97,7 +103,7 @@ Focus (`fragment_focus.xml`, destino `navigation_focus`, raíz `focusScreen`):
 | `focusTimerText` | mm:ss |
 | `focusEndsAtText` (`focusEndsAtRow`, `focusEndsAtIcon`) | «Ends at …» / «Paused» / «Ready when you are» |
 | `focusStopButton` | Stop (desc «Stop focus session»; deshabilitado sin sesión) |
-| `focusPlayButton` | desc «Start focus» / «Pause focus timer» / «Resume focus timer» |
+| `focusPlayButton` | `RingButtonView` since mejora-visual u6 (canvas, no text); desc «Start focus» / «Pause focus timer» / «Resume focus timer» |
 | `focusSkipButton` | desc «Skip rest» en descanso, «Skip rest (only during a rest)» si no |
 | `focusStatsCard` (`focusTodayColumn`, `focusStreakColumn`) | Tira Today / Streak |
 | `focusTodayText`, `focusFailsText`, `focusStreakText` | Tiempo de hoy, «N missed sessions» (GONE con 0), «N days» |

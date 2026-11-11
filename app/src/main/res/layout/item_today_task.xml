@@ -1,134 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fila de la lista de tareas de Home (spec tasks-home-today; u13 html 04): círculo de hecho +
-     título en UNA línea + chip de proyecto, separadas por un hairline. El progreso "X/Ym" y la
-     hora van en una línea secundaria bajo el título (en la fila partían el título en dos). El tachado/atenuado de las hechas, el
-     separador de la primera fila y el color del chip los aplica TodayTaskAdapter. -->
+<!-- Fila de la lista de tareas de Home (spec tasks-home-today; mejora-visual u6, M/40-home.png):
+     casilla que se dibuja + título (sin truncar) + línea secundaria («25 / 60 min», «18:00 · TFG»,
+     «Hecha») + anillo pequeño (RingButtonView compact: minutos atribuidos / objetivo) que arranca el
+     temporizador vinculado. El tachado/atenuado de las hechas lo aplica TodayTaskAdapter al instante. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/taskRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_target_min"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/spacing_xs"
+    android:paddingBottom="@dimen/spacing_xs">
 
-    <View
-        android:id="@+id/taskDivider"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/widget_hairline"
-        android:background="@color/bb_divider" />
+    <CheckBox
+        android:id="@+id/taskDoneCheckbox"
+        style="@style/Widget.BBetter.CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/checkbox_overhang"
+        android:layout_marginEnd="@dimen/checkbox_overhang" />
+    <!-- Widget.BBetter.CheckBox: useMaterialThemeColors=false y sin buttonTint; el dibujable
+         anima el check (u3). -->
 
     <LinearLayout
-        android:id="@+id/taskRow"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="44dp"
-        android:orientation="horizontal"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:layout_marginStart="@dimen/spacing_card_gap"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/taskDoneCheckbox"
-            style="@style/Widget.BBetter.CheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/checkbox_overhang"
-            android:layout_marginEnd="@dimen/checkbox_overhang" />
-        <!-- Widget.BBetter.CheckBox: useMaterialThemeColors=false y sin buttonTint; el dibujable
-             anima el check (u3). -->
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_card_gap"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/taskTitleText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.BBetter.Body.Medium"
-                tools:text="Write 3.1 Methods" />
-
-            <LinearLayout
-                android:id="@+id/taskMetaRow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <!-- Progreso de minutos atribuidos "X/Ym" (spec focus-attribution). Sólo visible para
-                     tareas con objetivo; lo rellena TodayTaskAdapter desde CalendarEntry.attributedMinutes. -->
-                <TextView
-                    android:id="@+id/taskProgressText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/spacing_sm"
-                    android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                    android:textColor="@color/bb_primary_bright"
-                    android:visibility="gone" />
-
-                <!-- Hora (hoy), fecha (atrasadas) o "Done" (hechas). -->
-                <TextView
-                    android:id="@+id/taskTimeText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.BBetter.Micro" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- u13: chip de proyecto (join projectId -> Project.name / colorIndex, sin esquema nuevo). -->
         <TextView
-            android:id="@+id/taskProjectChip"
-            android:layout_width="wrap_content"
+            android:id="@+id/taskTitleText"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_sm"
-            android:background="@drawable/bg_project_chip"
-            android:ellipsize="end"
-            android:maxWidth="120dp"
-            android:maxLines="1"
-            android:paddingStart="10dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="2dp"
-            android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-            android:visibility="gone"
-            tools:text="Thesis"
-            tools:visibility="visible" />
+            android:textAppearance="@style/TextAppearance.BBetter.Body.Medium"
+            tools:text="Repasar tema 4" />
 
-        <!-- "Focus this" (spec focus-attribution): vincula el timer a esta tarea y arranca la
-             sesión. Sólo visible para tareas con objetivo no completadas. -->
-        <ImageView
-            android:id="@+id/taskFocusButton"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginStart="@dimen/spacing_xs"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:contentDescription="@string/task_focus_this_desc"
-            android:focusable="true"
-            android:padding="@dimen/spacing_xs"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_timer_clock_24"
-            android:visibility="gone"
-            app:tint="@color/bb_primary_bright" />
-
-        <!-- "Quitar" de una tarea atrasada (spec tasks-recurrence): oculto salvo en la sección de
-             atrasadas, donde TodayTaskAdapter recibe un OnTaskRemoveListener. No borra: retira. -->
+        <!-- «25 / 60 min» · hora (hoy) o fecha (atrasadas) · proyecto, o «Hecha». -->
         <TextView
-            android:id="@+id/taskRemoveButton"
-            android:layout_width="wrap_content"
+            android:id="@+id/taskTimeText"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_sm"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:contentDescription="@string/home_overdue_remove_desc"
-            android:focusable="true"
-            android:padding="@dimen/spacing_xs"
-            android:text="@string/home_overdue_remove_symbol"
-            android:textAppearance="@style/TextAppearance.BBetter.Label"
-            android:visibility="gone" />
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            tools:text="25 / 60 min" />
     </LinearLayout>
+
+    <!-- "Focus this" (spec focus-attribution): vincula el timer a esta tarea y arranca la sesión.
+         Sólo con objetivo y sin hacer; el anillo es lo ya atribuido sobre el objetivo. -->
+    <com.example.bbettercalendar.ui.common.widget.RingButtonView
+        android:id="@+id/taskFocusButton"
+        android:layout_width="@dimen/home_task_ring_touch"
+        android:layout_height="@dimen/home_task_ring_touch"
+        android:layout_marginStart="@dimen/spacing_xs"
+        android:contentDescription="@string/task_focus_this_desc"
+        android:padding="@dimen/home_task_ring_inset"
+        android:visibility="gone"
+        app:ringVariant="compact" />
+
+    <!-- "Quitar" de una tarea atrasada (spec tasks-recurrence): oculto salvo en la sección de
+         atrasadas, donde TodayTaskAdapter recibe un OnTaskRemoveListener. No borra: retira. -->
+    <TextView
+        android:id="@+id/taskRemoveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/home_overdue_remove_desc"
+        android:focusable="true"
+        android:padding="@dimen/spacing_xs"
+        android:text="@string/home_overdue_remove_symbol"
+        android:textAppearance="@style/TextAppearance.BBetter.Label"
+        android:visibility="gone" />
 
 </LinearLayout>

@@ -1,6 +1,5 @@
 package com.example.bbettercalendar.ui.focus;
 
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -21,7 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.MenuItemCompat;
-import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -37,6 +35,9 @@ import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
+import com.example.bbettercalendar.ui.common.motion.Motion;
+import com.example.bbettercalendar.ui.common.widget.RingButtonView;
+import com.example.bbettercalendar.ui.common.widget.RingState;
 import com.example.bbettercalendar.social.account.SocialEntryRouter;
 import com.example.bbettercalendar.ui.social.AvatarPalette;
 import com.example.bbettercalendar.ui.social.EntryTarget;
@@ -91,7 +92,7 @@ public class FocusFragment extends Fragment
     private TextView endsAtText;
     private TextView restHint;
     private ImageButton stopButton;
-    private ImageButton playButton;
+    private RingButtonView playButton;
     private ImageButton skipButton;
     private TextView todayText;
     private TextView failsText;
@@ -107,6 +108,8 @@ public class FocusFragment extends Fragment
 
     // Último estado pintado: los controles sólo se repintan cuando cambia algo más que el tiempo.
     @Nullable private FocusUiState lastRendered;
+    // u6: último estado de anillo pintado (null = aún nada en esta vista), para el barrido al empezar.
+    @Nullable private RingState lastRingState;
 
     public FocusFragment() {
         super(R.layout.fragment_focus);
@@ -124,8 +127,12 @@ public class FocusFragment extends Fragment
         stopButton.setOnClickListener(this::onStopTapped);
         playButton.setOnClickListener(this::onPlayTapped);
         skipButton.setOnClickListener(this::onSkipTapped);
+        // u6: los botones fantasma adoptan la pulsación de la familia (el de anillo ya la trae).
+        Motion.pressable(stopButton);
+        Motion.pressable(skipButton);
 
         lastRendered = null;
+        lastRingState = null;
         session.getUiState().observe(getViewLifecycleOwner(), this::render);
         session.getTodayTimeStudiedMillis().observe(getViewLifecycleOwner(), this::renderToday);
         session.getTodayFails().observe(getViewLifecycleOwner(), this::renderFails);
@@ -258,10 +265,7 @@ public class FocusFragment extends Fragment
             return;
         }
         timerText.setText(FormatHelper.formatTime((int) state.getRemainingMillis(), "mm:ss"));
-        // html 01b: el arco es lo que QUEDA (se vacía en sentido horario desde arriba).
-        ring.setRemaining(state.isIdle() ? 1f : 1f - state.getProgress());
-        ring.setMode(state.isRest() ? FocusRingView.Mode.REST
-                : state.isPaused() ? FocusRingView.Mode.PAUSED : FocusRingView.Mode.FOCUS);
+        renderRings(state);
         timerText.setTextColor(ContextCompat.getColor(requireContext(), state.isPaused()
                 ? R.color.bb_sanct_on_surface_muted : R.color.bb_sanct_on_surface));
         renderEndsAt(state);
@@ -275,6 +279,35 @@ public class FocusFragment extends Fragment
         renderCycleDots(state);
         renderControls(state);
         renderBlockMode();
+    }
+
+    /**
+     * html 01b: el arco es lo que QUEDA (se vacía en sentido horario desde arriba). u6: el anillo grande y
+     * el del botón salen del mismo {@link RingStateMapper} que Home, así que muestran la misma fracción.
+     * Al empezar (reposo → en marcha, o al abrir la pantalla sobre una sesión recién arrancada) el arco
+     * se dibuja de 0 a su valor; mientras corre, el brillo respira despacio (solo aquí).
+     */
+    private void renderRings(@NonNull FocusUiState state) {
+        RingStateMapper.Ring r = RingStateMapper.map(state);
+        ring.setRemaining(r.remaining);
+        ring.setMode(r.rest ? FocusRingView.Mode.REST
+                : r.state == RingState.PAUSED ? FocusRingView.Mode.PAUSED : FocusRingView.Mode.FOCUS);
+        playButton.setRest(r.rest);
+        playButton.setRemaining(r.remaining);
+        boolean firstRender = lastRingState == null;
+        // El botón barre él solo en la transición reposo → en marcha; en el primer pintado no sabe.
+        playButton.setState(r.state);
+        boolean started = firstRender
+                ? RingStateMapper.justStarted(state)
+                : lastRingState == RingState.IDLE && r.state.ticking();
+        if (started) {
+            ring.sweepIn();
+            if (firstRender) {
+                playButton.playStartSweep();
+            }
+        }
+        ring.setBreathing(r.state.ticking());
+        lastRingState = r.state;
     }
 
     /** "CONCENTRATION · 2 OF 4" / "REST · …" / "PAUSED · …" (textAllCaps del appearance Chip). */
@@ -357,10 +390,9 @@ public class FocusFragment extends Fragment
     }
 
     private void renderControls(@NonNull FocusUiState state) {
-        // Centro: play (parado o en pausa) / pausa (corriendo).
+        // Centro: play (parado o en pausa) / pausa (corriendo). El icono, el disco y el anillo los pinta
+        // RingButtonView desde RingStateMapper (renderRings); aquí solo la descripción.
         boolean running = state.isRunning();
-        playButton.setImageResource(running
-                ? R.drawable.ic_pause_v2_filled_24 : R.drawable.ic_play_v2_filled_24);
         int playDesc;
         if (running) {
             playDesc = R.string.focus_pause;
@@ -370,12 +402,9 @@ public class FocusFragment extends Fragment
             playDesc = R.string.focus_start;
         }
         playButton.setContentDescription(getString(playDesc));
-        // html 01c: en descanso el ámbar se retira (queda para concentración y logros): botón
-        // fantasma salvia y "saltar" destacado. html 01d: en pausa "saltar" se apaga al 40 %.
+        // html 01c: en descanso el disco del botón pasa a fantasma (RingButtonView, variante focus) y
+        // "saltar" se destaca. html 01d: en pausa "saltar" se apaga al 40 %.
         boolean rest = state.isRest();
-        playButton.setBackgroundResource(rest ? R.drawable.bg_sanct_play_rest : R.drawable.bg_sanct_play);
-        ImageViewCompat.setImageTintList(playButton, ColorStateList.valueOf(ContextCompat.getColor(
-                requireContext(), rest ? R.color.bb_sanct_sage_bright : R.color.bb_sanct_on_primary)));
         skipButton.setBackgroundResource(rest ? R.drawable.bg_sanct_ghost_strong : R.drawable.bg_sanct_ghost);
         skipButton.setAlpha(state.isPaused() ? DISABLED_ALPHA : 1f);
         restHint.setVisibility(rest && state.isSessionActive() ? View.VISIBLE : View.GONE);
@@ -710,6 +739,7 @@ public class FocusFragment extends Fragment
         socialEntry = null;
         timeViews.clear();
         lastRendered = null;
+        lastRingState = null;
         toolbar = null;
         modeDot = null;
         modeChip = null;

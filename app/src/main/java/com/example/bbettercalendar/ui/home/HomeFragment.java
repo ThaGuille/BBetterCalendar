@@ -2,7 +2,7 @@ package com.example.bbettercalendar.ui.home;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +20,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
@@ -37,10 +39,14 @@ import com.example.bbettercalendar.social.Friend;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
+import com.example.bbettercalendar.stats.StreakCalculator;
+import com.example.bbettercalendar.ui.common.motion.Motion;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
+import com.example.bbettercalendar.ui.common.widget.RingState;
 import com.example.bbettercalendar.ui.focus.FocusSessionEventPresenter;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
+import com.example.bbettercalendar.ui.focus.RingStateMapper;
 import com.example.bbettercalendar.ui.social.AvatarPalette;
 import com.example.bbettercalendar.ui.social.StudyingSummary;
 import com.example.bbettercalendar.ui.social.EntryTarget;
@@ -90,6 +96,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     private boolean overdueExpanded = false;
     // Primera tarea pendiente de hoy: el "Next: <tarea>" de la tarjeta del temporizador.
     private String nextTaskTitle;
+    // u6: hasta la primera emisión de tareas la tarjeta enseña el esqueleto.
+    private boolean tasksLoaded;
 
     @Inject
     ConfigurationManager configurationManager;
@@ -116,8 +124,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         homeViewModel.getGreeting().observe(getViewLifecycleOwner(), this::renderGreeting);
         binding.homeAvatar.setContentDescription(getString(R.string.local_name_avatar_cd));
         binding.homeAvatar.setOnClickListener(v -> onAvatarClicked());
-        binding.homeDateText.setText(
-                new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date()));
+        binding.homeDateText.setText(todayLabel());
+        // El halo ámbar se sale por la esquina: la tarjeta lo recorta con su contorno redondeado.
+        binding.homeTimerCard.setClipToOutline(true);
 
         // Tarjeta del temporizador: texto, modo y ciclo salen del estado de la sesión.
         lastRenderedState = null;
@@ -128,8 +137,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         sessionEvents = new FocusSessionEventPresenter(this, focusSession, this::renderCycleLine);
         sessionEvents.observe(getViewLifecycleOwner());
 
-        // Racha real (StreakCalculator, u3): días seguidos + semana L→D.
-        homeViewModel.getStreak().observe(getViewLifecycleOwner(), binding.homeStreakWeek::setStreak);
+        // Racha semanal real (StreakCalculator): «2 semanas», semana L→D y «2 de 3 días».
+        homeViewModel.getStreak().observe(getViewLifecycleOwner(), this::renderStreak);
 
         // Amigos estudiando (maqueta tras FEATURE_SOCIAL_MOCK; GONE sin hueco con el flag apagado).
         SocialFeature.applyVisibility(binding.homeFriendsCard);
@@ -153,6 +162,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
 
         SoundFeedback.get(requireContext()); // warm singleton so first tap is silent-fast
 
+        // u6: entrada escalonada de las tarjetas, solo la primera vez (no al volver de Focus).
+        if (homeViewModel.consumeEntrance()) {
+            Motion.staggerIn(binding.homeContent);
+        }
+
         // Sin restauración manual: la sesión sobrevive a la rotación en el ViewModel de actividad
         // y a la muerte del proceso en su SavedStateHandle (instante de fin, no ticks).
         return binding.getRoot();
@@ -163,22 +177,33 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
      * proyecto (u13), alta rápida (bottom sheet) y sección plegable de tareas atrasadas.
      */
     private void setUpTaskList() {
-        todayTaskAdapter = new TodayTaskAdapter(false,
-                (entry, done) -> homeViewModel.setTaskDone(entry, done));
+        // u6: la fila y la cuenta «2 de 5» cambian al instante; el guardado llega después.
+        todayTaskAdapter = new TodayTaskAdapter(false, (entry, done) -> {
+            homeViewModel.setTaskDoneSoon(entry, done);
+            renderTaskSummary(true);
+        });
         // "Focus this" (spec focus-attribution): vincula el timer a la tarea, arranca y abre Focus.
         todayTaskAdapter.setOnTaskFocusListener(this::onFocusRequested);
         // La sección de atrasadas pasa un removeListener: habilita el botón "quitar" que retira
         // (sin borrar) la serie/tarea atrasada — datos conservados para stats (spec tasks-recurrence).
         overdueTaskAdapter = new TodayTaskAdapter(true,
-                (entry, done) -> homeViewModel.setTaskDone(entry, done),
+                (entry, done) -> homeViewModel.setTaskDoneSoon(entry, done),
                 entry -> homeViewModel.dismissSeries(entry));
+        binding.homeTasksEmpty.setOnActionClickListener(v -> openQuickAdd());
+        tasksLoaded = false;
+        binding.homeTasksSkeleton.show();
 
         binding.homeTodayTaskList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.homeTodayTaskList.setAdapter(todayTaskAdapter);
         binding.homeOverdueTaskList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.homeOverdueTaskList.setAdapter(overdueTaskAdapter);
+        // u6: las filas se mueven (DiffUtil) pero no se funden al cambiar: el fundido del item animator
+        // dejaría la fila hecha a alfa 1 en vez del atenuado de las hechas.
+        disableChangeFade(binding.homeTodayTaskList);
+        disableChangeFade(binding.homeOverdueTaskList);
 
         binding.homeAddTaskButton.setOnClickListener(this);
+        Motion.pressable(binding.homeAddTaskButton);
         binding.homeShowOverdueButton.setOnClickListener(this);
         updateOverdueToggle();
 
@@ -189,8 +214,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         homeViewModel.setOverdueVisible(false);
 
         homeViewModel.getTodayTasks().observe(getViewLifecycleOwner(), tasks -> {
+            boolean first = !tasksLoaded;
+            tasksLoaded = true;
+            if (first) {
+                binding.homeTasksSkeleton.hide();
+            }
             todayTaskAdapter.submitList(tasks);
-            binding.homeTasksEmptyText.setVisibility(tasks.isEmpty() ? View.VISIBLE : View.GONE);
+            boolean empty = tasks == null || tasks.isEmpty();
+            binding.homeTasksEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+            binding.homeTodayTaskList.setVisibility(empty ? View.GONE : View.VISIBLE);
+            renderTaskSummary(!first);
             nextTaskTitle = firstPendingTitle(tasks);
             renderCycleLine();
         });
@@ -216,6 +249,72 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             }
         }
         return null;
+    }
+
+    private static void disableChangeFade(@NonNull RecyclerView list) {
+        if (list.getItemAnimator() instanceof SimpleItemAnimator) {
+            ((SimpleItemAnimator) list.getItemAnimator()).setSupportsChangeAnimations(false);
+        }
+    }
+
+    /** «2 de 5 tareas» + barra de avance, con lo que se ve ahora (incluye lo recién marcado). */
+    private void renderTaskSummary(boolean animate) {
+        if (binding == null || todayTaskAdapter == null) {
+            return;
+        }
+        int total = todayTaskAdapter.getItemCount();
+        if (total == 0) {
+            binding.homeTasksCount.setVisibility(View.GONE);
+            binding.homeTasksProgress.setVisibility(View.GONE);
+            return;
+        }
+        int done = todayTaskAdapter.countDoneNow();
+        binding.homeTasksCount.setVisibility(View.VISIBLE);
+        binding.homeTasksCount.setText(getResources().getQuantityString(
+                R.plurals.home_tasks_progress, total, done, total));
+        binding.homeTasksProgress.setVisibility(View.VISIBLE);
+        binding.homeTasksProgress.setProgressCompat(Math.round(100f * done / total),
+                animate && Motion.enabled(requireContext()));
+    }
+
+    /** Tarjeta de racha (M/40): «Racha», «2 semanas» en ámbar, semana L→D y «2 de 3 días». */
+    private void renderStreak(@Nullable StreakCalculator.Result streak) {
+        if (binding == null) {
+            return;
+        }
+        int weeks = streak == null ? 0 : streak.weekStreak;
+        binding.homeStreakValue.setText(
+                getResources().getQuantityString(R.plurals.streak_weeks, weeks, weeks));
+        binding.homeStreakStrip.setWeek(streak == null ? null : streak.week);
+        if (streak == null || streak.goal <= 0) {
+            binding.homeStreakGoal.setVisibility(View.GONE);
+            binding.homeStreakButton.setContentDescription(getString(R.string.home_streak_desc));
+            return;
+        }
+        String goal = getResources().getQuantityString(R.plurals.home_streak_days_goal,
+                streak.goal, streak.daysThisWeek, streak.goal);
+        binding.homeStreakGoal.setVisibility(View.VISIBLE);
+        binding.homeStreakGoal.setText(goal);
+        binding.homeStreakButton.setContentDescription(getString(R.string.home_streak_desc) + ". "
+                + binding.homeStreakValue.getText() + ". "
+                + getString(R.string.streak_week_goal_desc, streak.daysThisWeek, streak.goal));
+    }
+
+    /** «Miércoles, 11 nov»: patrón del idioma (día de la semana, día, mes corto), con mayúscula. */
+    @NonNull
+    private static String todayLabel() {
+        Locale locale = Locale.getDefault();
+        String pattern = DateFormat.getBestDateTimePattern(locale, "EEEEdMMM");
+        String text = new SimpleDateFormat(pattern, locale).format(new Date());
+        return text.isEmpty() ? text : text.substring(0, 1).toUpperCase(locale) + text.substring(1);
+    }
+
+    private void openQuickAdd() {
+        // childFragmentManager: QuickAddTaskSheet localiza este fragment como parent
+        // para compartir el HomeViewModel.
+        if (getChildFragmentManager().findFragmentByTag(QuickAddTaskSheet.SHEET_TAG) == null) {
+            new QuickAddTaskSheet().show(getChildFragmentManager(), QuickAddTaskSheet.SHEET_TAG);
+        }
     }
 
     private void toggleOverdueSection() {
@@ -251,27 +350,34 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         if (binding == null || state == null) return;
         binding.homeTimerText.setText(
                 FormatHelper.formatTime((int) state.getRemainingMillis(), "mm:ss"));
+        // u6: anillo vivo. Mismo RingStateMapper que Focus → misma fracción en las dos pantallas.
+        RingStateMapper.Ring ring = RingStateMapper.map(state);
+        boolean firstRender = lastRenderedState == null;
+        binding.homePlayButton.setRest(ring.rest);
+        binding.homePlayButton.setRemaining(ring.remaining);
+        binding.homePlayButton.setState(ring.state);
+        if (firstRender && RingStateMapper.justStarted(state)) {
+            binding.homePlayButton.playStartSweep();
+        }
         if (!state.controlsDifferFrom(lastRenderedState)) {
             lastRenderedState = state;
             return;
         }
         lastRenderedState = state;
 
-        int mode;
-        if (state.isPaused()) {
-            mode = R.string.home_mode_paused;
-        } else if (state.isRest()) {
-            mode = R.string.home_mode_rest;
-        } else {
-            mode = R.string.home_mode_concentration;
-        }
-        binding.homeTimerTypeText.setText(mode);
+        // «Concentración · 2 de 4» (mismo cálculo que el chip de Focus).
+        String mode = getString(state.isPaused() ? R.string.home_mode_paused
+                : state.isRest() ? R.string.home_mode_rest : R.string.home_mode_concentration);
+        int cycle = state.isInfiniteCycles()
+                ? state.getCurrentCycle()
+                : Math.min(state.getCurrentCycle(), Math.max(1, state.getTotalCycles()));
+        binding.homeTimerTypeText.setText(state.isInfiniteCycles()
+                ? getString(R.string.focus_mode_chip_infinite_format, mode, cycle)
+                : getString(R.string.focus_mode_chip_format, mode, cycle, state.getTotalCycles()));
 
         // Idle: play. Sesión viva (corriendo, en pausa o en descanso): el botón y la tarjeta
         // llevan a Focus, donde están pausa / stop / saltar descanso (u14).
         boolean active = state.isSessionActive();
-        binding.homePlayButton.setImageResource(
-                active ? R.drawable.ic_arrow_forward_24 : R.drawable.ic_play_v2_filled_24);
         binding.homePlayButton.setContentDescription(
                 getString(active ? R.string.home_open_focus : R.string.home_play));
         binding.homeTimerCard.setClickable(active);
@@ -279,27 +385,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         renderCycleLine();
     }
 
-    /** "Cycle x of N · Next: <tarea>" (html 04) o "· Focusing: <tarea>" si hay una vinculada. */
+    /**
+     * u6 (M/40): bajo el anillo, «Ahora: <tarea>» si el temporizador está vinculado a una o
+     * «Siguiente: <tarea>» (primera pendiente de hoy); sin ninguna, la línea no sale. El chip de arriba
+     * («Concentración · 2 de 4») abre la configuración del temporizador.
+     */
     private void renderCycleLine() {
         if (binding == null || lastRenderedState == null) {
             return;
         }
-        FocusUiState state = lastRenderedState;
-        // En reposo cuenta los ciclos hechos ("Cycle 0 of 4", como el diseño); en marcha, el actual.
-        int cycle = state.isSessionActive() ? state.getCurrentCycle() : state.getCyclesCompleted();
-        String cycleText = state.isInfiniteCycles()
-                ? getString(R.string.home_cycle_infinite_format, cycle)
-                : getString(R.string.home_cycle_format, cycle, state.getTotalCycles());
         String line;
         if (FocusTarget.isSet() && FocusTarget.getTitle() != null) {
-            line = getString(R.string.home_cycle_focusing_format, cycleText, FocusTarget.getTitle());
+            // Vinculada: «Ahora» con la sesión viva; en reposo es la que arrancará el play.
+            line = getString(lastRenderedState.isSessionActive()
+                    ? R.string.home_timer_now : R.string.home_timer_next, FocusTarget.getTitle());
         } else if (nextTaskTitle != null) {
-            line = getString(R.string.home_cycle_next_format, cycleText, nextTaskTitle);
+            line = getString(R.string.home_timer_next, nextTaskTitle);
         } else {
-            line = cycleText;
+            line = null;
         }
         binding.homeCycleText.setText(line);
-        binding.homeCycleChip.setContentDescription(getString(R.string.home_cycle_chip_desc, line));
+        binding.homeCycleText.setVisibility(line == null ? View.GONE : View.VISIBLE);
+        binding.homeCycleChip.setContentDescription(getString(R.string.home_cycle_chip_desc,
+                binding.homeTimerTypeText.getText()));
     }
 
     /**
@@ -374,12 +482,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             if (signedOut) {
                 binding.homeFriendsCard.setVisibility(View.VISIBLE);
                 binding.homeFriendsTitle.setText(R.string.social_cta_title);
-                binding.homeFriendsDot.setVisibility(View.GONE);
                 binding.homeFriendsAvatars.setVisibility(View.GONE);
                 binding.homeFriendsJoin.setVisibility(View.VISIBLE);
                 binding.homeFriendsCard.setOnClickListener(v -> entry.requestEntry());
             } else {
-                binding.homeFriendsDot.setVisibility(View.VISIBLE);
                 binding.homeFriendsAvatars.setVisibility(View.VISIBLE);
                 binding.homeFriendsJoin.setVisibility(View.GONE);
                 // F2-u7: con sesión, tocar la tarjeta abre Amigos (F4-u6: con datos reales).
@@ -443,15 +549,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         }
         StudyingSummary summary = StudyingSummary.of(snapshot, MAX_FRIEND_AVATARS);
         LinearLayout row = binding.homeFriendsAvatars;
-        // Quitar los avatares de una emisión anterior (el último hijo es el texto de nombres).
-        while (row.getChildCount() > 1) {
-            row.removeViewAt(0);
-        }
+        // Quitar los avatares de una emisión anterior.
+        row.removeAllViews();
         binding.homeFriendsJoin.setVisibility(View.GONE);
         if (!summary.hasFriends()) {
             // Sin amigos: una línea que invita (nunca nombres de maqueta).
             binding.homeFriendsTitle.setText(R.string.home_friends_invite_title);
-            binding.homeFriendsDot.setVisibility(View.GONE);
             row.setVisibility(View.GONE);
             binding.homeFriendsNote.setText(R.string.home_friends_invite_note);
             binding.homeFriendsNote.setVisibility(View.VISIBLE);
@@ -461,14 +564,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         if (summary.isNobodyStudying()) {
             // Con amigos pero sin nadie estudiando: una línea tranquila, sin avatares.
             binding.homeFriendsTitle.setText(R.string.home_friends_nobody);
-            binding.homeFriendsDot.setVisibility(View.GONE);
             row.setVisibility(View.GONE);
             return;
         }
+        // M/40: avatares solapados encima y «2 estudiando ahora» debajo.
         int count = summary.getStudyingCount();
         binding.homeFriendsTitle.setText(getResources().getQuantityString(
-                R.plurals.home_friends_studying, count, count));
-        binding.homeFriendsDot.setVisibility(View.VISIBLE);
+                R.plurals.home_friends_studying_short, count, count));
         row.setVisibility(View.VISIBLE);
 
         int size = getResources().getDimensionPixelSize(R.dimen.home_friend_avatar_size);
@@ -489,19 +591,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
             lp.setMarginStart(i == 0 ? 0 : overlap);
             row.addView(avatar, i, lp);
         }
-        String names = TextUtils.join(", ", summary.getShownFirstNames());
-        if (summary.getMoreCount() > 0) {
-            names = getString(R.string.home_friends_names_more, names, summary.getMoreCount());
+        // Los nombres quedan para lectores de pantalla (la maqueta no los pinta).
+        StringBuilder names = new StringBuilder();
+        for (String name : summary.getShownFirstNames()) {
+            names.append(names.length() == 0 ? "" : ", ").append(name);
         }
-        binding.homeFriendsNames.setText(names);
+        String desc = summary.getMoreCount() > 0
+                ? getString(R.string.home_friends_names_more, names, summary.getMoreCount())
+                : names.toString();
+        row.setContentDescription(desc);
     }
 
-    /** "Next up": hora (o día + hora si no es hoy) y título del siguiente evento. */
+    /** «A continuación · 16:30» (o día + hora si no es hoy) y, debajo, el título del siguiente evento. */
     private void renderNextUp(@Nullable CalendarEntry entry) {
         if (binding == null) {
             return;
         }
         if (entry == null) {
+            binding.homeNextUpLabel.setText(R.string.home_next_up);
             binding.homeNextUpText.setText(R.string.home_next_up_empty);
             return;
         }
@@ -512,7 +619,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 && start.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR);
         String when = new SimpleDateFormat(today ? "HH:mm" : "EEE HH:mm", Locale.getDefault())
                 .format(new Date(entry.getStartMillis()));
-        binding.homeNextUpText.setText(when + " " + entry.getTitle());
+        binding.homeNextUpLabel.setText(getString(R.string.home_next_up_when, when));
+        binding.homeNextUpText.setText(entry.getTitle());
     }
 
     @Override
@@ -537,9 +645,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         } else if (id == R.id.homeNextUpCard) {
             openCalendarTab();
         } else if (id == R.id.homeAddTaskButton) {
-            // childFragmentManager: QuickAddTaskSheet localiza este fragment como parent
-            // para compartir el HomeViewModel.
-            new QuickAddTaskSheet().show(getChildFragmentManager(), QuickAddTaskSheet.SHEET_TAG);
+            openQuickAdd();
         } else if (id == R.id.homeShowOverdueButton) {
             toggleOverdueSection();
         }

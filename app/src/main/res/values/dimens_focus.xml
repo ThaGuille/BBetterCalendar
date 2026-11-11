@@ -26,5 +26,8 @@
     <dimen name="focus_sanct_invite_height">44dp</dimen>
     <dimen name="focus_sanct_top_bar_height">56dp</dimen>  <!-- h-12 bar (+ 8dp so the touch target stays 48) -->
     <dimen name="focus_sanct_friend_row_gap">8dp</dimen>   <!-- gap-y-2 -->
+    <!-- mejora-visual u6: play button of the ring family (mockup 02) between the two ghosts. -->
+    <dimen name="focus_ring_button_size">72dp</dimen>
+    <dimen name="focus_ring_button_gap">24dp</dimen>
 
 </resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u6 · Home rehecha (M/40-home.png). The older home_* dimens stay in dimens.xml. -->
+<resources>
+    <!-- Play button with the live ring (RingButtonView, variant primary). -->
+    <dimen name="home_ring_button_size">84dp</dimen>
+    <!-- Task row ring (variant compact): 36dp ring inside a 48dp touch target. -->
+    <dimen name="home_task_ring_touch">48dp</dimen>
+    <dimen name="home_task_ring_inset">6dp</dimen>
+    <!-- Amber halo in the timer card, pushed past its bottom-right corner (the card clips it). -->
+    <dimen name="home_timer_halo_size">220dp</dimen>
+    <dimen name="home_timer_halo_offset">-70dp</dimen>
+    <!-- Streak card: 7 pills (done / today / rest). -->
+    <dimen name="home_streak_strip_height">10dp</dimen>
+    <dimen name="home_streak_strip_gap">5dp</dimen>
+    <dimen name="home_streak_strip_stroke">1.5dp</dimen>
+    <!-- "+" of the tasks card: 48dp raised circle (Fitts). -->
+    <dimen name="home_tasks_add_size">48dp</dimen>
+    <dimen name="home_tasks_add_padding">12dp</dimen>
+    <!-- «● Concentración · 2 de 4» chip (it opens the timer settings). -->
+    <dimen name="home_chip_min_height">36dp</dimen>
+    <!-- Small card padding (streak, friends, next up). -->
+    <dimen name="home_small_card_padding">14dp</dimen>
+</resources>

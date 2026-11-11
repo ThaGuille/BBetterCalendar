@@ -16,4 +16,27 @@
     <string name="home_friends_invite_title">Study with friends</string>
     <string name="home_friends_invite_note">Invite someone to see who is studying.</string>
     <string name="home_friends_names_more">%1$s +%2$d</string>
+
+    <!-- mejora-visual u6 · Home rehecha (M/40-home.png) -->
+    <string name="home_timer_now">Now: %1$s</string>
+    <string name="home_timer_next">Next: %1$s</string>
+    <string name="home_streak_label">Streak</string>
+    <plurals name="home_streak_days_goal">
+        <item quantity="one">%1$d of %2$d day</item>
+        <item quantity="other">%1$d of %2$d days</item>
+    </plurals>
+    <string name="home_friends_label">Friends</string>
+    <plurals name="home_friends_studying_short">
+        <item quantity="one">%d studying now</item>
+        <item quantity="other">%d studying now</item>
+    </plurals>
+    <string name="home_tasks_today">Today</string>
+    <plurals name="home_tasks_progress">
+        <item quantity="one">%1$d of %2$d task</item>
+        <item quantity="other">%1$d of %2$d tasks</item>
+    </plurals>
+    <string name="home_task_minutes_progress" translatable="false">%1$d / %2$d min</string>
+    <string name="home_tasks_empty_title">Nothing for today</string>
+    <string name="home_tasks_empty_message">Add a task and get it moving.</string>
+    <string name="home_next_up_when">Next up · %1$s</string>
 </resources>

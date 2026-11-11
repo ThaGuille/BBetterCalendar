@@ -10,6 +10,8 @@
     <dimen name="glow_radius">96dp</dimen>
     <!-- staggerIn: how far a child travels while it fades in. -->
     <dimen name="motion_stagger_offset">10dp</dimen>
+    <!-- u15 · period / month change (incoming half of a shared X axis): Material's 30dp slide. -->
+    <dimen name="motion_shared_axis_slide">30dp</dimen>
     <!-- Checkbox canvas = touch target (Widget.BBetter.CheckBox draws a 22dp ring inside it). The row
          layouts pull it back by the overhang (48 - 22) / 2 so the ring keeps its old alignment. -->
     <dimen name="checkbox_touch_size">48dp</dimen>

@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 
 /**
  * Period navigator (u9; html 13 under the segmented control):
@@ -36,6 +37,8 @@ public class PeriodNavigatorView extends LinearLayout {
     private final ImageButton next;
 
     @Nullable private OnPeriodNavigateListener listener;
+    /** u15: direction of the step just tapped (-1 back, 1 forward, 0 none) until its new title arrives. */
+    private int pendingShift;
 
     public PeriodNavigatorView(@NonNull Context context) {
         this(context, null);
@@ -54,13 +57,17 @@ public class PeriodNavigatorView extends LinearLayout {
         subtitle = findViewById(R.id.periodNavSubtitle);
         previous = findViewById(R.id.periodNavPrevious);
         next = findViewById(R.id.periodNavNext);
+        // u15: cambio de periodo = eje X compartido; la etiqueta nueva entra desde el lado del paso
+        // (la pantalla la pone con setTitle, en el mismo toque o al llegar el rango).
         previous.setOnClickListener(v -> {
             if (listener != null) {
+                pendingShift = -1;
                 listener.onPrevious(this);
             }
         });
         next.setOnClickListener(v -> {
             if (listener != null) {
+                pendingShift = 1;
                 listener.onNext(this);
             }
         });
@@ -78,7 +85,13 @@ public class PeriodNavigatorView extends LinearLayout {
 
     /** "This week", "October 2026"… */
     public void setTitle(@Nullable CharSequence text) {
+        boolean changed = !TextUtils.equals(title.getText(), text);
         title.setText(text);
+        if (changed && pendingShift != 0) {
+            ScreenTransitions.periodShift(title, pendingShift > 0);
+            ScreenTransitions.periodShift(subtitle, pendingShift > 0);
+            pendingShift = 0;
+        }
     }
 
     /** "Mon – Sun", "Oct 5 – 11"…; shown as "· Mon – Sun". Null hides it. */

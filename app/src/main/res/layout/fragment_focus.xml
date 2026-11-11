@@ -88,7 +88,9 @@
                 android:minHeight="@dimen/spacing_xs" />
 
             <!-- ============ Anillo con resplandor + restante + "Ends at" ============ -->
+            <!-- u15: focusRingBox = elemento compartido con homePlayButton (ScreenTransitions.FOCUS_RING). -->
             <FrameLayout
+                android:id="@+id/focusRingBox"
                 android:layout_width="@dimen/focus_sanct_ring_box"
                 android:layout_height="@dimen/focus_sanct_ring_box">
 

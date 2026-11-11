@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
@@ -21,6 +22,7 @@ import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
 import com.example.bbettercalendar.ui.common.widget.ExpandStripView;
 import com.example.bbettercalendar.ui.common.widget.ProgressRingView;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -34,7 +36,8 @@ import java.util.Set;
 public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.ProjectViewHolder> {
 
     public interface OnProjectClickListener {
-        void onProjectClick(Project project);
+        /** {@code card} = the whole card: it grows into the detail (u15, container transform). */
+        void onProjectClick(Project project, View card);
     }
 
     /** Acciones dentro de la tarjeta: marcar una tarea, enfocarla y "Anadir tarea". */
@@ -114,14 +117,16 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         bindDeadlineChip(holder, item, context);
 
         holder.top.setContentDescription(context.getString(R.string.project_open_desc, project.name));
-        holder.top.setOnClickListener(v -> open(project));
+        // u15: la tarjeta entera es el elemento compartido con la raiz del detalle.
+        ViewCompat.setTransitionName(holder.itemView, ScreenTransitions.projectCardName(project.id));
+        holder.top.setOnClickListener(v -> open(project, holder.itemView));
         bindNextTask(holder, item, context);
         bindStrip(holder, item, context);
     }
 
-    private void open(Project project) {
+    private void open(Project project, View card) {
         if (listener != null) {
-            listener.onProjectClick(project);
+            listener.onProjectClick(project, card);
         }
     }
 

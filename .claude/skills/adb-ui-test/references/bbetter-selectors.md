@@ -26,7 +26,11 @@ Resource-ids below are the **suffix** after `:id/` — pass them bare to
 Tab labels (for `-Text` fallback): Home · Progress · Calendar · Projects.
 
 `nav_view` (and `nav_divider`) is **only present on top-level destinations** (the 4 tabs +
-Calendar week). On every secondary destination it is GONE → `find-node -Id nav_view` exits 1.
+Calendar week). On every secondary destination it is hidden → `find-node -Id nav_view` exits 1.
+Since mejora-visual u15 it overlays the navigation host and fades out to INVISIBLE (it stays laid out, so hiding it
+never resizes the screens mid-transition); the tabs reserve its height with a bottom margin on their root. Every tab
+keeps its scroll position (saved back stacks): a flow that needs the top of a tab swipes down first (see
+`recordings/mv-u15-tour.log`).
 
 ## Home (u13, rehecha en mejora-visual u6, `fragment_home.xml`)
 
@@ -99,6 +103,7 @@ Focus (`fragment_focus.xml`, destino `navigation_focus`, raíz `focusScreen`):
 | `focusBlockModeButton` | Acción 🚫 de la barra; content-desc «Block mode: off/on/needs permission. …» |
 | `focusModeChip` (`focusModeChipRow`, `focusModeDot`) | «CONCENTRATION · x OF N» / «REST · x OF N» / «PAUSED · x OF N» |
 | `focusCycleDots` | Puntos de ciclo (content-desc «Cycle x of N») |
+| `focusRingBox` | Caja del anillo (anillo + restante + «Termina a las»); elemento compartido con `homePlayButton` en la transición Home → Focus (mejora-visual u15) |
 | `focusRing` | `FocusRingView` (restante; canvas, invisible en el dump) |
 | `focusTimerText` | mm:ss |
 | `focusEndsAtText` (`focusEndsAtRow`, `focusEndsAtIcon`) | «Ends at …» / «Paused» / «Ready when you are» |

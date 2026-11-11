@@ -15,12 +15,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.focus.CelebrationPrefs;
 import com.example.bbettercalendar.ui.focus.CelebrationSheet;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
@@ -60,6 +62,13 @@ public class ProjectDetailFragment extends Fragment {
     private int focusedTotal;
     private int focusedWeek;
 
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -75,6 +84,9 @@ public class ProjectDetailFragment extends Fragment {
 
         int projectId = requireArguments().getInt(ARG_PROJECT_ID, 0);
         viewModel.setProjectId(projectId);
+        // u15: la raiz es el destino de la tarjeta que se transforma; entra cuando ya hay tareas pintadas.
+        ViewCompat.setTransitionName(view, ScreenTransitions.projectCardName(projectId));
+        ScreenTransitions.postponeUntilReady(this);
 
         itemAdapter = new ProjectItemAdapter((entry, done) -> viewModel.setItemDone(entry, done));
         // "Focus this" (spec focus-attribution): el timer vive sólo en Home, así que vinculamos el
@@ -132,6 +144,7 @@ public class ProjectDetailFragment extends Fragment {
             bindProgress();
             binding.projectDetailItemsEmptyText.setVisibility(
                     items == null || items.isEmpty() ? View.VISIBLE : View.GONE);
+            ScreenTransitions.startWhenDrawn(this, binding.projectDetailItemsList);
         });
         viewModel.getFocusedTotalMinutes().observe(getViewLifecycleOwner(), minutes -> {
             focusedTotal = minutes == null ? 0 : minutes;

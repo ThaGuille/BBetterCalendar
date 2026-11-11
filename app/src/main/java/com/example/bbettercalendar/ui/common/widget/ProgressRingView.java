@@ -176,7 +176,9 @@ public class ProgressRingView extends View {
     protected void onDetachedFromWindow() {
         cancelAnimation();
         shown = target;
-        entered = false;
+        // u15: sin volver a entrar al reengancharse. Las transiciones de pantalla pasan la pantalla que sale
+        // por el overlay del contenedor (se desengancha y se vuelve a enganchar): el anillo barría otra vez
+        // desde 0 mientras se iba. Una vista nueva (pantalla recreada) sigue entrando con su barrido.
         super.onDetachedFromWindow();
     }
 

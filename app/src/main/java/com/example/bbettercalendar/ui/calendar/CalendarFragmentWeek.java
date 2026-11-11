@@ -22,6 +22,7 @@ import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.databinding.FragmentCalendarWeekBinding;
 import com.example.bbettercalendar.helpers.FontHelper;
 import com.example.bbettercalendar.ui.calendar.binders.WeekViewItemAdapter;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
@@ -52,6 +53,13 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
                     // (repository-layer-consolidation, T2; see data-model.md).
                 }
             });
+
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,

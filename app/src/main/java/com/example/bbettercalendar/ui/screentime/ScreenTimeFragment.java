@@ -36,6 +36,7 @@ import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
 import com.example.bbettercalendar.ui.common.chart.DumbbellRowView;
 import com.example.bbettercalendar.ui.common.chart.LimitBarView;
 import com.example.bbettercalendar.ui.common.chart.StackedBarsView;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.common.widget.AppUsageRowView;
 import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
@@ -104,6 +105,13 @@ public class ScreenTimeFragment extends Fragment
 
     public ScreenTimeFragment() {
         super(R.layout.fragment_screen_time);
+    }
+
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
     }
 
     @Override

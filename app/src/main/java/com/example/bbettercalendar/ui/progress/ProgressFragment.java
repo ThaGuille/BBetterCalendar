@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,6 +25,7 @@ import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
 import com.example.bbettercalendar.ui.common.chart.LimitBarView;
 import com.example.bbettercalendar.ui.common.chart.SparkBarsView;
 import com.example.bbettercalendar.ui.common.motion.Motion;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.common.share.ShareCardRenderer;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.ProgressRowView;
@@ -49,6 +51,13 @@ public class ProgressFragment extends Fragment {
     private long shownFocusMinutes;
     private long shownSessions;
     private long shownTasks;
+
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {

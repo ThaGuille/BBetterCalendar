@@ -27,6 +27,8 @@ import com.example.bbettercalendar.ui.calendar.binders.MonthDayBinder;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
 import com.example.bbettercalendar.ui.calendar.domain.DayPlan;
 import com.example.bbettercalendar.ui.calendar.domain.ProjectDeadlineItemMapper;
+import com.example.bbettercalendar.ui.common.motion.Motion;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.view.CalendarView;
 
@@ -69,6 +71,13 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
                     // (repository-layer-consolidation, T2; see data-model.md).
                 }
             });
+
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -160,13 +169,16 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
         YearMonth previous = shownMonth;
         shownMonth = month;
         if (previous == null || previous.equals(month)) return;
-        float dir = month.isAfter(previous) ? 1f : -1f;
-        float dx = dir * getResources().getDisplayMetrics().density * 24f;
-        binding.monthTitleText.setAlpha(0f);
-        binding.monthTitleText.setTranslationX(dx);
-        binding.monthTitleText.animate().alpha(1f).translationX(0f).setDuration(220).start();
-        binding.monthCalendarView.setAlpha(0.35f);
-        binding.monthCalendarView.animate().alpha(1f).setDuration(260).start();
+        // u15: mismo eje X que el cambio de periodo de Progreso (ScreenTransitions.periodShift).
+        ScreenTransitions.periodShift(binding.monthTitleText, month.isAfter(previous));
+        int fade = Motion.duration(requireContext(), R.integer.bb_motion_screen_enter);
+        binding.monthCalendarView.animate().cancel();
+        if (fade > 0) {
+            binding.monthCalendarView.setAlpha(0.35f);
+            binding.monthCalendarView.animate().alpha(1f).setDuration(fade).start();
+        } else {
+            binding.monthCalendarView.setAlpha(1f);
+        }
     }
 
     private void setupDayDetail() {

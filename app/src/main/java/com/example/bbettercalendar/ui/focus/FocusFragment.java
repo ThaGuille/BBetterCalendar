@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.MenuItemCompat;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -36,6 +37,7 @@ import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
 import com.example.bbettercalendar.ui.common.motion.Motion;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.common.widget.RingButtonView;
 import com.example.bbettercalendar.ui.common.widget.RingState;
 import com.example.bbettercalendar.social.account.SocialEntryRouter;
@@ -115,6 +117,14 @@ public class FocusFragment extends Fragment
         super(R.layout.fragment_focus);
     }
 
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
+        ScreenTransitions.sharedFocusRing(this);
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -160,6 +170,8 @@ public class FocusFragment extends Fragment
         modeChip = view.findViewById(R.id.focusModeChip);
         cycleDots = view.findViewById(R.id.focusCycleDots);
         ring = view.findViewById(R.id.focusRing);
+        // u15: la caja del anillo (anillo + restante) es donde aterriza el play de Home.
+        ViewCompat.setTransitionName(view.findViewById(R.id.focusRingBox), ScreenTransitions.FOCUS_RING);
         timerText = view.findViewById(R.id.focusTimerText);
         endsAtIcon = view.findViewById(R.id.focusEndsAtIcon);
         endsAtText = view.findViewById(R.id.focusEndsAtText);

@@ -6,8 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -15,6 +17,7 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.databinding.FragmentProjectsBinding;
 import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.home.FocusTarget;
 import com.example.bbettercalendar.ui.home.QuickAddTaskSheet;
 
@@ -31,6 +34,13 @@ public class ProjectsFragment extends Fragment {
     private ProjectListAdapter adapter;
     private ProjectListAdapter completedAdapter;
     private boolean completedOpen;
+
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -66,7 +76,10 @@ public class ProjectsFragment extends Fragment {
             binding.projectsCompletedTitle.setText(
                     getString(R.string.projects_completed_title, completed.size()));
             renderCompletedOpen();
+            // u15: al volver del detalle la tarjeta tiene que estar dibujada para encogerse en ella.
+            ScreenTransitions.startWhenDrawn(this, binding.projectsList);
         });
+        ScreenTransitions.postponeUntilReady(this);
 
         projectsViewModel.getSummary().observe(getViewLifecycleOwner(), this::bindSummary);
 
@@ -74,11 +87,16 @@ public class ProjectsFragment extends Fragment {
     }
 
     private ProjectListAdapter newAdapter() {
-        ProjectListAdapter result = new ProjectListAdapter(project -> {
+        ProjectListAdapter result = new ProjectListAdapter((project, card) -> {
             Bundle args = new Bundle();
             args.putInt("projectId", project.id);
+            // u15: la tarjeta se transforma en el detalle (Hold en la lista, contenedor en el detalle).
+            FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                    .addSharedElement(card, ScreenTransitions.projectCardName(project.id))
+                    .build();
+            ScreenTransitions.prepareContainerTransform();
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_navigation_projects_to_navigation_project_detail, args);
+                    .navigate(R.id.action_navigation_projects_to_navigation_project_detail, args, null, extras);
         });
         result.setOnSubtaskActionListener(new ProjectListAdapter.OnSubtaskActionListener() {
             @Override

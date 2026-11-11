@@ -29,6 +29,7 @@ import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.chart.ChartFormat;
 import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
 import com.example.bbettercalendar.ui.common.chart.CompareBarsView;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.example.bbettercalendar.ui.common.widget.StatTileView;
 import com.example.bbettercalendar.ui.common.widget.StepperView;
@@ -87,6 +88,13 @@ public class AppDetailFragment extends Fragment
 
     public AppDetailFragment() {
         super(R.layout.fragment_app_detail);
+    }
+
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
     }
 
     @Override

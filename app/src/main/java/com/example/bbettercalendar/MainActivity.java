@@ -4,6 +4,7 @@ package com.example.bbettercalendar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -36,6 +37,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.bbettercalendar.databinding.ActivityMainBinding;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.focus.CycleCompleteFragment;
 
 import java.util.Arrays;
@@ -95,7 +97,14 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_DEBUG_PUSH_FROM = "bb_debug_push_from";
     public static final String EXTRA_DEBUG_PUSH_INBOX = "bb_debug_push_inbox";
 
+    /** Navigator de los destinos {@code <dialog>} (hojas): no cuentan como cambio de pantalla. */
+    private static final String DIALOG_NAVIGATOR = "dialog";
+
     private final String TAG = "MainActivityTAG";
+    /** u15: clases de las pestañas (las que reservan la barra inferior con un margen). */
+    private final Set<String> topLevelClasses = new HashSet<>();
+    /** u15: destino anterior (0 = aún ninguno: la primera llamada del listener no es una navegación). */
+    private int lastDestinationId;
     private ActivityMainBinding binding;
     private StatsDAO statsDao;
     private ExecutorService executorService;
@@ -145,11 +154,19 @@ public class MainActivity extends AppCompatActivity {
 
         // u12: chrome por destino (sustituye al setAppChromeVisible de HomeFragment). El listener
         // se dispara también con el destino actual al registrarlo, así que cubre la recreación.
+        // u15: además decide la transición (ScreenTransitions.onNavigate corre antes de que se
+        // ejecute la transacción del fragment) y la barra se funde en vez de saltar. Las hojas
+        // (destinos <dialog>) no cambian ni la barra ni la transición de la pantalla de debajo.
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-            int visibility = TOP_LEVEL_DESTINATIONS.contains(destination.getId())
-                    ? View.VISIBLE : View.GONE;
-            binding.navView.setVisibility(visibility);
-            binding.navDivider.setVisibility(visibility);
+            if (DIALOG_NAVIGATOR.equals(destination.getNavigatorName())) return;
+            boolean topLevel = TOP_LEVEL_DESTINATIONS.contains(destination.getId());
+            boolean navigated = lastDestinationId != 0;
+            if (navigated) {
+                ScreenTransitions.onNavigate(navHostFragment.getChildFragmentManager(),
+                        TOP_LEVEL_DESTINATIONS.contains(lastDestinationId), topLevel);
+            }
+            ScreenTransitions.showBottomBar(topLevel, navigated, binding.navView, binding.navDivider);
+            lastDestinationId = destination.getId();
         });
 
         openProjectFromIntent(getIntent());
@@ -193,21 +210,36 @@ public class MainActivity extends AppCompatActivity {
      * </ul>
      */
     private void installFragmentInsets(@NonNull NavHostFragment host) {
-        Set<String> topLevelClasses = new HashSet<>();
         for (int id : TOP_LEVEL_DESTINATIONS) {
             NavDestination node = navController.getGraph().findNode(id);
             if (node instanceof FragmentNavigator.Destination) {
                 topLevelClasses.add(((FragmentNavigator.Destination) node).getClassName());
             }
         }
+        // u15: la barra inferior va encima del host (activity_main.xml); su altura se reserva con un
+        // margen en la raíz de cada pestaña y se actualiza si la barra cambia de alto (insets, giro).
+        binding.navView.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            if (b - t != ob - ot) v.post(() -> updateTopLevelMargins(host));
+        });
         host.getChildFragmentManager().registerFragmentLifecycleCallbacks(
                 new FragmentManager.FragmentLifecycleCallbacks() {
+                    @Override
+                    public void onFragmentCreated(@NonNull FragmentManager fm, @NonNull Fragment f,
+                                                  Bundle savedInstanceState) {
+                        // u15: las pantallas que no llaman a ScreenTransitions.apply en su onCreate
+                        // (las sociales) reciben aquí las mismas transiciones.
+                        if (!(f instanceof DialogFragment)) ScreenTransitions.applyIfMissing(f);
+                    }
+
                     @Override
                     public void onFragmentViewCreated(@NonNull FragmentManager fm,
                                                       @NonNull Fragment f, @NonNull View v,
                                                       Bundle savedInstanceState) {
                         // F1-u4: las hojas (destinos <dialog>) tratan sus propios insets.
                         if (f instanceof DialogFragment) return;
+                        if (topLevelClasses.contains(f.getClass().getName())) {
+                            setBottomMargin(v, bottomBarHeight());
+                        }
                         int sides = 0;
                         if (v.findViewById(R.id.topBar) == null) sides |= InsetsHelper.TOP;
                         if (!topLevelClasses.contains(f.getClass().getName())
@@ -217,6 +249,29 @@ public class MainActivity extends AppCompatActivity {
                         if (sides != 0) InsetsHelper.apply(v, sides);
                     }
                 }, false);
+    }
+
+    /** Alto que tapa la barra inferior (con su divisor y el inset del sistema que ya lleva dentro). */
+    private int bottomBarHeight() {
+        return binding.navView.getHeight() + binding.navDivider.getHeight();
+    }
+
+    private void updateTopLevelMargins(@NonNull NavHostFragment host) {
+        if (binding == null || !host.isAdded()) return;
+        int height = bottomBarHeight();
+        for (Fragment f : host.getChildFragmentManager().getFragments()) {
+            View v = f.getView();
+            if (v != null && topLevelClasses.contains(f.getClass().getName())) setBottomMargin(v, height);
+        }
+    }
+
+    private static void setBottomMargin(@NonNull View v, int margin) {
+        ViewGroup.LayoutParams lp = v.getLayoutParams();
+        if (lp instanceof ViewGroup.MarginLayoutParams
+                && ((ViewGroup.MarginLayoutParams) lp).bottomMargin != margin) {
+            ((ViewGroup.MarginLayoutParams) lp).bottomMargin = margin;
+            v.setLayoutParams(lp);
+        }
     }
 
     // El Intent de la notificación lleva CLEAR_TOP y el launchMode por defecto es standard, así que

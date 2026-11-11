@@ -14,10 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +43,7 @@ import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.motion.Motion;
+import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
 import com.example.bbettercalendar.ui.common.widget.RingState;
 import com.example.bbettercalendar.ui.focus.FocusSessionEventPresenter;
@@ -102,6 +105,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
     @Inject
     ConfigurationManager configurationManager;
 
+    // u15: transiciones de pantalla (ScreenTransitions: fundido entre pestañas, eje Z/X, contenedor).
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ScreenTransitions.apply(this);
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
@@ -110,6 +120,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         binding = FragmentHomeBinding.inflate(inflater, container, false);
 
         binding.homePlayButton.setOnClickListener(this);
+        // u15: el play crece hasta el anillo de Focus (contenedor que se transforma).
+        ViewCompat.setTransitionName(binding.homePlayButton, ScreenTransitions.FOCUS_RING);
         binding.homeTimerCard.setOnClickListener(this);
         binding.homeCycleChip.setOnClickListener(this);
         binding.homeBellButton.setOnClickListener(this);
@@ -450,7 +462,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         NavController nav = NavHostFragment.findNavController(this);
         NavDestination current = nav.getCurrentDestination();
         if (current != null && current.getId() == R.id.navigation_home) {
-            nav.navigate(R.id.navigation_focus);
+            // u15: el botón es el elemento compartido con la caja del anillo de Focus.
+            FragmentNavigator.Extras extras = binding == null ? null
+                    : new FragmentNavigator.Extras.Builder()
+                            .addSharedElement(binding.homePlayButton, ScreenTransitions.FOCUS_RING)
+                            .build();
+            nav.navigate(R.id.navigation_focus, null, null, extras);
         }
     }
 

@@ -13,7 +13,8 @@ plain `adb`, `gradlew installDebug`, bbadb.py, the adb-ui-test .ps1 scripts and 
 A single argument runs through bash -c (Git Bash on Windows); several run as they are.
 
 - ANDROID_SERIAL already set: the caller chose the device; the command runs on it without a lease.
-- The unit already holds a lease (taken with emulator-lease --acquire): it is reused and not released.
+- The unit already holds a lease taken by hand (emulator-lease --acquire, no pid=): it is reused and not released.
+  A lease of the unit that names a pid belongs to a with-emulator call: dead -> taken over, alive -> not reused.
 - No free emulator: waits (polling every 5 s) up to --timeout-min (default 20), then exits 3.
 - The lease names this process (pid=...) and is touched every 60 s while the command runs: a lease
   whose process is gone is taken over at once, any other one after --stale-min (default 45).
@@ -108,7 +109,7 @@ def try_take(serial, unit, stale_min):
 def held_by(unit):
     for f in sorted(LEASES.glob('*.lock')):
         cur = read(f)
-        if cur and cur[0] == unit:
+        if cur and cur[0] == unit and cur[2] is None:  # only a lease taken by hand (no pid=): one with a pid belongs to a with-emulator call
             return f
     return None
 

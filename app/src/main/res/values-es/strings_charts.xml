@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chart_empty">Aún no hay datos</string>
+    <string name="chart_average">media %1$s</string>
+    <string name="chart_total">total</string>
+    <string name="chart_others">Otros</string>
+    <string name="chart_desc_bars">Gráfico de barras</string>
+    <string name="chart_desc_stacked">Gráfico de barras apiladas</string>
+    <string name="chart_desc_mirror">Gráfico de barras en espejo</string>
+    <string name="chart_desc_heatmap">Mapa de calor. Máximo: %1$s, %2$s</string>
+    <string name="chart_desc_donut">Gráfico circular. Total %1$s</string>
+    <string name="chart_desc_histogram">Histograma. Lo más habitual: %1$s (%2$s)</string>
+    <string name="chart_desc_dumbbell">%1$s: %2$s %3$s, %4$s %5$s, %6$s</string>
+    <string name="chart_limit_of">%1$s de %2$s</string>
+    <string name="chart_limit_over">%1$s de %2$s, por encima del límite</string>
+    <string name="chart_limit_none">%1$s, sin límite</string>
+</resources>

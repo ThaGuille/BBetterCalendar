@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Canvas chart kit (plan mejora-visual u4, ui/common/chart). Sizes read from the mockups 11-18, 20, 21. -->
+<resources>
+    <!-- Default heights (each view measures its own when wrap_content). -->
+    <dimen name="chart_height">180dp</dimen>
+    <dimen name="chart_spark_height">40dp</dimen>
+    <dimen name="chart_mirror_height">220dp</dimen>
+    <dimen name="chart_histogram_height">170dp</dimen>
+    <dimen name="chart_donut_size">140dp</dimen>
+    <dimen name="chart_row_min_height">48dp</dimen>
+    <dimen name="chart_limit_height">16dp</dimen>
+
+    <!-- Marks. -->
+    <dimen name="chart_bar_radius">4dp</dimen>
+    <dimen name="chart_spark_radius">2dp</dimen>
+    <dimen name="chart_bar_min">2dp</dimen>
+    <dimen name="chart_compare_gap">3dp</dimen>
+    <dimen name="chart_segment_gap">2dp</dimen>
+    <dimen name="chart_cell_radius">3dp</dimen>
+    <dimen name="chart_cell_gap">2dp</dimen>
+    <dimen name="chart_cell_max">28dp</dimen>
+    <dimen name="chart_donut_stroke">18dp</dimen>
+    <dimen name="chart_dot_radius">5dp</dimen>
+    <dimen name="chart_dot_stroke">2dp</dimen>
+    <dimen name="chart_limit_bar">6dp</dimen>
+    <dimen name="chart_limit_tick">2dp</dimen>
+    <dimen name="chart_selected_stroke">1.5dp</dimen>
+
+    <!-- Lines: grid dotted, average dashed. -->
+    <dimen name="chart_line">1dp</dimen>
+    <dimen name="chart_dot_on">2dp</dimen>
+    <dimen name="chart_dot_off">4dp</dimen>
+    <dimen name="chart_dash_on">6dp</dimen>
+    <dimen name="chart_dash_off">4dp</dimen>
+
+    <!-- Labels and bubble. -->
+    <dimen name="chart_label_gap">6dp</dimen>
+    <dimen name="chart_row_padding">8dp</dimen>
+    <dimen name="chart_bubble_margin">6dp</dimen>
+    <dimen name="chart_bubble_padding_h">10dp</dimen>
+    <dimen name="chart_bubble_padding_v">6dp</dimen>
+    <dimen name="chart_bubble_radius">10dp</dimen>
+    <dimen name="chart_bubble_max_width">240dp</dimen>
+</resources>

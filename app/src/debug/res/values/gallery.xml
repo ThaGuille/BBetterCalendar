@@ -20,6 +20,25 @@
         <item name="android:padding">@dimen/spacing_md</item>
     </style>
 
+    <!-- mejora-visual u4: chart cards of the gallery (gallery_section_charts.xml). -->
+    <style name="GalleryChartTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_sm</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Title</item>
+    </style>
+
+    <style name="GalleryChartLegend">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/spacing_sm</item>
+        <!-- Lines of up to 3 items, added by ChartGallerySection.legend(). -->
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <dimen name="gallery_spark_width">120dp</dimen>
+    <dimen name="gallery_legend_dot">10dp</dimen>
+
     <string-array name="gallery_u3_segments" translatable="false">
         <item>Semana</item>
         <item>Mes</item>

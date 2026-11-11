@@ -213,6 +213,16 @@
             android:id="@+id/galleryCharts"
             style="@style/GalleryCard" />
 
+        <!-- mejora-visual u4: the Canvas chart kit has its own page (DebugChartsGalleryActivity), so the
+             recorded flows of this long gallery keep their scroll positions. -->
+        <Button
+            android:id="@+id/galleryOpenCanvasCharts"
+            style="@style/Widget.BBetter.Button.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:text="Canvas charts (u4)" />
+
         <!-- ===================== Type scale (u9b) ===================== -->
         <TextView
             style="@style/GalleryLabel"

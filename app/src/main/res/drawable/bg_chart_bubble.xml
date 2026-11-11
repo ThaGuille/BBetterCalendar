@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Value bubble of the Canvas charts (mejora-visual u4): raised surface with a hairline border. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/bb_surface_highest" />
+    <stroke android:width="@dimen/chart_line" android:color="@color/bb_outline" />
+    <corners android:radius="@dimen/chart_bubble_radius" />
+</shape>

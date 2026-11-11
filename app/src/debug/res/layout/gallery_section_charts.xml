@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug gallery section of the Canvas chart kit (plan mejora-visual u4, ui/common/chart): every view with
+     the sample data of mockups 11-18, 20 and 21, plus one view without data. Filled by ChartGallerySection.
+     Included without android:id so the ids below resolve from the activity. Demo copy is hard-coded on
+     purpose: this screen never ships (src/debug) and is not translated. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <TextView
+        android:id="@+id/galleryU4Label"
+        style="@style/GalleryLabel"
+        android:text="Canvas charts (u4)" />
+
+    <!-- Repeats the value of the last tapped mark (BaseChartView.OnMarkSelectedListener), so adb flows can
+         assert a tap: the bubble itself is a PopupWindow that uiautomator does not dump. -->
+    <TextView
+        android:id="@+id/galleryU4Selected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/spacing_sm"
+        android:fontFeatureSettings="tnum"
+        android:text="Toca una barra"
+        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+    <!-- 11 · Enfoque por día: compare bars + legend. -->
+    <LinearLayout style="@style/GalleryCard">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Enfoque por día" />
+
+        <com.example.bbettercalendar.ui.common.chart.CompareBarsView
+            android:id="@+id/galleryU4Compare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/galleryU4CompareLegend"
+            style="@style/GalleryChartLegend" />
+    </LinearLayout>
+
+    <!-- Summary card mini bars. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Esta semana"
+                android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:text="12 h 40 m"
+                android:textAppearance="@style/TextAppearance.BBetter.Title" />
+        </LinearLayout>
+
+        <com.example.bbettercalendar.ui.common.chart.SparkBarsView
+            android:id="@+id/galleryU4Spark"
+            android:layout_width="@dimen/gallery_spark_width"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- 12 · Tus mejores horas: 7 x 18 heat map. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Tus mejores horas" />
+
+        <com.example.bbettercalendar.ui.common.chart.HeatmapView
+            android:id="@+id/galleryU4Hours"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/galleryU4HoursLegend"
+            style="@style/GalleryChartLegend" />
+    </LinearLayout>
+
+    <!-- 14 · Constancia: 26 weeks x 7 days. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Constancia" />
+
+        <com.example.bbettercalendar.ui.common.chart.HeatmapView
+            android:id="@+id/galleryU4Calendar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- 15 · Sesiones terminadas: stacked completed / abandoned. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Sesiones terminadas" />
+
+        <com.example.bbettercalendar.ui.common.chart.StackedBarsView
+            android:id="@+id/galleryU4Sessions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/galleryU4SessionsLegend"
+            style="@style/GalleryChartLegend" />
+    </LinearLayout>
+
+    <!-- 16 · Tiempo por proyecto: donut + legend beside it. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Tiempo por proyecto" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.example.bbettercalendar.ui.common.chart.DonutView
+                android:id="@+id/galleryU4Donut"
+                android:layout_width="@dimen/chart_donut_size"
+                android:layout_height="@dimen/chart_donut_size" />
+
+            <LinearLayout
+                android:id="@+id/galleryU4DonutLegend"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_md"
+                android:layout_weight="1"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 17 · Duración de tus sesiones: histogram, modal bar highlighted. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Duración de tus sesiones" />
+
+        <com.example.bbettercalendar.ui.common.chart.HistogramView
+            android:id="@+id/galleryU4Histogram"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- 18 · Enfoque frente a móvil: mirrored bars on one scale. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Enfoque frente a móvil" />
+
+        <com.example.bbettercalendar.ui.common.chart.MirrorBarsView
+            android:id="@+id/galleryU4Mirror"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/galleryU4MirrorLegend"
+            style="@style/GalleryChartLegend" />
+    </LinearLayout>
+
+    <!-- 20 · Uso por app: one LimitBarView per row (rows built in Java). -->
+    <LinearLayout
+        android:id="@+id/galleryU4LimitRows"
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Uso por app" />
+    </LinearLayout>
+
+    <!-- 21 · Día a día: stacked use per app with average. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Día a día" />
+
+        <com.example.bbettercalendar.ui.common.chart.StackedBarsView
+            android:id="@+id/galleryU4AppDaily"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/galleryU4AppDailyLegend"
+            style="@style/GalleryChartLegend" />
+    </LinearLayout>
+
+    <!-- 21 · Antes y después del límite: dumbbell rows sharing one scale. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Antes y después del límite" />
+
+        <com.example.bbettercalendar.ui.common.chart.DumbbellRowView
+            android:id="@+id/galleryU4DumbbellVideos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.example.bbettercalendar.ui.common.chart.DumbbellRowView
+            android:id="@+id/galleryU4DumbbellSocial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/galleryU4DumbbellLegend"
+            style="@style/GalleryChartLegend" />
+    </LinearLayout>
+
+    <!-- Empty state: a chart without data. -->
+    <LinearLayout
+        style="@style/GalleryCard"
+        android:layout_marginTop="@dimen/spacing_card_gap">
+
+        <TextView
+            style="@style/GalleryChartTitle"
+            android:text="Sin datos" />
+
+        <com.example.bbettercalendar.ui.common.chart.CompareBarsView
+            android:id="@+id/galleryU4Empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</merge>

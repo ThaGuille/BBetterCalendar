@@ -11,5 +11,14 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.BBetter.NoActionBar" />
+
+        <!-- mejora-visual u4: gallery page of the Canvas chart kit (adb recording mv-u4-charts). Same rules as
+             above: exported only in the debug manifest, no intent filter.
+             adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugChartsGalleryActivity -->
+        <activity
+            android:name="com.example.bbettercalendar.debug.DebugChartsGalleryActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.BBetter.NoActionBar" />
     </application>
 </manifest>

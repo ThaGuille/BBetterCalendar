@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Canvas chart kit (plan mejora-visual u4): empty state, average label and the textual summaries that
+     become each chart's contentDescription (Canvas marks are invisible to screen readers and uiautomator). -->
+<resources>
+    <string name="chart_empty">No data yet</string>
+    <string name="chart_average">avg %1$s</string>
+    <string name="chart_total">total</string>
+    <string name="chart_others">Others</string>
+    <string name="chart_desc_bars">Bar chart</string>
+    <string name="chart_desc_stacked">Stacked bar chart</string>
+    <string name="chart_desc_mirror">Mirrored bar chart</string>
+    <string name="chart_desc_heatmap">Heat map. Highest: %1$s, %2$s</string>
+    <string name="chart_desc_donut">Donut chart. Total %1$s</string>
+    <string name="chart_desc_histogram">Histogram. Most frequent: %1$s (%2$s)</string>
+    <string name="chart_desc_dumbbell">%1$s: %2$s %3$s, %4$s %5$s, %6$s</string>
+    <string name="chart_limit_of">%1$s of %2$s</string>
+    <string name="chart_limit_over">%1$s of %2$s, over the limit</string>
+    <string name="chart_limit_none">%1$s, no limit</string>
+</resources>

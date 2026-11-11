@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Value bubble shown by BaseChartView on tap (mejora-visual u4), in a PopupWindow so it is never clipped
+     by the chart or its card and closes on a tap outside. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chartBubble"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_chart_bubble"
+    android:fontFeatureSettings="tnum"
+    android:maxWidth="@dimen/chart_bubble_max_width"
+    android:paddingStart="@dimen/chart_bubble_padding_h"
+    android:paddingTop="@dimen/chart_bubble_padding_v"
+    android:paddingEnd="@dimen/chart_bubble_padding_h"
+    android:paddingBottom="@dimen/chart_bubble_padding_v"
+    android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+    android:textColor="@color/bb_on_surface" />

@@ -1,5 +1,6 @@
 package com.example.bbettercalendar.debug;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Button;
@@ -106,6 +107,8 @@ public class DebugGalleryActivity extends AppCompatActivity {
         bindAppRows();
         bindPeriod();
         bindMotion();
+        findViewById(R.id.galleryOpenCanvasCharts).setOnClickListener(
+                v -> startActivity(new Intent(this, DebugChartsGalleryActivity.class)));
 
         SectionHeaderView header = findViewById(R.id.galleryHeaderAction);
         header.setOnActionClickListener(h -> toast("Action: See all"));

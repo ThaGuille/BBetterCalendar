@@ -6,6 +6,7 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.configuration.ConfigurationDAO;
 import com.example.bbettercalendar.projects.ProjectDAO;
 import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.stats.AppUsageDailyDAO;
 import com.example.bbettercalendar.stats.ConsentRecordDAO;
 import com.example.bbettercalendar.stats.DailyStatDAO;
 import com.example.bbettercalendar.stats.FocusEventDAO;
@@ -19,7 +20,7 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 
-// Único módulo con @Provides para AppDatabase + sus 8 DAOs (spec di-threading-consolidation).
+// Único módulo con @Provides para AppDatabase + sus DAOs (8 originales + AppUsageDailyDAO en v15) (spec di-threading-consolidation).
 // Absorbe ConfigurationDatabaseModule (sólo daba AppDatabase) y los providers de DAO sueltos que
 // vivían en ConfigurationModule/NotificationsModule (3 de 8) -- ahora un único lugar que mirar.
 // AppDatabase.getDatabase() es package-private: este módulo (mismo paquete) es la única puerta.
@@ -79,5 +80,12 @@ public class DatabaseModule {
     @Singleton
     public static ProjectDAO provideProjectDAO(AppDatabase database) {
         return database.projectDao();
+    }
+
+    // mejora-visual u1 (DB v15): histórico diario de uso por app (UsageSnapshotter lo rellena).
+    @Provides
+    @Singleton
+    public static AppUsageDailyDAO provideAppUsageDailyDAO(AppDatabase database) {
+        return database.appUsageDailyDao();
     }
 }

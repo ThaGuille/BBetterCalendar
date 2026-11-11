@@ -31,6 +31,14 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // mejora-visual u1 (decisión d1): Room exporta el esquema de cada versión a app/schemas/ (14.json,
+        // 15.json...). Lo leen el test de migración, seed_progress_db.py --self-test y las migraciones futuras.
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     signingConfigs {

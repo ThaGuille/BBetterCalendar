@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.CompletionStamp;
 
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +108,7 @@ public class FocusAttributionRepository {
         }
         int attributed = focusEventDao.sumAttributedMinutes(entryId);
         if (attributed >= entry.getTargetMinutes()) {
-            entry.setDone(true);
+            CompletionStamp.apply(entry, true, System.currentTimeMillis());
             calendarEntryDao.update(entry);
             autoCompletedTaskTitle.postValue(entry.getTitle());
         }

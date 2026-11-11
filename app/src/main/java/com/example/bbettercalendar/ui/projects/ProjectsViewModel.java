@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.CompletionStamp;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.database.DbWriteExecutor;
@@ -206,7 +207,7 @@ public class ProjectsViewModel extends AndroidViewModel {
             if (fresh == null) {
                 return;
             }
-            fresh.setDone(done);
+            CompletionStamp.apply(fresh, done, System.currentTimeMillis());
             calendarEntryDao.update(fresh);
         });
     }

@@ -22,6 +22,10 @@ public class AppRule {
     public boolean enforceAtLimit;     // Phase 4a (cubrir al superar el límite)
     public boolean blockedToday;       // reservado (decisión en vivo lo hace redundante)
     public int blockStyle;             // reservado (un único estilo de bloqueo por ahora)
+    // mejora-visual u1 (DB v15): desde cuándo rige el límite (epoch millis); 0 = sin límite. Lo pone
+    // AppRuleDAO.setDailyLimit al pasar dailyLimitMinutes de 0 a > 0 y lo vuelve a 0 al quitarlo
+    // (cambiar un límite que ya existía no lo toca). Sirve para el "antes y después del límite".
+    public long limitSinceMillis;
 
     public AppRule() {
         this.packageName = "";

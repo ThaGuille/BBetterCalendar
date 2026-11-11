@@ -11,6 +11,7 @@ import androidx.lifecycle.Transformations;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.CompletionStamp;
 import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.notifications.project.ProjectDeadlineScheduler;
 import com.example.bbettercalendar.projects.Project;
@@ -97,7 +98,7 @@ public class ProjectDetailViewModel extends AndroidViewModel {
             if (fresh == null) {
                 return;
             }
-            fresh.setDone(done);
+            CompletionStamp.apply(fresh, done, System.currentTimeMillis());
             calendarEntryDao.update(fresh);
         });
     }

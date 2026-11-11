@@ -33,8 +33,14 @@ public interface AppRuleDAO {
     void setTracked(String pkg, boolean tracked);
 
     // Phase 3: límite diario en minutos (0 = sin límite). Columna ya existente desde MIGRATION_9_10.
-    @Query("UPDATE app_rule SET dailyLimitMinutes = :minutes WHERE packageName = :pkg")
-    void setDailyLimit(String pkg, int minutes);
+    // mejora-visual u1 (v15): en el mismo UPDATE se lleva limitSinceMillis -> :nowMillis al pasar de
+    // sin límite (0) a un límite, 0 al quitarlo, y se conserva si solo cambia el valor. En SQLite las
+    // expresiones del SET leen la fila ANTERIOR, así que el CASE ve el dailyLimitMinutes viejo.
+    @Query("UPDATE app_rule SET "
+            + "limitSinceMillis = CASE WHEN :minutes <= 0 THEN 0 "
+            + "WHEN dailyLimitMinutes <= 0 THEN :nowMillis ELSE limitSinceMillis END, "
+            + "dailyLimitMinutes = :minutes WHERE packageName = :pkg")
+    void setDailyLimit(String pkg, int minutes, long nowMillis);
 
     // u20: aviso previo en minutos (detalle por app). Columna ya existente desde MIGRATION_9_10.
     @Query("UPDATE app_rule SET warnBeforeMinutes = :minutes WHERE packageName = :pkg")

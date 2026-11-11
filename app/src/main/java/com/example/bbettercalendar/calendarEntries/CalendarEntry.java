@@ -40,6 +40,10 @@ public class CalendarEntry {
     // atribuidos a esta fila para auto-completarla.
     private int targetMinutes;
     private boolean isDone;
+    // mejora-visual u1 (DB v15): instante en que se marcó hecha (epoch millis); 0 = no hecha. Lo
+    // escribe SOLO CompletionStamp (los 4 sitios que marcan/desmarcan), nunca a mano. Las filas que
+    // ya estaban hechas antes de v15 recibieron startMillis (o el instante de la migración).
+    private long completedAtMillis;
     // Recurrencia (spec tasks-recurrence): una plantilla (isTemplate) es la definición de la
     // serie — conserva fecha ancla + hora pero se excluye de TODAS las queries de superficie
     // (nunca se pinta ni programa alarmas). Sus ocurrencias son filas propias con templateId
@@ -116,6 +120,8 @@ public class CalendarEntry {
     public void setAttributedMinutes(int attributedMinutes) {this.attributedMinutes = attributedMinutes;}
     public boolean isDone() {return isDone;}
     public void setDone(boolean done) {isDone = done;}
+    public long getCompletedAtMillis() {return completedAtMillis;}
+    public void setCompletedAtMillis(long completedAtMillis) {this.completedAtMillis = completedAtMillis;}
     public boolean isTemplate() {return isTemplate;}
     public void setTemplate(boolean template) {isTemplate = template;}
     public int getTemplateId() {return templateId;}

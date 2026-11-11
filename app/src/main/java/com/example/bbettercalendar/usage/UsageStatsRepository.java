@@ -77,6 +77,29 @@ public final class UsageStatsRepository {
         return buckets;
     }
 
+    // mejora-visual u1: milisegundos en primer plano por dia local de TODAS las apps (salvo la
+    // nuestra y el launcher por defecto, como totalScreenTime): pkg -> long[days], indice i =
+    // firstDay + i. Un solo recorrido del flujo de eventos; lo usa UsageSnapshotter.
+    public Map<String, long[]> foregroundMillisByDayAllApps(LocalDate firstDay, int days) {
+        final Map<String, long[]> perApp = new HashMap<>();
+        if (days <= 0) return perApp;
+        ZoneId zone = ZoneId.systemDefault();
+        long begin = firstDay.atStartOfDay(zone).toInstant().toEpochMilli();
+        long end = firstDay.plusDays(days).atStartOfDay(zone).toInstant().toEpochMilli();
+        final String launcher = defaultLauncherPackage();
+        final long now = System.currentTimeMillis();
+        walkIntervals(begin, end, (pkg, start, stop) -> {
+            if (pkg.equals(ownPackage) || pkg.equals(launcher)) return;
+            long[] buckets = perApp.get(pkg);
+            if (buckets == null) {
+                buckets = new long[days];
+                perApp.put(pkg, buckets);
+            }
+            UsageDayBuckets.addInterval(buckets, start, Math.min(stop, now), firstDay, zone);
+        });
+        return perApp;
+    }
+
     // Recorre el flujo de eventos de [begin, end) y entrega cada intervalo MOVE_TO_FOREGROUND ->
     // cierre (sin recortar: el sink recorta). Nuestro propio paquete participa en la maquina de
     // estados; el sink decide si lo descarta.

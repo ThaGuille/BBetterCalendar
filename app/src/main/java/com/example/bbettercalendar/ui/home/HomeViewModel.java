@@ -15,6 +15,7 @@ import androidx.lifecycle.Transformations;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.CompletionStamp;
 import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
@@ -337,7 +338,7 @@ public class HomeViewModel extends AndroidViewModel {
             if (fresh == null) {
                 return;
             }
-            fresh.setDone(done);
+            CompletionStamp.apply(fresh, done, System.currentTimeMillis());
             calendarEntryDao.update(fresh);
         });
     }

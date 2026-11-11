@@ -105,11 +105,11 @@ public interface CalendarEntryDAO {
     @Query("DELETE FROM CalendarEntry WHERE projectId = :projectId")
     void deleteItemsByProject(int projectId);
 
-    // u17 (Progress, tile "Tasks done"): tareas marcadas como hechas cuya fecha cae en el rango.
-    // APROXIMADO a propósito: no existe fecha de completado, así que se usa la fecha de la tarea
-    // (startMillis). PLACEHOLDER(ui-placeholders#progress-tasks-done-approx).
+    // u17 (Progress, tile "Tasks done"): tareas marcadas como hechas DENTRO del rango. Desde v15
+    // (mejora-visual u1) cuenta por la fecha real de completado (completedAtMillis, que pone
+    // CompletionStamp), no por la fecha de la tarea; una tarea sin fecha también cuenta.
     @Query("SELECT COUNT(*) FROM CalendarEntry WHERE type = 2 AND isDone = 1 " +
             "AND isTemplate = 0 AND isDismissed = 0 " +
-            "AND startMillis BETWEEN :startMillis AND :endMillis")
+            "AND completedAtMillis BETWEEN :startMillis AND :endMillis")
     int countDoneTasksBetween(long startMillis, long endMillis);
 }

@@ -109,7 +109,7 @@ public class FocusSessionRepositoryPublishTest {
 
     @Test
     public void aCompletedSessionRequestsOnePublishAfterTheInsert() {
-        repo(true).recordFocusCompleted(25 * 60_000, 0);
+        repo(true).recordFocusCompleted(25 * 60_000, 0, 25, 2);
         InOrder order = inOrder(focusEventDao, publisher);
         ArgumentCaptor<FocusEvent> ev = ArgumentCaptor.forClass(FocusEvent.class);
         order.verify(focusEventDao).insert(ev.capture());
@@ -117,11 +117,13 @@ public class FocusSessionRepositoryPublishTest {
         verify(publisher, times(1)).requestPublish();
         assertEquals(FocusEvent.TYPE_FOCUS, ev.getValue().type);
         assertEquals(25, ev.getValue().durationMin);
+        assertEquals(25, ev.getValue().elapsedMin);
+        assertEquals(2, ev.getValue().pauseCount);
     }
 
     @Test
     public void aFailRequestsOnePublishAfterTheInsert() {
-        repo(true).recordFail(0);
+        repo(true).recordFail(0, 7, 1);
         InOrder order = inOrder(focusEventDao, publisher);
         ArgumentCaptor<FocusEvent> ev = ArgumentCaptor.forClass(FocusEvent.class);
         order.verify(focusEventDao).insert(ev.capture());
@@ -129,13 +131,15 @@ public class FocusSessionRepositoryPublishTest {
         verify(publisher, times(1)).requestPublish();
         assertEquals(FocusEvent.TYPE_FAIL, ev.getValue().type);
         assertEquals(0, ev.getValue().durationMin);
+        assertEquals(7, ev.getValue().elapsedMin);
+        assertEquals(1, ev.getValue().pauseCount);
     }
 
     @Test
     public void withoutTheSocialFlagThePublisherIsNeverCreated() {
         FocusSessionRepository r = repo(false);
-        r.recordFocusCompleted(25 * 60_000, 0);
-        r.recordFail(0);
+        r.recordFocusCompleted(25 * 60_000, 0, 25, 0);
+        r.recordFail(0, 3, 0);
         verify(focusEventDao, times(2)).insert(any(FocusEvent.class));
         verify(publisher, never()).requestPublish();
         assertEquals(0, lazyGets.get());

@@ -13,6 +13,8 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.stats.AppUsageDaily;
+import com.example.bbettercalendar.stats.AppUsageDailyDAO;
 import com.example.bbettercalendar.stats.ConsentRecord;
 import com.example.bbettercalendar.stats.ConsentRecordDAO;
 import com.example.bbettercalendar.stats.DailyStat;
@@ -25,7 +27,8 @@ import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
 
 @Database(entities = {CalendarEntry.class, Stats.class, Configuration.class, DailyStat.class,
-        FocusEvent.class, AppRule.class, ConsentRecord.class, Project.class}, version = 14)
+        FocusEvent.class, AppRule.class, ConsentRecord.class, Project.class, AppUsageDaily.class},
+        version = 15)
 @TypeConverters({DBConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -38,6 +41,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract AppRuleDAO appRuleDao();
     public abstract ConsentRecordDAO consentRecordDao();
     public abstract ProjectDAO projectDao();
+    public abstract AppUsageDailyDAO appUsageDailyDao();
 
     // Esto sirve para que solo haya una instancia de la base de datos -> la borra y la vuelve a crear.
     // Package-private (spec di-threading-consolidation): la única puerta de entrada es
@@ -52,7 +56,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(DBMigration.MIGRATION_6_7, DBMigration.MIGRATION_7_8,
                                     DBMigration.MIGRATION_9_10, DBMigration.MIGRATION_10_11,
                                     DBMigration.MIGRATION_11_12, DBMigration.MIGRATION_12_13,
-                                    DBMigration.MIGRATION_13_14)
+                                    DBMigration.MIGRATION_13_14, DBMigration.MIGRATION_14_15)
                             .fallbackToDestructiveMigration() // Si una migración no existe, recrea la BD
                             .build();
                 }

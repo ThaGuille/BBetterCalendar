@@ -412,4 +412,77 @@ public class FocusTimerStateMachineTest {
         assertEquals(FOCUS - 30_000, machine.getRemainingMillis());
         assertEquals(FOCUS, machine.getCountdownMillis());
     }
+
+    // ------------------------------------------- mejora-visual u1: pausas y minutos (FocusEvent v15)
+
+    @Test
+    public void focusPauses_areCountedAndReportedWithTheCompletion() {
+        final int[] pausesAtCompletion = {-1};
+        final long[] elapsedAtCompletion = {-1L};
+        machine = new FocusTimerStateMachine(() -> now, () -> settings, new FocusTimerStateMachine.Listener() {
+            @Override
+            public void onFocusCompleted(long sessionMillis) {
+                pausesAtCompletion[0] = machine.getFocusPauseCount();
+                elapsedAtCompletion[0] = machine.getLastFocusElapsedMillis();
+            }
+
+            @Override
+            public void onAllCyclesCompleted(int cycles) { }
+
+            @Override
+            public void onFailed() { }
+        });
+        machine.toggle();
+        machine.pause();
+        machine.resume();
+        machine.toggle(); // toggle while running is a pause too
+        elapse(5 * 60_000); // paused time does not count
+        machine.toggle();
+        elapse(FOCUS);
+
+        assertEquals(2, pausesAtCompletion[0]);
+        assertEquals(FOCUS, elapsedAtCompletion[0]);
+    }
+
+    @Test
+    public void restPauses_doNotCount_andANewConcentrationStartsAtZero() {
+        machine.toggle();
+        machine.pause();
+        machine.resume();
+        elapse(FOCUS);                      // -> RUNNING_REST
+        machine.pause();                    // rest pause
+        assertEquals(1, machine.getFocusPauseCount());
+        machine.skipRest();
+        machine.toggle();                   // next concentration
+        assertEquals(0, machine.getFocusPauseCount());
+    }
+
+    @Test
+    public void fail_reportsTheRunTimeBeforeFailing() {
+        machine.toggle();
+        elapse(7 * 60_000);
+        machine.pause();
+        elapse(60_000);
+        machine.resume();
+        elapse(3 * 60_000);
+
+        assertTrue(machine.fail());
+
+        assertEquals(10 * 60_000L, machine.getLastFocusElapsedMillis());
+        assertEquals(1, machine.getFocusPauseCount());
+    }
+
+    @Test
+    public void pauseCount_survivesSnapshotAndRestore() {
+        machine.toggle();
+        machine.pause();
+        machine.resume();
+        machine.pause();
+        Snapshot saved = machine.snapshot();
+
+        machine = newMachine();
+        machine.restore(saved);
+
+        assertEquals(2, machine.getFocusPauseCount());
+    }
 }

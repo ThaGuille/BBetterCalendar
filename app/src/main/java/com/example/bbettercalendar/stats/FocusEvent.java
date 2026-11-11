@@ -20,6 +20,11 @@ public class FocusEvent {
     // 0 = sesión genérica sin vincular (comportamiento previo). La atribución se expresa aquí,
     // no con un type nuevo: una sesión vinculada sigue siendo un TYPE_FOCUS real.
     public int entryId;
+    // mejora-visual u1 (DB v15): minutos de cuenta atrás realmente corridos (sin contar las pausas) y
+    // nº de pausas de esa concentración. Sesión completada: elapsedMin = la cuenta atrás entera; fallo:
+    // lo que llevaba antes de fallar. 0/0 en las filas anteriores a v15 (dato desconocido).
+    public int elapsedMin;
+    public int pauseCount;
 
     public FocusEvent() {
     }

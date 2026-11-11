@@ -17,6 +17,7 @@ import com.example.bbettercalendar.social.push.FriendsNotificationsCleaner;
 import com.example.bbettercalendar.social.push.PushTokenRegistrar;
 import com.example.bbettercalendar.social.stats.StatsPublisher;
 import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.usage.UsageSnapshotter;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
 
@@ -42,6 +43,8 @@ public class DBMigration extends Application {
     @Inject Lazy<PushTokenRegistrar> pushTokenRegistrar;
     // L-u7: quita los avisos de Amigos de la bandeja al perder la sesion.
     @Inject Lazy<FriendsNotificationsCleaner> friendsNotificationsCleaner;
+    // mejora-visual u1: histórico diario de uso por app (app_usage_daily) en cada arranque en frío.
+    @Inject UsageSnapshotter usageSnapshotter;
 
     @Override
     public void onCreate() {
@@ -54,6 +57,8 @@ public class DBMigration extends Application {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         NotificationChannels.createAll(this);
         armUsageLimitScheduler();
+        // Fuera del hilo principal (regla #3): snapshotAsync encola el volcado en el executor de IO.
+        usageSnapshotter.snapshotAsync();
         installReferrerReader.readOnce();
         if (SocialFeature.isAccountEnabled()) {
             statsPublisher.get().start();
@@ -192,4 +197,33 @@ public class DBMigration extends Application {
                     "OR (repetition != 0 AND type = 2)");
         }
     };
+
+    // mejora-visual u1: datos nuevos de la mejora visual. Aditiva (ADD COLUMN ... NOT NULL DEFAULT 0 y
+    // CREATE TABLE IF NOT EXISTS) -> no se pierde ninguna fila (regla #6). El SQL de app_usage_daily es
+    // el createSql que Room exporta en app/schemas/.../15.json (si no coincide, la validación de Room
+    // al abrir la BD falla). Rellenos con el instante de la migración:
+    //   app_rule.limitSinceMillis        -> las reglas que ya tienen límite (no se sabe desde cuándo)
+    //   calendarEntry.completedAtMillis  -> las filas ya hechas: su startMillis si lo tienen, si no ahora
+    // focus_event.elapsedMin / pauseCount se quedan a 0 en el histórico: el dato no existía.
+    static final Migration MIGRATION_14_15 = new Migration(14, 15) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            migrate14To15(database, System.currentTimeMillis());
+        }
+    };
+
+    static void migrate14To15(SupportSQLiteDatabase database, long nowMillis) {
+        database.execSQL("CREATE TABLE IF NOT EXISTS `app_usage_daily` (`day` TEXT NOT NULL, " +
+                "`packageName` TEXT NOT NULL, `minutes` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`day`, `packageName`))");
+        database.execSQL("ALTER TABLE app_rule ADD COLUMN limitSinceMillis INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE focus_event ADD COLUMN elapsedMin INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE focus_event ADD COLUMN pauseCount INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE calendarEntry ADD COLUMN completedAtMillis INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("UPDATE app_rule SET limitSinceMillis = ? WHERE dailyLimitMinutes > 0",
+                new Object[]{nowMillis});
+        database.execSQL("UPDATE calendarEntry SET completedAtMillis = " +
+                        "CASE WHEN startMillis > 0 THEN startMillis ELSE ? END WHERE isDone = 1",
+                new Object[]{nowMillis});
+    }
 }

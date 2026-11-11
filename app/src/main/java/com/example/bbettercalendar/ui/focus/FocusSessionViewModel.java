@@ -66,6 +66,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private static final String KEY_SESSION = "bb_focus_session_millis";
     private static final String KEY_CYCLES = "bb_focus_cycles_completed";
     private static final String KEY_BLOCK_ARMED = "bb_focus_block_mode_armed";
+    private static final String KEY_FOCUS_PAUSES = "bb_focus_pause_count";
 
     private final SavedStateHandle savedState;
     private final ConfigurationManager configurationManager;
@@ -321,7 +322,10 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     public void onFocusCompleted(long sessionMillis) {
         // Atribuye la sesión a la tarea vinculada (0 = genérica). El auto-completado, si procede,
         // lo evalúa FocusAttributionRepository y avisa por getAutoCompletedTaskTitle().
-        repository.recordFocusCompleted((int) sessionMillis, FocusTarget.getEntryId());
+        // v15 (mejora-visual u1): minutos corridos y pausas de esta concentración, de la máquina.
+        repository.recordFocusCompleted((int) sessionMillis, FocusTarget.getEntryId(),
+                FormatHelper.millisToMinutes((int) machine.getLastFocusElapsedMillis()),
+                machine.getFocusPauseCount());
         focusCompleted.setValue(new SingleEvent<>(sessionMillis));
     }
 
@@ -333,7 +337,9 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     @Override
     public void onFailed() {
         Log.i(TAG, "Timer failed (background grace expired)");
-        repository.recordFail(FocusTarget.getEntryId());
+        repository.recordFail(FocusTarget.getEntryId(),
+                FormatHelper.millisToMinutes((int) machine.getLastFocusElapsedMillis()),
+                machine.getFocusPauseCount());
         focusFailNotifier.fire();
         sessionFailed.setValue(new SingleEvent<>(Boolean.TRUE));
     }
@@ -436,6 +442,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         savedState.set(KEY_COUNTDOWN, s.countdownMillis);
         savedState.set(KEY_SESSION, s.sessionMillis);
         savedState.set(KEY_CYCLES, s.cyclesCompleted);
+        savedState.set(KEY_FOCUS_PAUSES, s.focusPauseCount);
         savedState.set(KEY_BLOCK_ARMED, blockModeArmed);
     }
 
@@ -452,7 +459,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
                         longOr(KEY_ENDS_AT, 0L),
                         longOr(KEY_COUNTDOWN, machine.getCountdownMillis()),
                         longOr(KEY_SESSION, machine.getSessionMillis()),
-                        intOr(KEY_CYCLES, 0)));
+                        intOr(KEY_CYCLES, 0),
+                        intOr(KEY_FOCUS_PAUSES, 0)));
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "Unknown saved timer state " + stateName, e);
             }

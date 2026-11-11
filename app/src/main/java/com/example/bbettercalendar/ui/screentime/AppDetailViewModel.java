@@ -98,7 +98,8 @@ public class AppDetailViewModel extends AndroidViewModel {
         final String pkg = packageName;
         if (pkg == null) return;
         dbWriteExecutor.execute(() -> {
-            appRuleDao.setDailyLimit(pkg, minutes);
+            // v15: el DAO también lleva limitSinceMillis (0 -> límite: ahora; límite -> 0: 0).
+            appRuleDao.setDailyLimit(pkg, minutes, System.currentTimeMillis());
             // Sin limite no hay nada que hacer cumplir: se apaga el candado para no dejarlo
             // armado y mudo (la fila de Screen time lo mostraria activo sin efecto).
             if (minutes <= 0) appRuleDao.setEnforceAtLimit(pkg, false);

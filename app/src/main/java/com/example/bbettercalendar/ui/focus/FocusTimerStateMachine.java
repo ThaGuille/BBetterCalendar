@@ -93,15 +93,23 @@ public final class FocusTimerStateMachine {
         /** Length recorded in stats when the concentration completes (old {@code lastTimerTime}). */
         public final long sessionMillis;
         public final int cyclesCompleted;
+        /** Pauses of the current concentration so far (mejora-visual u1, FocusEvent.pauseCount). */
+        public final int focusPauseCount;
 
         public Snapshot(State state, long remainingMillis, long endsAtMillis, long countdownMillis,
                         long sessionMillis, int cyclesCompleted) {
+            this(state, remainingMillis, endsAtMillis, countdownMillis, sessionMillis, cyclesCompleted, 0);
+        }
+
+        public Snapshot(State state, long remainingMillis, long endsAtMillis, long countdownMillis,
+                        long sessionMillis, int cyclesCompleted, int focusPauseCount) {
             this.state = state;
             this.remainingMillis = remainingMillis;
             this.endsAtMillis = endsAtMillis;
             this.countdownMillis = countdownMillis;
             this.sessionMillis = sessionMillis;
             this.cyclesCompleted = cyclesCompleted;
+            this.focusPauseCount = focusPauseCount;
         }
     }
 
@@ -115,6 +123,11 @@ public final class FocusTimerStateMachine {
     private long countdownMillis;
     private long sessionMillis;
     private int cyclesCompleted;
+    // mejora-visual u1: pausas de la concentración en curso (las del descanso no cuentan) y minutos
+    // de cuenta atrás realmente corridos por la última concentración que terminó (completada o
+    // fallida). Los lee el Listener dentro de onFocusCompleted / onFailed para FocusEvent v15.
+    private int focusPauseCount;
+    private long lastFocusElapsedMillis;
 
     public FocusTimerStateMachine(Clock clock, SettingsProvider settings, Listener listener) {
         this.clock = clock;
@@ -159,6 +172,24 @@ public final class FocusTimerStateMachine {
 
     public int getCyclesCompleted() {
         return cyclesCompleted;
+    }
+
+    /**
+     * Pauses (RUNNING -> PAUSED) of the current concentration; rest pauses do not count. Reset when
+     * the next concentration begins, so inside {@link Listener#onFocusCompleted} and
+     * {@link Listener#onFailed} it is the count of the concentration that just ended.
+     */
+    public int getFocusPauseCount() {
+        return focusPauseCount;
+    }
+
+    /**
+     * Countdown time the last finished concentration actually ran, pauses excluded: the whole
+     * countdown when it completed, the part run before the background fail when it failed. Valid
+     * inside {@link Listener#onFocusCompleted} / {@link Listener#onFailed}.
+     */
+    public long getLastFocusElapsedMillis() {
+        return lastFocusElapsedMillis;
     }
 
     /** 1-based cycle in progress ("Cycle x of N"); a rest belongs to the cycle it follows. */
@@ -215,6 +246,9 @@ public final class FocusTimerStateMachine {
             return false;
         }
         remainingMillis = Math.max(0L, endsAtMillis - clock.now());
+        if (state == State.RUNNING) {
+            focusPauseCount++;
+        }
         state = state == State.RUNNING_REST ? State.PAUSED_REST : State.PAUSED;
         return true;
     }
@@ -272,6 +306,7 @@ public final class FocusTimerStateMachine {
             return false;
         }
         remainingMillis = Math.max(0L, endsAtMillis - clock.now());
+        lastFocusElapsedMillis = Math.max(0L, countdownMillis - remainingMillis);
         state = State.STOPPED;
         listener.onFailed();
         return true;
@@ -334,7 +369,7 @@ public final class FocusTimerStateMachine {
 
     public Snapshot snapshot() {
         return new Snapshot(state, getRemainingMillis(), endsAtMillis, countdownMillis,
-                sessionMillis, cyclesCompleted);
+                sessionMillis, cyclesCompleted, focusPauseCount);
     }
 
     /**
@@ -349,6 +384,7 @@ public final class FocusTimerStateMachine {
         countdownMillis = s.countdownMillis;
         sessionMillis = s.sessionMillis;
         cyclesCompleted = s.cyclesCompleted;
+        focusPauseCount = s.focusPauseCount;
     }
 
     // -------------------------------------------------------------------------- internals
@@ -359,10 +395,14 @@ public final class FocusTimerStateMachine {
         remainingMillis = durationMillis;
         endsAtMillis = clock.now() + durationMillis;
         state = state.isRest() ? State.RUNNING_REST : State.RUNNING;
+        if (state == State.RUNNING) {
+            focusPauseCount = 0; // una concentración nueva empieza sin pausas
+        }
     }
 
     /** Old {@code completeTimer}. */
     private void completeFocus() {
+        lastFocusElapsedMillis = countdownMillis;
         state = State.STOPPED;
         listener.onFocusCompleted(sessionMillis);
         Settings s = settings.get();

@@ -90,12 +90,15 @@ public class FocusSessionRepository {
     }
 
     //Cuando el temporizador llega a 0 se actualizan y guardan estadísticas
-    public void recordFocusCompleted(int timerTime, int boundEntryId) {
+    // v15 (mejora-visual u1): elapsedMin = minutos de cuenta atrás corridos y pauseCount = pausas de
+    // esta concentración; los cuenta la sesión (FocusTimerStateMachine) y van a FocusEvent.
+    public void recordFocusCompleted(int timerTime, int boundEntryId, int elapsedMin, int pauseCount) {
         dbWriteExecutor.execute(() -> {
             infoLog.accept("addTimeStudied( " + timerTime + " )");
             statsDao.addTimeStudied(timerTime);
             statsDao.addTasksDone();
-            logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime), boundEntryId);
+            logFocusEvent(FocusEvent.TYPE_FOCUS, FormatHelper.millisToMinutes(timerTime), boundEntryId,
+                    elapsedMin, pauseCount);
             requestStatsPublish();
             if (boundEntryId != 0) {
                 focusAttributionRepository.maybeAutoComplete(boundEntryId);
@@ -106,12 +109,12 @@ public class FocusSessionRepository {
     }
 
     //Cuando el usuario cierra la app a medio contador
-    public void recordFail(int boundEntryId) {
+    public void recordFail(int boundEntryId, int elapsedMin, int pauseCount) {
         dbWriteExecutor.execute(() -> {
             infoLog.accept("addFails()");
             statsDao.addFails();
             // El fallo registra la tarea vinculada pero con 0 minutos: no avanza el objetivo.
-            logFocusEvent(FocusEvent.TYPE_FAIL, 0, boundEntryId);
+            logFocusEvent(FocusEvent.TYPE_FAIL, 0, boundEntryId, elapsedMin, pauseCount);
             // Solo recalcula: del fallo no se publica nada (P5); el día o la semana sí pueden haber cambiado.
             requestStatsPublish();
             todayFails.postValue(statsDao.getTodayFails());
@@ -149,12 +152,14 @@ public class FocusSessionRepository {
 
     // Registra un evento con timestamp para el histórico por horas de Progress.
     // Se llama desde dentro del executor, así que ya está fuera del hilo principal.
-    private void logFocusEvent(int type, int durationMin, int entryId) {
+    private void logFocusEvent(int type, int durationMin, int entryId, int elapsedMin, int pauseCount) {
         FocusEvent ev = new FocusEvent();
         ev.timestamp = System.currentTimeMillis();
         ev.type = type;
         ev.durationMin = durationMin;
         ev.entryId = entryId;
+        ev.elapsedMin = Math.max(0, elapsedMin);
+        ev.pauseCount = Math.max(0, pauseCount);
         focusEventDao.insert(ev);
     }
 

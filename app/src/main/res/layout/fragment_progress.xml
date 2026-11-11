@@ -144,8 +144,6 @@
                         android:layout_height="match_parent"
                         android:background="@color/bb_divider" />
 
-                    <!-- PLACEHOLDER(ui-placeholders#progress-tasks-done-approx): sin fecha de completado,
-                         se cuentan las tareas hechas cuya fecha cae en el rango. -->
                     <com.example.bbettercalendar.ui.common.widget.StatTileView
                         android:id="@+id/progressTileTasks"
                         android:layout_width="0dp"

@@ -7,29 +7,27 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.time.LocalDate;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * u18: All progress ({@code navigation_all_progress}) — hosts the chart carousel that used to live
- * in Progress (u12 shell: top bar with back, no bottom nav). Own {@link ProgressViewModel} instance
- * (fragment-scoped), so its period selector never moves Progress' range.
+ * Todo tu progreso ({@code navigation_all_progress}), mejora-visual u8: selector de periodo fijo arriba y
+ * un NestedScrollView con 8 tarjetas de graficos (mockups 11-18). Tiene su propio
+ * {@link AllProgressViewModel}: el selector de esta pantalla nunca mueve el rango de Progreso. Las
+ * tarjetas las pinta {@link AllProgressCards}.
  */
 @AndroidEntryPoint
 public class AllProgressFragment extends Fragment {
 
-    private ProgressViewModel viewModel;
-    private ChartCarouselAdapter adapter;
+    private AllProgressViewModel viewModel;
+    private AllProgressCards cards;
     private SegmentedControlView granularity;
     private PeriodNavigatorView navigator;
 
@@ -41,15 +39,8 @@ public class AllProgressFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         TopBarHelper.bind(this, view, R.string.title_all_progress);
-        viewModel = new ViewModelProvider(this).get(ProgressViewModel.class);
-
-        adapter = new ChartCarouselAdapter();
-        ViewPager2 pager = view.findViewById(R.id.chart_pager);
-        TabLayout tabs = view.findViewById(R.id.chart_dots);
-        pager.setAdapter(adapter);
-        // Tabs titled per chart; autoRefresh re-maps them when DAY drops the "time of day" page.
-        new TabLayoutMediator(tabs, pager,
-                (tab, position) -> tab.setText(adapter.pageTitle(requireContext(), position))).attach();
+        viewModel = new ViewModelProvider(this).get(AllProgressViewModel.class);
+        cards = new AllProgressCards(view);
 
         granularity = view.findViewById(R.id.allProgressGranularity);
         navigator = view.findViewById(R.id.allProgressPeriodNavigator);
@@ -72,8 +63,23 @@ public class AllProgressFragment extends Fragment {
             }
         });
 
-        viewModel.getCharts().observe(getViewLifecycleOwner(), bundle -> adapter.setBundle(bundle));
+        viewModel.getData().observe(getViewLifecycleOwner(), data -> {
+            if (data != null) cards.render(data);
+        });
         viewModel.getSelectedRange().observe(getViewLifecycleOwner(), this::renderRange);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Al volver de Ajustes puede haber cambiado el acceso de uso (tarjeta «Enfoque frente a móvil»).
+        if (viewModel != null) viewModel.refresh();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        cards = null;
     }
 
     private static Granularity granularityAt(int index) {

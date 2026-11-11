@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
 
 /**
  * Frases de lectura de las estadísticas (mejora-visual u5), EN/ES desde {@code strings_insights.xml}.
@@ -159,5 +160,85 @@ public final class InsightPhrases {
             return "";
         }
         return res.getQuantityString(R.plurals.insight_focus_vs_phone, saved, saved);
+    }
+
+    /** Dias seguidos minimos para mencionar la racha de dias activos. */
+    public static final int MIN_RUN_DAYS = 3;
+    /** Columnas con datos minimas para decir cual fue la mejor. */
+    public static final int MIN_BEST_COLUMNS = 2;
+
+    /** Hay mejor columna que contar: el maximo es positivo y al menos {@link #MIN_BEST_COLUMNS} tienen datos. */
+    public static boolean hasBestColumn(@NonNull float[] values) {
+        int withData = 0;
+        for (float v : values) {
+            if (v > 0f) {
+                withData++;
+            }
+        }
+        return withData >= MIN_BEST_COLUMNS;
+    }
+
+    /** "Tu mejor hora fue a las 10:00: 1 h 5 m". Vacio sin al menos dos horas con datos. */
+    @NonNull
+    public String bestHour(@NonNull float[] minutesByHour, @NonNull ChartFormatter formatter) {
+        int best = indexOfMax(minutesByHour);
+        if (best < 0 || !hasBestColumn(minutesByHour)) {
+            return "";
+        }
+        return res.getString(R.string.insight_best_hour, best, formatter.format(minutesByHour[best]));
+    }
+
+    /** "El jueves fue tu mejor dia: 2 h 30 m". {@code dayName} ya viene en minusculas del idioma. */
+    @NonNull
+    public String bestDay(@NonNull float[] minutesByDay, @NonNull String[] dayNames,
+                          @NonNull ChartFormatter formatter) {
+        int best = indexOfMax(minutesByDay);
+        if (best < 0 || best >= dayNames.length || !hasBestColumn(minutesByDay)) {
+            return "";
+        }
+        return res.getString(R.string.insight_best_day, dayNames[best], formatter.format(minutesByDay[best]));
+    }
+
+    /** "La semana 3 fue tu mejor semana: 5 h". Vacio sin al menos dos semanas con datos. */
+    @NonNull
+    public String bestWeek(@NonNull float[] minutesByWeek, @NonNull ChartFormatter formatter) {
+        int best = indexOfMax(minutesByWeek);
+        if (best < 0 || !hasBestColumn(minutesByWeek)) {
+            return "";
+        }
+        return res.getString(R.string.insight_best_week, best + 1, formatter.format(minutesByWeek[best]));
+    }
+
+    /** "Marzo fue tu mejor mes: 40 h". Vacio sin al menos dos meses con datos. */
+    @NonNull
+    public String bestMonth(@NonNull float[] minutesByMonth, @NonNull String[] monthNames,
+                            @NonNull ChartFormatter formatter) {
+        int best = indexOfMax(minutesByMonth);
+        if (best < 0 || best >= monthNames.length || !hasBestColumn(minutesByMonth)) {
+            return "";
+        }
+        return res.getString(R.string.insight_best_month, monthNames[best], formatter.format(minutesByMonth[best]));
+    }
+
+    /** "Tu mejor racha: 5 dias seguidos". Vacio con menos de {@link #MIN_RUN_DAYS} dias. */
+    @NonNull
+    public String activeRun(int days) {
+        if (days < MIN_RUN_DAYS) {
+            return "";
+        }
+        return res.getQuantityString(R.plurals.insight_active_run, days, days);
+    }
+
+    /** Indice del mayor valor positivo (empate: el primero), o -1. */
+    private static int indexOfMax(@NonNull float[] values) {
+        int best = -1;
+        float max = 0f;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] > max) {
+                max = values[i];
+                best = i;
+            }
+        }
+        return best;
     }
 }

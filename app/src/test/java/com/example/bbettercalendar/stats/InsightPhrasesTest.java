@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import android.content.res.Resources;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -216,5 +217,25 @@ public class InsightPhrasesTest {
         assertEquals("", phrases.bestSlot(r));
         assertEquals("", phrases.completion(SessionStats.compute(ev, LocalDate.of(2026, 3, 29),
                 LocalDate.of(2026, 3, 29), ZoneId.of("Europe/Madrid")), null));
+    }
+
+    @Test
+    public void bestColumnPhrasesNeedAtLeastTwoColumnsWithData() {
+        assertEquals("", phrases.bestWeek(new float[]{0, 0, 0}, ChartFormatter.MINUTES));
+        assertEquals("", phrases.bestWeek(new float[]{0, 90, 0}, ChartFormatter.MINUTES));        // una sola semana
+        assertEquals(s(R.string.insight_best_week, 2, "1 h 30 m"),
+                phrases.bestWeek(new float[]{30, 90, 0}, ChartFormatter.MINUTES));
+        assertEquals(s(R.string.insight_best_hour, 1, "50 m"),
+                phrases.bestHour(new float[]{0, 50, 20}, ChartFormatter.MINUTES));
+        assertEquals(s(R.string.insight_best_day, "jueves", "2 h 30 m"),
+                phrases.bestDay(new float[]{0, 0, 0, 150, 60, 0, 0},
+                        new String[]{"lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"},
+                        ChartFormatter.MINUTES));
+    }
+
+    @Test
+    public void activeRunNeedsThreeDays() {
+        assertEquals("", phrases.activeRun(2));
+        assertEquals(q(R.plurals.insight_active_run, 5, 5), phrases.activeRun(5));
     }
 }

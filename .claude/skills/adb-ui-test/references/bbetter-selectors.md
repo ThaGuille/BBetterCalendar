@@ -143,7 +143,7 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
 ## All progress (u18)
 
-- All progress: `allProgressScreen`, `allProgressGranularity`, `allProgressPeriodNavigator` (`periodNavTitle/Subtitle/Previous/Next`), `chart_dots`, `chart_pager`.
+- All progress: `allProgressScreen`, `allProgressGranularity`, `allProgressPeriodNavigator` (`periodNavTitle/Subtitle/Previous/Next`), `allProgressScroll`, and the 8 cards `allProgressCardFocusByDay`, `allProgressCardBestHours`, `allProgressCard12Weeks`, `allProgressCardConsistency`, `allProgressCardSessions`, `allProgressCardProjects`, `allProgressCardDurations`, `allProgressCardFocusVsPhone` (hidden without usage access); inside each card (same ids in all 8, find them under the card) `chartCardTitle/Subtitle/Figure/Unit/Delta/Chart/Legend/Sentence`. Removed in mejora-visual u8: `chart_dots`, `chart_pager`.
 
 ## Screen time (u19)
 

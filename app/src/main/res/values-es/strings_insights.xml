@@ -39,4 +39,12 @@
         <item quantity="one">Los días que te concentras usas el móvil %1$d minuto menos</item>
         <item quantity="other">Los días que te concentras usas el móvil %1$d minutos menos</item>
     </plurals>
+    <string name="insight_best_hour">Tu mejor hora fue a las %1$d:00: %2$s</string>
+    <string name="insight_best_day">El %1$s fue tu mejor día: %2$s</string>
+    <string name="insight_best_week">La semana %1$d fue tu mejor semana: %2$s</string>
+    <string name="insight_best_month">%1$s fue tu mejor mes: %2$s</string>
+    <plurals name="insight_active_run">
+        <item quantity="one">Tu mejor racha: %1$d día seguido</item>
+        <item quantity="other">Tu mejor racha: %1$d días seguidos</item>
+    </plurals>
 </resources>

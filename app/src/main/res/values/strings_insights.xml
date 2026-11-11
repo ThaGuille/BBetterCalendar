@@ -41,4 +41,12 @@
         <item quantity="one">On days you focus, you use your phone %1$d minute less</item>
         <item quantity="other">On days you focus, you use your phone %1$d minutes less</item>
     </plurals>
+    <string name="insight_best_hour">Your best hour was %1$d:00: %2$s</string>
+    <string name="insight_best_day">%1$s was your best day: %2$s</string>
+    <string name="insight_best_week">Week %1$d was your best week: %2$s</string>
+    <string name="insight_best_month">%1$s was your best month: %2$s</string>
+    <plurals name="insight_active_run">
+        <item quantity="one">Your longest streak: %1$d day in a row</item>
+        <item quantity="other">Your longest streak: %1$d days in a row</item>
+    </plurals>
 </resources>

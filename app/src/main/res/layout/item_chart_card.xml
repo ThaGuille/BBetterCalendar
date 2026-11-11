@@ -1,19 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Una tarjeta del carrusel de gráficos. El gráfico (LineChart/BarChart) se crea en código
-     y se añade a chart_container. Sin título propio: lo da la pestaña de encima (TabLayout). -->
+<!-- mejora-visual u8 · una tarjeta de «Todo tu progreso» (mockups 11-18): titulo en una linea, subtitulo
+     opcional («Ultimos 90 dias»), cifra + delta, grafico (se anade en codigo a chartCardChart), leyenda y
+     frase. Todo lo opcional empieza en gone; AllProgressCards muestra solo lo que tiene datos.
+     La raiz NO lleva id: el include de fragment_all_progress.xml le pone el suyo. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginStart="@dimen/spacing_sm"
-    android:layout_marginEnd="@dimen/spacing_sm"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/spacing_card_gap"
     android:background="@drawable/bg_card"
-    android:elevation="@dimen/elevation_card"
     android:orientation="vertical"
-    android:padding="@dimen/home_card_padding">
+    android:padding="@dimen/spacing_md">
+
+    <TextView
+        android:id="@+id/chartCardTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.BBetter.Title"
+        tools:text="Enfoque por día" />
+
+    <TextView
+        android:id="@+id/chartCardSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+        android:visibility="gone"
+        tools:text="Últimos 90 días"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/chartCardFigureRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:baselineAligned="true"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/chartCardFigure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFeatureSettings="tnum"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.Stat.Tile"
+            tools:text="12 h 40 m" />
+
+        <TextView
+            android:id="@+id/chartCardUnit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.BBetter.Label"
+            android:visibility="gone"
+            tools:text="días activos de 182" />
+
+        <TextView
+            android:id="@+id/chartCardDelta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:background="@drawable/bg_widget_inset_pill"
+            android:fontFeatureSettings="tnum"
+            android:maxLines="1"
+            android:paddingStart="@dimen/spacing_sm"
+            android:paddingTop="2dp"
+            android:paddingEnd="@dimen/spacing_sm"
+            android:paddingBottom="2dp"
+            android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+            android:visibility="gone"
+            tools:text="▲ 18 %" />
+    </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/chart_container"
+        android:id="@+id/chartCardChart"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_card_gap" />
+
+    <LinearLayout
+        android:id="@+id/chartCardLegend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:orientation="vertical"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/chartCardSentence"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_card_gap"
+        android:background="@drawable/bg_projects_insight_card"
+        android:drawablePadding="@dimen/spacing_sm"
+        android:gravity="center_vertical"
+        android:padding="@dimen/spacing_card_gap"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
+        android:visibility="gone"
+        app:drawableStartCompat="@drawable/ic_info_24"
+        app:drawableTint="@color/bb_accent_reward"
+        tools:text="El jueves fue tu mejor día: 2 h 30 m."
+        tools:visibility="visible" />
 </LinearLayout>

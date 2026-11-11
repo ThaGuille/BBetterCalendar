@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u18: All progress = top bar + selector de periodo (Day/Week/Month/Year + navegador) + carrusel
-     de graficos (tabs + ViewPager2). El carrusel vivia en Progress hasta u17. -->
+<!-- «Todo tu progreso» (mejora-visual u8): barra superior + selector de periodo fijo (Dia/Semana/Mes/Año +
+     navegador) + NestedScrollView con 8 tarjetas (item_chart_card). Mockups 11-18.
+     Las 8 tarjetas son include con id propio: la raiz de item_chart_card no lleva id. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/allProgressScreen"
     android:layout_width="match_parent"
@@ -28,27 +28,52 @@
         android:layout_marginTop="@dimen/spacing_card_gap"
         android:layout_marginEnd="@dimen/spacing_md" />
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/chart_dots"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_md"
-        android:background="@android:color/transparent"
-        app:tabGravity="fill"
-        app:tabIndicatorColor="@color/bb_primary"
-        app:tabMode="fixed"
-        app:tabSelectedTextColor="@color/bb_primary"
-        app:tabTextAppearance="@style/TextAppearance.BBetter.Label"
-        app:tabTextColor="@color/bb_on_surface_muted" />
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/chart_pager"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/allProgressScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:layout_marginTop="@dimen/spacing_sm"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:layout_marginBottom="@dimen/progress_bottom_clearance"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/progress_bottom_clearance">
+
+            <include
+                android:id="@+id/allProgressCardFocusByDay"
+                layout="@layout/item_chart_card" />
+
+            <include
+                android:id="@+id/allProgressCardBestHours"
+                layout="@layout/item_chart_card" />
+
+            <include
+                android:id="@+id/allProgressCard12Weeks"
+                layout="@layout/item_chart_card" />
+
+            <include
+                android:id="@+id/allProgressCardConsistency"
+                layout="@layout/item_chart_card" />
+
+            <include
+                android:id="@+id/allProgressCardSessions"
+                layout="@layout/item_chart_card" />
+
+            <include
+                android:id="@+id/allProgressCardProjects"
+                layout="@layout/item_chart_card" />
+
+            <include
+                android:id="@+id/allProgressCardDurations"
+                layout="@layout/item_chart_card" />
+
+            <include
+                android:id="@+id/allProgressCardFocusVsPhone"
+                layout="@layout/item_chart_card" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

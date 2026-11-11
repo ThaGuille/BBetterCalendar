@@ -57,7 +57,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 
 // ViewModel de la pantalla Progress (Phase 1). Lee daily_stat / focus_event / stats fuera del
 // hilo principal (ExecutorService) y publica con postValue (regla #3). No importa tipos de
-// MPAndroidChart: produce un ChartBundle plano que el Fragment/adapter convierte en entries.
+// MPAndroidChart: publica ProgressOverview y la tarjeta de apps ya agregados (los gráficos de «Todo tu progreso» viven en AllProgressViewModel).
 @HiltViewModel
 public class ProgressViewModel extends AndroidViewModel {
 
@@ -65,7 +65,6 @@ public class ProgressViewModel extends AndroidViewModel {
     private final MutableLiveData<String> mText;
 
     private final MutableLiveData<TimeRange> selectedRange;
-    private final MutableLiveData<ChartBundle> charts;
 
     // Banda 2 (progreso por proyecto, spec project-deadlines-progress). Se compone de DOS fuentes
     // vivas: los proyectos con sus recuentos (LiveData de Room, se invalida sola al escribir en
@@ -104,7 +103,6 @@ public class ProgressViewModel extends AndroidViewModel {
         mText = new MutableLiveData<>();
         mText.setValue("This is progress fragment");
         selectedRange = new MutableLiveData<>();
-        charts = new MutableLiveData<>();
         projectMinutesInRange = new MutableLiveData<>();
         projectRows = new MediatorLiveData<>();
         overview = new MutableLiveData<>();
@@ -137,7 +135,6 @@ public class ProgressViewModel extends AndroidViewModel {
 
     public LiveData<String> getText() { return mText; }
     public LiveData<TimeRange> getSelectedRange() { return selectedRange; }
-    public LiveData<ChartBundle> getCharts() { return charts; }
     public LiveData<List<ProjectProgressRow>> getProjectRows() { return projectRows; }
     public LiveData<ProgressOverview> getOverview() { return overview; }
     public LiveData<ProgressOverview.AppsCard> getAppsCard() { return appsCard; }
@@ -167,11 +164,8 @@ public class ProgressViewModel extends AndroidViewModel {
     private void applyRange(TimeRange range) {
         selectedRange.setValue(range);
         executorService.execute(() -> {
-            // Una sola query de minutos por proyecto alimenta las dos superficies: la página de
-            // proyectos del carrusel (nombre -> minutos) y la banda (id -> minutos).
-            List<ProjectMinutes> byProject = queryProjectMinutes(range);
-            charts.postValue(buildBundle(range, byProject));
-            projectMinutesInRange.postValue(toMinutesById(byProject));
+            // Minutos por proyecto del rango (id -> minutos) para la banda de proyectos.
+            projectMinutesInRange.postValue(toMinutesById(queryProjectMinutes(range)));
         });
         executorService.execute(() -> refreshOverview(range));
         executorService.execute(this::publishAppsCard);
@@ -439,98 +433,6 @@ public class ProgressViewModel extends AndroidViewModel {
     // Reevalúa si el monitor de límites debe seguir armado (llamarlo, p.ej., en onResume).
     public void armUsageLimitMonitor() {
         executorService.execute(usageLimitScheduler::arm);
-    }
-
-    private ChartBundle buildBundle(TimeRange range, List<ProjectMinutes> byProject) {
-        LocalDate start = range.startDay();
-        LocalDate end = range.endDay();
-        LocalDate today = LocalDate.now();
-
-        // Series diarias indexadas por fecha ISO; days que no existen en la tabla -> 0 (rellenado).
-        Map<String, DailyStat> byDay = new HashMap<>();
-        for (DailyStat ds : dailyStatDao.getRange(start.toString(), end.toString())) {
-            byDay.put(ds.day, ds);
-        }
-
-        // Hoy aún no está en daily_stat (se vuelca en el reset del día siguiente): valor vivo en Stats.
-        Stats live = statsDao.getStats();
-        int liveTodayFocusMin = live != null ? FormatHelper.millisToMinutes(live.todayTimeStudied) : 0;
-        int liveTodayFails = live != null ? live.todayFails : 0;
-
-        int days = (int) (end.toEpochDay() - start.toEpochDay()) + 1;
-        String[] labels = new String[days];
-        int[] focusMinutes = new int[days];
-        int[] fails = new int[days];
-
-        LocalDate d = start;
-        for (int i = 0; i < days; i++) {
-            labels[i] = d.format(X_LABEL);
-            if (d.equals(today)) {
-                focusMinutes[i] = liveTodayFocusMin;
-                fails[i] = liveTodayFails;
-            } else {
-                DailyStat ds = byDay.get(d.toString());
-                if (ds != null) {
-                    focusMinutes[i] = ds.focusMinutes;
-                    fails[i] = ds.fails;
-                }
-            }
-            d = d.plusDays(1);
-        }
-
-        // YEAR (u17): 365 puntos no se leen en el carrusel heredado -> daily_stat agregado por mes
-        // (12 buckets, etiqueta "MMM"). Las series por hora y por proyecto no cambian.
-        if (range.granularity == Granularity.YEAR) {
-            String[] monthLabels = new String[12];
-            int[] monthFocus = new int[12];
-            int[] monthFails = new int[12];
-            LocalDate day = start;
-            for (int i = 0; i < days; i++) {
-                int m = day.getMonthValue() - 1;
-                monthFocus[m] += focusMinutes[i];
-                monthFails[m] += fails[i];
-                day = day.plusDays(1);
-            }
-            for (int m = 0; m < 12; m++) {
-                monthLabels[m] = start.withMonth(m + 1).format(TREND_MONTH);
-            }
-            labels = monthLabels;
-            focusMinutes = monthFocus;
-            fails = monthFails;
-        }
-
-        // Buckets por hora del día desde focus_event (incluye hoy: los eventos se escriben en vivo).
-        ZoneId zone = ZoneId.systemDefault();
-        long startMillis = start.atStartOfDay(zone).toInstant().toEpochMilli();
-        long endMillis = end.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1;
-        int[] focusMinutesByHour = new int[24];
-        int[] focusByHour = new int[24];
-        int[] failByHour = new int[24];
-        for (FocusEvent ev : focusEventDao.getRange(startMillis, endMillis)) {
-            int hour = Instant.ofEpochMilli(ev.timestamp).atZone(zone).getHour();
-            if (ev.type == FocusEvent.TYPE_FAIL) {
-                failByHour[hour]++;
-            } else if (ev.type == FocusEvent.TYPE_FOCUS) {
-                focusByHour[hour]++;
-                // Minutos por hora: alimenta el gráfico de concentración en vista DAY (misma
-                // unidad que la serie diaria), mientras focusByHour mantiene el conteo de sesiones
-                // que usa el gráfico "When" en week/month.
-                focusMinutesByHour[hour] += ev.durationMin;
-            }
-        }
-
-        // Página de proyectos del carrusel: la query ya viene ordenada por minutos desc.
-        int projectCount = byProject == null ? 0 : byProject.size();
-        String[] projectLabels = new String[projectCount];
-        int[] projectMinutes = new int[projectCount];
-        for (int i = 0; i < projectCount; i++) {
-            ProjectMinutes pm = byProject.get(i);
-            projectLabels[i] = pm.projectName != null ? pm.projectName : "";
-            projectMinutes[i] = pm.minutes;
-        }
-
-        return new ChartBundle(range.granularity, labels, focusMinutes, fails,
-                focusMinutesByHour, focusByHour, failByHour, projectLabels, projectMinutes);
     }
 
     // executorService es el @IoExecutor compartido de la app (Hilt @Singleton) -- ya no se cierra

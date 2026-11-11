@@ -1,8 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u18 · All progress: carrusel de gráficos (movido desde Progress). -->
+<!-- mejora-visual u8 · Todo tu progreso: 8 tarjetas (mockups 11-18). -->
 <resources>
-    <string name="all_progress_tab_focus">Tiempo de foco</string>
-    <string name="all_progress_tab_interruptions">Interrupciones</string>
-    <string name="all_progress_tab_time_of_day">Hora del día</string>
-    <string name="all_progress_tab_projects">Proyectos</string>
+    <string name="all_progress_title_focus_hour">Enfoque por hora</string>
+    <string name="all_progress_title_focus_day">Enfoque por día</string>
+    <string name="all_progress_title_focus_week">Enfoque por semana</string>
+    <string name="all_progress_title_focus_month">Enfoque por mes</string>
+    <string name="all_progress_title_best_hours">Tus mejores horas</string>
+    <string name="all_progress_title_12_weeks">Últimas 12 semanas</string>
+    <string name="all_progress_title_consistency">Constancia</string>
+    <string name="all_progress_title_sessions">Sesiones terminadas</string>
+    <string name="all_progress_title_projects">Tiempo por proyecto</string>
+    <string name="all_progress_title_durations">Duración de tus sesiones</string>
+    <string name="all_progress_title_focus_vs_phone">Enfoque frente a móvil</string>
+
+    <string name="all_progress_last_90_days">Últimos 90 días</string>
+    <string name="all_progress_last_26_weeks">Últimas 26 semanas</string>
+    <string name="all_progress_week_prefix">S</string>
+
+    <string name="all_progress_current_day">Hoy</string>
+    <string name="all_progress_previous_day">Día anterior</string>
+    <string name="all_progress_current_week">Esta semana</string>
+    <string name="all_progress_previous_week">Semana anterior</string>
+    <string name="all_progress_current_month">Este mes</string>
+    <string name="all_progress_previous_month">Mes anterior</string>
+    <string name="all_progress_current_year">Este año</string>
+    <string name="all_progress_previous_year">Año anterior</string>
+
+    <string name="all_progress_delta_up">▲ %1$d %%</string>
+    <string name="all_progress_delta_down">▼ %1$d %%</string>
+    <string name="all_progress_delta_points_up">▲ %1$d pts</string>
+    <string name="all_progress_delta_points_down">▼ %1$d pts</string>
+
+    <string name="all_progress_legend_low">Poco</string>
+    <string name="all_progress_legend_mid">Bastante</string>
+    <string name="all_progress_legend_high">Mucho</string>
+    <string name="all_progress_legend_completed">Completadas</string>
+    <string name="all_progress_legend_abandoned">Abandonadas</string>
+    <string name="all_progress_legend_last_12">Últimas 12</string>
+    <string name="all_progress_legend_previous_12">12 anteriores</string>
+    <string name="all_progress_legend_focus_up">Enfoque (arriba)</string>
+    <string name="all_progress_legend_phone_down">Apps limitadas (abajo)</string>
+    <string name="all_progress_series_focus">Enfoque</string>
+    <string name="all_progress_series_phone">Apps limitadas</string>
+
+    <string name="all_progress_active_days_of">días activos de %1$d</string>
+    <string name="all_progress_trend_unit">h la última semana completa</string>
+    <string name="all_progress_completion_unit">completadas</string>
+    <plurals name="all_progress_sessions_count">
+        <item quantity="one">%1$d sesión</item>
+        <item quantity="other">%1$d sesiones</item>
+    </plurals>
+    <!-- Letra de cada dia, lunes primero (ejes de los graficos). -->
+    <string-array name="all_progress_day_letters">
+        <item>L</item>
+        <item>M</item>
+        <item>X</item>
+        <item>J</item>
+        <item>V</item>
+        <item>S</item>
+        <item>D</item>
+    </string-array>
 </resources>

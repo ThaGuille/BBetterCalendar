@@ -6,4 +6,6 @@
     <dimen name="progress_spark_width">136dp</dimen>
     <dimen name="progress_apps_icon">40dp</dimen>
     <dimen name="progress_bottom_clearance">24dp</dimen>
+    <!-- u8: punto de color de las leyendas de Todo tu progreso. -->
+    <dimen name="progress_legend_dot">10dp</dimen>
 </resources>

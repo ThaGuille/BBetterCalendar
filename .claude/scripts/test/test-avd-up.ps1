@@ -115,15 +115,35 @@ try {
     '== F12: el snapshot falla o se cuelga: un solo arranque en frío'
     Reset-State @() @{} 'exitearly'
     $r = Run-AvdUp @('-TimeoutSec', '90', '-SnapshotTimeoutSec', '20')
-    $l = Emu-Launches
+    $l = @(Emu-Launches)
     Check 'el emulador del snapshot sale al instante: cae a «-no-snapshot-load» sin esperar los 300 s' (($r.Code -eq 0) -and ($r.Out -match 'cold boot') -and ($l.Count -eq 2) -and ($l[1] -match '-no-snapshot-load')) $r
     Reset-State @() @{} 'snaphang'
     $r = Run-AvdUp @('-TimeoutSec', '90', '-SnapshotTimeoutSec', '3')
-    $l = Emu-Launches
+    $l = @(Emu-Launches)
     Check 'hermana: el snapshot arranca pero no llega a listo: se corta y cae a frío' (($r.Code -eq 0) -and ($r.Out -match 'cold boot') -and ($l.Count -eq 2) -and ($l[1] -match '-no-snapshot-load')) $r
     Reset-State @() @{} 'ok'
     $r = Run-AvdUp @('-TimeoutSec', '60')
     Check 'hermana: el camino normal sigue siendo un solo arranque desde el snapshot' (($r.Code -eq 0) -and ($r.Out -match 'snapshot bt_quick') -and ((Emu-Launches).Count -eq 1)) $r
+
+    '== -Count: varias instancias del mismo AVD, las de más con -read-only'
+    Reset-State @() @{} 'ok'
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    $l = @(Emu-Launches)
+    Check 'ninguna en marcha: arranca dos, la primera escribe y la segunda va -read-only' (($r.Code -eq 0) -and ($l.Count -eq 2) -and ($l[0] -notmatch '-read-only') -and ($l[1] -match '-read-only') -and ($r.Out -match 'AVD READY emulator-5554 \(snapshot bt_quick,') -and ($r.Out -match 'AVD READY emulator-5556 \(snapshot bt_quick, read-only')) $r
+    Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' }
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    $l = @(Emu-Launches)
+    Check 'hermana: una ya en marcha: la reutiliza y arranca solo la segunda, -read-only' (($r.Code -eq 0) -and ($r.Out -match 'AVD READY emulator-5554 \(reused') -and ($l.Count -eq 1) -and ($l[0] -match '-read-only') -and ($r.Out -match 'AVD READY emulator-5556')) $r
+    Reset-State @('emulator-5554', 'emulator-5556') @{ 'emulator-5554' = 'api36'; 'emulator-5556' = 'api36' }
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    Check 'hermana: las dos en marcha: no arranca nada' (($r.Code -eq 0) -and ((Emu-Launches).Count -eq 0) -and (([regex]::Matches($r.Out, 'reused')).Count -eq 2)) $r
+    Reset-State @('emulator-5554') @{ 'emulator-5554' = 'Pixel_other' }
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    $l = @(Emu-Launches)
+    Check 'hermana: otro AVD conectado no cuenta: arranca dos api36' (($r.Code -eq 0) -and ($l.Count -eq 2) -and ($l[1] -match '-read-only') -and ($r.Out -notmatch 'reused')) $r
+    Reset-State @() @{} 'ok'
+    $r = Run-AvdUp @('-Count', '2', '-Clean', '-TimeoutSec', '30')
+    Check '-Clean con -Count 2: se niega sin arrancar nada' (($r.Code -eq 1) -and ((Emu-Launches).Count -eq 0)) $r
 }
 finally {
     Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue

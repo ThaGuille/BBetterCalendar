@@ -26,7 +26,7 @@ The repo is worked on from **two machines**: check the OS you are on (the sessio
 | **Gradle** | `.\gradlew.bat <task>` (`./gradlew` via Git Bash also works) | `./gradlew <task>` |
 | **adb** | on PATH | usually not on PATH: `python3 .claude/skills/adb-ui-test/scripts/bbadb.py adb <args>` (SDK in `~/Android/Sdk`) |
 | **adb-ui-test scripts** | `scripts\*.ps1` | `scripts/bbadb.py` (same flows and recordings) |
-| **Emulator lease** | `.claude\scripts\emulator-lease.ps1` | `python3 .claude/scripts/emulator-lease.py` |
+| **Emulator lease** | `.claude\scripts\emulator-lease.ps1`; one command on a free emulator: `python .claude\scripts\with-emulator.py -- "<cmd>"` | `python3 .claude/scripts/emulator-lease.py`; `python3 .claude/scripts/with-emulator.py -- "<cmd>"` |
 | **Hooks** | `.ps1` | `.sh` / `.py` twin |
 
 Hooks pick their implementation through [`.claude/hooks/run-hook.js`](.claude/hooks/run-hook.js) (`.ps1` on Windows, `.sh`/`.py` elsewhere). When you change a hook or an adb script, change its twin too.

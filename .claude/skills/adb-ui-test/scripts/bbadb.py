@@ -16,7 +16,7 @@ here and the other way round. Windows keeps using the .ps1 scripts.
     python3 bbadb.py capture --label progress-month-chart
     python3 bbadb.py adb devices          # the adb this script resolved, for ad-hoc calls
 
-Every command takes --serial (default: the first attached emulator-*, never a phone) and the
+Every command takes --serial (default: $ANDROID_SERIAL, else the first attached emulator-*, never a phone) and the
 ones that touch the app take --pkg. adb is found via $ADB, PATH, $ANDROID_HOME / $ANDROID_SDK_ROOT,
 sdk.dir in the repo's local.properties, then ~/Android/Sdk (Linux) or ~/Library/Android/sdk (macOS).
 
@@ -89,9 +89,12 @@ def adb(*args, serial=None, binary=False, check=False):
 
 
 def serial_of(requested):
-    """An explicit serial wins; otherwise the first attached emulator-*, never a physical phone."""
+    """An explicit serial wins, then $ANDROID_SERIAL (set by with-emulator.py for a leased emulator);
+    otherwise the first attached emulator-*, never a physical phone."""
     if requested:
         return requested
+    if os.environ.get('ANDROID_SERIAL'):
+        return os.environ['ANDROID_SERIAL']
     for line in adb('devices').stdout.splitlines():
         m = re.match(r'^(emulator-\S+)\s+device\b', line)
         if m:

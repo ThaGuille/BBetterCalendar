@@ -78,7 +78,8 @@ These tools live under the Android SDK; on most setups that's `%LOCALAPPDATA%\An
 | Take a screenshot | `adb exec-out screencap -p > screen.png` |
 | Pump a deep link | `adb shell am start -W -a android.intent.action.VIEW -d "<url>"` |
 | List AVDs | `emulator -list-avds` |
-| Get a ready AVD (reuse a running one, else boot `api36` from its `bt_quick` snapshot) | `powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1` (`-Clean` = cold boot with `-no-snapshot`, only when a test needs a clean device) |
+| Get a ready AVD (reuse a running one, else boot `api36` from its `bt_quick` snapshot) | `powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1` (`-Clean` = cold boot with `-no-snapshot`, only when a test needs a clean device; `-Count 2` = two instances of `api36`, the second `-read-only`, for units in parallel) |
+| Run one command on a free emulator (parallel units) | `python .claude\scripts\with-emulator.py -- "<cmd>"`: leases a free `emulator-*`, sets `ANDROID_SERIAL` for the command (adb, `installDebug`, bbadb, the adb-ui-test scripts follow it), releases it at the end |
 | Start an AVD by hand | `emulator -avd api36 -snapshot bt_quick -no-snapshot-save` (reuse ~1.5 s, snapshot ~10-30 s, cold `-no-snapshot` ~50-60 s) |
 
 > Use the foreground service notification channel name `pomodoro_channel` when filtering notification logs.

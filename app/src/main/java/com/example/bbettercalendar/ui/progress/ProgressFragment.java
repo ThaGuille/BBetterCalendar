@@ -1,11 +1,8 @@
 package com.example.bbettercalendar.ui.progress;
 
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.graphics.Typeface;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,17 +19,17 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.databinding.FragmentProgressBinding;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.ConsistencyCalculator;
-import com.example.bbettercalendar.ui.common.chart.ChartStyler;
+import com.example.bbettercalendar.ui.common.chart.ChartFormat;
+import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
+import com.example.bbettercalendar.ui.common.chart.LimitBarView;
+import com.example.bbettercalendar.ui.common.chart.SparkBarsView;
+import com.example.bbettercalendar.ui.common.motion.Motion;
 import com.example.bbettercalendar.ui.common.share.ShareCardRenderer;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.ProgressRowView;
 import com.example.bbettercalendar.ui.common.widget.StatTileView;
 import com.example.bbettercalendar.ui.common.widget.WidgetTone;
 import com.example.bbettercalendar.ui.projects.ProjectListAdapter;
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -48,17 +45,10 @@ public class ProgressFragment extends Fragment {
     private ProgressViewModel viewModel;
     private final ShareCardRenderer shareRenderer = new ShareCardRenderer();
 
-    // u17: pantalla rediseñada (html 13). Las vistas que se repintan se resuelven una vez.
-    private StatTileView tileFocus;
-    private StatTileView tileSessions;
-    private StatTileView tileTasks;
-    private LineChart trendChart;
-
-    // PLACEHOLDER(ui-placeholders#progress-blocked-opens): no se cuentan aperturas bloqueadas.
-    private static final int MOCK_BLOCKED_OPENS = 23;
-
-    // Vistas de la tarjeta de estado (LOCKED / EMPTY) — están dentro del <include>, se resuelven
-    // por findViewById para no depender del binding anidado del include.
+    // u7: valores que se muestran, para que Motion.countUp parta del anterior al cambiar de periodo.
+    private long shownFocusMinutes;
+    private long shownSessions;
+    private long shownTasks;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -68,16 +58,19 @@ public class ProgressFragment extends Fragment {
         setupHeader();
         setupNavigator();
 
-        tileFocus = binding.progressTileFocus;
-        tileSessions = binding.progressTileSessions;
-        tileTasks = binding.progressTileTasks;
+        shownFocusMinutes = 0;
+        shownSessions = 0;
+        shownTasks = 0;
+        // Esqueletos hasta que llegan ProgressOverview y la tarjeta de apps.
+        binding.progressSummarySkeleton.show();
+        binding.progressAppsSkeleton.show();
 
         View root = binding.getRoot();
 
         viewModel.getSelectedRange().observe(getViewLifecycleOwner(), this::renderRange);
         viewModel.getProjectRows().observe(getViewLifecycleOwner(), this::renderProjectRows);
         viewModel.getOverview().observe(getViewLifecycleOwner(), this::renderOverview);
-        viewModel.getBlockingCard().observe(getViewLifecycleOwner(), this::renderBlockingCard);
+        viewModel.getAppsCard().observe(getViewLifecycleOwner(), this::renderAppsCard);
 
         return root;
     }
@@ -96,7 +89,7 @@ public class ProgressFragment extends Fragment {
 
     private void setupHeader() {
         binding.progressShieldButton.setOnClickListener(v -> openScreenTime());
-        binding.progressManageBlocking.setOnClickListener(v -> openScreenTime());
+        binding.progressAppsCard.setOnClickListener(v -> openScreenTime());
         binding.progressSeeAll.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigate(R.id.navigation_all_progress));
         // F0-u5: tarjeta-imagen del periodo + ACTION_SEND solo con texto (Q-06, sin enlace).
@@ -173,41 +166,56 @@ public class ProgressFragment extends Fragment {
                 ? R.string.progress_projects_year : R.string.progress_projects_week);
     }
 
-    // --- tiles + "Past 12 weeks" ---
+    // --- tarjeta resumen (u7) ---
 
     private void renderOverview(ProgressOverview o) {
         if (binding == null || o == null) return;
         TimeRange range = viewModel.getSelectedRange().getValue();
         Granularity g = range == null ? Granularity.WEEK : range.granularity;
 
-        tileFocus.setValue(FormatHelper.formatDuration(o.focusMinutes * 60_000L));
+        boolean firstData = binding.progressSummaryContent.getVisibility() != View.VISIBLE;
+        if (firstData) {
+            binding.progressSummarySkeleton.hide();
+            binding.progressSummaryContent.setVisibility(View.VISIBLE);
+        }
+
+        StatTileView focusTile = binding.progressSummaryFocus;
+        ChartFormatter minutes = ChartFormatter.MINUTES;
+        Motion.countUp(focusTile.getValueView(), shownFocusMinutes, o.focusMinutes,
+                v -> minutes.format(v));
+        shownFocusMinutes = o.focusMinutes;
         if (o.hasFocusDelta) {
             long pct = Math.round(Math.abs(o.focusDeltaPercent));
             StatTileView.Trend trend = o.focusDeltaPercent > 0 ? StatTileView.Trend.UP
                     : o.focusDeltaPercent < 0 ? StatTileView.Trend.DOWN : StatTileView.Trend.NONE;
-            tileFocus.setDelta(getString(R.string.progress_tile_delta_percent, String.valueOf(pct)),
-                    trend, o.focusDeltaPercent >= 0 ? WidgetTone.PRIMARY : WidgetTone.MUTED);
+            focusTile.setDelta(getString(R.string.progress_summary_delta, (int) pct), trend,
+                    o.focusDeltaPercent >= 0 ? WidgetTone.PRIMARY : WidgetTone.MUTED);
         } else {
-            tileFocus.clearDelta();
+            focusTile.clearDelta();
         }
+        focusTile.setSub(getString(g == Granularity.MONTH ? R.string.progress_summary_vs_month
+                : g == Granularity.YEAR ? R.string.progress_summary_vs_year
+                : g == Granularity.DAY ? R.string.progress_summary_vs_day
+                : R.string.progress_summary_vs_week));
 
-        tileSessions.setValue(String.valueOf(o.sessions));
-        tileSessions.setSub(getString(R.string.progress_tile_sessions_avg,
-                String.format(Locale.getDefault(), "%.1f", o.sessionsPerDay)));
+        binding.progressSparkBars.setData(new SparkBarsView.Data(o.sparkValues, o.sparkLabels,
+                o.sparkHighlight, ChartFormatter.MINUTES));
 
-        tileTasks.setValue(String.valueOf(o.tasksDone));
-        int vsRes = g == Granularity.MONTH ? R.string.progress_tile_tasks_vs_month
-                : g == Granularity.YEAR ? R.string.progress_tile_tasks_vs_year
-                : g == Granularity.DAY ? R.string.progress_tile_tasks_vs_day
-                : R.string.progress_tile_tasks_vs_week;
-        tileTasks.setSub(getString(vsRes,
-                String.format(Locale.getDefault(), "%+d", o.tasksDoneDelta)));
+        StatTileView sessionsTile = binding.progressSummarySessions;
+        Motion.countUp(sessionsTile.getValueView(), shownSessions, o.sessions, String::valueOf);
+        shownSessions = o.sessions;
+        sessionsTile.setSub(o.sessions > 0
+                ? getString(R.string.progress_summary_sessions_avg, o.avgSessionMinutes)
+                : getString(R.string.progress_summary_sessions_none));
 
-        binding.progressTrendValue.setText(
-                String.format(Locale.getDefault(), "%.1f", o.trendCurrentMinutes / 60.0));
-        binding.progressTrendDelta.setText(getString(R.string.progress_trend_delta,
-                String.format(Locale.getDefault(), "%+.1f", o.trendDeltaMinutes / 60.0)));
-        renderTrendChart(o);
+        StatTileView tasksTile = binding.progressSummaryTasks;
+        Motion.countUp(tasksTile.getValueView(), shownTasks, o.tasksDone, String::valueOf);
+        shownTasks = o.tasksDone;
+        int d = o.tasksDoneDelta;
+        tasksTile.setSub(d > 0 ? getString(R.string.progress_summary_tasks_more, d)
+                : d < 0 ? getString(R.string.progress_summary_tasks_less, -d)
+                : getString(R.string.progress_summary_tasks_same));
+
         renderConsistency(o);
     }
 
@@ -238,108 +246,70 @@ public class ProgressFragment extends Fragment {
         }
     }
 
-    private static final int TREND_MARKER_STEP = 4;
+    // --- tarjeta "Tus apps" (u7) ---
 
-    // Línea héroe (12 semanas actuales) sobre la de comparación discontinua (las 12 anteriores).
-    private void renderTrendChart(ProgressOverview o) {
-        if (trendChart == null) {
-            trendChart = new LineChart(requireContext());
-            binding.progressTrendChartHolder.addView(trendChart);
-        }
-        ChartStyler styler = new ChartStyler(requireContext());
-        int n = o.trendCurrentHours.length;
-        List<Entry> cur = new ArrayList<>();
-        List<Entry> prev = new ArrayList<>();
-        float max = 0f;
-        for (int i = 0; i < n; i++) {
-            cur.add(new Entry(i, o.trendCurrentHours[i]));
-            prev.add(new Entry(i, o.trendPreviousHours[i]));
-            max = Math.max(max, Math.max(o.trendCurrentHours[i], o.trendPreviousHours[i]));
-        }
-        LineDataSet curSet = new LineDataSet(cur, "");
-        styler.styleHeroLine(curSet);
-        // html 13: marcadores huecos cada 4 semanas (no en todas) y el último punto en ámbar.
-        curSet.setDrawCircles(false);
-        styler.markEvery(curSet, TREND_MARKER_STEP);
-        LineDataSet prevSet = new LineDataSet(prev, "");
-        styler.styleCompareLine(prevSet);
-        trendChart.setData(new LineData(prevSet, curSet));
-        styler.styleChart(trendChart, o.trendLabels);
-        trendChart.getXAxis().setLabelCount(n, false);
-        styler.fitYAxis(trendChart, max);
-        styler.setYAxisFormatter(trendChart, ChartStyler.unitFormatter("h"));
-        trendChart.notifyDataSetChanged();
-        trendChart.invalidate();
-    }
-
-    // --- tarjeta Screen time & blocking ---
-
-    private void renderBlockingCard(ProgressOverview.BlockingCard c) {
+    private void renderAppsCard(ProgressOverview.AppsCard c) {
         if (binding == null || c == null) return;
-        binding.progressBlockingChips.removeAllViews();
-        binding.progressBlockingChips.setVisibility(View.GONE);
-        binding.progressBlockingGoalGroup.setVisibility(View.GONE);
+        binding.progressAppsSkeleton.hide();
+        binding.progressAppsRows.removeAllViews();
 
         if (c.locked) {
-            binding.progressBlockingSubtitle.setText(R.string.progress_blocking_locked);
-        } else if (c.trackedCount == 0) {
-            binding.progressBlockingSubtitle.setText(R.string.progress_blocking_no_apps);
+            binding.progressAppsSubtitle.setText(R.string.progress_apps_locked);
+        } else if (c.rows.isEmpty()) {
+            binding.progressAppsSubtitle.setText(R.string.progress_apps_none);
         } else {
-            String used = FormatHelper.formatDuration(c.usedMillis);
-            if (c.goalMinutes > 0) {
-                binding.progressBlockingSubtitle.setText(getString(R.string.progress_blocking_today_goal,
-                        used, FormatHelper.formatDuration(c.goalMinutes * 60_000L)));
-                binding.progressBlockingGoalGroup.setVisibility(View.VISIBLE);
-                binding.progressBlockingBar.setProgressCompat(c.percentOfGoal(), false);
-                binding.progressBlockingPercent.setText(
-                        getString(R.string.progress_blocking_percent, c.percentOfGoal()));
-                binding.progressBlockingRemaining.setText(getString(R.string.progress_blocking_remaining,
-                        FormatHelper.formatDuration(c.remainingMillis())));
-            } else {
-                binding.progressBlockingSubtitle.setText(getString(R.string.progress_blocking_today_only, used));
-            }
-            addAppChips(c);
+            String avg = ChartFormat.hoursMinutes(c.averageMinutes);
+            int pct = Math.abs(c.deltaPercent);
+            binding.progressAppsSubtitle.setText(!c.hasDelta || pct < 1
+                    ? getString(R.string.progress_apps_subtitle, avg)
+                    : getString(c.deltaPercent < 0 ? R.string.progress_apps_subtitle_less
+                            : R.string.progress_apps_subtitle_more, avg, pct));
         }
-
-        int onSurface = ContextCompat.getColor(requireContext(), R.color.bb_on_surface);
-        String count = getString(R.string.progress_blocking_opens_count, MOCK_BLOCKED_OPENS);
-        SpannableStringBuilder sb = new SpannableStringBuilder(count);
-        sb.setSpan(new StyleSpan(Typeface.BOLD), 0, count.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sb.setSpan(new ForegroundColorSpan(onSurface), 0, count.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sb.append(' ').append(getString(R.string.progress_blocking_opens_suffix));
-        binding.progressBlockingOpens.setText(sb);
+        boolean show = !c.locked && !c.rows.isEmpty();
+        binding.progressAppsRows.setVisibility(show ? View.VISIBLE : View.GONE);
+        boolean anyLimit = false;
+        if (show) {
+            float scaleMax = 0f;
+            for (ProgressOverview.AppsCard.AppRow r : c.rows) {
+                scaleMax = Math.max(scaleMax, Math.max(r.averageMinutes, r.limitMinutes));
+            }
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            int gap = getResources().getDimensionPixelSize(R.dimen.spacing_md);
+            for (int i = 0; i < c.rows.size(); i++) {
+                ProgressOverview.AppsCard.AppRow r = c.rows.get(i);
+                anyLimit |= r.limitMinutes > 0;
+                View v = inflater.inflate(R.layout.item_progress_app_row, binding.progressAppsRows, false);
+                bindAppRow(v, r, scaleMax);
+                if (i > 0) {
+                    ((LinearLayout.LayoutParams) v.getLayoutParams()).topMargin = gap;
+                }
+                binding.progressAppsRows.addView(v);
+            }
+        }
+        binding.progressAppsHint.setVisibility(anyLimit ? View.VISIBLE : View.GONE);
     }
 
-    private void addAppChips(ProgressOverview.BlockingCard c) {
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
-        int gap = getResources().getDimensionPixelSize(R.dimen.spacing_sm);
-        for (int i = 0; i < c.chips.size(); i++) {
-            ProgressOverview.BlockingCard.AppChip chip = c.chips.get(i);
-            View v = inflater.inflate(R.layout.item_progress_app_chip, binding.progressBlockingChips, false);
-            ((TextView) v.findViewById(R.id.progressChipName)).setText(chip.label);
-            TextView usage = v.findViewById(R.id.progressChipUsage);
-            View dot = v.findViewById(R.id.progressChipDot);
-            View lock = v.findViewById(R.id.progressChipLock);
-            if (chip.blocked) {
-                v.setBackgroundResource(R.drawable.bg_progress_app_tile_blocked);
-                dot.setVisibility(View.GONE);
-                lock.setVisibility(View.VISIBLE);
-                usage.setText(R.string.progress_blocking_blocked);
-                usage.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_danger));
-            } else {
-                usage.setText(FormatHelper.formatDuration(chip.millis));
-                // Cerca del límite: punto ámbar (el del drawable); si no, salvia.
-                if (!chip.nearLimit) {
-                    dot.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(),
-                            R.color.bb_primary));
-                }
-            }
-            if (i > 0) {
-                ((LinearLayout.LayoutParams) v.getLayoutParams()).setMarginStart(gap);
-            }
-            binding.progressBlockingChips.addView(v);
+    private void bindAppRow(View v, ProgressOverview.AppsCard.AppRow r, float scaleMax) {
+        ((TextView) v.findViewById(R.id.progressAppName)).setText(r.label);
+        PackageManager pm = requireContext().getPackageManager();
+        Drawable icon;
+        try {
+            icon = pm.getApplicationIcon(r.packageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            icon = pm.getDefaultActivityIcon();
         }
-        binding.progressBlockingChips.setVisibility(c.chips.isEmpty() ? View.GONE : View.VISIBLE);
+        ((android.widget.ImageView) v.findViewById(R.id.progressAppIcon)).setImageDrawable(icon);
+        v.findViewById(R.id.progressAppLock).setVisibility(r.enforce ? View.VISIBLE : View.GONE);
+        v.findViewById(R.id.progressAppSuggested).setVisibility(r.suggested ? View.VISIBLE : View.GONE);
+        String used = ChartFormat.hoursMinutes(r.averageMinutes);
+        ((TextView) v.findViewById(R.id.progressAppValue)).setText(r.limitMinutes > 0
+                ? getString(R.string.progress_apps_value_limit, used,
+                        ChartFormat.hoursMinutes(r.limitMinutes))
+                : used);
+        LimitBarView bar = v.findViewById(R.id.progressAppBar);
+        bar.setTapEnabled(false);
+        bar.setData(new LimitBarView.Data(r.averageMinutes, r.limitMinutes, scaleMax,
+                ChartFormatter.MINUTES));
     }
 
     // --- "Projects this week" (minutos por proyecto del rango; barra = parte del total) ---
@@ -389,7 +359,6 @@ public class ProgressFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        trendChart = null;
         binding = null;
     }
 }

@@ -19,6 +19,9 @@ import com.example.bbettercalendar.projects.ProjectWithCounts;
 import com.example.bbettercalendar.projects.ProjectsRepository;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.stats.AppUsageDaily;
+import com.example.bbettercalendar.stats.AppUsageDailyDAO;
+import com.example.bbettercalendar.stats.UsageInsights;
 import com.example.bbettercalendar.stats.ConsistencyCalculator;
 import com.example.bbettercalendar.stats.DailyStat;
 import com.example.bbettercalendar.stats.DailyStatDAO;
@@ -74,7 +77,7 @@ public class ProgressViewModel extends AndroidViewModel {
 
     // u17: tiles + "Past 12 weeks" (dependen del rango) y tarjeta Screen time & blocking (de hoy).
     private final MutableLiveData<ProgressOverview> overview;
-    private final MutableLiveData<ProgressOverview.BlockingCard> blockingCard;
+    private final MutableLiveData<ProgressOverview.AppsCard> appsCard;
 
     private final ExecutorService executorService;
     private final DailyStatDAO dailyStatDao;
@@ -83,6 +86,7 @@ public class ProgressViewModel extends AndroidViewModel {
     private final CalendarEntryDAO calendarEntryDao;
     private final FocusInsightsRepository insights;
     private final AppRuleDAO appRuleDao;
+    private final AppUsageDailyDAO appUsageDao;
     private final UsageStatsRepository usageRepo;
     private final UsageLimitScheduler usageLimitScheduler;
 
@@ -92,6 +96,7 @@ public class ProgressViewModel extends AndroidViewModel {
     @Inject
     public ProgressViewModel(@NonNull Application application, DailyStatDAO dailyStatDao,
                               FocusEventDAO focusEventDao, StatsDAO statsDao, AppRuleDAO appRuleDao,
+                              AppUsageDailyDAO appUsageDao,
                               ProjectsRepository projectsRepository,
                               CalendarEntryDAO calendarEntryDao, FocusInsightsRepository insights,
                               @IoExecutor ExecutorService executorService) {
@@ -103,7 +108,7 @@ public class ProgressViewModel extends AndroidViewModel {
         projectMinutesInRange = new MutableLiveData<>();
         projectRows = new MediatorLiveData<>();
         overview = new MutableLiveData<>();
-        blockingCard = new MutableLiveData<>();
+        appsCard = new MutableLiveData<>();
 
         this.calendarEntryDao = calendarEntryDao;
         this.insights = insights;
@@ -111,6 +116,7 @@ public class ProgressViewModel extends AndroidViewModel {
         this.focusEventDao = focusEventDao;
         this.statsDao = statsDao;
         this.appRuleDao = appRuleDao;
+        this.appUsageDao = appUsageDao;
         usageRepo = new UsageStatsRepository(application);
         AlarmManager alarmManager = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
         WarnedTodayStore warnedStore = new WarnedTodayStore(application);
@@ -134,7 +140,7 @@ public class ProgressViewModel extends AndroidViewModel {
     public LiveData<ChartBundle> getCharts() { return charts; }
     public LiveData<List<ProjectProgressRow>> getProjectRows() { return projectRows; }
     public LiveData<ProgressOverview> getOverview() { return overview; }
-    public LiveData<ProgressOverview.BlockingCard> getBlockingCard() { return blockingCard; }
+    public LiveData<ProgressOverview.AppsCard> getAppsCard() { return appsCard; }
 
     // --- intents del navegador (se llaman desde clicks de UI = hilo principal) ---
 
@@ -168,7 +174,7 @@ public class ProgressViewModel extends AndroidViewModel {
             projectMinutesInRange.postValue(toMinutesById(byProject));
         });
         executorService.execute(() -> refreshOverview(range));
-        executorService.execute(this::publishBlockingCard);
+        executorService.execute(this::publishAppsCard);
     }
 
     // --- u17: tiles del periodo + "Past 12 weeks" ---
@@ -271,19 +277,57 @@ public class ProgressViewModel extends AndroidViewModel {
         }
         int prevActive = ConsistencyCalculator.activeDaysBetween(activeDays, prev.startDay(), prevTo);
 
+        // Mini barras de la tarjeta resumen: minutos de foco por dia (por mes en Ano).
+        int days = (int) (range.endDay().toEpochDay() - range.startDay().toEpochDay()) + 1;
+        float[] spark = new float[days];
+        Map<String, DailyStat> byDay = new HashMap<>();
+        for (DailyStat ds : dailyStatDao.getRange(range.startDay().toString(), range.endDay().toString())) {
+            byDay.put(ds.day, ds);
+        }
+        Stats live = statsDao.getStats();
+        for (int i = 0; i < days; i++) {
+            LocalDate d = range.startDay().plusDays(i);
+            if (d.equals(today)) {
+                spark[i] = live != null ? FormatHelper.millisToMinutes(live.todayTimeStudied) : 0f;
+            } else {
+                DailyStat ds = byDay.get(d.toString());
+                spark[i] = ds != null ? ds.focusMinutes : 0f;
+            }
+        }
+        String[] sparkLabels = new String[days];
+        int sparkHighlight = inProgress ? (int) ChronoUnit.DAYS.between(range.startDay(), today) : -1;
+        for (int i = 0; i < days; i++) {
+            sparkLabels[i] = range.startDay().plusDays(i).format(X_LABEL);
+        }
+        if (range.granularity == Granularity.YEAR) {
+            float[] byMonth = new float[12];
+            String[] monthLabels = new String[12];
+            for (int i = 0; i < days; i++) {
+                byMonth[range.startDay().plusDays(i).getMonthValue() - 1] += spark[i];
+            }
+            for (int m = 0; m < 12; m++) {
+                monthLabels[m] = range.startDay().withMonth(m + 1).format(TREND_MONTH);
+            }
+            sparkHighlight = inProgress ? today.getMonthValue() - 1 : -1;
+            spark = byMonth;
+            sparkLabels = monthLabels;
+        }
+        int avgSession = sessions > 0 ? (int) Math.round((double) focus.currentTotal / sessions) : 0;
+
         overview.postValue(new ProgressOverview(focus.currentTotal, focus.hasDeltaPercent(),
                 focus.deltaPercent(), sessions, sessions / (double) elapsedDays,
                 tasksDone, tasksDone - tasksPrev, cur, prv, labels,
                 trend.currentTotal, trend.deltaAbsolute(),
-                consistency, prevActive > 0, consistency.activeDays - prevActive));
+                consistency, prevActive > 0, consistency.activeDays - prevActive,
+                spark, sparkLabels, sparkHighlight, avgSession));
     }
 
-    // Tarjeta "Screen time & blocking": uso de HOY de las apps seguidas frente a la suma de sus
-    // limites diarios. Corre en el executor (queryEvents + DAO) y publica con postValue.
-    private void publishBlockingCard() {
+    // Tarjeta "Tus apps": media diaria de los ultimos 7 dias (app_usage_daily + hoy en vivo) frente a
+    // los 7 anteriores, y las 3 apps con mas uso. Corre en el executor y publica con postValue.
+    private void publishAppsCard() {
         if (!UsageAccess.hasUsageAccess(getApplication())) {
-            blockingCard.postValue(new ProgressOverview.BlockingCard(true, 0, 0L, 0,
-                    Collections.<ProgressOverview.BlockingCard.AppChip>emptyList()));
+            appsCard.postValue(new ProgressOverview.AppsCard(true, 0f, false, 0,
+                    Collections.<ProgressOverview.AppsCard.AppRow>emptyList()));
             return;
         }
         ZoneId zone = ZoneId.systemDefault();
@@ -291,34 +335,39 @@ public class ProgressViewModel extends AndroidViewModel {
         long begin = today.atStartOfDay(zone).toInstant().toEpochMilli();
         long end = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli();
 
-        List<AppRule> tracked = appRuleDao.getTracked();
-        Map<String, Long> foreground = tracked.isEmpty()
-                ? Collections.<String, Long>emptyMap() : usageRepo.foregroundMillis(begin, end);
-
-        long usedLimited = 0L;
-        long usedAll = 0L;
-        int goal = 0;
-        List<ProgressOverview.BlockingCard.AppChip> chips = new ArrayList<>();
-        for (AppRule rule : tracked) {
-            Long m = foreground.get(rule.packageName);
-            long millis = m == null ? 0L : m;
-            usedAll += millis;
-            boolean limited = rule.dailyLimitMinutes > 0;
-            long limitMillis = rule.dailyLimitMinutes * 60_000L;
-            if (limited) {
-                usedLimited += millis;
-                goal += rule.dailyLimitMinutes;
-            }
-            boolean blocked = limited && rule.enforceAtLimit && millis >= limitMillis;
-            boolean near = limited && millis * 100L >= limitMillis * 75L;
-            chips.add(new ProgressOverview.BlockingCard.AppChip(rule.packageName,
-                    usageRepo.labelFor(rule.packageName), millis, blocked, near));
+        Map<String, Integer> liveToday = new HashMap<>();
+        for (Map.Entry<String, Long> en : usageRepo.foregroundMillis(begin, end).entrySet()) {
+            int minutes = (int) (en.getValue() / 60_000L);
+            if (minutes > 0) liveToday.put(en.getKey(), minutes);
         }
-        Collections.sort(chips, (a, b) -> Long.compare(b.millis, a.millis));
-        if (chips.size() > 3) chips = new ArrayList<>(chips.subList(0, 3));
+        List<AppUsageDaily> rows = appUsageDao.getBetween(today.minusDays(14).toString(), today.toString());
+        List<UsageInsights.AppAverage> now = UsageInsights.dailyAverages(rows,
+                liveToday.isEmpty() ? null : liveToday, today, 7);
+        LocalDate prevEnd = today.minusDays(7);
+        List<UsageInsights.AppAverage> before = UsageInsights.dailyAverages(rows, null, prevEnd, 7);
 
-        blockingCard.postValue(new ProgressOverview.BlockingCard(false, tracked.size(),
-                goal > 0 ? usedLimited : usedAll, goal, chips));
+        float nowTotal = 0f;
+        for (UsageInsights.AppAverage a : now) nowTotal += (float) a.averageMinutes;
+        float beforeTotal = 0f;
+        for (UsageInsights.AppAverage a : before) beforeTotal += (float) a.averageMinutes;
+        boolean hasDelta = beforeTotal > 0f && nowTotal > 0f;
+        int deltaPercent = hasDelta ? Math.round((nowTotal - beforeTotal) * 100f / beforeTotal) : 0;
+
+        List<AppRule> rules = appRuleDao.getAll();
+        Map<String, AppRule> ruleByPkg = new HashMap<>();
+        for (AppRule r : rules) ruleByPkg.put(r.packageName, r);
+        Set<String> suggested = new java.util.HashSet<>();
+        for (UsageInsights.AppAverage a : UsageInsights.suggested(now, rules)) suggested.add(a.packageName);
+
+        List<ProgressOverview.AppsCard.AppRow> top = new ArrayList<>();
+        for (UsageInsights.AppAverage a : UsageInsights.topN(now, 3)) {
+            AppRule rule = ruleByPkg.get(a.packageName);
+            int limit = rule != null && rule.dailyLimitMinutes > 0 ? rule.dailyLimitMinutes : 0;
+            top.add(new ProgressOverview.AppsCard.AppRow(a.packageName,
+                    usageRepo.labelFor(a.packageName), (float) a.averageMinutes, limit,
+                    limit > 0 && rule.enforceAtLimit, suggested.contains(a.packageName)));
+        }
+        appsCard.postValue(new ProgressOverview.AppsCard(false, nowTotal, hasDelta, deltaPercent, top));
     }
 
     // --- banda 2: progreso por proyecto ---
@@ -379,12 +428,12 @@ public class ProgressViewModel extends AndroidViewModel {
         projectRows.setValue(rows);
     }
 
-    // --- tarjeta Screen time & blocking ---
+    // --- tarjeta Tus apps ---
 
     // Re-evalúa el acceso a uso y recarga la tarjeta. Lo llama el Fragment en onResume() (al
     // volver de Ajustes o de Screen time no hay callback ni cambio de configuración).
     public void refreshUsageAccess() {
-        executorService.execute(this::publishBlockingCard);
+        executorService.execute(this::publishAppsCard);
     }
 
     // Reevalúa si el monitor de límites debe seguir armado (llamarlo, p.ej., en onResume).

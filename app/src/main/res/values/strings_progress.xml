@@ -8,15 +8,6 @@
     <string name="progress_header_screen_time_cd">Screen time and blocking</string>
     <string name="progress_header_share_cd">Share progress report</string>
 
-    <string name="progress_tile_focus_time">Focus time</string>
-    <string name="progress_tile_sessions">Sessions</string>
-    <string name="progress_tile_tasks_done">Tasks done</string>
-    <string name="progress_tile_delta_percent">%1$s%%</string>
-    <string name="progress_tile_sessions_avg">%1$s / day avg</string>
-    <string name="progress_tile_tasks_vs_week">%1$s vs last wk</string>
-    <string name="progress_tile_tasks_vs_month">%1$s vs last mo</string>
-    <string name="progress_tile_tasks_vs_year">%1$s vs last yr</string>
-    <string name="progress_tile_tasks_vs_day">%1$s vs yesterday</string>
 
     <string name="progress_trend_title">Past 12 weeks</string>
     <string name="progress_trend_subtitle">Weekly focus volume</string>
@@ -27,18 +18,6 @@
 
     <string name="progress_see_all">See all your progress</string>
 
-    <string name="progress_blocking_title">Screen time &amp; blocking</string>
-    <string name="progress_blocking_new">NEW</string>
-    <string name="progress_blocking_today_goal">%1$s today · goal %2$s</string>
-    <string name="progress_blocking_today_only">%1$s today</string>
-    <string name="progress_blocking_no_apps">No apps tracked yet</string>
-    <string name="progress_blocking_locked">Usage access is off</string>
-    <string name="progress_blocking_percent">%1$d%% of daily limit</string>
-    <string name="progress_blocking_remaining">%1$s remaining</string>
-    <string name="progress_blocking_blocked">Blocked</string>
-    <string name="progress_blocking_opens_count">%1$d opens</string>
-    <string name="progress_blocking_opens_suffix">blocked this week</string>
-    <string name="progress_blocking_manage">Manage app blocking</string>
 
     <string name="progress_projects_week">Projects this week</string>
     <string name="progress_projects_month">Projects this month</string>
@@ -56,4 +35,33 @@
     <string name="progress_consistency_none" translatable="false">–</string>
     <string name="progress_consistency_desc">Consistency: focus on %1$d of %2$d days</string>
     <string name="progress_consistency_desc_delta">Consistency: focus on %1$d of %2$d days, %3$+d vs the previous period</string>
+
+    <!-- u7 · summary card -->
+    <string name="progress_summary_focus">Focus</string>
+    <string name="progress_summary_sessions">Sessions</string>
+    <string name="progress_summary_tasks">Tasks</string>
+    <string name="progress_summary_delta">%1$d %%</string>
+    <string name="progress_summary_vs_week">vs. previous week</string>
+    <string name="progress_summary_vs_month">vs. previous month</string>
+    <string name="progress_summary_vs_year">vs. previous year</string>
+    <string name="progress_summary_vs_day">vs. yesterday</string>
+    <string name="progress_summary_sessions_avg">%1$d min on average</string>
+    <string name="progress_summary_sessions_none">No sessions yet</string>
+    <string name="progress_summary_tasks_more">%1$d more than the previous</string>
+    <string name="progress_summary_tasks_less">%1$d fewer than the previous</string>
+    <string name="progress_summary_tasks_same">Same as the previous</string>
+    <string name="progress_summary_spark_cd">Focus time of each day of the period</string>
+
+    <!-- u7 · "Your apps" card -->
+    <string name="progress_apps_title">Your apps</string>
+    <string name="progress_apps_subtitle">%1$s a day</string>
+    <string name="progress_apps_subtitle_less">%1$s a day · %2$d %% less</string>
+    <string name="progress_apps_subtitle_more">%1$s a day · %2$d %% more</string>
+    <string name="progress_apps_none">No app use recorded yet</string>
+    <string name="progress_apps_locked">Usage access is off</string>
+    <string name="progress_apps_suggested">Suggested</string>
+    <string name="progress_apps_value_limit">%1$s / %2$s</string>
+    <string name="progress_apps_hint">The line marks the daily limit</string>
+    <string name="progress_apps_cd">Your apps. Opens screen time</string>
+    <string name="progress_apps_lock_cd">Blocked when it reaches the limit</string>
 </resources>

@@ -40,9 +40,7 @@ repository `social/SocialModule` binds (`FEATURE_SOCIAL` first, see `systems/soc
 |---|---|---|---|---|---|
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
 | `projects-streak-chip` | Projects (u16) | `projectsStreakChip` | The **global** streak (hidden at 0), not a per-project streak | `focus_event` does not attribute a streak per project | P2 |
-| `progress-blocked-opens` | Progress (u17) | `progressBlockingCard` | "23 opens blocked this week" (`MOCK_BLOCKED_OPENS`) | Counting blocked opens in `BlockerAccessibilityService` + storage | P2 |
-| `progress-new-badge` | Progress (u17) | shield dot + NEW chip | Fixed honey dot / NEW chip | A "seen" flag once the blocking feature has an announcement state | P3 |
-| `screen-time-blocked-opens` | Screen time (u19) | `screenTimeTileBlocked` / `screenTimeBlockedCount` | "23" (`MOCK_BLOCKED_OPENS`) | Same counter as `progress-blocked-opens` | P2 |
+| `screen-time-blocked-opens` | Screen time (u19) | `screenTimeTileBlocked` / `screenTimeBlockedCount` | "23" (`MOCK_BLOCKED_OPENS`) | A blocked-opens counter in `BlockerAccessibilityService` | P2 |
 | `screen-time-new-badge` | Screen time (u19) | `screenTimeBlockNew` | Fixed NEW chip | A "seen" flag | P3 |
 | `app-detail-blocked-opens` | App detail (u20) | `appDetailTileBlocked` / `appDetailBlockedCount` | "6" (`MOCK_BLOCKED_OPENS`) | Per-app blocked-open counter | P2 |
 

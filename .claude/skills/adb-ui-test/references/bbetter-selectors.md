@@ -82,9 +82,9 @@ second MainActivity (known u6 quirk).
 ## Progress screen (`fragment_progress.xml`, u17 + u18)
 
 - `progressTitle`, `progressShieldButton`, `progressShareButton`, `progressScroll`, `progressGranularity`, `progressPeriodNavigator` (hijos `periodNavTitle/Subtitle/Previous/Next`).
-- Tiles: `progressTileFocus`, `progressTileSessions`, `progressTileTasks`.
-- Tendencia: `progressTrendValue`, `progressTrendDelta`, `progressTrendChartHolder`; `progressSeeAll`.
-- Bloqueo: `progressBlockingCard`, `progressBlockingSubtitle`, `progressBlockingBar`, `progressBlockingChips`, `progressManageBlocking`; proyectos: `progressProjectsCard`, `progressProjectsRows`.
+- Resumen (u7): `progressSummaryCard`, `progressSummarySkeleton`, `progressSummaryContent`, `progressSummaryFocus`, `progressSparkBars`, `progressSummarySessions`, `progressSummaryTasks` (replace `progressTileFocus/Sessions/Tasks`).
+- `progressSeeAll`. The "Past 12 weeks" card (`progressTrend*`) moved to All progress (u8).
+- Tus apps (u7): `progressAppsCard` (whole card opens `navigation_screen_time`), `progressAppsSubtitle`, `progressAppsSkeleton`, `progressAppsRows` (rows from `item_progress_app_row.xml`: `progressAppIcon`, `progressAppName`, `progressAppLock`, `progressAppSuggested`, `progressAppValue`, `progressAppBar`), `progressAppsHint`; replaces `progressBlocking*` and `progressManageBlocking`. Projects: `progressProjectsCard`, `progressProjectsRows`.
 - Retirados en u17: `granularity_day/week/month`, `range_prev/next/label` (el viejo `range_label` ya no existe: la aserción de rango es `periodNavTitle`), `projects_band`, `projects_list`.
 - Retirados en u18 (Progress ya no tiene carrusel ni controles de uso): `progressLegacyCharts`, `chart_dots`, `chart_pager`, `usage_add_apps`, `usage_enforce_master`, `usage_block_toggle(_chip)`.
 - Banda de uso (solo resume, u18): `usage_band`, `usage_screen_time`, `usage_list`, `usage_loading`, `usage_state_card`.

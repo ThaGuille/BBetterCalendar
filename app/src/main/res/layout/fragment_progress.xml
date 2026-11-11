@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Progress (migracion visual u17, .stitch/designs/13-progress-final.png + html/13).
      Titulo + escudo + compartir fijos arriba; el resto scrollea: Week/Month/Year + navegador de
-     periodo, tarjeta de tiles, "Past 12 weeks", "See all", Screen time & blocking, Projects.
-     El carrusel de graficos se movio a All progress (u18); la banda de uso que quedaba al final
-     duplicaba la tarjeta de bloqueo y se quito (fallos-frente-a-stitch). -->
+     periodo, tarjeta resumen (u7), "Ver todo tu progreso", "Tus apps" (u7), Proyectos.
+     El carrusel de graficos y "Past 12 weeks" viven en All progress. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -49,15 +48,6 @@
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_shield_24"
                 app:tint="@color/bb_primary_bright" />
-
-            <!-- PLACEHOLDER(ui-placeholders#progress-new-badge): punto de "novedad" fijo. -->
-            <View
-                android:layout_width="@dimen/progress_header_badge_dot"
-                android:layout_height="@dimen/progress_header_badge_dot"
-                android:layout_gravity="top|end"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:layout_marginEnd="@dimen/spacing_sm"
-                android:background="@drawable/bg_progress_badge_dot" />
         </FrameLayout>
 
         <ImageButton
@@ -101,9 +91,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_card_gap" />
 
-            <!-- ============ Tarjeta de tiles: Focus time / Sessions / Tasks done ============
-                 + pie de constancia (plan racha-semanal-y-constancia) -->
+            <!-- ============ Tarjeta resumen (mejora-visual u7): Enfoque + mini barras, Sesiones / Tareas,
+                 pie de constancia (plan racha-semanal-y-constancia) ============ -->
             <LinearLayout
+                android:id="@+id/progressSummaryCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_card_gap"
@@ -111,47 +102,68 @@
                 android:orientation="vertical"
                 android:padding="@dimen/spacing_md">
 
-                <LinearLayout
+                <com.example.bbettercalendar.ui.common.widget.SkeletonGroup
+                    android:id="@+id/progressSummarySkeleton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
+                    android:layout_marginBottom="@dimen/spacing_card_gap"
+                    app:skeletonRowHeight="28dp"
+                    app:skeletonRows="3" />
 
-                    <com.example.bbettercalendar.ui.common.widget.StatTileView
-                        android:id="@+id/progressTileFocus"
-                        android:layout_width="0dp"
+                <LinearLayout
+                    android:id="@+id/progressSummaryContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        app:tileCard="false"
-                        app:tileLabel="@string/progress_tile_focus_time" />
+                        android:baselineAligned="false"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
 
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/bb_divider" />
+                        <com.example.bbettercalendar.ui.common.widget.StatTileView
+                            android:id="@+id/progressSummaryFocus"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            app:tileCard="false"
+                            app:tileLabel="@string/progress_summary_focus" />
 
-                    <com.example.bbettercalendar.ui.common.widget.StatTileView
-                        android:id="@+id/progressTileSessions"
-                        android:layout_width="0dp"
+                        <com.example.bbettercalendar.ui.common.chart.SparkBarsView
+                            android:id="@+id/progressSparkBars"
+                            android:layout_width="@dimen/progress_spark_width"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_md"
+                            android:contentDescription="@string/progress_summary_spark_cd" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_card_gap"
-                        android:layout_weight="1"
-                        app:tileCard="false"
-                        app:tileLabel="@string/progress_tile_sessions" />
+                        android:layout_marginTop="@dimen/spacing_md"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
 
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:background="@color/bb_divider" />
+                        <com.example.bbettercalendar.ui.common.widget.StatTileView
+                            android:id="@+id/progressSummarySessions"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            app:tileIcon="@drawable/ic_timer_24"
+                            app:tileLabel="@string/progress_summary_sessions" />
 
-                    <com.example.bbettercalendar.ui.common.widget.StatTileView
-                        android:id="@+id/progressTileTasks"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_card_gap"
-                        android:layout_weight="1"
-                        app:tileCard="false"
-                        app:tileLabel="@string/progress_tile_tasks_done" />
+                        <com.example.bbettercalendar.ui.common.widget.StatTileView
+                            android:id="@+id/progressSummaryTasks"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_card_gap"
+                            android:layout_weight="1"
+                            app:tileIcon="@drawable/ic_check_24"
+                            app:tileLabel="@string/progress_summary_tasks" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- Constancia: una sola fila (etiqueta + "18/30 días" + delta | tira) para no
@@ -223,88 +235,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- ============ Past 12 weeks ============ -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_card"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_md">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/progress_trend_title"
-                            android:textAppearance="@style/TextAppearance.BBetter.Title" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/progress_trend_subtitle"
-                            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:drawablePadding="@dimen/spacing_sm"
-                        android:gravity="center_vertical"
-                        android:text="@string/progress_trend_legend"
-                        android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                        app:drawableStartCompat="@drawable/ic_progress_legend_dash" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_card_gap"
-                    android:baselineAligned="true"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/progressTrendValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.BBetter.Stat"
-                        tools:text="148.5" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_xs"
-                        android:text="@string/progress_trend_unit"
-                        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
-
-                    <TextView
-                        android:id="@+id/progressTrendDelta"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-                        android:textColor="@color/bb_primary_bright"
-                        tools:text="+18.2 hrs vs prior" />
-                </LinearLayout>
-
-                <FrameLayout
-                    android:id="@+id/progressTrendChartHolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/progress_trend_chart_height"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:contentDescription="@string/progress_trend_cd" />
-            </LinearLayout>
-
             <!-- ============ See all your progress ============ -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/progressSeeAll"
@@ -317,13 +247,17 @@
                 app:icon="@drawable/ic_arrow_forward_24"
                 app:iconGravity="textEnd" />
 
-            <!-- ============ Screen time & blocking ============ -->
+            <!-- ============ Tus apps (mejora-visual u7): toda la tarjeta abre Tiempo de pantalla ============ -->
             <LinearLayout
-                android:id="@+id/progressBlockingCard"
+                android:id="@+id/progressAppsCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_md"
-                android:background="@drawable/bg_progress_blocking_card"
+                android:background="@drawable/bg_card"
+                android:clickable="true"
+                android:contentDescription="@string/progress_apps_cd"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical"
                 android:padding="@dimen/spacing_md">
 
@@ -333,141 +267,59 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <ImageView
-                        android:layout_width="@dimen/progress_blocking_icon_tile"
-                        android:layout_height="@dimen/progress_blocking_icon_tile"
-                        android:background="@drawable/bg_progress_icon_tile"
-                        android:importantForAccessibility="no"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_shield_24"
-                        app:tint="@color/bb_primary_bright" />
-
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_card_gap"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/progress_blocking_title"
-                                android:textAppearance="@style/TextAppearance.BBetter.Title" />
-
-                            <!-- PLACEHOLDER(ui-placeholders#progress-new-badge): insignia fija. -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/spacing_sm"
-                                android:background="@drawable/bg_progress_new_badge"
-                                android:paddingStart="@dimen/spacing_sm"
-                                android:paddingTop="2dp"
-                                android:paddingEnd="@dimen/spacing_sm"
-                                android:paddingBottom="2dp"
-                                android:text="@string/progress_blocking_new"
-                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-                                android:textColor="@color/bb_on_reward" />
-                        </LinearLayout>
+                            android:text="@string/progress_apps_title"
+                            android:textAppearance="@style/TextAppearance.BBetter.Title" />
 
                         <TextView
-                            android:id="@+id/progressBlockingSubtitle"
+                            android:id="@+id/progressAppsSubtitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFeatureSettings="tnum"
                             android:textAppearance="@style/TextAppearance.BBetter.Caption"
-                            tools:text="1h 18m today · goal 1h 30m" />
+                            tools:text="3 h 10 m al día · 22 % menos" />
                     </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/progressBlockingGoalGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_md"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/progressBlockingBar"
-                        style="@style/Widget.BBetter.LinearProgress"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:max="100"
-                        app:trackColor="@color/bb_surface_card"
-                        app:trackThickness="8dp"
-                        tools:progress="78" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/progressBlockingPercent"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                            tools:text="78% of daily limit" />
-
-                        <TextView
-                            android:id="@+id/progressBlockingRemaining"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-                            android:textColor="@color/bb_on_surface"
-                            tools:text="12m remaining" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/progressBlockingChips"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_card_gap"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal" />
-
-                <!-- PLACEHOLDER(ui-placeholders#progress-blocked-opens): no se cuentan aperturas bloqueadas. -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_card_gap"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
 
                     <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_shield_24"
-                        app:tint="@color/bb_primary_bright" />
-
-                    <TextView
-                        android:id="@+id/progressBlockingOpens"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:textAppearance="@style/TextAppearance.BBetter.Caption"
-                        tools:text="23 opens blocked this week" />
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/bb_on_surface_muted" />
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/progressManageBlocking"
-                    style="@style/Widget.BBetter.Button.Primary"
+                <com.example.bbettercalendar.ui.common.widget.SkeletonGroup
+                    android:id="@+id/progressAppsSkeleton"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/progress_blocking_cta_height"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_md"
-                    android:minHeight="@dimen/progress_blocking_cta_height"
-                    android:text="@string/progress_blocking_manage"
-                    app:icon="@drawable/ic_arrow_forward_24"
-                    app:iconGravity="textEnd" />
+                    app:skeletonRowHeight="28dp"
+                    app:skeletonRows="3" />
+
+                <LinearLayout
+                    android:id="@+id/progressAppsRows"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:orientation="vertical"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/progressAppsHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_card_gap"
+                    android:text="@string/progress_apps_hint"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <!-- ============ Projects this week ============ -->

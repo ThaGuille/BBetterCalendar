@@ -128,6 +128,12 @@ public class StatTileView extends LinearLayout {
         value.setText(text);
     }
 
+    /** The big number's own TextView, for {@code Motion.countUp}. */
+    @NonNull
+    public TextView getValueView() {
+        return value;
+    }
+
     /** The big number plus a smaller muted unit after it ("42" + "m", "148.5" + "hrs"). */
     public void setValue(@Nullable CharSequence text, @Nullable CharSequence unitText) {
         value.setText(text);

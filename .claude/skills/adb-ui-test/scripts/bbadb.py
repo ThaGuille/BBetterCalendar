@@ -80,6 +80,7 @@ def adb(*args, serial=None, binary=False, check=False):
     cmd = [adb_path()] + (['-s', serial] if serial else []) + [str(a) for a in args]
     try:
         r = subprocess.run(cmd, capture_output=True, text=not binary,
+                           encoding=None if binary else 'utf-8',  # cp1252 default on Windows mangled n-tilde
                            errors=None if binary else 'replace')
     except FileNotFoundError:
         _no_adb()

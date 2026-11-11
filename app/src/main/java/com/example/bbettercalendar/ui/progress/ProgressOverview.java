@@ -30,12 +30,19 @@ public final class ProgressOverview {
     public final boolean hasConsistencyDelta; // false si el periodo anterior no tiene días con foco
     public final int consistencyDelta;        // días activos vs. el periodo anterior (a la misma altura si está en curso)
 
+    // --- u7: mini barras de la tarjeta resumen (una por dia; por mes en el ano) ---
+    public final float[] sparkValues;         // minutos de foco
+    public final String[] sparkLabels;
+    public final int sparkHighlight;          // indice de hoy dentro del rango, o -1
+    public final int avgSessionMinutes;       // minutos de foco / sesiones; 0 sin sesiones
+
     public ProgressOverview(long focusMinutes, boolean hasFocusDelta, double focusDeltaPercent,
                             int sessions, double sessionsPerDay, int tasksDone, int tasksDoneDelta,
                             float[] trendCurrentHours, float[] trendPreviousHours, String[] trendLabels,
                             long trendCurrentMinutes, long trendDeltaMinutes,
                             ConsistencyCalculator.Result consistency, boolean hasConsistencyDelta,
-                            int consistencyDelta) {
+                            int consistencyDelta, float[] sparkValues, String[] sparkLabels,
+                            int sparkHighlight, int avgSessionMinutes) {
         this.focusMinutes = focusMinutes;
         this.hasFocusDelta = hasFocusDelta;
         this.focusDeltaPercent = focusDeltaPercent;
@@ -51,51 +58,48 @@ public final class ProgressOverview {
         this.consistency = consistency;
         this.hasConsistencyDelta = hasConsistencyDelta;
         this.consistencyDelta = consistencyDelta;
+        this.sparkValues = sparkValues;
+        this.sparkLabels = sparkLabels;
+        this.sparkHighlight = sparkHighlight;
+        this.avgSessionMinutes = avgSessionMinutes;
     }
 
-    // Tarjeta "Screen time & blocking" (html 13): uso de HOY frente a la suma de límites diarios.
-    // No depende del rango seleccionado.
-    public static final class BlockingCard {
+    // Tarjeta "Tus apps" (mejora-visual u7): media diaria de los ultimos 7 dias frente a los 7
+    // anteriores y las 3 apps con mas uso. No depende del rango seleccionado.
+    public static final class AppsCard {
 
-        public static final class AppChip {
+        public static final class AppRow {
             public final String packageName;
             public final String label;
-            public final long millis;
-            public final boolean blocked;    // límite superado con "enforce" activo
-            public final boolean nearLimit;  // >= 75 % del límite (punto ámbar)
+            public final float averageMinutes;  // media diaria de los ultimos 7 dias
+            public final int limitMinutes;      // 0 = sin limite
+            public final boolean enforce;       // candado: se cubre al llegar al limite
+            public final boolean suggested;     // UsageInsights.suggested
 
-            public AppChip(String packageName, String label, long millis, boolean blocked,
-                           boolean nearLimit) {
+            public AppRow(String packageName, String label, float averageMinutes, int limitMinutes,
+                          boolean enforce, boolean suggested) {
                 this.packageName = packageName;
                 this.label = label;
-                this.millis = millis;
-                this.blocked = blocked;
-                this.nearLimit = nearLimit;
+                this.averageMinutes = averageMinutes;
+                this.limitMinutes = limitMinutes;
+                this.enforce = enforce;
+                this.suggested = suggested;
             }
         }
 
-        public final boolean locked;          // sin acceso a uso: no hay datos que mostrar
-        public final int trackedCount;
-        public final long usedMillis;         // uso de hoy de las apps con límite (o de todas si no hay límites)
-        public final int goalMinutes;         // suma de límites diarios; 0 = ninguno
-        public final List<AppChip> chips;     // hasta 3, más usadas primero
+        public final boolean locked;           // sin acceso a uso: no hay datos que mostrar
+        public final float averageMinutes;     // suma de las medias diarias de todas las apps
+        public final boolean hasDelta;         // hay media en los 7 dias anteriores
+        public final int deltaPercent;         // negativo = menos uso
+        public final List<AppRow> rows;        // hasta 3, mas usadas primero
 
-        public BlockingCard(boolean locked, int trackedCount, long usedMillis, int goalMinutes,
-                            List<AppChip> chips) {
+        public AppsCard(boolean locked, float averageMinutes, boolean hasDelta, int deltaPercent,
+                        List<AppRow> rows) {
             this.locked = locked;
-            this.trackedCount = trackedCount;
-            this.usedMillis = usedMillis;
-            this.goalMinutes = goalMinutes;
-            this.chips = chips;
-        }
-
-        public int percentOfGoal() {
-            if (goalMinutes <= 0) return 0;
-            return (int) Math.min(100L, usedMillis * 100L / (goalMinutes * 60_000L));
-        }
-
-        public long remainingMillis() {
-            return Math.max(0L, goalMinutes * 60_000L - usedMillis);
+            this.averageMinutes = averageMinutes;
+            this.hasDelta = hasDelta;
+            this.deltaPercent = deltaPercent;
+            this.rows = rows;
         }
     }
 }

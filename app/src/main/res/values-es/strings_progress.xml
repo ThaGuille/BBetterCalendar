@@ -6,15 +6,6 @@
     <string name="progress_header_screen_time_cd">Tiempo de pantalla y bloqueo</string>
     <string name="progress_header_share_cd">Compartir informe de progreso</string>
 
-    <string name="progress_tile_focus_time">Tiempo de foco</string>
-    <string name="progress_tile_sessions">Sesiones</string>
-    <string name="progress_tile_tasks_done">Tareas hechas</string>
-    <string name="progress_tile_delta_percent">%1$s%%</string>
-    <string name="progress_tile_sessions_avg">%1$s / día de media</string>
-    <string name="progress_tile_tasks_vs_week">%1$s vs sem. anterior</string>
-    <string name="progress_tile_tasks_vs_month">%1$s vs mes anterior</string>
-    <string name="progress_tile_tasks_vs_year">%1$s vs año anterior</string>
-    <string name="progress_tile_tasks_vs_day">%1$s vs ayer</string>
 
     <string name="progress_trend_title">Últimas 12 semanas</string>
     <string name="progress_trend_subtitle">Volumen semanal de foco</string>
@@ -25,18 +16,6 @@
 
     <string name="progress_see_all">Ver todo tu progreso</string>
 
-    <string name="progress_blocking_title">Tiempo de pantalla y bloqueo</string>
-    <string name="progress_blocking_new">NUEVO</string>
-    <string name="progress_blocking_today_goal">%1$s hoy · objetivo %2$s</string>
-    <string name="progress_blocking_today_only">%1$s hoy</string>
-    <string name="progress_blocking_no_apps">Aún no sigues ninguna app</string>
-    <string name="progress_blocking_locked">El acceso a uso está desactivado</string>
-    <string name="progress_blocking_percent">%1$d%% del límite diario</string>
-    <string name="progress_blocking_remaining">%1$s restantes</string>
-    <string name="progress_blocking_blocked">Bloqueada</string>
-    <string name="progress_blocking_opens_count">%1$d aperturas</string>
-    <string name="progress_blocking_opens_suffix">bloqueadas esta semana</string>
-    <string name="progress_blocking_manage">Gestionar bloqueo de apps</string>
 
     <string name="progress_projects_week">Proyectos esta semana</string>
     <string name="progress_projects_month">Proyectos este mes</string>
@@ -51,4 +30,33 @@
     </plurals>
     <string name="progress_consistency_desc">Constancia: foco en %1$d de %2$d días</string>
     <string name="progress_consistency_desc_delta">Constancia: foco en %1$d de %2$d días, %3$+d frente al periodo anterior</string>
+
+    <!-- u7 · tarjeta resumen -->
+    <string name="progress_summary_focus">Enfoque</string>
+    <string name="progress_summary_sessions">Sesiones</string>
+    <string name="progress_summary_tasks">Tareas</string>
+    <string name="progress_summary_delta">%1$d %%</string>
+    <string name="progress_summary_vs_week">vs. semana anterior</string>
+    <string name="progress_summary_vs_month">vs. mes anterior</string>
+    <string name="progress_summary_vs_year">vs. año anterior</string>
+    <string name="progress_summary_vs_day">vs. ayer</string>
+    <string name="progress_summary_sessions_avg">%1$d min de media</string>
+    <string name="progress_summary_sessions_none">Aún sin sesiones</string>
+    <string name="progress_summary_tasks_more">%1$d más que la anterior</string>
+    <string name="progress_summary_tasks_less">%1$d menos que la anterior</string>
+    <string name="progress_summary_tasks_same">Igual que la anterior</string>
+    <string name="progress_summary_spark_cd">Tiempo de enfoque de cada día del periodo</string>
+
+    <!-- u7 · tarjeta «Tus apps» -->
+    <string name="progress_apps_title">Tus apps</string>
+    <string name="progress_apps_subtitle">%1$s al día</string>
+    <string name="progress_apps_subtitle_less">%1$s al día · %2$d %% menos</string>
+    <string name="progress_apps_subtitle_more">%1$s al día · %2$d %% más</string>
+    <string name="progress_apps_none">Aún no hay uso de apps registrado</string>
+    <string name="progress_apps_locked">El acceso a uso está desactivado</string>
+    <string name="progress_apps_suggested">Sugerida</string>
+    <string name="progress_apps_value_limit">%1$s / %2$s</string>
+    <string name="progress_apps_hint">La raya marca el límite diario</string>
+    <string name="progress_apps_cd">Tus apps. Abre el tiempo de pantalla</string>
+    <string name="progress_apps_lock_cd">Se bloquea al llegar al límite</string>
 </resources>

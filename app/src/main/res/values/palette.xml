@@ -77,11 +77,11 @@
     <color name="sage_300_a20">#337FB69A</color>     <!-- 20 %: chip rim, invite rim -->
     <color name="sage_300_a15">#267FB69A</color>     <!-- 15 %: metric divider -->
     <color name="sage_300_a10">#1A7FB69A</color>     <!-- 10 %: chip fill, rest glow -->
-    <color name="sage_200_a08">#149BD3B5</color>     <!-- 8 %: Home timer card glow, top-end (html 04 primary/5 blurred) -->
-    <color name="sage_200_a00">#009BD3B5</color>     <!-- 0 %: glow end -->
-    <color name="forest_600_a60">#992C4C47</color>   <!-- 60 %: Home timer card glow, bottom-start (html 04 secondary-container/40) -->
-    <color name="forest_600_a00">#002C4C47</color>   <!-- 0 %: glow end -->
-    <color name="amber_400_a25">#40E5A93C</color>    <!-- 25 %: amber button glow -->
+<!-- 8 %: Home timer card glow, top-end (html 04 primary/5 blurred) -->
+<!-- 0 %: glow end -->
+<!-- 60 %: Home timer card glow, bottom-start (html 04 secondary-container/40) -->
+<!-- 0 %: glow end -->
+<!-- 25 %: amber button glow -->
     <color name="amber_400_a18">#2EE5A93C</color>    <!-- 18 %: hearth glow centre -->
     <color name="amber_400_a00">#00E5A93C</color>    <!-- 0 %: glow end -->
 

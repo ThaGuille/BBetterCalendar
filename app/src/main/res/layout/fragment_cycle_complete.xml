@@ -38,7 +38,7 @@
                     android:layout_gravity="end"
                     android:background="@drawable/bg_cycle_close"
                     android:contentDescription="@string/cycle_close_desc"
-                    android:padding="10dp"
+                    android:padding="16dp"
                     android:src="@drawable/ic_close_24"
                     app:tint="@color/bb_sanct_on_surface_muted" />
             </FrameLayout>

@@ -21,5 +21,4 @@
     <!-- Weekly goal picker (FocusStreakPopup). -->
     <string name="streak_goal_title">Weekly goal</string>
     <string name="streak_goal_unit">days / week</string>
-    <string name="streak_goal_caption">Each week you hit it, your streak grows</string>
 </resources>

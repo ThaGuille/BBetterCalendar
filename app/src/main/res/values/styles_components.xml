@@ -197,21 +197,6 @@
 
     <!-- Tiny status tag ("NEW RECORD", "CONCENTRATION"): tinted container, uppercase, not
          interactive. -->
-    <style name="Widget.BBetter.Chip.Status" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
-        <item name="shapeAppearanceOverlay">@null</item>
-        <item name="chipBackgroundColor">@color/bb_primary_container</item>
-        <item name="chipStrokeWidth">0dp</item>
-        <item name="chipMinHeight">@dimen/chip_status_min_height</item>
-        <item name="android:textAppearance">@style/TextAppearance.BBetter.Chip</item>
-        <item name="android:textColor">@color/bb_on_primary_container</item>
-        <item name="chipIconTint">@color/bb_on_primary_container</item>
-        <item name="android:checkable">false</item>
-        <item name="android:clickable">false</item>
-        <item name="android:focusable">false</item>
-        <item name="ensureMinTouchTargetSize">false</item>
-        <item name="rippleColor">@android:color/transparent</item>
-    </style>
 
     <!-- ===== CheckBox (mejora-visual u3) ===== -->
     <!-- 22dp sage ring; checked = bb_primary disc and the check draws itself (AnimatedStateListDrawable,
@@ -245,9 +230,6 @@
 
     <!-- u9: per-app "lock at limit" switch (AppUsageRowView, html 14): same track, the thumb
          carries a lock / open-lock glyph. -->
-    <style name="Widget.BBetter.Switch.Lock">
-        <item name="android:thumb">@drawable/bb_switch_thumb_lock</item>
-    </style>
 
     <!-- ===== Progress (theme linear/circularProgressIndicatorStyle) ===== -->
     <!-- 6dp sage bar on a raised track, rounded ends (corner radius is capped at thickness/2). -->

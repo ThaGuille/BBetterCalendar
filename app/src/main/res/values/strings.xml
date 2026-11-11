@@ -16,7 +16,6 @@
 
     <!-- Projects (spec projects-mvp) -->
     <string name="projects_add">Add project</string>
-    <string name="projects_empty">No projects yet — add one to group your tasks</string>
     <string name="create_project_title">New project</string>
     <string name="create_project_name_hint">Project name</string>
     <string name="create_project_notes_hint">Notes (optional)</string>
@@ -24,13 +23,8 @@
     <string name="create_project_cancel">Cancel</string>
     <string name="create_project_save">Create</string>
     <string name="create_project_name_required">Give it a name</string>
-    <string name="project_progress_format">%1$d/%2$d done</string>
-    <string name="project_progress_empty">No items yet</string>
-    <string name="project_deadline_approaching">Due soon</string>
     <string name="project_deadline_passed">Overdue</string>
     <string name="project_detail_title">Project</string>
-    <string name="project_detail_items_title">Items</string>
-    <string name="project_detail_add_item">Add item</string>
     <string name="project_detail_items_empty">No items yet — add one</string>
     <string name="project_detail_complete">Mark complete</string>
     <string name="project_detail_delete">Delete project</string>
@@ -40,7 +34,6 @@
     <string name="event">Event</string>
     <string name="task">Task</string>
 
-    <string name="events_for">Events for %1$s</string>
     <string name="month_view_prev">Previous month</string>
     <string name="month_view_next">Next month</string>
     <string name="no_events_today">No events for this day</string>
@@ -61,9 +54,7 @@
     <string name="home_block_mode_pending">Block mode: needs permission</string>
 
     <!-- Home: Today task list + quick-add (spec tasks-home-today) -->
-    <string name="home_tasks_card_title">Tasks</string>
     <string name="home_tasks_add">Add task</string>
-    <string name="home_tasks_empty">Nothing for today — add a task</string>
     <string name="home_tasks_show_overdue">Show older uncompleted tasks</string>
     <string name="home_tasks_hide_overdue">Hide older uncompleted tasks</string>
     <string name="home_tasks_overdue_empty">No older uncompleted tasks</string>
@@ -76,21 +67,14 @@
 
     <!-- Timer (Pomodoro) popup -->
     <string name="timer_popup_title">Pomodoro timer</string>
-    <string name="timer_popup_subtitle">Tune your focus session</string>
     <string name="timer_concentration_label">Concentration</string>
     <string name="timer_rest_label">Rest</string>
-    <string name="timer_minutes_unit">minutes</string>
-    <string name="timer_range_min">1 min</string>
-    <string name="timer_range_max">90 min</string>
-    <string name="timer_range_rest_max">30 min</string>
     <string name="timer_cycles_label">Total cycles</string>
     <string name="timer_infinite_symbol" translatable="false">∞</string>
     <string name="timer_auto_cycle_label">Auto-chain cycles</string>
     <string name="timer_auto_cycle_hint">Start the next session automatically</string>
     <string name="timer_btn_restore">Restore\ndefaults</string>
-    <string name="timer_btn_cancel">Cancel</string>
     <string name="timer_btn_save">Save</string>
-    <string name="timer_error_cycles_range">Cycles must be between 1 and 15.</string>
 
     <!-- Create event / task screen -->
     <string name="create_entry_headline_event">New event</string>
@@ -172,18 +156,10 @@
     <string name="chart_limit_label">Limit %1$s</string>
 
     <!-- Progress screen — project-progress band (spec project-deadlines-progress) -->
-    <string name="progress_project_minutes_format" translatable="false">%1$dm</string>
 
     <!-- Progress screen — phone & app usage (Phase 2) -->
-    <string name="progress_usage_limit_progress_format" translatable="false">%1$s / %2$s</string>
 
     <!-- App-limit dialog (Phase 3 — tap a usage row to set/clear a daily limit) -->
-    <string name="app_limit_dialog_title">Daily limit</string>
-    <string name="app_limit_dialog_minutes_hint">Minutes per day</string>
-    <string name="app_limit_dialog_save">Save</string>
-    <string name="app_limit_dialog_clear">Clear</string>
-    <string name="app_limit_dialog_cancel">Cancel</string>
-    <string name="app_limit_dialog_invalid_minutes">Enter a number of minutes greater than 0</string>
 
     <!-- App picker (Phase 2) -->
     <string name="app_picker_title">Add apps</string>
@@ -275,7 +251,6 @@
 
     <!-- Objetivos de minutos + "focus this" (spec focus-attribution) -->
     <string name="quick_add_target_hint">Target minutes (optional)</string>
-    <string name="focus_progress_format" translatable="false">%1$d/%2$dm</string>
     <string name="task_focus_this_desc">Focus this task</string>
 
     <!-- Focus mode + racha (spec focus-mode-and-streak; semanal desde plan racha-semanal-y-constancia) -->
@@ -288,7 +263,6 @@
     <string name="first_focus_title">Congratulations!</string>
     <string name="first_focus_message">First pomodoro of the day, done and dusted.</string>
     <string name="first_focus_button">Keep it up</string>
-    <string name="first_focus_badge" translatable="false">🔥</string>
     <plurals name="first_focus_days_this_month">
         <item quantity="one">day with a pomodoro this month</item>
         <item quantity="other">days with a pomodoro this month</item>
@@ -312,10 +286,6 @@
     <string name="widget_period_next">Next period</string>
     <string name="widget_stepper_decrease">Decrease</string>
     <string name="widget_stepper_increase">Increase</string>
-    <string name="widget_app_status_warning">Almost at limit</string>
-    <string name="widget_app_status_blocked">Blocked</string>
-    <string name="widget_app_set_limit">Set limit</string>
-    <string name="widget_app_lock_cd">Block %1$s when the limit is reached</string>
     <string name="widget_app_open_cd">%1$s details</string>
     <string name="widget_avatar_studying">%1$s, studying now</string>
     <string name="widget_avatar_away">%1$s, away</string>
@@ -324,16 +294,8 @@
     <string name="home_notifications">Notifications</string>
     <string name="home_notifications_soon">Notification centre is coming soon</string>
     <string name="home_mode_paused">Paused</string>
-    <string name="home_cycle_format">Cycle %1$d of %2$d</string>
-    <string name="home_cycle_infinite_format">Cycle %1$d</string>
-    <string name="home_cycle_next_format">%1$s · Next: %2$s</string>
-    <string name="home_cycle_focusing_format">%1$s · Focusing: %2$s</string>
     <string name="home_cycle_chip_desc">Timer settings: %1$s</string>
     <string name="home_open_focus">Open focus session</string>
-    <plurals name="home_friends_studying">
-        <item quantity="one">%d friend studying now</item>
-        <item quantity="other">%d friends studying now</item>
-    </plurals>
     <string name="home_next_up">Next up</string>
     <string name="home_next_up_empty">Nothing scheduled this week</string>
     <string name="home_next_up_desc">Open calendar</string>
@@ -358,10 +320,8 @@
         <item quantity="other">%d missed sessions</item>
     </plurals>
     <string name="focus_studying_now">Studying now</string>
-    <string name="focus_friends_meta" translatable="false">%1$d / %2$d</string>
     <string name="focus_friend_away">away</string>
     <string name="focus_invite_friends">Invite friends to study together</string>
-    <string name="focus_invite_soon">Inviting friends is coming soon</string>
     <string name="focus_cycles_desc">Cycle %1$d of %2$d</string>
 
     <string name="home_streak_title">Focus days</string>

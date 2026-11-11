@@ -17,5 +17,4 @@
 
     <string name="streak_goal_title">Objetivo semanal</string>
     <string name="streak_goal_unit">días / semana</string>
-    <string name="streak_goal_caption">Cada semana que lo cumples, tu racha crece</string>
 </resources>

@@ -20,7 +20,6 @@
 
     <!-- Proyectos -->
     <string name="projects_add">Añadir proyecto</string>
-    <string name="projects_empty">Aún no hay proyectos — crea uno para agrupar tus tareas</string>
     <string name="create_project_title">Nuevo proyecto</string>
     <string name="create_project_name_hint">Nombre del proyecto</string>
     <string name="create_project_notes_hint">Notas (opcional)</string>
@@ -28,13 +27,8 @@
     <string name="create_project_cancel">Cancelar</string>
     <string name="create_project_save">Crear</string>
     <string name="create_project_name_required">Ponle un nombre</string>
-    <string name="project_progress_format">%1$d/%2$d hechas</string>
-    <string name="project_progress_empty">Aún no hay elementos</string>
-    <string name="project_deadline_approaching">Vence pronto</string>
     <string name="project_deadline_passed">Vencido</string>
     <string name="project_detail_title">Proyecto</string>
-    <string name="project_detail_items_title">Elementos</string>
-    <string name="project_detail_add_item">Añadir elemento</string>
     <string name="project_detail_items_empty">Aún no hay elementos — añade uno</string>
     <string name="project_detail_complete">Marcar como completado</string>
     <string name="project_detail_delete">Eliminar proyecto</string>
@@ -44,7 +38,6 @@
     <string name="event">Evento</string>
     <string name="task">Tarea</string>
 
-    <string name="events_for">Eventos del %1$s</string>
     <string name="month_view_prev">Mes anterior</string>
     <string name="month_view_next">Mes siguiente</string>
     <string name="no_events_today">No hay eventos este día</string>
@@ -63,9 +56,7 @@
     <string name="home_block_mode_pending">Modo bloqueo: falta permiso</string>
 
     <!-- Inicio: tareas de hoy + alta rápida -->
-    <string name="home_tasks_card_title">Tareas</string>
     <string name="home_tasks_add">Añadir tarea</string>
-    <string name="home_tasks_empty">Nada para hoy — añade una tarea</string>
     <string name="home_tasks_show_overdue">Ver tareas pendientes anteriores</string>
     <string name="home_tasks_hide_overdue">Ocultar tareas pendientes anteriores</string>
     <string name="home_tasks_overdue_empty">No hay tareas pendientes anteriores</string>
@@ -78,20 +69,13 @@
 
     <!-- Popup del temporizador (pomodoro) -->
     <string name="timer_popup_title">Temporizador pomodoro</string>
-    <string name="timer_popup_subtitle">Ajusta tu sesión de concentración</string>
     <string name="timer_concentration_label">Concentración</string>
     <string name="timer_rest_label">Descanso</string>
-    <string name="timer_minutes_unit">minutos</string>
-    <string name="timer_range_min">1 min</string>
-    <string name="timer_range_max">90 min</string>
-    <string name="timer_range_rest_max">30 min</string>
     <string name="timer_cycles_label">Ciclos totales</string>
     <string name="timer_auto_cycle_label">Encadenar ciclos</string>
     <string name="timer_auto_cycle_hint">Empieza la siguiente sesión automáticamente</string>
     <string name="timer_btn_restore">Restaurar\nvalores</string>
-    <string name="timer_btn_cancel">Cancelar</string>
     <string name="timer_btn_save">Guardar</string>
-    <string name="timer_error_cycles_range">Los ciclos deben estar entre 1 y 15.</string>
 
     <!-- Crear evento / tarea -->
     <string name="create_entry_headline_event">Nuevo evento</string>
@@ -173,12 +157,6 @@
     <!-- Progreso: uso del móvil y de apps -->
 
     <!-- Diálogo de límite de app -->
-    <string name="app_limit_dialog_title">Límite diario</string>
-    <string name="app_limit_dialog_minutes_hint">Minutos al día</string>
-    <string name="app_limit_dialog_save">Guardar</string>
-    <string name="app_limit_dialog_clear">Quitar</string>
-    <string name="app_limit_dialog_cancel">Cancelar</string>
-    <string name="app_limit_dialog_invalid_minutes">Introduce un número de minutos mayor que 0</string>
 
     <!-- Selector de apps -->
     <string name="app_picker_title">Añadir apps</string>
@@ -293,10 +271,6 @@
     <string name="widget_period_next">Periodo siguiente</string>
     <string name="widget_stepper_decrease">Reducir</string>
     <string name="widget_stepper_increase">Aumentar</string>
-    <string name="widget_app_status_warning">Casi en el límite</string>
-    <string name="widget_app_status_blocked">Bloqueada</string>
-    <string name="widget_app_set_limit">Poner límite</string>
-    <string name="widget_app_lock_cd">Bloquear %1$s al llegar al límite</string>
     <string name="widget_app_open_cd">Detalle de %1$s</string>
     <string name="widget_avatar_studying">%1$s, estudiando ahora</string>
     <string name="widget_avatar_away">%1$s, ausente</string>
@@ -305,16 +279,8 @@
     <string name="home_notifications">Notificaciones</string>
     <string name="home_notifications_soon">El centro de notificaciones llegará pronto</string>
     <string name="home_mode_paused">En pausa</string>
-    <string name="home_cycle_format">Ciclo %1$d de %2$d</string>
-    <string name="home_cycle_infinite_format">Ciclo %1$d</string>
-    <string name="home_cycle_next_format">%1$s · Siguiente: %2$s</string>
-    <string name="home_cycle_focusing_format">%1$s · Concentrado en: %2$s</string>
     <string name="home_cycle_chip_desc">Ajustes del temporizador: %1$s</string>
     <string name="home_open_focus">Abrir la sesión de concentración</string>
-    <plurals name="home_friends_studying">
-        <item quantity="one">%d amigo estudiando ahora</item>
-        <item quantity="other">%d amigos estudiando ahora</item>
-    </plurals>
     <string name="home_next_up">A continuación</string>
     <string name="home_next_up_empty">Nada programado esta semana</string>
     <string name="home_next_up_desc">Abrir el calendario</string>
@@ -341,7 +307,6 @@
     <string name="focus_studying_now">Estudiando ahora</string>
     <string name="focus_friend_away">ausente</string>
     <string name="focus_invite_friends">Invita a tus amigos a estudiar juntos</string>
-    <string name="focus_invite_soon">Invitar amigos llegará pronto</string>
     <string name="focus_cycles_desc">Ciclo %1$d de %2$d</string>
 
     <string name="home_streak_title">Días de concentración</string>

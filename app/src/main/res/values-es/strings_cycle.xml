@@ -6,7 +6,6 @@
         <item quantity="one">%d pomodoro</item>
         <item quantity="other">%d pomodoros</item>
     </plurals>
-    <string name="cycle_tile_focus">Foco</string>
     <string name="cycle_tile_today">Hoy</string>
     <string name="cycle_tile_streak">Racha</string>
     <string name="cycle_friend_one_format">%1$s sigue estudiando</string>

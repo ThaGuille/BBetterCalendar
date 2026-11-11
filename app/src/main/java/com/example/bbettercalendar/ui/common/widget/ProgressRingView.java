@@ -193,8 +193,16 @@ public class ProgressRingView extends View {
         }
         if (showText) {
             String text = getContext().getString(R.string.widget_ring_percent, Math.round(shown));
+            // Large text: shrink to fit inside the ring instead of touching the stroke.
+            float room = oval.width() - stroke * 2f;
+            float size = textPaint.getTextSize();
+            float wide = textPaint.measureText(text);
+            if (room > 0f && wide > room) {
+                textPaint.setTextSize(size * room / wide);
+            }
             float y = getHeight() / 2f - (textPaint.descent() + textPaint.ascent()) / 2f;
             canvas.drawText(text, getWidth() / 2f, y, textPaint);
+            textPaint.setTextSize(size);
         }
     }
 

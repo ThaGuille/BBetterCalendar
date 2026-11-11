@@ -106,7 +106,7 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         for (CalendarEntry entry : next) {
             int i = pendingDone.indexOfKey(entry.getId());
             if (i >= 0 && pendingDone.valueAt(i) == entry.isDone()) {
-                pendingDone.removeAt(i);
+                pendingDone.delete(entry.getId());
             }
         }
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new TaskDiff(tasks, next));

@@ -15,9 +15,9 @@
     <dimen name="project_glow_offset">-60dp</dimen>
     <dimen name="project_chevron_size">20dp</dimen>
     <dimen name="project_focus_button_height">40dp</dimen>
-    <dimen name="project_play_size">40dp</dimen>
-    <dimen name="project_play_small">32dp</dimen>
-    <dimen name="project_play_icon_pad">10dp</dimen>
+    <dimen name="project_play_size">48dp</dimen>
+    <dimen name="project_play_small">48dp</dimen>
+    <dimen name="project_play_icon_pad">14dp</dimen>
     <dimen name="project_quick_add_height">56dp</dimen>
     <dimen name="project_quick_add_button">44dp</dimen>
     <dimen name="project_cell_gap">12dp</dimen>

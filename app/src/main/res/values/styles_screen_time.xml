@@ -12,7 +12,7 @@
         <item name="chipMinHeight">@dimen/screen_time_chip_height</item>
         <!-- Same 40dp as the "Add" chip beside it. With the 48dp touch-target inset the ChipGroup
              measured the chip at 40dp and clipped the bottom of its inset background. -->
-        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="ensureMinTouchTargetSize">true</item>
         <item name="android:textAppearance">@style/TextAppearance.BBetter.ChipLabel</item>
         <item name="android:textColor">@color/bb_on_surface</item>
         <item name="android:checkable">false</item>

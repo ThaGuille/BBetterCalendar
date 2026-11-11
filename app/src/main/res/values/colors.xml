@@ -43,7 +43,6 @@
     <!-- Content on surfaces -->
     <color name="bb_on_surface">@color/mist_50</color>
     <color name="bb_on_surface_muted">@color/lichen_300</color>
-    <color name="bb_on_surface_faint">@color/grey_400</color>
     <color name="bb_disabled">@color/mist_50_a38</color>
 
     <!-- Lines -->
@@ -62,7 +61,6 @@
     <color name="bb_chart_band">@color/sage_300_a12</color>
     <color name="bb_chart_halo">@color/honey_300_a25</color>
     <!-- u14 · Focus: halo of the current cycle dot (html ring-2 ring-primary/30). -->
-    <color name="bb_focus_dot_ring">@color/sage_300_a32</color>
 
     <!-- Project accents (ProjectListAdapter.ACCENT_COLORS cycles them by colorIndex).
          Order and hues follow the four project dots of .stitch/html/03-projects.html. -->
@@ -150,16 +148,11 @@
     <color name="bb_sanct_chip_fill">@color/sage_300_a10</color>
     <color name="bb_sanct_divider">@color/sage_300_a15</color>
     <!-- Brillos de la tarjeta del temporizador de Home (html 04: dos manchas difuminadas). -->
-    <color name="bb_home_glow_primary_start">@color/sage_200_a08</color>
-    <color name="bb_home_glow_primary_end">@color/sage_200_a00</color>
-    <color name="bb_home_glow_container_start">@color/forest_600_a60</color>
-    <color name="bb_home_glow_container_end">@color/forest_600_a00</color>
     <!-- Avatares de amigos de Cycle complete (html 02: sage-dark / amber-700 / pine-600). -->
     <color name="bb_sanct_avatar_1">@color/sage_500</color>
     <color name="bb_sanct_avatar_2">@color/amber_700</color>
     <color name="bb_sanct_avatar_3">@color/sanct_pine_600</color>
     <color name="bb_sanct_glow_sage">@color/sage_300_a10</color>
-    <color name="bb_sanct_button_glow">@color/amber_400_a25</color>
     <color name="bb_sanct_glow_start">@color/amber_400_a18</color>
     <color name="bb_sanct_glow_end">@color/amber_400_a00</color>
     <!-- F2-u8: el QR de invitación va oscuro sobre claro también en tema oscuro (un lector necesita ese contraste); sin variante night. -->

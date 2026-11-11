@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.example.bbettercalendar.R;
 
@@ -83,6 +84,7 @@ public class CompareBarsView extends BaseChartView {
     private final Paint avgPaint;
     private final Paint axisPaint;
     private final Paint labelPaint;
+    private final Paint haloPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint labelStrongPaint;
     private final float radius;
     private final float gap;
@@ -111,6 +113,9 @@ public class CompareBarsView extends BaseChartView {
                 R.dimen.chart_dash_off);
         axisPaint = textPaint(R.style.TextAppearance_BBetter_Micro, 500);
         labelPaint = textPaint(R.style.TextAppearance_BBetter_Micro, 500);
+        haloPaint.setStyle(Paint.Style.STROKE);
+        haloPaint.setStrokeJoin(Paint.Join.ROUND);
+        haloPaint.setColor(ContextCompat.getColor(context, R.color.bb_surface_card));
         labelPaint.setTextAlign(Paint.Align.CENTER);
         labelStrongPaint = textPaint(R.style.TextAppearance_BBetter_Micro_Bold, 700);
         labelStrongPaint.setColor(color(R.color.bb_on_surface));
@@ -200,7 +205,15 @@ public class CompareBarsView extends BaseChartView {
             String label = d.lineText(getContext());
             int old = axisPaint.getAlpha();
             axisPaint.setAlpha(Math.min(old, a));
-            canvas.drawText(label, plotLeft + labelGap / 2f, y - labelGap / 2f - axisPaint.descent(), axisPaint);
+            // Halo in the card colour so the label stays legible over the bars (large text makes it wider).
+            haloPaint.setTextSize(axisPaint.getTextSize());
+            haloPaint.setTypeface(axisPaint.getTypeface());
+            haloPaint.setStrokeWidth(labelGap * 0.6f);
+            haloPaint.setAlpha(Math.min(255, a));
+            float lx = plotLeft + labelGap / 2f;
+            float ly = y - labelGap / 2f - axisPaint.descent();
+            canvas.drawText(label, lx, ly, haloPaint);
+            canvas.drawText(label, lx, ly, axisPaint);
             axisPaint.setAlpha(old);
         }
 

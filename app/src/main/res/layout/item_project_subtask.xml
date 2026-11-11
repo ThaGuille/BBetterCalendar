@@ -57,10 +57,10 @@
         android:layout_width="@dimen/project_play_small"
         android:layout_height="@dimen/project_play_small"
         android:layout_marginStart="@dimen/spacing_sm"
-        android:background="@drawable/bg_project_play"
+        android:background="@drawable/bg_project_play_small"
         android:clickable="true"
         android:focusable="true"
-        android:padding="@dimen/spacing_sm"
+        android:padding="@dimen/spacing_md"
         android:src="@drawable/ic_play_v2_filled_24"
         app:tint="@color/bb_primary" />
 </LinearLayout>

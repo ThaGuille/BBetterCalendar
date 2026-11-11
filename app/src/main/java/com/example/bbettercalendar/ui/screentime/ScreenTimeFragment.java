@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.blocking.BlockingSettings;
@@ -153,7 +154,10 @@ public class ScreenTimeFragment extends Fragment
         view.findViewById(R.id.screenTimeAllowedRow).setOnClickListener(v -> openAllowlistPicker());
         allowedAdd.setOnClickListener(v -> openAllowlistPicker());
         shieldSwitch.setOnCheckedChangeListener((b, checked) -> {
-            if (!bindingShield) onShieldToggled(checked);
+            if (!bindingShield) {
+                HapticFeedback.lightTap(b);
+                onShieldToggled(checked);
+            }
         });
         footer.setOnClickListener(v -> onFooterTapped());
         period.setOnSegmentSelectedListener((v, index) -> viewModel.setMonth(index == 1));

@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
@@ -149,7 +150,10 @@ public class AppDetailFragment extends Fragment
         period.setSelectedIndex(viewModel.isMonth() ? 1 : 0);
         warnRow.setOnClickListener(v -> showWarnDialog());
         blockSwitch.setOnCheckedChangeListener((b, checked) -> {
-            if (!binding) onBlockToggled(checked);
+            if (!binding) {
+                HapticFeedback.lightTap(b);
+                onBlockToggled(checked);
+            }
         });
         a11yStatus.setOnClickListener(v -> {
             if (!AccessibilityAccess.isEnabled(requireContext())) openAccessibilitySettings();

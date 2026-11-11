@@ -7,12 +7,6 @@
     <string name="progress_header_share_cd">Compartir informe de progreso</string>
 
 
-    <string name="progress_trend_title">Últimas 12 semanas</string>
-    <string name="progress_trend_subtitle">Volumen semanal de foco</string>
-    <string name="progress_trend_legend">12 sem. previas</string>
-    <string name="progress_trend_unit">h</string>
-    <string name="progress_trend_delta">%1$s h vs anteriores</string>
-    <string name="progress_trend_cd">Horas de foco por semana en las últimas 12 semanas frente a las 12 anteriores</string>
 
     <string name="progress_see_all">Ver todo tu progreso</string>
 

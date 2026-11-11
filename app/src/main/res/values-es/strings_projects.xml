@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="projects_title">Proyectos</string>
+    <string name="project_tasks_and_time">%1$s · %2$s</string>
     <string name="projects_summary_active">%1$d activos</string>
     <plurals name="projects_summary_due">
         <item quantity="one">%1$d vence esta semana</item>

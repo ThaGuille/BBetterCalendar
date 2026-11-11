@@ -9,12 +9,6 @@
     <string name="progress_header_share_cd">Share progress report</string>
 
 
-    <string name="progress_trend_title">Past 12 weeks</string>
-    <string name="progress_trend_subtitle">Weekly focus volume</string>
-    <string name="progress_trend_legend">prev 12 wks</string>
-    <string name="progress_trend_unit">hrs</string>
-    <string name="progress_trend_delta">%1$s hrs vs prior</string>
-    <string name="progress_trend_cd">Weekly focus hours over the past 12 weeks compared with the 12 before</string>
 
     <string name="progress_see_all">See all your progress</string>
 

@@ -23,7 +23,6 @@
     <dimen name="button_text_height">48dp</dimen>
     <dimen name="button_padding_horizontal">24dp</dimen>
     <!-- Play / pause circle. -->
-    <dimen name="play_button_size">72dp</dimen>
     <!-- Segmented control: track 40dp = 4dp padding + 32dp item (html p-1 / py-2 text-xs). -->
     <dimen name="segmented_track_height">40dp</dimen>
     <dimen name="segmented_track_padding">4dp</dimen>
@@ -64,8 +63,6 @@
     <dimen name="widget_avatar_ring">2dp</dimen>
     <dimen name="widget_hairline">1dp</dimen>
     <!-- AppUsageRowView: html 14 w-11 icon, w-20 bar, rounded-[16px] row. -->
-    <dimen name="widget_app_icon_size">44dp</dimen>
-    <dimen name="widget_app_bar_width">80dp</dimen>
     <dimen name="widget_row_padding">12dp</dimen>
     <!-- StepperView: html 10 w-11 buttons. -->
     <dimen name="widget_stepper_button_size">44dp</dimen>
@@ -121,9 +118,6 @@
     <!-- Home screen -->
     <dimen name="home_card_padding">20dp</dimen>
     <!-- Radio de los brillos de la tarjeta del temporizador (html 04: manchas de 192/208px con blur-3xl). -->
-    <dimen name="home_timer_glow_radius">160dp</dimen>
-    <dimen name="home_timer_glow_radius_large">200dp</dimen>
-    <dimen name="home_play_button_size">@dimen/play_button_size</dimen>
     <!-- Iconos del par fecha / tiempo estudiado del header (spec focus-mode-and-streak) -->
     <dimen name="home_inline_stat_icon_size">16dp</dimen>
     <!-- Botón "cancelar sesión" del focus mode: satélite del play, deliberadamente menor -->
@@ -131,20 +125,19 @@
     <dimen name="home_timer_text">72sp</dimen>          <!-- text-7xl hero countdown -->
     <dimen name="home_mode_dot_size">6dp</dimen>        <!-- w-1.5 dot in the mode chip -->
     <dimen name="home_header_icon_button">40dp</dimen>  <!-- bell -->
-    <dimen name="home_add_task_button">28dp</dimen>     <!-- w-7 "+" next to Tasks -->
-    <dimen name="home_task_check_size">20dp</dimen>     <!-- w-5 round task checkbox -->
+<!-- w-7 "+" next to Tasks -->
+<!-- w-5 round task checkbox -->
     <dimen name="home_friend_avatar_size">32dp</dimen>  <!-- w-8 overlapped avatars -->
     <dimen name="home_friend_avatar_overlap">-8dp</dimen> <!-- -space-x-2 -->
-    <dimen name="home_next_up_icon_tile">36dp</dimen>   <!-- w-9 rounded-xl -->
+<!-- w-9 rounded-xl -->
     <!-- u14 · Focus (html 01) -->
-    <dimen name="focus_timer_text">74sp</dimen>          <!-- text-[74px] countdown -->
-    <dimen name="focus_ring_size">264dp</dimen>          <!-- w-72 box, r=126/140 + 7dp stroke -->
-    <dimen name="focus_control_size">56dp</dimen>        <!-- w-14 stop / skip -->
-    <dimen name="focus_control_gap">24dp</dimen>         <!-- gap-6 -->
+<!-- text-[74px] countdown -->
+<!-- w-72 box, r=126/140 + 7dp stroke -->
+<!-- w-14 stop / skip -->
+<!-- gap-6 -->
     <dimen name="focus_cycle_dot_box">14dp</dimen>       <!-- w-2.5 dot + 2dp ring each side -->
-    <dimen name="focus_cycle_dot_inset">2dp</dimen>
     <dimen name="focus_cycle_dot_gap">4dp</dimen>        <!-- gap-2 minus the ring boxes -->
-    <dimen name="focus_friend_avatar_size">44dp</dimen>  <!-- w-11 -->
+<!-- w-11 -->
 
     <!-- Fixed positions formerly hardcoded -->
 
@@ -163,7 +156,6 @@
     <dimen name="chart_point_hollow_stroke">2dp</dimen>
     <!-- Altura mínima del área de la banda de uso (tarjeta LOCKED/EMPTY o lista) para que no quede
          aplastada cuando hay pocas apps. -->
-    <dimen name="chip_status_min_height">24dp</dimen>
     <!-- Celda del calendario de rachas dentro del popup -->
     <dimen name="streak_day_marker_size">30dp</dimen>
 </resources>

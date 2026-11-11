@@ -5,7 +5,6 @@
     <dimen name="social_hero_icon_padding">16dp</dimen>
     <dimen name="social_input_min_height">52dp</dimen>
     <dimen name="social_input_padding_h">16dp</dimen>
-    <dimen name="social_content_max_width">420dp</dimen>
     <dimen name="social_cta_icon">40dp</dimen>
     <dimen name="social_cta_icon_padding">10dp</dimen>
     <dimen name="social_cta_card_padding">16dp</dimen>

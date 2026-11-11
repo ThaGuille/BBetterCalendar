@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Round play button of a project task (mejora-visual u11): a faint light disc that reads on card and strip. -->
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="@color/bb_ripple_on_primary">
-    <item>
-        <shape android:shape="oval">
-            <solid android:color="@color/bb_card_lit_edge" />
-        </shape>
-    </item>
-</ripple>
+<!-- Round play button of a project task (mejora-visual u11): a faint light disc that reads on card and strip.
+     u16: the view is 48dp (touch target); the inset keeps the 40dp disc. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="4dp">
+    <ripple android:color="@color/bb_ripple_on_primary">
+        <item>
+            <shape android:shape="oval">
+                <solid android:color="@color/bb_card_lit_edge" />
+            </shape>
+        </item>
+    </ripple>
+</inset>

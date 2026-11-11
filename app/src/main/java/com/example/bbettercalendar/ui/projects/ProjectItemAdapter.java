@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,11 +15,8 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 // Lista de items (CalendarEntry type task) del detalle de proyecto (spec projects-mvp). Los items
 // de proyecto no recurren (decisión #4) así que, a diferencia de TodayTaskAdapter, no hay
@@ -51,7 +47,17 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
     public void submitList(List<CalendarEntry> newItems) {
         items.clear();
         if (newItems != null) {
-            items.addAll(newItems);
+            // u11: pendientes primero, hechas al final (orden estable dentro de cada grupo).
+            for (CalendarEntry entry : newItems) {
+                if (!entry.isDone()) {
+                    items.add(entry);
+                }
+            }
+            for (CalendarEntry entry : newItems) {
+                if (entry.isDone()) {
+                    items.add(entry);
+                }
+            }
         }
         notifyDataSetChanged();
     }
@@ -83,26 +89,14 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
                     holder.itemView.getContext(), R.color.bb_on_surface));
         }
 
-        // Sin fecha (item que vive sólo dentro del proyecto): ocultamos la etiqueta en vez de
-        // mostrar "sin fecha", que sólo añadía ruido.
-        if (entry.getStartMillis() > 0L) {
-            holder.date.setVisibility(View.VISIBLE);
-            holder.date.setText(
-                    new SimpleDateFormat("MMM d", Locale.getDefault()).format(new Date(entry.getStartMillis())));
-        } else {
-            holder.date.setVisibility(View.GONE);
-        }
-
-        boolean hasTarget = entry.getTargetMinutes() > 0;
-        if (hasTarget) {
-            holder.progress.setVisibility(View.VISIBLE);
-            holder.progress.setText(holder.itemView.getContext().getString(
-                    R.string.focus_progress_format,
-                    entry.getAttributedMinutes(), entry.getTargetMinutes()));
-        } else {
-            holder.progress.setVisibility(View.GONE);
-        }
-        if (hasTarget && !entry.isDone() && focusListener != null) {
+        // u11: "40 / 120 min" (minutos atribuidos / objetivo) o "Sin objetivo de tiempo".
+        int target = entry.getTargetMinutes();
+        holder.progress.setText(target > 0
+                ? holder.itemView.getContext().getString(R.string.project_subtask_progress,
+                        Math.min(entry.getAttributedMinutes(), target), target)
+                : holder.itemView.getContext().getString(R.string.project_subtask_no_target));
+        // El play enlaza el temporizador a la tarea; solo las pendientes lo llevan (hechas: sin play).
+        if (!entry.isDone() && focusListener != null) {
             holder.focus.setVisibility(View.VISIBLE);
             holder.focus.setOnClickListener(v -> focusListener.onItemFocus(entry));
         } else {
@@ -128,15 +122,13 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         final CheckBox checkbox;
         final TextView title;
-        final TextView date;
         final TextView progress;
-        final ImageView focus;
+        final View focus;
 
         ItemViewHolder(@NonNull View itemView) {
             super(itemView);
             checkbox = itemView.findViewById(R.id.projectItemDoneCheckbox);
             title = itemView.findViewById(R.id.projectItemTitleText);
-            date = itemView.findViewById(R.id.projectItemDateText);
             progress = itemView.findViewById(R.id.projectItemProgressText);
             focus = itemView.findViewById(R.id.projectItemFocusButton);
         }

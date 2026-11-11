@@ -3,6 +3,7 @@ package com.example.bbettercalendar.ui.projects;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.projects.Project;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -21,20 +22,50 @@ public class ProjectListItem {
     public final List<CalendarEntry> subtasks;
     public final int pomodoroMinutes;
     public final int todayMinutes;
+    /** u11: minutos de foco atribuidos al proyecto de por vida (la tarjeta muestra "6 h 20 m"). */
+    public final int focusedMinutes;
 
     public ProjectListItem(Project project, int doneCount, int totalCount) {
         this(project, doneCount, totalCount, Collections.<CalendarEntry>emptyList(),
-                DEFAULT_POMODORO_MINUTES, 0);
+                DEFAULT_POMODORO_MINUTES, 0, 0);
     }
 
     public ProjectListItem(Project project, int doneCount, int totalCount,
                            List<CalendarEntry> subtasks, int pomodoroMinutes, int todayMinutes) {
+        this(project, doneCount, totalCount, subtasks, pomodoroMinutes, todayMinutes, 0);
+    }
+
+    public ProjectListItem(Project project, int doneCount, int totalCount,
+                           List<CalendarEntry> subtasks, int pomodoroMinutes, int todayMinutes,
+                           int focusedMinutes) {
+        this.focusedMinutes = Math.max(0, focusedMinutes);
         this.project = project;
         this.doneCount = doneCount;
         this.totalCount = totalCount;
         this.subtasks = subtasks;
         this.pomodoroMinutes = pomodoroMinutes > 0 ? pomodoroMinutes : DEFAULT_POMODORO_MINUTES;
         this.todayMinutes = Math.max(0, todayMinutes);
+    }
+
+    /** Subtareas sin hacer, en el orden de la lista. */
+    public List<CalendarEntry> pendingSubtasks() {
+        List<CalendarEntry> pending = new ArrayList<>();
+        for (CalendarEntry entry : subtasks) {
+            if (!entry.isDone()) {
+                pending.add(entry);
+            }
+        }
+        return pending;
+    }
+
+    /** La siguiente tarea a enfocar: la primera sin hacer, o null si no queda ninguna. */
+    public CalendarEntry nextTask() {
+        for (CalendarEntry entry : subtasks) {
+            if (!entry.isDone()) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     public int percent() {

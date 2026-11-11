@@ -133,13 +133,24 @@ Cycle complete (`fragment_cycle_complete.xml`, destino `navigation_cycle_complet
 
 Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
-## Projects (u16)
+## Projects (u11, mejora-visual)
 
-- Lista: `projectsList`, `projectsAddButton`, `projectsSummaryText`, `projectsStreakChip`, `projectsRhythmCard`.
-- Tarjeta: `projectCard`, `projectHeader` (tap = desplegar, long-press = detalle), `projectNameText`, `projectDeadlineChip`,
-  `projectTasksText`, `projectPercentText`, `projectCardProgress`, `projectPomodorosToday`, `projectEstRemaining`,
-  `projectSubtasksContainer`, `projectAddSubtask`, `projectOpenDetail`; subtarea: `projectSubtaskCheck/Title/Meta`.
-- Cambiados: `projectProgressBar`/`projectProgressText` ya no existen en `item_project.xml`.
+- Lista: `projectsList`, `projectsAddButton` (FAB extendido "Nuevo proyecto"), `projectsSummaryText`, `projectsStreakChip`,
+  `projectsEmptyState` (EmptyStateView), `projectsCompletedHeader` (+ `projectsCompletedTitle`, `projectsCompletedChevron`) que despliega `projectsCompletedList`.
+- Tarjeta (`item_project.xml`, dos zonas): `projectCard`; **`projectCardTop`** (tap = abre el detalle; ya no hay pulsacion larga) con `projectGlow`,
+  `projectRing` (ProgressRingView), `projectNameText`, `projectTasksText` ("4 de 9 tareas · 6 h 20 m"), `projectDeadlineChip`, `projectChevron`,
+  `projectNextRow` (`projectNextTitle`, `projectFocusButton` "Enfocar"); **`projectCardStrip`** (ExpandStripView: tap = solo despliega, no navega;
+  `expandStripTitle` = "5 tareas pendientes", `expandStripAction` = Ver/Ocultar) cuyo contenido son filas `item_project_subtask.xml`
+  (`projectSubtaskCheck/Title/Meta`, `projectSubtaskFocus` = play pequeno) y `projectAddSubtask` ("Anadir tarea").
+- Retirados en u11: `projectHeader`, `projectColorAccent`, `projectDotRing`, `projectPercentText`, `projectCardProgress`, `projectPomodoroRow`,
+  `projectPomodorosToday`, `projectEstRemaining`, `projectExpandIcon`, `projectExpandedBody`, `projectSubtasksContainer`, `projectOpenDetail`,
+  `projectsRhythmCard`, `projectsEmptyText`.
+- Detalle (`fragment_project_detail.xml`): `projectDetailBackButton`, `projectDetailMenuButton` (menu: completar, eliminar), `projectDetailRing`,
+  `projectDetailNameInput`, `projectDetailDeadlineChip` (siempre visible; abre el selector de fecha), `projectDetailFocusTile` ("Enfocado"),
+  `projectDetailTasksTile` ("4 de 9" + "Quedan unas 5 h"), `projectDetailNotesInput`, `projectDetailItemsList` (filas `projectItemDoneCheckbox`,
+  `projectItemTitleText`, `projectItemProgressText`, `projectItemFocusButton`), `projectDetailItemsEmptyText`, alta rapida fija
+  `projectDetailQuickAddInput` + `projectDetailAddItemButton` ("+", pulsacion larga = hoja completa).
+- Retirados en u11: `projectDetailDeadlineButton`, `projectDetailCompleteButton`, `projectDetailDeleteButton`, `projectItemDateText`.
 
 ## All progress (u18)
 

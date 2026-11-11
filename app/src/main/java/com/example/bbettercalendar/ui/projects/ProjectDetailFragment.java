@@ -3,10 +3,13 @@ package com.example.bbettercalendar.ui.projects;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.text.format.DateFormat;
+import android.text.InputType;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,18 +25,25 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.databinding.FragmentProjectDetailBinding;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
+import com.example.bbettercalendar.ui.common.widget.StatTileView;
 import com.example.bbettercalendar.ui.home.FocusTarget;
 import com.example.bbettercalendar.ui.home.QuickAddTaskSheet;
 
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+// Detalle de proyecto (mejora-visual u11, mockup 31): anillo + nombre editable + chip de vencimiento,
+// celdas Enfocado / Tareas, lista de tareas y alta rapida fija abajo. Barra propia con atras y menu
+// (completar, eliminar). Nombre y notas se guardan solos en onPause (sin boton Save).
 @AndroidEntryPoint
 public class ProjectDetailFragment extends Fragment {
 
     private static final String ARG_PROJECT_ID = "projectId";
+    private static final int MENU_COMPLETE = 1;
+    private static final int MENU_DELETE = 2;
 
     private FragmentProjectDetailBinding binding;
     private ProjectDetailViewModel viewModel;
@@ -44,6 +54,9 @@ public class ProjectDetailFragment extends Fragment {
     @Nullable private Project currentProject;
     private int doneItems;
     private int totalItems;
+    private int remainingMinutes;
+    private int focusedTotal;
+    private int focusedWeek;
 
     @Nullable
     @Override
@@ -71,11 +84,29 @@ public class ProjectDetailFragment extends Fragment {
         binding.projectDetailItemsList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.projectDetailItemsList.setAdapter(itemAdapter);
 
-        binding.projectDetailDeadlineButton.setOnClickListener(v -> showDeadlinePicker());
-        binding.projectDetailAddItemButton.setOnClickListener(v ->
-                QuickAddTaskSheet.forProject(projectId).show(getChildFragmentManager(), QuickAddTaskSheet.SHEET_TAG));
-        binding.projectDetailCompleteButton.setOnClickListener(v -> viewModel.completeProject());
-        binding.projectDetailDeleteButton.setOnClickListener(v -> confirmDelete());
+        // El nombre puede ocupar dos lineas (cabecera del mockup) pero "Hecho" cierra el teclado.
+        binding.projectDetailNameInput.setRawInputType(
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        binding.projectDetailNameInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        binding.projectDetailNameInput.setOnEditorActionListener((v, actionId, event) -> {
+            v.clearFocus();
+            return false;
+        });
+
+        binding.projectDetailDeadlineChip.setOnClickListener(v -> showDeadlinePicker());
+        binding.projectDetailMenuButton.setOnClickListener(this::showMenu);
+
+        // Alta rápida: "+" o "Hecho" añaden la tarea; pulsación larga en "+" abre la hoja completa.
+        binding.projectDetailAddItemButton.setOnClickListener(v -> submitQuickAdd());
+        binding.projectDetailAddItemButton.setOnLongClickListener(v -> {
+            QuickAddTaskSheet.forProject(projectId)
+                    .show(getChildFragmentManager(), QuickAddTaskSheet.SHEET_TAG);
+            return true;
+        });
+        binding.projectDetailQuickAddInput.setOnEditorActionListener((v, actionId, event) -> {
+            submitQuickAdd();
+            return true;
+        });
 
         viewModel.getProject().observe(getViewLifecycleOwner(), this::bindProject);
         // Sin ActionBar (spec frontend-structure-cleanup): flecha atrás propia en el contenido.
@@ -91,11 +122,22 @@ public class ProjectDetailFragment extends Fragment {
                     if (entry.isDone()) doneItems++;
                 }
             }
+            List<CalendarEntry> list = items == null ? new ArrayList<>() : items;
+            remainingMinutes = ProjectFormat.remainingMinutes(list);
             if (currentProject != null) {
                 bindDeadlineViews(currentProject);
             }
+            bindProgress();
             binding.projectDetailItemsEmptyText.setVisibility(
                     items == null || items.isEmpty() ? View.VISIBLE : View.GONE);
+        });
+        viewModel.getFocusedTotalMinutes().observe(getViewLifecycleOwner(), minutes -> {
+            focusedTotal = minutes == null ? 0 : minutes;
+            bindFocusTile();
+        });
+        viewModel.getFocusedWeekMinutes().observe(getViewLifecycleOwner(), minutes -> {
+            focusedWeek = minutes == null ? 0 : minutes;
+            bindFocusTile();
         });
         viewModel.getProjectDeleted().observe(getViewLifecycleOwner(), deleted -> {
             if (Boolean.TRUE.equals(deleted)) {
@@ -114,36 +156,94 @@ public class ProjectDetailFragment extends Fragment {
             headerLoaded = true;
         }
         currentProject = project;
+        binding.projectDetailRing.setRingColor(ContextCompat.getColor(requireContext(),
+                ProjectListAdapter.accentColorResFor(project.colorIndex)));
         bindDeadlineViews(project);
+    }
 
-        boolean completed = project.status == Project.STATUS_COMPLETED;
-        binding.projectDetailCompleteButton.setVisibility(completed ? View.GONE : View.VISIBLE);
+    // Anillo y celda "Tareas" salen de los items: marcar una subtarea los actualiza a la vez.
+    private void bindProgress() {
+        int percent = totalItems == 0 ? 0 : Math.round(100f * doneItems / totalItems);
+        binding.projectDetailRing.setProgress(percent, true);
+        StatTileView tile = binding.projectDetailTasksTile;
+        tile.setValue(getString(R.string.project_detail_tasks_value, doneItems, totalItems));
+        if (totalItems == 0) {
+            tile.setSub(getString(R.string.project_detail_tasks_none));
+        } else if (remainingMinutes > 0) {
+            tile.setSub(getString(R.string.project_detail_remaining, ProjectFormat.duration(
+                    requireContext(), ProjectFormat.roundedMinutes(remainingMinutes))));
+        } else {
+            tile.setSub(null);
+        }
+    }
+
+    private void bindFocusTile() {
+        if (binding == null) {
+            return;
+        }
+        StatTileView tile = binding.projectDetailFocusTile;
+        tile.setValue(ProjectFormat.duration(requireContext(), focusedTotal));
+        tile.setSub(focusedTotal == 0
+                ? getString(R.string.project_detail_focused_none)
+                : getString(R.string.project_detail_focused_week,
+                        ProjectFormat.duration(requireContext(), focusedWeek)));
+    }
+
+    private void submitQuickAdd() {
+        if (binding == null) {
+            return;
+        }
+        String title = binding.projectDetailQuickAddInput.getText().toString().trim();
+        if (title.isEmpty()) {
+            binding.projectDetailQuickAddInput.requestFocus();
+            return;
+        }
+        viewModel.addItem(title, null, 0);
+        binding.projectDetailQuickAddInput.setText("");
+    }
+
+    private void showMenu(View anchor) {
+        PopupMenu menu = new PopupMenu(requireContext(), anchor);
+        boolean completed = currentProject != null && currentProject.status == Project.STATUS_COMPLETED;
+        if (!completed) {
+            menu.getMenu().add(Menu.NONE, MENU_COMPLETE, 1, R.string.project_detail_complete);
+        }
+        menu.getMenu().add(Menu.NONE, MENU_DELETE, 2, R.string.project_detail_delete);
+        menu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == MENU_COMPLETE) {
+                viewModel.completeProject();
+            } else {
+                confirmDelete();
+            }
+            return true;
+        });
+        menu.show();
     }
 
     private void bindDeadlineViews(Project project) {
         long softDeadlineMillis = project.softDeadlineMillis;
         TextView chip = binding.projectDetailDeadlineChip;
+        // El chip siempre está visible y abre el selector de fecha ("Añadir fecha límite" si no hay).
         if (softDeadlineMillis <= 0L) {
-            chip.setVisibility(View.GONE);
-            binding.projectDetailDeadlineButton.setText(R.string.create_project_set_deadline);
+            chip.setText(R.string.project_due_add);
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.bb_on_surface_muted));
+            chip.setBackgroundResource(R.drawable.bg_project_due_chip);
             return;
         }
-        binding.projectDetailDeadlineButton.setText(
-                DateFormat.getMediumDateFormat(requireContext()).format(new Date(softDeadlineMillis)));
-
+        long now = System.currentTimeMillis();
         boolean finished = ProjectDeadlineState.isFinished(project.status, doneItems, totalItems);
-        ProjectDeadlineState state = ProjectDeadlineState.from(
-                softDeadlineMillis, System.currentTimeMillis(), finished);
-        if (state == ProjectDeadlineState.NONE) {
-            chip.setVisibility(View.GONE);
-            return;
+        ProjectDeadlineState state = ProjectDeadlineState.from(softDeadlineMillis, now, finished);
+        chip.setText(ProjectFormat.detailDeadline(requireContext(), softDeadlineMillis, now, state));
+        int color = R.color.bb_on_surface_muted;
+        int background = R.drawable.bg_project_due_chip;
+        if (state == ProjectDeadlineState.PASSED) {
+            color = R.color.bb_danger;
+        } else if (state == ProjectDeadlineState.APPROACHING) {
+            color = R.color.bb_accent_reward;
+            background = R.drawable.bg_project_due_chip_reward;
         }
-        chip.setVisibility(View.VISIBLE);
-        int tint = state == ProjectDeadlineState.PASSED ? R.color.bb_danger : R.color.bb_accent_reward;
-        chip.setTextColor(ContextCompat.getColor(requireContext(), tint));
-        chip.setText(state == ProjectDeadlineState.PASSED
-                ? R.string.project_deadline_passed
-                : R.string.project_deadline_approaching);
+        chip.setTextColor(ContextCompat.getColor(requireContext(), color));
+        chip.setBackgroundResource(background);
     }
 
     private void showDeadlinePicker() {

@@ -1,0 +1,27 @@
+﻿# scenario: mv-u11-projects
+# recorded: 2026-11-11T18:37:02.455635+00:00  serial=emulator-5554 pkg=io.github.thaguille.bbettercalendar
+1794422223105	START .configuration.SplashActivity
+1794422226973	WAIT 3500
+1794422229674	TAP id=navigation_projects
+1794422231429	WAIT 1500
+1794422233956	ASSERT id=projectsList
+1794422235427	SHOT mv-u11-list
+1794422248183	TAP id=projectCardTop
+1794422249943	WAIT 1500
+1794422252486	ASSERT id=projectDetailRing
+1794422254999	ASSERT id=projectDetailTasksTile
+1794422256127	SHOT mv-u11-detail
+1794422268385	TAP id=projectDetailBackButton
+1794422269847	WAIT 1200
+1794422272397	ASSERT id=projectsList
+1794422275065	TAP id=projectCardStrip
+1794422276358	WAIT 1000
+1794422278863	ASSERT id=projectSubtaskCheck
+1794422281392	ASSERT id=projectsList
+1794422282414	SHOT mv-u11-expanded
+1794422292627	ASSERT id=projectTasksText expect~=7 de 12
+1794422295243	TAP id=projectSubtaskCheck
+1794422296729	WAIT 1200
+1794422299269	ASSERT id=projectTasksText expect~=8 de 12
+1794422299994	SHOT mv-u11-ticked
+1794422302519	ASSERT id=projectsList

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fixed "Añadir tarea…" field of the project detail (mejora-visual u11): raised pill. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_card" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

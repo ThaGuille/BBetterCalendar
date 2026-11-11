@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- u16 · Subtarea dentro de una tarjeta de proyecto (html 03): circulo de check (Widget.BBetter.CheckBox), titulo (tachado y atenuado si esta hecha) y "25m" / "2 Pomodoros". -->
+<!-- mejora-visual u11 · Tarea pendiente dentro de la franja de una tarjeta de proyecto (mockup 30): casilla
+     (Widget.BBetter.CheckBox, solo muestra el estado), titulo + "0 / 30 min" debajo y play pequeno
+     (projectSubtaskFocus) que enlaza el temporizador. La fila entera marca/desmarca. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,10 +11,11 @@
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
-    android:minHeight="48dp"
-    android:orientation="horizontal">
+    android:minHeight="56dp"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/spacing_xs"
+    android:paddingBottom="@dimen/spacing_xs">
 
-    <!-- The whole row is the tap target; the box only shows the state (not clickable itself). -->
     <CheckBox
         android:id="@+id/projectSubtaskCheck"
         style="@style/Widget.BBetter.CheckBox"
@@ -22,25 +26,41 @@
         android:clickable="false"
         android:focusable="false"
         android:importantForAccessibility="no"
-        tools:checked="true" />
+        tools:checked="false" />
 
-    <TextView
-        android:id="@+id/projectSubtaskTitle"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/spacing_card_gap"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.BBetter.Body"
-        android:textSize="@dimen/project_subtask_text"
-        tools:text="Write 3.1 Methods" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/projectSubtaskMeta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        <TextView
+            android:id="@+id/projectSubtaskTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.BBetter.Body"
+            android:textSize="@dimen/project_subtask_text"
+            tools:text="Maquetar la portada" />
+
+        <TextView
+            android:id="@+id/projectSubtaskMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            tools:text="0 / 30 min" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/projectSubtaskFocus"
+        android:layout_width="@dimen/project_play_small"
+        android:layout_height="@dimen/project_play_small"
         android:layout_marginStart="@dimen/spacing_sm"
-        android:textAppearance="@style/TextAppearance.BBetter.Micro"
-        tools:text="2 Pomodoros" />
+        android:background="@drawable/bg_project_play"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="@dimen/spacing_sm"
+        android:src="@drawable/ic_play_v2_filled_24"
+        app:tint="@color/bb_primary" />
 </LinearLayout>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fila de un item (CalendarEntry type task) dentro del detalle de proyecto (spec projects-mvp).
-     Igual que item_today_task.xml pero sin el botón "quitar" (no aplica a items de proyecto) y
-     con una etiqueta "sin fecha" para los items que viven sólo dentro del proyecto. -->
+<!-- mejora-visual u11 (mockup 31) · Fila de tarea del detalle de proyecto: casilla, titulo (tachado si esta
+     hecha) con "40 / 120 min" o "Sin objetivo de tiempo" debajo y play redondo (solo las pendientes). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:minHeight="48dp"
+    android:minHeight="56dp"
     android:orientation="horizontal"
     android:paddingTop="@dimen/spacing_xs"
     android:paddingBottom="@dimen/spacing_xs">
@@ -20,51 +20,41 @@
         android:layout_marginStart="@dimen/checkbox_overhang"
         android:layout_marginEnd="@dimen/checkbox_overhang" />
 
-    <TextView
-        android:id="@+id/projectItemTitleText"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
+        android:layout_marginStart="@dimen/spacing_card_gap"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:textAppearance="@style/TextAppearance.BBetter.Body"
-        android:textColor="@color/bb_on_surface" />
+        android:orientation="vertical">
 
-    <!-- Progreso de minutos atribuidos "X/Ym" (spec focus-attribution). Sólo visible para items
-         con objetivo; lo rellena ProjectItemAdapter desde CalendarEntry.attributedMinutes. -->
-    <TextView
-        android:id="@+id/projectItemProgressText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:textAppearance="@style/TextAppearance.BBetter.Label"
-        android:textColor="@color/bb_primary_bright"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/projectItemTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.BBetter.Body.Medium"
+            android:textColor="@color/bb_on_surface"
+            tools:text="Maquetar la portada" />
 
-    <TextView
-        android:id="@+id/projectItemDateText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_sm"
-        android:textAppearance="@style/TextAppearance.BBetter.Label" />
+        <TextView
+            android:id="@+id/projectItemProgressText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            tools:text="0 / 30 min" />
+    </LinearLayout>
 
-    <!-- "Focus this" (spec focus-attribution): vincula el timer de Home a este item, navega a Home
-         y arranca la sesión. Icono del pomodoro (mismo que el timer) para dejar claro que lleva ahí.
-         Sólo visible para items con objetivo no completados. -->
     <ImageView
         android:id="@+id/projectItemFocusButton"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="@dimen/project_play_size"
+        android:layout_height="@dimen/project_play_size"
         android:layout_marginStart="@dimen/spacing_sm"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/bg_project_play"
         android:clickable="true"
         android:contentDescription="@string/task_focus_this_desc"
         android:focusable="true"
-        android:padding="@dimen/spacing_xs"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_timer_clock_24"
-        app:tint="@color/bb_primary_bright"
-        android:visibility="gone" />
+        android:padding="@dimen/project_play_icon_pad"
+        android:src="@drawable/ic_play_v2_filled_24"
+        app:tint="@color/bb_primary" />
 
 </LinearLayout>

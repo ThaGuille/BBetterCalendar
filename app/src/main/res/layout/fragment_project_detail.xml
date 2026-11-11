@@ -1,188 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Detalle de proyecto (spec projects-mvp; u16: tarjetas bg_project_card + Widget.BBetter.Button.*): header editable (nombre/notas/deadline), lista de
-     items y acciones de completar/borrar. Mismo patrón de scroll que fragment_home.xml. -->
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Detalle de proyecto (mejora-visual u11, mockup 31): barra con atras y menu (completar, eliminar);
+     cabecera con anillo de 76dp + nombre editable + chip de vencimiento (abre el selector de fecha);
+     celdas Enfocado / Tareas; lista de tareas (pendientes primero) con casilla y play; campo fijo abajo
+     "Anadir tarea..." con "+" (pulsacion larga abre la hoja completa). Las notas siguen guardandose en
+     onPause: su campo queda discreto bajo las celdas. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bb_surface"
-    android:fillViewport="true"
-    android:scrollbars="none"
+    android:orientation="vertical"
     tools:context=".ui.projects.ProjectDetailFragment">
 
     <LinearLayout
+        android:id="@+id/projectDetailBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="@dimen/spacing_md"
-        android:paddingEnd="@dimen/spacing_md"
-        android:paddingTop="@dimen/spacing_md"
-        android:paddingBottom="@dimen/spacing_lg">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_sm">
 
-        <!-- Volver a la lista (spec frontend-structure-cleanup): sustituye a la flecha Up de la
-             ActionBar, que ya no existe. marginStart negativo: alinea el icono con el borde de la
-             tarjeta en vez de con el área táctil de 48dp. -->
         <ImageButton
             android:id="@+id/projectDetailBackButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="-12dp"
-            android:layout_marginBottom="@dimen/spacing_xs"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/action_back"
+            android:contentDescription="@string/project_detail_back_desc"
             android:src="@drawable/ic_arrow_back_24"
             app:tint="@color/bb_on_surface" />
 
-        <!-- ============ Header card: name / notes / deadline ============ -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/projectDetailMenuButton"
+            android:layout_width="@dimen/touch_target_min"
+            android:layout_height="@dimen/touch_target_min"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/project_detail_menu_desc"
+            android:src="@drawable/ic_more_vert_24"
+            app:tint="@color/bb_on_surface" />
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/projectDetailScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:scrollbars="none">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_project_card"
             android:orientation="vertical"
-            android:padding="@dimen/home_card_padding">
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:paddingBottom="@dimen/spacing_md">
 
-            <EditText
-                android:id="@+id/projectDetailNameInput"
+            <!-- Cabecera: anillo + nombre editable + chip de vencimiento. -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:hint="@string/create_project_name_hint"
-                android:importantForAutofill="no"
-                android:inputType="textCapSentences"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.BBetter.Title" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
+                <com.example.bbettercalendar.ui.common.widget.ProgressRingView
+                    android:id="@+id/projectDetailRing"
+                    android:layout_width="@dimen/project_detail_ring_size"
+                    android:layout_height="@dimen/project_detail_ring_size"
+                    app:ringStroke="@dimen/project_detail_ring_stroke" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/projectDetailNameInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:hint="@string/create_project_name_hint"
+                        android:importantForAutofill="no"
+                        android:imeOptions="actionDone"
+                        android:padding="0dp"
+                        android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+                    <TextView
+                        android:id="@+id/projectDetailDeadlineChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:background="@drawable/bg_project_due_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:minHeight="@dimen/project_chip_min_height"
+                        android:paddingStart="@dimen/project_chip_padding_h"
+                        android:paddingEnd="@dimen/project_chip_padding_h"
+                        android:text="@string/project_due_add"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+                        android:textColor="@color/bb_on_surface_muted" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Celdas: Enfocado (total + esta semana) y Tareas (4 de 9 + quedan unas 5 h). -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:orientation="horizontal">
+
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/projectDetailFocusTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="@dimen/project_cell_gap"
+                    android:layout_weight="1"
+                    app:tileLabel="@string/project_detail_focused_label"
+                    app:tileLabelAllCaps="false"
+                    app:tileWide="true" />
+
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/projectDetailTasksTile"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    app:tileLabel="@string/project_detail_tasks_label"
+                    app:tileLabelAllCaps="false"
+                    app:tileWide="true" />
+            </LinearLayout>
+
+            <!-- Notas (opcional): se guardan con el nombre en onPause. -->
             <EditText
                 android:id="@+id/projectDetailNotesInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_xs"
+                android:layout_marginTop="@dimen/spacing_md"
                 android:background="@null"
                 android:gravity="top"
                 android:hint="@string/create_project_notes_hint"
                 android:importantForAutofill="no"
                 android:inputType="textMultiLine|textCapSentences"
-                android:minLines="2"
-                android:maxLines="6"
+                android:maxLines="4"
+                android:minHeight="@dimen/touch_target_min"
+                android:paddingStart="@dimen/spacing_xs"
+                android:paddingEnd="@dimen/spacing_xs"
                 android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
 
+            <!-- Lista de tareas. -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_sm"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:background="@drawable/bg_card_lit"
+                android:orientation="vertical"
+                android:padding="@dimen/project_card_padding">
 
                 <TextView
-                    android:id="@+id/projectDetailDeadlineButton"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:paddingTop="@dimen/spacing_xs"
-                    android:paddingBottom="@dimen/spacing_xs"
-                    android:text="@string/create_project_set_deadline"
-                    android:textAppearance="@style/TextAppearance.BBetter.Label"
-                    android:textColor="@color/bb_primary_bright" />
-
-                <TextView
-                    android:id="@+id/projectDetailDeadlineChip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_project_due_chip"
-                    android:letterSpacing="0.05"
-                    android:paddingStart="@dimen/project_chip_padding_h"
-                    android:paddingTop="@dimen/project_chip_padding_v"
-                    android:paddingEnd="@dimen/project_chip_padding_h"
-                    android:paddingBottom="@dimen/project_chip_padding_v"
-                    android:textAllCaps="true"
-                    android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-                    android:textSize="@dimen/project_chip_text"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- ============ Items card ============ -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_md"
-            android:background="@drawable/bg_project_card"
-            android:orientation="vertical"
-            android:padding="@dimen/home_card_padding">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/project_detail_items_title"
+                    android:text="@string/project_detail_list_title"
                     android:textAppearance="@style/TextAppearance.BBetter.Title" />
 
-                <ImageButton
-                    android:id="@+id/projectDetailAddItemButton"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/project_detail_add_item"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_add_24"
-                    app:tint="@color/bb_primary_bright" />
+                <TextView
+                    android:id="@+id/projectDetailItemsEmptyText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/project_detail_items_empty"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/projectDetailItemsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/projectDetailItemsEmptyText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_sm"
-                android:text="@string/project_detail_items_empty"
-                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted"
-                android:visibility="gone" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/projectDetailItemsList"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_xs"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never" />
-
         </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <!-- ============ Actions ============ -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_md"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+    <!-- Campo fijo de alta rapida: Enter o "+" anaden; pulsacion larga en "+" abre la hoja completa. -->
+    <LinearLayout
+        android:id="@+id/projectDetailQuickAdd"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/project_quick_add_height"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginTop="@dimen/spacing_sm"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:layout_marginBottom="@dimen/spacing_sm"
+        android:background="@drawable/bg_project_quick_add"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_sm">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/projectDetailCompleteButton"
-                style="@style/Widget.BBetter.Button.Primary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/project_detail_complete" />
+        <EditText
+            android:id="@+id/projectDetailQuickAddInput"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/project_detail_quick_hint"
+            android:imeOptions="actionDone"
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.Body" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/projectDetailDeleteButton"
-                style="@style/Widget.BBetter.Button.Danger"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_sm"
-                android:text="@string/project_detail_delete" />
-
-        </LinearLayout>
-
+        <ImageButton
+            android:id="@+id/projectDetailAddItemButton"
+            android:layout_width="@dimen/project_quick_add_button"
+            android:layout_height="@dimen/project_quick_add_button"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:background="@drawable/bg_play_button"
+            android:contentDescription="@string/project_detail_quick_add_desc"
+            android:src="@drawable/ic_add_24"
+            app:tint="@color/bb_on_primary" />
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</LinearLayout>

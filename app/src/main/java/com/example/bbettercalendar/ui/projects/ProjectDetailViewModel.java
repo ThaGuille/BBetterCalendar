@@ -17,6 +17,8 @@ import com.example.bbettercalendar.notifications.project.ProjectDeadlineSchedule
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
 import com.example.bbettercalendar.stats.FocusAttributionRepository;
+import com.example.bbettercalendar.stats.FocusEventDAO;
+import com.example.bbettercalendar.stats.ProjectMinutes;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -43,11 +45,15 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     // el fragment.
     private final LiveData<List<CalendarEntry>> itemsEnriched;
     private final MutableLiveData<Boolean> projectDeleted = new MutableLiveData<>();
+    // u11: minutos de foco del proyecto, de por vida y desde el inicio de esta semana ("Enfocado").
+    private final LiveData<Integer> focusedTotalMinutes;
+    private final LiveData<Integer> focusedWeekMinutes;
 
     @Inject
     public ProjectDetailViewModel(@NonNull Application application, ProjectDAO projectDao,
                                    CalendarEntryDAO calendarEntryDao,
                                    FocusAttributionRepository focusAttributionRepository,
+                                   FocusEventDAO focusEventDao,
                                    ProjectDeadlineScheduler deadlineScheduler,
                                    @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
@@ -61,6 +67,39 @@ public class ProjectDetailViewModel extends AndroidViewModel {
         items = Transformations.switchMap(projectIdLiveData, id ->
                 id == null ? emptyEntryList() : calendarEntryDao.observeItemsByProject(id));
         itemsEnriched = focusAttributionRepository.enrich(items);
+
+        Calendar weekStart = Calendar.getInstance();
+        weekStart.set(Calendar.DAY_OF_WEEK, weekStart.getFirstDayOfWeek());
+        weekStart.set(Calendar.HOUR_OF_DAY, 0);
+        weekStart.set(Calendar.MINUTE, 0);
+        weekStart.set(Calendar.SECOND, 0);
+        weekStart.set(Calendar.MILLISECOND, 0);
+        long weekStartMillis = weekStart.getTimeInMillis();
+        focusedTotalMinutes = Transformations.switchMap(projectIdLiveData, id ->
+                minutesOf(id, focusEventDao.observeMinutesByProject(0L, Long.MAX_VALUE)));
+        focusedWeekMinutes = Transformations.switchMap(projectIdLiveData, id ->
+                minutesOf(id, focusEventDao.observeMinutesByProject(weekStartMillis, Long.MAX_VALUE)));
+    }
+
+    private static LiveData<Integer> minutesOf(Integer projectId, LiveData<List<ProjectMinutes>> source) {
+        return Transformations.map(source, list -> {
+            if (list != null && projectId != null) {
+                for (ProjectMinutes pm : list) {
+                    if (pm.projectId == projectId) {
+                        return pm.minutes;
+                    }
+                }
+            }
+            return 0;
+        });
+    }
+
+    public LiveData<Integer> getFocusedTotalMinutes() {
+        return focusedTotalMinutes;
+    }
+
+    public LiveData<Integer> getFocusedWeekMinutes() {
+        return focusedWeekMinutes;
     }
 
     private static LiveData<Project> emptyProject() {

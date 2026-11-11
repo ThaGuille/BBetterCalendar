@@ -72,6 +72,7 @@ public class ProjectsViewModel extends AndroidViewModel {
     private List<ProjectWithCounts> latestProjects;
     private List<CalendarEntry> latestItems;
     private List<ProjectMinutes> latestToday;
+    private List<ProjectMinutes> latestTotal;
     private StreakCalculator.Result latestStreak;
 
     @Inject
@@ -107,6 +108,11 @@ public class ProjectsViewModel extends AndroidViewModel {
         });
         projectItems.addSource(focusEventDao.observeMinutesByProject(dayStart, dayEnd), value -> {
             latestToday = value;
+            recompose();
+        });
+        // u11: minutos de foco de por vida por proyecto ("4 de 9 tareas · 6 h 20 m").
+        projectItems.addSource(focusEventDao.observeMinutesByProject(0L, Long.MAX_VALUE), value -> {
+            latestTotal = value;
             recompose();
         });
         projectItems.addSource(pomodoroMinutes, value -> recompose());
@@ -148,6 +154,12 @@ public class ProjectsViewModel extends AndroidViewModel {
                 todayByProject.put(pm.projectId, pm.minutes);
             }
         }
+        Map<Integer, Integer> totalByProject = new HashMap<>();
+        if (latestTotal != null) {
+            for (ProjectMinutes pm : latestTotal) {
+                totalByProject.put(pm.projectId, pm.minutes);
+            }
+        }
         Integer pomodoro = pomodoroMinutes.getValue();
         int pomodoroMin = pomodoro == null ? ProjectListItem.DEFAULT_POMODORO_MINUTES : pomodoro;
 
@@ -158,8 +170,9 @@ public class ProjectsViewModel extends AndroidViewModel {
                 subtasks = new ArrayList<>();
             }
             Integer today = todayByProject.get(pwc.project.id);
+            Integer total = totalByProject.get(pwc.project.id);
             result.add(new ProjectListItem(pwc.project, pwc.doneCount, pwc.totalCount,
-                    subtasks, pomodoroMin, today == null ? 0 : today));
+                    subtasks, pomodoroMin, today == null ? 0 : today, total == null ? 0 : total));
         }
         Collections.sort(result, ProjectListItem.BY_URGENCY);
         projectItems.setValue(result);

@@ -3,13 +3,10 @@ package com.example.bbettercalendar.ui.projects;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,28 +19,30 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.example.bbettercalendar.ui.common.widget.ExpandStripView;
+import com.example.bbettercalendar.ui.common.widget.ProgressRingView;
+import com.google.android.material.button.MaterialButton;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
-// u16: tarjetas desplegables (html 03). Tocar la cabecera despliega/pliega (varias a la vez);
-// pulsacion larga o "Open project" abren ProjectDetailFragment.
+// mejora-visual u11: tarjeta de dos zonas (mockup 30). La zona superior (projectCardTop) abre
+// ProjectDetailFragment; la franja inferior (projectCardStrip, ExpandStripView) solo despliega las
+// tareas pendientes. Se quita la pulsacion larga. Varias franjas pueden estar desplegadas a la vez.
 public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.ProjectViewHolder> {
 
     public interface OnProjectClickListener {
         void onProjectClick(Project project);
     }
 
-    /** Acciones dentro de la tarjeta desplegada: marcar una subtarea y "Add subtask". */
+    /** Acciones dentro de la tarjeta: marcar una tarea, enfocarla y "Anadir tarea". */
     public interface OnSubtaskActionListener {
         void onSubtaskChecked(CalendarEntry entry, boolean done);
+
+        /** "Enfocar" / play pequeno: enlaza el temporizador a la tarea (como el detalle). */
+        void onSubtaskFocus(CalendarEntry entry);
 
         void onAddSubtask(Project project);
     }
@@ -67,9 +66,6 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
 
     private final List<ProjectListItem> items = new ArrayList<>();
     private final Set<Integer> expandedIds = new HashSet<>();
-    // html 03: el primero (el más urgente) llega desplegado; sólo en la primera carga, para no
-    // reabrir lo que el usuario cerró.
-    private boolean firstExpanded;
     private final OnProjectClickListener listener;
     @Nullable private OnSubtaskActionListener subtaskListener;
 
@@ -85,10 +81,6 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         items.clear();
         if (newItems != null) {
             items.addAll(newItems);
-        }
-        if (!firstExpanded && !items.isEmpty()) {
-            expandedIds.add(items.get(0).project.id);
-            firstExpanded = true;
         }
         notifyDataSetChanged();
     }
@@ -106,52 +98,25 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         ProjectListItem item = items.get(position);
         Project project = item.project;
         Context context = holder.itemView.getContext();
-        boolean expanded = expandedIds.contains(project.id);
         int accent = ContextCompat.getColor(context, accentColorResFor(project.colorIndex));
 
         holder.name.setText(project.name);
-        holder.colorAccent.setBackgroundTintList(ColorStateList.valueOf(accent));
-        holder.dotRing.setBackgroundTintList(ColorStateList.valueOf(accent));
+        holder.glow.setBackgroundTintList(ColorStateList.valueOf(accent));
+        holder.ring.setRingColor(accent);
+        holder.ring.setProgress(item.percent(), true);
 
-        holder.tasks.setText(context.getString(R.string.project_tasks_count,
-                item.doneCount, item.totalCount));
-        boolean notStarted = item.doneCount == 0;
-        holder.percent.setText(notStarted
-                ? context.getString(R.string.project_not_started)
-                : context.getString(R.string.project_percent_completed, item.percent()));
-        holder.percent.setTextColor(ContextCompat.getColor(context,
-                item.doneCount > 0 && item.percent() >= 40
-                        ? R.color.bb_primary_bright : R.color.bb_on_surface_muted));
-
-        holder.progress.setIndicatorColor(accent);
-        holder.progress.setProgressCompat(item.percent(), false);
+        String tasks = context.getString(R.string.project_tasks_count, item.doneCount, item.totalCount);
+        holder.tasks.setText(item.focusedMinutes > 0
+                ? context.getString(R.string.project_tasks_and_time, tasks,
+                        ProjectFormat.duration(context, item.focusedMinutes))
+                : tasks);
 
         bindDeadlineChip(holder, item, context);
-        bindExpansion(holder, item, context, expanded);
 
-        holder.header.setOnClickListener(v -> toggle(holder));
-        holder.header.setOnLongClickListener(v -> {
-            open(project);
-            return true;
-        });
-        holder.openDetail.setOnClickListener(v -> open(project));
-        holder.addSubtask.setOnClickListener(v -> {
-            if (subtaskListener != null) {
-                subtaskListener.onAddSubtask(project);
-            }
-        });
-    }
-
-    private void toggle(ProjectViewHolder holder) {
-        int pos = holder.getBindingAdapterPosition();
-        if (pos == RecyclerView.NO_POSITION) {
-            return;
-        }
-        int id = items.get(pos).project.id;
-        if (!expandedIds.remove(id)) {
-            expandedIds.add(id);
-        }
-        notifyItemChanged(pos);
+        holder.top.setContentDescription(context.getString(R.string.project_open_desc, project.name));
+        holder.top.setOnClickListener(v -> open(project));
+        bindNextTask(holder, item, context);
+        bindStrip(holder, item, context);
     }
 
     private void open(Project project) {
@@ -160,47 +125,67 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         }
     }
 
-    private void bindExpansion(ProjectViewHolder holder, ProjectListItem item, Context context,
-                               boolean expanded) {
-        Project project = item.project;
-        holder.card.setBackgroundResource(expanded
-                ? R.drawable.bg_project_card_expanded : R.drawable.bg_project_card);
-        holder.expandIcon.setRotation(expanded ? 180f : 0f);
-        holder.header.setContentDescription(context.getString(expanded
-                ? R.string.project_collapse_desc : R.string.project_expand_desc, project.name));
-        holder.pomodoroRow.setVisibility(expanded ? View.VISIBLE : View.GONE);
-        holder.expandedBody.setVisibility(expanded ? View.VISIBLE : View.GONE);
-        if (!expanded) {
-            holder.subtasksContainer.removeAllViews();
+    private void bindNextTask(ProjectViewHolder holder, ProjectListItem item, Context context) {
+        CalendarEntry next = item.nextTask();
+        if (next == null) {
+            holder.nextRow.setVisibility(View.GONE);
+            holder.focusButton.setOnClickListener(null);
             return;
         }
+        holder.nextRow.setVisibility(View.VISIBLE);
+        holder.nextTitle.setText(next.getTitle());
+        holder.focusButton.setContentDescription(
+                context.getString(R.string.project_focus_desc, next.getTitle()));
+        holder.focusButton.setOnClickListener(v -> {
+            if (subtaskListener != null) {
+                subtaskListener.onSubtaskFocus(next);
+            }
+        });
+    }
 
-        int today = item.pomodorosToday();
-        holder.pomodorosToday.setText(context.getResources().getQuantityString(
-                R.plurals.project_pomodoros_today, today, today));
-        int remaining = item.estimatedRemainingMinutes();
-        if (remaining > 0) {
-            holder.estRemaining.setVisibility(View.VISIBLE);
-            holder.estRemaining.setText(context.getString(R.string.project_est_remaining,
-                    formatDuration(context, remaining)));
-        } else {
-            holder.estRemaining.setVisibility(View.GONE);
-        }
+    private void bindStrip(ProjectViewHolder holder, ProjectListItem item, Context context) {
+        Project project = item.project;
+        ExpandStripView strip = holder.strip;
+        strip.setBackgroundColor(ContextCompat.getColor(context, R.color.bb_surface_raised));
+        strip.setOnExpandedChangeListener(null);
+        strip.clearContent();
 
-        holder.subtasksContainer.removeAllViews();
+        List<CalendarEntry> pending = item.pendingSubtasks();
+        strip.setTitle(pending.isEmpty()
+                ? context.getString(R.string.project_pending_none)
+                : context.getResources().getQuantityString(
+                        R.plurals.project_pending_title, pending.size(), pending.size()));
+        strip.setContentDescription(context.getString(R.string.project_strip_desc, project.name));
+
         LayoutInflater inflater = LayoutInflater.from(context);
-        for (CalendarEntry entry : item.subtasks) {
-            View row = inflater.inflate(R.layout.item_project_subtask,
-                    holder.subtasksContainer, false);
+        for (CalendarEntry entry : pending) {
+            View row = inflater.inflate(R.layout.item_project_subtask, null, false);
             bindSubtask(row, entry, item, context);
-            holder.subtasksContainer.addView(row);
+            strip.addContentView(row);
         }
+        TextView add = (TextView) inflater.inflate(R.layout.item_project_add_task, null, false);
+        add.setOnClickListener(v -> {
+            if (subtaskListener != null) {
+                subtaskListener.onAddSubtask(project);
+            }
+        });
+        strip.addContentView(add);
+
+        strip.setExpanded(expandedIds.contains(project.id), false);
+        strip.setOnExpandedChangeListener(expanded -> {
+            if (expanded) {
+                expandedIds.add(project.id);
+            } else {
+                expandedIds.remove(project.id);
+            }
+        });
     }
 
     private void bindSubtask(View row, CalendarEntry entry, ProjectListItem item, Context context) {
         CheckBox check = row.findViewById(R.id.projectSubtaskCheck);
         TextView title = row.findViewById(R.id.projectSubtaskTitle);
         TextView meta = row.findViewById(R.id.projectSubtaskMeta);
+        View focus = row.findViewById(R.id.projectSubtaskFocus);
         boolean done = entry.isDone();
 
         check.setChecked(done);
@@ -212,25 +197,22 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
                 done ? R.color.bb_on_surface_muted : R.color.bb_on_surface));
 
         int target = entry.getTargetMinutes();
-        if (target <= 0) {
-            meta.setVisibility(View.GONE);
-        } else {
-            meta.setVisibility(View.VISIBLE);
-            int remaining = ProjectListItem.remainingMinutes(entry);
-            if (done || remaining == 0) {
-                meta.setText(context.getString(R.string.project_subtask_minutes, target));
-            } else {
-                int pomodoros = ProjectListItem.pomodorosFor(remaining, item.pomodoroMinutes);
-                meta.setText(context.getResources().getQuantityString(
-                        R.plurals.project_subtask_pomodoros, pomodoros, pomodoros));
-            }
-        }
+        meta.setText(target > 0
+                ? context.getString(R.string.project_subtask_progress,
+                        Math.min(entry.getAttributedMinutes(), target), target)
+                : context.getString(R.string.project_subtask_no_target));
 
         row.setContentDescription(context.getString(R.string.project_item_done_desc, entry.getTitle()));
         row.setOnClickListener(v -> {
             HapticFeedback.lightTap(check);
             if (subtaskListener != null) {
                 subtaskListener.onSubtaskChecked(entry, !entry.isDone());
+            }
+        });
+        focus.setContentDescription(context.getString(R.string.project_focus_desc, entry.getTitle()));
+        focus.setOnClickListener(v -> {
+            if (subtaskListener != null) {
+                subtaskListener.onSubtaskFocus(entry);
             }
         });
     }
@@ -245,63 +227,20 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
         long now = System.currentTimeMillis();
         ProjectDeadlineState state = ProjectDeadlineState.from(project.softDeadlineMillis, now, false);
         holder.deadlineChip.setVisibility(View.VISIBLE);
-        holder.deadlineChip.setText(deadlineLabel(context, project.softDeadlineMillis, now, state));
+        holder.deadlineChip.setText(
+                ProjectFormat.cardDeadline(context, project.softDeadlineMillis, now, state));
         int color;
+        int background = R.drawable.bg_project_due_chip;
         if (state == ProjectDeadlineState.PASSED) {
             color = R.color.bb_danger;
         } else if (state == ProjectDeadlineState.APPROACHING) {
             color = R.color.bb_accent_reward;
+            background = R.drawable.bg_project_due_chip_reward;
         } else {
             color = R.color.bb_on_surface_muted;
         }
+        holder.deadlineChip.setBackgroundResource(background);
         holder.deadlineChip.setTextColor(ContextCompat.getColor(context, color));
-    }
-
-    // "Due today" / "Due tomorrow" / "Due Fri" (menos de una semana) / "Due Oct 28" / "Overdue".
-    private static String deadlineLabel(Context context, long deadlineMillis, long nowMillis,
-                                        ProjectDeadlineState state) {
-        if (state == ProjectDeadlineState.PASSED) {
-            return context.getString(R.string.project_deadline_passed);
-        }
-        int days = daysBetween(nowMillis, deadlineMillis);
-        if (days <= 0) {
-            return context.getString(R.string.project_due_today);
-        }
-        if (days == 1) {
-            return context.getString(R.string.project_due_tomorrow);
-        }
-        String skeleton = days < 7 ? "EEE" : "dMMM";
-        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
-        String date = new SimpleDateFormat(pattern, Locale.getDefault()).format(new Date(deadlineMillis));
-        return context.getString(R.string.project_due_on, date);
-    }
-
-    private static int daysBetween(long fromMillis, long toMillis) {
-        Calendar a = Calendar.getInstance();
-        a.setTimeInMillis(fromMillis);
-        a.set(Calendar.HOUR_OF_DAY, 0);
-        a.set(Calendar.MINUTE, 0);
-        a.set(Calendar.SECOND, 0);
-        a.set(Calendar.MILLISECOND, 0);
-        Calendar b = Calendar.getInstance();
-        b.setTimeInMillis(toMillis);
-        b.set(Calendar.HOUR_OF_DAY, 0);
-        b.set(Calendar.MINUTE, 0);
-        b.set(Calendar.SECOND, 0);
-        b.set(Calendar.MILLISECOND, 0);
-        return (int) Math.round((b.getTimeInMillis() - a.getTimeInMillis()) / 86_400_000d);
-    }
-
-    private static String formatDuration(Context context, int minutes) {
-        int h = minutes / 60;
-        int m = minutes % 60;
-        if (h == 0) {
-            return context.getString(R.string.project_duration_m, m);
-        }
-        if (m == 0) {
-            return context.getString(R.string.project_duration_h, h);
-        }
-        return context.getString(R.string.project_duration_hm, h, m);
     }
 
     @Override
@@ -310,43 +249,29 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     }
 
     static class ProjectViewHolder extends RecyclerView.ViewHolder {
-        final View card;
-        final View header;
-        final View colorAccent;
-        final View dotRing;
+        final View top;
+        final View glow;
+        final ProgressRingView ring;
         final TextView name;
         final TextView deadlineChip;
         final TextView tasks;
-        final TextView percent;
-        final ImageView expandIcon;
-        final LinearProgressIndicator progress;
-        final View pomodoroRow;
-        final TextView pomodorosToday;
-        final TextView estRemaining;
-        final View expandedBody;
-        final LinearLayout subtasksContainer;
-        final View addSubtask;
-        final View openDetail;
+        final View nextRow;
+        final TextView nextTitle;
+        final MaterialButton focusButton;
+        final ExpandStripView strip;
 
         ProjectViewHolder(@NonNull View itemView) {
             super(itemView);
-            card = itemView.findViewById(R.id.projectCard);
-            header = itemView.findViewById(R.id.projectHeader);
-            colorAccent = itemView.findViewById(R.id.projectColorAccent);
-            dotRing = itemView.findViewById(R.id.projectDotRing);
+            top = itemView.findViewById(R.id.projectCardTop);
+            glow = itemView.findViewById(R.id.projectGlow);
+            ring = itemView.findViewById(R.id.projectRing);
             name = itemView.findViewById(R.id.projectNameText);
             deadlineChip = itemView.findViewById(R.id.projectDeadlineChip);
             tasks = itemView.findViewById(R.id.projectTasksText);
-            percent = itemView.findViewById(R.id.projectPercentText);
-            expandIcon = itemView.findViewById(R.id.projectExpandIcon);
-            progress = itemView.findViewById(R.id.projectCardProgress);
-            pomodoroRow = itemView.findViewById(R.id.projectPomodoroRow);
-            pomodorosToday = itemView.findViewById(R.id.projectPomodorosToday);
-            estRemaining = itemView.findViewById(R.id.projectEstRemaining);
-            expandedBody = itemView.findViewById(R.id.projectExpandedBody);
-            subtasksContainer = itemView.findViewById(R.id.projectSubtasksContainer);
-            addSubtask = itemView.findViewById(R.id.projectAddSubtask);
-            openDetail = itemView.findViewById(R.id.projectOpenDetail);
+            nextRow = itemView.findViewById(R.id.projectNextRow);
+            nextTitle = itemView.findViewById(R.id.projectNextTitle);
+            focusButton = itemView.findViewById(R.id.projectFocusButton);
+            strip = itemView.findViewById(R.id.projectCardStrip);
         }
     }
 }

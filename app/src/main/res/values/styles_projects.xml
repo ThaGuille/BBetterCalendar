@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Projects (mejora-visual u11). -->
+<resources>
+    <!-- Extended FAB "Nuevo proyecto" (mockup 30): sage pill, pine text and icon, same elevation as the FAB. -->
+    <style name="Widget.BBetter.FAB.Extended" parent="Widget.MaterialComponents.ExtendedFloatingActionButton.Icon">
+        <item name="android:stateListAnimator">@animator/bb_press</item>
+        <item name="backgroundTint">@color/bb_primary</item>
+        <item name="iconTint">@color/bb_on_primary</item>
+        <item name="android:textColor">@color/bb_on_primary</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.Button</item>
+        <item name="rippleColor">@color/bb_ripple_on_primary</item>
+        <item name="elevation">@dimen/elevation_fab</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
+    </style>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u11 · "Anadir tarea" al final de las tareas pendientes de la franja (mockup 30). -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/projectAddSubtask"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:drawableStart="@drawable/ic_add_24"
+    android:drawablePadding="@dimen/spacing_sm"
+    android:drawableTint="@color/bb_primary_bright"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/touch_target_min"
+    android:text="@string/project_add_subtask"
+    android:textAppearance="@style/TextAppearance.BBetter.Label"
+    android:textColor="@color/bb_primary_bright" />

@@ -31,6 +31,12 @@ public class ExpandStripView extends LinearLayout {
     private final TextView action;
     private final LinearLayout content;
     private boolean expanded;
+    @Nullable private OnExpandedChangeListener expandedListener;
+
+    /** Called when the user (not {@link #setExpanded(boolean)} from code) toggles the strip. */
+    public interface OnExpandedChangeListener {
+        void onExpandedChanged(boolean expanded);
+    }
 
     public ExpandStripView(@NonNull Context context) {
         this(context, null);
@@ -50,7 +56,12 @@ public class ExpandStripView extends LinearLayout {
         title = findViewById(R.id.expandStripTitle);
         action = findViewById(R.id.expandStripAction);
         content = findViewById(R.id.expandStripContent);
-        header.setOnClickListener(v -> setExpanded(!expanded, true));
+        header.setOnClickListener(v -> {
+            setExpanded(!expanded, true);
+            if (expandedListener != null) {
+                expandedListener.onExpandedChanged(expanded);
+            }
+        });
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ExpandStripView, defStyleAttr, 0);
         try {
@@ -59,6 +70,15 @@ public class ExpandStripView extends LinearLayout {
         } finally {
             a.recycle();
         }
+    }
+
+    public void setOnExpandedChangeListener(@Nullable OnExpandedChangeListener listener) {
+        expandedListener = listener;
+    }
+
+    /** Removes every view added to the part that unfolds. */
+    public void clearContent() {
+        content.removeAllViews();
     }
 
     public void setTitle(@Nullable CharSequence text) {

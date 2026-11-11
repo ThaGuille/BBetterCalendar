@@ -25,7 +25,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
  * delta chip and sub line.
  *
  * <pre>
- *   FOCUS TIME          label  (Caption, uppercase by default)  [+ icon start/end]
+ *   Focus time          label  (Caption, sentence case; wraps, never ellipsized)  [+ icon start/end]
  *   12h 40m             value  (Stat.Tile 22sp, tabular)        [+ unit, muted]
  *   ▁▁▁▁▁▁              bar    (optional, 0..100)
  *   ▲ 14%               delta  (optional; inset pill or inline)
@@ -34,6 +34,11 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
  *
  * By default the tile paints its own Pine Card (20dp, {@code bg_card}) with 14dp padding; set
  * {@code app:tileCard="false"} to put several bare tiles inside one card (html 13).
+ *
+ * <p>mejora-visual u3: nothing is truncated (label wraps to two lines, sub to three, the value never
+ * ellipsizes) and labels are no longer forced to uppercase ({@link #setLabelAllCaps} still opts in).
+ * {@code app:tileWide="true"} / {@link #setWide} is the "wide cell" of mockup 10: an inset tile with
+ * label, value and a wrapping context line (the sub).
  */
 public class StatTileView extends LinearLayout {
 
@@ -49,8 +54,9 @@ public class StatTileView extends LinearLayout {
     private final TextView delta;
     private final TextView sub;
 
-    private boolean labelAllCaps = true;
+    private boolean labelAllCaps = false;
     private boolean deltaChip = true;
+    private boolean wide;
     @DrawableRes private int iconRes;
     private boolean iconAtEnd;
     @ColorInt private int iconTint;
@@ -80,7 +86,7 @@ public class StatTileView extends LinearLayout {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.StatTileView, defStyleAttr, 0);
         try {
             setCardStyle(a.getBoolean(R.styleable.StatTileView_tileCard, true));
-            labelAllCaps = a.getBoolean(R.styleable.StatTileView_tileLabelAllCaps, true);
+            labelAllCaps = a.getBoolean(R.styleable.StatTileView_tileLabelAllCaps, false);
             setLabel(a.getText(R.styleable.StatTileView_tileLabel));
             setValue(a.getText(R.styleable.StatTileView_tileValue), a.getText(R.styleable.StatTileView_tileUnit));
             setValueTone(WidgetTone.fromAttr(a.getInt(R.styleable.StatTileView_tileValueTone, 0), WidgetTone.NORMAL));
@@ -97,6 +103,7 @@ public class StatTileView extends LinearLayout {
             setDelta(deltaText, Trend.values()[Math.max(0, Math.min(trend, 2))],
                     WidgetTone.fromAttr(a.getInt(R.styleable.StatTileView_tileDeltaTone, 2), WidgetTone.PRIMARY));
             setProgress(a.getInt(R.styleable.StatTileView_tileProgress, -1));
+            setWide(a.getBoolean(R.styleable.StatTileView_tileWide, false));
         } finally {
             a.recycle();
         }
@@ -104,13 +111,13 @@ public class StatTileView extends LinearLayout {
 
     // ---- API ----
 
-    /** Small label above the number ("Focus time"). Uppercased by default (see {@link #setLabelAllCaps}). */
+    /** Small label above the number ("Focus time"). Sentence case unless {@link #setLabelAllCaps} says otherwise. */
     public void setLabel(@Nullable CharSequence text) {
         WidgetUtils.setTextOrGone(label, text);
         applyLabelCaps();
     }
 
-    /** html 13 / 10 = uppercase with tracking; html 14 = sentence case. */
+    /** Opt-in uppercase with tracking (off by default since u3). */
     public void setLabelAllCaps(boolean allCaps) {
         labelAllCaps = allCaps;
         applyLabelCaps();
@@ -209,6 +216,9 @@ public class StatTileView extends LinearLayout {
 
     /** true (default) = own Pine Card + padding; false = bare content for a shared card. */
     public void setCardStyle(boolean card) {
+        if (wide) {
+            return;
+        }
         if (card) {
             setBackgroundResource(R.drawable.bg_card);
             int p = getResources().getDimensionPixelSize(R.dimen.widget_tile_padding);
@@ -217,6 +227,26 @@ public class StatTileView extends LinearLayout {
             setBackground(null);
             setPadding(0, 0, 0, 0);
         }
+    }
+
+    /**
+     * "Wide cell" (mockup 10, Sesiones / Tareas): an inset tile (own rounded fill, 14dp padding) whose context
+     * line (the sub) may wrap to three lines. Replaces the card look; false restores it.
+     */
+    public void setWide(boolean wide) {
+        this.wide = wide;
+        if (wide) {
+            setBackgroundResource(R.drawable.bg_stat_tile_wide);
+            int p = getResources().getDimensionPixelSize(R.dimen.widget_tile_padding);
+            setPadding(p, p, p, p);
+            sub.setMaxLines(3);
+        } else {
+            sub.setMaxLines(2);
+        }
+    }
+
+    public boolean isWide() {
+        return wide;
     }
 
     // ---- internals ----

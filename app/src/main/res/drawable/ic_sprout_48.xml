@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u3: default EmptyStateView illustration. Sage sprout (stem + two leaves) with three
+     amber dots at its feet. Colours are tokens (bb_primary / bb_primary_bright / bb_illustration_amber). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M24,38L24,22"
+        android:strokeColor="@color/bb_primary"
+        android:strokeLineCap="round"
+        android:strokeWidth="2.6" />
+    <path
+        android:fillColor="@color/bb_primary"
+        android:pathData="M24,27C24,19 18.5,14.5 9,14.5C9,23 14.5,27 24,27Z" />
+    <path
+        android:fillColor="@color/bb_primary_bright"
+        android:pathData="M24,22.5C24,14.5 29.5,9.5 39,9.5C39,18.5 33.5,22.5 24,22.5Z" />
+    <path
+        android:fillColor="@color/bb_illustration_amber"
+        android:pathData="M11,41.5a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0" />
+    <path
+        android:fillColor="@color/bb_illustration_amber"
+        android:pathData="M21.8,43.5a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0" />
+    <path
+        android:fillColor="@color/bb_illustration_amber"
+        android:pathData="M32.6,41.5a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0" />
+</vector>

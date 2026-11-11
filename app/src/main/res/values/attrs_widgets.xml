@@ -54,6 +54,8 @@
         <attr name="tileProgress" format="integer" />
         <!-- true (default): label in uppercase with tracking (html 13 / 10). -->
         <attr name="tileLabelAllCaps" format="boolean" />
+        <!-- u3: "wide cell" = inset tile with label, value and a wrapping context line (mockup 10). -->
+        <attr name="tileWide" format="boolean" />
         <!-- true (default): the tile draws its own Pine Card (20dp) + 14dp padding. false: bare
              content, for several tiles inside one card (html 13). -->
         <attr name="tileCard" format="boolean" />
@@ -146,6 +148,29 @@
         <attr name="stepperValue" format="integer" />
         <attr name="stepperUnit" format="string" />
         <attr name="stepperCaption" format="string" />
+    </declare-styleable>
+
+    <!-- mejora-visual u3 -->
+    <declare-styleable name="SkeletonView">
+        <attr name="skeletonRadius" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="SkeletonGroup">
+        <attr name="skeletonRows" format="integer" />
+        <attr name="skeletonRowHeight" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="ExpandStripView">
+        <attr name="stripTitle" format="string" />
+        <attr name="stripExpanded" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="ProgressRingView">
+        <attr name="ringStroke" format="dimension" />
+        <attr name="ringColor" format="color" />
+        <attr name="ringTrackColor" format="color" />
+        <attr name="ringProgress" format="integer" />
+        <attr name="ringShowText" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="EmptyStateView">

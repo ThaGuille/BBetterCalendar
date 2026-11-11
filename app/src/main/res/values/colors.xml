@@ -98,6 +98,10 @@
     <color name="bb_cat_2">@color/seafoam_200</color>
     <color name="bb_cat_3">@color/sage_500</color>
     <color name="bb_cat_4">@color/grey_400</color>
+    <!-- mejora-visual u3: amber dots of the ic_sprout_48 illustration. -->
+    <color name="bb_illustration_amber">@color/amber_400</color>
+    <!-- mejora-visual u3: ring of the unchecked task circle (Widget.BBetter.CheckBox). -->
+    <color name="bb_checkbox_border">@color/sage_500</color>
     <!-- Skeleton loading blocks. -->
     <color name="bb_skeleton_base">@color/pine_800</color>
     <color name="bb_skeleton_shine">@color/birch_50_a10</color>

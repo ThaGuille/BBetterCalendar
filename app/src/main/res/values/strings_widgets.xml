@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ExpandStripView action label (u3). -->
+    <string name="widget_strip_show">Show</string>
+    <string name="widget_strip_hide">Hide</string>
+    <string name="widget_ring_percent">%1$d%%</string>
+</resources>

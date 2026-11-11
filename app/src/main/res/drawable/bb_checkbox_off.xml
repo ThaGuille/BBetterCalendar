@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u3: unchecked task circle. 48dp canvas = the touch target; the visible ring is
+     22dp (r 10 + 2dp stroke, sage border). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/checkbox_touch_size"
+    android:height="@dimen/checkbox_touch_size"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M14,24a10,10 0 1,0 20,0a10,10 0 1,0 -20,0"
+        android:strokeColor="@color/bb_checkbox_border"
+        android:strokeWidth="2" />
+</vector>

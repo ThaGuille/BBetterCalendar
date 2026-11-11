@@ -6,6 +6,7 @@
     <integer name="bb_motion_press_up">300</integer>
     <integer name="bb_motion_toggle">200</integer>
     <integer name="bb_motion_expand">250</integer>
+    <integer name="bb_motion_slide">260</integer>
     <integer name="bb_motion_screen_enter">300</integer>
     <integer name="bb_motion_screen_exit">250</integer>
     <integer name="bb_motion_chart">450</integer>

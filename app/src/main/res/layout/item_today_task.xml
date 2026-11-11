@@ -28,15 +28,13 @@
 
         <CheckBox
             android:id="@+id/taskDoneCheckbox"
+            style="@style/Widget.BBetter.CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:button="@drawable/bb_task_check"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            app:useMaterialThemeColors="false" />
-        <!-- useMaterialThemeColors=false: si no, MaterialCheckBox tiñe todo el layer-list de un
-             solo color y el check de la tarea hecha desaparece (disco gris liso). -->
+            android:layout_marginStart="@dimen/checkbox_overhang"
+            android:layout_marginEnd="@dimen/checkbox_overhang" />
+        <!-- Widget.BBetter.CheckBox: useMaterialThemeColors=false y sin buttonTint; el dibujable
+             anima el check (u3). -->
 
         <LinearLayout
             android:layout_width="0dp"

@@ -72,6 +72,7 @@
     <!-- EmptyStateView icon disc. -->
     <dimen name="widget_empty_icon_container">56dp</dimen>
     <dimen name="widget_empty_icon_size">28dp</dimen>
+    <dimen name="widget_empty_illustration_size">64dp</dimen>
 
     <!-- Text scale (u6, .stitch/DESIGN.md §3) — mapped by TextAppearance.BBetter.* in
          styles_typography.xml. -->

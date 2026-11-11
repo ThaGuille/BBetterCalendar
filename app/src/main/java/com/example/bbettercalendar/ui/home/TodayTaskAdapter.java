@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
+import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.ui.projects.ProjectListAdapter;
 
@@ -175,6 +176,9 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
                 && holder.progress.getVisibility() == View.GONE ? View.GONE : View.VISIBLE);
 
         holder.checkbox.setOnCheckedChangeListener((button, isChecked) -> {
+            if (button.isPressed()) {
+                HapticFeedback.lightTap(button);
+            }
             if (listener != null) {
                 listener.onTaskChecked(entry, isChecked);
             }

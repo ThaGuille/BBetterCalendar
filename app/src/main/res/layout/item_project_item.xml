@@ -14,11 +14,11 @@
 
     <CheckBox
         android:id="@+id/projectItemDoneCheckbox"
+        style="@style/Widget.BBetter.CheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:buttonTint="@color/bb_primary"
-        android:minWidth="0dp"
-        android:minHeight="0dp" />
+        android:layout_marginStart="@dimen/checkbox_overhang"
+        android:layout_marginEnd="@dimen/checkbox_overhang" />
 
     <TextView
         android:id="@+id/projectItemTitleText"

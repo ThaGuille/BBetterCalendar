@@ -6,12 +6,22 @@
     tools:orientation="vertical"
     tools:parentTag="android.widget.LinearLayout">
 
+    <!-- Default illustration (u3): shown when no emptyIcon is given. -->
+    <ImageView
+        android:id="@+id/emptyStateIllustration"
+        android:layout_width="@dimen/widget_empty_illustration_size"
+        android:layout_height="@dimen/widget_empty_illustration_size"
+        android:layout_marginBottom="16dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_sprout_48" />
+
     <FrameLayout
         android:id="@+id/emptyStateIconDisc"
         android:layout_width="@dimen/widget_empty_icon_container"
         android:layout_height="@dimen/widget_empty_icon_container"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/bg_empty_icon">
+        android:background="@drawable/bg_icon_box"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/emptyStateIcon"
@@ -19,7 +29,7 @@
             android:layout_height="@dimen/widget_empty_icon_size"
             android:layout_gravity="center"
             android:importantForAccessibility="no"
-            app:tint="@color/bb_primary_bright" />
+            app:tint="@color/bb_on_primary_container" />
     </FrameLayout>
 
     <TextView

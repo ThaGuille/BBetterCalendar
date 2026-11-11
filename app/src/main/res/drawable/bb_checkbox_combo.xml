@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u3: shared vector of the two checkbox transitions. Starts unchecked (no disc, check
+     not drawn); the animated-vectors set the from/to values themselves. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/checkbox_touch_size"
+    android:height="@dimen/checkbox_touch_size"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M14,24a10,10 0 1,0 20,0a10,10 0 1,0 -20,0"
+        android:strokeColor="@color/bb_checkbox_border"
+        android:strokeWidth="2" />
+    <group
+        android:name="pop"
+        android:pivotX="24"
+        android:pivotY="24">
+        <path
+            android:name="fill"
+            android:fillAlpha="0"
+            android:fillColor="@color/bb_primary"
+            android:pathData="M13,24a11,11 0 1,0 22,0a11,11 0 1,0 -22,0" />
+        <path
+            android:name="check"
+            android:pathData="M18.5,24.5L22.3,28.3L29.8,19.8"
+            android:strokeColor="@color/bb_on_primary"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="2.4"
+            android:trimPathEnd="0" />
+    </group>
+</vector>

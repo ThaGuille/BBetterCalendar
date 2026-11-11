@@ -213,6 +213,22 @@
         <item name="rippleColor">@android:color/transparent</item>
     </style>
 
+    <!-- ===== CheckBox (mejora-visual u3) ===== -->
+    <!-- 22dp sage ring; checked = bb_primary disc and the check draws itself (AnimatedStateListDrawable,
+         220 ms). The 48dp canvas of the drawable is the touch target, so no min size/padding here.
+         Layouts must not set buttonTint (it would retint the vector). Haptics: the adapters call
+         HapticFeedback on user toggles. -->
+    <style name="Widget.BBetter.CheckBox" parent="Widget.MaterialComponents.CompoundButton.CheckBox">
+        <item name="useMaterialThemeColors">false</item>
+        <item name="android:button">@drawable/bb_checkbox_button</item>
+        <item name="buttonCompat">@drawable/bb_checkbox_button</item>
+        <item name="buttonTint">@null</item>
+        <item name="android:background">@null</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
     <!-- ===== Switch (SwitchMaterial; theme switchStyle) ===== -->
     <!-- MD3-looking pill drawn with our own thumb/track (html 14: 48x28 sage track, pine thumb);
          useMaterialThemeColors off so MDC does not re-tint them. Layouts must not set

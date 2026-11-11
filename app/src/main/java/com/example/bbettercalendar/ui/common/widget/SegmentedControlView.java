@@ -1,7 +1,14 @@
 package com.example.bbettercalendar.ui.common.widget;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +19,10 @@ import androidx.annotation.ArrayRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import androidx.core.content.ContextCompat;
+
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.motion.Motion;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +36,9 @@ import java.util.List;
  * <p>Items come from {@code app:segmentEntries} (string-array) or {@link #setItems}. Exactly one item
  * is selected; {@link OnSegmentSelectedListener} fires only on user taps that change it. Height is
  * fixed at {@code @dimen/segmented_track_height} unless the layout gives an exact height.
+ *
+ * <p>mejora-visual u3: the selected pill is drawn by the track itself and slides to the new item
+ * (260 ms, {@code bb_standard}) while the two labels cross-fade; with animations off it jumps.
  */
 public class SegmentedControlView extends LinearLayout {
 
@@ -36,6 +49,17 @@ public class SegmentedControlView extends LinearLayout {
     private final int trackHeight;
     private int selected = -1;
     @Nullable private OnSegmentSelectedListener listener;
+
+    private final Paint pillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final RectF pill = new RectF();
+    private final ArgbEvaluator argb = new ArgbEvaluator();
+    private final int colorOn;
+    private final int colorMuted;
+    private final int colorDisabled;
+    @Nullable private ValueAnimator slide;
+    /** Previous item while a slide runs (its label fades back to muted). */
+    private int leaving = -1;
+    private float slideProgress = 1f;
 
     public SegmentedControlView(@NonNull Context context) {
         this(context, null);
@@ -50,6 +74,11 @@ public class SegmentedControlView extends LinearLayout {
         super(context, attrs, defStyleAttr, R.style.Widget_BBetter_SegmentedControl);
         setOrientation(HORIZONTAL);
         trackHeight = getResources().getDimensionPixelSize(R.dimen.segmented_track_height);
+        setWillNotDraw(false);
+        colorOn = ContextCompat.getColor(context, R.color.bb_on_primary);
+        colorMuted = ContextCompat.getColor(context, R.color.bb_on_surface_muted);
+        colorDisabled = ContextCompat.getColor(context, R.color.bb_disabled);
+        pillPaint.setColor(ContextCompat.getColor(context, R.color.bb_primary));
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SegmentedControlView, defStyleAttr, 0);
         try {
@@ -97,10 +126,115 @@ public class SegmentedControlView extends LinearLayout {
         if (index < 0 || index >= getChildCount()) {
             return;
         }
+        select(index, false);
+    }
+
+    /** Selects {@code index}; {@code animate} slides the pill (only once laid out and with animations on). */
+    private void select(int index, boolean animate) {
+        int previous = selected;
         selected = index;
         for (int i = 0; i < getChildCount(); i++) {
             getChildAt(i).setSelected(i == index);
         }
+        cancelSlide();
+        View target = getChildAt(index);
+        boolean canSlide = animate && previous >= 0 && previous != index && isLaidOut()
+                && target.getWidth() > 0 && Motion.enabled(getContext());
+        if (!canSlide) {
+            leaving = -1;
+            slideProgress = 1f;
+            placePill(target);
+            applyLabelColors();
+            invalidate();
+            return;
+        }
+        final float fromL = pill.left;
+        final float fromR = pill.right;
+        final float toL = target.getLeft();
+        final float toR = target.getRight();
+        leaving = previous;
+        slideProgress = 0f;
+        slide = ValueAnimator.ofFloat(0f, 1f);
+        slide.setDuration(Motion.duration(getContext(), R.integer.bb_motion_slide));
+        slide.setInterpolator(Motion.interpolator(getContext(), R.interpolator.bb_standard));
+        slide.addUpdateListener(a -> {
+            slideProgress = (float) a.getAnimatedValue();
+            pill.left = fromL + (toL - fromL) * slideProgress;
+            pill.right = fromR + (toR - fromR) * slideProgress;
+            applyLabelColors();
+            invalidate();
+        });
+        slide.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                leaving = -1;
+                slideProgress = 1f;
+                slide = null;
+                applyLabelColors();
+            }
+        });
+        applyLabelColors();
+        slide.start();
+    }
+
+    private void cancelSlide() {
+        if (slide != null) {
+            ValueAnimator running = slide;
+            slide = null;
+            running.removeAllListeners();
+            running.cancel();
+        }
+    }
+
+    private void placePill(@Nullable View item) {
+        if (item == null) {
+            return;
+        }
+        pill.set(item.getLeft(), item.getTop(), item.getRight(), item.getBottom());
+    }
+
+    /** Label colours by hand (a ColorStateList cannot cross-fade): on-primary on the pill, muted elsewhere. */
+    private void applyLabelColors() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (!(child instanceof TextView)) {
+                continue;
+            }
+            int color;
+            if (!child.isEnabled()) {
+                color = colorDisabled;
+            } else if (i == selected) {
+                color = leaving >= 0 ? (Integer) argb.evaluate(slideProgress, colorMuted, colorOn) : colorOn;
+            } else if (i == leaving) {
+                color = (Integer) argb.evaluate(slideProgress, colorOn, colorMuted);
+            } else {
+                color = colorMuted;
+            }
+            ((TextView) child).setTextColor(color);
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (slide == null && selected >= 0 && selected < getChildCount()) {
+            placePill(getChildAt(selected));
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (selected >= 0 && pill.right > pill.left) {
+            float radius = pill.height() / 2f;
+            canvas.drawRoundRect(pill, radius, radius, pillPaint);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        cancelSlide();
+        super.onDetachedFromWindow();
     }
 
     public int getSelectedIndex() {
@@ -112,6 +246,7 @@ public class SegmentedControlView extends LinearLayout {
         View child = getChildAt(index);
         if (child != null) {
             child.setEnabled(enabled);
+            applyLabelColors();
         }
     }
 
@@ -123,7 +258,7 @@ public class SegmentedControlView extends LinearLayout {
         if (index == selected) {
             return;
         }
-        setSelectedIndex(index);
+        select(index, true);
         if (listener != null) {
             listener.onSegmentSelected(this, index);
         }

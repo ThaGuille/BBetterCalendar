@@ -20,6 +20,12 @@
         <item name="android:padding">@dimen/spacing_md</item>
     </style>
 
+    <string-array name="gallery_u3_segments" translatable="false">
+        <item>Semana</item>
+        <item>Mes</item>
+        <item>Ano</item>
+    </string-array>
+
     <string-array name="gallery_periods" translatable="false">
         <item>Week</item>
         <item>Month</item>

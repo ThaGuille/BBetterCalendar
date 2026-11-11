@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Etiqueta de accion de ExpandStripView (u3). -->
+    <string name="widget_strip_show">Ver</string>
+    <string name="widget_strip_hide">Ocultar</string>
+    <string name="widget_ring_percent">%1$d%%</string>
+</resources>

@@ -18,11 +18,14 @@ import androidx.annotation.Nullable;
 import com.example.bbettercalendar.R;
 
 /**
- * Empty state (u9): sage icon on a raised disc, Title, muted message and an optional secondary pill
- * action. Centred; 24dp padding. Use it inside a card or full-screen when a list has no data.
+ * Empty state (u9; restyled in mejora-visual u3): an icon box (tinted glyph on {@code bg_icon_box}) or, when
+ * no icon is given, the default sprout illustration {@code ic_sprout_48}; then Title, one muted sentence and
+ * an optional action pill ({@link #setAction}). Centred; 24dp padding. Use it inside a card or full-screen
+ * when a list has no data.
  */
 public class EmptyStateView extends LinearLayout {
 
+    private final ImageView illustration;
     private final View iconDisc;
     private final ImageView icon;
     private final TextView title;
@@ -44,6 +47,7 @@ public class EmptyStateView extends LinearLayout {
         int p = getResources().getDimensionPixelSize(R.dimen.spacing_lg);
         setPadding(p, p, p, p);
         inflate(context, R.layout.view_empty_state, this);
+        illustration = findViewById(R.id.emptyStateIllustration);
         iconDisc = findViewById(R.id.emptyStateIconDisc);
         icon = findViewById(R.id.emptyStateIcon);
         title = findViewById(R.id.emptyStateTitle);
@@ -61,13 +65,15 @@ public class EmptyStateView extends LinearLayout {
         }
     }
 
-    /** 0 hides the disc. */
+    /** A glyph in the icon box; 0 falls back to the default sprout illustration ({@code ic_sprout_48}). */
     public void setIcon(@DrawableRes int res) {
         if (res == 0) {
             iconDisc.setVisibility(GONE);
+            illustration.setVisibility(VISIBLE);
         } else {
             icon.setImageResource(res);
             iconDisc.setVisibility(VISIBLE);
+            illustration.setVisibility(GONE);
         }
     }
 

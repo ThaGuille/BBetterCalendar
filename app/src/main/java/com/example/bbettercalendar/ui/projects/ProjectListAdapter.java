@@ -7,6 +7,7 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
+import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDeadlineState;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -196,12 +198,12 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
     }
 
     private void bindSubtask(View row, CalendarEntry entry, ProjectListItem item, Context context) {
-        ImageView check = row.findViewById(R.id.projectSubtaskCheck);
+        CheckBox check = row.findViewById(R.id.projectSubtaskCheck);
         TextView title = row.findViewById(R.id.projectSubtaskTitle);
         TextView meta = row.findViewById(R.id.projectSubtaskMeta);
         boolean done = entry.isDone();
 
-        check.setImageResource(done ? R.drawable.bg_subtask_check_on : R.drawable.bg_task_check_off);
+        check.setChecked(done);
         title.setText(entry.getTitle());
         int flags = title.getPaintFlags();
         title.setPaintFlags(done ? flags | Paint.STRIKE_THRU_TEXT_FLAG
@@ -226,6 +228,7 @@ public class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.
 
         row.setContentDescription(context.getString(R.string.project_item_done_desc, entry.getTitle()));
         row.setOnClickListener(v -> {
+            HapticFeedback.lightTap(check);
             if (subtaskListener != null) {
                 subtaskListener.onSubtaskChecked(entry, !entry.isDone());
             }

@@ -31,6 +31,161 @@
             android:text="ui/common/widget · u9"
             android:textAppearance="@style/TextAppearance.BBetter.Caption" />
 
+        <!-- ===================== Animated components (mejora-visual u3) ===================== -->
+        <TextView
+            android:id="@+id/galleryU3Label"
+            style="@style/GalleryLabel"
+            android:text="Animated components (u3)" />
+
+        <LinearLayout style="@style/GalleryCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/galleryU3Check"
+                    style="@style/Widget.BBetter.CheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/checkbox_overhang"
+                    android:layout_marginEnd="@dimen/checkbox_overhang" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_card_gap"
+                    android:text="Repasar tema 4"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body.Medium" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/galleryU3CheckOn"
+                    style="@style/Widget.BBetter.CheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/checkbox_overhang"
+                    android:layout_marginEnd="@dimen/checkbox_overhang"
+                    android:checked="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_card_gap"
+                    android:text="Leer capitulo 2"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body.Medium" />
+            </LinearLayout>
+
+            <com.example.bbettercalendar.ui.common.widget.SegmentedControlView
+                android:id="@+id/galleryU3Segmented"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                app:segmentEntries="@array/gallery_u3_segments" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/galleryU3Switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:checked="true"
+                android:minHeight="@dimen/touch_target_min" />
+
+            <com.example.bbettercalendar.ui.common.widget.ExpandStripView
+                android:id="@+id/galleryU3Strip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                app:stripTitle="5 tareas pendientes">
+
+                <TextView
+                    android:id="@+id/galleryU3StripContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/spacing_sm"
+                    android:text="Entregar practica de redes\nLeer capitulo 2\nRepasar tema 4"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body" />
+            </com.example.bbettercalendar.ui.common.widget.ExpandStripView>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:layout_marginTop="@dimen/spacing_card_gap">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.example.bbettercalendar.ui.common.widget.ProgressRingView
+                    android:id="@+id/galleryU3Ring"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    app:ringProgress="72" />
+
+                <com.example.bbettercalendar.ui.common.widget.SkeletonGroup
+                    android:id="@+id/galleryU3Skeleton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    android:layout_weight="1"
+                    app:skeletonRows="3" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:orientation="horizontal">
+
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/galleryU3TileSessions"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/spacing_xs"
+                    android:layout_weight="1"
+                    app:tileIcon="@drawable/ic_timer_24"
+                    app:tileLabel="Sesiones"
+                    app:tileSub="26 min de media"
+                    app:tileValue="29"
+                    app:tileWide="true" />
+
+                <com.example.bbettercalendar.ui.common.widget.StatTileView
+                    android:id="@+id/galleryU3TileTasks"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_xs"
+                    android:layout_weight="1"
+                    app:tileIcon="@drawable/ic_check_24"
+                    app:tileLabel="Tareas"
+                    app:tileSub="3 mas que la semana anterior"
+                    app:tileValue="14"
+                    app:tileWide="true" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:layout_marginTop="@dimen/spacing_card_gap">
+
+            <com.example.bbettercalendar.ui.common.widget.EmptyStateView
+                android:id="@+id/galleryU3Empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:emptyActionText="Crear proyecto"
+                app:emptyMessage="Agrupa tus tareas en un proyecto para ver el tiempo de enfoque."
+                app:emptyTitle="Aun no hay proyectos" />
+        </LinearLayout>
+
         <!-- ===================== Firebase ping (F0-u4) ===================== -->
         <TextView
             style="@style/GalleryLabel"

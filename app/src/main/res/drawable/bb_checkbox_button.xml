@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u3: button drawable of Widget.BBetter.CheckBox. Checking plays the draw-the-check
+     animated-vector (220 ms); with the system animations off the transition ends at once. -->
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/bb_checkbox_state_on"
+        android:drawable="@drawable/bb_checkbox_on"
+        android:state_checked="true" />
+    <item
+        android:id="@+id/bb_checkbox_state_off"
+        android:drawable="@drawable/bb_checkbox_off" />
+    <transition
+        android:drawable="@drawable/bb_checkbox_anim_check"
+        android:fromId="@id/bb_checkbox_state_off"
+        android:toId="@id/bb_checkbox_state_on" />
+    <transition
+        android:drawable="@drawable/bb_checkbox_anim_uncheck"
+        android:fromId="@id/bb_checkbox_state_on"
+        android:toId="@id/bb_checkbox_state_off" />
+</animated-selector>

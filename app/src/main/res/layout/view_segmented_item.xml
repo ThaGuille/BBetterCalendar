@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Widget.BBetter.SegmentedControl.Item"
     android:clickable="true"
+    android:background="@null"
     android:focusable="true"
     android:maxLines="1"
     tools:text="Week" />

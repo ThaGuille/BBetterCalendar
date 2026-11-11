@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u3: checked -> unchecked. The check un-draws and the disc fades out (140 ms). -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/bb_checkbox_combo">
+    <target android:name="fill">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="140"
+                android:interpolator="@android:interpolator/linear"
+                android:propertyName="fillAlpha"
+                android:valueFrom="1"
+                android:valueTo="0" />
+        </aapt:attr>
+    </target>
+    <target android:name="check">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="100"
+                android:interpolator="@android:interpolator/fast_out_linear_in"
+                android:propertyName="trimPathEnd"
+                android:valueFrom="1"
+                android:valueTo="0" />
+        </aapt:attr>
+    </target>
+</animated-vector>

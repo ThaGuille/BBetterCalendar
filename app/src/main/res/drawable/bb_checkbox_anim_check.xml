@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u3: unchecked -> checked. The disc fades in with a short bounce and the check
+     stroke draws itself (trimPathEnd 0 -> 1), 220 ms in all. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/bb_checkbox_combo">
+    <target android:name="fill">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="120"
+                android:interpolator="@android:interpolator/linear"
+                android:propertyName="fillAlpha"
+                android:valueFrom="0"
+                android:valueTo="1" />
+        </aapt:attr>
+    </target>
+    <target android:name="check">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="160"
+                android:interpolator="@android:interpolator/fast_out_slow_in"
+                android:propertyName="trimPathEnd"
+                android:startOffset="60"
+                android:valueFrom="0"
+                android:valueTo="1" />
+        </aapt:attr>
+    </target>
+    <target android:name="pop">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:duration="220">
+                <propertyValuesHolder android:propertyName="scaleX">
+                    <keyframe android:fraction="0" android:value="0.86" />
+                    <keyframe android:fraction="0.6" android:value="1.1" />
+                    <keyframe android:fraction="1" android:value="1" />
+                </propertyValuesHolder>
+                <propertyValuesHolder android:propertyName="scaleY">
+                    <keyframe android:fraction="0" android:value="0.86" />
+                    <keyframe android:fraction="0.6" android:value="1.1" />
+                    <keyframe android:fraction="1" android:value="1" />
+                </propertyValuesHolder>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+</animated-vector>

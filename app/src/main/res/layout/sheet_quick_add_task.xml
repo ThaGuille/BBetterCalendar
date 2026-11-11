@@ -5,6 +5,7 @@
      esquinas superiores de 24dp); un fondo aquí taparía las esquinas redondeadas. -->
 <!-- F0-u2: el contenido va en un NestedScrollView: en pantallas bajas (p. ej. 360x640dp) con el
      teclado abierto la altura natural de la hoja no cabe y los botones se aplastaban. -->
+<!-- u3: la hoja no tiene casilla hoy; cualquier casilla nueva usa @style/Widget.BBetter.CheckBox. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">

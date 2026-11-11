@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
+import com.example.bbettercalendar.feedback.HapticFeedback;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -110,6 +111,9 @@ public class ProjectItemAdapter extends RecyclerView.Adapter<ProjectItemAdapter.
         }
 
         holder.checkbox.setOnCheckedChangeListener((button, isChecked) -> {
+            if (button.isPressed()) {
+                HapticFeedback.lightTap(button);
+            }
             if (listener != null) {
                 listener.onItemChecked(entry, isChecked);
             }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Halo (mejora-visual u2): radial wash, centre alpha ~0.18 -> 0. Place behind a card's content, offset to a corner. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:gradientRadius="@dimen/glow_radius"
+        android:startColor="@color/bb_glow_sage_start"
+        android:endColor="@color/bb_glow_sage_end"
+        android:type="radial" />
+</shape>

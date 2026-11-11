@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lit card (mejora-visual u2): bb_surface_card + very soft vertical wash + 1dp top rim of light.
+     Layer 2 is the rim colour over the whole card; layer 3 (inset 1dp at the top) repaints it, so only the top edge keeps the rim. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_surface_card" />
+            <corners android:radius="@dimen/radius_card" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_card_lit_edge" />
+            <corners android:radius="@dimen/radius_card" />
+        </shape>
+    </item>
+    <item android:top="@dimen/card_lit_rim">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/bb_surface_card" />
+                    <corners android:radius="@dimen/radius_card" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:angle="270"
+                        android:startColor="@color/bb_card_lit_top"
+                        android:endColor="@color/bb_glow_sage_end" />
+                    <corners android:radius="@dimen/radius_card" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</layer-list>

@@ -3,6 +3,7 @@ package com.example.bbettercalendar.debug;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Button;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,6 +83,15 @@ public class DebugGalleryActivity extends AppCompatActivity {
         });
     }
 
+    /** mejora-visual u2: press feedback and count-up demo (nothing moves with animations off). */
+    private void bindMotion() {
+        View card = findViewById(R.id.galleryLitCard);
+        card.setClickable(true);
+        com.example.bbettercalendar.ui.common.motion.Motion.pressable(card);
+        TextView count = findViewById(R.id.galleryCountUp);
+        com.example.bbettercalendar.ui.common.motion.Motion.countUp(count, 0, 128, v -> v + " min");
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +105,7 @@ public class DebugGalleryActivity extends AppCompatActivity {
         bindStreaks();
         bindAppRows();
         bindPeriod();
+        bindMotion();
 
         SectionHeaderView header = findViewById(R.id.galleryHeaderAction);
         header.setOnActionClickListener(h -> toast("Action: See all"));

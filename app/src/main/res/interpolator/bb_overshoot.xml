@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Soft bounce: cubic-bezier(0.3, 1.7, 0.5, 1). Press release, celebrations. -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.3"
+    android:controlY1="1.7"
+    android:controlX2="0.5"
+    android:controlY2="1" />

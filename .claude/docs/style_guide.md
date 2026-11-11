@@ -261,6 +261,59 @@ When adding a new visual primitive, look here and in `styles_components.xml` fir
 
 ---
 
+## 4b. Movimiento y profundidad (mejora-visual u2)
+
+Base de movimiento y de profundidad. Los tiempos son enteros en [`motion.xml`](../../app/src/main/res/values/motion.xml); las curvas, interpoladores en `res/interpolator/`. Java los lee con `ui/common/motion/Motion` (`Motion.duration(ctx, R.integer.x)` devuelve 0 con las animaciones del sistema desactivadas: entonces nada se mueve y todo queda en su estado final).
+
+### Tiempos
+
+| Entero | ms | Uso |
+|---|---|---|
+| `bb_motion_press_down` | 80 | Pulsar: escala a 0,93 |
+| `bb_motion_press_up` | 300 | Soltar: vuelta con rebote |
+| `bb_motion_toggle` | 200 | Casillas, interruptores, chips |
+| `bb_motion_expand` | 250 | Expandir / plegar |
+| `bb_motion_screen_enter` | 300 | Entrada de pantalla |
+| `bb_motion_screen_exit` | 250 | Salida de pantalla |
+| `bb_motion_chart` | 450 | Entrada de un grafico |
+| `bb_motion_chart_stagger` | 40 | Retraso entre barras / puntos |
+| `bb_motion_count_up` | 600 | Cifras que cuentan hasta su valor |
+| `bb_motion_celebrate` | 900 | Celebracion |
+
+### Curvas
+
+| Interpolador | cubic-bezier | Uso |
+|---|---|---|
+| `bb_standard` | 0.2, 0, 0, 1 | Movimiento general |
+| `bb_decelerate` | 0.05, 0.7, 0.1, 1 | Lo que entra |
+| `bb_accelerate` | 0.3, 0, 0.8, 0.15 | Lo que sale |
+| `bb_overshoot` | 0.3, 1.7, 0.5, 1 | Rebote suave (soltar, celebrar) |
+
+`Motion`: `pressable(View)` (0,93 en 80 ms, rebote en 300 ms), `staggerIn(ViewGroup)` (10dp + fundido, 260 ms, 50 ms entre hijos), `countUp(TextView, from, to, formatter)`. Pulsacion por defecto: `animator/bb_press.xml` en `Widget.BBetter.Button*`, `FAB`, `Card` y `Chip`.
+
+### Dibujables
+
+| Dibujable / estilo | Que es |
+|---|---|
+| `bg_card_lit` | Tarjeta con luz: degradado vertical muy suave sobre `bb_surface_card` + filo superior de 1dp (`bb_card_lit_edge`). `bg_card` lo adopta, asi que toda tarjeta que use `bg_card` gana profundidad. `MaterialCardView` ignora los fondos: `Widget.BBetter.Card` solo suma la pulsacion |
+| `bg_card_lit_tinted` | Igual sobre `bb_primary_container` |
+| `bg_icon_box` + `Widget.BBetter.IconBox` | Caja de 36dp, radio 11dp, `bb_primary_container`, filo de luz |
+| `bg_glow_sage`, `bg_glow_amber` | Halos radiales (alfa ~0,18 -> 0) tras el contenido de una tarjeta |
+| `Widget.BBetter.BottomSheet` / `ThemeOverlay.BBetter.BottomSheetDialog` | Hoja inferior: radio superior de `ShapeAppearance.BBetter.Sheet`, fondo `bb_surface_card`; el asa la pone cada layout de hoja |
+
+### Colores nuevos (alias en `colors.xml`)
+
+| Alias | Primitiva |
+|---|---|
+| `bb_card_lit_top` / `bb_card_lit_edge` | `birch_50_a03` / `birch_50_a06` |
+| `bb_glow_sage_start/end`, `bb_glow_amber_start/end` | `sage_300_a18` -> `sage_300_a00`, `amber_400_a18` -> `amber_400_a00` |
+| `bb_chart_grid`, `bb_chart_average` | `pine_700`, `lichen_300` |
+| `bb_heat_0..4` | `pine_800`, `forest_600`, `sage_500`, `sage_300`, `sage_200` |
+| `bb_cal_focus_1..3` | `forest_600`, `sage_500`, `sage_300` |
+| `bb_cat_1..4` | `bb_data_compare`, `seafoam_200`, `sage_500`, `grey_400` |
+| `bb_skeleton_base` / `bb_skeleton_shine` | `pine_800` / `birch_50_a10` |
+| `bb_project_3` | pasa a `dusk_300` |
+
 ## 5. Drawable conventions
 
 Selected drawables you should know about (all under [`res/drawable/`](../../app/src/main/res/drawable/)):

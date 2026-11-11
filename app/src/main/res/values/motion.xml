@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Motion timings in ms (plan mejora-visual u2). Java reads them through ui/common/motion/Motion.duration(ctx, R.integer.x),
+     which returns 0 when the system animations are off. Curves: res/interpolator/bb_*.xml. Table: style_guide.md. -->
+<resources>
+    <integer name="bb_motion_press_down">80</integer>
+    <integer name="bb_motion_press_up">300</integer>
+    <integer name="bb_motion_toggle">200</integer>
+    <integer name="bb_motion_expand">250</integer>
+    <integer name="bb_motion_screen_enter">300</integer>
+    <integer name="bb_motion_screen_exit">250</integer>
+    <integer name="bb_motion_chart">450</integer>
+    <integer name="bb_motion_chart_stagger">40</integer>
+    <integer name="bb_motion_count_up">600</integer>
+    <integer name="bb_motion_celebrate">900</integer>
+</resources>

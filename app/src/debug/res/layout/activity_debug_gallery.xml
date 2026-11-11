@@ -611,5 +611,131 @@
                 app:emptyMessage="Finish a pomodoro and your week fills up here."
                 app:emptyTitle="No sessions this week" />
         </LinearLayout>
+        <!-- ===================== Motion and depth (mejora-visual u2) ===================== -->
+        <TextView
+            android:id="@+id/galleryMotionLabel"
+            style="@style/GalleryLabel"
+            android:text="Motion and depth (u2)" />
+
+        <LinearLayout
+            android:id="@+id/galleryMotionButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/galleryMotionPrimary"
+                style="@style/Widget.BBetter.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/galleryMotionSecondary"
+                style="@style/Widget.BBetter.Button.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:text="Outline" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/galleryMotionText"
+                style="@style/Widget.BBetter.Button.Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:text="Text" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/galleryLitCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_card_gap"
+            android:background="@drawable/bg_card_lit"
+            android:clipChildren="true">
+
+            <View
+                android:id="@+id/galleryGlowSage"
+                android:layout_width="192dp"
+                android:layout_height="192dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_glow_sage" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_md">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/galleryIconBox"
+                        style="@style/Widget.BBetter.IconBox"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_check_24" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tareas de hoy"
+                            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Aun no has apuntado ninguna"
+                            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/galleryMotionAdd"
+                    style="@style/Widget.BBetter.Button.Primary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:text="Anadir tarea" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/galleryTintedCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_card_gap"
+            android:background="@drawable/bg_card_lit_tinted"
+            android:clipChildren="true">
+
+            <View
+                android:id="@+id/galleryGlowAmber"
+                android:layout_width="192dp"
+                android:layout_height="192dp"
+                android:layout_gravity="top|start"
+                android:background="@drawable/bg_glow_amber" />
+
+            <TextView
+                android:id="@+id/galleryCountUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/spacing_md"
+                android:text="0 min"
+                android:textAppearance="@style/TextAppearance.BBetter.Stat" />
+        </FrameLayout>
     </LinearLayout>
 </ScrollView>

@@ -81,4 +81,9 @@
     <color name="amber_400_a18">#2EE5A93C</color>    <!-- 18 %: hearth glow centre -->
     <color name="amber_400_a00">#00E5A93C</color>    <!-- 0 %: glow end -->
 
+    <!-- mejora-visual u2: depth (lit cards, glows) and skeleton. -->
+    <color name="birch_50_a03">#08EBF3EE</color>     <!-- 3 %: lit card gradient top -->
+    <color name="birch_50_a10">#1AEBF3EE</color>     <!-- 10 %: skeleton shine -->
+    <color name="sage_300_a18">#2E7FB69A</color>     <!-- 18 %: sage halo centre -->
+
 </resources>

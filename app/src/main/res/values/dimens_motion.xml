@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Motion and depth dimens (plan mejora-visual u2). -->
+<resources>
+    <!-- Icon box: 36dp tinted square, 11dp corners, 20dp glyph centred inside. -->
+    <dimen name="icon_box_size">36dp</dimen>
+    <dimen name="icon_box_radius">11dp</dimen>
+    <!-- Light rim on lit cards / icon boxes. -->
+    <dimen name="card_lit_rim">1dp</dimen>
+    <!-- Halo (radial glow) radius. -->
+    <dimen name="glow_radius">96dp</dimen>
+    <!-- staggerIn: how far a child travels while it fades in. -->
+    <dimen name="motion_stagger_offset">10dp</dimen>
+</resources>

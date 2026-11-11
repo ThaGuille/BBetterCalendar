@@ -68,8 +68,39 @@
          Order and hues follow the four project dots of .stitch/html/03-projects.html. -->
     <color name="bb_project_1">@color/sage_300</color>
     <color name="bb_project_2">@color/honey_300</color>
-    <color name="bb_project_3">@color/sage_200</color>
+    <color name="bb_project_3">@color/dusk_300</color>
     <color name="bb_project_4">@color/seafoam_200</color>
+
+    <!-- mejora-visual u2: shared aliases of the depth / chart / heat / skeleton steps. Primitives only. -->
+    <!-- Lit card: soft top wash + 1dp top rim (bg_card_lit*). -->
+    <color name="bb_card_lit_top">@color/birch_50_a03</color>
+    <color name="bb_card_lit_edge">@color/birch_50_a06</color>
+    <!-- Halos behind a card's content (bg_glow_*): centre -> transparent. -->
+    <color name="bb_glow_sage_start">@color/sage_300_a18</color>
+    <color name="bb_glow_sage_end">@color/sage_300_a00</color>
+    <color name="bb_glow_amber_start">@color/amber_400_a18</color>
+    <color name="bb_glow_amber_end">@color/amber_400_a00</color>
+    <!-- Charts. -->
+    <color name="bb_chart_grid">@color/pine_700</color>
+    <color name="bb_chart_average">@color/lichen_300</color>
+    <!-- Heat ramp (best hours, constancy): 0 = none -> 4 = most. -->
+    <color name="bb_heat_0">@color/pine_800</color>
+    <color name="bb_heat_1">@color/forest_600</color>
+    <color name="bb_heat_2">@color/sage_500</color>
+    <color name="bb_heat_3">@color/sage_300</color>
+    <color name="bb_heat_4">@color/sage_200</color>
+    <!-- Calendar day focus ramp (little -> a lot of focus). -->
+    <color name="bb_cal_focus_1">@color/forest_600</color>
+    <color name="bb_cal_focus_2">@color/sage_500</color>
+    <color name="bb_cal_focus_3">@color/sage_300</color>
+    <!-- Categorical series (apps in usage charts). -->
+    <color name="bb_cat_1">@color/bb_data_compare</color>
+    <color name="bb_cat_2">@color/seafoam_200</color>
+    <color name="bb_cat_3">@color/sage_500</color>
+    <color name="bb_cat_4">@color/grey_400</color>
+    <!-- Skeleton loading blocks. -->
+    <color name="bb_skeleton_base">@color/pine_800</color>
+    <color name="bb_skeleton_shine">@color/birch_50_a10</color>
 
     <!-- F1-u5: the 8 profile avatar colours (profiles/{uid}.avatarColor 0-7, AvatarPalette). Aliases of
          the existing ramps, never hex; initials on them are bb_on_reward (pine_950). -->

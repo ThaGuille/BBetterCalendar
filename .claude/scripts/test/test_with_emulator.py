@@ -96,6 +96,18 @@ with tempfile.TemporaryDirectory() as tmp:
     og, eg = g.communicate(timeout=30)
     check('sister: a live lease of another unit is never taken', g.returncode == 3 and 'SERIAL' not in og, og + eg)
     (leases / 'emulator-5554.lock').unlink()
+    # F1: a lease of the SAME unit with a dead pid (its earlier call was killed) is abandoned, not "held by hand":
+    # it is taken over (own pid, heartbeat) and released at the end, so no other unit can share the emulator.
+    (leases / 'emulator-5554.lock').write_text(f'uk 2026-01-01T00:00:00 pid={dead.pid}\n')
+    k = start(leases, 'emulator-5554', py(SHOW), 'uk', extra=['--timeout-min', '0.2'])
+    ok_, ek = k.communicate(timeout=30)
+    check('F1: a same-unit lease with a dead pid is taken over and released, not reused', 'SERIAL emulator-5554' in ok_ and 'abandoned' in ek and not (leases / 'emulator-5554.lock').exists(), ok_ + ek)
+    # F6: a same-unit lease owned by another LIVE with-emulator call is not reused (the first would free it mid-run).
+    (leases / 'emulator-5554.lock').write_text(f'ul 2026-01-01T00:00:00 pid={os.getpid()}\n')
+    l = start(leases, 'emulator-5554', py(SHOW), 'ul', extra=['--timeout-min', '0.03'])
+    ol, el = l.communicate(timeout=30)
+    check('F6: a same-unit lease of another live call is not reused (waits, exit 3)', l.returncode == 3 and 'SERIAL' not in ol and (leases / 'emulator-5554.lock').exists(), ol + el)
+    (leases / 'emulator-5554.lock').unlink()
 
     print('== six units race for one abandoned lease')
     # Each run writes when it starts and ends: no two may hold the emulator at the same time.

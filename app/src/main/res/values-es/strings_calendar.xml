@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Leyenda del mes + agenda del dia (mejora-visual u12). -->
+    <string name="calendar_legend_task">Tarea</string>
+    <string name="calendar_legend_event">Evento</string>
+    <string name="calendar_legend_deadline">Entrega</string>
+    <string name="calendar_legend_focus">Enfoque</string>
+    <string name="calendar_type_reminder">Recordatorio</string>
+    <string name="calendar_agenda_title">%1$s %2$d</string>
+    <plurals name="calendar_agenda_count">
+        <item quantity="one">%d cosa</item>
+        <item quantity="other">%d cosas</item>
+    </plurals>
+    <string name="calendar_agenda_summary">%1$s · %2$s previstos</string>
+    <string name="calendar_agenda_summary_none">Nada previsto</string>
+    <string name="calendar_agenda_meta">%1$s · %2$s</string>
+    <string name="calendar_duration_min">%d min</string>
+    <string name="calendar_duration_h">%d h</string>
+    <string name="calendar_duration_h_min">%1$d h %2$d m</string>
+    <string name="calendar_agenda_add">Añadir</string>
+    <string name="calendar_agenda_empty_title">Nada previsto</string>
+</resources>

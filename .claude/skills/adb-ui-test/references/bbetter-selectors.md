@@ -165,7 +165,7 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
 ## Calendar month/week and forms (u22)
 
-- Mes: `calendarModeMonth`, `calendarModeWeek`, `monthGridCard`, `monthPrevButton`, `monthNextButton`, `monthTitleText`, `monthCalendarView`, `legendDay0..6`, `dayDetailTitle`, `dayDetailEmptyText`, `dayDetailRecycler`, `calendarAddEventButton`; celda: `cellDayText`, `cellTodayIndicator`, `cellEventBar1..3`; item: `eventColorSwatch`, `eventTitle`, `eventDescription`, `eventTime`.
+- Mes: `calendarModeMonth`, `calendarModeWeek`, `monthGridCard`, `monthPrevButton`, `monthNextButton`, `monthTitleText`, `monthCalendarView`, `legendDay0..6`, `calendarLegend`, `calendarAgendaCard`, `dayDetailTitle`, `dayDetailSubtitle`, `dayDetailEmptyText` (EmptyStateView; su botón `emptyStateAction`), `dayDetailRecycler`, `calendarAddEventButton` (el «+» de la tarjeta, ya no es FAB); celda: `cellDayText`, `cellTodayIndicator`, `cellFocusBg`, `cellDots`, `cellDot1..3` (antes `cellEventBar1..3`); item: `eventColorSwatch`, `eventTitle`, `eventMeta` (antes `eventDescription`), `eventTime`.
 - Semana: `calendarWeekRoot`, `weekMonthTitleText`, `weekView` (canvas, sin hijos accesibles por id), `calendarAddEventButton2`.
 - Formularios: `btnClose`, `btnSaveEvent`, `switch_to_event_button`, `switch_to_task_button`, `notificationsButton`, `event_title`, `event_start_date/hour`, `event_end_date/hour`, `task_title`, `task_start_date/hour`, `task_duration`.
 - Hoja rapida (abre `homeAddTaskButton`): `quickAddTitleInput`, `quickAddTimeButton`, `quickAddRepeatButton`, `quickAddTargetInput`, `quickAddMoreOptionsButton`, `quickAddSaveButton`.

@@ -1,11 +1,14 @@
 package com.example.bbettercalendar.ui.calendar.binders;
 
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bbettercalendar.R;
@@ -50,15 +53,10 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
         holder.title.setText(item.getTitle() != null && !item.getTitle().isEmpty()
                 ? item.getTitle()
                 : holder.itemView.getContext().getString(R.string.calendar_untitled));
-        String description = item.getDescription();
-        if (description != null && !description.trim().isEmpty()) {
-            holder.description.setText(description);
-            holder.description.setVisibility(View.VISIBLE);
-        } else {
-            holder.description.setVisibility(View.GONE);
-        }
-        holder.time.setText(timeFormat.format(new Date(item.getStartMillis())));
-        holder.swatch.setBackgroundColor(item.getColorArgb());
+        holder.meta.setText(metaFor(holder.itemView.getContext(), item));
+        holder.time.setText(item.getType() == CalendarItem.Type.DEADLINE
+                ? "" : timeFormat.format(new Date(item.getStartMillis())));
+        ViewCompat.setBackgroundTintList(holder.swatch, ColorStateList.valueOf(item.getColorArgb()));
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onItemClick(item);
         });
@@ -69,17 +67,44 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
         return items.size();
     }
 
+    /** "Evento · 2 h": tipo + duración (sin duración, sólo el tipo). */
+    static String metaFor(Context ctx, CalendarItem item) {
+        String type = typeLabel(ctx, item.getType());
+        long minutes = item.durationMinutes();
+        if (minutes <= 0) return type;
+        return ctx.getString(R.string.calendar_agenda_meta, type, formatDuration(ctx, minutes));
+    }
+
+    static String typeLabel(Context ctx, CalendarItem.Type type) {
+        switch (type) {
+            case TASK: return ctx.getString(R.string.calendar_legend_task);
+            case DEADLINE: return ctx.getString(R.string.calendar_legend_deadline);
+            case REMINDER: return ctx.getString(R.string.calendar_type_reminder);
+            case EVENT:
+            default: return ctx.getString(R.string.calendar_legend_event);
+        }
+    }
+
+    /** "30 min" / "2 h" / "1 h 30 m". */
+    public static String formatDuration(Context ctx, long minutes) {
+        long h = minutes / 60;
+        long m = minutes % 60;
+        if (h == 0) return ctx.getString(R.string.calendar_duration_min, (int) m);
+        if (m == 0) return ctx.getString(R.string.calendar_duration_h, (int) h);
+        return ctx.getString(R.string.calendar_duration_h_min, (int) h, (int) m);
+    }
+
     static class VH extends RecyclerView.ViewHolder {
         final View swatch;
         final TextView title;
-        final TextView description;
+        final TextView meta;
         final TextView time;
 
         VH(@NonNull View itemView) {
             super(itemView);
             swatch = itemView.findViewById(R.id.eventColorSwatch);
             title = itemView.findViewById(R.id.eventTitle);
-            description = itemView.findViewById(R.id.eventDescription);
+            meta = itemView.findViewById(R.id.eventMeta);
             time = itemView.findViewById(R.id.eventTime);
         }
     }

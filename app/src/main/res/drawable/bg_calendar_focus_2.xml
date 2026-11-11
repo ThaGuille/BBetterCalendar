@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Celda del mes con enfoque nivel 2 (CalendarHeatLevel). Mismo inset que hoy / seleccion. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="@dimen/calendar_cell_inset">
+    <shape android:shape="rectangle">
+        <corners android:radius="@dimen/radius_sm" />
+        <solid android:color="@color/bb_cal_focus_2" />
+    </shape>
+</inset>

@@ -5,10 +5,20 @@
     <dimen name="touch_target_min">48dp</dimen>
     <!-- Celda del mes (A10): el relleno de seleccion y el recuadro de hoy comparten este inset. -->
     <dimen name="calendar_cell_inset">2dp</dimen>
+    <!-- Alto de la celda del mes (cv_daySize=seventhWidth: el ancho es 1/7). -->
+    <dimen name="calendar_cell_height">44dp</dimen>
     <dimen name="calendar_cell_text_top">8dp</dimen>
     <!-- Cabecera del formulario: boton visual 40dp / 36dp dentro de un area tactil de 48dp. -->
     <dimen name="form_close_inset">4dp</dimen>
     <dimen name="form_save_inset">6dp</dimen>
     <!-- Hueco bajo la lista del día para que el FAB (56dp + 12dp de margen) no tape la última fila. -->
     <dimen name="calendar_fab_clearance">80dp</dimen>
+    <!-- Puntos de tipo en la celda del mes (u12). -->
+    <dimen name="calendar_dot_size">5dp</dimen>
+    <dimen name="calendar_dot_gap">1.5dp</dimen>
+    <dimen name="calendar_cell_dots_bottom">7dp</dimen>
+    <!-- Agenda del dia (u12): barra de color de cada fila y boton "+" de la tarjeta. -->
+    <dimen name="calendar_agenda_bar_width">4dp</dimen>
+    <dimen name="calendar_agenda_time_width">48dp</dimen>
+    <dimen name="calendar_agenda_add_size">40dp</dimen>
 </resources>

@@ -60,6 +60,10 @@
     <color name="sanct_pine_800">#FF202D26</color>   <!-- surface-container-high: meta pill -->
     <color name="sanct_pine_600">#FF1E3427</color>   <!-- pine-600: 3rd friend avatar (html 02) -->
     <color name="sage_500">#FF5B9377</color>         <!-- sage-dark: 1st friend avatar (html 02) -->
+    <!-- Calendar focus ramp (mejora-visual u12; mockups.html .cal): dark moss steps, 3 of the mockup's 4. -->
+    <color name="moss_700">#FF1F4338</color>
+    <color name="moss_600">#FF2B594A</color>
+    <color name="moss_500">#FF3A7260</color>
     <color name="amber_700">#FFB45309</color>        <!-- amber-700: 2nd friend avatar (html 02) -->
     <color name="sanct_pine_ink">#FF0E1B15</color>   <!-- Deep Pine Void: icon/text on amber -->
     <color name="amber_400">#FFE5A93C</color>        <!-- primary-container: amber fills, ring start -->

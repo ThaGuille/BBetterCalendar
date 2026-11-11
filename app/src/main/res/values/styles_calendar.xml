@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Calendario (mejora-visual u12): punto de tipo de la celda del mes y de la leyenda. -->
+<resources>
+    <style name="Widget.BBetter.CalendarDot" parent="">
+        <item name="android:layout_width">@dimen/calendar_dot_size</item>
+        <item name="android:layout_height">@dimen/calendar_dot_size</item>
+        <item name="android:layout_marginStart">@dimen/calendar_dot_gap</item>
+        <item name="android:layout_marginEnd">@dimen/calendar_dot_gap</item>
+        <item name="android:background">@drawable/bg_calendar_dot</item>
+    </style>
+
+    <style name="TextAppearance.BBetter.CalendarLegend" parent="TextAppearance.BBetter.Caption" />
+
+    <style name="CalendarLegendLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">@dimen/spacing_xs</item>
+        <item name="android:layout_marginEnd">@dimen/spacing_md</item>
+        <item name="android:textAppearance">@style/TextAppearance.BBetter.CalendarLegend</item>
+    </style>
+</resources>

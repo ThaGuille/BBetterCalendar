@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barra de color de una fila de la agenda del dia; el color llega por backgroundTint. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="2dp" />
+    <solid android:color="@color/bb_primary" />
+</shape>

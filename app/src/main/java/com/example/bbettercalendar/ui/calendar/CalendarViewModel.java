@@ -11,15 +11,25 @@ import androidx.lifecycle.Transformations;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.database.IoExecutor;
+import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
+import com.example.bbettercalendar.stats.DailyStat;
+import com.example.bbettercalendar.stats.DailyStatDAO;
+import com.example.bbettercalendar.stats.Stats;
+import com.example.bbettercalendar.stats.StatsDAO;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItemMapper;
 import com.example.bbettercalendar.ui.calendar.domain.ProjectDeadlineItemMapper;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -41,13 +51,21 @@ public class CalendarViewModel extends AndroidViewModel {
     private final ProjectDAO projectDao;
     private final MutableLiveData<DateRange> range = new MutableLiveData<>();
     private final LiveData<List<CalendarItem>> items;
+    private final DailyStatDAO dailyStatDao;
+    private final StatsDAO statsDao;
+    private final ExecutorService executor;
+    private final MutableLiveData<Map<LocalDate, Integer>> focusMinutes = new MutableLiveData<>(new HashMap<>());
 
     @Inject
     public CalendarViewModel(@NonNull Application application, CalendarEntryDAO dao,
-                              ProjectDAO projectDao) {
+                              ProjectDAO projectDao, DailyStatDAO dailyStatDao, StatsDAO statsDao,
+                              @IoExecutor ExecutorService executor) {
         super(application);
         this.dao = dao;
         this.projectDao = projectDao;
+        this.dailyStatDao = dailyStatDao;
+        this.statsDao = statsDao;
+        this.executor = executor;
         this.items = Transformations.switchMap(range, r -> {
             if (r == null) {
                 MutableLiveData<List<CalendarItem>> empty = new MutableLiveData<>();
@@ -107,6 +125,43 @@ public class CalendarViewModel extends AndroidViewModel {
             return;
         }
         range.setValue(new DateRange(startMillis, endMillis));
+        loadFocusMinutes(startMillis, endMillis);
+    }
+
+    /**
+     * Minutos de enfoque por día del rango visible (mejora-visual u12): daily_stat para los días
+     * ya volcados y, para hoy (que se vuelca en el reset del día siguiente), el valor vivo de Stats.
+     * DB en el executor, publicado con postValue (regla #3).
+     */
+    private void loadFocusMinutes(long startMillis, long endMillis) {
+        java.time.ZoneId zone = java.time.ZoneId.systemDefault();
+        LocalDate start = java.time.Instant.ofEpochMilli(startMillis).atZone(zone).toLocalDate();
+        LocalDate end = java.time.Instant.ofEpochMilli(endMillis).atZone(zone).toLocalDate();
+        executor.execute(() -> {
+            Map<LocalDate, Integer> out = new HashMap<>();
+            List<DailyStat> rows = dailyStatDao.getRange(start.toString(), end.toString());
+            if (rows != null) {
+                for (DailyStat ds : rows) {
+                    try {
+                        out.put(LocalDate.parse(ds.day), ds.focusMinutes);
+                    } catch (RuntimeException ignored) {
+                        // fila con día mal formado: se ignora
+                    }
+                }
+            }
+            LocalDate today = LocalDate.now();
+            if (!today.isBefore(start) && !today.isAfter(end)) {
+                Stats live = statsDao.getStats();
+                if (live != null) {
+                    out.put(today, FormatHelper.millisToMinutes(live.todayTimeStudied));
+                }
+            }
+            focusMinutes.postValue(out);
+        });
+    }
+
+    public LiveData<Map<LocalDate, Integer>> getFocusMinutes() {
+        return focusMinutes;
     }
 
     public LiveData<List<CalendarItem>> getItems() {

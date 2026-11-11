@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Boton "+" redondo de la tarjeta de agenda del dia (mejora-visual u12). -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?android:attr/colorControlHighlight">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_primary" />
+        </shape>
+    </item>
+</ripple>

@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Fila de la agenda del dia (mejora-visual u12): hora + barra de color + titulo + "Evento · 2 h". -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="top"
     android:minHeight="@dimen/touch_target_min"
-    android:background="?android:attr/selectableItemBackground">
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingTop="@dimen/spacing_sm"
+    android:paddingEnd="@dimen/spacing_md"
+    android:paddingBottom="@dimen/spacing_sm">
+
+    <TextView
+        android:id="@+id/eventTime"
+        android:layout_width="@dimen/calendar_agenda_time_width"
+        android:layout_height="wrap_content"
+        android:fontFeatureSettings="tnum"
+        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
 
     <View
         android:id="@+id/eventColorSwatch"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_gravity="top"
-        android:background="@color/calendar_item_event" />
+        android:layout_width="@dimen/calendar_agenda_bar_width"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:background="@drawable/bg_calendar_agenda_bar" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -30,27 +36,15 @@
             android:id="@+id/eventTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
 
         <TextView
-            android:id="@+id/eventDescription"
+            android:id="@+id/eventMeta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.BBetter.Caption"
-            android:textColor="@color/bb_on_surface_muted"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:visibility="gone" />
+            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/eventTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_gravity="top"
-        android:textAppearance="@style/TextAppearance.BBetter.Label" />
 
 </LinearLayout>

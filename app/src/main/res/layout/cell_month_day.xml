@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_calendar_day_selected">
+    android:layout_height="@dimen/calendar_cell_height">
 
-    <!-- Marca de hoy: cuadrado con borde que ocupa la celda entera. -->
+    <!-- Fondo de la celda: tinte por minutos de enfoque (bg_calendar_focus_N) o, si está
+         seleccionada, relleno salvia (bg_calendar_day_selected). Lo elige MonthDayBinder. -->
+    <View
+        android:id="@+id/cellFocusBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Marca de hoy: anillo que ocupa la celda entera. -->
     <View
         android:id="@+id/cellTodayIndicator"
         android:layout_width="match_parent"
@@ -21,34 +27,29 @@
         android:textAppearance="@style/TextAppearance.BBetter.Label"
         android:textColor="@color/bb_on_surface" />
 
-    <View
-        android:id="@+id/cellEventBar1"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="4dp"
-        android:visibility="gone" />
+    <!-- Hasta 3 puntos por tipo (tarea / evento / entrega / recordatorio). -->
+    <LinearLayout
+        android:id="@+id/cellDots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="@dimen/calendar_cell_dots_bottom"
+        android:orientation="horizontal">
 
-    <View
-        android:id="@+id/cellEventBar2"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="9dp"
-        android:visibility="gone" />
+        <View
+            android:id="@+id/cellDot1"
+            style="@style/Widget.BBetter.CalendarDot"
+            android:visibility="gone" />
 
-    <View
-        android:id="@+id/cellEventBar3"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="14dp"
-        android:visibility="gone" />
+        <View
+            android:id="@+id/cellDot2"
+            style="@style/Widget.BBetter.CalendarDot"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/cellDot3"
+            style="@style/Widget.BBetter.CalendarDot"
+            android:visibility="gone" />
+    </LinearLayout>
 
 </FrameLayout>

@@ -25,6 +25,7 @@ import com.example.bbettercalendar.databinding.FragmentCalendarMonthBinding;
 import com.example.bbettercalendar.ui.calendar.binders.DayDetailAdapter;
 import com.example.bbettercalendar.ui.calendar.binders.MonthDayBinder;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
+import com.example.bbettercalendar.ui.calendar.domain.DayPlan;
 import com.example.bbettercalendar.ui.calendar.domain.ProjectDeadlineItemMapper;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.view.CalendarView;
@@ -34,7 +35,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,8 +57,7 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
     private Map<LocalDate, List<CalendarItem>> currentItemsByDate = Collections.emptyMap();
     private final DateTimeFormatter monthTitleFormatter =
             DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault());
-    private final DateTimeFormatter dayDetailFormatter =
-            DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault());
+    private YearMonth shownMonth;
 
     private final ActivityResultLauncher<Intent> addEventLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -86,7 +85,10 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
 
         binding.calendarAddEventButton.setOnClickListener(this);
 
-        binding.dayDetailEmptyText.setText(R.string.no_events_today);
+        binding.dayDetailEmptyText.setTitle(getString(R.string.calendar_agenda_empty_title));
+        binding.dayDetailEmptyText.setMessage(getString(R.string.no_events_today));
+        binding.dayDetailEmptyText.setAction(getString(R.string.calendar_agenda_add),
+                v -> launchAddEvent(selectedDate));
         populateWeekdayLegend();
         setupCalendar();
         setupDayDetail();
@@ -127,9 +129,11 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
 
         binding.monthTitleText.setText(currentMonth.format(monthTitleFormatter));
 
+        shownMonth = currentMonth;
         calendarView.setMonthScrollListener(month -> {
             updateRangeForMonth(month.getYearMonth());
             binding.monthTitleText.setText(month.getYearMonth().format(monthTitleFormatter));
+            animateMonthChange(month.getYearMonth());
             return null;
         });
         updateRangeForMonth(currentMonth);
@@ -146,6 +150,23 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
                 calendarView.smoothScrollToMonth(visible.getYearMonth().plusMonths(1));
             }
         });
+    }
+
+    // Cambio de mes (eje X compartido): la página del pager ya se desliza sola; el título entra
+    // desde el lado del avance y la rejilla funde. Sin animaciones del sistema, ViewPropertyAnimator
+    // salta al final.
+    private void animateMonthChange(YearMonth month) {
+        if (binding == null) return;
+        YearMonth previous = shownMonth;
+        shownMonth = month;
+        if (previous == null || previous.equals(month)) return;
+        float dir = month.isAfter(previous) ? 1f : -1f;
+        float dx = dir * getResources().getDisplayMetrics().density * 24f;
+        binding.monthTitleText.setAlpha(0f);
+        binding.monthTitleText.setTranslationX(dx);
+        binding.monthTitleText.animate().alpha(1f).translationX(0f).setDuration(220).start();
+        binding.monthCalendarView.setAlpha(0.35f);
+        binding.monthCalendarView.animate().alpha(1f).setDuration(260).start();
     }
 
     private void setupDayDetail() {
@@ -194,13 +215,32 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
             binding.monthCalendarView.notifyCalendarChanged();
             refreshDayDetail();
         });
+        viewModel.getFocusMinutes().observe(getViewLifecycleOwner(), minutes -> {
+            if (binding == null) return;
+            dayBinder.setFocusMinutesByDate(minutes != null ? minutes : Collections.emptyMap());
+            binding.monthCalendarView.notifyCalendarChanged();
+        });
     }
 
     private void refreshDayDetail() {
         if (binding == null) return;
-        binding.dayDetailTitle.setText(getString(R.string.events_for, selectedDate.format(dayDetailFormatter)));
+        String weekday = selectedDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault());
+        weekday = weekday.substring(0, 1).toUpperCase(Locale.getDefault()) + weekday.substring(1);
+        binding.dayDetailTitle.setText(getString(R.string.calendar_agenda_title,
+                weekday, selectedDate.getDayOfMonth()));
         List<CalendarItem> dayItems = currentItemsByDate.get(selectedDate);
         boolean empty = dayItems == null || dayItems.isEmpty();
+        if (empty) {
+            binding.dayDetailSubtitle.setText(R.string.calendar_agenda_summary_none);
+        } else {
+            long planned = DayPlan.plannedMinutes(dayItems, selectedDate, ZoneId.systemDefault());
+            String count = getResources().getQuantityString(R.plurals.calendar_agenda_count,
+                    dayItems.size(), dayItems.size());
+            binding.dayDetailSubtitle.setText(planned > 0
+                    ? getString(R.string.calendar_agenda_summary, count,
+                            DayDetailAdapter.formatDuration(requireContext(), planned))
+                    : count);
+        }
         dayDetailAdapter.submitList(empty ? Collections.emptyList() : dayItems);
         binding.dayDetailEmptyText.setVisibility(empty ? View.VISIBLE : View.GONE);
     }

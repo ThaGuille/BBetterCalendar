@@ -90,9 +90,9 @@
     <color name="bb_heat_3">@color/sage_300</color>
     <color name="bb_heat_4">@color/sage_200</color>
     <!-- Calendar day focus ramp (little -> a lot of focus). -->
-    <color name="bb_cal_focus_1">@color/forest_600</color>
-    <color name="bb_cal_focus_2">@color/sage_500</color>
-    <color name="bb_cal_focus_3">@color/sage_300</color>
+    <color name="bb_cal_focus_1">@color/moss_700</color>
+    <color name="bb_cal_focus_2">@color/moss_600</color>
+    <color name="bb_cal_focus_3">@color/moss_500</color>
     <!-- Categorical series (apps in usage charts). -->
     <color name="bb_cat_1">@color/bb_data_compare</color>
     <color name="bb_cat_2">@color/seafoam_200</color>

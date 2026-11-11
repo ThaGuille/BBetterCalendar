@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Calendar month legend + day agenda (mejora-visual u12). -->
+    <string name="calendar_legend_task">Task</string>
+    <string name="calendar_legend_event">Event</string>
+    <string name="calendar_legend_deadline">Deadline</string>
+    <string name="calendar_legend_focus">Focus</string>
+    <string name="calendar_type_reminder">Reminder</string>
+    <string name="calendar_agenda_title">%1$s %2$d</string>
+    <plurals name="calendar_agenda_count">
+        <item quantity="one">%d thing</item>
+        <item quantity="other">%d things</item>
+    </plurals>
+    <string name="calendar_agenda_summary">%1$s · %2$s planned</string>
+    <string name="calendar_agenda_summary_none">Nothing planned</string>
+    <string name="calendar_agenda_meta">%1$s · %2$s</string>
+    <string name="calendar_duration_min">%d min</string>
+    <string name="calendar_duration_h">%d h</string>
+    <string name="calendar_duration_h_min">%1$d h %2$d m</string>
+    <string name="calendar_agenda_add">Add</string>
+    <string name="calendar_agenda_empty_title">Nothing planned</string>
+</resources>

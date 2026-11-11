@@ -3,7 +3,9 @@
 
     Dot-sourced by every script that talks to adb. Resolves which serial to
     drive: if the caller passed -Serial explicitly, that wins outright (so an
-    operator can still deliberately target a phone). Otherwise this skill
+    operator can still deliberately target a phone). Then $env:ANDROID_SERIAL
+    (with-emulator.py sets it to the emulator it leased, so parallel units
+    each drive their own). Otherwise this skill
     must default to an attached emulator-* device and never silently fall
     back to a physical phone, even if the phone is connected and is the
     device preselected/active in Android Studio.
@@ -13,6 +15,7 @@ function Get-BBSerial {
     param([string]$Requested)
 
     if ($Requested) { return $Requested }
+    if ($env:ANDROID_SERIAL) { return $env:ANDROID_SERIAL }
 
     $lines = & adb devices 2>$null
     $emulators = $lines | Where-Object { $_ -match '^(emulator-\S+)\s+device\b' }

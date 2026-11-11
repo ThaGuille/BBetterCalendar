@@ -30,8 +30,9 @@ it finds (`$ADB`, PATH, `$ANDROID_HOME`, `local.properties` `sdk.dir`, `~/Androi
 | `.\gradlew.bat assembleDebug`, `app\build\…` | `./gradlew assembleDebug`, `app/build/…` |
 | `& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd <name> -no-window` | `~/Android/Sdk/emulator/emulator -avd <name> -no-window -no-audio` (run in background) |
 | `.claude\scripts\emulator-lease.ps1 -Acquire -Unit u1` | `python3 .claude/scripts/emulator-lease.py --acquire --unit u1` |
+| `python .claude\scripts\with-emulator.py -- "<cmd>"` | `python3 .claude/scripts/with-emulator.py -- "<cmd>"` |
 
-`--serial` / `-Serial` behave the same: default is the first attached `emulator-*`, never a phone.
+`--serial` / `-Serial` behave the same: default is `$ANDROID_SERIAL` when set, else the first attached `emulator-*`, never a phone.
 
 Selectors and device facts live in
 [`references/bbetter-selectors.md`](references/bbetter-selectors.md) — read it first; don't
@@ -45,6 +46,15 @@ re-derive ids.
     (~10-30 s; it creates the snapshot on the first cold boot), and prints `AVD READY <serial> (...)`.
     If the snapshot boot fails it falls back once to a cold boot. `avd-up` does **not** lease: when several units
     share emulators, take the lease with `.claude\scripts\emulator-lease.ps1 -Acquire` after it.
+  - **Several units at once (parallel big-task units):** `avd-up.ps1 -Count 2` keeps two instances of `api36`
+    running (it reuses the ones already up; the extra one boots `-read-only`, which needs no extra disk and loses its
+    state when it stops). Then wrap each device command in `python .claude\scripts\with-emulator.py -- "<cmd>"`:
+    it leases a free emulator, sets `ANDROID_SERIAL` for the command and gives the lease back when it ends, waiting
+    when both are busy. `adb`, `gradlew installDebug`, `bbadb.py`, the `.ps1` scripts here and
+    `seed_progress_db.py` all follow `ANDROID_SERIAL`, so never write a fixed `-s emulator-5554` into such a command.
+    With two emulators attached, a bare `adb shell …` outside the wrapper fails with "more than one device":
+    that is the guard, not a bug. For several commands by hand (recording a flow), take one with
+    `emulator-lease … -Acquire`, set `ANDROID_SERIAL` (or pass `-Serial`) and release it at the end.
     Add `-Clean` only when a check needs a clean boot (`-no-snapshot`, ~50-60 s cold; it refuses while any emulator
     is attached: `adb -s <serial> emu kill` it first or lease another). Never boot the
     emulator through `bt-run.sh` (it would hold the worktree's build lock), and never kill a running one

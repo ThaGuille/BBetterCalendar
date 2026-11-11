@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u5 · Insight sentences built by stats/InsightPhrases. Each one is shown only when
+     there is enough data; the class returns an empty string otherwise (never an invented sentence). -->
+<resources>
+    <!-- Index 0 = Monday .. 6 = Sunday; used in "You focus best on %1$s ..." -->
+    <string-array name="insight_weekdays_plural">
+        <item>Mondays</item>
+        <item>Tuesdays</item>
+        <item>Wednesdays</item>
+        <item>Thursdays</item>
+        <item>Fridays</item>
+        <item>Saturdays</item>
+        <item>Sundays</item>
+    </string-array>
+
+    <string name="insight_best_slot">You focus best on %1$s from %2$d to %3$d</string>
+    <string name="insight_completion">You complete %1$d%% of your sessions</string>
+    <string name="insight_completion_up">You complete %1$d%% of your sessions, %2$d points more than before</string>
+    <string name="insight_completion_down">You complete %1$d%% of your sessions, %2$d points fewer than before</string>
+    <string name="insight_peak_hour">Your peak hour is %1$d:00</string>
+    <string name="insight_suggested_limit">%1$s is among your most used apps (%2$d min a day) and has no limit</string>
+    <string name="insight_before_after">Since the limit, %1$s went from %2$d to %3$d min a day</string>
+
+    <plurals name="insight_modal_duration">
+        <item quantity="one">Your usual session lasts %1$d minute</item>
+        <item quantity="other">Your usual session lasts %1$d minutes</item>
+    </plurals>
+    <plurals name="insight_longest_session">
+        <item quantity="one">Your longest session: %1$d minute</item>
+        <item quantity="other">Your longest session: %1$d minutes</item>
+    </plurals>
+    <plurals name="insight_weeks_above_average">
+        <item quantity="one">%1$d week in a row above your average</item>
+        <item quantity="other">%1$d weeks in a row above your average</item>
+    </plurals>
+    <plurals name="insight_recovered">
+        <item quantity="one">You have recovered %1$d minute</item>
+        <item quantity="other">You have recovered %1$d minutes</item>
+    </plurals>
+    <plurals name="insight_focus_vs_phone">
+        <item quantity="one">On days you focus, you use your phone %1$d minute less</item>
+        <item quantity="other">On days you focus, you use your phone %1$d minutes less</item>
+    </plurals>
+</resources>

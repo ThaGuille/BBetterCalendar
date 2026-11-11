@@ -18,7 +18,7 @@
 - **Fase activa:** **L** (Lanzamiento), abierta el 2026-11-03: [`social-l-lanzamiento.md`](social-l-lanzamiento.md). F0, F1, F2, F3, F4 y F5 hechas (F5 cerrada el 2026-11-02, [`social-f5-interaccion.md`](social-f5-interaccion.md)).
   ([`social-f0-base.md`](social-f0-base.md), [`social-f1-cuenta.md`](social-f1-cuenta.md), [`social-f2-amigos.md`](social-f2-amigos.md),
   [`social-f3-stats.md`](social-f3-stats.md), [`social-f4-presencia.md`](social-f4-presencia.md), [`social-f5-interaccion.md`](social-f5-interaccion.md)); el estado as-built está en [`systems/social.md`](../docs/systems/social.md).
-- **Siguiente paso:** la parte (b) de L, que solo puedes hacer tú: sigue la guía paso a paso «Guía para ti» de [`social-l-lanzamiento.md`](social-l-lanzamiento.md) (L.1 a L.7). La parte (a) está hecha y comprobada. `FEATURE_SOCIAL` sigue en `false` en release hasta que cierres L.6.
+- **Siguiente paso:** el pulido final de [`social-pulido-final.md`](social-pulido-final.md) (análisis del 2026-11-05: 14 unidades, tres fallos que bloquean L.6 o el deploy) con big-task; **después**, la parte (b) de L, que solo puedes hacer tú: la «Guía para ti» de [`social-l-lanzamiento.md`](social-l-lanzamiento.md) (L.1 a L.7), que el pulido reordena (U14). `FEATURE_SOCIAL` sigue en `false` en release hasta que cierres L.6.
 - **F0.1 (target 36)** es requisito para la primera subida a Play. La app no está publicada, así que
   no hay urgencia de plazo.
 
@@ -178,6 +178,7 @@ de fase y en este tablero (diario) y marca entonces los entregables `[x]`.
 
 Lo más reciente arriba. Una línea por sesión: qué se hizo, el commit y lo siguiente.
 
+- **2026-11-05 (55)** · Análisis final del sistema social (backend, datos, UI, especificación y lanzamiento): plan [`social-pulido-final.md`](social-pulido-final.md) con 14 unidades y 10 decisiones con recomendación. Bloquean L.6 o el deploy: la UI social oculta en el release con `-PfeatureSocial=true` (U1.1), tocar una notificación con un Pomodoro en marcha lo cuenta como fallo (U1.3) y el índice `inbox.from` deja `blockUser` sin índice en producción (U2.1). Sin commit. **Siguiente:** big-task del pulido; después la parte (b) de L.
 - **2026-11-05 (54)** · L-u14 parte (a) de L cerrada: notas de L-u1 a L-u13 plegadas en el plan, «Guía para ti» (L.1-L.7 con «Comprobar después»), tablero con (a)/(b), `systems/social.md` con App Check, bloquear, despliegue y arreglos de la bandeja, y paso de punta a punta en api36 sin crashes (ninguno). **L sigue «activa».** **Siguiente:** tu parte (b) según la guía del plan de L.
 - **2026-11-02 (53)** · F5-u9 F5 cerrada: notas plegadas, `systems/social.md`, `notifications.md`, `home-notification-centre` en Resolved con su History, política v2 y página de borrado al día, y paso de punta a punta en api36 sin crashes (ninguno). **F5.1-F5.3 marcadas.** **Siguiente:** gate L; push y fusión de `bt/social-f5-interaccion` en `main` por la sesión principal.
 - **2026-11-02 (52)** · F5-u10 índice de collection group `inbox.from` declarado en `firestore.indexes.json`, sin desplegar (ninguno). **Siguiente:** F5-u9.

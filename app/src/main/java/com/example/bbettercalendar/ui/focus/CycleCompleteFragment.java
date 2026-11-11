@@ -1,12 +1,10 @@
 package com.example.bbettercalendar.ui.focus;
 
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.TextView;
 
@@ -22,11 +20,13 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.social.Friend;
 import com.example.bbettercalendar.social.SocialFeature;
-import com.example.bbettercalendar.social.SocialRank;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.stats.StreakCalculator;
+import com.example.bbettercalendar.ui.calendar.binders.DayDetailAdapter;
+import com.example.bbettercalendar.ui.common.motion.Motion;
 import com.example.bbettercalendar.ui.common.share.ShareCardRenderer;
 import com.example.bbettercalendar.ui.common.widget.AvatarView;
+import com.example.bbettercalendar.ui.common.widget.CelebrationView;
 import com.example.bbettercalendar.ui.home.FocusTarget;
 import com.example.bbettercalendar.ui.social.AvatarPalette;
 import com.example.bbettercalendar.ui.social.StudyingSummary;
@@ -60,9 +60,12 @@ public class CycleCompleteFragment extends Fragment {
 
     private TextView streakValue;
     private TextView streakSub;
-    private TextView bestValue;
-    private TextView bestSub;
-    private TextView streakBadge;
+    private TextView focusValue;
+    private TextView focusSub;
+    private long shownFocusMinutes;
+    private int shownWeeks;
+    private long sessionFloorMinutes;
+    @Nullable private StreakCalculator.Result latestStreak;
     private View friendsStrip;
     private TextView friendsText;
     private AvatarView[] avatars;
@@ -79,9 +82,15 @@ public class CycleCompleteFragment extends Fragment {
 
         streakValue = view.findViewById(R.id.cycleStreakValue);
         streakSub = view.findViewById(R.id.cycleStreakSub);
-        bestValue = view.findViewById(R.id.cycleBestValue);
-        bestSub = view.findViewById(R.id.cycleBestSub);
-        streakBadge = view.findViewById(R.id.cycleStreakBadge);
+        focusValue = view.findViewById(R.id.cycleFocusValue);
+        focusSub = view.findViewById(R.id.cycleFocusSub);
+        // u13: the ring completes once per entry; after a rotation it is drawn whole, without the burst.
+        CelebrationView celebration = view.findViewById(R.id.cycleCelebration);
+        if (savedInstanceState == null) {
+            celebration.play();
+        } else {
+            celebration.showComplete();
+        }
         friendsStrip = view.findViewById(R.id.cycleFriendsStrip);
         friendsText = view.findViewById(R.id.cycleFriendsText);
         avatars = new AvatarView[] {
@@ -105,17 +114,11 @@ public class CycleCompleteFragment extends Fragment {
                     }
                 });
 
-        // Social blocks: GONE (no gap) with the feature off; the Best tile is the third weighted
-        // tile, its gap goes with it.
-        SocialFeature.applyVisibility(view.findViewById(R.id.cycleBestTile),
-                view.findViewById(R.id.cycleBestGap), friendsStrip);
+        // Social block: GONE (no gap) with the feature off.
+        SocialFeature.applyVisibility(friendsStrip);
 
         viewModel.getStreak().observe(getViewLifecycleOwner(), this::renderStreak);
-        // F3-u8: the Best tile is the real rank (d5: a dash without account, profile or friends).
-        renderRank(null);
-        if (SocialFeature.isAccountEnabled()) {
-            viewModel.getRank().observe(getViewLifecycleOwner(), this::renderRank);
-        }
+        viewModel.getDayTotals().observe(getViewLifecycleOwner(), this::renderToday);
         if (SocialFeature.isEnabled()) {
             viewModel.getSocial().observe(getViewLifecycleOwner(), this::renderSocial);
         }
@@ -137,26 +140,32 @@ public class CycleCompleteFragment extends Fragment {
         String count = getResources().getQuantityString(R.plurals.cycle_pomodoros, cycles, cycles);
         String title = FocusTarget.isSet() ? FocusTarget.getTitle() : null;
         boolean hasTask = !TextUtils.isEmpty(title);
-        String line = getString(hasTask
-                ? R.string.cycle_finished_on_format : R.string.cycle_finished_format, count);
-        SpannableStringBuilder summary = new SpannableStringBuilder(line);
-        int at = line.indexOf(count);
-        if (at >= 0) {
-            int end = at + count.length();
-            summary.setSpan(new ForegroundColorSpan(
-                            ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface)),
-                    at, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            summary.setSpan(new StyleSpan(Typeface.BOLD), at, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        ((TextView) view.findViewById(R.id.cycleSummary)).setText(summary);
+        long sessionMinutes = cycles * focusMillis / 60000L;
+        String line = getString(R.string.cycle_summary_format, count,
+                DayDetailAdapter.formatDuration(requireContext(), sessionMinutes));
+        ((TextView) view.findViewById(R.id.cycleSummary)).setText(line);
 
         TextView chip = view.findViewById(R.id.cycleTaskChip);
         chip.setText(title);
         chip.setVisibility(hasTask ? View.VISIBLE : View.GONE);
+        sessionFloorMinutes = sessionMinutes;
+    }
 
-        ((TextView) view.findViewById(R.id.cycleFocusValue)).setText(
-                FormatHelper.formatDuration(cycles * focusMillis));
-        ((TextView) view.findViewById(R.id.cycleFocusSub)).setText(R.string.cycle_tile_focus_sub);
+    /** "Hoy": minutes of focus today (never below this cycle) and the best day ever. */
+    private void renderToday(@Nullable CycleCompleteViewModel.DayTotals totals) {
+        if (focusValue == null || totals == null) {
+            return;
+        }
+        long today = Math.max(totals.todayMinutes, sessionFloorMinutes);
+        long best = Math.max(totals.bestMinutes, today);
+        Motion.countUp(focusValue, shownFocusMinutes, today,
+                v -> DayDetailAdapter.formatDuration(requireContext(), v));
+        shownFocusMinutes = today;
+        focusSub.setText(today >= best
+                ? getString(R.string.cycle_today_best_now)
+                : getString(R.string.cycle_today_best_format,
+                        DayDetailAdapter.formatDuration(requireContext(), best)
+                                .replace(' ', ' ')));
     }
 
     private void renderStreak(@Nullable StreakCalculator.Result streak) {
@@ -164,36 +173,19 @@ public class CycleCompleteFragment extends Fragment {
             return;
         }
         shareStreak = streak;
+        latestStreak = streak;
         // Weekly streak (plan racha-semanal-y-constancia): weeks in a row meeting the goal.
         int weeks = streak == null ? 0 : streak.weekStreak;
-        int best = streak == null ? 0 : streak.bestWeekStreak;
-        streakValue.setText(getResources().getQuantityString(R.plurals.streak_weeks, weeks, weeks));
-        if (weeks >= best) {
-            streakSub.setText(R.string.cycle_streak_personal_best);
-        } else {
-            streakSub.setText(getString(R.string.cycle_streak_best_format,
-                    getResources().getQuantityString(R.plurals.streak_weeks, best, best)));
-        }
-        // Badge = this week's days vs the goal ("3/4"; "4/4 ✓" once met).
+        Motion.countUp(streakValue, shownWeeks, weeks,
+                v -> getResources().getQuantityString(R.plurals.streak_weeks, (int) v, (int) v));
+        shownWeeks = weeks;
         if (streak == null) {
-            streakBadge.setVisibility(View.GONE);
+            streakSub.setText("");
         } else {
-            streakBadge.setVisibility(View.VISIBLE);
-            streakBadge.setText(getString(streak.goalMetThisWeek
-                            ? R.string.streak_week_goal_met : R.string.cycle_streak_week_badge,
-                    streak.daysThisWeek, streak.goal));
-            streakBadge.setContentDescription(getString(R.string.streak_week_goal_desc,
+            streakSub.setText(getString(streak.goalMetThisWeek
+                            ? R.string.cycle_streak_goal_met : R.string.cycle_streak_goal_progress,
                     streak.daysThisWeek, streak.goal));
         }
-    }
-
-    /** «Nº entre amigos»: my position in Minutos this week, or a dash (d5); never mock data. */
-    private void renderRank(@Nullable SocialRank rank) {
-        if (bestValue == null) {
-            return;
-        }
-        bestValue.setText(rank == null ? getString(R.string.cycle_rank_none) : ordinal(rank.getPosition()));
-        bestSub.setText(R.string.cycle_tile_best_sub);
     }
 
     /** F4-u6: strip "Laia and N others still studying · Live", only while somebody studies. */
@@ -236,22 +228,6 @@ public class CycleCompleteFragment extends Fragment {
         friendsText.setText(styled);
     }
 
-    private String ordinal(int n) {
-        int mod100 = n % 100;
-        int mod10 = n % 10;
-        int res = R.string.cycle_rank_th;
-        if (mod100 < 11 || mod100 > 13) {
-            if (mod10 == 1) {
-                res = R.string.cycle_rank_st;
-            } else if (mod10 == 2) {
-                res = R.string.cycle_rank_nd;
-            } else if (mod10 == 3) {
-                res = R.string.cycle_rank_rd;
-            }
-        }
-        return getString(res, n);
-    }
-
     /** Same values the screen shows: focus tile (cycles x length), cycles and the weekly streak. */
     private ShareCardRenderer.Card buildShareCard() {
         String focus = FormatHelper.formatDuration(shareCycles * shareFocusMillis);
@@ -271,6 +247,13 @@ public class CycleCompleteFragment extends Fragment {
     /** Continue / close / back: the session shows idle again and Home is next on the stack. */
     private void finish() {
         session.resetIdleDisplay();
+        // u13 (d3): the short goal celebration, once per ISO week, over Home. Claimed before leaving.
+        boolean goalMet = latestStreak != null && latestStreak.goalMetThisWeek;
+        if (CelebrationPrefs.claimWeeklyGoal(requireContext(), goalMet)) {
+            CelebrationSheet.show(requireActivity().getSupportFragmentManager(),
+                    getString(R.string.celebration_week_title),
+                    getString(R.string.celebration_week_message));
+        }
         if (!NavHostFragment.findNavController(this).navigateUp()) {
             requireActivity().finish();
         }
@@ -281,9 +264,8 @@ public class CycleCompleteFragment extends Fragment {
         super.onDestroyView();
         streakValue = null;
         streakSub = null;
-        bestValue = null;
-        bestSub = null;
-        streakBadge = null;
+        focusValue = null;
+        focusSub = null;
         friendsStrip = null;
         friendsText = null;
         avatars = null;

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u13 · short celebration sheet (weekly goal reached / project completed). No background
+     on the root: Widget.BBetter.BottomSheet paints it. The handle include has no android:id. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_lg">
+
+        <include layout="@layout/view_sheet_handle" />
+
+        <com.example.bbettercalendar.ui.common.widget.CelebrationView
+            android:id="@+id/celebrationSheetMark"
+            android:layout_width="@dimen/celebration_sheet_size"
+            android:layout_height="@dimen/celebration_sheet_size"
+            android:layout_marginTop="@dimen/spacing_sm" />
+
+        <TextView
+            android:id="@+id/celebrationSheetTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.BBetter.Headline" />
+
+        <TextView
+            android:id="@+id/celebrationSheetMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/celebrationSheetButton"
+            style="@style/Widget.BBetter.Button.Reward"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:text="@string/celebration_sheet_button" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

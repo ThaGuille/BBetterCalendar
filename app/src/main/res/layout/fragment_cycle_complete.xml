@@ -51,12 +51,11 @@
                 android:orientation="vertical"
                 android:paddingHorizontal="24dp">
 
-                <ImageView
-                    android:layout_width="@dimen/cycle_illustration_size"
-                    android:layout_height="@dimen/cycle_illustration_size"
-                    android:layout_marginBottom="12dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_cycle_plant" />
+                <com.example.bbettercalendar.ui.common.widget.CelebrationView
+                    android:id="@+id/cycleCelebration"
+                    android:layout_width="@dimen/celebration_size"
+                    android:layout_height="@dimen/celebration_size"
+                    android:layout_marginBottom="12dp" />
 
                 <TextView
                     android:id="@+id/cycleTitle"
@@ -112,62 +111,35 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="@dimen/cycle_tile_padding">
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/cycle_tile_accent_height"
-                        android:background="@color/bb_sanct_sage" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cycle_tile_today"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                        android:textColor="@color/bb_sanct_on_surface_muted" />
 
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/cycleFocusValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/cycle_tile_padding">
+                        android:layout_marginTop="4dp"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
+                        app:autoSizeMaxTextSize="@dimen/cycle_tile_value_text"
+                        app:autoSizeMinTextSize="@dimen/cycle_tile_value_min_text"
+                        app:autoSizeStepGranularity="@dimen/cycle_tile_value_step"
+                        app:autoSizeTextType="uniform" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="@dimen/cycle_tile_icon_size"
-                                android:layout_height="@dimen/cycle_tile_icon_size"
-                                android:layout_marginEnd="6dp"
-                                android:importantForAccessibility="no"
-                                android:src="@drawable/ic_clock_v2_24"
-                                app:tint="@color/bb_sanct_sage_bright" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:text="@string/cycle_tile_focus"
-                                android:textAllCaps="true"
-                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/cycleFocusValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
-                            tools:text="1h 40m" />
-
-                        <TextView
-                            android:id="@+id/cycleFocusSub"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                            android:textColor="@color/bb_sanct_on_surface_muted"
-                            tools:text="unbroken" />
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/cycleFocusSub"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                        android:textColor="@color/bb_sanct_on_surface_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -188,152 +160,36 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="@dimen/cycle_tile_padding">
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/cycle_tile_accent_height"
-                        android:background="@color/bb_sanct_primary" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cycle_tile_streak"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                        android:textColor="@color/bb_sanct_on_surface_muted" />
 
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/cycleStreakValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/cycle_tile_padding">
+                        android:layout_marginTop="4dp"
+                        android:maxLines="1"
+                        android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
+                        android:textColor="@color/bb_sanct_primary"
+                        app:autoSizeMaxTextSize="@dimen/cycle_tile_value_text"
+                        app:autoSizeMinTextSize="@dimen/cycle_tile_value_min_text"
+                        app:autoSizeStepGranularity="@dimen/cycle_tile_value_step"
+                        app:autoSizeTextType="uniform" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="@dimen/cycle_tile_icon_size"
-                                android:layout_height="@dimen/cycle_tile_icon_size"
-                                android:layout_marginEnd="6dp"
-                                android:importantForAccessibility="no"
-                                android:src="@drawable/ic_flame_v2_24"
-                                app:tint="@color/bb_sanct_primary" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:text="@string/cycle_tile_streak"
-                                android:textAllCaps="true"
-                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold" />
-
-                        <TextView
-                            android:id="@+id/cycleStreakBadge"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_cycle_badge"
-                            android:paddingHorizontal="6dp"
-                            android:paddingVertical="1dp"
-                            android:fontFeatureSettings="tnum"
-                            android:visibility="gone"
-                            tools:text="3/4"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
-                            android:textColor="@color/bb_sanct_primary" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/cycleStreakValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
-                            tools:text="13 days" />
-
-                        <TextView
-                            android:id="@+id/cycleStreakSub"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                            android:textColor="@color/bb_sanct_primary"
-                            tools:text="Personal best" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <Space
-                android:id="@+id/cycleBestGap"
-                android:layout_width="@dimen/cycle_tile_gap"
-                android:layout_height="match_parent" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cycleBestTile"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/bb_sanct_card"
-                app:contentPadding="0dp"
-                app:strokeColor="@color/bb_sanct_card_rim"
-                app:strokeWidth="@dimen/widget_hairline">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/cycle_tile_accent_height"
-                        android:background="@color/bb_sanct_primary" />
-
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/cycleStreakSub"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/cycle_tile_padding">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="@dimen/cycle_tile_icon_size"
-                                android:layout_height="@dimen/cycle_tile_icon_size"
-                                android:layout_marginEnd="6dp"
-                                android:importantForAccessibility="no"
-                                android:src="@drawable/ic_trophy_24"
-                                app:tint="@color/bb_sanct_primary" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:text="@string/cycle_tile_best"
-                                android:textAllCaps="true"
-                                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/cycleBestValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.BBetter.CycleTileValue"
-                            tools:text="2nd" />
-
-                        <TextView
-                            android:id="@+id/cycleBestSub"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro"
-                            android:textColor="@color/bb_sanct_on_surface_muted"
-                            tools:text="among friends" />
-                    </LinearLayout>
+                        android:layout_marginTop="2dp"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                        android:textColor="@color/bb_sanct_on_surface_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

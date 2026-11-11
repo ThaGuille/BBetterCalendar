@@ -2,7 +2,7 @@
 <!-- u15 · Cycle complete (html 02). -->
 <resources>
     <dimen name="cycle_title_text">30sp</dimen>             <!-- text-3xl font-extrabold -->
-    <dimen name="cycle_tile_value_text">18sp</dimen>        <!-- text-lg font-bold -->
+    <dimen name="cycle_tile_value_text">24sp</dimen>        <!-- two wide cells (u13) -->
     <dimen name="cycle_illustration_size">192dp</dimen>     <!-- w-48 h-48 -->
     <dimen name="cycle_tile_accent_height">4dp</dimen>      <!-- h-1 top accent line -->
     <dimen name="cycle_tile_padding">12dp</dimen>           <!-- p-3 -->
@@ -12,4 +12,13 @@
     <dimen name="cycle_avatar_overlap">-8dp</dimen>         <!-- -space-x-2 -->
     <dimen name="cycle_live_dot">8dp</dimen>                <!-- h-2 w-2 -->
     <dimen name="cycle_close_size">36dp</dimen>             <!-- w-9 h-9 -->
+    <dimen name="cycle_tile_value_min_text">14sp</dimen>   <!-- autosize floor of the two wide figures -->
+    <dimen name="cycle_tile_value_step">1sp</dimen>
+    <dimen name="celebration_size">192dp</dimen>             <!-- CelebrationView box -->
+    <dimen name="celebration_ring_stroke">8dp</dimen>
+    <dimen name="celebration_particle_min">2dp</dimen>
+    <dimen name="celebration_particle_max">4dp</dimen>
+    <dimen name="celebration_sheet_size">120dp</dimen>      <!-- CelebrationView in the short sheets and the first-focus popup -->
+    <integer name="cycle_celebrate_burst">600</integer>
+    <integer name="cycle_celebrate_particles">14</integer>
 </resources>

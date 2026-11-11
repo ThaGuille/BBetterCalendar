@@ -6,19 +6,9 @@
         <item quantity="one">%d pomodoro</item>
         <item quantity="other">%d pomodoros</item>
     </plurals>
-    <string name="cycle_finished_format">Has terminado %1$s</string>
-    <string name="cycle_finished_on_format">Has terminado %1$s en</string>
     <string name="cycle_tile_focus">Foco</string>
-    <string name="cycle_tile_focus_sub">sin interrupciones</string>
+    <string name="cycle_tile_today">Hoy</string>
     <string name="cycle_tile_streak">Racha</string>
-    <string name="cycle_streak_personal_best">Récord personal</string>
-    <string name="cycle_streak_best_format">Mejor: %1$s</string>
-    <string name="cycle_tile_best">Mejor</string>
-    <string name="cycle_tile_best_sub">entre amigos</string>
-    <string name="cycle_rank_st">%1$d.º</string>
-    <string name="cycle_rank_nd">%1$d.º</string>
-    <string name="cycle_rank_rd">%1$d.º</string>
-    <string name="cycle_rank_th">%1$d.º</string>
     <string name="cycle_friend_one_format">%1$s sigue estudiando</string>
     <plurals name="cycle_friends_format">
         <item quantity="one">%1$s y %2$d más siguen estudiando</item>
@@ -28,4 +18,15 @@
     <string name="cycle_continue">Continuar</string>
     <string name="cycle_share">Compartir mi progreso</string>
     <string name="cycle_close_desc">Cerrar</string>
+    <!-- u13 -->
+    <string name="cycle_summary_format">%1$s · %2$s de enfoque</string>
+    <string name="cycle_today_best_format">Tu mejor marca: %1$s</string>
+    <string name="cycle_today_best_now">¡Tu mejor día hasta ahora!</string>
+    <string name="cycle_streak_goal_met">%1$d de %2$d días: objetivo cumplido</string>
+    <string name="cycle_streak_goal_progress">%1$d de %2$d días esta semana</string>
+    <string name="celebration_sheet_button">Genial</string>
+    <string name="celebration_week_title">¡Objetivo semanal cumplido!</string>
+    <string name="celebration_week_message">Has llegado a tus días de enfoque de esta semana. Mantén el ritmo.</string>
+    <string name="celebration_project_title">¡Proyecto completado!</string>
+    <string name="celebration_project_message">Todas las tareas están hechas. Bien merecido.</string>
 </resources>

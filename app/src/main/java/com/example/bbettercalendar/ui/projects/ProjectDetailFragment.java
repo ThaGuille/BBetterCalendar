@@ -21,6 +21,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.focus.CelebrationPrefs;
+import com.example.bbettercalendar.ui.focus.CelebrationSheet;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.databinding.FragmentProjectDetailBinding;
 import com.example.bbettercalendar.projects.Project;
@@ -212,6 +214,13 @@ public class ProjectDetailFragment extends Fragment {
         menu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == MENU_COMPLETE) {
                 viewModel.completeProject();
+                // u13 (d3): short celebration, once per project id.
+                int completedId = requireArguments().getInt(ARG_PROJECT_ID, 0);
+                if (CelebrationPrefs.claimProject(requireContext(), completedId)) {
+                    CelebrationSheet.show(getChildFragmentManager(),
+                            getString(R.string.celebration_project_title),
+                            getString(R.string.celebration_project_message));
+                }
             } else {
                 confirmDelete();
             }

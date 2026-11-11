@@ -21,13 +21,10 @@
         android:paddingTop="@dimen/spacing_lg"
         android:paddingBottom="@dimen/spacing_md">
 
-        <TextView
+        <com.example.bbettercalendar.ui.common.widget.CelebrationView
             android:id="@+id/firstFocusBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/first_focus_badge"
-            android:textAppearance="@style/TextAppearance.BBetter.Display"
-            android:textSize="@dimen/text_display_compact" />
+            android:layout_width="@dimen/celebration_sheet_size"
+            android:layout_height="@dimen/celebration_sheet_size" />
 
         <TextView
             android:layout_width="wrap_content"

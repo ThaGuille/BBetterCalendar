@@ -124,12 +124,14 @@ Cycle complete (`fragment_cycle_complete.xml`, destino `navigation_cycle_complet
 | id | Qué |
 |---|---|
 | `cycleCloseButton` | Pastilla X (igual que Continue) |
-| `cycleTitle`, `cycleSummary`, `cycleTaskChip` | Título, "You finished N Pomodoros", chip de tarea |
-| `cycleFocusTile` (`cycleFocusValue`, `cycleFocusSub`) | Tile Focus |
-| `cycleStreakTile` (`cycleStreakValue`, `cycleStreakSub`, `cycleStreakBadge`) | Tile Streak |
-| `cycleBestTile` (`cycleBestValue`, `cycleBestSub`, `cycleBestGap`) | Tile Best (social) |
+| `cycleCelebration` | `CelebrationView` (anillo + brote + destello, una vez por entrada) |
+| `cycleTitle`, `cycleSummary`, `cycleTaskChip` | Título, "4 pomodoros · 1 h 40 m de enfoque", chip de tarea |
+| `cycleFocusTile` (`cycleFocusValue`, `cycleFocusSub`) | Celda «Hoy» (valor + «Tu mejor marca») |
+| `cycleStreakTile` (`cycleStreakValue`, `cycleStreakSub`) | Celda «Racha» (u13: sin `cycleStreakBadge`) |
 | `cycleFriendsStrip` (`cycleAvatar1..3`, `cycleFriendsText`) | Franja de amigos (social) |
 | `cycleContinueButton`, `cycleShareButton` | Acciones |
+
+u13: hoja breve `celebrationSheetMark/Title/Message/Button` (`CelebrationSheet`) al cumplir el objetivo semanal (al pulsar Continuar, una vez por semana ISO) y al completar un proyecto (una vez por id).
 
 Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 

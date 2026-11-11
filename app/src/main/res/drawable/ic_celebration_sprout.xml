@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u13: the sprout of the CelebrationView ring (the geometry of ic_cycle_plant without its
+     badge disc and sparkles; the burst particles are drawn by the view). Viewport 280, sprout box 90..190. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="280"
+    android:viewportHeight="280">
+    <path
+        android:fillColor="@color/bb_sanct_sage"
+        android:pathData="M98,190 L182,190 L182,198 L98,198 Z" />
+    <path
+        android:fillColor="@color/bb_sanct_sage_bright"
+        android:pathData="M138.5,190 C138.5,158 137.5,135 140,108 C142.5,135 141.5,158 141.5,190 Z" />
+    <path
+        android:fillColor="@color/bb_sanct_sage"
+        android:pathData="M139,152 C116,150 96,138 92,122 C112,120 134,136 139,152 Z" />
+    <path
+        android:fillColor="@color/bb_sanct_sage_bright"
+        android:pathData="M141,146 C164,144 184,132 188,116 C168,114 146,130 141,146 Z" />
+    <path
+        android:fillColor="@color/bb_sanct_sage"
+        android:pathData="M139,126 C124,116 114,100 112,88 C128,88 138,104 139,126 Z" />
+    <path
+        android:fillColor="@color/bb_sanct_sage_bright"
+        android:pathData="M141,122 C156,112 166,96 168,84 C152,84 142,100 141,122 Z" />
+</vector>

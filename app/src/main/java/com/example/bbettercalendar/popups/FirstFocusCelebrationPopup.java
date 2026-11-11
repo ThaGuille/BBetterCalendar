@@ -14,15 +14,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.bbettercalendar.R;
-import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
+import com.example.bbettercalendar.ui.common.widget.CelebrationView;
 
 /**
  * Recompensa por el primer pomodoro del día (spec focus-mode-and-streak).
  *
  * <p>Deliberadamente NO es un {@code MessagePopup}: aquí el punto es que se sienta premio y no
  * cartel. Por eso ventana transparente ({@code R.style.RewardDialog}), entrada con escala +
- * overshoot, la llama con un latido y el contador de días subiendo desde 0. El número que muestra
+ * overshoot, el anillo que se completa con su destello (CelebrationView) y el contador de días subiendo desde 0. El número que muestra
  * lo calcula {@code HomeViewModel} en el mismo executor que inserta el FocusEvent.
  */
 public class FirstFocusCelebrationPopup extends DialogFragment {
@@ -59,7 +59,7 @@ public class FirstFocusCelebrationPopup extends DialogFragment {
         TextView daysNumber = view.findViewById(R.id.firstFocusDaysNumber);
         TextView daysLabel = view.findViewById(R.id.firstFocusDaysLabel);
         View card = view.findViewById(R.id.firstFocusCard);
-        View badge = view.findViewById(R.id.firstFocusBadge);
+        CelebrationView badge = view.findViewById(R.id.firstFocusBadge);
 
         daysNumber.setText(String.valueOf(days));
         daysLabel.setText(getResources()
@@ -70,12 +70,13 @@ public class FirstFocusCelebrationPopup extends DialogFragment {
         // animación y el sonido lo convertiría justo en el cartel pesado que queríamos evitar.
         if (savedInstanceState == null) {
             animateIn(card, badge, daysNumber, days);
-            HapticFeedback.confirm(card);
             SoundFeedback.get(requireContext()).playSuccess();
+        } else {
+            badge.showComplete();
         }
     }
 
-    private void animateIn(View card, View badge, TextView daysNumber, int days) {
+    private void animateIn(View card, CelebrationView badge, TextView daysNumber, int days) {
         card.setAlpha(0f);
         card.setScaleX(0.8f);
         card.setScaleY(0.8f);
@@ -85,11 +86,8 @@ public class FirstFocusCelebrationPopup extends DialogFragment {
                 .setInterpolator(new OvershootInterpolator(2.2f))
                 .start();
 
-        // Latido de la llama, encadenado al final de la entrada.
-        badge.animate().setStartDelay(320).scaleX(1.25f).scaleY(1.25f).setDuration(180)
-                .setInterpolator(new DecelerateInterpolator())
-                .withEndAction(() -> badge.animate().scaleX(1f).scaleY(1f).setDuration(220).start())
-                .start();
+        // u13: the ring completes (and bursts, with the haptic) once the card is in.
+        badge.play();
 
         if (days <= 1) {
             return; // contar de 0 a 1 no es una animación, es un parpadeo

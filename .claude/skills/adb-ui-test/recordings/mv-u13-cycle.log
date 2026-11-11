@@ -1,0 +1,10 @@
+﻿# scenario: mv-u13-cycle
+# recorded: 2026-11-11T19:48:52.060628+00:00  serial=emulator-5554 pkg=io.github.thaguille.bbettercalendar
+1794426536114	WAIT 3500
+1794426538791	ASSERT id=cycleCelebration
+1794426541403	ASSERT id=cycleSummary expect~=pomodoros
+1794426544139	ASSERT id=cycleFocusValue expect~=h
+1794426546808	ASSERT id=cycleStreakValue expect~=semanas
+1794426549399	ASSERT id=cycleStreakSub expect~=objetivo
+1794426550329	SHOT mv-u13-cycle
+1794426552956	ASSERT id=cycleContinueButton

@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_DEBUG_NAV_FROM = "bb_debug_from";
     /** Solo debug: packageName para {@code app_detail} (por defecto, el de esta app). */
     public static final String EXTRA_DEBUG_NAV_PACKAGE = "bb_debug_pkg";
-    /** Solo debug: ARG_CYCLES / ARG_FOCUS_MILLIS de {@code cycle_complete} ({@code --ei} / {@code --el}). */
+    /** Solo debug: ARG_CYCLES / ARG_FOCUS_MILLIS de {@code cycle_complete} ({@code --ei} / {@code --el}); sin extras: 4 ciclos de 25 min (u13). */
     public static final String EXTRA_DEBUG_CYCLES = "bb_debug_cycles";
     public static final String EXTRA_DEBUG_FOCUS_MILLIS = "bb_debug_focus_millis";
     /**
@@ -259,9 +259,9 @@ public class MainActivity extends AppCompatActivity {
             case "cycle_complete":
                 destination = R.id.navigation_cycle_complete;
                 args = new Bundle();
-                args.putInt(CycleCompleteFragment.ARG_CYCLES, intent.getIntExtra(EXTRA_DEBUG_CYCLES, 0));
+                args.putInt(CycleCompleteFragment.ARG_CYCLES, intent.getIntExtra(EXTRA_DEBUG_CYCLES, 4));
                 args.putLong(CycleCompleteFragment.ARG_FOCUS_MILLIS,
-                        intent.getLongExtra(EXTRA_DEBUG_FOCUS_MILLIS, 0L));
+                        intent.getLongExtra(EXTRA_DEBUG_FOCUS_MILLIS, 25L * 60_000L));
                 intent.removeExtra(EXTRA_DEBUG_CYCLES);
                 intent.removeExtra(EXTRA_DEBUG_FOCUS_MILLIS);
                 break;

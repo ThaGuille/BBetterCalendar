@@ -36,15 +36,23 @@ public class BlockDecisionEngine {
         public final boolean block;
         public final long usedMillis;
         public final boolean focusMode;
+        // u14: límite diario (minutos) de la regla que bloquea; 0 en el modo bloqueo total o sin
+        // regla. La portada lo usa para pintar el anillo de uso frente a límite.
+        public final int limitMinutes;
 
         Decision(boolean block, long usedMillis) {
-            this(block, usedMillis, false);
+            this(block, usedMillis, false, 0);
         }
 
         Decision(boolean block, long usedMillis, boolean focusMode) {
+            this(block, usedMillis, focusMode, 0);
+        }
+
+        Decision(boolean block, long usedMillis, boolean focusMode, int limitMinutes) {
             this.block = block;
             this.usedMillis = usedMillis;
             this.focusMode = focusMode;
+            this.limitMinutes = limitMinutes;
         }
     }
 
@@ -123,7 +131,7 @@ public class BlockDecisionEngine {
 
         // Latch: una vez cubierto hoy, sigue cubierto hasta medianoche sin re-consultar.
         if (Boolean.TRUE.equals(blockedToday.get(packageName))) {
-            return new Decision(true, usageTodayMillis(packageName));
+            return new Decision(true, usageTodayMillis(packageName), false, rule.dailyLimitMinutes);
         }
 
         // TTL de la decisión negativa: si la comprobamos hace poco y estaba por debajo, no re-leemos.
@@ -136,7 +144,7 @@ public class BlockDecisionEngine {
         long usedMinutes = TimeUnit.MILLISECONDS.toMinutes(usedMillis);
         if (usedMinutes >= rule.dailyLimitMinutes) {
             blockedToday.put(packageName, Boolean.TRUE);
-            return new Decision(true, usedMillis);
+            return new Decision(true, usedMillis, false, rule.dailyLimitMinutes);
         }
 
         lastNegativeCheckAt.put(packageName, System.currentTimeMillis());

@@ -172,18 +172,18 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
 ## Popups (u21)
 
-`okButton`, `popup_description_edit_text`, `streakCloseButton`, `firstFocusButton`, `btn_save`, `btn_cancel`; abrir: `homeCycleChip` (timer), `homeStreakButton` (streak), `quickAddRepeatButton`/`task_repetition_layout`, `task_notifications_layout`, `task_description_layout` (tras `quickAddMoreOptionsButton`).
+`okButton`, `popup_description_edit_text`, `streakCloseButton`, `firstFocusButton`, `btn_save`, `btn_restore`, `repetition_popup_confirm`, `btnSaveNotificationsPopup`; mejora-visual u14: Timer, Streak, Notifications, Repetition and Description are bottom sheets (handle, drag to dismiss, main button at the bottom); the timer has chips `chip_preset_25/50/90` («25 / 5», «50 / 10», «90 / 15»), `slider_timer`, `slider_rest`, `stepper_cycles` (a StepperView: `stepperMinus/stepperPlus/stepperValue`), `toggle_infinite_cycles`, `switch_rest_enabled`, `switch_auto_cycle`; `btn_cancel` and `btn_add_cycles`/`btn_subtract_cycles`/`text_cycles` were removed; abrir: `homeCycleChip` (timer), `homeStreakButton` (streak), `quickAddRepeatButton`/`task_repetition_layout`, `task_notifications_layout`, `task_description_layout` (tras `quickAddMoreOptionsButton`).
 
 ## Calendar month/week and forms (u22)
 
 - Mes: `calendarModeMonth`, `calendarModeWeek`, `monthGridCard`, `monthPrevButton`, `monthNextButton`, `monthTitleText`, `monthCalendarView`, `legendDay0..6`, `calendarLegend`, `calendarAgendaCard`, `dayDetailTitle`, `dayDetailSubtitle`, `dayDetailEmptyText` (EmptyStateView; su botón `emptyStateAction`), `dayDetailRecycler`, `calendarAddEventButton` (el «+» de la tarjeta, ya no es FAB); celda: `cellDayText`, `cellTodayIndicator`, `cellFocusBg`, `cellDots`, `cellDot1..3` (antes `cellEventBar1..3`); item: `eventColorSwatch`, `eventTitle`, `eventMeta` (antes `eventDescription`), `eventTime`.
 - Semana: `calendarWeekRoot`, `weekMonthTitleText`, `weekView` (canvas, sin hijos accesibles por id), `calendarAddEventButton2`.
-- Formularios: `btnClose`, `btnSaveEvent`, `switch_to_event_button`, `switch_to_task_button`, `notificationsButton`, `event_title`, `event_start_date/hour`, `event_end_date/hour`, `task_title`, `task_start_date/hour`, `task_duration`.
-- Hoja rapida (abre `homeAddTaskButton`): `quickAddTitleInput`, `quickAddTimeButton`, `quickAddRepeatButton`, `quickAddTargetInput`, `quickAddMoreOptionsButton`, `quickAddSaveButton`.
+- Formularios: `btnClose`, `btnSaveEvent` (disabled until there is a title and, in an event, the end is not before the start), `form_type_selector` (SegmentedControlView Evento/Tarea/Recordatorio; replaces `switch_to_event_button`/`switch_to_task_button`/`notificationsButton`, tap its items by text), `event_title`, `event_start_label`/`event_start_date`/`event_start_hour`, `event_end_label`/`event_end_date`/`event_end_hour`, `task_title`, `task_start_label`/`task_start_date`/`task_start_hour`, `task_duration`, shortcuts `form_shortcut_today`/`form_shortcut_tomorrow`/`form_shortcut_plus_hour`, inline error `form_error`.
+- Hoja rapida (abre `homeAddTaskButton`; u14: handle, shortcuts `quickAddShortcutToday/Tomorrow/PlusHour`, save disabled until a title): `quickAddTitleInput`, `quickAddTimeButton`, `quickAddRepeatButton`, `quickAddTargetInput`, `quickAddMoreOptionsButton`, `quickAddSaveButton`.
 
 ## Splash, AppPicker, block cover (u23)
 
-- Sin ids nuevos. Existentes: `splash_logo`, `app_picker_close`, `app_picker_save`, `app_picker_list`, `app_pick_icon/label/check`, `block_cover_app_label/title/subtitle/close`.
+- Sin ids nuevos. Existentes: `splash_logo`, `app_picker_close`, `app_picker_save`, `app_picker_list`, `app_pick_icon/label/check`, `block_cover_app_label/title/subtitle/close`; u14 adds `block_cover_ring` (ProgressRingView usage vs limit, hidden in focus mode), `block_cover_app_icon`, `block_cover_note` («Vuelve a estar disponible mañana» / «Termina tu pomodoro para usarla»).
 - (mejora-visual u10) `app_picker_title` ("Añadir apps" / "Apps siempre permitidas" with extra `mode=allowlist`), `app_pick_suggested` ("Sugerida" badge, first allowlist opening only). Block cover: uiautomator does not see the accessibility overlay, and every uiautomator dump rebinds accessibility services (the service clears `FocusBlockState` on reconnect): verify the shield with `screencap` + `input tap` only.
 
 ## Home additions (u13b)

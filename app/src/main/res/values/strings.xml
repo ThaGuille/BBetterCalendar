@@ -104,8 +104,6 @@
     <string name="create_entry_notification_hint">Add notification</string>
     <string name="create_entry_description_hint">Add description</string>
     <string name="create_entry_title_hint">Title</string>
-    <string name="create_entry_time_placeholder" translatable="false">00:00</string>
-    <string name="create_entry_date_placeholder">Date</string>
     <string name="create_entry_duration_separator" translatable="false">:</string>
     <string name="create_entry_duration_unit" translatable="false">h</string>
 

@@ -1,18 +1,18 @@
 package com.example.bbettercalendar.popups;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
+import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.R;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 /**
  * Selector de recurrencia (spec tasks-recurrence). Extiende el popup original (4 opciones
@@ -20,7 +20,7 @@ import com.example.bbettercalendar.R;
  * el bitmask de días de la semana (semanal), devolviendo un {@link RepetitionSpec} vía
  * {@link OnPopupListener#OnClosePopup(int, Object)}. Ya no auto-cierra: hay un botón "Hecho".
  */
-public class RepetitionPopup extends DialogFragment implements View.OnClickListener {
+public class RepetitionPopup extends BottomSheetDialogFragment implements View.OnClickListener {
 
     /** @deprecated use {@link RepetitionOptions#NONE}. Kept for binary compatibility. */
     @Deprecated public static final int REPETITION_NONE = RepetitionOptions.NONE;
@@ -68,13 +68,11 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
         }
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.RoundedDialog);
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.popup_repetition, null);
-        builder.setView(view);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.popup_repetition, container, false);
 
         baseToggles[0] = view.findViewById(R.id.repetition_popup_toggle_none);
         baseToggles[1] = view.findViewById(R.id.repetition_popup_toggle_daily);
@@ -132,7 +130,7 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
         renderSelection();
         renderInterval();
         renderWeekdays();
-        return builder.create();
+        return view;
     }
 
     private void selectBase(int idx) {
@@ -198,5 +196,11 @@ public class RepetitionPopup extends DialogFragment implements View.OnClickListe
             listener.OnClosePopup(PopupHelper.REPETITION_POPUP,
                     new RepetitionSpec(selected, interval, daysMask, hiddenInCalendar));
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        SheetBehavior.expand(getDialog());
     }
 }

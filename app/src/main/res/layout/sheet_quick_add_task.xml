@@ -7,8 +7,10 @@
      teclado abierto la altura natural de la hoja no cabe y los botones se aplastaban. -->
 <!-- u3: la hoja no tiene casilla hoy; cualquier casilla nueva usa @style/Widget.BBetter.CheckBox. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:clipToPadding="false">
 
 <LinearLayout
     android:layout_width="match_parent"
@@ -16,8 +18,9 @@
     android:orientation="vertical"
     android:paddingStart="@dimen/spacing_md"
     android:paddingEnd="@dimen/spacing_md"
-    android:paddingTop="@dimen/spacing_md"
-    android:paddingBottom="@dimen/spacing_lg">
+    android:paddingBottom="@dimen/spacing_md">
+
+    <include layout="@layout/view_sheet_handle" />
 
     <TextView
         android:layout_width="match_parent"
@@ -39,11 +42,54 @@
         android:textColor="@color/bb_on_surface"
         android:textColorHint="@color/bb_on_surface_muted" />
 
-    <TextView
-        android:id="@+id/quickAddTimeButton"
-        android:layout_width="wrap_content"
+    <!-- u14: atajos de fecha -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_sm"
+        android:orientation="horizontal">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/quickAddShortcutToday"
+            style="@style/Widget.BBetter.Chip"
+            android:checkable="false"
+            app:ensureMinTouchTargetSize="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/form_shortcut_today" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/quickAddShortcutTomorrow"
+            style="@style/Widget.BBetter.Chip"
+            android:checkable="false"
+            app:ensureMinTouchTargetSize="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:text="@string/form_shortcut_tomorrow" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/quickAddShortcutPlusHour"
+            style="@style/Widget.BBetter.Chip"
+            android:checkable="false"
+            app:ensureMinTouchTargetSize="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:text="@string/form_shortcut_plus_hour" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/quickAddTimeButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
@@ -57,9 +103,9 @@
 
     <TextView
         android:id="@+id/quickAddRepeatButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_xs"
+        android:layout_weight="1"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
@@ -70,6 +116,7 @@
         android:text="@string/quick_add_repeat_label"
         android:textAppearance="@style/TextAppearance.BBetter.Label"
         android:textColor="@color/bb_primary_bright" />
+    </LinearLayout>
 
     <!-- Objetivo de minutos de concentración (spec focus-attribution). Opcional; en blanco = 0. -->
     <EditText
@@ -108,22 +155,12 @@
             android:text="@string/quick_add_more_options"
             android:textAppearance="@style/TextAppearance.BBetter.Label" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/quickAddSaveButton"
+            style="@style/Widget.BBetter.Button.Primary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_chip_energy"
-            android:clickable="true"
-            android:focusable="true"
-            android:minHeight="@dimen/touch_target_min"
-            android:gravity="center"
-            android:paddingStart="18dp"
-            android:paddingEnd="18dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:text="@string/quick_add_save"
-            android:textAppearance="@style/TextAppearance.BBetter.Chip"
-            android:textColor="@color/bb_on_primary" />
+            android:text="@string/quick_add_save" />
     </LinearLayout>
 
 </LinearLayout>

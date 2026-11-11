@@ -105,7 +105,6 @@
     <string name="create_entry_notification_hint">Añadir notificación</string>
     <string name="create_entry_description_hint">Añadir descripción</string>
     <string name="create_entry_title_hint">Título</string>
-    <string name="create_entry_date_placeholder">Fecha</string>
 
     <!-- Popup de notificaciones -->
     <string name="notifications_popup_title">Notificaciones</string>

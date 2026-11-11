@@ -36,20 +36,12 @@
             android:text="@string/app_picker_title"
             android:textAppearance="@style/TextAppearance.BBetter.Headline" />
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/app_picker_save"
+            style="@style/Widget.BBetter.Button.Primary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_save_pill"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingStart="@dimen/spacing_lg"
-            android:paddingTop="@dimen/spacing_sm"
-            android:paddingEnd="@dimen/spacing_lg"
-            android:paddingBottom="@dimen/spacing_sm"
-            android:text="@string/app_picker_save"
-            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
-            android:textColor="@color/bb_on_primary" />
+            android:text="@string/app_picker_save" />
     </LinearLayout>
 
     <FrameLayout

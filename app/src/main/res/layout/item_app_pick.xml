@@ -54,13 +54,16 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <!-- u14: casilla animada de la app (Widget.BBetter.CheckBox); la fila entera es el área de toque. -->
     <CheckBox
         android:id="@+id/app_pick_check"
+        style="@style/Widget.BBetter.CheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/checkbox_overhang"
+        android:layout_marginEnd="@dimen/checkbox_overhang"
         android:clickable="false"
         android:contentDescription="@string/app_picker_check"
-        android:focusable="false"
-        app:buttonTint="@color/bb_primary" />
+        android:focusable="false" />
 
 </LinearLayout>

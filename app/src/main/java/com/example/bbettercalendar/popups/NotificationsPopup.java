@@ -1,40 +1,38 @@
 package com.example.bbettercalendar.popups;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
+import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.R;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NotificationsPopup extends DialogFragment implements CompoundButton.OnCheckedChangeListener {
+public class NotificationsPopup extends BottomSheetDialogFragment implements CompoundButton.OnCheckedChangeListener {
 
     private OnNotificationsPopupListener listener;
     private boolean[] notificationsArray = new boolean[7];
     private ToggleButton[] toggleButtons = new ToggleButton[7];
     private final String TAG = "NotificationsPopupTAG";
 
-    @NonNull
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.RoundedDialog);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
         // Inflar y establecer el layout para el dialog
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.popup_notifications, null);
-        builder.setView(view);
+        View view = inflater.inflate(R.layout.popup_notifications, container, false);
 
         // Configurar elementos del layout y manejar eventos aquí
         //El sistema de guardar notificaciones se podría hacer con un diccionario de parejas minutos/booleano
@@ -81,7 +79,7 @@ public class NotificationsPopup extends DialogFragment implements CompoundButton
             }
         });
 
-        return builder.create();
+        return view;
     }
 
     private void setToggleButtons(){
@@ -144,4 +142,10 @@ public class NotificationsPopup extends DialogFragment implements CompoundButton
     }
 
 
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        SheetBehavior.expand(getDialog());
+    }
 }

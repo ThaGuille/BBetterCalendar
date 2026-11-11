@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u14: medidas de las hojas inferiores. -->
+<resources>
+    <!-- Alto de la celda del calendario de racha: 6 filas caben en una hoja de 640dp. -->
+    <dimen name="streak_day_cell_height">36dp</dimen>
+</resources>

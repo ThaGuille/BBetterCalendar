@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="form_starts">Empieza</string>
+    <string name="form_ends">Termina</string>
+    <string name="form_shortcut_today">Hoy</string>
+    <string name="form_shortcut_tomorrow">Mañana</string>
+    <string name="form_shortcut_plus_hour">+1 h</string>
+    <string name="form_error_end_before_start">El fin no puede ser anterior al inicio.</string>
+
+    <string name="block_cover_available_tomorrow">Vuelve a estar disponible mañana</string>
+    <string name="block_cover_finish_pomodoro">Termina tu pomodoro para usarla</string>
+    <string name="block_cover_usage_of_limit">%1$s de %2$s</string>
+</resources>

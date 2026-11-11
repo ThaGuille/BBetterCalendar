@@ -1,28 +1,27 @@
 package com.example.bbettercalendar.popups;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
+import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.R;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.ui.common.widget.StepperView;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.slider.Slider;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
-public class TimerPopup extends DialogFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+public class TimerPopup extends BottomSheetDialogFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private static final int MIN_MINUTES = 1;
     private static final int MAX_MINUTES = 90;
@@ -44,44 +43,46 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
 
     private TextView timerTimeTextView;
     private TextView restTimeTextView;
-    private TextView cyclesNumberTextView;
     private Slider timerSlider;
     private Slider restSlider;
     private View restContent;
     private SwitchMaterial restEnabledSwitch;
     private SwitchMaterial autoCycleSwitch;
     private ToggleButton infiniteCyclesToggle;
-    private ImageButton btnAddCycles;
-    private ImageButton btnSubtractCycles;
+    private StepperView cyclesStepper;
+    private final Chip[] presetChips = new Chip[3];
+    // Concentracion / descanso (minutos) de cada chip rapido: 25/5, 50/10, 90/15.
+    private static final int[][] PRESETS = {{25, 5}, {50, 10}, {90, 15}};
 
     private OnPopupListener listener;
 
-    @NonNull
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.RoundedDialog);
 
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.popup_home_timer_configuration, null);
-        builder.setView(view);
+        View view = inflater.inflate(R.layout.popup_home_timer_configuration, container, false);
 
         timerTimeTextView = view.findViewById(R.id.text_time_timer);
         restTimeTextView = view.findViewById(R.id.text_time_resting);
-        cyclesNumberTextView = view.findViewById(R.id.text_cycles);
         timerSlider = view.findViewById(R.id.slider_timer);
         restSlider = view.findViewById(R.id.slider_rest);
         restContent = view.findViewById(R.id.rest_content);
         restEnabledSwitch = view.findViewById(R.id.switch_rest_enabled);
         autoCycleSwitch = view.findViewById(R.id.switch_auto_cycle);
         infiniteCyclesToggle = view.findViewById(R.id.toggle_infinite_cycles);
-        btnAddCycles = view.findViewById(R.id.btn_add_cycles);
-        btnSubtractCycles = view.findViewById(R.id.btn_subtract_cycles);
-
-        btnAddCycles.setOnClickListener(this);
-        btnSubtractCycles.setOnClickListener(this);
+        cyclesStepper = view.findViewById(R.id.stepper_cycles);
+        cyclesStepper.setRange(MIN_CYCLES, MAX_CYCLES, 1);
+        cyclesStepper.setOnValueChangeListener((stepper, value) -> cyclesNumber = value);
+        presetChips[0] = view.findViewById(R.id.chip_preset_25);
+        presetChips[1] = view.findViewById(R.id.chip_preset_50);
+        presetChips[2] = view.findViewById(R.id.chip_preset_90);
+        for (int i = 0; i < presetChips.length; i++) {
+            final int idx = i;
+            presetChips[i].setOnClickListener(v -> applyPreset(PRESETS[idx][0], PRESETS[idx][1]));
+        }
         view.findViewById(R.id.btn_restore).setOnClickListener(this);
-        view.findViewById(R.id.btn_cancel).setOnClickListener(this);
         view.findViewById(R.id.btn_save).setOnClickListener(this);
 
         getInitialValues();
@@ -96,6 +97,7 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
             int newMinutes = (int) value;
             timerTime = FormatHelper.minutesToMillis(newMinutes);
             timerTimeTextView.setText(formatTime(timerTime));
+            syncPresetChips();
         });
 
         restSlider.addOnChangeListener((slider, value, fromUser) -> {
@@ -103,9 +105,10 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
             int newMinutes = (int) value;
             restTime = FormatHelper.minutesToMillis(newMinutes);
             restTimeTextView.setText(formatTime(restTime));
+            syncPresetChips();
         });
 
-        return builder.create();
+        return view;
     }
 
     public void setOnPopupListener(OnPopupListener listener) {
@@ -157,18 +160,36 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
 
         applyRestEnabledState();
         applyInfiniteCyclesState();
+        syncPresetChips();
+    }
+
+    /** Chip rapido: ajusta concentracion y descanso a la vez y activa el descanso. */
+    private void applyPreset(int focusMinutes, int restMinutes) {
+        timerTime = FormatHelper.minutesToMillis(focusMinutes);
+        restTime = FormatHelper.minutesToMillis(restMinutes);
+        timerSlider.setValue(focusMinutes);
+        restSlider.setValue(restMinutes);
+        timerTimeTextView.setText(formatTime(timerTime));
+        restTimeTextView.setText(formatTime(restTime));
+        if (!isRestEnabled) {
+            isRestEnabled = true;
+            restEnabledSwitch.setChecked(true);
+        }
+        syncPresetChips();
+    }
+
+    /** Un chip queda marcado solo mientras coincidan los dos valores actuales. */
+    private void syncPresetChips() {
+        for (int i = 0; i < presetChips.length; i++) {
+            presetChips[i].setChecked(timerTime == FormatHelper.minutesToMillis(PRESETS[i][0])
+                    && restTime == FormatHelper.minutesToMillis(PRESETS[i][1]));
+        }
     }
 
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        if (id == R.id.btn_add_cycles) {
-            changeCycles(1);
-        } else if (id == R.id.btn_subtract_cycles) {
-            changeCycles(-1);
-        } else if (id == R.id.btn_cancel) {
-            dismiss();
-        } else if (id == R.id.btn_restore) {
+        if (id == R.id.btn_restore) {
             getRestoredValues();
             bindValues();
         } else if (id == R.id.btn_save) {
@@ -193,36 +214,17 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
     private void applyRestEnabledState() {
         float alpha = isRestEnabled ? 1f : 0.4f;
         restContent.setAlpha(alpha);
+        restTimeTextView.setAlpha(alpha);
         restSlider.setEnabled(isRestEnabled);
     }
 
     private void applyInfiniteCyclesState() {
-        float alpha = isInfiniteCycles ? 0.4f : 1f;
-        btnAddCycles.setEnabled(!isInfiniteCycles);
-        btnSubtractCycles.setEnabled(!isInfiniteCycles);
-        btnAddCycles.setAlpha(alpha);
-        btnSubtractCycles.setAlpha(alpha);
-        cyclesNumberTextView.setText(isInfiniteCycles
-                ? getString(R.string.timer_infinite_symbol)
-                : String.valueOf(cyclesNumber));
-    }
-
-    private void changeCycles(int cyclesChange) {
-        int next = cyclesNumber + cyclesChange;
-        if (next < MIN_CYCLES || next > MAX_CYCLES) {
-            sendErrorMessage(getString(R.string.timer_error_cycles_range));
-            return;
-        }
-        cyclesNumber = next;
-        cyclesNumberTextView.setText(String.valueOf(cyclesNumber));
-    }
-
-    private void sendErrorMessage(String message) {
-        try {
-            Snackbar.make(this.getParentFragment().getView(), message, Snackbar.LENGTH_SHORT).show();
-        } catch (NullPointerException e) {
-            Log.e(TAG, "the TimerPopup is not attached to any view.");
-        }
+        cyclesStepper.setValueFormatter(isInfiniteCycles
+                ? value -> getString(R.string.timer_infinite_symbol)
+                : null);
+        cyclesStepper.setValue(cyclesNumber);
+        cyclesStepper.setEnabled(!isInfiniteCycles);
+        cyclesStepper.setAlpha(isInfiniteCycles ? 0.4f : 1f);
     }
 
     private static int clamp(int value, int min, int max) {
@@ -259,5 +261,11 @@ public class TimerPopup extends DialogFragment implements View.OnClickListener, 
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        SheetBehavior.expand(getDialog());
     }
 }

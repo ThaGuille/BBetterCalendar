@@ -43,28 +43,13 @@
                 android:text="@string/create_entry_headline_task"
                 android:textAppearance="@style/TextAppearance.BBetter.Headline" />
 
-            <!-- 2. Segmented track -->
-            <LinearLayout
-                android:id="@+id/task_type_layout"
-                style="@style/Widget.BBetter.SegmentedControl"
-                android:layout_marginTop="@dimen/spacing_md">
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/switch_to_event_button"
-                    style="@style/Widget.BBetter.SegmentedControl.Item"
-                    android:text="@string/create_entry_segment_event" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/switch_to_task_button"
-                    style="@style/Widget.BBetter.SegmentedControl.Item"
-                    android:text="@string/create_entry_segment_task" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/notificationsButton"
-                    style="@style/Widget.BBetter.SegmentedControl.Item"
-                    android:enabled="false"
-                    android:text="@string/create_entry_segment_reminder" />
-            </LinearLayout>
+            <!-- 2. Evento / Tarea / Recordatorio: píldora deslizante (u14) -->
+            <com.example.bbettercalendar.ui.common.widget.SegmentedControlView
+                android:id="@+id/form_type_selector"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                app:segmentEntries="@array/form_type_entries" />
 
             <!-- 3. Title card -->
             <LinearLayout
@@ -115,9 +100,18 @@
                         app:tint="@color/bb_primary_bright" />
 
                     <TextView
+                        android:id="@+id/task_start_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_md"
+                        android:minWidth="72dp"
+                        android:text="@string/form_starts"
+                        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+                    <TextView
                         android:id="@+id/task_start_date"
                         style="@style/BBetter.CardFormRow.Value"
-                        android:hint="@string/create_entry_date_placeholder" />
+                        android:gravity="end" />
 
                     <TextView
                         android:id="@+id/task_start_hour"
@@ -125,8 +119,7 @@
                         android:layout_width="wrap_content"
                         android:layout_marginStart="@dimen/spacing_sm"
                         android:layout_weight="0"
-                        android:gravity="end"
-                        android:hint="@string/create_entry_time_placeholder" />
+                        android:gravity="end" />
                 </LinearLayout>
 
                 <View
@@ -187,6 +180,50 @@
                         android:textAppearance="@style/TextAppearance.BBetter.Body" />
                 </LinearLayout>
             </LinearLayout>
+
+            <!-- Atajos de fecha (u14) + error en línea -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:orientation="horizontal">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/form_shortcut_today"
+                    style="@style/Widget.BBetter.Chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="false"
+                    android:text="@string/form_shortcut_today" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/form_shortcut_tomorrow"
+                    style="@style/Widget.BBetter.Chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:checkable="false"
+                    android:text="@string/form_shortcut_tomorrow" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/form_shortcut_plus_hour"
+                    style="@style/Widget.BBetter.Chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_sm"
+                    android:checkable="false"
+                    android:text="@string/form_shortcut_plus_hour" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/form_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:text="@string/form_error_end_before_start"
+                android:textAppearance="@style/TextAppearance.BBetter.Label"
+                android:textColor="@color/bb_danger"
+                android:visibility="gone" />
 
             <!-- 5. Options card -->
             <LinearLayout

@@ -6,6 +6,7 @@
      que solo lo entiende la factory de AppCompat) y el servicio infla con un ContextThemeWrapper
      sobre Theme.BBetter como red de seguridad para los ?attr de los vectores. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,19 +17,33 @@
     android:orientation="vertical"
     android:padding="@dimen/spacing_lg">
 
-    <ImageView
-        android:layout_width="@dimen/block_cover_icon_size"
-        android:layout_height="@dimen/block_cover_icon_size"
-        android:contentDescription="@null"
-        android:src="@drawable/ic_block_24"
-        android:tint="@color/bb_danger"
-        tools:ignore="UseAppTint" />
+    <!-- u14: icono de la app dentro del anillo de uso frente a límite (ProgressRingView sin
+         texto; en el modo bloqueo total el anillo se oculta y queda solo el icono). -->
+    <FrameLayout
+        android:layout_width="@dimen/block_cover_ring_size"
+        android:layout_height="@dimen/block_cover_ring_size">
+
+        <com.example.bbettercalendar.ui.common.widget.ProgressRingView
+            android:id="@+id/block_cover_ring"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            app:ringColor="@color/bb_danger"
+            app:ringShowText="false" />
+
+        <ImageView
+            android:id="@+id/block_cover_app_icon"
+            android:layout_width="@dimen/block_cover_icon_size"
+            android:layout_height="@dimen/block_cover_icon_size"
+            android:layout_gravity="center"
+            android:contentDescription="@null" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/block_cover_app_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_lg"
+        android:layout_marginTop="@dimen/spacing_md"
         android:textAppearance="@style/TextAppearance.BBetter.Headline"
         tools:text="Instagram" />
 
@@ -50,6 +65,16 @@
         android:textAppearance="@style/TextAppearance.BBetter.Body"
         android:textColor="@color/bb_on_surface_muted"
         tools:text="2h 15m used today" />
+
+    <TextView
+        android:id="@+id/block_cover_note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_md"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+        android:textColor="@color/bb_primary_bright"
+        tools:text="Available again tomorrow" />
 
     <TextView
         android:id="@+id/block_cover_close"

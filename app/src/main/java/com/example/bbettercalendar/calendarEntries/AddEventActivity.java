@@ -9,6 +9,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -46,6 +49,8 @@ import com.example.bbettercalendar.popups.RepetitionOptions;
 import com.example.bbettercalendar.popups.RepetitionPopup;
 import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
+import com.example.bbettercalendar.ui.common.motion.Motion;
+import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import javax.inject.Inject;
@@ -122,8 +127,13 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     private NumberPicker numberPickerHoursView;
     private LinearLayout createEntryLinearLayout;
     private LinearLayout optionsCard;
-    private Button switchToEventButton;
-    private Button switchToTaskButton;
+    private SegmentedControlView formTypeSelector;
+    private Button saveButton;
+    private TextView formErrorView;
+    // u14: fecha y hora del formulario (la fuente de verdad); el builder las recibe al guardar.
+    // Un evento nuevo dura 1 h por defecto, asi la fila "Termina" nunca esta vacia.
+    private Calendar formStart;
+    private Calendar formEnd;
 
     //private boolean[] notifications = new boolean[5];
 
@@ -143,6 +153,11 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         if (preselectedMillis > 0L) {
             localCalendar.setTimeInMillis(preselectedMillis);
         }
+        localCalendar.set(Calendar.SECOND, 0);
+        localCalendar.set(Calendar.MILLISECOND, 0);
+        formStart = (Calendar) localCalendar.clone();
+        formEnd = (Calendar) localCalendar.clone();
+        formEnd.add(Calendar.HOUR_OF_DAY, 1);
         // Cargar el layout adecuado
         switch (layoutType) {
             case TYPE_EVENT:
@@ -166,18 +181,6 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         toolbarHelper = new ToolbarHelper(this, this, getMenuInflater(), R.id.toolbar_close_or_save, false);
         toolbarHelper.setOnToolbarListener(this);
         initializeComponents(layoutType);
-
-        // For TYPE_EVENT with a preselected date, default the end date to the same day so the
-        // event spans a single day by default. The start date was already populated from
-        // localCalendar inside initializeComponents.
-        if (preselectedMillis > 0L && layoutType == TYPE_EVENT) {
-            eventBuilder.setEventEndDay(localCalendar);
-            if (endDateView != null) {
-                endDateView.setText(java.text.DateFormat.getDateInstance(
-                        java.text.DateFormat.SHORT, java.util.Locale.getDefault())
-                        .format(localCalendar.getTime()));
-            }
-        }
 
         projectId = intent.getIntExtra(EXTRA_PROJECT_ID, 0);
 
@@ -249,6 +252,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         this.layoutType = layoutType;
         eventBuilder.setEventType(layoutType);
         Button btnSaveEvent = findViewById(R.id.btnSaveEvent);
+        saveButton = btnSaveEvent;
         ImageButton btnClose = findViewById(R.id.btnClose);
         TextView toolbarTitle = findViewById(R.id.toolbarText);
         Toolbar toolbar = findViewById(R.id.toolbar_close_or_save);
@@ -275,8 +279,6 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 descriptionLayout = findViewById(R.id.event_description_layout);
                 createEntryLinearLayout = findViewById(R.id.create_event_linear_layout);
                 optionsCard = findViewById(R.id.options_card);
-                switchToEventButton = findViewById(R.id.switch_to_event_button);
-                switchToTaskButton = findViewById(R.id.switch_to_task_button);
 
                 startTimeView.setOnClickListener(this);
                 endTimeView.setOnClickListener(this);
@@ -284,10 +286,6 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 startDateView.setOnClickListener(this);
                 notificationsView.setOnClickListener(this);
                 descriptionLayout.setOnClickListener(this);
-                switchToEventButton.setOnClickListener(this);
-                switchToTaskButton.setOnClickListener(this);
-                switchToEventButton.setSelected(true);
-                switchToTaskButton.setSelected(false);
                 // Position inside options_card where new notification rows are inserted:
                 // 0=event_notifications_layout, 1=divider, 2=event_description_layout.
                 // Insert at 1 so injected rows sit between the notifications row and the divider.
@@ -295,8 +293,6 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
                 eventBuilder.setEventType(TYPE_EVENT);
 
-                startDateView.setText(DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(localCalendar.getTime()));
-                startTimeView.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(localCalendar.getTime()));
                 toolbarTitle.setText(R.string.event);
 
                 break;
@@ -322,21 +318,13 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 optionsCard = findViewById(R.id.options_card);
                 numberPickerMinutesView = findViewById(R.id.number_picker_minutes);
                 numberPickerHoursView = findViewById(R.id.number_picker_hours);
-                switchToEventButton = findViewById(R.id.switch_to_event_button);
-                switchToTaskButton = findViewById(R.id.switch_to_task_button);
 
                 startTimeView.setOnClickListener(this);
                 startDateView.setOnClickListener(this);
                 notificationsView.setOnClickListener(this);
                 repetitionView.setOnClickListener(this);
                 descriptionLayout.setOnClickListener(this);
-                switchToEventButton.setOnClickListener(this);
-                switchToTaskButton.setOnClickListener(this);
-                switchToEventButton.setSelected(false);
-                switchToTaskButton.setSelected(true);
 
-                startDateView.setText(DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(localCalendar.getTime()));
-                startTimeView.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(localCalendar.getTime()));
                 String[] displayedValuesMinutes = {"00", "55", "50", "45", "40", "35", "30", "25", "20", "15", "10", "05"};
                 numberPickerMinutesView.setMinValue(0);
                 numberPickerMinutesView.setMaxValue(displayedValuesMinutes.length - 1);
@@ -356,6 +344,83 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 // Inicializar componentes específicos del layout 3
                 break;
         }
+        setUpFormChrome();
+    }
+
+    /** u14: selector con píldora, atajos de fecha, error en línea y "Guardar" según el validador. */
+    private void setUpFormChrome() {
+        formTypeSelector = findViewById(R.id.form_type_selector);
+        formTypeSelector.setItemEnabled(2, false); // Recordatorio: aún no existe
+        formTypeSelector.setSelectedIndex(layoutType == TYPE_TASK ? 1 : 0);
+        formTypeSelector.setOnSegmentSelectedListener((view, index) -> {
+            final int target = index == 1 ? TYPE_TASK : TYPE_EVENT;
+            if (target == layoutType) return;
+            // Se deja correr el deslizamiento de la píldora antes de re-inflar el formulario.
+            long delay = Motion.enabled(this) ? 280L : 0L;
+            view.postDelayed(() -> {
+                if (!isFinishing() && target != layoutType) switchLayout(target);
+            }, delay);
+        });
+
+        formErrorView = findViewById(R.id.form_error);
+        findViewById(R.id.form_shortcut_today).setOnClickListener(v -> applyShortcut(0));
+        findViewById(R.id.form_shortcut_tomorrow).setOnClickListener(v -> applyShortcut(1));
+        findViewById(R.id.form_shortcut_plus_hour).setOnClickListener(v -> applyShortcut(-1));
+
+        titleView.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) { }
+            @Override public void onTextChanged(CharSequence s, int st, int b, int c) { }
+            @Override public void afterTextChanged(Editable s) { renderForm(); }
+        });
+        renderForm();
+    }
+
+    /** 0 = hoy, 1 = mañana (fecha de inicio); -1 = inicio dentro de 1 h. Un evento conserva su duración. */
+    private void applyShortcut(int daysFromToday) {
+        long duration = Math.max(0L, formEnd.getTimeInMillis() - formStart.getTimeInMillis());
+        Calendar now = Calendar.getInstance();
+        if (daysFromToday < 0) {
+            now.add(Calendar.HOUR_OF_DAY, 1);
+            now.set(Calendar.SECOND, 0);
+            now.set(Calendar.MILLISECOND, 0);
+            formStart.setTimeInMillis(now.getTimeInMillis());
+        } else {
+            now.add(Calendar.DAY_OF_MONTH, daysFromToday);
+            formStart.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
+        }
+        formEnd.setTimeInMillis(formStart.getTimeInMillis() + duration);
+        renderForm();
+    }
+
+    /** Pinta fechas y horas, muestra el error de fin anterior al inicio y habilita "Guardar". */
+    private void renderForm() {
+        if (startDateView == null || formStart == null) return;
+        startDateView.setText(formatDate(formStart));
+        startTimeView.setText(formatTime(formStart));
+        boolean hasEnd = endDateView != null && endTimeView != null;
+        if (hasEnd) {
+            endDateView.setText(formatDate(formEnd));
+            endTimeView.setText(formatTime(formEnd));
+        }
+        EventFormValidator.Result result = EventFormValidator.validate(
+                titleView != null ? titleView.getText().toString() : "",
+                hasEnd, formStart.getTimeInMillis(), formEnd.getTimeInMillis());
+        if (formErrorView != null) {
+            formErrorView.setVisibility(result.endBeforeStart ? View.VISIBLE : View.GONE);
+        }
+        if (saveButton != null) {
+            saveButton.setEnabled(result.canSave());
+            saveButton.setAlpha(result.canSave() ? 1f : 0.4f);
+        }
+    }
+
+    private String formatDate(Calendar c) {
+        return DateUtils.formatDateTime(this, c.getTimeInMillis(),
+                DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_ALL);
+    }
+
+    private String formatTime(Calendar c) {
+        return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(c.getTime());
     }
 
 
@@ -370,8 +435,9 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         // quedaría a 0 — invisible para todas las queries por rango (mes del calendario y
         // lista de Home). Por defecto: la fecha que ya muestra el formulario (localCalendar,
         // preseleccionada o "ahora").
-        if (eventBuilder.getEventStartDayAndHour() == null) {
-            eventBuilder.setEventStartDayAndHour(localCalendar);
+        eventBuilder.setEventStartDayAndHour((Calendar) formStart.clone());
+        if (layoutType == TYPE_EVENT) {
+            eventBuilder.setEventEndDayAndHour((Calendar) formEnd.clone());
         }
 
         if(layoutType==AddEventActivity.TYPE_TASK){
@@ -465,74 +531,35 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     }
 
     private void openHourPicker(int type){
-        Calendar calendar = Calendar.getInstance();
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-
+        final Calendar target = type == START ? formStart : formEnd;
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, R.style.Theme_BBetter_PickerDialog,
-                new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        // Manejar la selección de la fecha aquí
-                        Log.i(TAG, "onDateSet: " + hourOfDay + ":" + minute);
-                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        calendar.set(Calendar.MINUTE,minute);
-                        updateHourLabel(calendar, type);
+                (view, hourOfDay, minute) -> {
+                    Log.i(TAG, "onTimeSet: " + hourOfDay + ":" + minute);
+                    long duration = Math.max(0L, formEnd.getTimeInMillis() - formStart.getTimeInMillis());
+                    target.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    target.set(Calendar.MINUTE, minute);
+                    if (type == START) {
+                        formEnd.setTimeInMillis(formStart.getTimeInMillis() + duration);
                     }
-                }, hour, minute, true);
+                    renderForm();
+                }, target.get(Calendar.HOUR_OF_DAY), target.get(Calendar.MINUTE), true);
         timePickerDialog.show();
     }
 
     private void openDatePicker(int type){
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
+        final Calendar target = type == START ? formStart : formEnd;
         DatePickerDialog datePickerDialog = new DatePickerDialog(this, R.style.Theme_BBetter_PickerDialog,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        // Manejar la selección de la fecha aquí
-                        Log.i(TAG, "onDateSet: " + dayOfMonth + "/" + month + "/" + year);
-                        calendar.set(Calendar.YEAR, year);
-                        calendar.set(Calendar.MONTH,month);
-                        calendar.set(Calendar.DAY_OF_MONTH,dayOfMonth);
-                         updateDateLabel(calendar, type);
+                (view, year, month, dayOfMonth) -> {
+                    Log.i(TAG, "onDateSet: " + dayOfMonth + "/" + month + "/" + year);
+                    long duration = Math.max(0L, formEnd.getTimeInMillis() - formStart.getTimeInMillis());
+                    target.set(year, month, dayOfMonth);
+                    if (type == START) {
+                        // El fin acompaña al inicio conservando la duración.
+                        formEnd.setTimeInMillis(formStart.getTimeInMillis() + duration);
                     }
-                }, year, month, day);
+                    renderForm();
+                }, target.get(Calendar.YEAR), target.get(Calendar.MONTH), target.get(Calendar.DAY_OF_MONTH));
         datePickerDialog.show();
-    }
-
-    private void updateDateLabel(Calendar calendar, int type){
-        String myFormat="dd/MM/yy";
-        Log.i(TAG, "day and hour: "+new SimpleDateFormat("dd/MM/yyyy HH:mm").format(calendar.getTime()));
-        SimpleDateFormat dateFormat=new SimpleDateFormat(myFormat, Locale.getDefault());
-        if(type== START) {
-            eventBuilder.setEventStartDay(calendar);
-            startDateView.setText(DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar.getTime()));
-            //startDateView.setText(dateFormat.format(calendar.getTime()));
-        }else if(type == END){
-            eventBuilder.setEventEndDay(calendar);
-            if(endDateView!=null)
-                endDateView.setText(FormatHelper.formatDateToDateString(calendar));
-        }
-    }
-
-    private void updateHourLabel(Calendar calendar, int type){
-        String myFormat="HH:mm";
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        String time = sdf.format(calendar.getTime());
-        Log.i(TAG, "time: "+ time);
-        SimpleDateFormat dateFormat=new SimpleDateFormat(myFormat, Locale.getDefault());
-        if(type== START) {
-            eventBuilder.setEventStartHour(calendar);
-            startTimeView.setText(dateFormat.format(calendar.getTime()));
-        }else if(type == END){
-            eventBuilder.setEventEndHour(calendar);
-            if(endTimeView!=null)
-                endTimeView.setText(dateFormat.format(calendar.getTime()));
-        }
     }
 
     //Retorno del popup NotificationsPopup, guarda las notificaciones y coloca sus nuevas vistas
@@ -593,10 +620,6 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
             openDatePicker(END);
         } else if (id == R.id.event_end_hour) {
             openHourPicker(END);
-        } else if (id == R.id.switch_to_event_button) {
-            switchLayout(TYPE_EVENT);
-        } else if (id == R.id.switch_to_task_button) {
-            switchLayout(TYPE_TASK);
         }
 
         if(view.getId()==notificationsView.getId()){
@@ -618,10 +641,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
             titleView.setText(eventBuilder.getEventTitle());
         if (eventBuilder.getEventDescription()!=null)
             descriptionView.setText(eventBuilder.getEventDescription());
-        if(eventBuilder.getEventStartDayAndHour()!=null && eventBuilder.getEventStartDayAndHour().isSet(Calendar.DAY_OF_MONTH))  //todo error per aqui
-            startDateView.setText(FormatHelper.formatDateToDateString(eventBuilder.getEventStartDayAndHour()));
-        if(eventBuilder.getEventStartDayAndHour() !=null && eventBuilder.getEventStartDayAndHour().isSet(Calendar.HOUR_OF_DAY))
-            startTimeView.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(eventBuilder.getEventStartDayAndHour().getTime()));
+        renderForm();
 
 
         //todo guillem: probablemente haya un fallo si la pantalla ya tenía layouts de notificaciones. Habrá que eliminarlas y recrearlas al cambiar.

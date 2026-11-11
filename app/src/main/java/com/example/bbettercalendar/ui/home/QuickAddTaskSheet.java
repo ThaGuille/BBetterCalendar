@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +56,9 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     private TextView repeatButton;
     private int selectedHour = -1;
     private int selectedMinute = -1;
+    // u14: atajos de fecha. 0 = hoy, 1 = mañana (la hora elegida se conserva).
+    private int dayOffset = 0;
+    private View saveButton;
     private final RepetitionPopup repetitionPopup = new RepetitionPopup();
     private RepetitionSpec repetitionSpec = RepetitionSpec.none();
     // 0 = alta normal desde Home; si no, el proyecto dueño del item (spec projects-mvp).
@@ -113,7 +118,20 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
 
         timeButton.setOnClickListener(v -> showTimePicker());
         repeatButton.setOnClickListener(v -> showRepeatPicker());
-        view.findViewById(R.id.quickAddSaveButton).setOnClickListener(v -> save());
+        saveButton = view.findViewById(R.id.quickAddSaveButton);
+        saveButton.setOnClickListener(v -> save());
+        view.findViewById(R.id.quickAddShortcutToday).setOnClickListener(v -> setDayOffset(0));
+        view.findViewById(R.id.quickAddShortcutTomorrow).setOnClickListener(v -> setDayOffset(1));
+        view.findViewById(R.id.quickAddShortcutPlusHour).setOnClickListener(v -> setInOneHour());
+        // "Guardar" queda desactivado hasta que haya título.
+        saveButton.setEnabled(false);
+        titleInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) { }
+            @Override public void onTextChanged(CharSequence s, int st, int b, int c) { }
+            @Override public void afterTextChanged(Editable s) {
+                saveButton.setEnabled(s.toString().trim().length() > 0);
+            }
+        });
         view.findViewById(R.id.quickAddMoreOptionsButton).setOnClickListener(v -> openMoreOptions());
 
         repetitionPopup.setOnPopupListener(this);
@@ -139,6 +157,21 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
             behavior.setSkipCollapsed(true);
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
+    }
+
+    private void setDayOffset(int offset) {
+        dayOffset = offset;
+    }
+
+    /** "+1 h": hora = ahora + 1 h; si cruza la medianoche cuenta como mañana. */
+    private void setInOneHour() {
+        Calendar now = Calendar.getInstance();
+        int today = now.get(Calendar.DAY_OF_YEAR);
+        now.add(Calendar.HOUR_OF_DAY, 1);
+        selectedHour = now.get(Calendar.HOUR_OF_DAY);
+        selectedMinute = now.get(Calendar.MINUTE);
+        dayOffset = now.get(Calendar.DAY_OF_YEAR) != today ? 1 : 0;
+        timeButton.setText(String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute));
     }
 
     private void showTimePicker() {
@@ -188,6 +221,7 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
         }
 
         Calendar start = Calendar.getInstance();
+        start.add(Calendar.DAY_OF_MONTH, dayOffset);
         // Sin hora elegida la tarea queda a las 00:00 de hoy (la lista no muestra esa hora).
         start.set(Calendar.HOUR_OF_DAY, Math.max(selectedHour, 0));
         start.set(Calendar.MINUTE, Math.max(selectedMinute, 0));
@@ -217,9 +251,10 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     // a diferencia del alta normal de Home que siempre lo fecha a hoy.
     private void saveProjectItem(String title) {
         Calendar start = null;
-        if (selectedHour >= 0) {
+        if (selectedHour >= 0 || dayOffset > 0) {
             start = Calendar.getInstance();
-            start.set(Calendar.HOUR_OF_DAY, selectedHour);
+            start.add(Calendar.DAY_OF_MONTH, dayOffset);
+            start.set(Calendar.HOUR_OF_DAY, Math.max(selectedHour, 0));
             start.set(Calendar.MINUTE, Math.max(selectedMinute, 0));
             start.set(Calendar.SECOND, 0);
             start.set(Calendar.MILLISECOND, 0);
@@ -249,6 +284,7 @@ public class QuickAddTaskSheet extends BottomSheetDialogFragment implements OnPo
     // con estos millis, hora incluida).
     private long preselectedDateMillis() {
         Calendar start = Calendar.getInstance();
+        start.add(Calendar.DAY_OF_MONTH, dayOffset);
         if (selectedHour >= 0) {
             start.set(Calendar.HOUR_OF_DAY, selectedHour);
             start.set(Calendar.MINUTE, Math.max(selectedMinute, 0));

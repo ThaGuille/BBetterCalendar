@@ -1,19 +1,19 @@
 package com.example.bbettercalendar.popups;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
+import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.R;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.WeeklyGoalStore;
@@ -55,7 +55,7 @@ import dagger.hilt.android.AndroidEntryPoint;
  * {@link WeeklyGoalStore}; todas las pantallas de racha lo observan y se recalculan solas.
  */
 @AndroidEntryPoint
-public class FocusStreakPopup extends DialogFragment {
+public class FocusStreakPopup extends BottomSheetDialogFragment {
 
     public static final String POPUP_TAG = "focus_streak_popup";
 
@@ -76,13 +76,11 @@ public class FocusStreakPopup extends DialogFragment {
     private TextView monthTitle;
     private final StreakDayBinder dayBinder = new StreakDayBinder();
 
-    @NonNull
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity(), R.style.RoundedDialog);
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.popup_focus_streak, null);
-        builder.setView(view);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.popup_focus_streak, container, false);
 
         summaryText = view.findViewById(R.id.streakSummaryText);
         monthTitle = view.findViewById(R.id.streakMonthTitle);
@@ -94,7 +92,7 @@ public class FocusStreakPopup extends DialogFragment {
         setUpGoal(view);
         loadDays();
 
-        return builder.create();
+        return view;
     }
 
     /** Mismos nombres de día (y mismo primer día de semana) que la pantalla de calendario. */
@@ -143,11 +141,8 @@ public class FocusStreakPopup extends DialogFragment {
         StepperView stepper = root.findViewById(R.id.streakGoalStepper);
         Integer current = weeklyGoalStore.observeGoal().getValue();
         stepper.setValue(current != null ? current : WeeklyGoalStore.DEFAULT_GOAL);
-        // Un DialogFragment creado con onCreateDialog no tiene vista propia: se observa con el
-        // propio fragment, que vive lo mismo que el diálogo. onCreateDialog se repite al recrear
-        // el diálogo con el mismo fragment: se quita antes el observador del stepper anterior.
-        weeklyGoalStore.observeGoal().removeObservers(this);
-        weeklyGoalStore.observeGoal().observe(this, goal -> {
+        // Hoja inferior (u14): tiene vista propia, se observa con su ciclo de vida.
+        weeklyGoalStore.observeGoal().observe(getViewLifecycleOwner(), goal -> {
             if (goal != null && goal != stepper.getValue()) {
                 stepper.setValue(goal);
             }
@@ -240,5 +235,11 @@ public class FocusStreakPopup extends DialogFragment {
                 this.today = view.findViewById(R.id.streakDayToday);
             }
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        SheetBehavior.expand(getDialog());
     }
 }

@@ -15,6 +15,8 @@
         android:paddingEnd="@dimen/spacing_md"
         android:paddingBottom="@dimen/spacing_md">
 
+        <include layout="@layout/view_sheet_handle" />
+
         <!-- Header -->
         <LinearLayout
             android:id="@+id/notifications_popup_header"
@@ -40,21 +42,6 @@
                 android:layout_weight="1"
                 android:text="@string/notifications_popup_title"
                 android:textAppearance="@style/TextAppearance.BBetter.Title" />
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnSaveNotificationsPopup"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_save_pill"
-                android:minWidth="88dp"
-                android:minHeight="0dp"
-                android:paddingStart="@dimen/spacing_md"
-                android:paddingEnd="@dimen/spacing_md"
-                android:stateListAnimator="@null"
-                android:text="@string/create_entry_btn_save"
-                android:textAllCaps="false"
-                android:textAppearance="@style/TextAppearance.BBetter.Label"
-                android:textColor="@color/bb_on_primary" />
         </LinearLayout>
 
         <!-- Rows -->
@@ -260,5 +247,13 @@
                     android:textOn="" />
             </LinearLayout>
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveNotificationsPopup"
+            style="@style/Widget.BBetter.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:text="@string/create_entry_btn_save" />
     </LinearLayout>
 </ScrollView>

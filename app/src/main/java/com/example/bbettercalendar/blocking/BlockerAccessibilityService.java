@@ -16,12 +16,14 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.widget.ProgressRingView;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.stats.AppRule;
@@ -170,7 +172,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
             mainHandler.post(() -> {
                 if (destroyed) return;
                 if (decision.block) {
-                    showCover(fg, decision.usedMillis, decision.focusMode);
+                    showCover(fg, decision.usedMillis, decision.focusMode, decision.limitMinutes);
                 } else if (coveredPackage != null && !coveredPackage.equals(fg)) {
                     // El usuario salió de la app cubierta (inicio / otra app) -> retirar la portada.
                     removeCover();
@@ -250,7 +252,7 @@ public class BlockerAccessibilityService extends AccessibilityService {
 
     // --- portada de bloqueo ---
 
-    private void showCover(String packageName, long usedMillis, boolean focusMode) {
+    private void showCover(String packageName, long usedMillis, boolean focusMode, int limitMinutes) {
         if (coverView != null) {
             if (packageName.equals(coveredPackage)) return; // ya cubierta
             removeCover();
@@ -263,15 +265,35 @@ public class BlockerAccessibilityService extends AccessibilityService {
 
         TextView label = view.findViewById(R.id.block_cover_app_label);
         label.setText(labelFor(packageName));
+        ImageView appIcon = view.findViewById(R.id.block_cover_app_icon);
+        try {
+            appIcon.setImageDrawable(getPackageManager().getApplicationIcon(packageName));
+        } catch (PackageManager.NameNotFoundException e) {
+            appIcon.setVisibility(View.GONE);
+        }
         TextView title = view.findViewById(R.id.block_cover_title);
         TextView subtitle = view.findViewById(R.id.block_cover_subtitle);
+        TextView note = view.findViewById(R.id.block_cover_note);
+        ProgressRingView ring = view.findViewById(R.id.block_cover_ring);
         if (focusMode) {
             title.setText(R.string.block_cover_focus_title);
             subtitle.setText(R.string.block_cover_focus_subtitle);
+            note.setText(R.string.block_cover_finish_pomodoro);
+            ring.setVisibility(View.GONE);
         } else {
             title.setText(R.string.block_cover_title);
-            subtitle.setText(getString(R.string.block_cover_subtitle,
-                    FormatHelper.formatDuration(usedMillis)));
+            if (limitMinutes > 0) {
+                subtitle.setText(getString(R.string.block_cover_usage_of_limit,
+                        FormatHelper.formatDuration(usedMillis),
+                        FormatHelper.formatDuration(limitMinutes * 60_000L)));
+                long pct = Math.min(100L, usedMillis * 100L / (limitMinutes * 60_000L));
+                ring.setProgress((int) pct, true);
+            } else {
+                subtitle.setText(getString(R.string.block_cover_subtitle,
+                        FormatHelper.formatDuration(usedMillis)));
+                ring.setVisibility(View.GONE);
+            }
+            note.setText(R.string.block_cover_available_tomorrow);
         }
         view.findViewById(R.id.block_cover_close).setOnClickListener(v -> {
             removeCover();

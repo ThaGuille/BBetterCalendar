@@ -4,5 +4,6 @@
     <dimen name="splash_logo_size">160dp</dimen>
     <dimen name="app_pick_row_gap">8dp</dimen>
     <dimen name="app_pick_icon_size">40dp</dimen>
-    <dimen name="block_cover_icon_size">72dp</dimen>
+    <dimen name="block_cover_icon_size">64dp</dimen>
+    <dimen name="block_cover_ring_size">132dp</dimen>
 </resources>

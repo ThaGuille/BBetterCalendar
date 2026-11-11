@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u14: hojas inferiores, formularios de evento / tarea, bloqueo de una app. -->
+<resources>
+    <!-- Timer presets: focus / rest minutes -->
+    <string name="timer_preset_25" translatable="false">25 / 5</string>
+    <string name="timer_preset_50" translatable="false">50 / 10</string>
+    <string name="timer_preset_90" translatable="false">90 / 15</string>
+
+    <!-- Event / task form -->
+    <string name="form_starts">Starts</string>
+    <string name="form_ends">Ends</string>
+    <string name="form_shortcut_today">Today</string>
+    <string name="form_shortcut_tomorrow">Tomorrow</string>
+    <string name="form_shortcut_plus_hour">+1 h</string>
+    <string name="form_error_end_before_start">The end can\'t be before the start.</string>
+
+    <string-array name="form_type_entries">
+        <item>@string/create_entry_segment_event</item>
+        <item>@string/create_entry_segment_task</item>
+        <item>@string/create_entry_segment_reminder</item>
+    </string-array>
+
+    <!-- App block cover (one-app block) -->
+    <string name="block_cover_available_tomorrow">Available again tomorrow</string>
+    <string name="block_cover_finish_pomodoro">Finish your pomodoro to use it</string>
+    <string name="block_cover_usage_of_limit">%1$s of %2$s</string>
+</resources>

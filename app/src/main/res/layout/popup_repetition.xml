@@ -11,6 +11,8 @@
     android:paddingEnd="@dimen/spacing_md"
     android:paddingBottom="@dimen/spacing_md">
 
+    <include layout="@layout/view_sheet_handle" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -271,23 +273,12 @@
             android:focusable="false" />
     </LinearLayout>
 
-    <TextView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/repetition_popup_confirm"
-        android:layout_width="wrap_content"
+        style="@style/Widget.BBetter.Button.Primary"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
         android:layout_marginTop="@dimen/spacing_md"
-        android:layout_marginEnd="@dimen/spacing_sm"
-        android:background="@drawable/bg_chip_energy"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:text="@string/repetition_popup_confirm"
-        android:textAppearance="@style/TextAppearance.BBetter.Chip"
-        android:textColor="@color/bb_on_primary" />
+        android:text="@string/repetition_popup_confirm" />
 
 </LinearLayout>

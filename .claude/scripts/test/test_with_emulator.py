@@ -97,6 +97,27 @@ with tempfile.TemporaryDirectory() as tmp:
     check('sister: a live lease of another unit is never taken', g.returncode == 3 and 'SERIAL' not in og, og + eg)
     (leases / 'emulator-5554.lock').unlink()
 
+    print('== six units race for one abandoned lease')
+    # Each run writes when it starts and ends: no two may hold the emulator at the same time.
+    marks = Path(tmp) / 'marks.txt'
+    HOLD = ("import sys,time; f=open(sys.argv[1],'a'); f.write('S %f\\n' % time.time()); f.flush(); "
+            "time.sleep(0.6); f.write('E %f\\n' % time.time()); f.close()")
+    overlaps = 0
+    ran = 0
+    for _ in range(3):
+        marks.write_text('')
+        (leases / 'emulator-5554.lock').write_text(f'ux 2026-01-01T00:00:00 pid={dead.pid}\n')
+        procs = [start(leases, 'emulator-5554', py(HOLD) + [str(marks)], f'r{i}', extra=['--timeout-min', '1']) for i in range(6)]
+        for q in procs:
+            q.communicate(timeout=90)
+        evs = sorted((float(l.split()[1]), l[0]) for l in marks.read_text().splitlines() if l)
+        depth = 0
+        for _, kind in evs:
+            depth += 1 if kind == 'S' else -1
+            overlaps += depth > 1
+        ran += sum(1 for _, kind in evs if kind == 'S')
+    check('all 18 commands ran, never two at once on the emulator', ran == 18 and overlaps == 0, f'ran={ran} overlaps={overlaps}')
+
     print('== ANDROID_SERIAL set and $BT_UNIT')
     h = start(leases, 'emulator-5554', py(SHOW), None, env={'ANDROID_SERIAL': 'emulator-5560'})
     oh, eh = h.communicate(timeout=30)

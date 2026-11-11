@@ -52,5 +52,9 @@ segundo emulador mientras corre: con dos conectados, su `adb shell …` a secas 
 - RAM: cada instancia usa 3 GB. Con 3 unidades y 2 daemons de Gradle cabe en 31 GB.
 - Dos unidades que lancen `avd-up -Count 2` a la vez pueden arrancar una tercera instancia. Sobra, pero no rompe
   nada: el lease reparte igual.
+- Lease abandonado con varias unidades a la vez (corregido el 2026-11-11): dos unidades que veían el mismo lease
+  muerto podían quedarse las dos con el emulador, y en Windows el borrado del lease fallaba con WinError 32 si otra
+  lo estaba leyendo. `with-emulator.py` ahora confirma el lease tras escribirlo y reintenta; el test lanza 6 a la vez.
+  `emulator-lease.ps1` / `.py` (lease a mano) no se han revisado para esa misma carrera.
 - Un `adb` a mano sin `ANDROID_SERIAL` falla con dos emuladores. Es intencionado: mejor un fallo ruidoso que tocar
   el emulador de otra unidad.

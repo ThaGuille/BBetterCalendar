@@ -87,15 +87,22 @@ def try_take(serial, unit, stale_min):
     cur = read(p)
     if cur and (cur[1] >= stale_min or (cur[2] is not None and not alive(cur[2]))):
         log(f'taking over the abandoned lease of {serial} (held by {cur[0]})')
-        p.unlink(missing_ok=True)
+        try:
+            p.unlink(missing_ok=True)
+        except OSError:
+            return False  # Windows: another caller has the file open right now; the next poll tries again
     try:
         # O_EXCL is atomic: exactly one caller wins when two race for the same emulator.
         fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-    except FileExistsError:
+    except OSError:  # it exists, or (Windows) it is being deleted or read by another caller
         return False
     with os.fdopen(fd, 'w') as f:
         f.write(f'{unit} {datetime.now().strftime("%Y-%m-%dT%H:%M:%S")} pid={os.getpid()}\n')
-    return True
+    # Two callers that saw the same abandoned lease can both delete it: the slower one then deletes the lease the
+    # faster one just wrote and writes its own. Look again after a moment: only the one still named in it holds it.
+    time.sleep(0.3)
+    cur = read(p)
+    return bool(cur) and cur[2] == os.getpid()
 
 
 def held_by(unit):
@@ -194,7 +201,12 @@ def main():
         stop.set()
         cur = read(lease)
         if cur and cur[0] == unit and cur[2] == os.getpid():
-            lease.unlink(missing_ok=True)
+            for _ in range(20):  # Windows refuses the delete while a waiting caller reads the file
+                try:
+                    lease.unlink(missing_ok=True)
+                    break
+                except OSError:
+                    time.sleep(0.1)
         log(f'{serial} released')
 
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- mejora-visual u5 · Frases de lectura de stats/InsightPhrases (solo con datos suficientes). -->
+<resources>
+    <string-array name="insight_weekdays_plural">
+        <item>los lunes</item>
+        <item>los martes</item>
+        <item>los miércoles</item>
+        <item>los jueves</item>
+        <item>los viernes</item>
+        <item>los sábados</item>
+        <item>los domingos</item>
+    </string-array>
+
+    <string name="insight_best_slot">Rindes más %1$s de %2$d a %3$d</string>
+    <string name="insight_completion">Completas el %1$d%% de tus sesiones</string>
+    <string name="insight_completion_up">Completas el %1$d%% de tus sesiones, %2$d puntos más que antes</string>
+    <string name="insight_completion_down">Completas el %1$d%% de tus sesiones, %2$d puntos menos que antes</string>
+    <string name="insight_peak_hour">Tu hora punta son las %1$d:00</string>
+    <string name="insight_suggested_limit">%1$s está entre tus apps más usadas (%2$d min al día) y no tiene límite</string>
+    <string name="insight_before_after">Desde el límite, %1$s pasó de %2$d a %3$d min al día</string>
+
+    <plurals name="insight_modal_duration">
+        <item quantity="one">Tu sesión habitual dura %1$d minuto</item>
+        <item quantity="other">Tu sesión habitual dura %1$d minutos</item>
+    </plurals>
+    <plurals name="insight_longest_session">
+        <item quantity="one">Tu sesión más larga: %1$d minuto</item>
+        <item quantity="other">Tu sesión más larga: %1$d minutos</item>
+    </plurals>
+    <plurals name="insight_weeks_above_average">
+        <item quantity="one">%1$d semana seguida por encima de tu media</item>
+        <item quantity="other">%1$d semanas seguidas por encima de tu media</item>
+    </plurals>
+    <plurals name="insight_recovered">
+        <item quantity="one">Has recuperado %1$d minuto</item>
+        <item quantity="other">Has recuperado %1$d minutos</item>
+    </plurals>
+    <plurals name="insight_focus_vs_phone">
+        <item quantity="one">Los días que te concentras usas el móvil %1$d minuto menos</item>
+        <item quantity="other">Los días que te concentras usas el móvil %1$d minutos menos</item>
+    </plurals>
+</resources>

@@ -98,15 +98,8 @@
         <attr name="appName" format="string" />
         <attr name="appIcon" format="reference" />
         <attr name="appUsage" format="string" />
-        <attr name="appProgress" format="integer" />
-        <attr name="appStatus" format="enum">
-            <enum name="none" value="0" />
-            <enum name="warning" value="1" />
-            <enum name="blocked" value="2" />
-        </attr>
         <attr name="appLocked" format="boolean" />
-        <!-- No limit set: hides the bar and shows the "Set limit" action. -->
-        <attr name="appNoLimit" format="boolean" />
+        <attr name="appSuggested" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="PeriodNavigatorView">

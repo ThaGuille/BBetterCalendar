@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen time (mejora-visual u9): chip "Anadir" de Siempre permitidas (borde discontinuo, mockup 21). -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <stroke
+                android:width="@dimen/screen_time_hairline"
+                android:color="@color/bb_primary"
+                android:dashGap="4dp"
+                android:dashWidth="4dp" />
+            <corners android:radius="@dimen/radius_pill" />
+        </shape>
+    </item>
+</ripple>

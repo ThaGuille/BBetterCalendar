@@ -19,6 +19,8 @@ import com.example.bbettercalendar.helpers.FontHelper;
 import com.example.bbettercalendar.stats.StreakCalculator;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.chart.ChartStyler;
+import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
+import com.example.bbettercalendar.ui.common.chart.LimitBarView;
 import com.example.bbettercalendar.ui.common.widget.AppUsageRowView;
 import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.SectionHeaderView;
@@ -226,16 +228,14 @@ public class DebugGalleryActivity extends AppCompatActivity {
 
     private void bindAppRows() {
         Drawable icon = getApplicationInfo().loadIcon(getPackageManager());
+        float[][] rows = {{52f, 60f}, {48f, 45f}, {44f, 0f}, {18f, 0f}};
         int[] ids = {R.id.galleryAppWarning, R.id.galleryAppBlocked, R.id.galleryAppOk, R.id.galleryAppNoLimit};
-        for (int id : ids) {
-            AppUsageRowView row = findViewById(id);
+        for (int i = 0; i < ids.length; i++) {
+            AppUsageRowView row = findViewById(ids[i]);
             row.setAppIcon(icon);
+            row.setBar(new LimitBarView.Data(rows[i][0], rows[i][1], 60f, ChartFormatter.MINUTES));
             row.setOnRowClickListener(r -> toast("Open detail"));
-            row.setOnLockChangeListener((r, locked) -> toast(locked ? "Locked" : "Unlocked"));
-            row.setOnSetLimitClickListener(r -> toast("Set limit"));
         }
-        AppUsageRowView blocked = findViewById(R.id.galleryAppBlocked);
-        blocked.setStatus(AppUsageRowView.Status.BLOCKED, "Blocked · 00:00");
     }
 
     private void bindPeriod() {

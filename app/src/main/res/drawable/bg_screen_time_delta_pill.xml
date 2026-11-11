@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen time (mejora-visual u9): pastilla del cambio frente al periodo anterior. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_primary_container" />
+    <corners android:radius="@dimen/radius_pill" />
+</shape>

@@ -147,15 +147,15 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
 ## Screen time (u19)
 
-- `screenTimeScreen`, `topBar`, `screenTimeScroll`, `screenTimeTileTracked`, `screenTimeTileLimit`, `screenTimeTileBlocked`, `screenTimeBlockedCount`.
-- `screenTimeHourCard`, `screenTimeHourChartHolder`; `screenTimeManageCard`, `screenTimeProtected`, `screenTimeBlockNew`, `screenTimeAppRows` (filas `appUsageName/Text/Bar/Lock/Chevron`), `screenTimeAppsEmpty`.
-- `screenTimeShieldCard`, `screenTimeShieldSwitch`, `screenTimeFooter`, `screenTimeFooterText`.
+- `screenTimeScreen`, `topBar`, `screenTimeScroll`.
+- (u9) `screenTimeShieldCard`, `screenTimeShieldSwitch`, `screenTimeAllowedRow` (`screenTimeAllowedCount`, `screenTimeAllowedEdit`); `screenTimePeriod` (Semana / Mes); `screenTimeUsageCard` (`screenTimeUsageSubtitle`, `screenTimeAvgValue`, `screenTimeAvgDelta`, `screenTimeAppRows` with rows `appUsageIcon/Name/LockIcon/Suggested/Text/Bar`, `screenTimeAppsEmpty`, `screenTimeUsageLegend`, `screenTimeBlockNew` = "Limitar otra app"); `screenTimeDailyCard` (`screenTimeDailyChart`, `screenTimeDailyLegend`, `screenTimeDailySentence`); `screenTimeBeforeAfterCard` (`screenTimeBeforeAfterRows`, `screenTimeBeforeAfterEmpty`, `screenTimeBeforeAfterSentence`); `screenTimeAllowedCard` (`screenTimeAllowedChips`, `screenTimeAllowedAdd`).
+- `screenTimeFooter`, `screenTimeFooterIcon`, `screenTimeFooterText`.
 
 ## App detail (u20)
 
 - `appDetailScreen`, `appDetailHeader`, `appDetailBack`, `appDetailIcon`, `appDetailName`, `appDetailSubtitle`, `appDetailScroll`, `appDetailPeriod`.
-- `appDetailTileToday`, `appDetailTileAvg`, `appDetailTileBlocked`, `appDetailBlockedCount`.
-- `appDetailChartCard`, `appDetailChartTitle`, `appDetailChartHolder`.
+- `appDetailTileToday`, `appDetailTileAvg` (the blocked-opens tile was removed in u9).
+- `appDetailChartCard`, `appDetailChartTitle`, `appDetailChart` (CompareBarsView, replaces `appDetailChartHolder`).
 - `appDetailLimitCard`, `appDetailLimitSubtitle`, `appDetailLimitBadge`, `appDetailStepper` (`stepperMinus/stepperPlus/stepperValue`), `appDetailPresets`, `appDetailPreset30/45/60/None`.
 - `appDetailProtectCard`, `appDetailWarnRow`, `appDetailWarnValue`, `appDetailBlockSwitch`, `appDetailA11yStatus/Dot/Text`, `appDetailStopTracking`.
 

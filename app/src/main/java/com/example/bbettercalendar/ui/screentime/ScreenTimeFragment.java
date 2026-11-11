@@ -3,25 +3,26 @@ package com.example.bbettercalendar.ui.screentime;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
+import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
-
-import android.content.res.ColorStateList;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
@@ -29,64 +30,70 @@ import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.blocking.BlockingSettings;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.TopBarHelper;
-import com.example.bbettercalendar.ui.common.chart.ChartStyler;
+import com.example.bbettercalendar.ui.common.chart.ChartFormat;
+import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
+import com.example.bbettercalendar.ui.common.chart.DumbbellRowView;
+import com.example.bbettercalendar.ui.common.chart.LimitBarView;
+import com.example.bbettercalendar.ui.common.chart.StackedBarsView;
 import com.example.bbettercalendar.ui.common.widget.AppUsageRowView;
-import com.example.bbettercalendar.ui.common.widget.StatTileView;
-import com.example.bbettercalendar.ui.common.widget.WidgetTone;
+import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.progress.UsageDisclosureDialog;
 import com.example.bbettercalendar.ui.progress.apppicker.AppPickerActivity;
 import com.example.bbettercalendar.usage.UsageAccess;
-import com.github.mikephil.charting.charts.CombinedChart;
-import com.github.mikephil.charting.data.CombinedData;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
-import java.util.ArrayList;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * u19: Screen time &amp; blocking ({@code navigation_screen_time}, html 14): 3 tiles, "Today by hour"
- * (usage line + FOCUS bands), "Manage your apps" ({@link AppUsageRowView} rows: lock =
- * {@code enforceAtLimit}, row / chevron = app detail, "Block a new app" = picker), "Focus shield"
- * and the permissions footer. Top bar with back; no bottom nav (MainActivity hides it).
+ * Screen time ({@code navigation_screen_time}, mockups 20 and 21), in this order: focus shield (with the
+ * "N apps always allowed" row), Week / Month, usage per app ({@link AppUsageRowView} rows; tap = app detail,
+ * "Limit another app" = picker), day by day ({@link StackedBarsView}), before and after the limit
+ * ({@link DumbbellRowView}), always allowed (content in the allow-list step) and the permissions footer.
+ * Top bar with back; no bottom nav (MainActivity hides it).
  */
 @AndroidEntryPoint
 public class ScreenTimeFragment extends Fragment
         implements AccessibilityDisclosureDialog.OnConsentGrantedListener,
         InsetsHelper.OwnsBottomInset {
 
-    // PLACEHOLDER(ui-placeholders#screen-time-blocked-opens): no se cuentan aperturas bloqueadas.
-    private static final int MOCK_BLOCKED_OPENS = 23;
-
     private static final String DISCLOSURE_TAG = "accessibility_disclosure";
     private static final String USAGE_DISCLOSURE_TAG = "usage_disclosure";
+    private static final int[] DAILY_COLORS = {
+            R.color.bb_cat_1, R.color.bb_cat_2, R.color.bb_cat_3, R.color.bb_cat_4};
 
     private ScreenTimeViewModel viewModel;
     private FocusSessionViewModel session;
-    private ChartStyler styler;
 
-    private StatTileView tileTracked;
-    private StatTileView tileLimit;
-    private TextView blockedCount;
-    private FrameLayout chartHolder;
-    private CombinedChart chart;
-    private TextView protectedCount;
+    private SwitchMaterial shieldSwitch;
+    private TextView allowedCount;
+    private SegmentedControlView period;
+    private TextView usageSubtitle;
+    private TextView avgValue;
+    private TextView avgDelta;
     private LinearLayout appRows;
     private TextView appsEmpty;
-    private SwitchMaterial shieldSwitch;
+    private StackedBarsView dailyChart;
+    private ViewGroup dailyLegend;
+    private View dailySentence;
+    private TextView dailySentenceText;
+    private LinearLayout beforeAfterRows;
+    private TextView beforeAfterEmpty;
+    private View beforeAfterLegend;
+    private View beforeAfterSentence;
+    private TextView beforeAfterSentenceText;
     private View footer;
     private ImageView footerIcon;
     private TextView footerText;
 
     private boolean bindingShield;
-    // Consentimiento de accesibilidad en curso: el candado de esta app, o el escudo.
-    @Nullable private String pendingEnforcePackage;
+    // Consentimiento de accesibilidad en curso para encender el escudo.
     private boolean pendingShield;
 
     public ScreenTimeFragment() {
@@ -101,22 +108,27 @@ public class ScreenTimeFragment extends Fragment
 
         viewModel = new ViewModelProvider(this).get(ScreenTimeViewModel.class);
         session = new ViewModelProvider(requireActivity()).get(FocusSessionViewModel.class);
-        styler = new ChartStyler(requireContext());
 
-        tileTracked = view.findViewById(R.id.screenTimeTileTracked);
-        tileLimit = view.findViewById(R.id.screenTimeTileLimit);
-        blockedCount = view.findViewById(R.id.screenTimeBlockedCount);
-        chartHolder = view.findViewById(R.id.screenTimeHourChartHolder);
-        protectedCount = view.findViewById(R.id.screenTimeProtected);
+        shieldSwitch = view.findViewById(R.id.screenTimeShieldSwitch);
+        allowedCount = view.findViewById(R.id.screenTimeAllowedCount);
+        period = view.findViewById(R.id.screenTimePeriod);
+        usageSubtitle = view.findViewById(R.id.screenTimeUsageSubtitle);
+        avgValue = view.findViewById(R.id.screenTimeAvgValue);
+        avgDelta = view.findViewById(R.id.screenTimeAvgDelta);
         appRows = view.findViewById(R.id.screenTimeAppRows);
         appsEmpty = view.findViewById(R.id.screenTimeAppsEmpty);
-        shieldSwitch = view.findViewById(R.id.screenTimeShieldSwitch);
+        dailyChart = view.findViewById(R.id.screenTimeDailyChart);
+        dailyLegend = view.findViewById(R.id.screenTimeDailyLegend);
+        dailySentence = view.findViewById(R.id.screenTimeDailySentence);
+        dailySentenceText = view.findViewById(R.id.screenTimeDailySentenceText);
+        beforeAfterRows = view.findViewById(R.id.screenTimeBeforeAfterRows);
+        beforeAfterEmpty = view.findViewById(R.id.screenTimeBeforeAfterEmpty);
+        beforeAfterLegend = view.findViewById(R.id.screenTimeBeforeAfterLegend);
+        beforeAfterSentence = view.findViewById(R.id.screenTimeBeforeAfterSentence);
+        beforeAfterSentenceText = view.findViewById(R.id.screenTimeBeforeAfterSentenceText);
         footer = view.findViewById(R.id.screenTimeFooter);
         footerIcon = view.findViewById(R.id.screenTimeFooterIcon);
         footerText = view.findViewById(R.id.screenTimeFooterText);
-
-        tileTracked.setDeltaChip(false);
-        blockedCount.setText(String.valueOf(MOCK_BLOCKED_OPENS));
 
         view.findViewById(R.id.screenTimeBlockNew).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), AppPickerActivity.class)));
@@ -124,6 +136,8 @@ public class ScreenTimeFragment extends Fragment
             if (!bindingShield) onShieldToggled(checked);
         });
         footer.setOnClickListener(v -> onFooterTapped());
+        period.setOnSegmentSelectedListener((v, index) -> viewModel.setMonth(index == 1));
+        period.setSelectedIndex(viewModel.isMonth() ? 1 : 0);
 
         viewModel.getState().observe(getViewLifecycleOwner(), this::render);
     }
@@ -141,144 +155,73 @@ public class ScreenTimeFragment extends Fragment
 
     private void render(@Nullable ScreenTimeState s) {
         if (s == null || getView() == null) return;
-        renderTiles(s);
-        renderHourChart(s);
-        renderApps(s);
+        allowedCount.setText(getResources().getQuantityString(
+                R.plurals.screen_time_allowed_count, s.allowedCount, s.allowedCount));
+        renderUsage(s);
+        renderDaily(s);
+        renderBeforeAfter(s);
         renderFooter();
     }
 
-    private void renderTiles(ScreenTimeState s) {
-        if (!s.usageAccess) {
-            tileTracked.setValue(getString(R.string.screen_time_value_none));
-            tileTracked.clearDelta();
-        } else {
-            tileTracked.setValue(formatMillis(s.trackedMillis));
-            if (s.hasAverage && s.deltaPercentVsAverage != 0) {
-                boolean down = s.deltaPercentVsAverage < 0;
-                tileTracked.setDelta(getString(R.string.screen_time_delta_vs_avg,
-                                Math.abs(s.deltaPercentVsAverage)),
-                        down ? StatTileView.Trend.DOWN : StatTileView.Trend.UP,
-                        down ? WidgetTone.PRIMARY : WidgetTone.DANGER);
-            } else {
-                tileTracked.clearDelta();
-            }
-        }
+    // ---- 3. Uso por app
 
-        if (s.totalLimitMinutes > 0) {
-            tileLimit.setValue(formatMillis(s.totalLimitMinutes * 60_000L));
-            tileLimit.setProgress(s.limitPercent());
-            tileLimit.setSub(getString(R.string.screen_time_limit_reached, s.limitPercent()));
-        } else {
-            tileLimit.setValue(getString(R.string.screen_time_value_none));
-            tileLimit.setProgress(-1);
-            tileLimit.setSub(getString(R.string.screen_time_limit_none));
-        }
-    }
+    private void renderUsage(ScreenTimeState s) {
+        usageSubtitle.setText(s.month ? R.string.screen_time_usage_subtitle_month
+                : R.string.screen_time_usage_subtitle_week);
+        boolean hasData = !s.apps.isEmpty();
+        avgValue.setText(hasData ? spannedDuration(s.avgMinutesPerDay)
+                : getString(R.string.screen_time_value_none));
+        renderDelta(s, hasData);
 
-    // Usage line (minutos por hora) + bandas FOCUS, como el grafico de html 14.
-    private void renderHourChart(ScreenTimeState s) {
-        if (chart == null) {
-            chart = new CombinedChart(requireContext());
-            chartHolder.addView(chart, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        }
-        List<Entry> line = new ArrayList<>(24);
-        int peak = 0;
-        float max = 0f;
-        for (int h = 0; h < s.hourMillis.length; h++) {
-            float minutes = s.hourMillis[h] / 60_000f;
-            line.add(new Entry(h, minutes));
-            if (minutes > max) {
-                max = minutes;
-                peak = h;
-            }
-        }
-        LineDataSet usage = styler.styleUsageLine(new LineDataSet(line, getString(R.string.screen_time_legend_usage)));
-        if (max > 0f) {
-            styler.markEntry(usage.getEntryForIndex(peak));
-            usage.setDrawIcons(true);
-        }
-        float top = ChartStyler.niceMax(Math.max(max, 10f));
-
-        CombinedData data = new CombinedData();
-        data.setData(new LineData(usage));
-        data.setData(styler.focusBandsData(s.focusHours, top));
-        styler.styleBandsChart(chart);
-        chart.setData(data);
-        styler.styleChart(chart, hourLabels());
-        styler.fitYAxis(chart, top);
-        chart.getAxisRight().setDrawLabels(false);
-        chart.getXAxis().setLabelCount(24, false);
-        chart.getXAxis().setAxisMinimum(-0.5f);
-        chart.getXAxis().setAxisMaximum(23.5f);
-        chart.getXAxis().setAvoidFirstLastClipping(true);
-        chart.notifyDataSetChanged();
-        chart.invalidate();
-    }
-
-    // 00:00 06:00 12:00 18:00 24:00 (la ultima franja, 23, hace de borde final del dia).
-    private static String[] hourLabels() {
-        String[] labels = new String[24];
-        for (int h = 0; h < labels.length; h++) {
-            labels[h] = "";
-        }
-        labels[0] = "00:00";
-        labels[6] = "06:00";
-        labels[12] = "12:00";
-        labels[18] = "18:00";
-        labels[23] = "24:00";
-        return labels;
-    }
-
-    private void renderApps(ScreenTimeState s) {
-        protectedCount.setText(getResources().getQuantityString(
-                R.plurals.screen_time_protected, s.enforcedCount, s.enforcedCount));
         appRows.removeAllViews();
-        appsEmpty.setVisibility(s.apps.isEmpty() ? View.VISIBLE : View.GONE);
+        appsEmpty.setVisibility(hasData ? View.GONE : View.VISIBLE);
+        appsEmpty.setText(s.usageAccess ? R.string.screen_time_usage_empty
+                : R.string.screen_time_usage_no_access);
         PackageManager pm = requireContext().getPackageManager();
-        int gap = getResources().getDimensionPixelSize(R.dimen.spacing_card_gap);
+        float scaleMax = 0f;
+        for (ScreenTimeState.AppRow app : s.apps) {
+            scaleMax = Math.max(scaleMax, Math.max(app.avgMinutes, app.limitMinutes));
+        }
+        int gap = getResources().getDimensionPixelSize(R.dimen.screen_time_row_gap);
+        boolean first = true;
         for (ScreenTimeState.AppRow app : s.apps) {
             AppUsageRowView row = new AppUsageRowView(requireContext());
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.topMargin = gap;
+            lp.topMargin = first ? 0 : gap;
+            first = false;
             appRows.addView(row, lp);
-            bindRow(row, app, pm);
+            bindRow(row, app, scaleMax, pm);
         }
     }
 
-    private void bindRow(AppUsageRowView row, ScreenTimeState.AppRow app, PackageManager pm) {
+    private void renderDelta(ScreenTimeState s, boolean hasData) {
+        if (!hasData || !s.hasDelta || s.deltaPercent == 0) {
+            avgDelta.setVisibility(View.GONE);
+            return;
+        }
+        boolean down = s.deltaPercent < 0;
+        int value = Math.abs(s.deltaPercent);
+        avgDelta.setText((down ? "▼ " : "▲ ") + ChartFormat.percent(value));
+        avgDelta.setTextColor(ContextCompat.getColor(requireContext(),
+                down ? R.color.bb_primary_bright : R.color.bb_danger));
+        avgDelta.setContentDescription(getString(down ? R.string.screen_time_delta_less_cd
+                : R.string.screen_time_delta_more_cd, value));
+        avgDelta.setVisibility(View.VISIBLE);
+    }
+
+    private void bindRow(AppUsageRowView row, ScreenTimeState.AppRow app, float scaleMax,
+                         PackageManager pm) {
         row.setAppName(app.label);
         row.setAppIcon(iconFor(pm, app.packageName));
-        String used = formatMillis(app.todayMillis);
-        if (!app.hasLimit()) {
-            row.setNoLimit(true);
-            row.setStatus(AppUsageRowView.Status.NONE, null);
-            row.setUsage(getString(R.string.screen_time_row_no_limit, used), 0);
-        } else {
-            row.setNoLimit(false);
-            String limit = formatMillis(app.limitMillis());
-            if (app.isOverLimit()) {
-                if (app.enforceAtLimit) {
-                    row.setStatus(AppUsageRowView.Status.BLOCKED, getString(
-                            R.string.screen_time_row_blocked_until,
-                            getString(R.string.screen_time_midnight)));
-                } else {
-                    row.setStatus(AppUsageRowView.Status.WARNING,
-                            getString(R.string.screen_time_row_over_limit));
-                }
-                row.setUsage(getString(R.string.screen_time_row_reached, used, limit), 100);
-            } else {
-                row.setStatus(app.isNearLimit() ? AppUsageRowView.Status.WARNING
-                        : AppUsageRowView.Status.NONE, null);
-                row.setUsage(getString(R.string.screen_time_row_of, used, limit),
-                        app.percentOfLimit());
-            }
-        }
-        row.setLocked(app.enforceAtLimit);
-        row.setOnLockChangeListener((r, locked) -> onLockToggled(r, app, locked));
+        String used = ChartFormat.hoursMinutes(app.avgMinutes);
+        row.setValue(app.hasLimit() ? getString(R.string.screen_time_row_value_of, used,
+                ChartFormat.hoursMinutes(app.limitMinutes)) : used);
+        row.setBar(new LimitBarView.Data(app.avgMinutes, app.limitMinutes, scaleMax,
+                ChartFormatter.MINUTES));
+        row.setLocked(app.hasLimit() && app.enforceAtLimit);
+        row.setSuggested(app.suggested && !app.hasLimit());
         row.setOnRowClickListener(r -> openDetail(app.packageName));
-        row.setOnSetLimitClickListener(r -> openDetail(app.packageName));
     }
 
     @Nullable
@@ -290,36 +233,111 @@ public class ScreenTimeFragment extends Fragment
         }
     }
 
-    // ---------------------------------------------------------------- lock (enforceAtLimit)
-
-    private void onLockToggled(AppUsageRowView row, ScreenTimeState.AppRow app, boolean locked) {
-        if (!locked) {
-            viewModel.setEnforceAtLimit(app.packageName, false);
-            return;
+    // "3 h 10 m": cifras grandes y las unidades a mitad de tamano.
+    private static CharSequence spannedDuration(float minutes) {
+        String text = ChartFormat.hoursMinutes(minutes);
+        SpannableString out = new SpannableString(text);
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.isLetter(text.charAt(i))) {
+                out.setSpan(new RelativeSizeSpan(0.55f), i, i + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
-        if (!app.hasLimit()) {
-            // No se puede hacer cumplir lo que no existe: el limite se fija en el detalle.
-            row.setLocked(false);
-            Toast.makeText(requireContext(), R.string.screen_time_lock_needs_limit,
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (AccessibilityAccess.isEnabled(requireContext())) {
-            viewModel.setEnforceAtLimit(app.packageName, true);
-        } else {
-            // Mismo criterio que Progress: sin el servicio no se arma nada hasta que el usuario
-            // acepte la divulgacion (onAccessibilityConsentGranted).
-            row.setLocked(false);
-            pendingEnforcePackage = app.packageName;
-            pendingShield = false;
-            AccessibilityDisclosureDialog.newInstance().show(getChildFragmentManager(), DISCLOSURE_TAG);
-        }
+        return out;
     }
 
     private void openDetail(String packageName) {
         Bundle args = new Bundle();
         args.putString(AppDetailFragment.ARG_PACKAGE_NAME, packageName);
         NavHostFragment.findNavController(this).navigate(R.id.navigation_app_detail, args);
+    }
+
+    // ---- 4. Dia a dia
+
+    private void renderDaily(ScreenTimeState s) {
+        String[] names = new String[DAILY_COLORS.length];
+        for (int i = 0; i < s.dailySeriesNames.length; i++) {
+            names[i] = s.dailySeriesNames[i] == null ? "" : s.dailySeriesNames[i];
+        }
+        names[names.length - 1] = getString(R.string.screen_time_others);
+        int days = s.dailyValues.length;
+        String[] labels = new String[days];
+        for (int i = 0; i < days; i++) {
+            LocalDate d = s.firstDay.plusDays(i);
+            if (s.month) {
+                labels[i] = (days - 1 - i) % 5 == 0 ? String.valueOf(d.getDayOfMonth()) : "";
+            } else {
+                labels[i] = WeekdayLabels.initial(d.getDayOfWeek());
+            }
+        }
+        dailyChart.setData(days == 0 ? null : new StackedBarsView.Data(s.dailyValues, DAILY_COLORS,
+                names, labels, true, ChartFormatter.MINUTES));
+
+        dailyLegend.removeAllViews();
+        if (days > 0) {
+            for (int i = 0; i < names.length; i++) {
+                if (!names[i].isEmpty()) addLegendItem(dailyLegend, DAILY_COLORS[i], names[i]);
+            }
+        }
+        if (s.peakWeekday >= 0) {
+            String day = DayOfWeek.of(s.peakWeekday + 1).getDisplayName(TextStyle.FULL,
+                    Locale.getDefault());
+            dailySentenceText.setText(getString(R.string.screen_time_daily_peak,
+                    day, ChartFormat.hoursMinutes(s.peakWeekdayMinutes)));
+            dailySentence.setVisibility(View.VISIBLE);
+        } else {
+            dailySentence.setVisibility(View.GONE);
+        }
+    }
+
+    private void addLegendItem(ViewGroup parent, int colorRes, String label) {
+        LinearLayout item = new LinearLayout(requireContext());
+        item.setOrientation(LinearLayout.HORIZONTAL);
+        item.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        int dot = getResources().getDimensionPixelSize(R.dimen.screen_time_legend_dot);
+        View swatch = new View(requireContext());
+        swatch.setBackgroundResource(R.drawable.bg_dot_primary);
+        swatch.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), colorRes)));
+        item.addView(swatch, new LinearLayout.LayoutParams(dot, dot));
+        TextView text = new TextView(requireContext());
+        TextViewCompat.setTextAppearance(text, R.style.TextAppearance_BBetter_Micro);
+        text.setText(label);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMarginStart(getResources().getDimensionPixelSize(R.dimen.spacing_xs) + 2);
+        item.addView(text, lp);
+        parent.addView(item);
+    }
+
+    // ---- 5. Antes y despues del limite
+
+    private void renderBeforeAfter(ScreenTimeState s) {
+        beforeAfterRows.removeAllViews();
+        boolean has = !s.beforeAfter.isEmpty();
+        beforeAfterEmpty.setVisibility(has ? View.GONE : View.VISIBLE);
+        beforeAfterLegend.setVisibility(has ? View.VISIBLE : View.GONE);
+        if (has) {
+            float scaleMax = 0f;
+            for (ScreenTimeState.BeforeAfterRow r : s.beforeAfter) {
+                scaleMax = Math.max(scaleMax, Math.max(r.before, r.after));
+            }
+            String before = getString(R.string.screen_time_ba_before);
+            String after = getString(R.string.screen_time_ba_after);
+            for (ScreenTimeState.BeforeAfterRow r : s.beforeAfter) {
+                DumbbellRowView row = new DumbbellRowView(requireContext());
+                row.setData(new DumbbellRowView.Data(r.label, r.before, r.after, scaleMax, before,
+                        after, ChartFormatter.MINUTES));
+                beforeAfterRows.addView(row, new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            }
+        }
+        if (has && Math.round(s.recoveredMinutesPerDay) > 0) {
+            beforeAfterSentenceText.setText(getString(R.string.screen_time_ba_recovered,
+                    ChartFormat.hoursMinutes(s.recoveredMinutesPerDay)));
+            beforeAfterSentence.setVisibility(View.VISIBLE);
+        } else {
+            beforeAfterSentence.setVisibility(View.GONE);
+        }
     }
 
     // ---------------------------------------------------------------- Focus shield
@@ -340,7 +358,6 @@ public class ScreenTimeFragment extends Fragment
         } else {
             setShieldSilently(false);
             pendingShield = true;
-            pendingEnforcePackage = null;
             AccessibilityDisclosureDialog.newInstance().show(getChildFragmentManager(), DISCLOSURE_TAG);
         }
     }
@@ -351,11 +368,8 @@ public class ScreenTimeFragment extends Fragment
             BlockingSettings.setFocusShieldEnabled(requireContext(), true);
             session.setBlockModeArmed(true);
             setShieldSilently(true);
-        } else if (pendingEnforcePackage != null) {
-            viewModel.setEnforceAtLimit(pendingEnforcePackage, true);
         }
         pendingShield = false;
-        pendingEnforcePackage = null;
     }
 
     private void renderShield() {
@@ -405,31 +419,32 @@ public class ScreenTimeFragment extends Fragment
             });
         } else if (!AccessibilityAccess.isEnabled(requireContext())) {
             pendingShield = false;
-            pendingEnforcePackage = null;
             AccessibilityDisclosureDialog.newInstance().show(getChildFragmentManager(), DISCLOSURE_TAG);
         }
-    }
-
-    // ---------------------------------------------------------------- helpers
-
-    // "1h 18m" / "1h" / "42m" (sin ceros de relleno: "1h of 1h").
-    private static String formatMillis(long millis) {
-        long totalMinutes = Math.max(0L, millis) / 60_000L;
-        long hours = totalMinutes / 60;
-        long minutes = totalMinutes % 60;
-        if (hours > 0 && minutes == 0) return String.format(Locale.getDefault(), "%dh", hours);
-        if (hours > 0) return String.format(Locale.getDefault(), "%dh %dm", hours, minutes);
-        return String.format(Locale.getDefault(), "%dm", minutes);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        chart = null;
-        chartHolder = null;
-        tileTracked = null;
-        tileLimit = null;
-        footer = null;
+        shieldSwitch = null;
+        allowedCount = null;
+        period = null;
+        usageSubtitle = null;
+        avgValue = null;
+        avgDelta = null;
         appRows = null;
+        appsEmpty = null;
+        dailyChart = null;
+        dailyLegend = null;
+        dailySentence = null;
+        dailySentenceText = null;
+        beforeAfterRows = null;
+        beforeAfterEmpty = null;
+        beforeAfterLegend = null;
+        beforeAfterSentence = null;
+        beforeAfterSentenceText = null;
+        footer = null;
+        footerIcon = null;
+        footerText = null;
     }
 }

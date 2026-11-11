@@ -591,7 +591,7 @@
         <!-- ===================== AppUsageRowView ===================== -->
         <TextView
             style="@style/GalleryLabel"
-            android:text="AppUsageRowView · warning / blocked / ok / no limit" />
+            android:text="AppUsageRowView · limit / over / suggested / none" />
 
         <LinearLayout style="@style/GalleryCard">
 
@@ -601,9 +601,7 @@
                 android:layout_height="wrap_content"
                 app:appLocked="true"
                 app:appName="Instagram"
-                app:appProgress="93"
-                app:appStatus="warning"
-                app:appUsage="42m of 45m" />
+                app:appUsage="52 m / 1 h" />
 
             <com.example.bbettercalendar.ui.common.widget.AppUsageRowView
                 android:id="@+id/galleryAppBlocked"
@@ -612,19 +610,16 @@
                 android:layout_marginTop="@dimen/spacing_card_gap"
                 app:appLocked="true"
                 app:appName="TikTok"
-                app:appProgress="100"
-                app:appStatus="blocked"
-                app:appUsage="1h of 1h" />
+                app:appUsage="48 m / 45 m" />
 
             <com.example.bbettercalendar.ui.common.widget.AppUsageRowView
                 android:id="@+id/galleryAppOk"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_card_gap"
-                app:appLocked="true"
                 app:appName="YouTube"
-                app:appProgress="41"
-                app:appUsage="25m of 1h" />
+                app:appSuggested="true"
+                app:appUsage="44 m" />
 
             <com.example.bbettercalendar.ui.common.widget.AppUsageRowView
                 android:id="@+id/galleryAppNoLimit"
@@ -632,8 +627,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_card_gap"
                 app:appName="Discord"
-                app:appNoLimit="true"
-                app:appUsage="10m · no limit" />
+                app:appUsage="18 m" />
         </LinearLayout>
 
         <!-- ===================== PeriodNavigatorView + SegmentedControlView ===================== -->

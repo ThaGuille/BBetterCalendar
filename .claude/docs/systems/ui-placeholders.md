@@ -40,14 +40,12 @@ repository `social/SocialModule` binds (`FEATURE_SOCIAL` first, see `systems/soc
 |---|---|---|---|---|---|
 | `projects-weekly-rhythm` | Projects (u16) | `projectsRhythmCard` | Fixed text "Weekly rhythm is on track / Best study block: 09:00 - 11:30 AM", inert chevron | Real weekly-rhythm and best-block computation from `focus_event` | P2 |
 | `projects-streak-chip` | Projects (u16) | `projectsStreakChip` | The **global** streak (hidden at 0), not a per-project streak | `focus_event` does not attribute a streak per project | P2 |
-| `screen-time-blocked-opens` | Screen time (u19) | `screenTimeTileBlocked` / `screenTimeBlockedCount` | "23" (`MOCK_BLOCKED_OPENS`) | A blocked-opens counter in `BlockerAccessibilityService` | P2 |
-| `screen-time-new-badge` | Screen time (u19) | `screenTimeBlockNew` | Fixed NEW chip | A "seen" flag | P3 |
-| `app-detail-blocked-opens` | App detail (u20) | `appDetailTileBlocked` / `appDetailBlockedCount` | "6" (`MOCK_BLOCKED_OPENS`) | Per-app blocked-open counter | P2 |
 
 ## Resolved
 | id | Date | How |
 |---|---|---|
 | `cycle-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
+| `screen-time-blocked-opens`, `app-detail-blocked-opens`, `screen-time-new-badge` | 2026-11-11 | mejora-visual u9: the tiles and the NEW chip were removed from Screen time and App detail |
 | `progress-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
 | `home-user-name` | 2026-10-20 | F1-u8: `GreetingResolver` (profile name, else local name in `SocialPrefs`, else generic greeting) |
 | `social-focus-invite` | 2026-10-24 | F2-u8: `focusInviteButton` opens `InviteSheet` (`@usuario`, link with copy and share, QR) when signed in with a profile, or the entry router otherwise; markers removed from Java and layout |

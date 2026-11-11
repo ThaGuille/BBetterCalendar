@@ -31,6 +31,8 @@ public class CompareBarsView extends BaseChartView {
         final ChartFormatter formatter;
         final String currentName;
         @Nullable final String previousName;
+        /** Text of the dashed line instead of "avg X" (e.g. "limit 1 h"), or null for the average. */
+        @Nullable final String lineLabel;
 
         /**
          * @param current      minutes per column
@@ -44,6 +46,14 @@ public class CompareBarsView extends BaseChartView {
         public Data(@NonNull float[] current, @Nullable float[] previous, @Nullable String[] labels, int highlight,
                     float average, @NonNull ChartFormatter formatter, @NonNull String currentName,
                     @Nullable String previousName) {
+            this(current, previous, labels, highlight, average, formatter, currentName, previousName, null);
+        }
+
+        /** Same, with the dashed line labelled {@code lineLabel} (a limit instead of the average). */
+        public Data(@NonNull float[] current, @Nullable float[] previous, @Nullable String[] labels, int highlight,
+                    float average, @NonNull ChartFormatter formatter, @NonNull String currentName,
+                    @Nullable String previousName, @Nullable String lineLabel) {
+            this.lineLabel = lineLabel;
             this.current = current.clone();
             this.previous = fitValues(previous, current.length);
             this.labels = fit(labels, current.length);
@@ -56,6 +66,11 @@ public class CompareBarsView extends BaseChartView {
 
         boolean hasAverage() {
             return average > 0f;
+        }
+
+        String lineText(@NonNull android.content.Context context) {
+            return lineLabel != null ? lineLabel
+                    : context.getString(R.string.chart_average, formatter.format(average));
         }
     }
 
@@ -182,7 +197,7 @@ public class CompareBarsView extends BaseChartView {
             int a = Math.round(255 * markProgress(n - 1));
             avgPaint.setAlpha(a);
             drawLine(canvas, plotLeft, y, plotRight, y, avgPaint);
-            String label = getContext().getString(R.string.chart_average, d.formatter.format(d.average));
+            String label = d.lineText(getContext());
             int old = axisPaint.getAlpha();
             axisPaint.setAlpha(Math.min(old, a));
             canvas.drawText(label, plotLeft + labelGap / 2f, y - labelGap / 2f - axisPaint.descent(), axisPaint);
@@ -248,7 +263,7 @@ public class CompareBarsView extends BaseChartView {
             appendSeries(sb, d, d.previous);
         }
         if (d.hasAverage()) {
-            sb.append(". ").append(getContext().getString(R.string.chart_average, d.formatter.format(d.average)));
+            sb.append(". ").append(d.lineText(getContext()));
         }
         return sb.toString();
     }

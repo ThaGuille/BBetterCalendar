@@ -117,58 +117,6 @@
                     android:layout_marginStart="@dimen/app_detail_tile_gap"
                     android:layout_weight="1"
                     app:tileLabel="@string/app_detail_tile_avg" />
-
-                <!-- PLACEHOLDER(ui-placeholders#app-detail-blocked-opens): no se cuentan aperturas bloqueadas. -->
-                <LinearLayout
-                    android:id="@+id/appDetailTileBlocked"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/app_detail_tile_gap"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_card"
-                    android:orientation="vertical"
-                    android:padding="@dimen/widget_tile_padding">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:text="@string/app_detail_tile_blocked"
-                            android:textAllCaps="true"
-                            android:textAppearance="@style/TextAppearance.BBetter.Caption" />
-
-                        <ImageView
-                            android:layout_width="@dimen/widget_tile_icon_size"
-                            android:layout_height="@dimen/widget_tile_icon_size"
-                            android:layout_marginStart="@dimen/spacing_xs"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_shield_24"
-                            app:tint="@color/bb_accent_reward" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/appDetailBlockedCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textAppearance="@style/TextAppearance.BBetter.Stat.Tile"
-                        tools:text="6" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/app_detail_tile_blocked_sub"
-                        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
-                </LinearLayout>
             </LinearLayout>
 
             <!-- ============ Past 7 days ============ -->
@@ -207,47 +155,13 @@
                             android:textAppearance="@style/TextAppearance.BBetter.Caption" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_sm"
-                        android:layout_marginTop="2dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <View
-                            android:layout_width="@dimen/app_detail_legend_swatch"
-                            android:layout_height="@dimen/app_detail_legend_swatch"
-                            android:background="@drawable/bg_app_detail_swatch_within" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="@string/app_detail_legend_within"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro" />
-
-                        <View
-                            android:layout_width="@dimen/app_detail_legend_swatch"
-                            android:layout_height="@dimen/app_detail_legend_swatch"
-                            android:layout_marginStart="@dimen/spacing_card_gap"
-                            android:background="@drawable/bg_app_detail_swatch_over" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="@string/app_detail_legend_over"
-                            android:textAppearance="@style/TextAppearance.BBetter.Micro" />
-                    </LinearLayout>
                 </LinearLayout>
 
-                <FrameLayout
-                    android:id="@+id/appDetailChartHolder"
+                <com.example.bbettercalendar.ui.common.chart.CompareBarsView
+                    android:id="@+id/appDetailChart"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/app_detail_chart_height"
-                    android:layout_marginTop="@dimen/spacing_sm"
-                    android:contentDescription="@string/app_detail_chart_cd" />
+                    android:layout_marginTop="@dimen/spacing_sm" />
             </LinearLayout>
 
             <!-- ============ Daily limit ============ -->

@@ -12,8 +12,6 @@
 
     <string name="app_detail_tile_today">Today</string>
     <string name="app_detail_tile_avg">Daily avg</string>
-    <string name="app_detail_tile_blocked">Blocked</string>
-    <string name="app_detail_tile_blocked_sub">Opens stopped</string>
     <string name="app_detail_unit_minutes_short">m</string>
     <string name="app_detail_value_hours_minutes">%1$dh %2$d</string>
     <string name="app_detail_value_none">—</string>
@@ -28,9 +26,9 @@
     <string name="app_detail_chart_title_week">Past 7 days</string>
     <string name="app_detail_chart_title_month">Past 30 days</string>
     <string name="app_detail_chart_subtitle">Daily screen time distribution</string>
-    <string name="app_detail_legend_within">Within</string>
-    <string name="app_detail_legend_over">Over limit</string>
-    <string name="app_detail_chart_cd">Daily screen time of this app, split into time within and over the limit</string>
+
+    <string name="app_detail_limit_line">limit %1$s</string>
+    <string name="app_detail_chart_series">Usage</string>
 
     <string name="app_detail_limit_title">Daily limit</string>
     <string name="app_detail_limit_subtitle">Time granted before %1$s is paused</string>

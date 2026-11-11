@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,32 +26,25 @@ import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.ui.common.InsetsHelper;
-import com.example.bbettercalendar.ui.common.chart.ChartStyler;
+import com.example.bbettercalendar.ui.common.chart.ChartFormat;
+import com.example.bbettercalendar.ui.common.chart.ChartFormatter;
+import com.example.bbettercalendar.ui.common.chart.CompareBarsView;
 import com.example.bbettercalendar.ui.common.widget.SegmentedControlView;
 import com.example.bbettercalendar.ui.common.widget.StatTileView;
 import com.example.bbettercalendar.ui.common.widget.StepperView;
 import com.example.bbettercalendar.ui.common.widget.WidgetTone;
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.time.LocalDate;
-import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * u20: per-app detail ({@code navigation_app_detail}, html 10): header (icon, name, category),
- * Week / Month, 3 tiles, stacked "within / over limit" bars with the limit line, "Daily limit"
+ * Per-app detail ({@code navigation_app_detail}): header (icon, name, category), Week / Month,
+ * "today" + daily average (with the change), {@link CompareBarsView} of 7 / 30 days with the limit
+ * line (mejora-visual u9), "Daily limit"
  * stepper + presets (writes {@code AppRule.dailyLimitMinutes}), "Warn me before"
  * ({@code warnBeforeMinutes}), "Block when limit is reached" ({@code enforceAtLimit}) and "Stop
  * tracking" ({@code tracked = false}). No bottom nav (MainActivity hides it).
@@ -65,23 +57,18 @@ public class AppDetailFragment extends Fragment
     /** Nav argument (mobile_navigation.xml): package of the app whose detail is shown. */
     public static final String ARG_PACKAGE_NAME = "packageName";
 
-    // PLACEHOLDER(ui-placeholders#app-detail-blocked-opens): no se cuentan aperturas bloqueadas.
-    private static final int MOCK_BLOCKED_OPENS = 6;
-
     private static final String DISCLOSURE_TAG = "accessibility_disclosure";
     private static final int[] WARN_OPTIONS = {5, 10, 15, 30};
     private static final int FIRST_LIMIT_MINUTES = 30;   // "+" desde "sin limite"
 
     private AppDetailViewModel viewModel;
-    private ChartStyler styler;
     private String packageName;
     private String appLabel;
 
     private StatTileView tileToday;
     private StatTileView tileAvg;
     private TextView chartTitle;
-    private FrameLayout chartHolder;
-    private BarChart chart;
+    private CompareBarsView chart;
     private TextView limitBadge;
     private TextView limitSubtitle;
     private StepperView stepper;
@@ -112,7 +99,6 @@ public class AppDetailFragment extends Fragment
             return;
         }
         viewModel = new ViewModelProvider(this).get(AppDetailViewModel.class);
-        styler = new ChartStyler(requireContext());
 
         view.findViewById(R.id.appDetailBack).setOnClickListener(v -> navigateBack());
         bindHeader(view);
@@ -120,7 +106,7 @@ public class AppDetailFragment extends Fragment
         tileToday = view.findViewById(R.id.appDetailTileToday);
         tileAvg = view.findViewById(R.id.appDetailTileAvg);
         chartTitle = view.findViewById(R.id.appDetailChartTitle);
-        chartHolder = view.findViewById(R.id.appDetailChartHolder);
+        chart = view.findViewById(R.id.appDetailChart);
         limitBadge = view.findViewById(R.id.appDetailLimitBadge);
         limitSubtitle = view.findViewById(R.id.appDetailLimitSubtitle);
         stepper = view.findViewById(R.id.appDetailStepper);
@@ -132,10 +118,8 @@ public class AppDetailFragment extends Fragment
         a11yDot = view.findViewById(R.id.appDetailA11yDot);
         a11yText = view.findViewById(R.id.appDetailA11yText);
         period = view.findViewById(R.id.appDetailPeriod);
-        TextView blockedCount = view.findViewById(R.id.appDetailBlockedCount);
         TextView stop = view.findViewById(R.id.appDetailStopTracking);
 
-        blockedCount.setText(String.valueOf(MOCK_BLOCKED_OPENS));
         limitSubtitle.setText(getString(R.string.app_detail_limit_subtitle, appLabel));
         stop.setText(getString(R.string.app_detail_stop_tracking, appLabel));
 
@@ -292,50 +276,20 @@ public class AppDetailFragment extends Fragment
         }
     }
 
-    // Barras apiladas dentro / sobre el limite + linea del limite (html 10).
+    // 7 / 30 dias con la raya del limite (mejora-visual u9); hoy resaltado.
     private void renderChart(AppDetailState s) {
         chartTitle.setText(s.month ? R.string.app_detail_chart_title_month
                 : R.string.app_detail_chart_title_week);
-        if (chart == null) {
-            chart = new BarChart(requireContext());
-            chartHolder.addView(chart, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        }
         int days = s.dayMillis.length;
-        float limit = s.hasLimit() ? s.limitMinutes : Float.MAX_VALUE;
-        List<BarEntry> entries = new ArrayList<>(days);
-        float max = 0f;
+        float[] minutes = new float[days];
         for (int i = 0; i < days; i++) {
-            float minutes = s.dayMillis[i] / 60_000f;
-            max = Math.max(max, minutes);
-            entries.add(new BarEntry(i, ChartStyler.splitAtLimit(minutes, limit)));
+            minutes[i] = s.dayMillis[i] / 60_000f;
         }
-        BarDataSet set = styler.styleLimitBars(new BarDataSet(entries, ""));
-        if (max > 0f) {
-            // Punto honey sobre la barra de hoy (html 10).
-            styler.markEntry(entries.get(days - 1));
-            set.setDrawIcons(true);
-        }
-        BarData data = new BarData(set);
-        data.setBarWidth(ChartStyler.barWidth());
-        chart.setData(data);
-        styler.styleChart(chart, dayLabels(s));
-        chart.getXAxis().setLabelCount(days, false);
-        float top = ChartStyler.niceMax(Math.max(Math.max(max, s.hasLimit() ? s.limitMinutes : 0f), 10f));
-        styler.fitYAxis(chart, top);
-        styler.setYAxisFormatter(chart, new ValueFormatter() {
-            @Override
-            public String getAxisLabel(float value, AxisBase axis) {
-                return formatDuration(Math.round(value) * 60_000L);
-            }
-        });
-        if (s.hasLimit()) {
-            styler.addLimitLine(chart, s.limitMinutes, formatDuration(s.limitMinutes * 60_000L));
-        } else {
-            chart.getAxisRight().removeAllLimitLines();
-        }
-        chart.notifyDataSetChanged();
-        chart.invalidate();
+        String limitLabel = s.hasLimit() ? getString(R.string.app_detail_limit_line,
+                ChartFormat.hoursMinutes(s.limitMinutes)) : null;
+        chart.setData(new CompareBarsView.Data(minutes, null, dayLabels(s), days - 1,
+                s.hasLimit() ? s.limitMinutes : 0f, ChartFormatter.MINUTES,
+                getString(R.string.app_detail_chart_series), null, limitLabel));
     }
 
     // Semana: inicial del dia (M T W ...). Mes: dia del mes cada 5 dias hasta hoy.
@@ -347,7 +301,7 @@ public class AppDetailFragment extends Fragment
             if (s.month) {
                 labels[i] = (days - 1 - i) % 5 == 0 ? String.valueOf(d.getDayOfMonth()) : "";
             } else {
-                labels[i] = d.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.getDefault());
+                labels[i] = WeekdayLabels.initial(d.getDayOfWeek());
             }
         }
         return labels;

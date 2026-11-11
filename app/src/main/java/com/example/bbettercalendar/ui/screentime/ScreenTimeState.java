@@ -1,82 +1,91 @@
 package com.example.bbettercalendar.ui.screentime;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
-// u19: datos planos de "Screen time & blocking" (sin Drawables ni Views; el icono lo resuelve el
-// Fragment con PackageManager). Lo publica ScreenTimeViewModel desde el executor con postValue.
+// mejora-visual u9: datos planos de "Tiempo de pantalla" (sin Drawables ni Views; el icono lo resuelve
+// el Fragment con PackageManager). Lo publica ScreenTimeViewModel desde el executor con postValue.
+// Todos los minutos son medias por dia del periodo (7 o 30 dias), salvo donde se dice otra cosa.
 public final class ScreenTimeState {
 
-    /** Una app seguida con su uso de HOY y su regla. */
+    /** Una fila de "Uso por app": media diaria del periodo y su regla (si esta seguida). */
     public static final class AppRow {
         public final String packageName;
         public final String label;
-        public final long todayMillis;
-        public final int dailyLimitMinutes;   // 0 = sin limite
+        public final float avgMinutes;
+        public final int limitMinutes;        // 0 = sin limite activo
         public final boolean enforceAtLimit;
+        public final boolean suggested;       // muy usada y sin limite
 
-        public AppRow(String packageName, String label, long todayMillis,
-                      int dailyLimitMinutes, boolean enforceAtLimit) {
+        public AppRow(String packageName, String label, float avgMinutes, int limitMinutes,
+                      boolean enforceAtLimit, boolean suggested) {
             this.packageName = packageName;
             this.label = label;
-            this.todayMillis = todayMillis;
-            this.dailyLimitMinutes = dailyLimitMinutes;
+            this.avgMinutes = avgMinutes;
+            this.limitMinutes = limitMinutes;
             this.enforceAtLimit = enforceAtLimit;
+            this.suggested = suggested;
         }
 
         public boolean hasLimit() {
-            return dailyLimitMinutes > 0;
+            return limitMinutes > 0;
         }
+    }
 
-        public long limitMillis() {
-            return dailyLimitMinutes * 60_000L;
-        }
+    /** Una app con limite que ya tiene suficientes dias antes y despues. */
+    public static final class BeforeAfterRow {
+        public final String label;
+        public final float before;
+        public final float after;
 
-        /** 0..100 del limite consumido (0 sin limite). */
-        public int percentOfLimit() {
-            if (!hasLimit()) return 0;
-            return (int) Math.min(100L, todayMillis * 100L / limitMillis());
-        }
-
-        public boolean isOverLimit() {
-            return hasLimit() && todayMillis >= limitMillis();
-        }
-
-        /** >= 75 % del limite y todavia por debajo. */
-        public boolean isNearLimit() {
-            return hasLimit() && !isOverLimit() && todayMillis * 100L >= limitMillis() * 75L;
+        public BeforeAfterRow(String label, float before, float after) {
+            this.label = label;
+            this.before = before;
+            this.after = after;
         }
     }
 
     public final boolean usageAccess;
-    public final long trackedMillis;          // uso de hoy de las apps seguidas
-    public final boolean hasAverage;          // false = sin historial previo para comparar
-    public final int deltaPercentVsAverage;   // hoy frente a la media diaria de los 7 dias previos
-    public final int totalLimitMinutes;       // suma de limites de las apps seguidas con limite
-    public final long limitedMillis;          // uso de hoy de esas apps
-    public final long[] hourMillis;           // 24 franjas, uso de hoy
-    public final boolean[] focusHours;        // 24 franjas con minutos de concentracion
+    public final boolean month;
+    public final float avgMinutesPerDay;       // media diaria de todas las apps
+    public final boolean hasDelta;             // hay periodo anterior con el que comparar
+    public final int deltaPercent;             // negativo = menos movil que el periodo anterior
     public final List<AppRow> apps;
-    public final int enforcedCount;           // apps con candado y limite ("N apps protected")
+    public final LocalDate firstDay;           // primer dia de "Dia a dia"
+    public final float[][] dailyValues;        // [dia][serie]: 3 apps principales + otras
+    public final String[] dailySeriesNames;    // nombres de las 3 apps principales ("" si faltan)
+    public final int peakWeekday;              // 0 = lunes ... 6 = domingo; -1 sin frase
+    public final float peakWeekdayMinutes;
+    public final List<BeforeAfterRow> beforeAfter;
+    public final float recoveredMinutesPerDay;
+    public final int allowedCount;             // apps siempre permitidas (las cablea la unidad u10)
 
-    public ScreenTimeState(boolean usageAccess, long trackedMillis, boolean hasAverage,
-                           int deltaPercentVsAverage, int totalLimitMinutes, long limitedMillis,
-                           long[] hourMillis, boolean[] focusHours, List<AppRow> apps,
-                           int enforcedCount) {
+    public ScreenTimeState(boolean usageAccess, boolean month, float avgMinutesPerDay,
+                           boolean hasDelta, int deltaPercent, List<AppRow> apps,
+                           LocalDate firstDay, float[][] dailyValues, String[] dailySeriesNames,
+                           int peakWeekday, float peakWeekdayMinutes,
+                           List<BeforeAfterRow> beforeAfter, float recoveredMinutesPerDay,
+                           int allowedCount) {
         this.usageAccess = usageAccess;
-        this.trackedMillis = trackedMillis;
-        this.hasAverage = hasAverage;
-        this.deltaPercentVsAverage = deltaPercentVsAverage;
-        this.totalLimitMinutes = totalLimitMinutes;
-        this.limitedMillis = limitedMillis;
-        this.hourMillis = hourMillis;
-        this.focusHours = focusHours;
+        this.month = month;
+        this.avgMinutesPerDay = avgMinutesPerDay;
+        this.hasDelta = hasDelta;
+        this.deltaPercent = deltaPercent;
         this.apps = apps;
-        this.enforcedCount = enforcedCount;
+        this.firstDay = firstDay;
+        this.dailyValues = dailyValues;
+        this.dailySeriesNames = dailySeriesNames;
+        this.peakWeekday = peakWeekday;
+        this.peakWeekdayMinutes = peakWeekdayMinutes;
+        this.beforeAfter = beforeAfter;
+        this.recoveredMinutesPerDay = recoveredMinutesPerDay;
+        this.allowedCount = allowedCount;
     }
 
-    /** % del limite diario total consumido (0..100); 0 si no hay limites. */
-    public int limitPercent() {
-        if (totalLimitMinutes <= 0) return 0;
-        return (int) Math.min(100L, limitedMillis * 100L / (totalLimitMinutes * 60_000L));
+    /** Estado vacio (sin datos): cada tarjeta enseña su vacio. */
+    public static ScreenTimeState empty(boolean usageAccess, boolean month, LocalDate firstDay) {
+        return new ScreenTimeState(usageAccess, month, 0f, false, 0, Collections.emptyList(),
+                firstDay, new float[0][4], new String[3], -1, 0f, Collections.emptyList(), 0f, 0);
     }
 }

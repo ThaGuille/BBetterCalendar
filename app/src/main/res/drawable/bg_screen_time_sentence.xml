@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen time (mejora-visual u9): caja de la frase bajo un grafico (mockup 21). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bb_surface_raised" />
+    <corners android:radius="@dimen/radius_md" />
+</shape>

@@ -18,6 +18,8 @@ import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.usage.UsageLimitNotifier;
 import com.example.bbettercalendar.stats.AppRule;
 import com.example.bbettercalendar.stats.AppRuleDAO;
+import com.example.bbettercalendar.stats.AppUsageDaily;
+import com.example.bbettercalendar.stats.AppUsageDailyDAO;
 import com.example.bbettercalendar.usage.UsageAccess;
 import com.example.bbettercalendar.usage.UsageStatsRepository;
 import com.example.bbettercalendar.usage.limits.UsageLimitChecker;
@@ -25,6 +27,8 @@ import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -41,6 +45,7 @@ public class AppDetailViewModel extends AndroidViewModel {
     private final ExecutorService executor;
     private final ExecutorService dbWriteExecutor;
     private final AppRuleDAO appRuleDao;
+    private final AppUsageDailyDAO appUsageDao;
     private final UsageStatsRepository usageRepo;
     private final UsageLimitScheduler limitScheduler;
     private final UsageLimitChecker limitChecker;
@@ -51,10 +56,12 @@ public class AppDetailViewModel extends AndroidViewModel {
 
     @Inject
     public AppDetailViewModel(@NonNull Application application, AppRuleDAO appRuleDao,
+                              AppUsageDailyDAO appUsageDao,
                               @IoExecutor ExecutorService executor,
                               @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
         this.appRuleDao = appRuleDao;
+        this.appUsageDao = appUsageDao;
         this.executor = executor;
         this.dbWriteExecutor = dbWriteExecutor;
         usageRepo = new UsageStatsRepository(application);
@@ -156,20 +163,33 @@ public class AppDetailViewModel extends AndroidViewModel {
         long[] current = new long[days];
         boolean hasPrevious = false;
         int delta = 0;
+        // mejora-visual u9: el historial sale de app_usage_daily (sobrevive a la ventana de Android) y
+        // hoy del uso en vivo; el periodo anterior (mismo largo) se lee en la misma consulta.
+        LocalDate prevFirst = firstDay.minusDays(days);
+        long[] both = new long[days * 2];
+        List<AppUsageDaily> rows = appUsageDao.getForPackage(pkg, prevFirst.toString(), today.toString());
+        for (AppUsageDaily r : rows) {
+            try {
+                int idx = (int) ChronoUnit.DAYS.between(prevFirst, LocalDate.parse(r.day));
+                if (idx >= 0 && idx < both.length) both[idx] = r.minutes * 60_000L;
+            } catch (RuntimeException e) {
+                // fila con 'day' corrupto: se ignora
+            }
+        }
         if (access) {
-            // Un solo recorrido: el periodo anterior (mismo largo) + el actual.
-            long[] both = usageRepo.foregroundMillisByDay(pkg, firstDay.minusDays(days), days * 2);
-            long prevSum = 0L;
-            long curSum = 0L;
-            for (int i = 0; i < days; i++) {
-                prevSum += both[i];
-                current[i] = both[days + i];
-                curSum += current[i];
-            }
-            if (prevSum > 0L) {
-                hasPrevious = true;
-                delta = (int) Math.round((curSum - prevSum) * 100.0 / prevSum);
-            }
+            long liveToday = usageRepo.foregroundMillisByDay(pkg, today, 1)[0];
+            if (liveToday > 0L) both[both.length - 1] = liveToday;
+        }
+        long prevSum = 0L;
+        long curSum = 0L;
+        for (int i = 0; i < days; i++) {
+            prevSum += both[i];
+            current[i] = both[days + i];
+            curSum += current[i];
+        }
+        if (prevSum > 0L) {
+            hasPrevious = true;
+            delta = (int) Math.round((curSum - prevSum) * 100.0 / prevSum);
         }
         long total = 0L;
         for (long v : current) total += v;

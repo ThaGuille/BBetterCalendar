@@ -8,7 +8,7 @@
     <string name="title_focus">Focus</string>
     <string name="title_cycle_complete">Cycle complete</string>
     <string name="title_all_progress">All progress</string>
-    <string name="title_screen_time">Screen time &amp; blocking</string>
+    <string name="title_screen_time">Screen time</string>
     <string name="title_app_detail">App details</string>
     <string name="popup_ok">OK</string>
     <string name="popup_timer_failed">Timer failed</string>

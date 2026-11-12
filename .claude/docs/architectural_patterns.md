@@ -2,6 +2,8 @@
 
 Patterns that appear across multiple files in this codebase.
 
+**Last verified:** 2026-11-11 (mejora-visual u17) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+
 ## Threading Model: ExecutorService + LiveData.postValue()
 
 All database work runs on a background `ExecutorService`; results reach the UI via `postValue()`.
@@ -112,3 +114,11 @@ When adding a new complex field to an entity, add a converter pair here — do n
 - `type` field: `1` = event, `2` = task, `3` = reminder
 
 Use `EventBuilder` whenever creating a new `CalendarEntry`; direct field assignment bypasses required defaults.
+
+## Bottom sheets (mejora-visual u14)
+
+`TimerPopup`, `FocusStreakPopup`, `NotificationsPopup`, `RepetitionPopup` and `DescriptionPopup` are `BottomSheetDialogFragment`s (handle `view_sheet_handle.xml`, drag to dismiss, full-width primary button at the bottom). They keep the listener, result and tag contract of the popup pattern above. `popups/SheetBehavior.expand(dialog)` opens them already expanded (the collapsed peek would hide the main button). `AlertPopup` and `MessagePopup` stay centred dialogs. `CelebrationSheet` (weekly goal, project completed) and `QuickAddTaskSheet` follow the same shape.
+
+## Screen transitions (mejora-visual u15)
+
+`ui/common/motion/ScreenTransitions` (Material 1.9.0 `com.google.android.material.transition`): tab to tab = `MaterialFadeThrough`; tab to secondary and back = `MaterialSharedAxis` Z; secondary to secondary and period changes = `MaterialSharedAxis` X; project card -> detail and Home play -> Focus ring = `MaterialContainerTransform`. Every navigation fragment calls `ScreenTransitions.apply(this)` in `onCreate`; `MainActivity`'s destination listener calls `onNavigate` before the transaction. Durations come from `Motion.duration` (`bb_motion_screen_enter` / `_exit`), so with animations off navigation is instant. Sheets and dialogs keep Material's own animations.

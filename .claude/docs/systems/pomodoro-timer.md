@@ -1,6 +1,6 @@
 # System — Pomodoro timer (`ui/home/` + `notifications/focus/`)
 
-**Last verified:** 2026-11-11 (mejora-visual u6: ring button family, `RingStateMapper`) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (DB v15, mejora-visual u6, u13, u17) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The focus timer — the app's core feature. A pure 6-state machine (stopped/running/paused ×
 normal/rest, `ui/focus/FocusTimerStateMachine`) owned by an **activity-scoped**
@@ -102,3 +102,10 @@ to `navigation_focus`); the Focus screen (`FocusFragment`, u14) owns the running
 | 2026-08-29 | Repository layer: `maybeAutoComplete` moved from `HomeViewModel` into `FocusAttributionRepository` (cohesion — it's the write side of the same attribution rule `enrich()` reads, not a de-duplication); `completeTimer`'s write block moved from `@IoExecutor` to `@DbWriteExecutor`. No behavior change to the timer state machine itself. | — |
 | 2026-10-07 | u14: pantalla Focus (html 01); gracia por segundo plano a nivel de proceso (`BackgroundGrace` + `FocusBackgroundObserver` en `ProcessLifecycleOwner`, JUnit `BackgroundGraceTest`); `FocusSessionEventPresenter` compartido Home/Focus; `SplashActivity` ya no apila una segunda `MainActivity` desde el launcher | `.claude/plans/migracion-visual-stitch/notes/u14.md` |
 | 2026-10-06 | u13: Home rediseñada (html 04); sin focus mode in-place — Play arranca y navega a Focus; el servicio en primer plano lo maneja `FocusSessionViewModel` según el estado de la sesión | `.claude/plans/migracion-visual-stitch-impl.md` § u13 |
+
+## mejora-visual additions (2026-11-11, Last verified: 2026-11-11)
+- **Cycle complete** shows `CelebrationView` (`cycleCelebration`: sage-amber ring that closes in 900 ms, 14 particles; no particles and a full ring with animations off; haptic `confirm`), summary, today / streak wide cells with `Motion.countUp`, `CycleCompleteViewModel.getDayTotals()`. The "best / among friends" cell was removed.
+- **Weekly goal**: when `goalMetThisWeek` is reached, pressing Continue on Home opens `CelebrationSheet` once per ISO week (`CelebrationOncePolicy` + `CelebrationPrefs`, decision d3).
+- **Focus session data** (v15): `focus_event.elapsedMin` and `pauseCount` are written by `FocusSessionRepository.recordFail` / `recordFocusCompleted` (counted by the session on each `pause()`).
+- Home play button -> Focus ring is a `MaterialContainerTransform` on `bb_focus_ring` (`homePlayButton` / `focusRingBox`).
+- Debug: `bb_debug_nav cycle_complete` without extras uses 4 cycles of 25 min.

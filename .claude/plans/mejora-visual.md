@@ -1,6 +1,6 @@
 # Mejora visual y funcional de toda la app — plan de implementación
 
-**Status:** proposed (listo para ejecutar; todas las dudas resueltas)
+**Status:** implemented in branch bt/mejora-visual (U1-U17 done; pending merge to main). Docs updated and final walk done in U17 (`notes/u17.md`)
 **Created:** 2026-11-11
 **Last updated:** 2026-11-11
 

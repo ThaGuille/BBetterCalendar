@@ -3,7 +3,7 @@
     Dot-sourced by bb-adb.ps1 (record, live) and replay.ps1 (replay).
 
     A "step" is one flat line of the recording grammar:
-        START <component>                  am start -n <pkg>/<component>
+        START <component> [am-args]       am start -n <pkg>/<component> [extras]
         GRANT <permission>                 pm grant <pkg> <permission>
         CLEAR                              pm clear <pkg>
         TAP id=<idSuffix>                  find-node -Id ... -Tap
@@ -42,8 +42,12 @@ function Invoke-BBStep {
     switch ($verb) {
         'START' {
             # applicationId (-n prefix) != namespace (class names): expand ".foo.Bar" against the namespace.
-            $cls = if ($rest.StartsWith('.')) { "com.example.bbettercalendar$rest" } else { $rest }
-            & adb -s $Serial shell am start -n "$Pkg/$cls" | Out-Null
+            # Anything after the component goes to am start as-is (extras: START .configuration.SplashActivity --es k v).
+            $tokens = $rest -split '\s+'
+            $comp = $tokens[0]
+            $extra = @($tokens | Select-Object -Skip 1)
+            $cls = if ($comp.StartsWith('.')) { "com.example.bbettercalendar$comp" } else { $comp }
+            & adb -s $Serial shell am start -n "$Pkg/$cls" @extra | Out-Null
             return @{ ok = $true; info = "started $rest" }
         }
         'GRANT' {

@@ -195,10 +195,10 @@ with e.g. "use the code-reviewer subagent".
 
 | Path | Purpose |
 |---|---|
-| `app/src/main/java/.../ui/` | MVVM screens: `home/`, `focus/`, `calendar/`, `progress/`, `screentime/`, `projects/`; `common/` = reusable widgets (`widget/`) + `ChartStyler` (`chart/`) |
+| `app/src/main/java/.../ui/` | MVVM screens: `home/`, `focus/`, `calendar/`, `progress/`, `screentime/`, `projects/`; `common/` = reusable widgets (`widget/`), the chart kit (`chart/`: `ChartStyler` + hand-drawn chart views) and motion (`motion/`: `Motion`, `ScreenTransitions`) |
 | `app/src/main/java/.../calendarEntries/` | `CalendarEntry` entity + `EventBuilder`, `AddEventActivity` |
 | `app/src/main/java/.../configuration/` | `Configuration` entity, `ConfigurationManager`, `SplashActivity`, Hilt modules |
-| `app/src/main/java/.../database/` | `AppDatabase` (v10, 3 real migrations + destructive fallback), `DBConverter`, `DBMigration` (Application class) |
+| `app/src/main/java/.../database/` | `AppDatabase` (v15, real migrations up to `MIGRATION_14_15` + destructive fallback; schema exported to `app/schemas/`), `DBConverter`, `DBMigration` (Application class) |
 | `app/src/main/java/.../stats/` | `Stats`, `DailyStat`, `FocusEvent`, `AppRule`, `ConsentRecord` entities + DAOs |
 | `app/src/main/java/.../usage/` | Usage measurement (`UsageStatsRepository`) + `limits/` (alarm-based warn pipeline) |
 | `app/src/main/java/.../blocking/` | Accessibility-service enforcement (cover overlay / bounce-to-home) |

@@ -1,6 +1,6 @@
 # System — App usage limits (`usage/` + `usage/limits/` + `blocking/`)
 
-**Last verified:** 2026-11-11 (mejora-visual u10) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (DB v15, mejora-visual u9-u10, u17) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Measure → warn → enforce pipeline for per-app daily usage limits. Reads real usage via
 `UsageStatsManager` (special-access permission, no runtime dialog), lets the user set a daily
@@ -90,3 +90,8 @@ three tiles (tracked apps today vs the previous 7-day daily average, sum of dail
 - Block when limit is reached: `enforceAtLimit`, same accessibility gate as the Screen time lock (disclosure dialog first); the status line reads `AccessibilityAccess.isEnabled`.
 - Stop tracking: `setTracked(pkg, false)` (rule kept), then back.
 - Usage per day: `UsageStatsRepository.foregroundMillisByDay` (one event walk, split by `UsageDayBuckets`); Week = 7 days, Month = 30, delta vs the previous period of equal length. Android only keeps recent usage events, so older days read 0.
+
+## mejora-visual screen-time pass (2026-11-11, Last verified: 2026-11-11)
+- **Screen time** order: focus shield card (`screenTimeShieldSwitch`, haptic on toggle, footer `screenTimeAllowedRow` -> allowed apps), period selector 7/30 days, apps list (`AppUsageRowView`: icon, name, time, delta, lock shown only; the switch lives in the detail), suggestions and before/after (`UsageInsights.dailyAverages` / `suggested` / `beforeAfter`). Data: `app_usage_daily` (90 days) + today live; without usage access only today is shown.
+- **App detail**: tiles "Hoy" and "Media diaria"; `CompareBarsView` for 7 or 30 days with the limit line labelled; limit stepper, quick values, warn-before, block-at-limit (haptic). `AppRule.limitSinceMillis` is stamped when `dailyLimitMinutes` goes 0 -> > 0 and cleared on 0.
+- Always-allowed apps (u10) are documented above; the picker is `ui/progress/apppicker/`.

@@ -1,6 +1,6 @@
 # System — Calendar (`ui/calendar/` + `calendarEntries/` + `notifications/event/`)
 
-**Last verified:** 2026-10-14 (DB v14, u22/u24; fallos-frente-a-stitch) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (DB v15, mejora-visual u12) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Month and week views over a single unified entity (`CalendarEntry`) that represents events,
 tasks, and reminders via an int `type` field. Includes creation (`AddEventActivity`) and the
@@ -92,3 +92,9 @@ or get alarms.
 - Month grid (`cell_month_day`, `bg_calendar_day_selected` / `bg_calendar_day_today`) shares the `calendar_cell_inset`; the grid sits inside the `monthGridCard` card. `dayDetailEmptyText` shows `no_events_today`.
 - WeekView: the 23 colour attributes are set in `fragment_calendar_week.xml`; `ViewStateFactory.kt` no longer uses `Color.WHITE/LTGRAY`; `WeekViewItemAdapter(Context)` picks `bb_on_primary` or `bb_on_surface` from the category colour luminance (threshold 0.4). The "now" line uses `bb_accent_reward`.
 - Forms: `toolbar_close_or_save` has 48dp touch areas (`bg_close_circle_touch`, `bg_save_pill_touch`); the quick-add sheet controls have `minHeight` 48dp.
+
+## mejora-visual redesign (2026-11-11, Last verified: 2026-11-11)
+- **Month cell** (`cell_month_day.xml`): day number, background by focus minutes (`CalendarHeatLevel`: 0, 1-29, 30-89, >= 90), up to 3 dots by type (`cellDot1..3`: task / event / due; reminder only if it fits), today ring, sage fill when selected. `cellEventBar1..3` are gone. `CalendarViewModel.getFocusMinutes()` reads `daily_stat` for the visible month plus the live value for today (IO executor, `postValue`). Cells are 44dp wide (`seventhWidth`) inside a `NestedScrollView`.
+- **Legend** `calendarLegend` under the grid: a `ConstraintLayout` with a `Flow` over four dot + label pairs (`legendTask`, `legendEvent`, `legendDeadline`, `legendFocus`) so it wraps at large text. **Agenda card** `calendarAgendaCard`: weekday + day, "N things · M min planned" (`DayPlan.plannedMinutes`), "+" button `calendarAddEventButton` (was the FAB), rows hour + colour bar + title (`item_day_event.xml`), `EmptyStateView` when the day is empty.
+- Month changes slide the pager page and fade the title/grid (`animateMonthChange`, `ScreenTransitions.periodShift`).
+- Event and task forms plus the bottom sheets are in `architectural_patterns.md` (Bottom sheets).

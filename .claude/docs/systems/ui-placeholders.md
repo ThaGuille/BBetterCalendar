@@ -1,6 +1,6 @@
 # System — UI placeholders (functional-debt ledger)
 
-**Last verified:** 2026-11-11 (DB v15, mejora-visual u1) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (DB v15, mejora-visual u17) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Stitch visual migration (`.claude/plans/migracion-visual-stitch.md`) builds every designed
 element whose data already exists in the DB, and **registers the rest here** instead of bumping
@@ -44,7 +44,7 @@ repository `social/SocialModule` binds (`FEATURE_SOCIAL` first, see `systems/soc
 | id | Date | How |
 |---|---|---|
 | `cycle-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
-| `screen-time-blocked-opens`, `app-detail-blocked-opens`, `screen-time-new-badge` | 2026-11-11 | mejora-visual u9: the tiles and the NEW chip were removed from Screen time and App detail |
+| `screen-time-blocked-opens`, `app-detail-blocked-opens`, `screen-time-new-badge` | 2026-11-11 | Resolved, mejora-visual u9: the tiles and the NEW chip were removed from Screen time and App detail |
 | `progress-share` | 2026-10-19 | F0-u5: ShareCardRenderer + FileProvider |
 | `home-user-name` | 2026-10-20 | F1-u8: `GreetingResolver` (profile name, else local name in `SocialPrefs`, else generic greeting) |
 | `social-focus-invite` | 2026-10-24 | F2-u8: `focusInviteButton` opens `InviteSheet` (`@usuario`, link with copy and share, QR) when signed in with a profile, or the entry router otherwise; markers removed from Java and layout |
@@ -54,8 +54,8 @@ repository `social/SocialModule` binds (`FEATURE_SOCIAL` first, see `systems/soc
 | `social-home-friends` | 2026-10-31 | F4-u6: `homeFriendsCard` shows «N friends studying now» with the real studying friends' avatars and names (`StudyingSummary`), a calm line when nobody studies, an invite line without friends; tap still opens Friends; markers removed |
 | `social-celebration-strip` | 2026-10-31 | F4-u6: `cycleFriendsStrip` shows «Laia and N others still studying · Live» from the real snapshot and is `GONE` when nobody studies; no code marker existed, the data source changed |
 | `home-notification-centre` | 2026-11-02 | F5-u7: the Home bell opens the inbox (`navigation_inbox`, `InboxFragment`) when signed in with a profile; `homeBellDot` shows with unread inbox items or pending requests (`InboxRows.bellCount`, no number); without an account or in release the bell keeps the fixed dot and the "coming soon" toast; markers removed |
-| `progress-tasks-done-approx` | 2026-11-11 | mejora-visual u1: DB v15 adds `calendarEntry.completedAtMillis` (written only by `CompletionStamp`; done rows backfilled with `startMillis` or the migration instant) and `CalendarEntryDAO.countDoneTasksBetween` counts by it; markers removed from Java and layout |
-| `projects-weekly-rhythm` | 2026-11-11 | mejora-visual u11: the fixed "Weekly rhythm is on track" card was removed from the Projects list (`projectsRhythmCard` no longer exists) |
+| `progress-tasks-done-approx` | 2026-11-11 | Resolved, mejora-visual u1: DB v15 adds `calendarEntry.completedAtMillis` (written only by `CompletionStamp`; done rows backfilled with `startMillis` or the migration instant) and `CalendarEntryDAO.countDoneTasksBetween` counts by it; markers removed from Java and layout |
+| `projects-weekly-rhythm` | 2026-11-11 | Resolved, mejora-visual u11: the fixed "Weekly rhythm is on track" card was removed from the Projects list (`projectsRhythmCard` no longer exists) |
 
 ## History
 | Date | Change | Ref |

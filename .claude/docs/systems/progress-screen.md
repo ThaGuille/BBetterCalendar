@@ -1,6 +1,6 @@
 # System — Progress screen (`ui/progress/` + `ui/progress/apppicker/`)
 
-**Last verified:** 2026-10-19 (DB v14, consistency footer) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (DB v15, mejora-visual u7-u9) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Progress tab: a fixed Day/Week/Month + range-stepper header pinned under the toolbar, then
 three stacked, scrolling bands below it. A charts carousel (always renders, no permission needed,
@@ -85,3 +85,9 @@ Plan [`racha-semanal-y-constancia`](../../plans/racha-semanal-y-constancia.md). 
 - Follows the selector like every band: Week/Month = one cell per day, Year = one cell per Monday-week (intensity = active/possible). Built in `refreshOverview` from a single `FocusEventDAO.getActiveDaysSince(previousPeriodStart)` read → `ConsistencyCalculator`; carried by `ProgressOverview.consistency`.
 - Denominator = elapsed days; today counts only once it has a session (no "0/0": shown as "–" on the first day before any session).
 - The rolling "last 28 days" variant (no selector) lives in `FocusStreakPopup`, for future screens without a period selector.
+
+## mejora-visual redesign (2026-11-11, Last verified: 2026-11-11)
+- **Progress** (`progressSummaryCard`): big Focus `StatTileView` with delta pill + `SparkBarsView` (per day; per month in Year), two cells (sessions with mean minutes, tasks done by `completedAtMillis`), consistency footer kept. The "Past 12 weeks" card left the screen (its `trend*` fields stay in `ProgressOverview`). `progressAppsCard` "Tus apps" replaces the blocking card: 7-day mean from `app_usage_daily` plus today live, delta against the previous 7 days only when there is a base, 3 rows with real icons.
+- **All progress** is a vertical list of chart cards (no carousel) built by `AllProgressViewModel` / `AllProgressCards` / `PeriodBuckets` with the chart kit in `ui/common/chart/` (`ChartStyler` plus hand-drawn views: `SparkBarsView`, `CompareBarsView`, `HeatmapView`, `HistogramView`, `DonutView`, ...). Charts animate in with `ChartMotion` and draw statically when animations are off (`Motion.enabled`).
+- **Screen time** and **App detail** (details in `app-limits.md`) read `app_usage_daily` through `UsageInsights`; the blocked-opens tiles and the NEW chip are gone (placeholders resolved).
+- Large text (font_scale 1.3) was walked on every screen in u16/u17: `CompareBarsView` average label has a card-coloured halo, `ProgressRingView` shrinks its text to fit.

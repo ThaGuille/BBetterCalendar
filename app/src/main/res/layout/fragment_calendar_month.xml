@@ -91,46 +91,88 @@
             app:cv_outDateStyle="endOfGrid"
             app:cv_scrollPaged="true" />
 
-        <!-- Leyenda: tipos (puntos) y enfoque (cuadrado teñido). -->
-        <LinearLayout
+        <!-- Leyenda: tipos (puntos) y enfoque (cuadrado teñido). Un Flow envuelve las parejas punto + texto:
+             con letra grande (1.3) las cuatro no caben en una fila y el texto se partia en mitad de la palabra. -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/calendarLegend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
             android:paddingStart="@dimen/spacing_md"
             android:paddingTop="@dimen/spacing_xs"
             android:paddingEnd="@dimen/spacing_md"
             android:paddingBottom="@dimen/spacing_md">
 
-            <View
-                style="@style/Widget.BBetter.CalendarDot"
-                android:backgroundTint="@color/calendar_item_task" />
-            <TextView
-                style="@style/CalendarLegendLabel"
-                android:text="@string/calendar_legend_task" />
+            <LinearLayout
+                android:id="@+id/legendTask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <View
-                style="@style/Widget.BBetter.CalendarDot"
-                android:backgroundTint="@color/calendar_item_event" />
-            <TextView
-                style="@style/CalendarLegendLabel"
-                android:text="@string/calendar_legend_event" />
+                <View
+                    style="@style/Widget.BBetter.CalendarDot"
+                    android:backgroundTint="@color/calendar_item_task" />
+                <TextView
+                    style="@style/CalendarLegendLabel"
+                    android:text="@string/calendar_legend_task" />
+            </LinearLayout>
 
-            <View
-                style="@style/Widget.BBetter.CalendarDot"
-                android:backgroundTint="@color/calendar_item_deadline" />
-            <TextView
-                style="@style/CalendarLegendLabel"
-                android:text="@string/calendar_legend_deadline" />
+            <LinearLayout
+                android:id="@+id/legendEvent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <View
-                style="@style/Widget.BBetter.CalendarDot"
-                android:backgroundTint="@color/bb_cal_focus_3" />
-            <TextView
-                style="@style/CalendarLegendLabel"
-                android:text="@string/calendar_legend_focus" />
-        </LinearLayout>
+                <View
+                    style="@style/Widget.BBetter.CalendarDot"
+                    android:backgroundTint="@color/calendar_item_event" />
+                <TextView
+                    style="@style/CalendarLegendLabel"
+                    android:text="@string/calendar_legend_event" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/legendDeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    style="@style/Widget.BBetter.CalendarDot"
+                    android:backgroundTint="@color/calendar_item_deadline" />
+                <TextView
+                    style="@style/CalendarLegendLabel"
+                    android:text="@string/calendar_legend_deadline" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/legendFocus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    style="@style/Widget.BBetter.CalendarDot"
+                    android:backgroundTint="@color/bb_cal_focus_3" />
+                <TextView
+                    style="@style/CalendarLegendLabel"
+                    android:text="@string/calendar_legend_focus" />
+            </LinearLayout>
+
+            <androidx.constraintlayout.helper.widget.Flow
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="legendTask,legendEvent,legendDeadline,legendFocus"
+                app:flow_horizontalBias="0"
+                app:flow_horizontalStyle="packed"
+                app:flow_wrapMode="chain"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
 

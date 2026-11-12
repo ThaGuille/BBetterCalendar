@@ -4,6 +4,8 @@ The id/selector facts the agent needs so it never re-derives them each run.
 Resource-ids below are the **suffix** after `:id/` — pass them bare to
 `find-node.ps1 -Id <suffix>` (it matches `com.example.bbettercalendar:id/<suffix>`).
 
+**Last verified:** 2026-11-11 (mejora-visual u17: ids of u6-u16 screens walked by the mv-tour recording).
+
 ## App / device facts
 
 | Thing | Value |
@@ -183,7 +185,7 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
 ## Calendar month/week and forms (u22)
 
-- Mes: `calendarModeMonth`, `calendarModeWeek`, `monthGridCard`, `monthPrevButton`, `monthNextButton`, `monthTitleText`, `monthCalendarView`, `legendDay0..6`, `calendarLegend`, `calendarAgendaCard`, `dayDetailTitle`, `dayDetailSubtitle`, `dayDetailEmptyText` (EmptyStateView; su botón `emptyStateAction`), `dayDetailRecycler`, `calendarAddEventButton` (el «+» de la tarjeta, ya no es FAB); celda: `cellDayText`, `cellTodayIndicator`, `cellFocusBg`, `cellDots`, `cellDot1..3` (antes `cellEventBar1..3`); item: `eventColorSwatch`, `eventTitle`, `eventMeta` (antes `eventDescription`), `eventTime`.
+- Mes: `legendTask`, `legendEvent`, `legendDeadline`, `legendFocus` (pairs inside `calendarLegend`), `calendarModeMonth`, `calendarModeWeek`, `monthGridCard`, `monthPrevButton`, `monthNextButton`, `monthTitleText`, `monthCalendarView`, `legendDay0..6`, `calendarLegend`, `calendarAgendaCard`, `dayDetailTitle`, `dayDetailSubtitle`, `dayDetailEmptyText` (EmptyStateView; su botón `emptyStateAction`), `dayDetailRecycler`, `calendarAddEventButton` (el «+» de la tarjeta, ya no es FAB); celda: `cellDayText`, `cellTodayIndicator`, `cellFocusBg`, `cellDots`, `cellDot1..3` (antes `cellEventBar1..3`); item: `eventColorSwatch`, `eventTitle`, `eventMeta` (antes `eventDescription`), `eventTime`.
 - Semana: `calendarWeekRoot`, `weekMonthTitleText`, `weekView` (canvas, sin hijos accesibles por id), `calendarAddEventButton2`.
 - Formularios: `btnClose`, `btnSaveEvent` (disabled until there is a title and, in an event, the end is not before the start), `form_type_selector` (SegmentedControlView Evento/Tarea/Recordatorio; replaces `switch_to_event_button`/`switch_to_task_button`/`notificationsButton`, tap its items by text), `event_title`, `event_start_label`/`event_start_date`/`event_start_hour`, `event_end_label`/`event_end_date`/`event_end_hour`, `task_title`, `task_start_label`/`task_start_date`/`task_start_hour`, `task_duration`, shortcuts `form_shortcut_today`/`form_shortcut_tomorrow`/`form_shortcut_plus_hour`, inline error `form_error`.
 - Hoja rapida (abre `homeAddTaskButton`; u14: handle, shortcuts `quickAddShortcutToday/Tomorrow/PlusHour`, save disabled until a title): `quickAddTitleInput`, `quickAddTimeButton`, `quickAddRepeatButton`, `quickAddTargetInput`, `quickAddMoreOptionsButton`, `quickAddSaveButton`.

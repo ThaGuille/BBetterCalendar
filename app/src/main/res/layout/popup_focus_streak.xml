@@ -2,9 +2,15 @@
 <!-- Calendario de rachas (spec focus-mode-and-streak): marca los días en los que el usuario
      terminó un pomodoro, con la constancia de los últimos 28 días y el objetivo semanal de la
      racha (plan racha-semanal-y-constancia). Se abre desde la tarjeta de racha de Home. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- mejora-visual u17: con letra grande (1.3) la hoja no cabe en pantalla y el boton Cerrar quedaba
+     fuera: el contenido va dentro de un NestedScrollView para poder llegar a el. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -142,3 +148,5 @@
         android:text="@string/focus_streak_close" />
 
 </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

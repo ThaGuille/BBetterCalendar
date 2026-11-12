@@ -218,8 +218,10 @@ def run_step(step, serial, pkg=PKG):
     rest = rest.strip()
     if verb == 'START':
         # applicationId (-n prefix) != namespace (class names): expand ".foo.Bar" against the namespace.
-        cls = f'{NAMESPACE}{rest}' if rest.startswith('.') else rest
-        adb('shell', 'am', 'start', '-n', f'{pkg}/{cls}', serial=serial)
+        # Anything after the component goes to am start as-is (extras: START .configuration.SplashActivity --es k v).
+        comp, *extra = rest.split()
+        cls = f'{NAMESPACE}{comp}' if comp.startswith('.') else comp
+        adb('shell', 'am', 'start', '-n', f'{pkg}/{cls}', *extra, serial=serial)
         return True, f'started {rest}'
     if verb == 'GRANT':
         adb('shell', 'pm', 'grant', pkg, rest, serial=serial)

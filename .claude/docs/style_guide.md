@@ -1,6 +1,6 @@
 # BBetterCalendar — Style Guide
 
-**Last verified:** 2026-10-13 (u24, end of the Stitch visual migration) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (DB v15, mejora-visual u17) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The visual language is **Stitch «Calm Focus»**: dark-first, sage on deep pine, honey amber only for earned moments, one family (Plus Jakarta Sans). Source of truth for look and feel: [`.stitch/DESIGN.md`](../../.stitch/DESIGN.md) and the exported designs in `.stitch/designs/` (PNG) + `.stitch/html/`. History and per-unit decisions: [`migracion-visual-stitch-impl.md`](../plans/migracion-visual-stitch-impl.md); open design questions: [`migracion-visual-stitch-questions.md`](../plans/migracion-visual-stitch-questions.md).
 
@@ -395,3 +395,8 @@ Common patterns you'll see across `res/layout/`:
 - [ ] `tools:text` previews stay in sync with `@string/*` (don't leave stale placeholders).
 - [ ] Strings live in `strings.xml` or `strings_<area>.xml` (EN **and** ES), not inline.
 - [ ] `./gradlew lint` is green; review `UnusedResources` after deleting a screen.
+
+## 9. Charts, celebration and large text (mejora-visual, 2026-11-11)
+- Chart views live in `ui/common/chart/` and take colours from the `bb_*` aliases (grid, average, heat ramp, categorical app colours); they never hardcode hex. Figures use `fontFeatureSettings="tnum"`; data labels are never ellipsized (one-word labels in narrow cells, two lines elsewhere).
+- Everything that animates asks `Motion.enabled(context)` / `Motion.duration(...)` (`ui/common/motion/Motion`), so with system animations off the final state is drawn at once.
+- Large text: screens were walked at font_scale 1.3; touch targets are 48dp (`touch_target_min`), the visible disc may be smaller through an `<inset>` drawable.

@@ -1,6 +1,6 @@
 # System — Projects (`projects/` + `ui/projects/`)
 
-**Last verified:** 2026-10-13 (DB v13) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-11 (DB v15, mejora-visual u11) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The Projects bottom-nav tab: a `Project` entity that groups existing `CalendarEntry` (type
 task) rows via a nullable `projectId` — there is no separate "project item" table. Progress is
@@ -114,3 +114,9 @@ the project's attributed focus minutes surface on Progress.
 | 2026-07-17 | Focus attribution: project items gain `targetMinutes` + `X/Ym` progress + focus-this (binds Home timer via `FocusTarget`, navigates to Home); header Save button replaced by `onPause` auto-persist; ActionBar Up-nav wired | — |
 | 2026-08-29 | Repository layer: new `ProjectsRepository` + `ProjectDAO.observeAllWithCounts()` (cross-table join) replace `ProjectsViewModel`'s manual Observer/recompute and the `refresh()`/`onResume()` polling workaround, which turned out to be a real structural gap (not "InvalidationTracker lag" — see `data-model.md`). `ProjectDetailViewModel`'s enrichment now shares `FocusAttributionRepository.enrich()` with `HomeViewModel` instead of a duplicated private method; all its writes moved to `@DbWriteExecutor`. No schema change. | — |
 | 2026-09-01 | Phase 5 — deadlines stop being inert: `{3d, 1d}` alarms via `ProjectDeadlineScheduler`/`Receiver` (new channel, deep-linking notification), read-only deadline markers on the Calendar, a time-per-project chart page and a project-progress band on Progress. New global nav action `action_global_project_detail`. No schema change. | — |
+
+## mejora-visual redesign (2026-11-11, Last verified: 2026-11-11)
+- **List**: subtitle with plurals ("3 activos · 1 vence esta semana"); card = `projectCardTop` (tap opens the detail; no long-press) with a tinted radial glow, `ProgressRingView` and tasks/time line, plus a separate `ExpandStripView` strip for the tasks. Collapsed "Completados (N)" section, extended FAB "Nuevo proyecto" (`Widget.BBetter.FAB.Extended`), `EmptyStateView` when empty. The fixed "weekly rhythm" card was removed (`projects-weekly-rhythm` resolved).
+- **Detail**: top bar with back + menu (complete, delete), header with 76dp ring, two-line editable name, always-visible due chip that opens the date picker, `StatTileView` cells, quick-add task sheet (`QuickAddTaskSheet`). `ProjectFormat` formats durations and due text.
+- **Completion**: all done-marking sites go through `CompletionStamp` (`completedAtMillis`). "Complete project" shows `CelebrationSheet` once per project id (`CelebrationPrefs`, decision d3).
+- Screen transitions: project card -> detail is a `MaterialContainerTransform` (`transitionName` `bb_project_card_<id>`) with `Hold` on the list (`ui/common/motion/ScreenTransitions`).

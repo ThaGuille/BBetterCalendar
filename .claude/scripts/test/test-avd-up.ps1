@@ -152,9 +152,48 @@ try {
     Check 'sin lease: la para y arranca dos -read-only' (($r.Code -eq 0) -and ($r.Out -match 'restarting api36 read-only') -and ($r.Out -notmatch 'reused') -and ($l.Count -eq 2) -and ($l[0] -match '-read-only') -and ($l[1] -match '-read-only') -and ((Get-Content (Join-Path $state 'adb.log')) -match 'emulator-5554 emu kill')) $r
     Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' } 'ok' @('emulator-5554')
     New-Item -ItemType Directory -Force (Join-Path $tmp 'bbetter\emulator-leases') | Out-Null
-    Set-Content (Join-Path $tmp 'bbetter\emulator-leases\emulator-5554.lock') 'u7 2026-11-13T10:00:00 pid=1'
+    Set-Content (Join-Path $tmp 'bbetter\emulator-leases\emulator-5554.lock') "u7 2026-11-13T10:00:00 pid=$PID"
     $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
     Check 'hermana: con lease: no la toca, sale con 1 y no arranca nada' (($r.Code -eq 1) -and ($r.Out -match 'leased \(u7') -and ((Emu-Launches).Count -eq 0) -and -not ((Get-Content (Join-Path $state 'adb.log')) -match 'emu kill')) $r
+    # F3 / F10: un lease cuyo pid murió (una llamada de with-emulator que cayó) no cuenta como tomado.
+    $dead = Start-Process cmd -ArgumentList '/c exit' -PassThru -WindowStyle Hidden; $dead.WaitForExit()
+    $live = Start-Process cmd -ArgumentList '/c ping -n 40 127.0.0.1 >nul' -PassThru -WindowStyle Hidden
+    Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' } 'ok' @('emulator-5554')
+    New-Item -ItemType Directory -Force (Join-Path $tmp 'bbetter\emulator-leases') | Out-Null
+    Set-Content (Join-Path $tmp 'bbetter\emulator-leases\emulator-5554.lock') "u7 2026-11-13T10:00:00 pid=$($dead.Id)"
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    Check 'F3/F10: con el lease de un pid muerto: no bloquea, la reinicia -read-only y deja dos' (($r.Code -eq 0) -and ($r.Out -match 'restarting api36 read-only') -and ((Emu-Launches).Count -eq 2)) $r
+    Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' } 'ok' @('emulator-5554')
+    New-Item -ItemType Directory -Force (Join-Path $tmp 'bbetter\emulator-leases') | Out-Null
+    Set-Content (Join-Path $tmp 'bbetter\emulator-leases\emulator-5554.lock') "u7 2026-11-13T10:00:00 pid=$($dead.Id) child=$($live.Id)"
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    Check 'F3/F10 hermana: pid muerto pero child= vivo: sigue tomado (exit 1, no arranca nada)' (($r.Code -eq 1) -and ($r.Out -match 'leased') -and ((Emu-Launches).Count -eq 0)) $r
+    Stop-Process -Id $live.Id -Force -ErrorAction SilentlyContinue
+    Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' } 'ok' @('emulator-5554')
+    New-Item -ItemType Directory -Force (Join-Path $tmp 'bbetter\emulator-leases') | Out-Null
+    $f = Join-Path $tmp 'bbetter\emulator-leases\emulator-5554.lock'
+    Set-Content $f 'u8 2026-11-13T07:00:00'
+    (Get-Item $f).LastWriteTime = (Get-Date).AddHours(-3)
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    Check 'F10 hermana: un lease manual (sin pid) de 3 h está abandonado y no bloquea' (($r.Code -eq 0) -and ($r.Out -match 'restarting api36 read-only')) $r
+
+    # F2: dos avd-up -Count 2 a la vez no arrancan cada uno los suyos: el segundo espera y reutiliza lo del primero.
+    '== F2: dos avd-up -Count 2 concurrentes'
+    Reset-State @() @{} 'ok'
+    $o1 = Join-Path $tmp 'p1.txt'; $o2 = Join-Path $tmp 'p2.txt'
+    $a = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $script, '-Count', '2', '-TimeoutSec', '90')
+    $p1 = Start-Process powershell -ArgumentList $a -PassThru -WindowStyle Hidden -RedirectStandardOutput $o1; $null = $p1.Handle
+    $p2 = Start-Process powershell -ArgumentList $a -PassThru -WindowStyle Hidden -RedirectStandardOutput $o2; $null = $p2.Handle
+    $p1.WaitForExit(); $p2.WaitForExit()
+    $r = @{ Out = ((Get-Content $o1 -Raw) + (Get-Content $o2 -Raw)); Code = 0 }
+    Check 'ambos salen con 0 y entre los dos solo arrancan 2 emuladores (el segundo los reutiliza)' (($p1.ExitCode -eq 0) -and ($p2.ExitCode -eq 0) -and ((Emu-Launches).Count -eq 2) -and (([regex]::Matches($r.Out, 'reused')).Count -eq 2)) $r
+    Reset-State @() @{} 'ok'
+    $p1 = Start-Process powershell -ArgumentList (@('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $script, '-Count', '1', '-TimeoutSec', '90')) -PassThru -WindowStyle Hidden -RedirectStandardOutput $o1; $null = $p1.Handle
+    $p2 = Start-Process powershell -ArgumentList (@('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $script, '-Count', '1', '-TimeoutSec', '90')) -PassThru -WindowStyle Hidden -RedirectStandardOutput $o2; $null = $p2.Handle
+    $p1.WaitForExit(); $p2.WaitForExit()
+    $r = @{ Out = ((Get-Content $o1 -Raw) + (Get-Content $o2 -Raw)); Code = 0 }
+    Check 'hermana: dos con -Count 1: un solo arranque' (($p1.ExitCode -eq 0) -and ($p2.ExitCode -eq 0) -and ((Emu-Launches).Count -eq 1)) $r
+
     Reset-State @() @{} 'ok'
     $r = Run-AvdUp @('-TimeoutSec', '60')
     $l = @(Emu-Launches)

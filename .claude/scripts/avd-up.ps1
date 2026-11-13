@@ -31,6 +31,21 @@ $adb = Join-Path $sdk 'platform-tools\adb.exe'
 $emu = Join-Path $sdk 'emulator\emulator.exe'
 $t0 = Get-Date
 
+# Un solo avd-up a la vez: dos unidades que lo lanzan juntas con -Count 2 arrancarían cada una sus emuladores (o una
+# pararía el que la otra está arrancando). Se espera el turno; el candado lo suelta el SO al morir el proceso.
+function Enter-AvdUpLock {
+    $dir = Join-Path $env:LOCALAPPDATA 'bbetter'
+    New-Item -ItemType Directory -Force $dir | Out-Null
+    $limit = (Get-Date).AddSeconds($TimeoutSec + 120)
+    while ($true) {
+        try { return [IO.File]::Open((Join-Path $dir 'avd-up.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
+        catch [IO.IOException] {
+            if ((Get-Date) -gt $limit) { 'AVD NOT READY: another avd-up held the lock for more than {0} s' -f ($TimeoutSec + 120); exit 1 }
+            Start-Sleep -Milliseconds 500
+        }
+    }
+}
+
 function Get-Emulators { @(& $adb devices 2>$null | ForEach-Object { if ($_ -match '^(emulator-\d+)\s+device\b') { $Matches[1] } }) }
 function Get-AvdName([string]$serial) {
     $n = @(& $adb -s $serial emu avd name 2>$null) | Select-Object -First 1
@@ -76,9 +91,17 @@ function Test-WritableRunning {
     }
     return [bool](@($cmds | Where-Object { $_ -match ('-avd\s+' + [regex]::Escape($Avd) + '(\s|$)') -and $_ -notmatch '-read-only' }).Count)
 }
+# La línea de lease de $serial si está VIVA, o $null. Misma regla que with-emulator.py: un lease que nombra procesos
+# (pid=, child=) está vivo mientras alguno corra, tenga la edad que tenga; uno tomado a mano (sin pids) lo está hasta
+# los 45 min (el -StaleMin de emulator-lease). Uno de una llamada que murió no bloquea.
 function Get-Lease([string]$serial) {
     $f = Join-Path $env:LOCALAPPDATA ('bbetter\emulator-leases\{0}.lock' -f $serial)
-    if (Test-Path $f) { (Get-Content $f -TotalCount 1) }
+    if (-not (Test-Path $f)) { return }
+    $first = [string](Get-Content $f -TotalCount 1)
+    $pids = @([regex]::Matches($first, '\b(?:pid|child)=(\d+)') | ForEach-Object { [int]$_.Groups[1].Value })
+    if ($pids.Count) { $live = [bool]($pids | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue }) }
+    else { $live = ((Get-Date) - (Get-Item $f).LastWriteTime).TotalMinutes -lt 45 }
+    if ($live) { $first }
 }
 function Say-Ready([string]$serial, [string]$how) { 'AVD READY {0} ({1}, {2:N0} s)' -f $serial, $how, ((Get-Date) - $t0).TotalSeconds }
 
@@ -113,6 +136,8 @@ function Boot-One([bool]$ro) {
 }
 
 if ($Count -lt 1) { 'AVD NOT READY: -Count must be 1 or more'; exit 1 }
+$script:LockHandle = Enter-AvdUpLock
+$t0 = Get-Date  # el tiempo de espera del candado no gasta -TimeoutSec
 $running = @(Get-Emulators)
 if ($Clean -and $Count -gt 1) { 'AVD NOT READY: -Clean boots one instance; use -Count 1'; exit 1 }
 if ($Clean -and $running) {

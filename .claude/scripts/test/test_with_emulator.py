@@ -109,6 +109,55 @@ with tempfile.TemporaryDirectory() as tmp:
     check('F6: a same-unit lease of another live call is not reused (waits, exit 3)', l.returncode == 3 and 'SERIAL' not in ol and (leases / 'emulator-5554.lock').exists(), ol + el)
     (leases / 'emulator-5554.lock').unlink()
 
+    print('== F6: a live pid is never stale by age alone')
+    old = time.time() - 3 * 3600
+    (leases / 'emulator-5554.lock').write_text(f'um 2026-01-01T00:00:00 pid={os.getpid()}\n')
+    os.utime(leases / 'emulator-5554.lock', (old, old))
+    m = start(leases, 'emulator-5554', py(SHOW), 'un', extra=['--timeout-min', '0.03'])
+    om, em = m.communicate(timeout=30)
+    check('F6: a 3 h old lease whose pid is alive is not taken', m.returncode == 3 and 'SERIAL' not in om, om + em)
+    (leases / 'emulator-5554.lock').write_text('uo 2026-01-01T00:00:00\n')
+    os.utime(leases / 'emulator-5554.lock', (old, old))
+    n = start(leases, 'emulator-5554', py(SHOW), 'up', extra=['--timeout-min', '0.2'])
+    on, en = n.communicate(timeout=30)
+    check('F6: sister: a manual lease (no pid) that old is still taken over by age', 'SERIAL emulator-5554' in on, on + en)
+    (leases / 'emulator-5554.lock').unlink(missing_ok=True)
+
+    print('== F5: the command outlives with-emulator.py itself')
+    pidfile = Path(tmp) / 'child.pid'
+    SLEEP = "import os,sys,time; open(sys.argv[1],'w').write(str(os.getpid())); time.sleep(30)"
+    a5 = start(leases, 'emulator-5554', py(SLEEP) + [str(pidfile)], 'uq')
+    for _ in range(100):
+        if pidfile.exists() and pidfile.read_text() and 'child=' in (leases / 'emulator-5554.lock').read_text():
+            break
+        time.sleep(0.1)
+    child = int(pidfile.read_text())
+    check('F5: the lease names the command (child=)', f'child={child}' in (leases / 'emulator-5554.lock').read_text(), (leases / 'emulator-5554.lock').read_text())
+    a5.kill()
+    a5.communicate()
+    time.sleep(1.5)
+    sys.path.insert(0, str(SCRIPT.parents[1] / 'skills' / 'adb-ui-test' / 'scripts'))
+    from bbadb import pid_alive
+    child_alive = pid_alive(child)
+    b5 = start(leases, 'emulator-5554', py(SHOW), 'ur', extra=['--timeout-min', '0.05'])
+    ob5, eb5 = b5.communicate(timeout=30)
+    check('F5: after with-emulator dies, the command is dead or the lease is still held (never two drivers)',
+          (not child_alive) or ('SERIAL' not in ob5 and b5.returncode == 3), f'child_alive={child_alive} {ob5}{eb5}')
+    if child_alive:
+        os.kill(child, 9)
+    (leases / 'emulator-5554.lock').unlink(missing_ok=True)
+    # sister: a lease whose pid is dead but whose recorded child runs is held; once the child is gone it is taken over
+    live = subprocess.Popen(py('import time; time.sleep(30)'))
+    (leases / 'emulator-5554.lock').write_text(f'us 2026-01-01T00:00:00 pid={dead.pid} child={live.pid}\n')
+    c5 = start(leases, 'emulator-5554', py(SHOW), 'ut', extra=['--timeout-min', '0.03'])
+    oc5, ec5 = c5.communicate(timeout=30)
+    check('F5: sister: dead pid but live child= keeps the lease held', c5.returncode == 3 and 'SERIAL' not in oc5, oc5 + ec5)
+    live.kill()
+    live.wait()
+    d5 = start(leases, 'emulator-5554', py(SHOW), 'uu', extra=['--timeout-min', '0.2'])
+    od5, ed5 = d5.communicate(timeout=30)
+    check('F5: sister: with the child gone too it is taken over', 'SERIAL emulator-5554' in od5, od5 + ed5)
+
     print('== six units race for one abandoned lease')
     # Each run writes when it starts and ends: no two may hold the emulator at the same time.
     marks = Path(tmp) / 'marks.txt'
@@ -134,6 +183,14 @@ with tempfile.TemporaryDirectory() as tmp:
     h = start(leases, 'emulator-5554', py(SHOW), None, env={'ANDROID_SERIAL': 'emulator-5560'})
     oh, eh = h.communicate(timeout=30)
     check('ANDROID_SERIAL already set: runs on it without a lease', 'SERIAL emulator-5560' in oh and not list(leases.glob('*.lock')), oh + eh)
+    h2 = start(leases, 'emulator-5554', py(SHOW), None, env={'ANDROID_SERIAL': 'emulator-5560'})
+    h2.communicate(timeout=30)
+    ph = start(leases, 'emulator-5554', py(SHOW), None, env={'ANDROID_SERIAL': 'R58M12ABCDE'})
+    oph, eph = ph.communicate(timeout=30)
+    check('F12: a pre-set ANDROID_SERIAL that is a phone is refused (exit 2, command never ran)', ph.returncode == 2 and 'SERIAL' not in oph and '--allow-device' in eph, oph + eph)
+    pa = start(leases, 'emulator-5554', py(SHOW), None, extra=['--allow-device'], env={'ANDROID_SERIAL': 'R58M12ABCDE'})
+    opa, epa = pa.communicate(timeout=30)
+    check('F12: sister: --allow-device lets it run on that phone', 'SERIAL R58M12ABCDE' in opa, opa + epa)
     i = start(leases, 'emulator-5554', py("import pathlib,sys; print(pathlib.Path(sys.argv[1]).read_text())") + [str(leases / 'emulator-5554.lock')], None, env={'BT_UNIT': 'u42'})
     oi, ei = i.communicate(timeout=30)
     check('the lease is named after $BT_UNIT when there is no --unit', oi.startswith('u42 '), oi + ei)

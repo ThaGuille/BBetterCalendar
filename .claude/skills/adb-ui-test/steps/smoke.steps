@@ -1,0 +1,12 @@
+# Smoke of the app: opens it, checks Home and the Progress tab by resource id (no language-dependent text).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/smoke.steps
+# Same grammar as a recording; the '<epochMs><TAB>' column is not needed.
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+ASSERT id=homePlayButton
+SHOT smoke-home
+TAP id=navigation_progress
+WAIT 2000
+ASSERT id=periodNavTitle
+SHOT smoke-progress

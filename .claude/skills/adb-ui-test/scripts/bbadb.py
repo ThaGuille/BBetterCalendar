@@ -13,6 +13,7 @@ here and the other way round. Windows keeps using the .ps1 scripts.
     python3 bbadb.py record progress-smoke --tap navigation_progress
     python3 bbadb.py record progress-smoke --assert-id periodNavTitle [--expect Oct]
     python3 bbadb.py replay progress-smoke [--speed 0.5] [--min-settle 400 --max-settle 4000]
+    python3 bbadb.py run-steps steps/smoke.steps [--keep-going] [--save scenario]
     python3 bbadb.py capture --label progress-month-chart
     python3 bbadb.py adb devices          # the adb this script resolved, for ad-hoc calls
 
@@ -21,7 +22,13 @@ ones that touch the app take --pkg. adb is found via $ADB, PATH, $ANDROID_HOME /
 sdk.dir in the repo's local.properties, then ~/Android/Sdk (Linux) or ~/Library/Android/sdk (macOS).
 
 Exit codes (as the .ps1): find-node 0 found, 1 not found, 2 dump failed / usage; record 0 ok, 1 step
-failed, 2 usage; replay 0 PASS, 1 FAIL, 2 no recording; capture 0 saved, 2 failed.
+failed, 2 usage; replay 0 PASS, 1 FAIL, 2 no recording; capture 0 saved, 2 failed; run-steps 0 all steps ok, 1 a step failed, 2 missing or empty file.
+
+run-steps runs a whole file of steps (the recording grammar, the '<epochMs><TAB>' column optional, '#' comments and
+blank lines skipped) with the replay engine and no pacing, prints one '[OK  ]'/'[FAIL]' line per step, stops at the
+first failure after a '<file stem>-fail-<n>' capture (--keep-going goes on), then 'SHEET <png>' (one labelled mosaic of
+every capture of the run, Pillow; 'SHEET none (Pillow missing)' plus the paths without it) and the last line
+'run-steps: <ok>/<total> steps ok in <s> s'. --save <scenario> writes the steps it ran to recordings/<scenario>.log.
 """
 import argparse
 import os
@@ -486,6 +493,140 @@ def replay(a):
     return 1
 
 
+# ---------- run-steps ----------
+
+def parse_steps(text):
+    """Step lines of a steps file or recording: blank lines and '#' comments skipped, the '<epochMs><TAB>' column optional."""
+    steps = []
+    for line in text.splitlines():
+        if re.match(r'^\s*(#|$)', line):
+            continue
+        step = re.sub(r'^\s*\d+\t', '', line).strip()
+        if step:
+            steps.append(step)
+    return steps
+
+
+def app_crashed(serial, pkg):
+    # Only the app's own crashes: the uiautomator shell process can also log a FATAL EXCEPTION
+    # with no "Process: <pkg>" line, which is a harness flake.
+    text = adb('logcat', '-d', '-b', 'crash', serial=serial).stdout or ''
+    return re.search(rf'FATAL EXCEPTION[\s\S]{{0,200}}?Process: {re.escape(pkg)}', text) is not None
+
+
+def _pillow():
+    try:
+        from PIL import Image, ImageDraw
+        return Image, ImageDraw
+    except ImportError:
+        return None
+
+
+def contact_sheet(captures, out_path, cols=4, thumb_w=300, bar=22):
+    """One PNG mosaic of [(label, png path)], each thumbnail under its label. Returns the path, or None without Pillow."""
+    pil = _pillow()
+    if pil is None or not captures:
+        return None
+    Image, ImageDraw = pil
+    tiles = []
+    for label, path in captures:
+        try:
+            im = Image.open(path).convert('RGB')
+        except Exception:  # a capture that is not an image: leave it out of the sheet
+            continue
+        im.thumbnail((thumb_w, thumb_w * 3))
+        tiles.append((label, im))
+    if not tiles:
+        return None
+    cols = min(cols, len(tiles))
+    rows = -(-len(tiles) // cols)
+    cell_w = thumb_w + 8
+    cell_h = max(im.height for _, im in tiles) + bar + 8
+    sheet = Image.new('RGB', (cols * cell_w, rows * cell_h), (32, 32, 32))
+    draw = ImageDraw.Draw(sheet)
+    for i, (label, im) in enumerate(tiles):
+        x, y = (i % cols) * cell_w + 4, (i // cols) * cell_h + 4
+        draw.text((x, y + 4), label[:44], fill=(255, 255, 255))
+        sheet.paste(im, (x, y + bar))
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(out_path, 'PNG')
+    return out_path
+
+
+def run_steps(a):
+    src = Path(a.file)
+    if not src.is_file() and (SKILL / 'steps' / a.file).is_file():
+        src = SKILL / 'steps' / a.file
+    if not src.is_file():
+        print(f'No steps file: {a.file}')
+        return 2
+    steps = parse_steps(src.read_text(encoding='utf-8-sig'))
+    if not steps:
+        print(f'Steps file has no steps: {src}')
+        return 2
+    serial = serial_of(a.serial)
+    stem = src.stem
+    print(f"Running '{stem}' ({len(steps)} steps) on {serial}")
+    adb('logcat', '-c', '-b', 'crash', serial=serial)
+    started = time.monotonic()
+    ok_n, ran, shots = 0, [], []
+    cache, pending_wait = {}, 0
+
+    def saved(line):
+        m = re.match(r'SAVED (.+?) \(\d+ bytes\)', line)
+        return m.group(1) if m else None
+
+    def fail_capture(n):
+        code, out = capture(label=f'{stem}-fail-{n}', serial=serial)
+        path = saved(out[0]) if code == 0 else None
+        if path:
+            shots.append((f'FAIL step {n}', path))
+        print(f'         fail capture: {out[0]}')
+
+    for i, step in enumerate(steps):
+        n = i + 1
+        verb = step.split(' ', 1)[0]
+        nxt = steps[i + 1].split(' ', 1)[0] if i + 1 < len(steps) else ''
+        ran.append((int(time.time() * 1000), step))
+        if verb == 'WAIT' and nxt in ('TAP', 'ASSERT'):
+            pending_wait = int(step.split(' ', 1)[1])
+            cache.clear()
+            ok_n += 1
+            print(f"  [OK  ] {step}  cap for the next {nxt} (not slept)")
+            continue
+        ok, info = run_step(step, serial, a.pkg, wait_ms=pending_wait, cache=cache)
+        pending_wait = 0
+        print(f"  [{'OK  ' if ok else 'FAIL'}] {step}  {info}")
+        if verb == 'SHOT' and ok and saved(info):
+            shots.append((step.partition(' ')[2].strip() or 'shot', saved(info)))
+        crashed = app_crashed(serial, a.pkg)
+        if crashed:
+            print(f'  [FAIL] FATAL EXCEPTION detected in crash log after: {step}')
+        if ok and not crashed:
+            ok_n += 1
+            continue
+        fail_capture(n)
+        if crashed or not a.keep_going:
+            break
+
+    if a.save:
+        rec = SKILL / 'recordings'
+        rec.mkdir(parents=True, exist_ok=True)
+        (rec / f'{a.save}.log').write_text(
+            f'# scenario: {a.save}\n# recorded: {datetime.now(timezone.utc).isoformat()}  from run-steps {stem}\n'
+            + ''.join(f'{t}\t{s}\n' for t, s in ran), encoding='utf-8-sig')  # BOM, as record does
+    sheet = contact_sheet(shots, SKILL / 'captures' / f'{stem}-sheet.png') if shots else None
+    if sheet:
+        print(f'SHEET {sheet}')
+    else:
+        print('SHEET none (Pillow missing)' if shots and _pillow() is None else 'SHEET none (no captures)')
+        for label, path in shots:
+            print(f'  {label}: {path}')
+    print(f'run-steps: {ok_n}/{len(steps)} steps ok in {time.monotonic() - started:.1f} s')
+    return 0 if ok_n == len(steps) else 1
+
+
 # ---------- CLI ----------
 
 def main(argv=None):
@@ -532,6 +673,13 @@ def main(argv=None):
     rp.add_argument('--serial', default='')
     rp.add_argument('--pkg', default=PKG)
 
+    rs = sub.add_parser('run-steps', help='run a whole steps file: one result line per step and one contact sheet')
+    rs.add_argument('file', help='path of the steps file (or a name in steps/)')
+    rs.add_argument('--keep-going', action='store_true', help='run the remaining steps after a failure')
+    rs.add_argument('--save', metavar='SCENARIO', help='also write the steps it ran to recordings/<scenario>.log')
+    rs.add_argument('--serial', default='')
+    rs.add_argument('--pkg', default=PKG)
+
     c = sub.add_parser('capture', help='visual checkpoint PNG (charts/layout only)')
     c.add_argument('--label')
     c.add_argument('--out-dir')
@@ -551,6 +699,8 @@ def main(argv=None):
         return record(a)
     elif a.cmd == 'replay':
         return replay(a)
+    elif a.cmd == 'run-steps':
+        return run_steps(a)
     print('\n'.join(out))
     return code
 

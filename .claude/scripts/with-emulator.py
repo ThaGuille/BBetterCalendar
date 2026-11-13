@@ -118,41 +118,6 @@ def bash():
     return shutil.which('bash') or 'bash'
 
 
-def kill_with_me(proc):
-    """Windows: put the command in a job object that kills it (and its children) when this process dies, however it
-    dies (taskkill, a timeout), so nobody keeps driving an emulator whose lease is gone. Elsewhere the child= pid in
-    the lease keeps the lease alive while the command runs. Best effort."""
-    if os.name != 'nt':
-        return None
-    try:
-        import ctypes
-        from ctypes import wintypes
-        k = ctypes.WinDLL('kernel32', use_last_error=True)
-        k.CreateJobObjectW.restype = wintypes.HANDLE
-        k.SetInformationJobObject.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
-        k.AssignProcessToJobObject.argtypes = [wintypes.HANDLE, wintypes.HANDLE]
-
-        class Basic(ctypes.Structure):
-            _fields_ = [('PerProcessUserTimeLimit', ctypes.c_int64), ('PerJobUserTimeLimit', ctypes.c_int64),
-                        ('LimitFlags', wintypes.DWORD), ('MinimumWorkingSetSize', ctypes.c_size_t),
-                        ('MaximumWorkingSetSize', ctypes.c_size_t), ('ActiveProcessLimit', wintypes.DWORD),
-                        ('Affinity', ctypes.c_size_t), ('PriorityClass', wintypes.DWORD), ('SchedulingClass', wintypes.DWORD)]
-
-        class Ext(ctypes.Structure):
-            _fields_ = [('Basic', Basic), ('Io', ctypes.c_uint64 * 6), ('ProcessMemoryLimit', ctypes.c_size_t),
-                        ('JobMemoryLimit', ctypes.c_size_t), ('PeakProcessMemoryUsed', ctypes.c_size_t),
-                        ('PeakJobMemoryUsed', ctypes.c_size_t)]
-
-        job = k.CreateJobObjectW(None, None)
-        info = Ext()
-        info.Basic.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-        if job and k.SetInformationJobObject(job, 9, ctypes.byref(info), ctypes.sizeof(info)):
-            k.AssignProcessToJobObject(job, int(proc._handle))
-        return job  # never closed: it closes (and kills the command) when this process ends
-    except Exception:
-        return None
-
-
 def run(cmd, serial, lease=None):
     env = dict(os.environ, ANDROID_SERIAL=serial) if serial else dict(os.environ)
     argv = [bash(), '-c', cmd[0]] if len(cmd) == 1 else cmd
@@ -161,7 +126,6 @@ def run(cmd, serial, lease=None):
     except FileNotFoundError:
         log(f'cannot run {argv[0]}')
         return 127
-    job = kill_with_me(proc)  # noqa: F841  (keeps the handle alive)
     if lease is not None:
         try:  # name the command in the lease: it is abandoned only when this process AND the command are gone
             first = (lease.read_text(encoding='ascii', errors='replace').splitlines() or [''])[0]

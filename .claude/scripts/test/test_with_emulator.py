@@ -195,5 +195,29 @@ with tempfile.TemporaryDirectory() as tmp:
     oi, ei = i.communicate(timeout=30)
     check('the lease is named after $BT_UNIT when there is no --unit', oi.startswith('u42 '), oi + ei)
 
+    print('== F14: a daemon the command starts (detached) outlives with-emulator')
+    DAEMON = ("import subprocess,sys,os; f=(0x8|0x200) if os.name=='nt' else 0; "
+              "kw={'creationflags':f} if os.name=='nt' else {'start_new_session':True}; "
+              "d=subprocess.Popen([sys.executable,'-c','import time; time.sleep(60)'],stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,**kw); print('DPID',d.pid)")
+    dm = start(leases, 'emulator-5554', py(DAEMON), 'ud')
+    od, ed = dm.communicate(timeout=30)
+    dpid = int(od.split()[1]) if od.startswith('DPID') else 0
+    time.sleep(1.0)
+    if os.name == 'nt':
+        alive = subprocess.run(['tasklist', '/FI', f'PID eq {dpid}', '/NH'], capture_output=True, text=True).stdout.find(str(dpid)) >= 0 if dpid else False
+    else:
+        try:
+            os.kill(dpid, 0)
+            alive = True
+        except OSError:
+            alive = False
+    check('the detached process is still alive after with-emulator returned', alive, od + ed)
+    if alive:
+        if os.name == 'nt':
+            subprocess.run(['taskkill', '/F', '/PID', str(dpid)], capture_output=True)
+        else:
+            os.kill(dpid, 9)
+
+
 print('test-with-emulator: ' + (f'{fails} failures' if fails else 'all good'))
 sys.exit(1 if fails else 0)

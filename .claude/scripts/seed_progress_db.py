@@ -107,15 +107,18 @@ def session_hours(rng, weekday, count):
     return sorted(weighted_sample(rng, list(weights), list(weights.values()), count))
 
 
-def clear_seeded(c, packages):
+def clear_seeded(c, packages, delete_reunion=False):
     c.execute("DELETE FROM focus_event")
     c.execute("DELETE FROM daily_stat")
     c.execute("DELETE FROM app_usage_daily")
     c.execute("DELETE FROM calendarEntry WHERE projectId != 0")
     c.execute("DELETE FROM project")
     # The mv-tour walk adds one "Reunion" event per run; piled up they fill the day's agenda and scroll the "+"
-    # button out of view for the next run, so the walk is only repeatable if the seed removes them.
-    c.execute("DELETE FROM calendarEntry WHERE projectId = 0 AND title = 'Reunion'")
+    # button out of view for the next run, so the walk is only repeatable if the seed removes them. That is
+    # only safe on an emulator (nobody's real data): on a phone a user's own "Reunion" events must survive,
+    # so the delete is off by default and device_run turns it on only for an 'emulator-' serial.
+    if delete_reunion:
+        c.execute("DELETE FROM calendarEntry WHERE projectId = 0 AND title = 'Reunion'")
     c.executemany("DELETE FROM app_rule WHERE packageName = ?", [(p,) for p in packages])
 
 
@@ -140,9 +143,9 @@ TODAY_TASKS = [
 ]
 
 
-def seed(c, packages, tz, now, rng):
+def seed(c, packages, tz, now, rng, delete_reunion=False):
     """Clears and fills the seeded tables. Returns a dict of counts."""
-    clear_seeded(c, packages)
+    clear_seeded(c, packages, delete_reunion)
     today = now.date()
 
     def at(d, h, m=0):
@@ -421,12 +424,13 @@ def device_run(serial, empty):
         c.close()
         c = pull_db(dev, tmp)
         packages = pick_packages(dev.installed())
+        reunion = str(dev.serial).startswith("emulator-")
         if empty:
-            clear_seeded(c, packages)
+            clear_seeded(c, packages, reunion)
             msg = "device empty ok: cleared focus_event, daily_stat, app_usage_daily, project, project tasks, app_rule of %d apps" % len(packages)
         else:
             tz = dev.timezone()
-            n = seed(c, packages, tz, dt.datetime.now(tz), random.Random(15))
+            n = seed(c, packages, tz, dt.datetime.now(tz), random.Random(15), reunion)
             msg = ("device seed ok: project=%d tasks=%d focus_event=%d app_usage_daily=%d app_rule_limited=%d apps=%s"
                    % (n["project"], n["tasks"], n["focus_event"], n["app_usage_daily"], n["app_rule_limited"],
                       ",".join(packages)))

@@ -169,6 +169,8 @@ Adjust the file and rerun it whole; do not go back to one command per step.
 - No recorded pacing: `--min-settle 0 --max-settle 0`. Restore the old pacing with `--min-settle 400 --max-settle 4000`.
 - `WAIT n` right before a `TAP`/`ASSERT` is a cap, not a sleep: the next step polls for its node up to n ms.
 - `START` runs `am force-stop` before `am start`, so a walk does not depend on the previous install or state.
+- Every START (replay, record, run-steps) force-stops the app first, so a mid-walk START loses the in-memory state. To relaunch with extras, keep the app state in the database or start a separate walk.
+- `ASSERT ... expect~=` is a case-insensitive substring match with `a|b` alternation (e.g. `expect~=Evento|Event`), so a recording survives the emulator language. A literal `|` in an expected text is therefore an alternation separator and cannot be asserted as text. Decision kept because the AVD runs in English.
 - Consecutive `ASSERT`s share one uiautomator dump.
 - The last line carries the elapsed time: `PASS: '<s>' (<n> steps, no crash) in <t> s` / `FAIL: ... in <t> s`.
 - Measured: mv-tour about 257 s before, about 188 s after; progress-smoke 15 s.

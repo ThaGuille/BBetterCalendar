@@ -194,5 +194,43 @@ with tempfile.TemporaryDirectory() as tmp:
     code, out = run('between', [dump(A)])
     check('a step that is not ASSERT/SHOT drops the shared dump', code == 0 and fake.count('shell', 'uiautomator', 'dump') == 3, fake.count('shell', 'uiautomator', 'dump'))
 
+    print('== F1: ASSERT expect~= retries until the text shows')
+    M = lambda t: node('x:id/monthTitleText', t)
+    recording('month', (0, 'WAIT 1200'), (0, 'ASSERT id=monthTitleText expect~=diciembre|december'))
+    code, out = run('month', [dump(M('noviembre')), dump(M('diciembre'))])
+    check('ASSERT expect retries until text matches', code == 0 and sleeps == [0.5] and fake.count('shell', 'uiautomator', 'dump') == 2, (code, sleeps, out))
+    code, out = run('month', [dump(M('noviembre'))])
+    check('a text that never matches fails with the last dump\'s message', code == 1 and "expected~='diciembre|december' but text='noviembre'" in out
+          and abs(sum(sleeps) - (1.2 + 3 * 1.5)) < 1e-6, (code, sleeps, out))
+    recording('monthnow', (0, 'ASSERT id=monthTitleText expect~=noviembre'))
+    code, out = run('monthnow', [dump(M('noviembre'))])
+    check('a text that already matches does not sleep', code == 0 and sleeps == [], (code, sleeps))
+
+    print('== F8: WAIT before a TAP of a node already on screen')
+    recording('twice', (0, 'TAP id=a'), (0, 'WAIT 1200'), (0, 'TAP id=a'))
+    code, out = run('twice', [dump(A)])
+    check('WAIT before TAP of an already present node waits', code == 0 and sleeps == [1.2] and len(fake.taps) == 2, (code, sleeps, fake.taps))
+    recording('seen', (0, 'ASSERT id=a'), (0, 'WAIT 1200'), (0, 'TAP id=a'))
+    code, out = run('seen', [dump(A)])
+    check('a node of the previous ASSERT dump waits too', code == 0 and sleeps == [1.2], (code, sleeps))
+    recording('next', (0, 'TAP id=a'), (0, 'WAIT 3000'), (0, 'TAP id=b'))
+    code, out = run('next', [dump(A), dump(), dump(B)])
+    check('a TAP of an absent-then-appearing node does not sleep the full n', code == 0 and sleeps == [0.5], (code, sleeps))
+
+    print('== F2: the force-stop before START')
+    # A START mid-walk would drop the app's in-memory state. Allowed: setup steps (CLEAR/GRANT/START) before the
+    # first UI step, and a START -S (it already force-stopped the app before the force-stop was added).
+    ui = ('TAP', 'ASSERT', 'SWIPE', 'TYPE', 'KEY', 'SHOT')
+    restarts = []
+    real = Path(__file__).resolve().parents[2] / 'skills' / 'adb-ui-test' / 'recordings'
+    for log in sorted(real.glob('*.log')):
+        seen_ui = False
+        for step in bbadb.parse_steps(log.read_text(encoding='utf-8-sig')):
+            verb = step.split(' ', 1)[0]
+            if verb == 'START' and seen_ui and ' -S' not in step:
+                restarts.append(f'{log.name}: {step}')
+            seen_ui = seen_ui or verb in ui
+    check('no recording restarts mid-walk', real.is_dir() and not restarts, restarts)
+
 print('test-bbadb: ' + (f'{fails} failures' if fails else 'all good'))
 sys.exit(1 if fails else 0)

@@ -1,8 +1,8 @@
 # Que una tarea grande tarde horas, no días
 
-**Status:** proposed
+**Status:** merged
 **Created:** 2026-11-13
-**Last updated:** 2026-11-13 (parte BBetterCalendar hecha en la rama bt/wall-time-bbetter)
+**Last updated:** 2026-11-14 (ejecutado: `big-task-wall-time` fusionada en AI-kit main y `wall-time-bbetter` en este repo; queda la tarea canario de la fase 4)
 
 ## Summary
 

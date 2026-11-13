@@ -89,17 +89,69 @@ def adb(*args, serial=None, binary=False, check=False):
     return r
 
 
+def pid_alive(pid):
+    if os.name == 'nt':
+        import ctypes
+        k = ctypes.WinDLL('kernel32', use_last_error=True)
+        k.OpenProcess.restype = ctypes.c_void_p
+        k.GetExitCodeProcess.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        k.CloseHandle.argtypes = [ctypes.c_void_p]
+        h = k.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return ctypes.get_last_error() == 5  # access denied: it exists; anything else: gone
+        code = ctypes.c_ulong()
+        ok = k.GetExitCodeProcess(h, ctypes.byref(code))
+        k.CloseHandle(h)
+        return bool(ok) and code.value == 259  # STILL_ACTIVE
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def lease_dir():
+    """Where emulator-lease.ps1/.py and with-emulator.py keep their leases (outside the repo, shared by worktrees)."""
+    if os.name == 'nt':
+        return Path(os.environ.get('LOCALAPPDATA', Path.home() / 'AppData' / 'Local')) / 'bbetter' / 'emulator-leases'
+    return Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'bbetter' / 'emulator-leases'
+
+
+def lease_holder(serial, stale_min=45, leases=None):
+    """The unit holding a LIVE lease on `serial`, else None. A lease that names processes (pid=, child=) is live
+    while any of them runs, however old; one without (taken by hand) is live until it is `stale_min` old."""
+    p = (Path(leases) if leases else lease_dir()) / f'{serial}.lock'
+    try:
+        first = (p.read_text(encoding='ascii', errors='replace').splitlines() or [''])[0]
+        age = (time.time() - p.stat().st_mtime) / 60
+    except OSError:
+        return None
+    pids = [int(x) for x in re.findall(r'\b(?:pid|child)=(\d+)\b', first)]
+    live = any(pid_alive(x) for x in pids) if pids else age < stale_min
+    return (first.split(' ')[0] or '?') if live else None
+
+
 def serial_of(requested):
     """An explicit serial wins, then $ANDROID_SERIAL (set by with-emulator.py for a leased emulator);
-    otherwise the first attached emulator-*, never a physical phone."""
+    otherwise an attached emulator-* that no unit has leased (the unit in $BT_UNIT counts as the caller's own),
+    never a physical phone and never a leased emulator: all leased -> exit 2."""
     if requested:
         return requested
     if os.environ.get('ANDROID_SERIAL'):
         return os.environ['ANDROID_SERIAL']
-    for line in adb('devices').stdout.splitlines():
-        m = re.match(r'^(emulator-\S+)\s+device\b', line)
-        if m:
-            return m.group(1)
+    emus = [m.group(1) for line in adb('devices').stdout.splitlines()
+            if (m := re.match(r'^(emulator-\S+)\s+device\b', line))]
+    me = os.environ.get('BT_UNIT')
+    for e in emus:
+        holder = lease_holder(e)
+        if holder is None or (me and holder == me):
+            return e
+    if emus:
+        print('every attached emulator is leased by a unit (' + ', '.join(f'{e} by {lease_holder(e)}' for e in emus)
+              + '): run through with-emulator.py or set ANDROID_SERIAL', file=sys.stderr)
+        raise SystemExit(2)
     return 'emulator-5554'  # no emulator: fail on the adb call instead of driving a phone
 
 

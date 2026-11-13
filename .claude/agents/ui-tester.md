@@ -19,13 +19,15 @@ Pick the command set for the OS you run on (the adb-ui-test skill has the full m
 usually not on PATH there) and `./gradlew` instead of `.\gradlew.bat`.
 
 How to work:
-1. Confirm a device: `adb devices` (expect `emulator-5554 device`). If none, STOP and report
+1. Confirm a device: `adb devices` (expect an `emulator-* device`). Other units may hold leases on some emulators: run every
+   command that touches the device through `python .claude/scripts/with-emulator.py -- <command>` (it leases a free one and
+   sets `ANDROID_SERIAL`), or use the serial it printed. The scripts refuse an emulator someone else has leased. If none, STOP and report
    that an operator must boot/create an AVD — you cannot.
 2. Build + install + grant POST_NOTIFICATIONS + `am start` the launcher (skill step 1–2).
    Build failure → defer to the [`bb-build`](../skills/bb-build/SKILL.md) recovery (`--stop`).
 3. Navigate with `scripts\find-node.ps1 -Id <suffix> -Tap`; assert effects with
    `find-node.ps1 -Id <suffix>` (check returned text) and scan
-   `adb -s emulator-5554 logcat -d -b crash` for `FATAL EXCEPTION`.
+   `adb -s <serial> logcat -d -b crash` (`<serial>` = `$ANDROID_SERIAL` / the leased one) for `FATAL EXCEPTION`.
 4. For a repeatable flow, record with `scripts\bb-adb.ps1` and verify with `scripts\replay.ps1`.
 5. `pm clear io.github.thaguille.bbettercalendar` to reset between scenarios.
 

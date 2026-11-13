@@ -296,6 +296,24 @@ def capture(label=None, out_dir=None, device_path='/sdcard/bb_shot.png', keep=Fa
 
 # ---------- _steps.ps1 ----------
 
+def _in_dump(raw, id_=None, text=None):
+    """Is the node in this (previous) dump? False for no dump."""
+    if not raw:
+        return False
+    try:
+        nodes = ET.fromstring(raw.strip()).iter('node')
+    except ET.ParseError:
+        return False
+    for n in nodes:
+        if id_:
+            if re.search(f':id/{re.escape(id_)}$', n.get('resource-id', '')):
+                return True
+        elif any(t and (t in n.get('text', '').lower() or t in n.get('content-desc', '').lower())
+                 for t in text.lower().split('|')):
+            return True
+    return False
+
+
 def _retry(fn, tries=4, pause=1.5):
     code, out = fn()
     for _ in range(tries - 1):
@@ -325,6 +343,7 @@ def run_step(step, serial, pkg=PKG, wait_ms=0, cache=None):
     `cache`: dict shared by a run so consecutive ASSERTs reuse one dump; any step but ASSERT/SHOT empties it."""
     verb, _, rest = step.strip().partition(' ')
     rest = rest.strip()
+    prior = dict(cache) if cache is not None else {}  # what the previous steps left: its dump, its TAP target
     if cache is not None and verb not in ('ASSERT', 'SHOT'):
         cache.clear()
     if verb == 'START':
@@ -358,31 +377,48 @@ def run_step(step, serial, pkg=PKG, wait_ms=0, cache=None):
         if not m:
             return False, f'bad TAP target: {rest}'
         kw = {'id_': m.group(2)} if m.group(1) == 'id' else {'text': m.group(2)}
+        target = (m.group(1), m.group(2))
         # Retry only while the node is missing (right after launch the dump can be of the splash/old window).
         fn = lambda: find_node(tap=True, serial=serial, **kw)
-        code, out = _poll(fn, wait_ms) if wait_ms else (1, [])
+        if wait_ms and (prior.get('tap') == target or _in_dump(prior.get('raw'), **kw)):
+            # The node is already on the old screen: polling would tap it at once, before the screen changed.
+            # So the WAIT is really slept (it is capped at its own n ms).
+            time.sleep(wait_ms / 1000)
+            code, out = 1, []
+        else:
+            code, out = _poll(fn, wait_ms) if wait_ms else (1, [])
         if code != 0:
             code, out = _retry(fn)
+        if cache is not None:
+            cache['tap'] = target
         return code == 0, '; '.join(out)
     if verb == 'ASSERT':
         m = re.match(r'^id=(\S+)(\s+expect~=(.*))?$', rest)
         if not m:
             return False, f'bad ASSERT: {rest}'
         id_, expect = m.group(1), (m.group(3) or '').strip()
-        fn = lambda: find_node(id_=id_, serial=serial, cache=cache)
-        code, out = _poll(fn, wait_ms) if wait_ms else (1, [])
-        if code != 0:
-            code, out = _retry(fn)
-        if code != 0:
-            return False, f'ASSERT failed: id={id_} not found'
-        if expect:
+        mismatch = []  # the message of the last dump whose node existed but not with the expected text
+
+        def fn():
+            del mismatch[:]
+            code, out = find_node(id_=id_, serial=serial, cache=cache)
+            if code != 0 or not expect:
+                return code, out
             a = re.search(r"text='(.*?)' desc=", '\n'.join(out))
             actual = a.group(1) if a else ''
             # "7 de 12|7 of 12": any alternative matches, so the recording survives the emulator's language.
             if any(alt and alt in actual.lower() for alt in expect.lower().split('|')):
-                return True, f"ASSERT ok: id={id_} text~='{expect}' (actual '{actual}')"
-            return False, f"ASSERT failed: id={id_} expected~='{expect}' but text='{actual}'"
-        return True, f'ASSERT ok: id={id_} exists'
+                return 0, [f"ASSERT ok: id={id_} text~='{expect}' (actual '{actual}')"]
+            mismatch[:] = [f"ASSERT failed: id={id_} expected~='{expect}' but text='{actual}'"]
+            if cache is not None:
+                cache.pop('raw', None)  # the shared dump is stale: the next try must look at a fresh one
+            return 1, out
+        code, out = _poll(fn, wait_ms) if wait_ms else (1, [])
+        if code != 0:
+            code, out = _retry(fn)
+        if code != 0:
+            return False, mismatch[0] if mismatch else f'ASSERT failed: id={id_} not found'
+        return True, out[0] if expect else f'ASSERT ok: id={id_} exists'
     if verb == 'SHOT':
         code, out = capture(label=rest or None, serial=serial)
         return code == 0, '; '.join(out)
@@ -473,7 +509,8 @@ def replay(a):
         if verb == 'WAIT' and nxt in ('TAP', 'ASSERT'):
             # No fixed sleep: the next step polls for its node, and this WAIT only caps how long.
             pending_wait = int(step.split(' ', 1)[1])
-            cache.clear()
+            if nxt == 'ASSERT':
+                cache.clear()  # TAP keeps what the previous step saw: run_step compares its target with it
             print(f"  [OK  ] {step:<40} cap for the next {nxt} (not slept)")
             continue
         ok, info = run_step(step, serial, a.pkg, wait_ms=pending_wait, cache=cache)
@@ -591,7 +628,8 @@ def run_steps(a):
         ran.append((int(time.time() * 1000), step))
         if verb == 'WAIT' and nxt in ('TAP', 'ASSERT'):
             pending_wait = int(step.split(' ', 1)[1])
-            cache.clear()
+            if nxt == 'ASSERT':
+                cache.clear()
             ok_n += 1
             print(f"  [OK  ] {step}  cap for the next {nxt} (not slept)")
             continue

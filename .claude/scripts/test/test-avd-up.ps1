@@ -32,7 +32,7 @@ class P {
       Console.WriteLine(File.Exists(f) ? File.ReadAllText(f).Trim() : "unknown"); Console.WriteLine("OK"); return 0;
     }
     if (c[0] == "emu" && c.Length > 1 && c[1] == "kill") {
-      File.WriteAllLines(Dev(), Devs().Where(d => d != serial).ToArray()); Console.WriteLine("OK: killing emulator, bye bye"); return 0;
+      File.WriteAllLines(Dev(), Devs().Where(d => d != serial).ToArray()); File.Delete(Path.Combine(S, "cmd_" + serial + ".txt")); Console.WriteLine("OK: killing emulator, bye bye"); return 0;
     }
     return 0;
   }
@@ -53,6 +53,7 @@ class P {
     for (int n = 5554; serial == null; n += 2) if (!now.Contains("emulator-" + n)) serial = "emulator-" + n;
     string avd = a[Array.IndexOf(a, "-avd") + 1];
     File.WriteAllText(Path.Combine(S, "avd_" + serial + ".txt"), avd);
+    File.WriteAllText(Path.Combine(S, "cmd_" + serial + ".txt"), string.Join(" ", a));
     string nb = Path.Combine(S, "noboot_" + serial);
     if (mode == "snaphang" && snap) File.WriteAllText(nb, "x"); else if (File.Exists(nb)) File.Delete(nb);
     File.AppendAllText(dev, serial + "\n");
@@ -76,11 +77,18 @@ foreach ($pair in @(@('platform-tools\adb.exe', 'adb.cs'), @('emulator\emulator.
 $env:LOCALAPPDATA = $tmp
 $env:USERPROFILE = Join-Path $tmp 'home'
 $env:FAKE_STATE = $state
+$env:AVDUP_FAKE_PROCS = $state
 New-Item -ItemType Directory -Force (Join-Path $env:USERPROFILE '.android\avd\api36.avd\snapshots\bt_quick') | Out-Null
 
 $fails = 0
-function Reset-State([string[]]$devices = @(), [hashtable]$avds = @{}, [string]$mode = 'ok') {
+# $rw: emuladores ya en marcha CON escritura (sin -read-only), como los deja un arranque normal.
+function Reset-State([string[]]$devices = @(), [hashtable]$avds = @{}, [string]$mode = 'ok', [string[]]$rw = @()) {
+    # Los emuladores falsos de un caso anterior siguen vivos unos segundos leyendo devices.txt: se cierran antes.
+    Get-Process emulator -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$sdk*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 300
     Get-ChildItem $state | Remove-Item -Force
+    Remove-Item -Recurse -Force (Join-Path $tmp 'bbetter') -ErrorAction SilentlyContinue
+    foreach ($k in $rw) { Set-Content (Join-Path $state "cmd_$k.txt") '-avd api36 -no-window -snapshot bt_quick' }
     if ($devices.Count) { Set-Content (Join-Path $state 'devices.txt') $devices } else { Set-Content (Join-Path $state 'devices.txt') @() }
     foreach ($k in $avds.Keys) { Set-Content (Join-Path $state "avd_$k.txt") $avds[$k] }
     Set-Content (Join-Path $state 'emu_mode') $mode
@@ -129,7 +137,7 @@ try {
     Reset-State @() @{} 'ok'
     $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
     $l = @(Emu-Launches)
-    Check 'ninguna en marcha: arranca dos, la primera escribe y la segunda va -read-only' (($r.Code -eq 0) -and ($l.Count -eq 2) -and ($l[0] -notmatch '-read-only') -and ($l[1] -match '-read-only') -and ($r.Out -match 'AVD READY emulator-5554 \(snapshot bt_quick,') -and ($r.Out -match 'AVD READY emulator-5556 \(snapshot bt_quick, read-only')) $r
+    Check 'ninguna en marcha: arranca dos, las dos -read-only (el emulador no deja mezclar)' (($r.Code -eq 0) -and ($l.Count -eq 2) -and ($l[0] -match '-read-only') -and ($l[1] -match '-read-only') -and ($r.Out -match 'AVD READY emulator-5554 \(snapshot bt_quick, read-only') -and ($r.Out -match 'AVD READY emulator-5556 \(snapshot bt_quick, read-only')) $r
     Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' }
     $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
     $l = @(Emu-Launches)
@@ -137,6 +145,20 @@ try {
     Reset-State @('emulator-5554', 'emulator-5556') @{ 'emulator-5554' = 'api36'; 'emulator-5556' = 'api36' }
     $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
     Check 'hermana: las dos en marcha: no arranca nada' (($r.Code -eq 0) -and ((Emu-Launches).Count -eq 0) -and (([regex]::Matches($r.Out, 'reused')).Count -eq 2)) $r
+    '== -Count 2 con una instancia que escribe (la de un arranque normal)'
+    Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' } 'ok' @('emulator-5554')
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    $l = @(Emu-Launches)
+    Check 'sin lease: la para y arranca dos -read-only' (($r.Code -eq 0) -and ($r.Out -match 'restarting api36 read-only') -and ($r.Out -notmatch 'reused') -and ($l.Count -eq 2) -and ($l[0] -match '-read-only') -and ($l[1] -match '-read-only') -and ((Get-Content (Join-Path $state 'adb.log')) -match 'emulator-5554 emu kill')) $r
+    Reset-State @('emulator-5554') @{ 'emulator-5554' = 'api36' } 'ok' @('emulator-5554')
+    New-Item -ItemType Directory -Force (Join-Path $tmp 'bbetter\emulator-leases') | Out-Null
+    Set-Content (Join-Path $tmp 'bbetter\emulator-leases\emulator-5554.lock') 'u7 2026-11-13T10:00:00 pid=1'
+    $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
+    Check 'hermana: con lease: no la toca, sale con 1 y no arranca nada' (($r.Code -eq 1) -and ($r.Out -match 'leased \(u7') -and ((Emu-Launches).Count -eq 0) -and -not ((Get-Content (Join-Path $state 'adb.log')) -match 'emu kill')) $r
+    Reset-State @() @{} 'ok'
+    $r = Run-AvdUp @('-TimeoutSec', '60')
+    $l = @(Emu-Launches)
+    Check 'hermana: -Count 1 sigue arrancando con escritura' (($r.Code -eq 0) -and ($l.Count -eq 1) -and ($l[0] -notmatch '-read-only')) $r
     Reset-State @('emulator-5554') @{ 'emulator-5554' = 'Pixel_other' }
     $r = Run-AvdUp @('-Count', '2', '-TimeoutSec', '60')
     $l = @(Emu-Launches)
@@ -146,6 +168,8 @@ try {
     Check '-Clean con -Count 2: se niega sin arrancar nada' (($r.Code -eq 1) -and ((Emu-Launches).Count -eq 0)) $r
 }
 finally {
+    Get-Process emulator -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "$sdk*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 300
     Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
 }
 if ($fails) { "test-avd-up: $fails fallos"; exit 1 }

@@ -154,26 +154,41 @@ def find_node(id_=None, text=None, tap=False, list_=False, serial=None, dump_pat
     if not id_ and not text:
         return 2, ['Provide --id, --text, or --list.']
 
-    match = None
-    for n in nodes:
-        if id_:
-            rid = n.get('resource-id', '')
-            if rid and re.search(f':id/{re.escape(id_)}$', rid):
-                match = n
-                break
-        else:
-            t = text.lower()
-            if t in n.get('text', '').lower() or t in n.get('content-desc', '').lower():
-                match = n
-                break
+    def search(nodes):
+        for n in nodes:
+            if id_:
+                rid = n.get('resource-id', '')
+                if rid and re.search(f':id/{re.escape(id_)}$', rid):
+                    return n
+            else:
+                # "Evento|Event": any alternative matches, so a recording survives the emulator's language.
+                for t in text.lower().split('|'):
+                    if t and (t in n.get('text', '').lower() or t in n.get('content-desc', '').lower()):
+                        return n
+        return None
 
+    match = search(nodes)
     selector = f'id={id_}' if id_ else f"text~='{text}'"
+    note = []
+    # A loaded host (two emulators at once) makes Android show "System UI / <app> isn't responding" over the app.
+    # The app behind it is fine: tap "Wait" once and look again.
+    wait = None if match is not None else next(
+        (n for n in nodes if n.get('resource-id', '') == 'android:id/aerr_wait'), None)
+    if wait is not None and center(wait.get('bounds')):
+        adb('shell', 'input', 'tap', *center(wait.get('bounds')), serial=serial)
+        note = ["DISMISSED system not-responding dialog (Wait)"]
+        time.sleep(1)
+        raw = ui_dump(serial, dump_path)
+        try:
+            match = search(list(ET.fromstring(raw.strip()).iter('node'))) if raw else None
+        except ET.ParseError:
+            match = None
     if match is None:
-        return 1, [f'NOT FOUND: {selector}']
+        return 1, note + [f'NOT FOUND: {selector}']
     c = center(match.get('bounds'))
     if not c:
         return 1, [f"FOUND {selector} but bounds unparseable: {match.get('bounds')}"]
-    out = [f"FOUND {selector}  center=({c[0]},{c[1]})  text='{match.get('text', '')}' "
+    out = note + [f"FOUND {selector}  center=({c[0]},{c[1]})  text='{match.get('text', '')}' "
            f"desc='{match.get('content-desc', '')}'  enabled={match.get('enabled', '')}"]
     if tap:
         adb('shell', 'input', 'tap', c[0], c[1], serial=serial)

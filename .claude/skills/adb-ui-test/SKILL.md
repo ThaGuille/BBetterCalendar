@@ -25,6 +25,7 @@ it finds (`$ADB`, PATH, `$ANDROID_HOME`, `local.properties` `sdk.dir`, `~/Androi
 | `.\bb-adb.ps1 -Scenario S -Init` | `python3 bbadb.py record S --init` |
 | `.\bb-adb.ps1 -Scenario S -Tap X` (`-Start`, `-Grant`, `-Clear`, `-TapText`, `-Type`, `-Key`, `-Swipe`, `-Wait`, `-AssertId X -Expect Y`, `-Shot L`) | `python3 bbadb.py record S --tap X` (`--start`, `--grant`, `--clear`, `--tap-text`, `--type`, `--key`, `--swipe x1 y1 x2 y2 ms`, `--wait`, `--assert-id X --expect Y`, `--shot L`) |
 | `.\replay.ps1 S [-Speed 0.5]` | `python3 bbadb.py replay S [--speed 0.5]` |
+| Text selectors (`-Text`, `-TapText`, `TAP text=` in a recording) match text or content-desc as a substring; `Evento\|Event` matches either, so a recording works whatever the emulator's language (the AVD runs in English). Prefer ids; use `\|` for app or segment labels that have no id | (same) |
 | `.\capture-screen.ps1 -Label L` | `python3 bbadb.py capture --label L` |
 | `adb -s emulator-5554 …` | `python3 bbadb.py adb -s emulator-5554 …` |
 | `.\gradlew.bat assembleDebug`, `app\build\…` | `./gradlew assembleDebug`, `app/build/…` |
@@ -47,13 +48,15 @@ re-derive ids.
     If the snapshot boot fails it falls back once to a cold boot. `avd-up` does **not** lease: when several units
     share emulators, take the lease with `.claude\scripts\emulator-lease.ps1 -Acquire` after it.
   - **Several units at once (parallel big-task units):** `avd-up.ps1 -Count 2` keeps two instances of `api36`
-    running (it reuses the ones already up; the extra one boots `-read-only`, which needs no extra disk and loses its
-    state when it stops). Then wrap each device command in `python .claude\scripts\with-emulator.py -- "<cmd>"`:
+    running (with several, the emulator requires `-read-only` on all of them: they need no extra disk and lose their
+    state when they stop; a writable one already up is restarted read-only unless a unit holds its lease). Then wrap each device command in `python .claude\scripts\with-emulator.py -- "<cmd>"`:
     it leases a free emulator, sets `ANDROID_SERIAL` for the command and gives the lease back when it ends, waiting
     when both are busy. `adb`, `gradlew installDebug`, `bbadb.py`, the `.ps1` scripts here and
     `seed_progress_db.py` all follow `ANDROID_SERIAL`, so never write a fixed `-s emulator-5554` into such a command.
     With two emulators attached, a bare `adb shell …` outside the wrapper fails with "more than one device":
-    that is the guard, not a bug. For several commands by hand (recording a flow), take one with
+    that is the guard, not a bug. Two emulators load the host enough that Android may show "System UI isn't
+    responding" over the app: when a lookup misses, `find-node` / `bbadb.py` tap its "Wait" once and look again
+    (the step prints `DISMISSED system not-responding dialog`). For several commands by hand (recording a flow), take one with
     `emulator-lease … -Acquire`, set `ANDROID_SERIAL` (or pass `-Serial`) and release it at the end.
     Add `-Clean` only when a check needs a clean boot (`-no-snapshot`, ~50-60 s cold; it refuses while any emulator
     is attached: `adb -s <serial> emu kill` it first or lease another). Never boot the

@@ -111,16 +111,37 @@ if (-not $Id -and -not $Text) {
     exit 2
 }
 
-$match = $null
-foreach ($n in $nodes) {
-    if ($Id) {
-        $rid = $n.GetAttribute('resource-id')
-        if ($rid -and ($rid -match ":id/$([regex]::Escape($Id))$")) { $match = $n; break }
-    } elseif ($Text) {
-        $txt  = $n.GetAttribute('text')
-        $desc = $n.GetAttribute('content-desc')
-        if (($txt -and $txt.ToLower().Contains($Text.ToLower())) -or
-            ($desc -and $desc.ToLower().Contains($Text.ToLower()))) { $match = $n; break }
+function Find-Match($nodes) {
+    foreach ($n in $nodes) {
+        if ($Id) {
+            $rid = $n.GetAttribute('resource-id')
+            if ($rid -and ($rid -match ":id/$([regex]::Escape($Id))$")) { return $n }
+        } elseif ($Text) {
+            $txt  = $n.GetAttribute('text')
+            $desc = $n.GetAttribute('content-desc')
+            # "Evento|Event": any alternative matches, so a recording survives the emulator's language.
+            foreach ($t in ($Text.ToLower() -split '\|')) {
+                if ($t -and (($txt -and $txt.ToLower().Contains($t)) -or ($desc -and $desc.ToLower().Contains($t)))) { return $n }
+            }
+        }
+    }
+    return $null
+}
+
+$match = Find-Match $nodes
+# A loaded host (two emulators at once) makes Android show "System UI / <app> isn't responding" over the app.
+# The app behind it is fine: tap "Wait" once and look again.
+if (-not $match) {
+    $wait = $doc.SelectSingleNode("//node[@resource-id='android:id/aerr_wait']")
+    $wc = if ($wait) { Get-Center $wait.GetAttribute('bounds') } else { $null }
+    if ($wc) {
+        & adb -s $Serial shell input tap $wc[0] $wc[1] | Out-Null
+        Write-Output "DISMISSED system not-responding dialog (Wait)"
+        Start-Sleep -Seconds 1
+        $rawXml = Invoke-UiDump
+        if ($rawXml) {
+            try { [xml]$doc = $rawXml; $match = Find-Match $doc.SelectNodes('//node') } catch { $match = $null }
+        }
     }
 }
 

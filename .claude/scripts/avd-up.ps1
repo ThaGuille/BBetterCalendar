@@ -15,8 +15,9 @@
     y cada «arranque rápido» acababa en uno en frío; por eso se usa uno con nombre propio.
 
     -Count N deja N instancias del MISMO AVD en marcha (para unidades en paralelo): reutiliza las que ya corren y arranca
-    las que faltan una tras otra. Solo una instancia puede escribir en el AVD; las demás arrancan con -read-only (sin
-    disco extra; lo que pase en ellas se pierde al apagarlas, y no pueden guardar el snapshot). Cada unidad toma la suya
+    las que faltan una tras otra. Con varias, el emulador exige -read-only en TODAS (con una que escribe no arranca
+    ninguna más): todas arrancan así, y una que ya corría con escritura se reinicia -read-only si nadie tiene su lease
+    (si lo tiene, sale con 1). Lo que pase en una -read-only se pierde al apagarla y no puede guardar el snapshot. Cada unidad toma la suya
     con .claude\scripts\with-emulator.py (o emulator-lease.ps1). -Clean solo con -Count 1.
 
     Uso:  powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1 [-Avd api36] [-Count 1] [-Clean] [-Window] [-TimeoutSec 300] [-SnapshotTimeoutSec 90]
@@ -64,6 +65,21 @@ function Stop-Emu([string]$serial) {
     if ($serial) { & $adb -s $serial emu kill 2>$null | Out-Null }
     if ($script:EmuProc -and -not $script:EmuProc.WaitForExit(20000)) { Stop-Process -Id $script:EmuProc.Id -Force -ErrorAction SilentlyContinue }
 }
+# Instancias de -Avd en marcha CON escritura (sin -read-only). El emulador no deja mezclar: con una así no arranca
+# ninguna otra, ni siquiera -read-only. Lo dice la línea de comandos del proceso; los tests (AVDUP_FAKE_PROCS) leen
+# los cmd_*.txt que deja su emulador falso.
+function Test-WritableRunning {
+    if ($env:AVDUP_FAKE_PROCS) {
+        $cmds = @(Get-ChildItem $env:AVDUP_FAKE_PROCS -Filter 'cmd_*.txt' -ErrorAction SilentlyContinue | ForEach-Object { Get-Content $_.FullName -Raw })
+    } else {
+        $cmds = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'qemu-system%'" -ErrorAction SilentlyContinue | ForEach-Object { $_.CommandLine })
+    }
+    return [bool](@($cmds | Where-Object { $_ -match ('-avd\s+' + [regex]::Escape($Avd) + '(\s|$)') -and $_ -notmatch '-read-only' }).Count)
+}
+function Get-Lease([string]$serial) {
+    $f = Join-Path $env:LOCALAPPDATA ('bbetter\emulator-leases\{0}.lock' -f $serial)
+    if (Test-Path $f) { (Get-Content $f -TotalCount 1) }
+}
 function Say-Ready([string]$serial, [string]$how) { 'AVD READY {0} ({1}, {2:N0} s)' -f $serial, $how, ((Get-Date) - $t0).TotalSeconds }
 
 $snapDir = Join-Path $env:USERPROFILE (".android\avd\{0}.avd\snapshots\{1}" -f $Avd, $Snapshot)
@@ -104,6 +120,21 @@ if ($Clean -and $running) {
     exit 1
 }
 $have = @()
+# Varias instancias: el emulador exige -read-only en TODAS. Una instancia con escritura (la de un arranque normal) se
+# reinicia -read-only, salvo que una unidad la tenga tomada con su lease.
+if ($Count -gt 1 -and (Test-WritableRunning)) {
+    $mine = @($running | Where-Object { (Get-AvdName $_) -eq $Avd })
+    $held = @($mine | Where-Object { Get-Lease $_ })
+    if ($held.Count) {
+        'AVD NOT READY: {0} runs {1} with write access and is leased ({2}); several instances need all of them -read-only. Release it or wait, then run again' -f $held[0], $Avd, (Get-Lease $held[0])
+        exit 1
+    }
+    foreach ($r in $mine) { & $adb -s $r emu kill 2>$null | Out-Null }
+    $w0 = Get-Date
+    while ((@(Get-Emulators | Where-Object { $mine -contains $_ }).Count -or (Test-WritableRunning)) -and ((Get-Date) - $w0).TotalSeconds -lt 30) { Start-Sleep -Milliseconds 500 }
+    'restarting {0} read-only: {1} ran with write access' -f $Avd, ($mine -join ', ')
+    $running = @(Get-Emulators)
+}
 if (-not $Clean) {
     foreach ($r in $running) {
         if ($have.Count -ge $Count) { break }
@@ -111,7 +142,7 @@ if (-not $Clean) {
     }
 }
 while ($have.Count -lt $Count) {
-    $b = Boot-One ($have.Count -gt 0)
+    $b = Boot-One ($Count -gt 1)
     if (-not $b) {
         'AVD NOT READY after {0} s ({1} of {2} ready; adb devices: {3})' -f $TimeoutSec, $have.Count, $Count, (@(Get-Emulators) -join ', ')
         exit 1

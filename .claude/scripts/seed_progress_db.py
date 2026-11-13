@@ -21,7 +21,8 @@ Usage (Windows or Linux; `adb` on PATH, or ANDROID_HOME/ANDROID_SDK_ROOT set):
       One command on the emulator: force-stops the app, starts it once if its database does not exist
       yet, pulls eventDB, seeds it, pushes it back (removing -wal/-shm), grants usage access
       (appops GET_USAGE_STATS allow) and POST_NOTIFICATIONS. Prints a line starting 'device seed ok'.
-      Without --serial it uses emulator-5554, or the only emulator-* attached; it never picks a
+      Without --serial it uses $ANDROID_SERIAL (with-emulator.py sets it to the emulator it leased),
+      else the only emulator-* attached, and refuses when there are several; it never picks a
       physical phone on its own (pass --serial for that).
   python .claude/scripts/seed_progress_db.py --device --empty [--serial S]
       Same flow but only clears the seeded tables (the empty-state screens). Prints 'device empty ok'.
@@ -333,8 +334,9 @@ class Device:
         out = subprocess.run([self.adb, "devices"], capture_output=True).stdout.decode()
         devs = [l.split()[0] for l in out.splitlines()[1:] if l.strip().endswith("device")]
         emus = [d for d in devs if d.startswith("emulator-")]
-        if "emulator-5554" in devs:
-            return "emulator-5554"
+        # Parallel units each run on the emulator with-emulator.py leased them; never guess between two.
+        if os.environ.get("ANDROID_SERIAL"):
+            return os.environ["ANDROID_SERIAL"]
         if len(emus) == 1:
             return emus[0]
         sys.exit("no unambiguous emulator attached (devices: %s); start one or pass --serial" % (devs or "none"))
@@ -367,6 +369,19 @@ def pick_packages(installed):
     return chosen[:6]
 
 
+def pull_db(dev, tmp):
+    """Copies eventDB (and its -wal/-shm) from the device into tmp and opens it."""
+    for n in ("eventDB", "eventDB-wal", "eventDB-shm"):
+        if os.path.exists(os.path.join(tmp, n)):
+            os.remove(os.path.join(tmp, n))
+    names = [n for n in ("eventDB", "eventDB-wal", "eventDB-shm") if n in dev.run_as("ls databases").split()]
+    for n in names:
+        data = dev.raw("exec-out", "run-as %s cat databases/%s" % (APP_ID, n), binary=True)
+        with open(os.path.join(tmp, n), "wb") as f:
+            f.write(data)
+    return sqlite3.connect(os.path.join(tmp, "eventDB"))
+
+
 def device_run(serial, empty):
     dev = Device(serial)
     if APP_ID not in dev.installed():
@@ -384,13 +399,24 @@ def device_run(serial, empty):
         dev.shell("am force-stop " + APP_ID)
     tmp = tempfile.mkdtemp(prefix="bb-seed-")
     try:
-        names = [n for n in ("eventDB", "eventDB-wal", "eventDB-shm") if n in dev.run_as("ls databases").split()]
-        for n in names:
-            data = dev.raw("exec-out", "run-as %s cat databases/%s" % (APP_ID, n), binary=True)
-            with open(os.path.join(tmp, n), "wb") as f:
-                f.write(data)
-        local = os.path.join(tmp, "eventDB")
-        c = sqlite3.connect(local)
+        with open(SCHEMA_15, encoding="utf-8") as f:
+            want = json.load(f)["database"]["version"]
+        # A database older than the build (an emulator booted from an older snapshot keeps the old app's data):
+        # the app migrates it the first time it opens, so it is opened once before seeding.
+        for attempt in range(16):
+            c = pull_db(dev, tmp)
+            have = c.execute("PRAGMA user_version").fetchone()[0]
+            if have >= want:
+                break
+            c.close()
+            if attempt == 0:
+                dev.shell("am start -n " + SPLASH)
+            time.sleep(2)
+        else:
+            sys.exit("the app did not migrate its database to version %d in 30 s (it is at %d)" % (want, have))
+        dev.shell("am force-stop " + APP_ID)
+        c.close()
+        c = pull_db(dev, tmp)
         packages = pick_packages(dev.installed())
         if empty:
             clear_seeded(c, packages)
@@ -406,7 +432,7 @@ def device_run(serial, empty):
             p = os.path.join(tmp, stale)
             if os.path.exists(p):
                 os.remove(p)
-        dev.raw("push", local, "/data/local/tmp/eventDB")
+        dev.raw("push", os.path.join(tmp, "eventDB"), "/data/local/tmp/eventDB")
         dev.run_as("rm -f databases/eventDB-wal databases/eventDB-shm; cp /data/local/tmp/eventDB databases/eventDB")
         dev.shell("rm -f /data/local/tmp/eventDB")
         dev.shell("appops set %s GET_USAGE_STATS allow" % APP_ID)
@@ -421,7 +447,7 @@ def device_run(serial, empty):
 def main():
     ap = argparse.ArgumentParser(description="Seed demo data (schema v15). See the module docstring.")
     ap.add_argument("--device", action="store_true", help="seed the emulator in one command")
-    ap.add_argument("--serial", help="adb serial (default: emulator-5554 or the only emulator)")
+    ap.add_argument("--serial", help="adb serial (default: $ANDROID_SERIAL, else the only emulator)")
     ap.add_argument("--empty", action="store_true", help="only clear the seeded tables")
     ap.add_argument("--self-test", action="store_true", help="offline check against 15.json")
     ap.add_argument("--db", default="eventDB", help="pulled database file (local mode)")

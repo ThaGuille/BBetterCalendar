@@ -16,7 +16,7 @@
 1794420285308	TAP id=screenTimeAllowedEdit
 1794420288134	WAIT 2500
 1794420290642	ASSERT id=app_picker_title expect~=siempre permitidas
-1794420293221	TAP text=Ajustes
+1794420293221	TAP text=Calendar
 1794420294123	WAIT 600
 1794420294858	SHOT mv-u10-picker
 1794420297472	TAP id=app_picker_save
@@ -35,7 +35,7 @@
 1794420330654	TAP id=screenTimeAllowedAdd
 1794420333512	WAIT 2500
 1794420336060	ASSERT id=app_picker_title expect~=siempre permitidas
-1794420338713	TAP text=Ajustes
+1794420338713	TAP text=Calendar
 1794420339621	WAIT 600
 1794420342322	TAP id=app_picker_save
 1794420344799	WAIT 2000

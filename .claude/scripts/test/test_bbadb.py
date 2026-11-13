@@ -6,7 +6,10 @@ leases live in a temp folder.
 Covers serial_of (never a leased emulator), find_node's "a|b" text alternatives and the dismissal of the
 "isn't responding" dialog (android:id/aerr_wait). Exit 1 when a check fails.
 """
+import contextlib
+import io
 import os
+import re
 import sys
 import tempfile
 import time
@@ -39,9 +42,13 @@ class FakeAdb:
     """adb stand-in: `devices` lists emulators, `cat` returns the next canned dump, `tap` is recorded."""
 
     def __init__(self, devices=(), dumps=()):
-        self.devices, self.dumps, self.taps = list(devices), list(dumps), []
+        self.devices, self.dumps, self.taps, self.calls = list(devices), list(dumps), [], []
+
+    def count(self, *prefix):
+        return sum(1 for c in self.calls if tuple(c[:len(prefix)]) == prefix)
 
     def __call__(self, *args, serial=None, binary=False, check=False):
+        self.calls.append(args)
         out = ''
         if args[:1] == ('devices',):
             out = 'List of devices attached\n' + ''.join(f'{d}\tdevice\n' for d in self.devices)
@@ -52,7 +59,17 @@ class FakeAdb:
         return SimpleNamespace(stdout=out, stderr='', returncode=0)
 
 
-bbadb.time.sleep = lambda *_: None
+# Fake clock: sleeping advances it, so the sleeps a run asks for are countable and never really wait.
+sleeps, clock = [], [0.0]
+
+
+def fake_sleep(s):
+    sleeps.append(s)
+    clock[0] += s
+
+
+bbadb.time.sleep = fake_sleep
+bbadb.time.monotonic = lambda: clock[0]
 for v in ('ANDROID_SERIAL', 'BT_UNIT'):
     os.environ.pop(v, None)
 
@@ -107,6 +124,75 @@ with tempfile.TemporaryDirectory() as tmp:
     fake = bbadb.adb = FakeAdb(['emulator-5554'], [dump(wait + target)])
     code, out = bbadb.find_node(id_='periodNavTitle', serial='emulator-5554')
     check('the node is already there: the dialog is not touched', code == 0 and not fake.taps, (code, out, fake.taps))
+
+    print('== replay: pacing, force-stop, WAIT as a cap, shared dumps')
+    rec = Path(tmp) / 'recordings'
+    rec.mkdir()
+    bbadb.SKILL = Path(tmp)
+    bbadb.capture = lambda label=None, **_: (0, [f'SAVED {label}'])
+    os.environ['ANDROID_SERIAL'] = 'emulator-5554'
+    A, B, C = node('x:id/a', 'Oct'), node('x:id/b', 'two'), node('x:id/c', 'three')
+
+    def recording(name, *steps):
+        t = 1000
+        lines = []
+        for gap, step in steps:
+            t += gap
+            lines.append(f'{t}\t{step}')
+        (rec / f'{name}.log').write_text('# scenario\n' + '\n'.join(lines) + '\n', encoding='utf-8')
+
+    def run(name, dumps, *flags):
+        global fake
+        fake = bbadb.adb = FakeAdb(['emulator-5554'], dumps)
+        del sleeps[:]
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = bbadb.main(['replay', name, *flags])
+        return code, buf.getvalue()
+
+    recording('pace', (0, 'START .configuration.SplashActivity'), (2000, 'TAP id=a'), (100, 'TAP id=b'), (9000, 'ASSERT id=c'))
+    code, out = run('pace', [dump(A, B, C)])
+    check('replay defaults: no recorded pacing', code == 0 and sleeps == [], (code, sleeps))
+    last = out.strip().splitlines()[-1]
+    check('the last line carries the elapsed time', re.fullmatch(r"PASS: 'pace' \(4 steps, no crash\) in \d+(\.\d+)? s", last) is not None, last)
+    code, out = run('pace', [dump(A, B, C)], '--min-settle', '400', '--max-settle', '4000')
+    check('--min-settle 400 --max-settle 4000 restores the pacing', sleeps == [2.0, 0.4, 4.0], sleeps)
+    code, out = run('pace', [dump(A)])
+    check('a failing run says FAIL with its elapsed time', code == 1 and re.fullmatch(
+        r"FAIL: 'pace' had 2 failing step\(s\) in \d+(\.\d+)? s\. See above\.", out.strip().splitlines()[-1]) is not None, out)
+
+    recording('start', (0, 'START .configuration.SplashActivity --es k v'), (0, 'ASSERT id=a'))
+    code, out = run('start', [dump(A)])
+    names = [c[:3] for c in fake.calls if c[:2] == ('shell', 'am')]
+    check('START force-stops the app before am start', code == 0 and names == [('shell', 'am', 'force-stop'), ('shell', 'am', 'start')]
+          and ('shell', 'am', 'force-stop', bbadb.PKG) in fake.calls, fake.calls)
+    fake = bbadb.adb = FakeAdb(['emulator-5554'], [dump(A)])
+    bbadb.run_step('START .main.MainActivity', 'emulator-5554')
+    check('run_step (record) force-stops too', fake.count('shell', 'am', 'force-stop', bbadb.PKG) == 1, fake.calls)
+
+    recording('cap', (0, 'WAIT 3000'), (0, 'TAP id=a'), (0, 'WAIT 2500'), (0, 'ASSERT id=b'), (0, 'WAIT 1000'), (0, 'KEY 4'))
+    code, out = run('cap', [dump(A, B)])
+    check('WAIT before TAP/ASSERT is a cap: no sleep when the node is there', code == 0 and 3.0 not in sleeps and 2.5 not in sleeps, sleeps)
+    check('a WAIT before any other verb still sleeps', sleeps == [1.0], sleeps)
+    recording('late', (0, 'WAIT 3000'), (0, 'TAP id=a'))
+    code, out = run('late', [dump(), dump(A)])
+    check('the node shows up late: it polls, it does not sleep the whole WAIT', code == 0 and sleeps == [0.5] and fake.taps, (sleeps, fake.taps))
+    recording('never', (0, 'WAIT 2000'), (0, 'ASSERT id=a'))
+    code, out = run('never', [dump()])
+    check('a node that never shows: the cap, then the usual retry budget', code == 1 and abs(sum(sleeps) - (2.0 + 3 * 1.5)) < 1e-6, (code, sleeps))
+
+    recording('asserts', (0, 'ASSERT id=a'), (0, 'SHOT one'), (0, 'ASSERT id=b'), (0, 'ASSERT id=c expect~=thr'))
+    code, out = run('asserts', [dump(A, B, C)])
+    check('consecutive ASSERTs share one dump', code == 0 and fake.count('shell', 'uiautomator', 'dump') == 1, (code, fake.count('shell', 'uiautomator', 'dump')))
+    recording('alt', (0, 'ASSERT id=a expect~=Nada|oct'))
+    code, out = run('alt', [dump(A)])
+    check('ASSERT expect~= takes "a|b" alternatives', code == 0, out)
+    recording('stale', (0, 'ASSERT id=a'), (0, 'ASSERT id=b'), (0, 'ASSERT id=a'))
+    code, out = run('stale', [dump(A), dump(A, B)])
+    check('an ASSERT whose node is not in the cached dump takes a fresh one', code == 0 and fake.count('shell', 'uiautomator', 'dump') == 2, fake.count('shell', 'uiautomator', 'dump'))
+    recording('between', (0, 'ASSERT id=a'), (0, 'TAP id=a'), (0, 'ASSERT id=a'))
+    code, out = run('between', [dump(A)])
+    check('a step that is not ASSERT/SHOT drops the shared dump', code == 0 and fake.count('shell', 'uiautomator', 'dump') == 3, fake.count('shell', 'uiautomator', 'dump'))
 
 print('test-bbadb: ' + (f'{fails} failures' if fails else 'all good'))
 sys.exit(1 if fails else 0)

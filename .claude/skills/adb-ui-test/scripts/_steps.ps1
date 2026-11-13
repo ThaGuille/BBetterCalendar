@@ -47,6 +47,7 @@ function Invoke-BBStep {
             $comp = $tokens[0]
             $extra = @($tokens | Select-Object -Skip 1)
             $cls = if ($comp.StartsWith('.')) { "com.example.bbettercalendar$comp" } else { $comp }
+            & adb -s $Serial shell am force-stop $Pkg | Out-Null   # a walk must not depend on who killed the app before
             & adb -s $Serial shell am start -n "$Pkg/$cls" @extra | Out-Null
             return @{ ok = $true; info = "started $rest" }
         }
@@ -109,7 +110,10 @@ function Invoke-BBStep {
                 }
                 if ($expect) {
                     $actual = if (($out -join "`n") -match "text='(.*?)' desc=") { $Matches[1] } else { '' }
-                    if ($actual.ToLower().Contains($expect.ToLower())) {
+                    # "7 de 12|7 of 12": any alternative matches (same as bbadb.py).
+                    $hit = $false
+                    foreach ($alt in ($expect.ToLower() -split '\|')) { if ($alt -and $actual.ToLower().Contains($alt)) { $hit = $true } }
+                    if ($hit) {
                         return @{ ok = $true; info = "ASSERT ok: id=$idSuffix text~='$expect' (actual '$actual')" }
                     }
                     return @{ ok = $false; info = "ASSERT failed: id=$idSuffix expected~='$expect' but text='$actual'" }

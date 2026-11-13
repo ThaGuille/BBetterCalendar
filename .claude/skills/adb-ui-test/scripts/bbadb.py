@@ -12,7 +12,7 @@ here and the other way round. Windows keeps using the .ps1 scripts.
     python3 bbadb.py record progress-smoke --start .configuration.SplashActivity
     python3 bbadb.py record progress-smoke --tap navigation_progress
     python3 bbadb.py record progress-smoke --assert-id periodNavTitle [--expect Oct]
-    python3 bbadb.py replay progress-smoke [--speed 0.5]
+    python3 bbadb.py replay progress-smoke [--speed 0.5] [--min-settle 400 --max-settle 4000]
     python3 bbadb.py capture --label progress-month-chart
     python3 bbadb.py adb devices          # the adb this script resolved, for ad-hoc calls
 
@@ -179,10 +179,13 @@ def center(bounds):
     return (x1 + x2) // 2, (y1 + y2) // 2
 
 
-def find_node(id_=None, text=None, tap=False, list_=False, serial=None, dump_path=DUMP_PATH):
-    """Returns (exit code, output lines), the same lines find-node.ps1 prints."""
+def find_node(id_=None, text=None, tap=False, list_=False, serial=None, dump_path=DUMP_PATH, cache=None):
+    """Returns (exit code, output lines), the same lines find-node.ps1 prints.
+    `cache` (a dict, used by consecutive ASSERT steps): its 'raw' dump is searched first and only when the node is
+    not in it is a fresh dump taken (and stored back)."""
     serial = serial_of(serial)
-    raw = ui_dump(serial, dump_path)
+    cached = cache.get('raw') if cache is not None and not list_ else None
+    raw = cached or ui_dump(serial, dump_path)
     if not raw:
         return 2, [f'DUMP FAILED on {serial} (uiautomator returned no hierarchy)']
     try:
@@ -190,6 +193,8 @@ def find_node(id_=None, text=None, tap=False, list_=False, serial=None, dump_pat
     except ET.ParseError as e:
         return 2, [f'DUMP UNPARSEABLE: {e}']
     nodes = list(root.iter('node'))
+    if cache is not None:
+        cache['raw'] = raw
 
     if list_:
         out = []
@@ -220,6 +225,16 @@ def find_node(id_=None, text=None, tap=False, list_=False, serial=None, dump_pat
         return None
 
     match = search(nodes)
+    if match is None and cached:  # the shared dump lacks it: the screen moved on, look at a fresh one
+        raw = ui_dump(serial, dump_path)
+        if not raw:
+            return 2, [f'DUMP FAILED on {serial} (uiautomator returned no hierarchy)']
+        try:
+            nodes = list(ET.fromstring(raw.strip()).iter('node'))
+        except ET.ParseError as e:
+            return 2, [f'DUMP UNPARSEABLE: {e}']
+        cache['raw'] = raw
+        match = search(nodes)
     selector = f'id={id_}' if id_ else f"text~='{text}'"
     note = []
     # A loaded host (two emulators at once) makes Android show "System UI / <app> isn't responding" over the app.
@@ -231,6 +246,8 @@ def find_node(id_=None, text=None, tap=False, list_=False, serial=None, dump_pat
         note = ["DISMISSED system not-responding dialog (Wait)"]
         time.sleep(1)
         raw = ui_dump(serial, dump_path)
+        if cache is not None:
+            cache['raw'] = raw
         try:
             match = search(list(ET.fromstring(raw.strip()).iter('node'))) if raw else None
         except ET.ParseError:
@@ -282,15 +299,33 @@ def _retry(fn, tries=4, pause=1.5):
     return code, out
 
 
-def run_step(step, serial, pkg=PKG):
-    """One line of the recording grammar -> (ok, info). Grammar: see _steps.ps1."""
+def _poll(fn, wait_ms, pause=0.5):
+    """Run fn until it succeeds (code 0) or `wait_ms` ms have passed: a WAIT folded into the TAP/ASSERT after it."""
+    deadline = time.monotonic() + wait_ms / 1000
+    code, out = fn()
+    while code != 0:
+        left = deadline - time.monotonic()
+        if left <= 0:
+            break
+        time.sleep(min(pause, left))
+        code, out = fn()
+    return code, out
+
+
+def run_step(step, serial, pkg=PKG, wait_ms=0, cache=None):
+    """One line of the recording grammar -> (ok, info). Grammar: see _steps.ps1.
+    `wait_ms`: a WAIT that preceded this TAP/ASSERT, used as a cap on polling for its node instead of a sleep.
+    `cache`: dict shared by a run so consecutive ASSERTs reuse one dump; any step but ASSERT/SHOT empties it."""
     verb, _, rest = step.strip().partition(' ')
     rest = rest.strip()
+    if cache is not None and verb not in ('ASSERT', 'SHOT'):
+        cache.clear()
     if verb == 'START':
         # applicationId (-n prefix) != namespace (class names): expand ".foo.Bar" against the namespace.
         # Anything after the component goes to am start as-is (extras: START .configuration.SplashActivity --es k v).
         comp, *extra = rest.split()
         cls = f'{NAMESPACE}{comp}' if comp.startswith('.') else comp
+        adb('shell', 'am', 'force-stop', pkg, serial=serial)  # a walk must not depend on who killed the app before
         adb('shell', 'am', 'start', '-n', f'{pkg}/{cls}', *extra, serial=serial)
         return True, f'started {rest}'
     if verb == 'GRANT':
@@ -317,20 +352,27 @@ def run_step(step, serial, pkg=PKG):
             return False, f'bad TAP target: {rest}'
         kw = {'id_': m.group(2)} if m.group(1) == 'id' else {'text': m.group(2)}
         # Retry only while the node is missing (right after launch the dump can be of the splash/old window).
-        code, out = _retry(lambda: find_node(tap=True, serial=serial, **kw))
+        fn = lambda: find_node(tap=True, serial=serial, **kw)
+        code, out = _poll(fn, wait_ms) if wait_ms else (1, [])
+        if code != 0:
+            code, out = _retry(fn)
         return code == 0, '; '.join(out)
     if verb == 'ASSERT':
         m = re.match(r'^id=(\S+)(\s+expect~=(.*))?$', rest)
         if not m:
             return False, f'bad ASSERT: {rest}'
         id_, expect = m.group(1), (m.group(3) or '').strip()
-        code, out = _retry(lambda: find_node(id_=id_, serial=serial))
+        fn = lambda: find_node(id_=id_, serial=serial, cache=cache)
+        code, out = _poll(fn, wait_ms) if wait_ms else (1, [])
+        if code != 0:
+            code, out = _retry(fn)
         if code != 0:
             return False, f'ASSERT failed: id={id_} not found'
         if expect:
             a = re.search(r"text='(.*?)' desc=", '\n'.join(out))
             actual = a.group(1) if a else ''
-            if expect.lower() in actual.lower():
+            # "7 de 12|7 of 12": any alternative matches, so the recording survives the emulator's language.
+            if any(alt and alt in actual.lower() for alt in expect.lower().split('|')):
                 return True, f"ASSERT ok: id={id_} text~='{expect}' (actual '{actual}')"
             return False, f"ASSERT failed: id={id_} expected~='{expect}' but text='{actual}'"
         return True, f'ASSERT ok: id={id_} exists'
@@ -408,14 +450,27 @@ def replay(a):
 
     print(f"Replaying '{a.scenario}' ({len(steps)} steps, speed x{a.speed}) on {serial}")
     adb('logcat', '-c', '-b', 'crash', serial=serial)
+    started = time.monotonic()
     failures = 0
     prev = steps[0][0]
+    cache = {}
+    pending_wait = 0
     for i, (t, step) in enumerate(steps):
         if i:
             delay = min(max(int((t - prev) * a.speed), a.min_settle), a.max_settle)
-            time.sleep(delay / 1000)
+            if delay:
+                time.sleep(delay / 1000)
         prev = t
-        ok, info = run_step(step, serial, a.pkg)
+        verb = step.split(' ', 1)[0]
+        nxt = steps[i + 1][1].split(' ', 1)[0] if i + 1 < len(steps) else ''
+        if verb == 'WAIT' and nxt in ('TAP', 'ASSERT'):
+            # No fixed sleep: the next step polls for its node, and this WAIT only caps how long.
+            pending_wait = int(step.split(' ', 1)[1])
+            cache.clear()
+            print(f"  [OK  ] {step:<40} cap for the next {nxt} (not slept)")
+            continue
+        ok, info = run_step(step, serial, a.pkg, wait_ms=pending_wait, cache=cache)
+        pending_wait = 0
         print(f"  [{'OK  ' if ok else 'FAIL'}] {step:<40} {info}")
         failures += 0 if ok else 1
         if crashed():
@@ -423,10 +478,11 @@ def replay(a):
             failures += 1
             break
     print()
+    secs = f'{time.monotonic() - started:.1f}'
     if failures == 0:
-        print(f"PASS: '{a.scenario}' ({len(steps)} steps, no crash)")
+        print(f"PASS: '{a.scenario}' ({len(steps)} steps, no crash) in {secs} s")
         return 0
-    print(f"FAIL: '{a.scenario}' had {failures} failing step(s). See above.")
+    print(f"FAIL: '{a.scenario}' had {failures} failing step(s) in {secs} s. See above.")
     return 1
 
 
@@ -471,8 +527,8 @@ def main(argv=None):
     rp = sub.add_parser('replay', help='replay recordings/<scenario>.log with no model in the loop')
     rp.add_argument('scenario')
     rp.add_argument('--speed', type=float, default=1.0)
-    rp.add_argument('--min-settle', type=int, default=400)
-    rp.add_argument('--max-settle', type=int, default=4000)
+    rp.add_argument('--min-settle', type=int, default=0, help='floor of the pause between steps, ms (0: none)')
+    rp.add_argument('--max-settle', type=int, default=0, help='ceiling of that pause, ms (400/4000 = the old pacing)')
     rp.add_argument('--serial', default='')
     rp.add_argument('--pkg', default=PKG)
 

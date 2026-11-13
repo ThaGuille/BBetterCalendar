@@ -1,85 +1,43 @@
 <#
 .SYNOPSIS
     Replays a recorded scenario (recordings/<Scenario>.log) with NO model in the
-    loop -- re-resolving every TAP by resource-id live, honoring recorded inter-step
-    delays (scaled by -Speed), checking each ASSERT, and failing fast on any missing
-    node or FATAL EXCEPTION in the crash log. Screenshot-free.
+    loop. Thin wrapper: the engine is `bbadb.py replay` (one implementation for both
+    OSes), so this script only maps its parameters to that command's flags and returns
+    its exit code (0 PASS, 1 FAIL, 2 no recording).
+
+    By default there is no recorded pacing between steps: each TAP/ASSERT polls for its
+    node, a WAIT before a TAP/ASSERT only caps that poll, START force-stops the app first.
 
 .PARAMETER Scenario   Recording name under recordings/.
-.PARAMETER Speed      Delay multiplier for recorded gaps (1.0 = real time, 0.5 = 2x faster).
-.PARAMETER MinSettle  Floor for inter-step delay in ms (taps must not race the UI).
-.PARAMETER MaxSettle  Ceiling for inter-step delay in ms.
+.PARAMETER Speed      Delay multiplier for recorded gaps (only matters with -MaxSettle > 0).
+.PARAMETER MinSettle  Floor for inter-step delay in ms (default 0 = none).
+.PARAMETER MaxSettle  Ceiling for inter-step delay in ms (default 0 = none; 4000 with -MinSettle 400 = the old pacing).
 
 .EXAMPLE
     .\replay.ps1 progress-smoke
-    .\replay.ps1 progress-smoke -Speed 0.5
+    .\replay.ps1 progress-smoke -MinSettle 400 -MaxSettle 4000
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string]$Scenario,
-    [double]$Speed   = 1.0,
-    [int]$MinSettle  = 400,
-    [int]$MaxSettle  = 4000,
-    [string]$Serial  = '',
-    [string]$Pkg     = 'io.github.thaguille.bbettercalendar'
+    [double]$Speed,
+    [int]$MinSettle,
+    [int]$MaxSettle,
+    [string]$Serial,
+    [string]$Pkg
 )
 
-$ErrorActionPreference = 'Stop'
-. (Join-Path $PSScriptRoot '_device.ps1')
-. (Join-Path $PSScriptRoot '_steps.ps1')
-$Serial = Get-BBSerial -Requested $Serial
+$py = Get-Command python -ErrorAction SilentlyContinue
+if (-not $py) { $py = Get-Command python3 -ErrorAction SilentlyContinue }
+if (-not $py) { Write-Output 'python not found: replay needs it (bbadb.py replay)'; exit 2 }
 
-$log = Join-Path (Split-Path $PSScriptRoot -Parent) "recordings\$Scenario.log"
-if (-not (Test-Path $log)) { Write-Output "No recording: $log"; exit 2 }
+# Only what the caller passed goes on: the defaults live in bbadb.py.
+$flags = @()
+if ($PSBoundParameters.ContainsKey('Speed'))     { $flags += @('--speed', $Speed.ToString([cultureinfo]::InvariantCulture)) }
+if ($PSBoundParameters.ContainsKey('MinSettle')) { $flags += @('--min-settle', $MinSettle) }
+if ($PSBoundParameters.ContainsKey('MaxSettle')) { $flags += @('--max-settle', $MaxSettle) }
+if ($Serial) { $flags += @('--serial', $Serial) }
+if ($Pkg)    { $flags += @('--pkg', $Pkg) }
 
-function Test-Crash {
-    $crash = (& adb -s $Serial logcat -d -b crash) -join "`n"
-    # Only the app's own crashes: the uiautomator shell process can also log a FATAL EXCEPTION
-    # (UiAutomation connect timeout) with no "Process: <pkg>" line, which is a harness flake.
-    return ($crash -match "FATAL EXCEPTION[\s\S]{0,200}?Process: $([regex]::Escape($Pkg))")
-}
-
-# Parse: skip comments/blanks; each line is "<epochMs>\t<STEP>".
-$steps = @()
-foreach ($line in (Get-Content $log)) {
-    if ($line -match '^\s*#' -or $line -match '^\s*$') { continue }
-    $parts = $line -split "`t", 2
-    if ($parts.Count -eq 2) { $steps += [pscustomobject]@{ T = [long]$parts[0]; Step = $parts[1].Trim() } }
-}
-if ($steps.Count -eq 0) { Write-Output "Recording has no steps: $log"; exit 2 }
-
-Write-Output "Replaying '$Scenario' ($($steps.Count) steps, speed x$Speed) on $Serial"
-& adb -s $Serial logcat -c -b crash 2>$null    # start from a clean crash buffer
-
-$failures = 0
-$prevT = $steps[0].T
-for ($i = 0; $i -lt $steps.Count; $i++) {
-    $s = $steps[$i]
-    if ($i -gt 0) {
-        $delay = [int](($s.T - $prevT) * $Speed)
-        if ($delay -lt $MinSettle) { $delay = $MinSettle }
-        if ($delay -gt $MaxSettle) { $delay = $MaxSettle }
-        Start-Sleep -Milliseconds $delay
-    }
-    $prevT = $s.T
-
-    $r = Invoke-BBStep -Step $s.Step -Serial $Serial -Pkg $Pkg -ScriptDir $PSScriptRoot
-    $tag = if ($r.ok) { 'OK  ' } else { 'FAIL' }
-    Write-Output ("  [{0}] {1,-40} {2}" -f $tag, $s.Step, $r.info)
-    if (-not $r.ok) { $failures++ }
-
-    if (Test-Crash) {
-        Write-Output "  [FAIL] FATAL EXCEPTION detected in crash log after: $($s.Step)"
-        $failures++
-        break
-    }
-}
-
-Write-Output ""
-if ($failures -eq 0) {
-    Write-Output "PASS: '$Scenario' ($($steps.Count) steps, no crash)"
-    exit 0
-} else {
-    Write-Output "FAIL: '$Scenario' had $failures failing step(s). See above."
-    exit 1
-}
+& $py.Source (Join-Path $PSScriptRoot 'bbadb.py') replay $Scenario @flags
+exit $LASTEXITCODE

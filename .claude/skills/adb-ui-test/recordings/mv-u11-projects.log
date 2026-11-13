@@ -19,9 +19,9 @@
 1794422278863	ASSERT id=projectSubtaskCheck
 1794422281392	ASSERT id=projectsList
 1794422282414	SHOT mv-u11-expanded
-1794422292627	ASSERT id=projectTasksText expect~=7 de 12
+1794422292627	ASSERT id=projectTasksText expect~=7 de 12|7 of 12
 1794422295243	TAP id=projectSubtaskCheck
 1794422296729	WAIT 1200
-1794422299269	ASSERT id=projectTasksText expect~=8 de 12
+1794422299269	ASSERT id=projectTasksText expect~=8 de 12|8 of 12
 1794422299994	SHOT mv-u11-ticked
 1794422302519	ASSERT id=projectsList

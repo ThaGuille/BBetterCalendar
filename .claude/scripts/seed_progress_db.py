@@ -113,6 +113,9 @@ def clear_seeded(c, packages):
     c.execute("DELETE FROM app_usage_daily")
     c.execute("DELETE FROM calendarEntry WHERE projectId != 0")
     c.execute("DELETE FROM project")
+    # The mv-tour walk adds one "Reunion" event per run; piled up they fill the day's agenda and scroll the "+"
+    # button out of view for the next run, so the walk is only repeatable if the seed removes them.
+    c.execute("DELETE FROM calendarEntry WHERE projectId = 0 AND title = 'Reunion'")
     c.executemany("DELETE FROM app_rule WHERE packageName = ?", [(p,) for p in packages])
 
 

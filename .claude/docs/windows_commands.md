@@ -84,6 +84,19 @@ These tools live under the Android SDK; on most setups that's `%LOCALAPPDATA%\An
 
 > Use the foreground service notification channel name `pomodoro_channel` when filtering notification logs.
 
+### Memory with two emulators (measured 2026-11-13)
+
+Measurement command (PowerShell, free physical memory):
+
+```powershell
+$o=Get-CimInstance Win32_OperatingSystem; 'FreeMB=' + [int]($o.FreePhysicalMemory/1024) + ' TotalMB=' + [int]($o.TotalVisibleMemorySize/1024)
+```
+
+- With two `api36` emulators running (`emulator-5554`, `emulator-5556`) the 31 GB machine had about 1.8 GB free (`FreeMB=~1800 TotalMB=32013`). A second reading, taken while other builds were also running, was `FreeMB=989 TotalMB=32013`.
+- Rule: **do not add a third emulator while free memory with two stays under 3 GB.**
+- `gradle.properties` sets `org.gradle.daemon.idletimeout=900000`: an unused Gradle daemon (about 2 GB each, `-Xmx2048m` stays) exits after 15 min instead of the 3 h default, so parallel units keep memory free.
+- The emulator RAM was not lowered: the `bt_quick` snapshot is tied to 3072 MB, and a different size would invalidate it (cold boot ~50-60 s instead of a snapshot load).
+
 ---
 
 ## 5. Git on this repo

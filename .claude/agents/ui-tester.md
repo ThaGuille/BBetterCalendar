@@ -21,14 +21,14 @@ usually not on PATH there) and `./gradlew` instead of `.\gradlew.bat`.
 How to work:
 1. Confirm a device: `adb devices` (expect an `emulator-* device`). Other units may hold leases on some emulators: run every
    command that touches the device through `python .claude/scripts/with-emulator.py -- <command>` (it leases a free one and
-   sets `ANDROID_SERIAL`), or use the serial it printed. The scripts refuse an emulator someone else has leased. If none, STOP and report
+   sets `ANDROID_SERIAL`), or use the serial it printed. Add `--install` (`with-emulator.py --install -- <command>`) instead of a separate `installDebug`: it installs once per commit and skips when the emulator already has it. The scripts refuse an emulator someone else has leased. If none, STOP and report
    that an operator must boot/create an AVD — you cannot.
 2. Build + install + grant POST_NOTIFICATIONS + `am start` the launcher (skill step 1–2).
    Build failure → defer to the [`bb-build`](../skills/bb-build/SKILL.md) recovery (`--stop`).
 3. Navigate with `scripts\find-node.ps1 -Id <suffix> -Tap`; assert effects with
    `find-node.ps1 -Id <suffix>` (check returned text) and scan
    `adb -s <serial> logcat -d -b crash` (`<serial>` = `$ANDROID_SERIAL` / the leased one) for `FATAL EXCEPTION`.
-4. For a repeatable flow, record with `scripts\bb-adb.ps1` and verify with `scripts\replay.ps1`.
+4. For a multi-step flow write a steps file and run it in ONE command: `python .claude/skills/adb-ui-test/scripts/bbadb.py run-steps <file>` (one result line per step, one contact-sheet PNG of the captures; `--keep-going` to see every failure; `--save <name>` keeps it as a recording). Do not issue one `record` call per step. Verify a saved flow with `replay <name>` (no recorded pacing, so it is fast).
 5. `pm clear io.github.thaguille.bbettercalendar` to reset between scenarios.
 
 What to return (keep it tight, ~1k tokens):

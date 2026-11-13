@@ -2,7 +2,7 @@
 
 **Status:** proposed
 **Created:** 2026-11-13
-**Last updated:** 2026-11-13 (tapa descartada; ejecución en dos tareas)
+**Last updated:** 2026-11-13 (parte BBetterCalendar hecha en la rama bt/wall-time-bbetter)
 
 ## Summary
 
@@ -174,6 +174,21 @@ ese repo, con Opus para el plan y su aprobación (después basta Sonnet para rea
    confirmar (commit) en AI-kit los cambios de telemetría de hoy, o la tarea partirá de una base sin ellos.
 2. **BBetterCalendar** (puntos 0.3 parte del perfil, 2.3, 3.1, 3.2, 3.3), después de que la primera esté fusionada:
    el perfil usa `probe`/`ready`, que nacen en la primera.
+
+### Estado: parte BBetterCalendar hecha (rama bt/wall-time-bbetter, 2026-11-13)
+
+- **0.3 (perfil):** `.agents/profile.yml` declara `resources.emulator` con `probe` (`emulator-probe.py --count 2`), `ready`
+  (`avd-up.ps1 -Count 2`) y la firma `with-emulator: no emulator attached`; `with-emulator.py` falla a los 60 s sin emulador.
+- **2.3:** `bbadb.py run-steps <fichero>` con resultado por paso, hoja de capturas, `--keep-going` y `--save`; test con adb falso.
+- **3.1:** `replay` sin ritmo grabado, `WAIT` como tope, `START` con `am force-stop`, un volcado para los `ASSERT` seguidos,
+  tiempo en la última línea; `replay.ps1` es un envoltorio. Medido en mv-tour: ~257 s antes, 188,4 / 187,0 / 189,8 s tres
+  pasadas seguidas; progress-smoke 15,1 s, mv-u11-projects 32,6 s.
+- **3.2:** `with-emulator.py --install` instala una vez por commit y emulador (registro `<serial>.installed`); medido: 2 s con
+  la instalación saltada, 8 s forzada.
+- **3.3:** memoria con dos emuladores ~1,8 GB libres (989 MB con otros builds): daemons de Gradle ociosos salen a los 15 min
+  (`org.gradle.daemon.idletimeout`), RAM del emulador sin tocar (el snapshot `bt_quick` está atado a 3072 MB). Regla del
+  planificador en `planNotes`: parte de pantalla depende solo de su base; `mv-tour` es una parte final propia.
+  Pendiente de medir en la siguiente tarea: `parallel.peak` >= 2 en las tandas de pantalla.
 
 ## Open questions
 

@@ -80,6 +80,8 @@ These tools live under the Android SDK; on most setups that's `%LOCALAPPDATA%\An
 | List AVDs | `emulator -list-avds` |
 | Get a ready AVD (reuse a running one, else boot `api36` from its `bt_quick` snapshot) | `powershell -NoProfile -ExecutionPolicy Bypass -File .claude\scripts\avd-up.ps1` (`-Clean` = cold boot with `-no-snapshot`, only when a test needs a clean device; `-Count 2` = two instances of `api36`, the second `-read-only`, for units in parallel) |
 | Run one command on a free emulator (parallel units) | `python .claude\scripts\with-emulator.py -- "<cmd>"`: leases a free `emulator-*`, sets `ANDROID_SERIAL` for the command (adb, `installDebug`, bbadb, the adb-ui-test scripts follow it), releases it at the end |
+| Same, installing the app first | `python .claude\scripts\with-emulator.py --install -- "<cmd>"`: runs `installDebug` on the leased emulator once per commit (remembered in `<leases dir>\<serial>.installed`), skipped when the emulator already has this commit; a dirty tracked tree always installs. Use it instead of a separate `installDebug` |
+| Check emulators are booted | `python .claude\scripts\emulator-probe.py --count 2`: exit 0 when 2 emulators are ready (the probe big-task runs before `avd-up.ps1`) |
 | Start an AVD by hand | `emulator -avd api36 -snapshot bt_quick -no-snapshot-save` (reuse ~1.5 s, snapshot ~10-30 s, cold `-no-snapshot` ~50-60 s) |
 
 > Use the foreground service notification channel name `pomodoro_channel` when filtering notification logs.

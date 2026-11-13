@@ -24,7 +24,8 @@ it finds (`$ADB`, PATH, `$ANDROID_HOME`, `local.properties` `sdk.dir`, `~/Androi
 | `.\find-node.ps1 -Id X -Tap` / `-Text T` / `-List` | `python3 bbadb.py find-node --id X --tap` / `--text T` / `--list` |
 | `.\bb-adb.ps1 -Scenario S -Init` | `python3 bbadb.py record S --init` |
 | `.\bb-adb.ps1 -Scenario S -Tap X` (`-Start`, `-Grant`, `-Clear`, `-TapText`, `-Type`, `-Key`, `-Swipe`, `-Wait`, `-AssertId X -Expect Y`, `-Shot L`) | `python3 bbadb.py record S --tap X` (`--start`, `--grant`, `--clear`, `--tap-text`, `--type`, `--key`, `--swipe x1 y1 x2 y2 ms`, `--wait`, `--assert-id X --expect Y`, `--shot L`) |
-| `.\replay.ps1 S [-Speed 0.5]` | `python3 bbadb.py replay S [--speed 0.5]` |
+| `.\replay.ps1 S [-Speed 0.5]` (thin wrapper of `bbadb.py replay`) | `python3 bbadb.py replay S [--speed 0.5]` |
+| `python bbadb.py run-steps steps/F.steps` (no .ps1 twin; python works on Windows too) | `python3 bbadb.py run-steps steps/F.steps [--keep-going] [--save S]` |
 | Text selectors (`-Text`, `-TapText`, `TAP text=` in a recording) match text or content-desc as a substring; `Evento\|Event` matches either, so a recording works whatever the emulator's language (the AVD runs in English). Prefer ids; use `\|` for app or segment labels that have no id | (same) |
 | `.\capture-screen.ps1 -Label L` | `python3 bbadb.py capture --label L` |
 | `adb -s emulator-5554 …` | `python3 bbadb.py adb -s emulator-5554 …` |
@@ -145,6 +146,38 @@ grammar (START / GRANT / CLEAR / TAP / TYPE / KEY / SWIPE / WAIT / ASSERT / SHOT
 documented in [`scripts/_steps.ps1`](scripts/_steps.ps1). `SHOT <label>` (recorder flag
 `-Shot <label>`) drops a visual-checkpoint PNG into `captures/` — include it in a flow only
 when that scenario renders a chart you need to eyeball.
+
+## Run a whole steps file (preferred for authoring)
+
+Instead of one `record` call per step (each is a 20-120 s round trip), write the walk as a steps file (same grammar as a
+recording, `#` comments, the epoch column optional; example `steps/smoke.steps`) and run it whole:
+
+```
+python bbadb.py run-steps steps/F.steps [--keep-going] [--save S]
+```
+
+- One `[OK  ]` / `[FAIL]` line per step; it stops at the first failure after a `<stem>-fail-<n>` capture, `--keep-going`
+  runs the rest.
+- `SHEET <png>`: one labelled mosaic of every capture of the run (Pillow; without it `SHEET none` plus the paths).
+- Last line `run-steps: <ok>/<total> steps ok in <s> s`. Exit 0 all ok, 1 a step failed, 2 missing/empty file.
+- `--save S` also writes the steps it ran to `recordings/S.log`, ready for `replay S`.
+
+Adjust the file and rerun it whole; do not go back to one command per step.
+
+## Replay defaults (fast mode)
+
+- No recorded pacing: `--min-settle 0 --max-settle 0`. Restore the old pacing with `--min-settle 400 --max-settle 4000`.
+- `WAIT n` right before a `TAP`/`ASSERT` is a cap, not a sleep: the next step polls for its node up to n ms.
+- `START` runs `am force-stop` before `am start`, so a walk does not depend on the previous install or state.
+- Consecutive `ASSERT`s share one uiautomator dump.
+- The last line carries the elapsed time: `PASS: '<s>' (<n> steps, no crash) in <t> s` / `FAIL: ... in <t> s`.
+- Measured: mv-tour about 257 s before, about 188 s after; progress-smoke 15 s.
+
+## Install once per commit
+
+`python .claude/scripts/with-emulator.py --install -- "<cmd>"` leases an emulator, runs `installDebug` on it (unless that
+emulator already has this commit installed: skipped, ~2 s instead of ~8 s warm) and then the command. Use it instead of a
+separate `installDebug`. A dirty tracked tree always installs.
 
 ## RIGHT / WRONG
 

@@ -224,6 +224,49 @@ with tempfile.TemporaryDirectory() as tmp:
         else:
             os.kill(dpid, 9)
 
+    print('== --install: once per commit and emulator (fake install command, fake HEAD and package state)')
+    cnt = Path(tmp) / 'installs.txt'
+    upd = Path(tmp) / 'update-time.txt'
+    upd.write_text('2026-11-13 10:00:00')
+    cnt.write_text('')
+
+    def inst(head, extra=(), cmd=None, serial='emulator-5554', env=None):
+        x = ['--install', '--head', head, '--install-cmd', f'echo "$ANDROID_SERIAL" >> {cnt.as_posix()}', '--update-time-file', str(upd), *extra]
+        q = start(leases, serial, cmd or py(SHOW), 'ui', extra=x, env=env)
+        o, e = q.communicate(timeout=60)
+        return q.returncode, o, e, len(cnt.read_text().splitlines())
+
+    rc, o, e, n = inst('a' * 40)
+    check('first --install installs, runs the command and writes <serial>.installed', rc == 0 and n == 1 and 'installDebug on emulator-5554 (' in o and 'SERIAL emulator-5554' in o and (leases / 'emulator-5554.installed').exists() and not list(leases.glob('*.lock')), f'{rc} {n} {o}{e}')
+    rc, o, e, n = inst('a' * 40)
+    check('same commit skips installDebug', rc == 0 and n == 1 and 'installDebug skipped: emulator-5554 already has ' + 'a' * 12 in o and 'SERIAL emulator-5554' in o, f'{rc} {n} {o}{e}')
+    rc, o, e, n = inst('b' * 40)
+    check('a new commit runs installDebug', rc == 0 and n == 2 and 'installDebug on emulator-5554 (' in o, f'{rc} {n} {o}{e}')
+    upd.write_text('2026-11-13 11:00:00')  # the app was reinstalled behind our back
+    rc, o, e, n = inst('b' * 40)
+    check('same commit but another lastUpdateTime runs installDebug', rc == 0 and n == 3, f'{rc} {n} {o}{e}')
+    rc, o, e, n = inst('b' * 40, serial='emulator-5556')
+    check('the record is per emulator: another serial installs', n == 4 and (leases / 'emulator-5556.installed').exists(), f'{n} {e}')
+    (leases / 'emulator-5556.installed').unlink()
+    rc, o, e, n = inst('c' * 40, extra=['--dirty'])
+    rc, o, e, n2 = inst('c' * 40, extra=['--dirty'])
+    check('dirty tracked tree always installs', n2 == n + 1 and 'installDebug on emulator-5554' in o and (leases / 'emulator-5554.installed').read_text().split()[0] == 'b' * 40, f'{n} {n2} {e}')
+    rc, o, e, n3 = inst('c' * 40, extra=['--dirty', '--assume-clean'])
+    rc, o, e, n4 = inst('c' * 40, extra=['--dirty', '--assume-clean'])
+    check('--assume-clean (test-only) makes the dirty tree count as clean: recorded, then skipped', n3 == n2 + 1 and n4 == n3 and 'skipped' in o, f'{n2} {n3} {n4} {e}')
+    rc, o, e, n5 = inst('d' * 40, cmd=py(SHOW), extra=[])
+    cnt_before = n5
+    fail = start(leases, 'emulator-5554', py(SHOW), 'uf2', extra=['--install', '--head', 'e' * 40, '--install-cmd', 'exit 9', '--update-time-file', str(upd)])
+    of2, ef2 = fail.communicate(timeout=30)
+    check("a failed install exits with its code and the command does not run", fail.returncode == 9 and 'SERIAL' not in of2 and not list(leases.glob('*.lock')), f'{fail.returncode} {of2}{ef2}')
+    rc, o, e, n6 = inst('d' * 40, env={'ANDROID_SERIAL': 'emulator-5554'})
+    check('nested (ANDROID_SERIAL set): skips on the recorded serial without a lease', 'skipped' in o and 'SERIAL emulator-5554' in o and n6 == cnt_before, f'{n6} {o}{e}')
+    rc, o, e, n7 = inst('f' * 40, env={'ANDROID_SERIAL': 'emulator-5558'})
+    check('nested: a new commit installs on that serial', 'installDebug on emulator-5558' in o and cnt.read_text().splitlines()[-1] == 'emulator-5558', f'{o}{e}')
+    check('the .installed files are not leases', not list(leases.glob('*.lock')) and len(list(leases.glob('*.installed'))) >= 1)
+    for f in leases.glob('*.installed'):
+        f.unlink()
+
 
 print('test-with-emulator: ' + (f'{fails} failures' if fails else 'all good'))
 sys.exit(1 if fails else 0)

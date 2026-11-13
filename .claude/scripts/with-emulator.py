@@ -16,7 +16,9 @@ A single argument runs through bash -c (Git Bash on Windows); several run as the
   Set to anything else (a phone): refused with exit 2, unless --allow-device says it is meant.
 - The unit already holds a lease taken by hand (emulator-lease --acquire, no pid=): it is reused and not released.
   A lease of the unit that names a pid belongs to a with-emulator call: dead -> taken over, alive -> not reused.
-- No free emulator: waits (polling every 5 s) up to --timeout-min (default 20), then exits 3.
+- No emulator-* attached at all: waits at most --none-grace-s seconds (default 60) for one to appear, then prints
+  'with-emulator: no emulator attached' on stderr and exits 3 (fail fast: nothing is booting).
+- Emulators attached but all leased: waits (polling every 5 s) up to --timeout-min (default 20), then exits 3.
 - The lease names this process (pid=...) and is touched every 60 s while the command runs: a lease
   whose process is gone is taken over at once, any other one after --stale-min (default 45).
 
@@ -139,6 +141,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     p.add_argument('--unit', default='')
     p.add_argument('--timeout-min', type=float, default=20)
+    p.add_argument('--none-grace-s', type=float, default=60, help='seconds to wait when no emulator-* is attached at all (default 60)')
     p.add_argument('--allow-device', action='store_true', help='run on a pre-set ANDROID_SERIAL that is not an emulator-* (a phone)')
     p.add_argument('--stale-min', type=float, default=45)
     p.add_argument('--leases-dir', help=argparse.SUPPRESS)  # tests: a private lease folder
@@ -173,8 +176,15 @@ def main():
     deadline = time.time() + a.timeout_min * 60
     serial = None
     said = False
+    none_deadline = time.time() + a.none_grace_s
     while serial is None:
         emus = attached(a.emulators)
+        if not emus:
+            if time.time() >= none_deadline:
+                log('no emulator attached')
+                return 3
+        else:
+            none_deadline = time.time() + a.none_grace_s  # one is attached: a later vanish gets a fresh grace
         serial = next((e for e in emus if try_take(e, unit, a.stale_min)), None)
         if serial:
             break
@@ -185,7 +195,8 @@ def main():
             busy = ', '.join(f'{e} by {(read(LEASES / f"{e}.lock") or ("?",))[0]}' for e in emus) or 'no emulator attached'
             log(f'waiting for a free emulator ({busy})')
             said = True
-        time.sleep(max(0.2, min(5, deadline - time.time())))
+        wake = deadline if emus else min(deadline, none_deadline)
+        time.sleep(max(0.2, min(5, wake - time.time())))
 
     lease = LEASES / f'{serial}.lock'
     log(f'{serial} leased to {unit}')

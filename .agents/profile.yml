@@ -20,7 +20,14 @@ bigTask:
   # --block auto), así que hasta 3 lo usan a la vez. @emulator: dos instancias del AVD api36 (la segunda -read-only).
   resources:
     fbemu: 3
-    emulator: 2
+    # probe: comando que sale 0 cuando hay `count` emulador(es) listos (booted); ready: comando que los arranca si el
+    # probe falla (readyTimeout s como tope); signatures: salidas que bt trata como fallo de entorno, no de la unidad.
+    emulator:
+      count: 2
+      probe: "python .claude/scripts/emulator-probe.py --count 2"
+      ready: "powershell -NoProfile -ExecutionPolicy Bypass -File .claude/scripts/avd-up.ps1 -Count 2"
+      readyTimeout: 600
+      signatures: ["with-emulator: no emulator attached"]
   # Reglas para el planificador de big-task (las copia en su brief y en las constraints del plan).
   planNotes:
     - "La suite de Firebase se corre siempre con bash firebase/scripts/run-tests.sh (JDK 21, bloque de puertos libre). Tope de 300 s por intento que mata el árbol de procesos; como mucho un reintento, solo para fallos conocidos del emulador y nunca tras un tope; npm ci y tsc corren fuera del tope. Peor caso ~900 s (3 × el tope) más npm ci y tsc: el timeout del check, mayor. Un check de Firebase es {cmd: 'bash firebase/scripts/run-tests.sh', expect: '<N> passing'}, o con --only firestore,database si solo toca reglas; nunca firebase emulators:exec a mano. Declara @fbemu en touches."

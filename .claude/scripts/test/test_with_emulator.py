@@ -78,6 +78,12 @@ with tempfile.TemporaryDirectory() as tmp:
     od, ed = d.communicate(timeout=30)
     check('one argument runs through bash -c with ANDROID_SERIAL set', d.returncode == 4 and 'via bash: emulator-5554' in od, od + ed)
 
+    print('== no emulator attached at all: fail fast')
+    t0 = time.time()
+    n = start(leases, '', py(SHOW), 'un', extra=['--none-grace-s', '1'])
+    on, en = n.communicate(timeout=30)
+    check('no emulator attached: exits 3', n.returncode == 3 and 'SERIAL' not in on and 'with-emulator: no emulator attached' in en and time.time() - t0 < 20, f'{n.returncode} {on}{en}')
+
     print('== abandoned and held leases')
     dead = subprocess.Popen(py('pass'))
     dead.wait()

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -70,6 +71,7 @@ public class ProjectsViewModel extends AndroidViewModel {
             new MutableLiveData<>(ProjectListItem.DEFAULT_POMODORO_MINUTES);
 
     private List<ProjectWithCounts> latestProjects;
+    private final EventReminderScheduler eventReminderScheduler;
     private List<CalendarEntry> latestItems;
     private List<ProjectMinutes> latestToday;
     private List<ProjectMinutes> latestTotal;
@@ -80,12 +82,14 @@ public class ProjectsViewModel extends AndroidViewModel {
                              CalendarEntryDAO calendarEntryDao, FocusEventDAO focusEventDao,
                              FocusInsightsRepository focusInsightsRepository,
                              FocusAttributionRepository focusAttributionRepository,
+                             EventReminderScheduler eventReminderScheduler,
                              ConfigurationManager configurationManager,
                              @DbWriteExecutor ExecutorService dbWriteExecutor,
                              @IoExecutor ExecutorService ioExecutor) {
         super(application);
         this.repository = repository;
         this.calendarEntryDao = calendarEntryDao;
+        this.eventReminderScheduler = eventReminderScheduler;
         this.dbWriteExecutor = dbWriteExecutor;
 
         Calendar start = Calendar.getInstance();
@@ -222,6 +226,12 @@ public class ProjectsViewModel extends AndroidViewModel {
             }
             CompletionStamp.apply(fresh, done, System.currentTimeMillis());
             calendarEntryDao.update(fresh);
+            // Recordatorios: hecha -> fuera; desmarcada -> se reprograman los que sigan en el futuro.
+            if (done) {
+                eventReminderScheduler.cancelFor(fresh);
+            } else if (!fresh.isTemplate()) {
+                eventReminderScheduler.scheduleFor(fresh);
+            }
         });
     }
 }

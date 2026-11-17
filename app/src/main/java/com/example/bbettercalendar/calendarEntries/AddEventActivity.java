@@ -39,6 +39,7 @@ import com.example.bbettercalendar.helpers.FormatHelper;
 import com.example.bbettercalendar.helpers.OnToolBarListener;
 import com.example.bbettercalendar.helpers.ToolbarHelper;
 import com.example.bbettercalendar.notifications.NotificationOffsets;
+import com.example.bbettercalendar.notifications.NotificationPrefs;
 import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import com.example.bbettercalendar.popups.DescriptionPopup;
 import com.example.bbettercalendar.popups.NotificationsPopup;
@@ -183,6 +184,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         initializeComponents(layoutType);
 
         projectId = intent.getIntExtra(EXTRA_PROJECT_ID, 0);
+        applyDefaultReminder();
 
         String prefillTitle = intent.getStringExtra(EXTRA_PREFILL_TITLE);
         if (prefillTitle != null && !prefillTitle.isEmpty() && titleView != null) {
@@ -423,6 +425,18 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
         return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(c.getTime());
     }
 
+
+    // Recordatorio por defecto (plan sistema-notificaciones A1): la entrada nueva sale con el offset
+    // de NotificationPrefs ya marcado, visible en el formulario y desmarcable. El formulario siempre
+    // tiene hora de inicio (formStart), así que no hay caso "sin hora" que excluir aquí.
+    private void applyDefaultReminder() {
+        int idx = NotificationPrefs.from(this)
+                .getDefaultReminderOffsetIndex();
+        if (idx < 0 || idx >= createdNotificationLayouts.length || optionsCard == null) return;
+        boolean[] defaults = new boolean[createdNotificationLayouts.length];
+        defaults[idx] = true;
+        OnSetNotifications(defaults);
+    }
 
     private void saveAndQuit(){
         eventBuilder.setEventTitle(titleView.getText().toString());

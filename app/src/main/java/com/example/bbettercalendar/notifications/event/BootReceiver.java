@@ -8,6 +8,7 @@ import android.util.Log;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.IoExecutor;
+import com.example.bbettercalendar.notifications.nudge.DailyNudgeScheduler;
 import com.example.bbettercalendar.notifications.project.ProjectDeadlineScheduler;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
@@ -36,8 +37,13 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent == null || intent.getAction() == null) return;
         String action = intent.getAction();
+        // Reinicio, actualización de la app (borra las alarmas) y cambio de hora / zona (las alarmas
+        // RTC quedan desplazadas): en todos hay que reprogramar. Todo es idempotente.
         if (!Intent.ACTION_BOOT_COMPLETED.equals(action)
-                && !Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)) {
+                && !Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)
+                && !Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)
+                && !Intent.ACTION_TIME_CHANGED.equals(action)
+                && !Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
             return;
         }
 
@@ -72,7 +78,10 @@ public class BootReceiver extends BroadcastReceiver {
                     Log.i(TAG, "Rescheduled deadlines for " + projects.size() + " active projects");
                 }
 
-                usageLimitScheduler.arm();
+                // next_trigger_at guardado sigue en el futuro tras reinicio/actualización pero la
+                // alarma ya no existe: sin borrarlo arm() saldría sin reprogramar.
+                usageLimitScheduler.forceRearm();
+                DailyNudgeScheduler.rescheduleAll(context.getApplicationContext());
             } catch (Exception e) {
                 Log.e(TAG, "Boot reschedule failed", e);
             } finally {

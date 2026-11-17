@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plan sistema-notificaciones, parte A: botones de la notificación de recordatorio. -->
+<resources>
+    <string name="notif_reminder_action_done">Hecho</string>
+    <string name="notif_reminder_action_snooze">Posponer 10 min</string>
+</resources>

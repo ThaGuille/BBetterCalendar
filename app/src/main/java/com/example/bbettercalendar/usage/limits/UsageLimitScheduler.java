@@ -50,6 +50,12 @@ public class UsageLimitScheduler {
         this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
+    /** Borra el trigger guardado (obsoleto tras reinicio / actualización / cambio de hora) y rearma. */
+    public void forceRearm() {
+        prefs.edit().remove(KEY_NEXT_TRIGGER_AT).apply();
+        arm();
+    }
+
     // Reevalúa si hace falta seguir armado. Llamar tras cualquier cambio de límites, en el
     // arranque de la app y tras el boot; el propio receiver la vuelve a llamar en cada disparo.
     // Idempotente vía KEY_NEXT_TRIGGER_AT (no vía PendingIntent.FLAG_NO_CREATE: el registro de un

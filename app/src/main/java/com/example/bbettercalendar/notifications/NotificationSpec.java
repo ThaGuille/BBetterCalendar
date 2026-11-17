@@ -6,6 +6,10 @@ import android.content.Intent;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.R;
@@ -25,6 +29,8 @@ public final class NotificationSpec {
      */
     public final String publicTitle;
     public final String publicBody;
+    /** Botones de acción de la notificación (vacío = sin acciones). */
+    public final List<NotificationCompat.Action> actions;
 
     private NotificationSpec(Builder b) {
         this.channelId = b.channelId;
@@ -36,6 +42,7 @@ public final class NotificationSpec {
         this.autoCancel = b.autoCancel;
         this.publicTitle = b.publicTitle;
         this.publicBody = b.publicBody;
+        this.actions = b.actions;
     }
 
     public static final class Builder {
@@ -48,6 +55,7 @@ public final class NotificationSpec {
         private boolean autoCancel = true;
         private String publicTitle;
         private String publicBody;
+        private final List<NotificationCompat.Action> actions = new ArrayList<>();
 
         public Builder(@NonNull String channelId, int notificationId) {
             this.channelId = channelId;
@@ -64,6 +72,11 @@ public final class NotificationSpec {
         public Builder publicVersion(String title, String body) {
             this.publicTitle = title;
             this.publicBody = body;
+            return this;
+        }
+
+        public Builder addAction(NotificationCompat.Action action) {
+            if (action != null) this.actions.add(action);
             return this;
         }
 

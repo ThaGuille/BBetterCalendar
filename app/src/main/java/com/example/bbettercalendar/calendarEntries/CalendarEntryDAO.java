@@ -102,6 +102,10 @@ public interface CalendarEntryDAO {
     LiveData<List<CalendarEntry>> observeAllProjectItems();
 
     // Cascade manual del borrado de proyecto (decisión #3 del proposal — sin Room FK onDelete).
+    // Lectura síncrona (hilo de IO) para cancelar los recordatorios antes del borrado en cascada.
+    @Query("SELECT * FROM CalendarEntry WHERE projectId = :projectId")
+    List<CalendarEntry> getItemsByProjectNow(int projectId);
+
     @Query("DELETE FROM CalendarEntry WHERE projectId = :projectId")
     void deleteItemsByProject(int projectId);
 

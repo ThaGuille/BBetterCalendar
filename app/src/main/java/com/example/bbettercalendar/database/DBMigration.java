@@ -75,6 +75,7 @@ public class DBMigration extends Application {
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             WarnedTodayStore warnedStore = new WarnedTodayStore(this);
             new UsageLimitScheduler(this, alarmManager, appRuleDao, warnedStore).arm();
+            com.example.bbettercalendar.notifications.nudge.DailyNudgeScheduler.rescheduleAll(this);
         });
     }
 

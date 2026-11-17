@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
+
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.IoExecutor;
@@ -45,6 +48,8 @@ public class EventReminderReceiver extends BroadcastReceiver {
                     Log.w(TAG, "Entry " + entryId + " missing, skipping");
                     return;
                 }
+                // Hecha o retirada: el aviso ya no tiene sentido (la alarma pudo sobrevivir al cambio).
+                if (entry.isDone() || entry.isDismissed()) return;
                 fireNotification(appContext, entry, offsetIndex);
             } catch (Exception e) {
                 Log.e(TAG, "onReceive failed", e);
@@ -60,15 +65,26 @@ public class EventReminderReceiver extends BroadcastReceiver {
         String offsetLabel = NotificationOffsets.labelFor(context, offsetIndex);
         String body = context.getString(R.string.notif_event_body_format, offsetLabel);
 
-        NotificationSpec spec = new NotificationSpec.Builder(
+        NotificationSpec.Builder spec = new NotificationSpec.Builder(
                 NotificationChannels.CHANNEL_EVENT_REMINDERS,
                 notificationIdFor(entry.getId(), offsetIndex))
                 .title(title)
                 .body(body)
-                .openMainActivity(context)
-                .build();
+                .openMainActivity(context);
 
-        notifier.notify(spec);
+        int id = entry.getId();
+        if (entry.getType() == AddEventActivity.TYPE_TASK) {
+            spec.addAction(new NotificationCompat.Action(R.drawable.ic_check_24,
+                    context.getString(R.string.notif_reminder_action_done),
+                    ReminderActionReceiver.actionIntent(context, ReminderActionReceiver.ACTION_DONE,
+                            id, offsetIndex, ReminderActionReceiver.doneRequestCode(id, offsetIndex))));
+        }
+        spec.addAction(new NotificationCompat.Action(R.drawable.ic_clock_v2_24,
+                context.getString(R.string.notif_reminder_action_snooze),
+                ReminderActionReceiver.actionIntent(context, ReminderActionReceiver.ACTION_SNOOZE,
+                        id, offsetIndex, ReminderActionReceiver.snoozeRequestCode(id, offsetIndex))));
+
+        notifier.notify(spec.build());
     }
 
     // La recurrencia ya no se avanza aquí (spec tasks-recurrence): las ocurrencias se

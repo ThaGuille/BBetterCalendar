@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -26,10 +27,13 @@ public class FocusAttributionRepository {
 
     private final FocusEventDAO focusEventDao;
     private final CalendarEntryDAO calendarEntryDao;
+    private final EventReminderScheduler eventReminderScheduler;
     private final MutableLiveData<String> autoCompletedTaskTitle = new MutableLiveData<>();
 
     @Inject
-    public FocusAttributionRepository(FocusEventDAO focusEventDao, CalendarEntryDAO calendarEntryDao) {
+    public FocusAttributionRepository(FocusEventDAO focusEventDao, CalendarEntryDAO calendarEntryDao,
+                                      EventReminderScheduler eventReminderScheduler) {
+        this.eventReminderScheduler = eventReminderScheduler;
         this.focusEventDao = focusEventDao;
         this.calendarEntryDao = calendarEntryDao;
     }
@@ -110,6 +114,7 @@ public class FocusAttributionRepository {
         if (attributed >= entry.getTargetMinutes()) {
             CompletionStamp.apply(entry, true, System.currentTimeMillis());
             calendarEntryDao.update(entry);
+            eventReminderScheduler.cancelFor(entry);
             autoCompletedTaskTitle.postValue(entry.getTitle());
         }
     }

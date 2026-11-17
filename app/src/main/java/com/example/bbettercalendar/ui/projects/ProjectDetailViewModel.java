@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -36,6 +37,7 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     private final ProjectDAO projectDao;
     private final CalendarEntryDAO calendarEntryDao;
     private final ProjectDeadlineScheduler deadlineScheduler;
+    private final EventReminderScheduler eventReminderScheduler;
 
     private final MutableLiveData<Integer> projectIdLiveData = new MutableLiveData<>();
     private final LiveData<Project> project;
@@ -55,12 +57,14 @@ public class ProjectDetailViewModel extends AndroidViewModel {
                                    FocusAttributionRepository focusAttributionRepository,
                                    FocusEventDAO focusEventDao,
                                    ProjectDeadlineScheduler deadlineScheduler,
+                                   EventReminderScheduler eventReminderScheduler,
                                    @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
         this.dbWriteExecutor = dbWriteExecutor;
         this.projectDao = projectDao;
         this.calendarEntryDao = calendarEntryDao;
         this.deadlineScheduler = deadlineScheduler;
+        this.eventReminderScheduler = eventReminderScheduler;
 
         project = Transformations.switchMap(projectIdLiveData, id ->
                 id == null ? emptyProject() : projectDao.observeById(id));
@@ -139,6 +143,12 @@ public class ProjectDetailViewModel extends AndroidViewModel {
             }
             CompletionStamp.apply(fresh, done, System.currentTimeMillis());
             calendarEntryDao.update(fresh);
+            // Recordatorios: hecha -> fuera; desmarcada -> se reprograman los que sigan en el futuro.
+            if (done) {
+                eventReminderScheduler.cancelFor(fresh);
+            } else if (!fresh.isTemplate()) {
+                eventReminderScheduler.scheduleFor(fresh);
+            }
         });
     }
 
@@ -208,6 +218,13 @@ public class ProjectDetailViewModel extends AndroidViewModel {
     public void deleteProject() {
         int projectId = requireProjectId();
         dbWriteExecutor.execute(() -> {
+            // Las alarmas de cada item se cancelan antes de que sus filas desaparezcan.
+            List<CalendarEntry> doomed = calendarEntryDao.getItemsByProjectNow(projectId);
+            if (doomed != null) {
+                for (CalendarEntry item : doomed) {
+                    eventReminderScheduler.cancelFor(item);
+                }
+            }
             calendarEntryDao.deleteItemsByProject(projectId);
             projectDao.deleteById(projectId);
             // La fila ya no existe: sin esto el receiver recibiría la alarma y la descartaría, pero

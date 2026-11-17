@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -106,6 +107,7 @@ public class HomeViewModel extends AndroidViewModel {
     private final LiveData<StreakCalculator.Result> streak;
     private final LiveData<List<Project>> projects;
     private final SocialRepository socialRepository;
+    private final EventReminderScheduler eventReminderScheduler;
     // [ahora, ahora + 7 días]: se re-ancla en refreshToday() (onResume) para que "Next up" no se
     // quede en un evento que ya empezó.
     private final MutableLiveData<long[]> nextUpRange = new MutableLiveData<>();
@@ -115,6 +117,7 @@ public class HomeViewModel extends AndroidViewModel {
     public HomeViewModel(@NonNull Application application, FocusEventDAO focusEventDao,
                          CalendarEntryDAO calendarEntryDao, ConfigurationManager configManager,
                          FocusAttributionRepository focusAttributionRepository,
+                         EventReminderScheduler eventReminderScheduler,
                          FocusSessionRepository focusSessionRepository,
                          FocusInsightsRepository focusInsightsRepository,
                          ProjectDAO projectDao,
@@ -126,6 +129,7 @@ public class HomeViewModel extends AndroidViewModel {
                          @IoExecutor ExecutorService ioExecutor,
                          @DbWriteExecutor ExecutorService dbWriteExecutor) {
         super(application);
+        this.eventReminderScheduler = eventReminderScheduler;
         this.socialPrefs = socialPrefs;
         // Sin cuenta habilitada (release) el perfil no se observa: solo manda el nombre local.
         this.profileState = SocialFeature.isAccountEnabled() ? profileRepository.observeMine() : null;
@@ -366,6 +370,12 @@ public class HomeViewModel extends AndroidViewModel {
             }
             CompletionStamp.apply(fresh, done, System.currentTimeMillis());
             calendarEntryDao.update(fresh);
+            // Recordatorios: hecha -> fuera; desmarcada -> se reprograman los que sigan en el futuro.
+            if (done) {
+                eventReminderScheduler.cancelFor(fresh);
+            } else if (!fresh.isTemplate()) {
+                eventReminderScheduler.scheduleFor(fresh);
+            }
         });
     }
 
@@ -414,6 +424,7 @@ public class HomeViewModel extends AndroidViewModel {
                 if (fresh != null) {
                     fresh.setDismissed(true);
                     calendarEntryDao.update(fresh);
+                    eventReminderScheduler.cancelFor(fresh);
                 }
             }
         });

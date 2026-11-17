@@ -1,0 +1,16 @@
+﻿# scenario: pcu-timer-sheet
+# recorded: 2026-11-17T17:09:46.386578+00:00  from run-steps pcu-timer-sheet
+1794935368784	GRANT android.permission.POST_NOTIFICATIONS
+1794935368983	START .configuration.SplashActivity
+1794935369436	WAIT 5000
+1794935369436	ASSERT id=homeCycleChip
+1794935373197	TAP id=homeCycleChip
+1794935375745	WAIT 3000
+1794935375745	ASSERT id=btn_restore expect~=Restore|Restaurar
+1794935378430	ASSERT id=btn_save
+1794935378518	SHOT pcu-sheet-footer
+1794935379146	TAP id=chip_preset_50
+1794935381650	SHOT pcu-sheet-changed
+1794935382615	TAP id=btn_restore
+1794935385155	SHOT pcu-sheet-restored
+1794935386098	KEY KEYCODE_BACK

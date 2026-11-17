@@ -22,6 +22,11 @@ package com.example.bbettercalendar.notifications;
  *   1_000_000 + entryId*10 + i  acción «Hecho» de un recordatorio
  *   2_000_000 + entryId*10 + i  acción «Posponer» de un recordatorio
  *   3_000_000 + entryId*10 + i  alarma pospuesta de un recordatorio
+ *
+ * Techo: los espacios son disjuntos por desplazamiento, no por construcción. entryId*10 + i
+ * alcanza 500_000 (deadlines) con entryId = 50_000, 900_001 con 90_000 y 1_000_000 con 100_000.
+ * ReminderNamespaceTest / ReminderActionCodesTest lo fijan hasta ID_CEILING = 2_000; si alguna vez
+ * hay decenas de miles de entradas, hay que rehacer las bases.
  */
 public final class NotificationIds {
 

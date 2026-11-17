@@ -113,7 +113,20 @@ public class NotificationSettingsFragment extends Fragment {
     private void openAppNotificationSettings() {
         Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                 .putExtra(Settings.EXTRA_APP_PACKAGE, requireContext().getPackageName());
-        startActivity(intent);
+        startSettings(intent);
+    }
+
+    /**
+     * Las pantallas de notificaciones del sistema existen desde API 26 y algunos fabricantes no las
+     * exponen: si no hay quien las abra, la ficha de la app (siempre existe) da acceso a todo.
+     */
+    private void startSettings(Intent intent) {
+        try {
+            startActivity(intent);
+        } catch (android.content.ActivityNotFoundException e) {
+            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    android.net.Uri.fromParts("package", requireContext().getPackageName(), null)));
+        }
     }
 
     // ---- Secciones ----
@@ -268,7 +281,7 @@ public class NotificationSettingsFragment extends Fragment {
             intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         }
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, requireContext().getPackageName());
-        startActivity(intent);
+        startSettings(intent);
     }
 
     // ---- Filas ----

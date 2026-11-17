@@ -47,9 +47,23 @@ public class BootReceiver extends BroadcastReceiver {
             return;
         }
 
+        // Un cambio de hora o de zona no mueve las alarmas de entradas y deadlines (son instantes
+        // absolutos), pero sí las que dependen de la hora local: avisos diarios y la medianoche de
+        // los límites. La sincronización de red puede disparar TIME_SET a menudo: sólo lo necesario.
+        final boolean clockOnly = Intent.ACTION_TIME_CHANGED.equals(action)
+                || Intent.ACTION_TIMEZONE_CHANGED.equals(action);
+        // Antes del primer desbloqueo las SharedPreferences (almacenamiento cifrado por credencial)
+        // no se pueden leer: los avisos diarios esperan al BOOT_COMPLETED que llega después.
+        final boolean locked = Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action);
+
         final PendingResult pendingResult = goAsync();
         IO.execute(() -> {
             try {
+                if (clockOnly) {
+                    usageLimitScheduler.forceRearm();
+                    DailyNudgeScheduler.rescheduleAll(context.getApplicationContext());
+                    return;
+                }
                 long now = System.currentTimeMillis();
                 // El bloque tiene ya tres inquilinos independientes: que uno no encuentre filas no
                 // puede saltarse los otros dos (antes un getAllEvents() nulo se llevaba por delante
@@ -81,7 +95,9 @@ public class BootReceiver extends BroadcastReceiver {
                 // next_trigger_at guardado sigue en el futuro tras reinicio/actualización pero la
                 // alarma ya no existe: sin borrarlo arm() saldría sin reprogramar.
                 usageLimitScheduler.forceRearm();
-                DailyNudgeScheduler.rescheduleAll(context.getApplicationContext());
+                if (!locked) {
+                    DailyNudgeScheduler.rescheduleAll(context.getApplicationContext());
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Boot reschedule failed", e);
             } finally {

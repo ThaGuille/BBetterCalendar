@@ -276,7 +276,6 @@
 
     <!-- u13 · Home (html 04) -->
     <string name="home_notifications">Notificaciones</string>
-    <string name="home_notifications_soon">El centro de notificaciones llegará pronto</string>
     <string name="home_mode_paused">En pausa</string>
     <string name="home_cycle_chip_desc">Ajustes del Pomodoro: %1$s</string>
     <string name="home_open_focus">Abrir la sesión de concentración</string>

@@ -291,7 +291,6 @@
 
     <!-- u13 · Home (html 04) -->
     <string name="home_notifications">Notifications</string>
-    <string name="home_notifications_soon">Notification centre is coming soon</string>
     <string name="home_mode_paused">Paused</string>
     <string name="home_cycle_chip_desc">Pomodoro settings: %1$s</string>
     <string name="home_open_focus">Open focus session</string>

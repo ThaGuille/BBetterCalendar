@@ -280,8 +280,7 @@ public class FocusFragment extends Fragment
                 ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface));
         toolbar.inflateMenu(R.menu.menu_focus);
         // The round actions must not touch the screen edge.
-        toolbar.setPaddingRelative(toolbar.getPaddingStart(), toolbar.getPaddingTop(),
-                getResources().getDimensionPixelSize(R.dimen.focus_action_gap), toolbar.getPaddingBottom());
+        keepActionGap();
         // Both actions are action layouts (visible tonal circles): the click goes on the view.
         View settings = actionView(R.id.focusSettingsButton);
         if (settings != null) {
@@ -295,6 +294,23 @@ public class FocusFragment extends Fragment
         renderBlockMode();
     }
 
+    /**
+     * InsetsHelper.apply (from TopBarHelper.bind) re-sets the toolbar padding on every insets
+     * dispatch from the padding it captured, which wipes a synchronous end padding. So the gap is
+     * re-applied from a layout listener, after the insets have been dispatched; the top inset is kept.
+     */
+    private void keepActionGap() {
+        final int gap = getResources().getDimensionPixelSize(R.dimen.focus_action_gap);
+        final Runnable reapply = () -> {
+            if (toolbar != null && toolbar.getPaddingEnd() != gap) {
+                toolbar.setPaddingRelative(toolbar.getPaddingStart(), toolbar.getPaddingTop(),
+                        gap, toolbar.getPaddingBottom());
+            }
+        };
+        reapply.run();
+        toolbar.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> reapply.run());
+    }
+
     @Nullable
     private View actionView(int itemId) {
         if (toolbar == null) {
@@ -306,6 +322,11 @@ public class FocusFragment extends Fragment
 
     /** Opens the Pomodoro settings sheet (same as Home's cycle chip). */
     private void showTimerSettings() {
+        // Guard against a quick double tap: a second show() would throw "Fragment already added".
+        if (timerPopup.isAdded() || isStateSaved()
+                || getParentFragmentManager().findFragmentByTag("popup_tag") != null) {
+            return;
+        }
         timerPopup.setConfiguration(configurationManager.getConfiguration());
         timerPopup.show(getParentFragmentManager(), "popup_tag");
     }

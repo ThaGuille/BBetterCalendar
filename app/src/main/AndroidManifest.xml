@@ -99,6 +99,11 @@
             android:name=".ui.home.HomeForegroundService"
             android:foregroundServiceType="specialUse" />
 
+        <!-- Plan sistema-notificaciones (B.1): alarma exacta de fin de fase del pomodoro. -->
+        <receiver
+            android:name=".notifications.focus.FocusPhaseEndReceiver"
+            android:exported="false" />
+
         <!-- Phase 4a: servicio de Accesibilidad que hace cumplir los límites diarios cubriendo la
              app. BIND_ACCESSIBILITY_SERVICE va en la etiqueta <service> (no es <uses-permission>);
              exported=false + el sistema es quien lo enlaza cuando el usuario lo activa en Ajustes. -->

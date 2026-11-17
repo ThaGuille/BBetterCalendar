@@ -19,8 +19,12 @@ import com.example.bbettercalendar.blocking.FocusBlockState;
 import com.example.bbettercalendar.configuration.Configuration;
 import com.example.bbettercalendar.configuration.ConfigurationManager;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.notifications.FocusRunningFlag;
 import com.example.bbettercalendar.notifications.focus.FocusCompleteNotifier;
 import com.example.bbettercalendar.notifications.focus.FocusFailNotifier;
+import com.example.bbettercalendar.notifications.focus.FocusOngoingNotification;
+import com.example.bbettercalendar.notifications.focus.FocusPhaseAlarm;
+import com.example.bbettercalendar.notifications.focus.FocusPhaseEndNotifier;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.presence.PresencePublisher;
 import com.example.bbettercalendar.stats.FocusAttributionRepository;
@@ -52,7 +56,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  */
 @HiltViewModel
 public class FocusSessionViewModel extends ViewModel implements FocusTimerStateMachine.Listener,
-        FocusBackgroundObserver.Listener {
+        FocusBackgroundObserver.Listener, FocusPhaseAlarm.LiveSession {
 
     private static final String TAG = "FocusSessionViewModel";
     private static final long TICK_MILLIS = 1000L;
@@ -131,6 +135,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         // entera pase a segundo plano, no navegar dentro de ella ni abrir otra de sus Activities.
         backgroundObserver = FocusBackgroundObserver.get();
         backgroundObserver.addListener(this);
+        // Plan sistema-notificaciones (B.1): la alarma de fin de fase hace avanzar ESTA sesión.
+        FocusPhaseAlarm.attach(this);
     }
 
     // ============================================================================ public API
@@ -308,6 +314,23 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     @Override
     public void onAppForegrounded() {
         grace.onForegrounded();
+        // B.1: el aviso de fin de fase sólo tiene sentido con la app fuera; al volver, se retira.
+        FocusPhaseEndNotifier.cancel(appContext);
+    }
+
+    // ============================================================ FocusPhaseAlarm.LiveSession
+
+    /**
+     * B.1: sonó la alarma de fin de fase (FocusPhaseEndReceiver, hilo principal). Con la pantalla
+     * apagada el tick del Handler va con retraso (uptimeMillis no avanza dormido); la alarma despierta
+     * el móvil y la transición ocurre aquí, a su hora. Si el reloj de pared se movió y la fase aún no
+     * acabó (o ya no corre), sólo se vuelve a sincronizar la alarma.
+     */
+    @Override
+    public void onPhaseAlarm() {
+        if (!machine.getState().isRunning() || !advanceAndNotify()) {
+            syncPhaseAlarm();
+        }
     }
 
     private void onGraceExpired() {
@@ -350,12 +373,30 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         if (!machine.getState().isRunning()) {
             return;
         }
-        if (machine.advance()) {
-            onTransition();
+        if (advanceAndNotify()) {
             return;
         }
         publish();
         scheduleTick();
+    }
+
+    /**
+     * Fin de la cuenta atrás en curso, venga del tick o de la alarma (B.1). Con la app fuera publica el
+     * aviso de la fase que acaba de terminar: el plan se calcula ANTES de avanzar (es el mismo que
+     * llevaba la alarma), y como quien llegue segundo ya no encuentra nada que avanzar, sale una vez.
+     *
+     * @return true si hubo transición
+     */
+    private boolean advanceAndNotify() {
+        FocusPhaseAlarm.Plan ending = currentPhasePlan();
+        if (!machine.advance()) {
+            return false;
+        }
+        onTransition();
+        if (!FocusPhaseAlarm.isAppInForeground()) {
+            FocusPhaseEndNotifier.post(appContext, ending);
+        }
+        return true;
     }
 
     /** Next tick right after the displayed second changes (display = floor of remaining). */
@@ -373,6 +414,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private void onTransition() {
         saveState();
         syncBlockState();
+        syncRunningFlag();
+        syncPhaseAlarm();
         syncForegroundService();
         publish();
         publishPresence();
@@ -393,6 +436,36 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     }
 
     /**
+     * B.3: {@link FocusRunningFlag} (lo leen los avisos de amigos y los diarios) dice «concentración
+     * corriendo» sólo en RUNNING, con su fin de reloj; cualquier otro estado lo borra.
+     */
+    private void syncRunningFlag() {
+        if (machine.getState() == State.RUNNING) {
+            FocusRunningFlag.setRunning(appContext,
+                    System.currentTimeMillis() + machine.getRemainingMillis());
+        } else {
+            FocusRunningFlag.clear(appContext);
+        }
+    }
+
+    /**
+     * B.1: una alarma exacta al fin de la fase que corre, ninguna en cualquier otro estado (pausa,
+     * parada, cancelación, saltar descanso, fallo, fin). Con la app a la vista, además, se retira un
+     * aviso de fin de fase que siguiera ahí.
+     */
+    private void syncPhaseAlarm() {
+        FocusPhaseAlarm.sync(appContext, currentPhasePlan());
+        if (FocusPhaseAlarm.isAppInForeground()) {
+            FocusPhaseEndNotifier.cancel(appContext);
+        }
+    }
+
+    private FocusPhaseAlarm.Plan currentPhasePlan() {
+        return FocusPhaseAlarm.plan(machine.getState(), machine.getRemainingMillis(),
+                System.currentTimeMillis(), currentSettings(), machine.getCyclesCompleted());
+    }
+
+    /**
      * Arranca {@link HomeForegroundService} cuando empieza una sesión y lo para cuando vuelve a
      * STOPPED (fin de ciclos, cancelación, fallo). Las transiciones a "activa" sólo ocurren por
      * un toque del usuario o al restaurar la Activity, siempre en primer plano; aun así se
@@ -400,7 +473,14 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
      */
     private void syncForegroundService() {
         boolean active = machine.getState() != State.STOPPED;
+        // B.2: fase + cuenta atrás en la notificación del servicio. Con el servicio ya en marcha se
+        // vuelve a publicar el mismo id (nada de startForegroundService desde segundo plano).
+        FocusOngoingNotification.setLatest(active ? FocusOngoingNotification.Content.forState(
+                machine.getState(), machine.getRemainingMillis(), System.currentTimeMillis()) : null);
         if (active == foregroundServiceOn) {
+            if (active) {
+                FocusOngoingNotification.repost(appContext);
+            }
             return;
         }
         Intent intent = new Intent(appContext, HomeForegroundService.class);
@@ -413,6 +493,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
             }
         } else {
             appContext.stopService(intent);
+            FocusOngoingNotification.cancel(appContext);
             foregroundServiceOn = false;
         }
     }
@@ -499,6 +580,11 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     @Override
     protected void onCleared() {
         backgroundObserver.removeListener(this);
+        // B.1 / B.3: sin timer vivo no hay fin de fase que avisar ni concentración en marcha.
+        FocusPhaseAlarm.detach(this);
+        FocusPhaseAlarm.sync(appContext, FocusPhaseAlarm.Plan.NONE);
+        FocusRunningFlag.clear(appContext);
+        FocusOngoingNotification.setLatest(null);
         // The ticker dies with the ViewModel, but leaving the app with back mid-session (activity
         // finishing) still counts as a fail, as before. The process ON_STOP arrives ~700 ms AFTER
         // this (and nobody listens any more), so the grace is armed here with the same rule; one
@@ -509,6 +595,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         handler.removeCallbacks(tick);
         if (foregroundServiceOn) {
             appContext.stopService(new Intent(appContext, HomeForegroundService.class));
+            FocusOngoingNotification.cancel(appContext);
             foregroundServiceOn = false;
         }
         // Nada podrá volver a apagar el bloqueo total sin un timer vivo (kill-trap): se suelta aquí.

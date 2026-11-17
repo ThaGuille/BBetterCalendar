@@ -31,6 +31,8 @@ public final class NotificationSpec {
     public final String publicBody;
     /** Botones de acción de la notificación (vacío = sin acciones). */
     public final List<NotificationCompat.Action> actions;
+    /** Sale sin sonido ni vibración (amigos durante una concentración, plan sistema-notificaciones B.4). */
+    public final boolean silent;
 
     private NotificationSpec(Builder b) {
         this.channelId = b.channelId;
@@ -43,6 +45,7 @@ public final class NotificationSpec {
         this.publicTitle = b.publicTitle;
         this.publicBody = b.publicBody;
         this.actions = b.actions;
+        this.silent = b.silent;
     }
 
     public static final class Builder {
@@ -56,6 +59,7 @@ public final class NotificationSpec {
         private String publicTitle;
         private String publicBody;
         private final List<NotificationCompat.Action> actions = new ArrayList<>();
+        private boolean silent;
 
         public Builder(@NonNull String channelId, int notificationId) {
             this.channelId = channelId;
@@ -67,6 +71,7 @@ public final class NotificationSpec {
         public Builder smallIcon(@DrawableRes int res) { this.smallIconRes = res; return this; }
         public Builder contentIntent(PendingIntent pi) { this.contentIntent = pi; return this; }
         public Builder autoCancel(boolean v) { this.autoCancel = v; return this; }
+        public Builder silent(boolean v) { this.silent = v; return this; }
 
         /** F5-u6 (d7): lo que se ve con el móvil bloqueado en vez de título y cuerpo (sin datos personales). */
         public Builder publicVersion(String title, String body) {
@@ -82,7 +87,8 @@ public final class NotificationSpec {
 
         public Builder openMainActivity(Context context) {
             Intent intent = new Intent(context, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
             this.contentIntent = PendingIntent.getActivity(context, notificationId, intent, flags);
             return this;
@@ -95,7 +101,8 @@ public final class NotificationSpec {
          */
         public Builder openProjectDetail(Context context, int projectId) {
             Intent intent = new Intent(context, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra(MainActivity.EXTRA_OPEN_PROJECT_ID, projectId);
             int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
             this.contentIntent = PendingIntent.getActivity(context, notificationId, intent, flags);

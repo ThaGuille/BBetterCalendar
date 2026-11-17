@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plan sistema-notificaciones, parte B (pomodoro): aviso de fin de fase y notificación del
+     servicio en primer plano. -->
+<resources>
+    <string name="notif_focus_phase_focus_done_title">Concentración completada</string>
+    <string name="notif_focus_phase_focus_done_body">Toca un descanso de %1$d min</string>
+    <string name="notif_focus_phase_break_over_title">Descanso terminado</string>
+    <string name="notif_focus_phase_break_over_body">¿Vamos con otra ronda?</string>
+    <string name="notif_focus_phase_session_complete_title">Sesión completada</string>
+    <string name="notif_focus_phase_session_complete_body">Buen trabajo. Toca recargar pilas.</string>
+
+    <string name="notif_focus_ongoing_title_focus">Concentrándote</string>
+    <string name="notif_focus_ongoing_title_rest">En descanso</string>
+    <string name="notif_focus_ongoing_title_paused">En pausa</string>
+    <string name="notif_focus_ongoing_body_running">Toca para abrir el temporizador</string>
+    <string name="notif_focus_ongoing_body_paused">Quedan %1$s</string>
+</resources>

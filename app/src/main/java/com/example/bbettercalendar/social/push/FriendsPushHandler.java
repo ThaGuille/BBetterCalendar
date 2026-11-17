@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.notifications.BBetterNotifier;
+import com.example.bbettercalendar.notifications.FocusRunningFlag;
 import com.example.bbettercalendar.notifications.NotificationChannels;
 import com.example.bbettercalendar.notifications.NotificationSpec;
 import com.example.bbettercalendar.social.SocialFeature;
@@ -86,7 +87,8 @@ public final class FriendsPushHandler {
         FriendsPushPayload.Content content = payload.compose(app::getString);
         int id = payload.notificationId();
         Intent open = new Intent(app, MainActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .putExtra(EXTRA_OPEN_INBOX_ID, payload.inboxId);
         PendingIntent tap = PendingIntent.getActivity(app, id, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -96,6 +98,8 @@ public final class FriendsPushHandler {
                 .publicVersion(content.publicTitle, content.publicBody)
                 .contentIntent(tap)
                 .autoCancel(true)
+                // Plan sistema-notificaciones (B.4): con una concentración en marcha sale igual, pero en silencio.
+                .silent(FocusRunningFlag.isRunning(app))
                 .build();
     }
 }

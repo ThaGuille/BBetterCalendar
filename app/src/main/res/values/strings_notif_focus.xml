@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plan sistema-notificaciones, parte B (pomodoro): aviso de fin de fase y notificación del
+     servicio en primer plano. -->
+<resources>
+    <!-- Fin de fase (bb_focus_alerts), sólo con la app fuera. -->
+    <string name="notif_focus_phase_focus_done_title">Focus complete</string>
+    <string name="notif_focus_phase_focus_done_body">Time for a %1$d-min break</string>
+    <string name="notif_focus_phase_break_over_title">Break\'s over</string>
+    <string name="notif_focus_phase_break_over_body">Ready for another round?</string>
+    <string name="notif_focus_phase_session_complete_title">Session complete</string>
+    <string name="notif_focus_phase_session_complete_body">Nice work. Time to recharge.</string>
+
+    <!-- Notificación del servicio: fase + cuenta atrás. -->
+    <string name="notif_focus_ongoing_title_focus">Focusing</string>
+    <string name="notif_focus_ongoing_title_rest">On a break</string>
+    <string name="notif_focus_ongoing_title_paused">Paused</string>
+    <string name="notif_focus_ongoing_body_running">Tap to open the timer</string>
+    <string name="notif_focus_ongoing_body_paused">%1$s left</string>
+</resources>

@@ -1,6 +1,6 @@
 # BBetterCalendar — Style Guide
 
-**Last verified:** 2026-11-11 (DB v15, mejora-visual u17) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-17 (DB v15, mejora-visual u17, pomodoro-calendario-ui) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The visual language is **Stitch «Calm Focus»**: dark-first, sage on deep pine, honey amber only for earned moments, one family (Plus Jakarta Sans). Source of truth for look and feel: [`.stitch/DESIGN.md`](../../.stitch/DESIGN.md) and the exported designs in `.stitch/designs/` (PNG) + `.stitch/html/`. History and per-unit decisions: [`migracion-visual-stitch-impl.md`](../plans/migracion-visual-stitch-impl.md); open design questions: [`migracion-visual-stitch-questions.md`](../plans/migracion-visual-stitch-questions.md).
 

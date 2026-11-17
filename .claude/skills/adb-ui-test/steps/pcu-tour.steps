@@ -1,0 +1,49 @@
+# Closing walk of pomodoro-calendario-ui: Pomodoro (running, paused, top control, resume, stop), settings sheet
+# from Home's chip, Calendar month + legend with another day selected, Progress and Projects tabs.
+# Needs the seed (python .claude/scripts/seed_progress_db.py --device).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-tour.steps --save pcu-tour
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+ASSERT id=homePlayButton
+ASSERT id=homeCycleChip
+TAP id=homePlayButton
+WAIT 4000
+ASSERT id=focusRingBox
+SHOT pcu-tour-focus-running
+TAP id=focusPlayButton
+WAIT 1500
+ASSERT id=focusEndsAtText expect~=Paused|En pausa
+SHOT pcu-tour-focus-paused
+ASSERT id=focusBlockModeButton
+ASSERT id=focusSettingsButton
+TAP id=focusPlayButton
+WAIT 1500
+TAP id=focusStopButton
+WAIT 1500
+KEY KEYCODE_BACK
+WAIT 2500
+ASSERT id=homeCycleChip
+TAP id=homeCycleChip
+WAIT 3000
+ASSERT id=btn_restore
+ASSERT id=btn_save
+SHOT pcu-tour-sheet-footer
+KEY KEYCODE_BACK
+WAIT 1500
+TAP id=navigation_calendar_month
+WAIT 2000
+ASSERT id=monthCalendarView
+ASSERT id=legendReminder
+ASSERT id=legendFocus
+SHOT pcu-tour-calendar-month
+TAP text=deadline|entrega
+WAIT 1200
+ASSERT id=dayDetailTitle
+SHOT pcu-tour-calendar-other-day
+TAP id=navigation_progress
+WAIT 2500
+SHOT pcu-tour-progress
+TAP id=navigation_projects
+WAIT 2500
+SHOT pcu-tour-projects

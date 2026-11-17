@@ -102,7 +102,8 @@ Focus (`fragment_focus.xml`, destino `navigation_focus`, raíz `focusScreen`):
 | id | Qué |
 |---|---|
 | `topBar` | Barra superior (flecha «Back» = navigateUp, sin cancelar) |
-| `focusBlockModeButton` | Acción 🚫 de la barra; content-desc «Block mode: off/on/needs permission. …» |
+| `focusSettingsButton` | Botón de ajustes del Pomodoro de la barra (abre `TimerPopup`, pomodoro-calendario-ui) |
+| `focusBlockModeButton` | Vista de acción (icono propio de bloqueo) de la barra; content-desc «Block mode: off/on/needs permission. …» |
 | `focusModeChip` (`focusModeChipRow`, `focusModeDot`) | «CONCENTRATION · x OF N» / «REST · x OF N» / «PAUSED · x OF N» |
 | `focusCycleDots` | Puntos de ciclo (content-desc «Cycle x of N») |
 | `focusRingBox` | Caja del anillo (anillo + restante + «Termina a las»); elemento compartido con `homePlayButton` en la transición Home → Focus (mejora-visual u15) |
@@ -185,7 +186,7 @@ Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
 ## Calendar month/week and forms (u22)
 
-- Mes: `legendTask`, `legendEvent`, `legendDeadline`, `legendFocus` (pairs inside `calendarLegend`), `calendarModeMonth`, `calendarModeWeek`, `monthGridCard`, `monthPrevButton`, `monthNextButton`, `monthTitleText`, `monthCalendarView`, `legendDay0..6`, `calendarLegend`, `calendarAgendaCard`, `dayDetailTitle`, `dayDetailSubtitle`, `dayDetailEmptyText` (EmptyStateView; su botón `emptyStateAction`), `dayDetailRecycler`, `calendarAddEventButton` (el «+» de la tarjeta, ya no es FAB); celda: `cellDayText`, `cellTodayIndicator`, `cellFocusBg`, `cellDots`, `cellDot1..3` (antes `cellEventBar1..3`); item: `eventColorSwatch`, `eventTitle`, `eventMeta` (antes `eventDescription`), `eventTime`.
+- Mes: `legendTask`, `legendEvent`, `legendReminder` (pomodoro-calendario-ui), `legendDeadline`, `legendFocus` (pairs inside `calendarLegend`), `calendarModeMonth`, `calendarModeWeek`, `monthGridCard`, `monthPrevButton`, `monthNextButton`, `monthTitleText`, `monthCalendarView`, `legendDay0..6`, `calendarLegend`, `calendarAgendaCard`, `dayDetailTitle`, `dayDetailSubtitle`, `dayDetailEmptyText` (EmptyStateView; su botón `emptyStateAction`), `dayDetailRecycler`, `calendarAddEventButton` (el «+» de la tarjeta, ya no es FAB); celda (su content-desc lista las marcas, p. ej. «20, Task, Deadline»; `cellTodayIndicator` es ahora el círculo del número de hoy): `cellDayText`, `cellTodayIndicator`, `cellSelectedOutline`, `cellFocusBg`, `cellDots`, `cellDot1..3` (antes `cellEventBar1..3`); item: `eventColorSwatch`, `eventTitle`, `eventMeta` (antes `eventDescription`), `eventTime`.
 - Semana: `calendarWeekRoot`, `weekMonthTitleText`, `weekView` (canvas, sin hijos accesibles por id), `calendarAddEventButton2`.
 - Formularios: `btnClose`, `btnSaveEvent` (disabled until there is a title and, in an event, the end is not before the start), `form_type_selector` (SegmentedControlView Evento/Tarea/Recordatorio; replaces `switch_to_event_button`/`switch_to_task_button`/`notificationsButton`, tap its items by text), `event_title`, `event_start_label`/`event_start_date`/`event_start_hour`, `event_end_label`/`event_end_date`/`event_end_hour`, `task_title`, `task_start_label`/`task_start_date`/`task_start_hour`, `task_duration`, shortcuts `form_shortcut_today`/`form_shortcut_tomorrow`/`form_shortcut_plus_hour`, inline error `form_error`.
 - Hoja rapida (abre `homeAddTaskButton`; u14: handle, shortcuts `quickAddShortcutToday/Tomorrow/PlusHour`, save disabled until a title): `quickAddTitleInput`, `quickAddTimeButton`, `quickAddRepeatButton`, `quickAddTargetInput`, `quickAddMoreOptionsButton`, `quickAddSaveButton`.

@@ -1,6 +1,6 @@
 # System — Pomodoro timer (`ui/home/` + `notifications/focus/`)
 
-**Last verified:** 2026-11-11 (DB v15, mejora-visual u6, u13, u17) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-17 (DB v15, mejora-visual u6, u13, u17, pomodoro-calendario-ui) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The focus timer — the app's core feature. A pure 6-state machine (stopped/running/paused ×
 normal/rest, `ui/focus/FocusTimerStateMachine`) owned by an **activity-scoped**
@@ -109,3 +109,11 @@ to `navigation_focus`); the Focus screen (`FocusFragment`, u14) owns the running
 - **Focus session data** (v15): `focus_event.elapsedMin` and `pauseCount` are written by `FocusSessionRepository.recordFail` / `recordFocusCompleted` (counted by the session on each `pause()`).
 - Home play button -> Focus ring is a `MaterialContainerTransform` on `bb_focus_ring` (`homePlayButton` / `focusRingBox`).
 - Debug: `bb_debug_nav cycle_complete` without extras uses 4 cycles of 25 min.
+
+## pomodoro-calendario-ui (2026-11-17, Last verified: 2026-11-17)
+- **Growing ring.** `RingStateMapper.Ring.progress` (was `remaining`) is the drawn fraction: `MIN_VISIBLE_PROGRESS` (0.05) + (1 - MIN) * elapsed, so the arc never starts at zero, grows monotonically while running or paused and is full at the end. Idle (stopped / no state) draws the same starting stub (decision d4). `setRemaining` became `setProgress` in `RingButtonView`, `FocusRingView` and their callers (`HomeFragment`, `FocusFragment`, `TodayTaskAdapter`, where 0 = no arc).
+- **Colour ramp.** `RingRamp` (`ui/common/widget/`, pure, JVM-tested): `intensity(t) = 0.3 + 0.7 t`; `RingPainter` draws a `SweepGradient` rotated -90 degrees (starts at 12 o'clock, clockwise) with 17 stops from the soft tone (45 % alpha) to `bb_sanct_primary` (focus) or `bb_sanct_sage_bright` (rest). Pause dimming and the 700 ms start sweep are unchanged.
+- **Home -> Focus transition.** `FocusRingTransition` (pure description: THROUGH fade mode, threshold 0.35, opaque `bb_sanct_surface` container, circular corners) applied by `ScreenTransitions.sharedFocusRing`: the play disc fades out before the ring and timer fade in, never both at once.
+- **Focus top bar.** Two round tonal buttons: `focusSettingsButton` (tune icon, opens `TimerPopup` from Focus; `FocusFragment` is an `OnPopupListener`) and `focusBlockModeButton` (own icon `ic_focus_block_mode_24`, action layout `view_focus_block_action.xml`, three states off / on / pending by background, outline and tint). Home's `homeCycleChip` is a tonal outlined settings button (tune icon, 48dp). The paused text is two lines ("Paused" / "Timer waiting") capped at `focus_paused_line_width` so it fits inside the ring.
+- **Settings sheet footer.** `btn_restore` is an outlined `MaterialButton` (one line, icon) beside the filled `btn_save`, same width and height.
+- Walks: `steps/pcu-tour.steps` (closing), `pcu-ring`, `pcu-focus`, `pcu-focus-large`, `pcu-transition`, `pcu-timer-sheet`. Verified on the emulator only.

@@ -1,6 +1,6 @@
 # System — Calendar (`ui/calendar/` + `calendarEntries/` + `notifications/event/`)
 
-**Last verified:** 2026-11-11 (DB v15, mejora-visual u12) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-17 (DB v15, mejora-visual u12, pomodoro-calendario-ui) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Month and week views over a single unified entity (`CalendarEntry`) that represents events,
 tasks, and reminders via an int `type` field. Includes creation (`AddEventActivity`) and the
@@ -98,3 +98,12 @@ or get alarms.
 - **Legend** `calendarLegend` under the grid: a `ConstraintLayout` with a `Flow` over four dot + label pairs (`legendTask`, `legendEvent`, `legendDeadline`, `legendFocus`) so it wraps at large text. **Agenda card** `calendarAgendaCard`: weekday + day, "N things · M min planned" (`DayPlan.plannedMinutes`), "+" button `calendarAddEventButton` (was the FAB), rows hour + colour bar + title (`item_day_event.xml`), `EmptyStateView` when the day is empty.
 - Month changes slide the pager page and fade the title/grid (`animateMonthChange`, `ScreenTransitions.periodShift`).
 - Event and task forms plus the bottom sheets are in `architectural_patterns.md` (Bottom sheets).
+
+## pomodoro-calendario-ui colour system (2026-11-17, Last verified: 2026-11-17)
+Supersedes the cell description above (today ring, sage fill when selected). Separate channels, so no mark hides another:
+- **Focus** = amber background tint of the day in 3 steps (`CalendarHeatLevel`; `bb_cal_focus_1..3` = `amber_950/900/800`, solid, no alpha).
+- **Dots** (`cellDot1..3`): task sage, event blue, reminder lilac (`calendar_item_reminder` = `lilac_300`, new), deadline red. Focus and the four item colours are pairwise >= 30 degrees of hue apart (`CalendarPaletteTest` reads `colors.xml` + `palette.xml`).
+- **Today** = the day number inside a filled sage circle (`cellTodayIndicator`, 28dp, number `bb_cal_on_today`). **Selected** = light outline around the cell (`cellSelectedOutline`, `bb_cal_selected_outline`, 1.5dp) with no fill, so the focus tint and dot colours stay visible. Today + selected shows both.
+- `DayCellStyle` (`ui/calendar/domain/`, pure, `DayCellStyleTest`): (isToday, isSelected, focus level) -> `focusLevel`, `todayCircle`, `selectionOutline`, `numberOnCircle`; `MonthDayBinder` applies it. Each cell's `contentDescription` lists its marks ("20, Task, Deadline", "17, Today, Selected, Task"), so TalkBack reads them and walks pick a day by content (`TAP text=deadline|entrega`).
+- **Legend** `calendarLegend`: `legendTask`, `legendEvent`, `legendReminder` (new), `legendDeadline` (dot) and `legendFocus` (tinted square, `bg_calendar_legend_focus`). The day list (`DayDetailAdapter`) and week view (`WeekViewItemAdapter`) use `ColorResolver`, so reminders are lilac there too.
+- Walk: `steps/pcu-calendar.steps`; closing `pcu-tour.steps`. Verified on the emulator only.

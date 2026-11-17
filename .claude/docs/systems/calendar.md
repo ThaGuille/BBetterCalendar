@@ -18,7 +18,8 @@ or get alarms.
 | Fragment | `CalendarFragmentMonth` — bottom-nav destination; toggles to `CalendarFragmentWeek` via toolbar |
 | Activity | `.calendarEntries.AddEventActivity` (`exported=true`) — create/edit form, switches layout by type at runtime |
 | Receiver | `.notifications.event.EventReminderReceiver` (`exported=false`) — fires a scheduled reminder |
-| Receiver | `.notifications.event.BootReceiver` (`exported=true`, `BOOT_COMPLETED`/`LOCKED_BOOT_COMPLETED`) — reschedules all future reminders + re-arms `UsageLimitScheduler` (shared with `app-limits.md`) |
+| Receiver | `.notifications.event.BootReceiver` (`exported=true`, `BOOT_COMPLETED`/`LOCKED_BOOT_COMPLETED`/`MY_PACKAGE_REPLACED`/`TIME_SET`/`TIMEZONE_CHANGED`) — reschedules all future reminders + project deadlines, force re-arms `UsageLimitScheduler` (shared with `app-limits.md`) and the daily nudges (`notifications.md`) |
+| Receiver | `.notifications.event.ReminderActionReceiver` (`exported=false`) — reminder buttons «Done» (tasks) and «Snooze 10 min» |
 | Notification channel | `CHANNEL_EVENT_REMINDERS` (`bb_event_reminders`) — see `notifications.md` |
 
 ## Files
@@ -39,11 +40,12 @@ or get alarms.
 | `binders/DayDetailAdapter` | `ui/calendar/binders/DayDetailAdapter.java` | RecyclerView adapter for the selected-day list |
 | `binders/WeekViewItemAdapter` | `ui/calendar/binders/WeekViewItemAdapter.java` | Adapts `CalendarItem` → vendored `WeekViewEntity` |
 | `EventReminderScheduler` | `notifications/event/EventReminderScheduler.java` | Thin client of `AlarmReminderCore` (see `notifications.md`): `AlarmManager.setExactAndAllowWhileIdle` (falls back to inexact `set()` on `SecurityException`) per enabled offset |
-| `EventReminderReceiver` | `notifications/event/EventReminderReceiver.java` | Fires the actual reminder notification when an alarm lands |
+| `EventReminderReceiver` | `notifications/event/EventReminderReceiver.java` | Fires the actual reminder notification when an alarm lands; skips done / dismissed entries; body from the real start time (`ReminderTiming`); adds the Done / Snooze actions (2026-11-17) |
 | `BootReceiver` | `notifications/event/BootReceiver.java` | `goAsync()` + executor: reloads all `CalendarEntry` rows, reschedules future ones, re-arms `UsageLimitScheduler`, and re-arms project-deadline alarms (`projects.md`) — three tenants in one block |
 
 ## Flow — non-obvious hops only
 
+0. **New entries come with a default reminder ticked** (`NotificationPrefs`, 10 min before unless the user changed it in «Notificaciones»); reminders are cancelled when the entry is marked done or deleted (2026-11-17, `sistema-notificaciones.md` A).
 1. **Reminder scheduling is per-offset, not per-entry.** `EventReminderScheduler.scheduleFor(entry)` reads `entry.getNotifications()` (a `boolean[]` of offset slots, see `notifications/NotificationOffsets`) and delegates to the shared `AlarmReminderCore` (`notifications.md`), which schedules one `AlarmManager` alarm per enabled offset, each with its own `PendingIntent` (`requestCode = entryId * 10 + offsetIndex`, reproduced via a `RequestCodeNamespace` lambda) — cancelling an entry means cancelling all its offset alarms individually (`cancelFor`), not one alarm.
 2. **`CalendarItemMapper` has a legacy-data fallback**: if `startMillis`/`endMillis` are both 0 (pre-`MIGRATION_6_7` rows that never got backfilled), it falls back to reading the JSON-serialized `Calendar` fields — a call graph won't show this defensive branch is load-bearing for old data, not dead code.
 3. **`CalendarViewModel.refresh()` was deleted (repository-layer-consolidation, T2)** — it existed

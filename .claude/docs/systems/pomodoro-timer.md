@@ -16,7 +16,7 @@ to `navigation_focus`); the Focus screen (`FocusFragment`, u14) owns the running
 | Process observer | `FocusBackgroundObserver` — singleton registered on `ProcessLifecycleOwner` (dependency `androidx.lifecycle:lifecycle-process`) the first time a `FocusSessionViewModel` is built; feeds `BackgroundGrace` (u14) |
 | Launcher | `SplashActivity` finishes at once when `!isTaskRoot()` and the intent is `MAIN`/`LAUNCHER` (u14): a launcher tap on a live task resumes the existing `MainActivity` and its session |
 | Service | `.ui.home.HomeForegroundService` (`foregroundServiceType="specialUse"`) — sticky notification to keep the process alive while the timer runs. **Started/stopped by `FocusSessionViewModel.syncForegroundService()`** on every transition: on while the state ≠ `STOPPED`, off otherwise and in `onCleared()` (u13; before it followed `HomeFragment.onStart/onStop`) |
-| Notification channel | `channelId` (legacy literal, not in `NotificationChannels`) for the foreground service; `CHANNEL_FOCUS_ALERTS` for fail alerts — see `notifications.md` |
+| Notification channel | `channelId` (legacy literal in `FocusOngoingNotification`, not in `NotificationChannels`) for the foreground service; `CHANNEL_FOCUS_ALERTS` for fail, task-complete and phase-end alerts — see `notifications.md` |
 
 ## Files
 | Class | Path | Role |
@@ -34,7 +34,7 @@ to `navigation_focus`); the Focus screen (`FocusFragment`, u14) owns the running
 | `SingleEvent` | `ui/common/SingleEvent.java` | One-shot LiveData payload (consume once) |
 | `HomeFragment` | `ui/home/HomeFragment.java` | Idle/running timer card (text, mode chip, cycle line), Play → start + open Focus; session outcomes through `FocusSessionEventPresenter` |
 | `HomeViewModel` | `ui/home/HomeViewModel.java` | Home screen data (tasks, streak, today stats via `FocusSessionRepository`), `updateConfiguration()`. No timer state any more |
-| `HomeForegroundService` | `ui/home/HomeForegroundService.java` | Minimal `Service`; posts the keep-alive notification, `START_STICKY` |
+| `HomeForegroundService` | `ui/home/HomeForegroundService.java` | Minimal `Service`; posts the keep-alive notification built by `FocusOngoingNotification` (phase + live countdown), `START_STICKY` |
 | `FocusSessionConstants` | `ui/home/FocusSessionConstants.java` | `FAIL_GRACE_MILLIS = 4000L` |
 | `FocusFailNotifier` | `notifications/focus/FocusFailNotifier.java` | Fires `CHANNEL_FOCUS_ALERTS` notification when a background-fail grace period expires |
 | `FocusTarget` | `ui/home/FocusTarget.java` | In-memory static holder binding the single Home timer to a `CalendarEntry`: `entryId`, `title`, `targetMinutes`, one-shot `pendingAutoStart`. Survives config change / fragment recreation, not process death (out of scope) |
@@ -117,3 +117,11 @@ to `navigation_focus`); the Focus screen (`FocusFragment`, u14) owns the running
 - **Focus top bar.** Two round tonal buttons: `focusSettingsButton` (tune icon, opens `TimerPopup` from Focus; `FocusFragment` is an `OnPopupListener`) and `focusBlockModeButton` (own icon `ic_focus_block_mode_24`, action layout `view_focus_block_action.xml`, three states off / on / pending by background, outline and tint). Home's `homeCycleChip` is a tonal outlined settings button (tune icon, 48dp). The paused text is two lines ("Paused" / "Timer waiting") capped at `focus_paused_line_width` so it fits inside the ring.
 - **Settings sheet footer.** `btn_restore` is an outlined `MaterialButton` (one line, icon) beside the filled `btn_save`, same width and height.
 - Walks: `steps/pcu-tour.steps` (closing), `pcu-ring`, `pcu-focus`, `pcu-focus-large`, `pcu-transition`, `pcu-timer-sheet`. Verified on the emulator only.
+
+## Avisos de fin de fase (2026-11-17, plan `sistema-notificaciones.md` B, Last verified: 2026-11-17)
+- **Phase-end alarm.** `onTransition()` also runs `syncRunningFlag()` and `syncPhaseAlarm()`. `FocusPhaseAlarm.plan()` (pure, `FocusPhaseAlarmTest`) decides: while a phase (concentration or rest) is RUNNING there is one exact `RTC_WAKEUP` alarm (request code `900_001`, inexact `setAndAllowWhileIdle` fallback) at its wall-clock end, carrying which notice to show (focus done + break length / break over / session complete); every other state and `onCleared()` cancel it. Never per tick.
+- **One advance path.** The tick and the alarm both go through `advanceAndNotify()`: it computes the ending phase's plan BEFORE advancing, advances, and posts `FocusPhaseEndNotifier` (id `50_003`, `CHANNEL_FOCUS_ALERTS`) only when the app is in background (`ProcessLifecycleOwner` < STARTED). Whichever arrives second finds nothing to advance, so the notice is posted once. With the screen off the Handler tick is late (uptime stops in sleep); the alarm wakes the device and the transition happens on time.
+- **Process dead:** `FocusPhaseEndReceiver` finds no live session (`FocusPhaseAlarm.attach/detach` from the VM) and posts from the alarm's extras.
+- **Cleanup:** the notice is removed on `onAppForegrounded` and on any transition while the app is visible. Disabled by `NotificationPrefs.isFocusPhaseEndEnabled()`.
+- **Service notification** (`FocusOngoingNotification`, `FocusOngoingNotificationTest`): «Focusing» / «On a break» with a countdown chronometer (`setUsesChronometer` + `setChronometerCountDown` + `setWhen(end)`), «Paused» with mm:ss; the latest content is kept in a static, read by the service on start and re-posted on id 1 on later transitions (no `startForegroundService` from background). Tap → `MainActivity.EXTRA_OPEN_FOCUS` (consumed once) with `SINGLE_TOP`.
+- **`FocusRunningFlag`** is set (wall-clock end) only in `RUNNING`, cleared otherwise and in `onCleared()`; daily nudges defer and friends notifications go silent while it holds.

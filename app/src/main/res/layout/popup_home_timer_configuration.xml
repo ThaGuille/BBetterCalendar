@@ -279,32 +279,19 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <LinearLayout
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_restore"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/touch_target_min"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingEnd="@dimen/spacing_md">
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_restore_24"
-                    app:tint="@color/bb_on_surface_muted" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/spacing_xs"
-                    android:text="@string/timer_btn_restore"
-                    android:textAppearance="@style/TextAppearance.BBetter.Label"
-                    android:textColor="@color/bb_on_surface_muted" />
-            </LinearLayout>
+                style="@style/Widget.BBetter.Button.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:text="@string/timer_btn_restore"
+                app:icon="@drawable/ic_restore_24"
+                app:iconGravity="textStart"
+                app:iconPadding="@dimen/spacing_xs"
+                app:iconSize="18dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save"

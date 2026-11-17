@@ -1,0 +1,16 @@
+# Pomodoro settings sheet footer: Restore (outlined) + Save (filled), and that Restore resets the controls.
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-timer-sheet.steps --save pcu-timer-sheet
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+ASSERT id=homeCycleChip
+TAP id=homeCycleChip
+WAIT 3000
+ASSERT id=btn_restore expect~=Restore|Restaurar
+ASSERT id=btn_save
+SHOT pcu-sheet-footer
+TAP id=chip_preset_50
+SHOT pcu-sheet-changed
+TAP id=btn_restore
+SHOT pcu-sheet-restored
+KEY KEYCODE_BACK

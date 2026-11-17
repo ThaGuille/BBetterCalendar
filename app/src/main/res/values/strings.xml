@@ -73,7 +73,7 @@
     <string name="timer_infinite_symbol" translatable="false">∞</string>
     <string name="timer_auto_cycle_label">Auto-chain cycles</string>
     <string name="timer_auto_cycle_hint">Start the next session automatically</string>
-    <string name="timer_btn_restore">Restore\ndefaults</string>
+    <string name="timer_btn_restore">Restore</string>
     <string name="timer_btn_save">Save</string>
 
     <!-- Create event / task screen -->

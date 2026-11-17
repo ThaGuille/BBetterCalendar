@@ -74,7 +74,7 @@
     <string name="timer_cycles_label">Ciclos totales</string>
     <string name="timer_auto_cycle_label">Encadenar ciclos</string>
     <string name="timer_auto_cycle_hint">Empieza la siguiente sesión automáticamente</string>
-    <string name="timer_btn_restore">Restaurar\nvalores</string>
+    <string name="timer_btn_restore">Restaurar</string>
     <string name="timer_btn_save">Guardar</string>
 
     <!-- Crear evento / tarea -->

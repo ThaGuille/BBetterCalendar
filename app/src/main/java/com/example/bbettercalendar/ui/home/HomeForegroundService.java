@@ -7,32 +7,28 @@ import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
 
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
-
-import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.notifications.focus.FocusOngoingNotification;
 
 public class HomeForegroundService extends Service {
 
 
     /** Clase para detecar si la app esta en primer plano o en segundo plano
      *  y para iniciar el servicio en primer plano
+     *
+     *  Plan sistema-notificaciones (B.2): la notificación enseña la fase y una cuenta atrás en vivo.
+     *  El contenido lo decide FocusSessionViewModel en cada transición (FocusOngoingNotification);
+     *  aquí sólo se lee el último al arrancar. Sin contenido (reinicio STICKY tras matar el proceso)
+     *  sale la genérica de siempre.
      *  */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Start the foreground service
-        Notification notification = new NotificationCompat.Builder(this, "channelId")
-                .setContentTitle(getString(R.string.notif_foreground_service_title))
-                .setContentText(getString(R.string.notif_foreground_service_body))
-                .setSmallIcon(R.drawable.ic_stat_bbetter)
-                .setColor(ContextCompat.getColor(this, R.color.bb_primary))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .build();
+        Notification notification = FocusOngoingNotification.build(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+            startForeground(FocusOngoingNotification.ID, notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         } else {
-            startForeground(1, notification);
+            startForeground(FocusOngoingNotification.ID, notification);
         }
         return START_STICKY;
     }

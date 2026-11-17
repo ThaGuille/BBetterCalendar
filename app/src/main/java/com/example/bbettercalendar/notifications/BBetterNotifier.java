@@ -42,6 +42,7 @@ public class BBetterNotifier {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(spec.body))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(spec.autoCancel);
+        builder.setSilent(spec.silent);
 
         if (spec.contentIntent != null) {
             builder.setContentIntent(spec.contentIntent);

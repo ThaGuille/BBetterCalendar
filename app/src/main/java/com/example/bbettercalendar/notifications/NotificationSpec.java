@@ -25,6 +25,8 @@ public final class NotificationSpec {
      */
     public final String publicTitle;
     public final String publicBody;
+    /** Sale sin sonido ni vibración (amigos durante una concentración, plan sistema-notificaciones B.4). */
+    public final boolean silent;
 
     private NotificationSpec(Builder b) {
         this.channelId = b.channelId;
@@ -36,6 +38,7 @@ public final class NotificationSpec {
         this.autoCancel = b.autoCancel;
         this.publicTitle = b.publicTitle;
         this.publicBody = b.publicBody;
+        this.silent = b.silent;
     }
 
     public static final class Builder {
@@ -48,6 +51,7 @@ public final class NotificationSpec {
         private boolean autoCancel = true;
         private String publicTitle;
         private String publicBody;
+        private boolean silent;
 
         public Builder(@NonNull String channelId, int notificationId) {
             this.channelId = channelId;
@@ -59,6 +63,7 @@ public final class NotificationSpec {
         public Builder smallIcon(@DrawableRes int res) { this.smallIconRes = res; return this; }
         public Builder contentIntent(PendingIntent pi) { this.contentIntent = pi; return this; }
         public Builder autoCancel(boolean v) { this.autoCancel = v; return this; }
+        public Builder silent(boolean v) { this.silent = v; return this; }
 
         /** F5-u6 (d7): lo que se ve con el móvil bloqueado en vez de título y cuerpo (sin datos personales). */
         public Builder publicVersion(String title, String body) {

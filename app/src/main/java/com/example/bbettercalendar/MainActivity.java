@@ -61,6 +61,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_OPEN_PROJECT_ID = "open_project_id";
 
     /**
+     * Plan sistema-notificaciones (B): el toque de un aviso del pomodoro (fin de fase o la
+     * notificación del servicio) abre la pantalla Focus. Boolean; se consume una vez.
+     */
+    public static final String EXTRA_OPEN_FOCUS = "open_focus";
+
+    /**
      * u12: destinos de primer nivel = los únicos con barra inferior. Calendar Week cuenta porque es
      * la pestaña Calendar en modo semana (se alterna con Month desde la propia pantalla). Cualquier
      * otro destino (Focus, Cycle complete, All progress, Screen time, App detail, Project detail…)
@@ -171,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
         openProjectFromIntent(getIntent());
         openInboxFromIntent(getIntent());
+        openFocusFromIntent(getIntent());
         handleDebugNav(getIntent());
         setUpPendingInvite();
     }
@@ -283,7 +290,22 @@ public class MainActivity extends AppCompatActivity {
         setIntent(intent);
         openProjectFromIntent(intent);
         openInboxFromIntent(intent);
+        openFocusFromIntent(intent);
         handleDebugNav(intent);
+    }
+
+    /**
+     * Plan sistema-notificaciones (B): {@link #EXTRA_OPEN_FOCUS} abre Focus (singleTop: si ya está
+     * a la vista no se apila otra). Consumido para que una recreación no vuelva a navegar.
+     */
+    private void openFocusFromIntent(Intent intent) {
+        if (intent == null || navController == null
+                || !intent.getBooleanExtra(EXTRA_OPEN_FOCUS, false)) return;
+        intent.removeExtra(EXTRA_OPEN_FOCUS);
+        NavDestination current = navController.getCurrentDestination();
+        if (current != null && current.getId() == R.id.navigation_focus) return;
+        navController.navigate(R.id.navigation_focus, null,
+                new androidx.navigation.NavOptions.Builder().setLaunchSingleTop(true).build());
     }
 
     /**

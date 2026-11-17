@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Muestra de la leyenda para "Enfoque" (u5): un cuadrado redondeado con el tinte mas fuerte, la misma
+     forma que pinta la celda del mes (tinte de fondo), no un punto como los tipos de elemento. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="@dimen/calendar_legend_swatch_radius" />
+    <solid android:color="@color/bb_cal_focus_3" />
+</shape>

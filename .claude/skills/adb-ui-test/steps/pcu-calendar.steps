@@ -1,0 +1,34 @@
+# Calendar colour system (pomodoro-calendario-ui u5): amber focus tint, item dots (task / event / reminder /
+# deadline), today = number in a filled circle, selected = light outline; legend with the five entries.
+# Needs the seed (python .claude/scripts/seed_progress_db.py --device): focus on past days, today's tasks, and a
+# pending task + project deadline 3 days from today (the "other day with items" this walk selects; in the last
+# three days of a month that day is in the next month and the TAP below lands on the legend instead).
+# Each month cell's content description says its marks ("20, Selected, Task, Deadline"), so a day is picked by
+# what it holds, not by its position.
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-calendar.steps --save pcu-calendar
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_calendar_month
+WAIT 2000
+ASSERT id=monthCalendarView
+ASSERT id=calendarLegend
+ASSERT id=legendReminder
+ASSERT id=legendFocus
+SHOT pcu-calendar-month-today
+TAP text=deadline|entrega
+WAIT 1200
+ASSERT id=dayDetailTitle
+SHOT pcu-calendar-month-other-day
+SWIPE 540 1400 540 500 300
+WAIT 800
+ASSERT id=calendarAgendaCard
+ASSERT id=dayDetailRecycler
+SHOT pcu-calendar-day-list
+# Selecting a day with focus: the outline goes around the amber tint, which stays visible.
+SWIPE 540 600 540 1500 300
+WAIT 800
+TAP text=focus|enfoque
+WAIT 1200
+ASSERT id=dayDetailTitle
+SHOT pcu-calendar-selected-focus-day

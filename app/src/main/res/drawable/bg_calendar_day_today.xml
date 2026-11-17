@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Marca de HOY en la celda del mes: cuadrado con borde (spec frontend-structure-cleanup). Antes
-     era un círculo y el cuadrado marcaba la selección; ahora el cuadrado es siempre "hoy" y la
-     selección es un relleno suave (bg_calendar_day_selected). -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:inset="@dimen/calendar_cell_inset">
-    <shape android:shape="rectangle">
-        <corners android:radius="@dimen/radius_sm" />
-        <stroke android:width="2dp" android:color="@color/bb_primary" />
-        <solid android:color="@android:color/transparent" />
-    </shape>
-</inset>
+<!-- Marca de HOY en la celda del mes (pomodoro-calendario-ui u5): circulo relleno detras del numero.
+     Antes era un recuadro de toda la celda y la seleccion lo tapaba; ahora hoy es una forma (circulo
+     del numero) y la seleccion otra (contorno de la celda, bg_calendar_day_selected): se ven las dos. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bb_cal_today_fill" />
+</shape>

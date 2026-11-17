@@ -9,6 +9,15 @@
         <item name="android:background">@drawable/bg_calendar_dot</item>
     </style>
 
+    <!-- u5: muestra de "Enfoque" en la leyenda: cuadrado teñido, la forma con la que la celda pinta el enfoque. -->
+    <style name="Widget.BBetter.CalendarLegendSwatch" parent="">
+        <item name="android:layout_width">@dimen/calendar_legend_swatch_size</item>
+        <item name="android:layout_height">@dimen/calendar_legend_swatch_size</item>
+        <item name="android:layout_marginStart">@dimen/calendar_dot_gap</item>
+        <item name="android:layout_marginEnd">@dimen/calendar_dot_gap</item>
+        <item name="android:background">@drawable/bg_calendar_legend_focus</item>
+    </style>
+
     <style name="TextAppearance.BBetter.CalendarLegend" parent="TextAppearance.BBetter.Caption" />
 
     <style name="CalendarLegendLabel">

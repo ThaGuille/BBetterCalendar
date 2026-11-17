@@ -54,14 +54,19 @@ Contrast (WCAG, computed): every text token ≥ 4.5:1 on `bb_surface` and `bb_su
 `bb_danger` text goes on `bb_surface`/`bb_surface_card`, not on `bb_surface_raised`. Table in
 [`migracion-visual-stitch-impl.md`](../plans/migracion-visual-stitch-impl.md) (u4).
 
-### Calendar categoricals (provisional until the calendar is designed)
+### Calendar colour system (pomodoro-calendario-ui u5)
 
 | Token | Maps to | Use |
 |---|---|---|
 | `calendar_item_event` | `dusk_300` | Events |
 | `calendar_item_task` | `sage_300` | Tasks |
-| `calendar_item_reminder` | `honey_300` | Reminders |
+| `calendar_item_reminder` | `lilac_300` (`#C3A2E8`) | Reminders (honey until u5: too close to the amber focus tint) |
 | `calendar_item_deadline` | `ember_300` | Project deadlines |
+| `bb_cal_focus_1..3` | `amber_950` / `amber_900` / `amber_800` | Focus tint of a month cell (by `CalendarHeatLevel`) |
+| `bb_cal_today_fill` / `bb_cal_on_today` | `sage_300` / `pine_950` | Today: day number in a filled circle (8:1) |
+| `bb_cal_selected_outline` | `mist_50` | Selected day: light outline, the focus tint stays visible |
+
+Separate channels, so no mark hides another: focus = background tint, item types = dots, today = filled number circle, selected = outline (both together on today + selected). [`DayCellStyle`](../../app/src/main/java/com/example/bbettercalendar/ui/calendar/domain/DayCellStyle.java) decides what a cell draws; `CalendarPaletteTest` keeps the four item colours and `bb_cal_focus_3` >= 30 degrees of hue apart and the day number WCAG AA on every tint.
 
 Text on them is `bb_on_primary`. These are resolved by [`ColorResolver`](../../app/src/main/java/com/example/bbettercalendar/ui/calendar/domain/ColorResolver.java); if you add a new entry type, add the colour here and the resolver branch together.
 
@@ -309,7 +314,7 @@ Base de movimiento y de profundidad. Los tiempos son enteros en [`motion.xml`](.
 | `bb_glow_sage_start/end`, `bb_glow_amber_start/end` | `sage_300_a18` -> `sage_300_a00`, `amber_400_a18` -> `amber_400_a00` |
 | `bb_chart_grid`, `bb_chart_average` | `pine_700`, `lichen_300` |
 | `bb_heat_0..4` | `pine_800`, `forest_600`, `sage_500`, `sage_300`, `sage_200` |
-| `bb_cal_focus_1..3` | `forest_600`, `sage_500`, `sage_300` |
+| `bb_cal_focus_1..3` | `amber_950`, `amber_900`, `amber_800` (u5; antes musgo) |
 | `bb_cat_1..4` | `bb_data_compare`, `seafoam_200`, `sage_500`, `grey_400` |
 | `bb_skeleton_base` / `bb_skeleton_shine` | `pine_800` / `birch_50_a10` |
 | `bb_project_3` | pasa a `dusk_300` |
@@ -322,7 +327,7 @@ Selected drawables you should know about (all under [`res/drawable/`](../../app/
 - `bg_chip_energy.xml` / `bg_chip_primary.xml` / `bg_chip_secondary.xml` — Pill chips (energy and primary map to `bb_primary`).
 - `bg_play_button.xml` — Round background of the play button.
 - `bg_widget_inset_pill.xml` — Forest (`bb_primary_container`) pill behind delta/status chips (u13b).
-- `bg_calendar_day_selected.xml` / `bg_calendar_day_today.xml` — Month-grid highlights, same inset (`calendar_cell_inset`).
+- `bg_calendar_day_selected.xml` (outline, `calendar_cell_inset`) / `bg_calendar_day_today.xml` (filled circle behind the day number) / `bg_calendar_focus_1..3.xml` (amber tint) / `bg_calendar_legend_focus.xml` (legend swatch) — Month-grid marks (u5).
 - `bg_<area>_*.xml` — Per-screen backgrounds (`bg_project_*`, `bg_cycle_*`, `bg_progress_*`, `bg_screen_time_*`, `bg_app_detail_*`, `bg_focus_*`), same naming as the strings/dimens areas.
 - `ic_*_24.xml` — **Icon contract (u8):** every in-app vector carries `android:tint="?attr/colorControlNormal"` on the root (= `bb_on_surface_muted`) and paints its paths with `@color/bb_on_surface` (irrelevant under the `src_in` tint; no hex / `@android:color/white`). Override per use with `app:tint` / `app:drawableTint` / `setImageTintList` (e.g. `bb_on_primary` on the sage play button, `bb_on_surface` for nav chevrons); BottomNav / FAB tint through their `Widget.BBetter.*` style. New icons = Material Symbols **Outlined**, weight 400, 24dp, converted from the official SVG (viewport 960 + `<group android:translateY="960">`): `ic_shield/lock/share/eco(leaf)/skip_next/stop/chevron_left/chevron_right/expand_more/more_vert/info/timer/trophy/person_add/group_add/check_24`. Reused rather than duplicated: bell = `ic_notifications_empty_24`, add = `ic_add_24`, flame = `ic_flame_v2_24`.
 - `ic_stat_bbetter.xml` — Notification small icon (leaf). **No theme-attr tint on purpose:** SystemUI can't resolve `?attr` and only uses alpha. The accent comes from `setColor(bb_primary)`.

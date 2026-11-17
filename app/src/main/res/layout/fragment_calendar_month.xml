@@ -132,6 +132,22 @@
                     android:text="@string/calendar_legend_event" />
             </LinearLayout>
 
+            <!-- u5: los recordatorios tienen su propio color (lila) y su entrada en la leyenda. -->
+            <LinearLayout
+                android:id="@+id/legendReminder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    style="@style/Widget.BBetter.CalendarDot"
+                    android:backgroundTint="@color/calendar_item_reminder" />
+                <TextView
+                    style="@style/CalendarLegendLabel"
+                    android:text="@string/calendar_legend_reminder" />
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/legendDeadline"
                 android:layout_width="wrap_content"
@@ -154,9 +170,9 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <View
-                    style="@style/Widget.BBetter.CalendarDot"
-                    android:backgroundTint="@color/bb_cal_focus_3" />
+                <!-- u5: el enfoque es un tinte de fondo de la celda, asi que su muestra es un cuadrado
+                     teñido (la forma de la celda), no un punto como los tipos. -->
+                <View style="@style/Widget.BBetter.CalendarLegendSwatch" />
                 <TextView
                     style="@style/CalendarLegendLabel"
                     android:text="@string/calendar_legend_focus" />
@@ -165,7 +181,7 @@
             <androidx.constraintlayout.helper.widget.Flow
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:constraint_referenced_ids="legendTask,legendEvent,legendDeadline,legendFocus"
+                app:constraint_referenced_ids="legendTask,legendEvent,legendReminder,legendDeadline,legendFocus"
                 app:flow_horizontalBias="0"
                 app:flow_horizontalStyle="packed"
                 app:flow_wrapMode="chain"

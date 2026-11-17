@@ -87,10 +87,15 @@
     <color name="bb_heat_2">@color/sage_500</color>
     <color name="bb_heat_3">@color/sage_300</color>
     <color name="bb_heat_4">@color/sage_200</color>
-    <!-- Calendar day focus ramp (little -> a lot of focus). -->
-    <color name="bb_cal_focus_1">@color/moss_700</color>
-    <color name="bb_cal_focus_2">@color/moss_600</color>
-    <color name="bb_cal_focus_3">@color/moss_500</color>
+    <!-- Calendar day focus ramp (little -> a lot of focus): amber tint of the day cell (u5). -->
+    <color name="bb_cal_focus_1">@color/amber_950</color>
+    <color name="bb_cal_focus_2">@color/amber_900</color>
+    <color name="bb_cal_focus_3">@color/amber_800</color>
+    <!-- Calendar day marks (u5): today = number in a filled sage circle; selected = light outline
+         around the cell that leaves the focus tint visible. Number on the circle: 8:1. -->
+    <color name="bb_cal_today_fill">@color/sage_300</color>
+    <color name="bb_cal_on_today">@color/pine_950</color>
+    <color name="bb_cal_selected_outline">@color/mist_50</color>
     <!-- Categorical series (apps in usage charts). -->
     <color name="bb_cat_1">@color/bb_data_compare</color>
     <color name="bb_cat_2">@color/seafoam_200</color>
@@ -118,11 +123,13 @@
     <color name="bb_avatar_7">@color/sage_500</color>
 
 
-    <!-- Calendar categorical colors (provisional until the calendar is designed, plan u4):
-         aliases of primitives, never hex copies. Text on them is bb_on_primary (pine_950). -->
+    <!-- Calendar categorical colors (designed in pomodoro-calendario-ui u5): aliases of primitives,
+         never hex copies. Each item type and the focus tint sit >= 30 degrees of hue apart
+         (CalendarPaletteTest). Text on them is bb_on_primary. -->
     <color name="calendar_item_event">@color/dusk_300</color>
     <color name="calendar_item_task">@color/sage_300</color>
-    <color name="calendar_item_reminder">@color/honey_300</color>
+    <!-- u5: reminders move from honey amber (too close to the amber focus tint) to lilac. -->
+    <color name="calendar_item_reminder">@color/lilac_300</color>
     <!-- Deadline de proyecto (spec project-deadlines-progress). Antes alias del ámbar de recompensa;
          desde u4 el ámbar es el de los recordatorios y el deadline pasa a ember (plan u4). -->
     <color name="calendar_item_deadline">@color/ember_300</color>

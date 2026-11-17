@@ -7,7 +7,14 @@
     <dimen name="calendar_cell_inset">2dp</dimen>
     <!-- Alto de la celda del mes (cv_daySize=seventhWidth: el ancho es 1/7). -->
     <dimen name="calendar_cell_height">44dp</dimen>
-    <dimen name="calendar_cell_text_top">8dp</dimen>
+    <!-- u5: circulo de hoy detras del numero (cabe 13sp x 1.3 de dos cifras) y su margen superior;
+         el numero se centra en la misma caja. Contorno de la seleccion. -->
+    <dimen name="calendar_today_circle_size">28dp</dimen>
+    <dimen name="calendar_today_circle_top">3dp</dimen>
+    <dimen name="calendar_selected_stroke">1.5dp</dimen>
+    <!-- u5: muestra de "Enfoque" en la leyenda (cuadrado teñido, la forma del tinte de la celda). -->
+    <dimen name="calendar_legend_swatch_size">10dp</dimen>
+    <dimen name="calendar_legend_swatch_radius">3dp</dimen>
     <!-- Cabecera del formulario: boton visual 40dp / 36dp dentro de un area tactil de 48dp. -->
     <dimen name="form_close_inset">4dp</dimen>
     <dimen name="form_save_inset">6dp</dimen>

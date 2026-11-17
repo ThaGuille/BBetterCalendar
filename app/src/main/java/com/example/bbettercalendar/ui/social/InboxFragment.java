@@ -43,7 +43,19 @@ public class InboxFragment extends Fragment implements InboxAdapter.Listener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         InboxViewModel viewModel = new ViewModelProvider(this).get(InboxViewModel.class);
-        TopBarHelper.bind(this, view, R.string.inbox_top_title);
+        com.google.android.material.appbar.MaterialToolbar toolbar =
+                TopBarHelper.bind(this, view, R.string.inbox_top_title);
+        if (toolbar != null) {
+            toolbar.inflateMenu(R.menu.menu_inbox);
+            toolbar.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.inboxSettingsAction) {
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.navigation_notification_settings);
+                    return true;
+                }
+                return false;
+            });
+        }
         list = view.findViewById(R.id.inboxList);
         status = view.findViewById(R.id.inboxStatus);
         empty = view.findViewById(R.id.inboxEmpty);

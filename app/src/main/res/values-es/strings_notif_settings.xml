@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notif_settings_title">Notificaciones</string>
+    <string name="notif_settings_open_cd">Ajustes de notificaciones</string>
+    <string name="notif_settings_off_message">Las notificaciones están desactivadas para BBetter, así que los recordatorios no pueden llegarte</string>
+    <string name="notif_settings_turn_on">Activar</string>
+
+    <string name="notif_settings_section_reminders">Recordatorios</string>
+    <string name="notif_settings_default_reminder">Recordatorio por defecto de eventos y tareas nuevos</string>
+    <string name="notif_settings_default_reminder_none">Ninguno</string>
+    <string name="notif_settings_default_reminder_dialog">Recordatorio por defecto</string>
+
+    <string name="notif_settings_section_focus">Concentración</string>
+    <string name="notif_settings_focus_end">Al terminar una concentración o un descanso</string>
+    <string name="notif_settings_focus_end_desc">Sólo cuando estás fuera de la app</string>
+
+    <string name="notif_settings_section_daily">Avisos diarios</string>
+    <string name="notif_settings_morning">Tu día</string>
+    <string name="notif_settings_morning_desc">Tu agenda por la mañana, sólo si tienes planes</string>
+    <string name="notif_settings_streak">Racha en juego</string>
+    <string name="notif_settings_streak_desc">Sólo si hoy aún no te has concentrado</string>
+    <string name="notif_settings_evening">Planear mañana</string>
+    <string name="notif_settings_evening_desc">Sólo si mañana sigue vacío</string>
+    <string name="notif_settings_time_range_hint">Entre las 8:00 y las 22:00</string>
+    <string name="notif_settings_pick_time">Elige una hora</string>
+
+    <string name="notif_settings_section_weekly">Resumen semanal</string>
+    <string name="notif_settings_weekly">Resumen semanal</string>
+    <string name="notif_settings_weekly_desc">Un repaso tranquilo de tu semana</string>
+    <string name="notif_settings_weekly_time">Domingos · %1$s</string>
+
+    <string name="notif_settings_section_more">Más</string>
+    <string name="notif_settings_channel_usage">Límites de apps</string>
+    <string name="notif_settings_channel_friends">Amigos</string>
+    <string name="notif_settings_channel_projects">Fechas límite de proyectos</string>
+    <string name="notif_settings_channel_desc">Sonido y estilo en los ajustes del sistema</string>
+
+    <string name="notif_settings_footer">Lo mantenemos ligero: como mucho dos avisos diarios, nunca durante una concentración, nada entre las 22:00 y las 8:00. Un aviso que ignoras tres días seguidos se pausa hasta que abras la app.</string>
+</resources>

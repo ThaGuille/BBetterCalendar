@@ -206,4 +206,11 @@
             app:argType="string" />
     </fragment>
 
+    <!-- Parte D de notificaciones: ajustes de avisos. Lo abren la campana de Home (sin cuenta / release) y el engranaje de la bandeja. -->
+    <fragment
+        android:id="@+id/navigation_notification_settings"
+        android:name="com.example.bbettercalendar.ui.notifications.NotificationSettingsFragment"
+        android:label="@string/notif_settings_title"
+        tools:layout="@layout/fragment_notification_settings" />
+
 </navigation>

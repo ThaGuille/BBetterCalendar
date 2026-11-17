@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notifications screen: row minimum height (text wraps and grows at large font sizes). -->
+    <dimen name="notif_row_min_height">56dp</dimen>
+    <dimen name="notif_row_chevron_size">20dp</dimen>
+</resources>

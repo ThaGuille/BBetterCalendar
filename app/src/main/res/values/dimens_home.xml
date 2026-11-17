@@ -17,7 +17,10 @@
     <dimen name="home_tasks_add_size">48dp</dimen>
     <dimen name="home_tasks_add_padding">12dp</dimen>
     <!-- «● Concentración · 2 de 4» chip (it opens the timer settings). -->
-    <dimen name="home_chip_min_height">36dp</dimen>
+    <dimen name="home_chip_min_height">48dp</dimen>
     <!-- Small card padding (streak, friends, next up). -->
     <dimen name="home_small_card_padding">14dp</dimen>
+    <dimen name="home_chip_icon_size">20dp</dimen>
+    <dimen name="home_chip_padding_start">14dp</dimen>
+    <dimen name="home_chip_stroke">1.5dp</dimen>
 </resources>

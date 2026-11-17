@@ -1,0 +1,24 @@
+# Focus paused line at font scale 1.3 (the check sets the scale before and restores it after).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-focus-large.steps --save pcu-focus-large
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+ASSERT id=homePlayButton
+TAP id=homePlayButton
+WAIT 4000
+ASSERT id=focusRingBox
+TAP id=focusPlayButton
+WAIT 1500
+ASSERT id=focusEndsAtText expect~=Paused|En pausa
+SHOT pcu-focus-large-paused
+ASSERT id=focusSettingsButton
+ASSERT id=focusBlockModeButton
+SHOT pcu-focus-large-top
+TAP id=focusPlayButton
+WAIT 1500
+TAP id=focusStopButton
+WAIT 1500
+KEY KEYCODE_BACK
+WAIT 2000
+ASSERT id=homeCycleChip
+SHOT pcu-focus-large-home

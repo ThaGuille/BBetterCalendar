@@ -1,6 +1,6 @@
 # Sistema de notificaciones
 
-Status: in progress
+Status: implemented on branch (feat/notificaciones), pending merge to main
 Created: 2026-11-17
 Last updated: 2026-11-17
 Branch: `feat/notificaciones`
@@ -127,3 +127,22 @@ entrada en el Bench Log.
 - Una alarma de fin de fase que llega con la app en primer plano no debe duplicar el feedback in-app.
 - Los canales existentes no cambian de importancia sin desinstalar (sólo creamos canales nuevos).
 - Amigos no se puede probar con push real hasta el despliegue (L.7); se prueba la ruta local de depuración.
+
+## Resultado (2026-11-17)
+
+Hecho en `feat/notificaciones` (sin fusionar ni subir). Partes A–D integradas, más arreglos de la
+revisión de código y de la prueba en emulador:
+- Tocar cualquier notificación recreaba `MainActivity` (CLEAR_TOP sin SINGLE_TOP) y perdía el pomodoro: arreglado.
+- La pantalla Notificaciones apagaba y guardaba todos los interruptores al recrearse (modo oscuro): las filas
+  compartían ids y se restauraba el estado de una en todas; ahora las filas no guardan estado.
+- `BootReceiver`: TIME_SET / TIMEZONE_CHANGED sólo rearman lo que depende de la hora local; los avisos diarios
+  no se tocan en LOCKED_BOOT_COMPLETED. Los intents de ajustes del sistema tienen respaldo.
+
+Verificado en emulador (API 36): recordatorio por defecto + texto + Hecho; fin de descanso en segundo plano (una
+vez), sin aviso con la app delante, tocar el aviso abre Focus sin perder la sesión; cuenta atrás en vivo en la
+notificación del servicio; alarmas sobreviven a `install -r`; Tu día y resumen semanal publican, la racha se
+salta sin contenido, el aplazamiento por concentración funciona; pantalla de ajustes completa. `testDebugUnitTest`
+y `lintDebug` sin errores.
+
+Sin probar: «Posponer» en un dispositivo, el disparo real de «racha en juego» (requiere días de historial),
+avisos de amigos con push real (backend sin desplegar, L.7), un móvil físico con ahorro de batería agresivo.

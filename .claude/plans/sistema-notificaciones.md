@@ -10,7 +10,8 @@ Branch: `feat/notificaciones`
 Que las notificaciones funcionen de verdad y cubran lo básico (recordatorios, fin de pomodoro,
 amigos, límites de apps) más unos pocos avisos diarios elegidos con evidencia: pocos, útiles,
 con presupuesto y retirada automática si se ignoran. La explicación para el usuario (qué avisos no
-obvios se añadieron y por qué) está en un artifact aparte; este plan es la referencia técnica.
+obvios se añadieron y por qué) está en el artifact «Notificaciones de BBetter»
+(https://claude.ai/artifact/LtMiQ72VSBHuNZfxY85zdy); este plan es la referencia técnica.
 
 ## Diagnóstico de partida (auditoría 2026-11-17)
 

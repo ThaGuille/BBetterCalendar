@@ -47,7 +47,7 @@ permission gating with a backoff schedule. The four feature notifiers (`focus`, 
 
 ## Sistema de notificaciones (2026-11-17, plan `.claude/plans/sistema-notificaciones.md`)
 
-User-facing rationale (which notifications and why, with the research): the «Notificaciones» artifact linked from the plan.
+User-facing rationale (which notifications and why, with the research): the «Notificaciones de BBetter» artifact (https://claude.ai/artifact/LtMiQ72VSBHuNZfxY85zdy), linked from the plan.
 
 | Class | Path | Role |
 |---|---|---|

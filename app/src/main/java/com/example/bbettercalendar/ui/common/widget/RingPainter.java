@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -44,6 +45,7 @@ public final class RingPainter {
 
     private final Paint trackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint headPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF bounds = new RectF();
 
     @ColorInt private final int amber;
@@ -51,6 +53,8 @@ public final class RingPainter {
     @ColorInt private final int sage;
     private final Matrix shaderMatrix = new Matrix();
 
+    @ColorInt private int softColor;
+    @ColorInt private int intenseColor;
     private boolean rest;
     private int arcAlpha = 255;
     /** 0..1 multiplier of the drawn arc while the start sweep runs; 1 otherwise. */
@@ -63,7 +67,9 @@ public final class RingPainter {
         sage = ContextCompat.getColor(context, R.color.bb_sanct_sage);
         trackPaint.setStyle(Paint.Style.STROKE);
         arcPaint.setStyle(Paint.Style.STROKE);
-        arcPaint.setStrokeCap(Paint.Cap.ROUND);
+        // BUTT: a round cap at the start would sit on the gradient seam and show its intense colour.
+        arcPaint.setStrokeCap(Paint.Cap.BUTT);
+        headPaint.setStyle(Paint.Style.FILL);
     }
 
     public void setTrackColor(@ColorInt int color) {
@@ -108,6 +114,8 @@ public final class RingPainter {
         int intense = rest ? sageBright : amber;
         int base = rest ? sage : amber;
         int soft = (base & 0x00FFFFFF) | (Math.round(255 * SOFT_ALPHA) << 24);
+        softColor = soft;
+        intenseColor = intense;
         int[] colors = new int[RAMP_STOPS + 1];
         float[] stops = new float[RAMP_STOPS + 1];
         for (int i = 0; i <= RAMP_STOPS; i++) {
@@ -131,6 +139,16 @@ public final class RingPainter {
         float f = Math.max(0f, Math.min(1f, fraction)) * sweep;
         if (f > 0f) {
             canvas.drawArc(bounds, START_ANGLE, 360f * f, false, arcPaint);
+            if (RingRamp.hasHeadCap(f)) {
+                // Round look only at the head: a small filled circle in the head colour.
+                double rad = Math.toRadians(RingRamp.headAngle(START_ANGLE, f));
+                float r = bounds.width() / 2f;
+                headPaint.setColor(RingRamp.headColor(softColor, intenseColor, f));
+                headPaint.setAlpha(Math.round(Color.alpha(headPaint.getColor()) * arcAlpha / 255f));
+                canvas.drawCircle(bounds.centerX() + (float) (r * Math.cos(rad)),
+                        bounds.centerY() + (float) (r * Math.sin(rad)),
+                        arcPaint.getStrokeWidth() / 2f, headPaint);
+            }
         }
     }
 

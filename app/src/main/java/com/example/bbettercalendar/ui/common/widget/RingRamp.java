@@ -33,6 +33,21 @@ public final class RingRamp {
         return blend(soft, intense, intensity(t));
     }
 
+    /** Whether the round head cap is drawn: only for a partial arc (none at 0, none on a full turn). */
+    public static boolean hasHeadCap(float fraction) {
+        return fraction > 0f && fraction < 1f;
+    }
+
+    /** Colour of the head cap: the ramp colour at the arc's head, same as the arc end. */
+    public static int headColor(int soft, int intense, float fraction) {
+        return colorAt(soft, intense, fraction);
+    }
+
+    /** Angle in degrees (canvas convention, 0 = 3 o'clock, clockwise) of the arc head; start is -90. */
+    public static float headAngle(float startAngle, float fraction) {
+        return startAngle + 360f * Math.max(0f, Math.min(1f, fraction));
+    }
+
     private static int mix(int from, int to, float w) {
         return Math.round(from + (to - from) * w);
     }

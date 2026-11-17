@@ -14,7 +14,6 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.NotificationChannels;
-import com.example.bbettercalendar.notifications.NotificationOffsets;
 import com.example.bbettercalendar.notifications.NotificationSpec;
 
 import java.util.concurrent.ExecutorService;
@@ -62,8 +61,7 @@ public class EventReminderReceiver extends BroadcastReceiver {
     private void fireNotification(Context context, CalendarEntry entry, int offsetIndex) {
         String title = entry.getTitle() != null ? entry.getTitle()
                 : context.getString(R.string.notif_event_default_title);
-        String offsetLabel = NotificationOffsets.labelFor(context, offsetIndex);
-        String body = context.getString(R.string.notif_event_body_format, offsetLabel);
+        String body = bodyFor(context, entry.getStartMillis(), System.currentTimeMillis());
 
         NotificationSpec.Builder spec = new NotificationSpec.Builder(
                 NotificationChannels.CHANNEL_EVENT_REMINDERS,
@@ -85,6 +83,28 @@ public class EventReminderReceiver extends BroadcastReceiver {
                         id, offsetIndex, ReminderActionReceiver.snoozeRequestCode(id, offsetIndex))));
 
         notifier.notify(spec.build());
+    }
+
+    /** Cuerpo según la hora real de inicio (ReminderTiming), no la etiqueta del offset. */
+    static String bodyFor(Context context, long startMillis, long now) {
+        if (startMillis <= 0L) return context.getString(R.string.notif_event_default_title);
+        java.util.Date start = new java.util.Date(startMillis);
+        String time = android.text.format.DateFormat.getTimeFormat(context).format(start);
+        ReminderTiming timing = ReminderTiming.of(startMillis, now, java.util.TimeZone.getDefault());
+        switch (timing.kind) {
+            case NOW:
+                return context.getString(R.string.notif_reminder_body_now, time);
+            case IN_MINUTES:
+                return context.getResources().getQuantityString(
+                        R.plurals.notif_reminder_body_in_minutes, timing.minutes, timing.minutes, time);
+            case TODAY_AT:
+                return context.getString(R.string.notif_reminder_body_today, time);
+            case TOMORROW_AT:
+                return context.getString(R.string.notif_reminder_body_tomorrow, time);
+            default:
+                String date = android.text.format.DateFormat.getMediumDateFormat(context).format(start);
+                return context.getString(R.string.notif_reminder_body_on_date, date, time);
+        }
     }
 
     // La recurrencia ya no se avanza aquí (spec tasks-recurrence): las ocurrencias se

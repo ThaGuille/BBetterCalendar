@@ -118,7 +118,6 @@
 
     <!-- Recordatorio de evento -->
     <string name="notif_event_default_title">Próximo evento</string>
-    <string name="notif_event_body_format">Empieza %1$s</string>
 
     <!-- Fecha límite de proyecto -->
     <string name="notif_project_deadline_default_title">Fecha límite del proyecto</string>

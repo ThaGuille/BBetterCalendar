@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Plan sistema-notificaciones, parte A: botones de la notificación de recordatorio. -->
+<!-- Plan sistema-notificaciones, parte A: botones y cuerpo de la notificación de recordatorio. -->
 <resources>
     <string name="notif_reminder_action_done">Hecho</string>
     <string name="notif_reminder_action_snooze">Posponer 10 min</string>
+    <string name="notif_reminder_body_now">Empieza ahora · %1$s</string>
+    <plurals name="notif_reminder_body_in_minutes">
+        <item quantity="one">Empieza en %1$d minuto · %2$s</item>
+        <item quantity="many">Empieza en %1$d minutos · %2$s</item>
+        <item quantity="other">Empieza en %1$d minutos · %2$s</item>
+    </plurals>
+    <string name="notif_reminder_body_today">Hoy a las %1$s</string>
+    <string name="notif_reminder_body_tomorrow">Mañana a las %1$s</string>
+    <string name="notif_reminder_body_on_date">%1$s a las %2$s</string>
 </resources>

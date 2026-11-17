@@ -119,7 +119,6 @@
 
     <!-- Event reminder notification -->
     <string name="notif_event_default_title">Upcoming event</string>
-    <string name="notif_event_body_format">Starting %1$s</string>
 
     <!-- Project-deadline notification (spec project-deadlines-progress). Un cuerpo por offset:
          los dos avisos ({3d, 1d}) son fijos, así que el texto es literal y no un formato. -->

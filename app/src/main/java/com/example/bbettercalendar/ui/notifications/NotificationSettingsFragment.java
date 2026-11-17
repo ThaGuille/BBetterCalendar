@@ -289,6 +289,11 @@ public class NotificationSettingsFragment extends Fragment {
     private View newRow(ViewGroup parent) {
         View row = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.view_notif_row, parent, false);
+        // Todas las filas comparten los ids del layout (notifRowSwitch…): si el sistema guardara su
+        // estado, al recrear la Activity (p. ej. modo oscuro) restauraría el interruptor de una fila
+        // en todas las demás y sus listeners lo escribirían en las preferencias. El estado sale
+        // siempre de NotificationPrefs, así que la jerarquía de la fila no guarda nada.
+        row.setSaveFromParentEnabled(false);
         parent.addView(row);
         return row;
     }

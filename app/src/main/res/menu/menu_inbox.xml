@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inbox top bar: shortcut to the Notifications settings screen. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/inboxSettingsAction"
+        android:icon="@drawable/ic_tune_24"
+        android:title="@string/notif_settings_open_cd"
+        app:iconTint="@color/bb_on_surface"
+        app:showAsAction="always" />
+</menu>

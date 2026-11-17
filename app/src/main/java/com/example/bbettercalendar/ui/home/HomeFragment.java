@@ -656,8 +656,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
                 // F5-u7: con perfil, la campana abre la bandeja (ánimos, empujones y solicitudes).
                 NavHostFragment.findNavController(this).navigate(R.id.navigation_inbox);
             } else {
-                // Sin cuenta o en release: la campana sigue como antes (aviso «pronto»).
-                Toast.makeText(requireContext(), R.string.home_notifications_soon, Toast.LENGTH_SHORT).show();
+                // Sin cuenta o en release: la campana abre los ajustes de notificaciones.
+                NavHostFragment.findNavController(this).navigate(R.id.navigation_notification_settings);
             }
         } else if (id == R.id.homeNextUpCard) {
             openCalendarTab();

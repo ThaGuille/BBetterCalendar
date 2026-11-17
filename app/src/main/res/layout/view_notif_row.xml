@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings-like row of the Notifications screen: title + optional subtitle on the left; optional value,
+     switch and chevron on the right. Parts are shown/hidden by NotificationSettingsFragment. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/notif_row_min_height"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingTop="@dimen/spacing_sm"
+    android:paddingEnd="@dimen/spacing_md"
+    android:paddingBottom="@dimen/spacing_sm">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/notifRowTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+
+        <TextView
+            android:id="@+id/notifRowSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:textAppearance="@style/TextAppearance.BBetter.Caption"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/notifRowValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:gravity="end"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+        android:textColor="@color/bb_primary"
+        android:visibility="gone" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/notifRowSwitch"
+        style="@style/Widget.BBetter.Switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:thumb="@drawable/bb_switch_thumb_check"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/notifRowChevron"
+        android:layout_width="@dimen/notif_row_chevron_size"
+        android:layout_height="@dimen/notif_row_chevron_size"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right_24"
+        android:visibility="gone"
+        app:tint="@color/bb_on_surface_muted" />
+</LinearLayout>

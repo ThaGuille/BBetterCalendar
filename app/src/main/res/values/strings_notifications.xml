@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plan sistema-notificaciones: textos compartidos (canales nuevos). Cada parte del sistema tiene
+     su propio strings_notif_<parte>.xml. -->
+<resources>
+    <string name="notif_channel_daily_nudges_name">Daily nudges</string>
+    <string name="notif_channel_daily_nudges_desc">Your day in the morning, a streak reminder and planning tomorrow. At most two a day.</string>
+    <string name="notif_channel_weekly_summary_name">Weekly summary</string>
+    <string name="notif_channel_weekly_summary_desc">A quiet summary of your week, on Sundays.</string>
+</resources>

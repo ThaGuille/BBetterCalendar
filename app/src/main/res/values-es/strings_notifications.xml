@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plan sistema-notificaciones: textos compartidos (canales nuevos). -->
+<resources>
+    <string name="notif_channel_daily_nudges_name">Avisos diarios</string>
+    <string name="notif_channel_daily_nudges_desc">Tu día por la mañana, un aviso de racha y planear mañana. Como mucho dos al día.</string>
+    <string name="notif_channel_weekly_summary_name">Resumen semanal</string>
+    <string name="notif_channel_weekly_summary_desc">Un resumen tranquilo de tu semana, los domingos.</string>
+</resources>

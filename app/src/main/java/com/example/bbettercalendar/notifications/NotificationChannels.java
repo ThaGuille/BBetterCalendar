@@ -16,6 +16,10 @@ public final class NotificationChannels {
     public static final String CHANNEL_PROJECT_DEADLINES = "bb_project_deadlines";
     // F5-u6 (D-034): ánimos, empujones y solicitudes de amigos. Es el único control para silenciarlos (DIF-01).
     public static final String CHANNEL_FRIENDS = "bb_friends";
+    // Plan sistema-notificaciones: avisos diarios (Tu día, racha en juego, planear mañana) con
+    // importancia DEFAULT (suenan pero no asoman como heads-up) y el resumen semanal en LOW (silencioso).
+    public static final String CHANNEL_DAILY_NUDGES = "bb_daily_nudges";
+    public static final String CHANNEL_WEEKLY_SUMMARY = "bb_weekly_summary";
 
     public static void createAll(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -64,12 +68,26 @@ public final class NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH);
         friends.setDescription(context.getString(R.string.notif_channel_friends_desc));
 
+        NotificationChannel daily = new NotificationChannel(
+                CHANNEL_DAILY_NUDGES,
+                context.getString(R.string.notif_channel_daily_nudges_name),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        daily.setDescription(context.getString(R.string.notif_channel_daily_nudges_desc));
+
+        NotificationChannel weekly = new NotificationChannel(
+                CHANNEL_WEEKLY_SUMMARY,
+                context.getString(R.string.notif_channel_weekly_summary_name),
+                NotificationManager.IMPORTANCE_LOW);
+        weekly.setDescription(context.getString(R.string.notif_channel_weekly_summary_desc));
+
         nm.createNotificationChannel(foreground);
         nm.createNotificationChannel(events);
         nm.createNotificationChannel(focus);
         nm.createNotificationChannel(usageLimits);
         nm.createNotificationChannel(projectDeadlines);
         nm.createNotificationChannel(friends);
+        nm.createNotificationChannel(daily);
+        nm.createNotificationChannel(weekly);
     }
 
     private NotificationChannels() {}

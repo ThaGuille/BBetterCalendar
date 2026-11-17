@@ -1,0 +1,20 @@
+# Home play -> Focus start animation and its return, in slow motion (the check sets animator_duration_scale 10 and restores it).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-transition.steps --save pcu-transition
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+ASSERT id=homePlayButton
+SHOT pcu-trans-home
+TAP id=homePlayButton
+SHOT pcu-trans-enter-1
+SHOT pcu-trans-enter-2
+SHOT pcu-trans-enter-3
+WAIT 6000
+ASSERT id=focusRingBox
+SHOT pcu-trans-focus
+KEY KEYCODE_BACK
+SHOT pcu-trans-back-1
+SHOT pcu-trans-back-2
+WAIT 6000
+ASSERT id=homePlayButton
+SHOT pcu-trans-home-again

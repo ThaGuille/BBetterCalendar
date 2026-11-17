@@ -1,0 +1,20 @@
+﻿# scenario: pcu-transition
+# recorded: 2026-11-17T17:03:35.583878+00:00  from run-steps pcu-transition
+1794934988976	GRANT android.permission.POST_NOTIFICATIONS
+1794934989234	START .configuration.SplashActivity
+1794934989928	WAIT 5000
+1794934989928	ASSERT id=homePlayButton
+1794934996873	SHOT pcu-trans-home
+1794934997537	TAP id=homePlayButton
+1794935000054	SHOT pcu-trans-enter-1
+1794935000762	SHOT pcu-trans-enter-2
+1794935001529	SHOT pcu-trans-enter-3
+1794935002448	WAIT 6000
+1794935002448	ASSERT id=focusRingBox
+1794935007136	SHOT pcu-trans-focus
+1794935008122	KEY KEYCODE_BACK
+1794935008413	SHOT pcu-trans-back-1
+1794935009495	SHOT pcu-trans-back-2
+1794935010525	WAIT 6000
+1794935010525	ASSERT id=homePlayButton
+1794935015000	SHOT pcu-trans-home-again

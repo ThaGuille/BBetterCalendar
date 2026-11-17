@@ -166,14 +166,17 @@ public final class ScreenTransitions {
      */
     public static void sharedFocusRing(@NonNull Fragment focus) {
         Context ctx = focus.requireContext();
+        int surface = ContextCompat.getColor(ctx, R.color.bb_sanct_surface);
         ShapeAppearanceModel circle = ShapeAppearanceModel.builder()
-                .setAllCornerSizes(new RelativeCornerSize(0.5f)).build();
-        MaterialContainerTransform in = container(ctx, enterMs(ctx), Color.TRANSPARENT);
+                .setAllCornerSizes(new RelativeCornerSize(FocusRingTransition.CORNER_SIZE_FRACTION)).build();
+        MaterialContainerTransform in = container(ctx, enterMs(ctx), surface);
         in.setStartShapeAppearanceModel(circle);
         in.setEndShapeAppearanceModel(circle);
-        MaterialContainerTransform back = container(ctx, exitMs(ctx), Color.TRANSPARENT);
+        in.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
+        MaterialContainerTransform back = container(ctx, exitMs(ctx), surface);
         back.setStartShapeAppearanceModel(circle);
         back.setEndShapeAppearanceModel(circle);
+        back.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
         focus.setSharedElementEnterTransition(in);
         focus.setSharedElementReturnTransition(back);
     }

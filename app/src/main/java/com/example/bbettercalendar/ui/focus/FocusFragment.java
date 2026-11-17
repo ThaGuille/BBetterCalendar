@@ -355,11 +355,11 @@ public class FocusFragment extends Fragment
      */
     private void renderRings(@NonNull FocusUiState state) {
         RingStateMapper.Ring r = RingStateMapper.map(state);
-        ring.setRemaining(r.remaining);
+        ring.setProgress(r.progress);
         ring.setMode(r.rest ? FocusRingView.Mode.REST
                 : r.state == RingState.PAUSED ? FocusRingView.Mode.PAUSED : FocusRingView.Mode.FOCUS);
         playButton.setRest(r.rest);
-        playButton.setRemaining(r.remaining);
+        playButton.setProgress(r.progress);
         boolean firstRender = lastRingState == null;
         // El botón barre él solo en la transición reposo → en marcha; en el primer pintado no sabe.
         playButton.setState(r.state);

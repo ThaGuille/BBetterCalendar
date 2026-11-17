@@ -73,7 +73,7 @@ public class RingButtonView extends View {
     @NonNull private RingState state = RingState.IDLE;
     private boolean stateSet;
     private boolean rest;
-    private float remaining = 1f;
+    private float progress = 0f;
 
     private float cx;
     private float cy;
@@ -118,17 +118,17 @@ public class RingButtonView extends View {
 
     // ------------------------------------------------------------------ API
 
-    /** Fraction of the ring drawn, 0..1: time left of the countdown, or minutes done / target (compact). */
-    public void setRemaining(float fraction) {
+    /** Fraction of the ring drawn, 0..1: elapsed progress of the countdown, or minutes done / target (compact). */
+    public void setProgress(float fraction) {
         float f = Math.max(0f, Math.min(1f, fraction));
-        if (f != remaining) {
-            remaining = f;
+        if (f != progress) {
+            progress = f;
             invalidate();
         }
     }
 
-    public float getRemaining() {
-        return remaining;
+    public float getProgress() {
+        return progress;
     }
 
     /**
@@ -290,7 +290,7 @@ public class RingButtonView extends View {
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
-        ring.draw(canvas, remaining);
+        ring.draw(canvas, progress);
         if (discRadius <= 0f) {
             return;
         }

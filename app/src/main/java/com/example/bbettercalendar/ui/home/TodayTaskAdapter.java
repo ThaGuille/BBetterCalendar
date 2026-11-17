@@ -198,7 +198,7 @@ public class TodayTaskAdapter extends RecyclerView.Adapter<TodayTaskAdapter.Task
         if (hasTarget && !done && focusListener != null) {
             holder.focus.setVisibility(View.VISIBLE);
             holder.focus.setState(RingState.IDLE);
-            holder.focus.setRemaining(entry.getAttributedMinutes() / (float) entry.getTargetMinutes());
+            holder.focus.setProgress(entry.getAttributedMinutes() / (float) entry.getTargetMinutes());
             holder.focus.setOnClickListener(v -> focusListener.onTaskFocus(entry));
         } else {
             // En la sección de hoy la columna del botón se reserva (INVISIBLE) aunque esta fila no

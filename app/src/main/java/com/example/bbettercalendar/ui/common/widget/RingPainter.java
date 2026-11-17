@@ -5,10 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.Shader;
+import android.graphics.SweepGradient;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
@@ -25,19 +25,22 @@ import com.example.bbettercalendar.ui.common.motion.Motion;
  * {@link RingButtonView} (play button and task rows), so both draw exactly the same ring.
  *
  * <pre>
- *   focus palette   amber -> light sage -> sage (stops 0 / .65 / 1)
- *   rest palette    sage -> light sage
+ *   focus palette   soft amber -> bb_sanct_primary amber
+ *   rest palette    soft sage  -> bb_sanct_sage_bright
  * </pre>
  *
- * The gradient is linear from the bottom-left to the top-right corner of the ring box (the html
- * mockups rotate a TL->BR svg gradient by -90 degrees). {@link #startSweep(View)} grows the arc from 0 to
+ * The gradient is a {@link SweepGradient} over the full turn, rotated to start at 12 o'clock and run
+ * clockwise, with its colours taken from {@link RingRamp}: the arc head gets more intense as the
+ * session advances. The painter adds no start stub (that is {@code RingStateMapper}'s job).
+ {@link #startSweep(View)} grows the arc from 0 to
  * its value in {@code bb_motion_ring_sweep} ms when a session starts; with the system animations off it
  * is drawn whole at once.
  */
 public final class RingPainter {
 
     private static final float START_ANGLE = -90f;
-    private static final float[] FOCUS_STOPS = {0f, 0.65f, 1f};
+    private static final int RAMP_STOPS = 16;
+    private static final float SOFT_ALPHA = 0.45f;
 
     private final Paint trackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -46,6 +49,7 @@ public final class RingPainter {
     @ColorInt private final int amber;
     @ColorInt private final int sageBright;
     @ColorInt private final int sage;
+    private final Matrix shaderMatrix = new Matrix();
 
     private boolean rest;
     private int arcAlpha = 255;
@@ -78,7 +82,7 @@ public final class RingPainter {
         updateShader();
     }
 
-    /** Rest palette (sage only) instead of the focus one (amber to sage). */
+    /** Rest palette (sage only) instead of the focus one (amber). */
     public void setRest(boolean rest) {
         if (this.rest != rest) {
             this.rest = rest;
@@ -101,9 +105,20 @@ public final class RingPainter {
         if (bounds.isEmpty()) {
             return;
         }
-        int[] colors = rest ? new int[]{sage, sageBright} : new int[]{amber, sageBright, sage};
-        arcPaint.setShader(new LinearGradient(bounds.left, bounds.bottom, bounds.right, bounds.top,
-                colors, rest ? null : FOCUS_STOPS, Shader.TileMode.CLAMP));
+        int intense = rest ? sageBright : amber;
+        int base = rest ? sage : amber;
+        int soft = (base & 0x00FFFFFF) | (Math.round(255 * SOFT_ALPHA) << 24);
+        int[] colors = new int[RAMP_STOPS + 1];
+        float[] stops = new float[RAMP_STOPS + 1];
+        for (int i = 0; i <= RAMP_STOPS; i++) {
+            stops[i] = i / (float) RAMP_STOPS;
+            colors[i] = RingRamp.colorAt(soft, intense, stops[i]);
+        }
+        SweepGradient shader = new SweepGradient(bounds.centerX(), bounds.centerY(), colors, stops);
+        // SweepGradient starts at 3 o'clock: rotate it to 12 o'clock (clockwise, like the arc).
+        shaderMatrix.setRotate(START_ANGLE, bounds.centerX(), bounds.centerY());
+        shader.setLocalMatrix(shaderMatrix);
+        arcPaint.setShader(shader);
         arcPaint.setAlpha(arcAlpha);
     }
 

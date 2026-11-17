@@ -47,6 +47,14 @@ public interface CalendarEntryDAO {
             "(startMillis <= :startMillis AND endMillis >= :endMillis))")
     LiveData<List<CalendarEntry>> getEventsBetween(long startMillis, long endMillis);
 
+    // Igual que getEventsBetween pero síncrona, para los avisos diarios (notifications/nudge:
+    // agenda de hoy / mañana), que leen desde el @IoExecutor de un receiver. Sin cambio de esquema.
+    @Query("SELECT * FROM CalendarEntry WHERE isTemplate = 0 AND isDismissed = 0 AND (" +
+            "(startMillis BETWEEN :startMillis AND :endMillis) OR " +
+            "(endMillis BETWEEN :startMillis AND :endMillis) OR " +
+            "(startMillis <= :startMillis AND endMillis >= :endMillis)) ORDER BY startMillis ASC")
+    List<CalendarEntry> getEventsBetweenSync(long startMillis, long endMillis);
+
     // Igual que getEventsBetween pero además sin las filas marcadas "no pintar en el calendario"
     // (spec recurrence-calendar-visibility). Es la query de la PANTALLA DE CALENDARIO; Home sigue
     // usando getEventsBetween, porque ocultar es sólo visual y la tarea debe seguir siendo

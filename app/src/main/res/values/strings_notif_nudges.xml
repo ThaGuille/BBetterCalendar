@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plan sistema-notificaciones, parte C: avisos diarios (Tu día, racha en juego, planear mañana)
+     y resumen semanal. Copy positivo y sin culpa; varias variantes que rotan (NudgePolicy.pickVariant). -->
+<resources>
+    <!-- Tu día (agenda de hoy). %1$s = recuento ("3 tasks, 2 events"). -->
+    <string name="nudge_morning_title_1">Your day: %1$s</string>
+    <string name="nudge_morning_title_2">Today: %1$s</string>
+    <string name="nudge_morning_title_3">On today\'s plan: %1$s</string>
+    <string name="nudge_morning_public_title">Your day</string>
+    <string name="nudge_morning_public_body">Open BBetter to see today\'s plan.</string>
+    <plurals name="nudge_count_tasks">
+        <item quantity="one">%d task</item>
+        <item quantity="other">%d tasks</item>
+    </plurals>
+    <plurals name="nudge_count_events">
+        <item quantity="one">%d event</item>
+        <item quantity="other">%d events</item>
+    </plurals>
+    <string name="nudge_count_join">%1$s, %2$s</string>
+    <!-- %1$s = título de la tarea / evento, %2$s = hora. -->
+    <string name="nudge_morning_first_up">First up: %1$s at %2$s.</string>
+    <plurals name="nudge_morning_more">
+        <item quantity="one">%d more after that.</item>
+        <item quantity="other">%d more after that.</item>
+    </plurals>
+    <string name="nudge_morning_no_upcoming">Tap to see the plan for today.</string>
+    <string name="nudge_untitled">Untitled</string>
+
+    <!-- Racha en juego. %d = días seguidos hasta ayer (siempre >= 2). -->
+    <string name="nudge_streak_title">Streak in play</string>
+    <plurals name="nudge_streak_body_1">
+        <item quantity="one">Keep your %d-day streak going. One pomodoro is enough today.</item>
+        <item quantity="other">Keep your %d-day streak going. One pomodoro is enough today.</item>
+    </plurals>
+    <plurals name="nudge_streak_body_2">
+        <item quantity="one">%d day in a row so far. A single focus session keeps it alive.</item>
+        <item quantity="other">%d days in a row so far. A single focus session keeps it alive.</item>
+    </plurals>
+    <plurals name="nudge_streak_body_3">
+        <item quantity="one">Your %d-day streak is still open today. Fancy a short pomodoro?</item>
+        <item quantity="other">Your %d-day streak is still open today. Fancy a short pomodoro?</item>
+    </plurals>
+
+    <!-- Planear mañana. -->
+    <string name="nudge_evening_title">Plan tomorrow</string>
+    <string name="nudge_evening_body_1">Tomorrow is open. Two minutes now to plan it?</string>
+    <string name="nudge_evening_body_2">Tomorrow is still mostly blank. Want to sketch it out now?</string>
+    <string name="nudge_evening_body_3">A quick look at tomorrow tonight makes the morning easier.</string>
+
+    <!-- Resumen semanal (domingo). -->
+    <string name="nudge_weekly_title">Your week</string>
+    <!-- %1$s = duración ("3 h 20 min"), %2$s = variación frente a la semana anterior (o vacío). -->
+    <string name="nudge_weekly_focus">%1$s of focus%2$s</string>
+    <string name="nudge_weekly_hours_minutes">%1$d h %2$d min</string>
+    <string name="nudge_weekly_minutes">%1$d min</string>
+    <string name="nudge_weekly_delta_up">" (+%1$d%% vs last week)"</string>
+    <string name="nudge_weekly_delta_down">" (%1$d%% vs last week)"</string>
+    <string name="nudge_weekly_delta_same">" (same as last week)"</string>
+    <string name="nudge_weekly_active_days">Active days: %1$d/7</string>
+    <plurals name="nudge_weekly_tasks">
+        <item quantity="one">%d task completed</item>
+        <item quantity="other">%d tasks completed</item>
+    </plurals>
+</resources>

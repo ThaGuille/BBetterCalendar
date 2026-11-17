@@ -176,6 +176,12 @@
             android:name=".notifications.project.ProjectDeadlineReceiver"
             android:exported="false" />
 
+        <!-- Avisos diarios y resumen semanal (plan sistema-notificaciones, parte C). El manifest de
+             debug lo exporta para poder dispararlo con adb. -->
+        <receiver
+            android:name=".notifications.nudge.DailyNudgeReceiver"
+            android:exported="false" />
+
         <receiver
             android:name=".notifications.event.BootReceiver"
             android:exported="true">

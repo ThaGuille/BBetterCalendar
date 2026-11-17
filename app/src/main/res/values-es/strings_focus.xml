@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- u14 · Focus (ES). -->
 <resources>
-    <string name="focus_paused_line">En pausa · el temporizador espera</string>
+    <string name="focus_paused_line">En pausa\nTiempo en espera</string>
     <string name="focus_back_at">Vuelves a concentrarte a las %1$s</string>
     <string name="focus_rest_hint">Estírate y bebe un poco de agua.</string>
     <string name="focus_block_mode_desc_off">Activar el modo bloqueo</string>
@@ -9,4 +9,5 @@
     <string name="focus_block_mode_desc_pending">El modo bloqueo necesita el permiso de accesibilidad</string>
     <string name="focus_friend_paused">En pausa</string>
     <string name="focus_friends_empty">Aún no hay amigos aquí. Invita a alguien a estudiar contigo.</string>
+    <string name="focus_settings_desc">Ajustes del Pomodoro</string>
 </resources>

@@ -404,7 +404,7 @@ def run_step(step, serial, pkg=PKG, wait_ms=0, cache=None):
             code, out = find_node(id_=id_, serial=serial, cache=cache)
             if code != 0 or not expect:
                 return code, out
-            a = re.search(r"text='(.*?)' desc=", '\n'.join(out))
+            a = re.search(r"text='(.*?)' desc=", '\n'.join(out), re.S)
             actual = a.group(1) if a else ''
             # "7 de 12|7 of 12": any alternative matches, so the recording survives the emulator's language.
             if any(alt and alt in actual.lower() for alt in expect.lower().split('|')):

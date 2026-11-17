@@ -121,7 +121,7 @@
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
-                <!-- Chip «● Concentración · 2 de 4»: abre la configuración del temporizador. -->
+                <!-- Chip «[tune] Concentración · 2 de 4»: botón tonal con contorno que abre los ajustes del Pomodoro. -->
                 <LinearLayout
                     android:id="@+id/homeCycleChip"
                     android:layout_width="wrap_content"
@@ -133,13 +133,15 @@
                     android:gravity="center_vertical"
                     android:minHeight="@dimen/home_chip_min_height"
                     android:orientation="horizontal"
-                    android:paddingStart="@dimen/spacing_md"
+                    android:paddingStart="@dimen/home_chip_padding_start"
                     android:paddingEnd="@dimen/spacing_md">
 
-                    <View
-                        android:layout_width="@dimen/home_mode_dot_size"
-                        android:layout_height="@dimen/home_mode_dot_size"
-                        android:background="@drawable/bg_dot_primary" />
+                    <ImageView
+                        android:layout_width="@dimen/home_chip_icon_size"
+                        android:layout_height="@dimen/home_chip_icon_size"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_tune_24"
+                        app:tint="@color/bb_on_primary_container" />
 
                     <TextView
                         android:id="@+id/homeTimerTypeText"

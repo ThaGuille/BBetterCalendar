@@ -23,7 +23,7 @@ public class RingStateMapperTest {
     public void nullStateIsIdleWithFullRing() {
         RingStateMapper.Ring ring = RingStateMapper.map(null);
         assertEquals(RingState.IDLE, ring.state);
-        assertEquals(1f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS, ring.progress, EPS);
         assertFalse(ring.rest);
     }
 
@@ -31,15 +31,15 @@ public class RingStateMapperTest {
     public void stoppedIsIdleWithFullRing() {
         RingStateMapper.Ring ring = RingStateMapper.map(ui(State.STOPPED, MIN25, MIN25));
         assertEquals(RingState.IDLE, ring.state);
-        assertEquals(1f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS, ring.progress, EPS);
         assertFalse(ring.rest);
     }
 
     @Test
-    public void runningShowsTimeLeft() {
+    public void runningShowsElapsedProgress() {
         RingStateMapper.Ring ring = RingStateMapper.map(ui(State.RUNNING, MIN25 / 4, MIN25));
         assertEquals(RingState.RUNNING, ring.state);
-        assertEquals(0.25f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS + (1f - RingStateMapper.MIN_VISIBLE_PROGRESS) * 0.75f, ring.progress, EPS);
         assertFalse(ring.rest);
     }
 
@@ -47,7 +47,7 @@ public class RingStateMapperTest {
     public void pausedKeepsTheFrozenFraction() {
         RingStateMapper.Ring ring = RingStateMapper.map(ui(State.PAUSED, MIN25 * 3 / 5, MIN25));
         assertEquals(RingState.PAUSED, ring.state);
-        assertEquals(0.6f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS + (1f - RingStateMapper.MIN_VISIBLE_PROGRESS) * 0.4f, ring.progress, EPS);
         assertFalse(ring.rest);
     }
 
@@ -56,7 +56,7 @@ public class RingStateMapperTest {
         long fiveMin = 5L * 60_000L;
         RingStateMapper.Ring ring = RingStateMapper.map(ui(State.RUNNING_REST, fiveMin / 2, fiveMin));
         assertEquals(RingState.REST, ring.state);
-        assertEquals(0.5f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS + (1f - RingStateMapper.MIN_VISIBLE_PROGRESS) * 0.5f, ring.progress, EPS);
         assertTrue(ring.rest);
     }
 
@@ -65,7 +65,7 @@ public class RingStateMapperTest {
         long fiveMin = 5L * 60_000L;
         RingStateMapper.Ring ring = RingStateMapper.map(ui(State.PAUSED_REST, fiveMin / 5, fiveMin));
         assertEquals(RingState.PAUSED, ring.state);
-        assertEquals(0.2f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS + (1f - RingStateMapper.MIN_VISIBLE_PROGRESS) * 0.8f, ring.progress, EPS);
         assertTrue(ring.rest);
     }
 
@@ -74,21 +74,21 @@ public class RingStateMapperTest {
         long fiveMin = 5L * 60_000L;
         RingStateMapper.Ring ring = RingStateMapper.map(ui(State.STOPPED_REST, fiveMin, fiveMin));
         assertEquals(RingState.IDLE, ring.state);
-        assertEquals(1f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS, ring.progress, EPS);
         assertTrue(ring.rest);
     }
 
     @Test
     public void fractionIsClampedToZeroAndOne() {
-        assertEquals(1f, RingStateMapper.map(ui(State.RUNNING, MIN25 * 2, MIN25)).remaining, EPS);
-        assertEquals(0f, RingStateMapper.map(ui(State.RUNNING, -1_000L, MIN25)).remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS, RingStateMapper.map(ui(State.RUNNING, MIN25 * 2, MIN25)).progress, EPS);
+        assertEquals(1f, RingStateMapper.map(ui(State.RUNNING, -1_000L, MIN25)).progress, EPS);
     }
 
     @Test
-    public void zeroCountdownDrawsAFullRing() {
+    public void zeroCountdownDrawsTheStartStub() {
         RingStateMapper.Ring ring = RingStateMapper.map(ui(State.RUNNING, 0L, 0L));
         assertEquals(RingState.RUNNING, ring.state);
-        assertEquals(1f, ring.remaining, EPS);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS, ring.progress, EPS);
     }
 
     @Test
@@ -97,8 +97,8 @@ public class RingStateMapperTest {
         RingStateMapper.Ring home = RingStateMapper.map(shared);
         RingStateMapper.Ring focus = RingStateMapper.map(shared);
         assertEquals(home.state, focus.state);
-        assertEquals(home.remaining, focus.remaining, 0f);
-        assertEquals(1f - shared.getProgress(), home.remaining, EPS);
+        assertEquals(home.progress, focus.progress, 0f);
+        assertEquals(RingStateMapper.MIN_VISIBLE_PROGRESS + (1f - RingStateMapper.MIN_VISIBLE_PROGRESS) * shared.getProgress(), home.progress, EPS);
     }
 
     @Test

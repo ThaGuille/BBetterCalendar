@@ -134,10 +134,15 @@
                             android:src="@drawable/ic_clock_v2_24"
                             app:tint="@color/bb_sanct_sage_bright" />
 
+                        <!-- Paused: two centred lines ("Paused" bold + the hint) inside the inner
+                             circle of the ring: width capped by focus_paused_line_width. -->
                         <TextView
                             android:id="@+id/focusEndsAtText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:maxWidth="@dimen/focus_paused_line_width"
+                            android:textAlignment="center"
                             android:textAppearance="@style/TextAppearance.BBetter.Label"
                             android:textColor="@color/bb_sanct_on_surface_muted"
                             tools:text="Ends at 17:30" />

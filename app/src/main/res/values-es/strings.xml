@@ -279,7 +279,7 @@
     <string name="home_notifications">Notificaciones</string>
     <string name="home_notifications_soon">El centro de notificaciones llegará pronto</string>
     <string name="home_mode_paused">En pausa</string>
-    <string name="home_cycle_chip_desc">Ajustes del temporizador: %1$s</string>
+    <string name="home_cycle_chip_desc">Ajustes del Pomodoro: %1$s</string>
     <string name="home_open_focus">Abrir la sesión de concentración</string>
     <string name="home_next_up">A continuación</string>
     <string name="home_next_up_empty">Nada programado esta semana</string>

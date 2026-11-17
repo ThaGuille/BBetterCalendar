@@ -30,4 +30,15 @@
     <dimen name="focus_ring_button_size">72dp</dimen>
     <dimen name="focus_ring_button_gap">24dp</dimen>
 
+    <!-- Paused line inside the ring: ring r = 118dp, arc 7dp -> inner diameter 229dp; the text
+         block is centred and 2 lines tall (up to ~150dp at font 1.3), so its width is limited to
+         the chord at its lower line: 2 * sqrt(114.5^2 - 75^2) ~ 173dp, minus air. -->
+    <dimen name="focus_sanct_ring_inner">229dp</dimen>
+    <dimen name="focus_paused_line_width">164dp</dimen>
+    <!-- Top-bar action buttons (settings, block mode): 48dp target, 40dp visible circle. -->
+    <dimen name="focus_action_size">48dp</dimen>
+    <dimen name="focus_action_inset">4dp</dimen>
+    <dimen name="focus_action_stroke">1.5dp</dimen>
+    <dimen name="focus_action_icon_padding">12dp</dimen>
+    <dimen name="focus_action_gap">8dp</dimen>
 </resources>

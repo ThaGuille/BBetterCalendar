@@ -57,7 +57,7 @@ public class FocusRingView extends View {
     @ColorInt private final int sageGlow;
 
     private Mode mode = Mode.FOCUS;
-    private float remaining = 1f;
+    private float progress = 0f;
 
     private boolean breathingWanted;
     @Nullable private ValueAnimator breath;
@@ -80,11 +80,11 @@ public class FocusRingView extends View {
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
-    /** Fraction of the block still to go, 0..1 (1 = full ring). */
-    public void setRemaining(float fraction) {
+    /** Fraction of the ring drawn, 0..1 (elapsed progress; 1 = full ring). */
+    public void setProgress(float fraction) {
         float f = Math.max(0f, Math.min(1f, fraction));
-        if (f != remaining) {
-            remaining = f;
+        if (f != progress) {
+            progress = f;
             invalidate();
         }
     }
@@ -222,6 +222,6 @@ public class FocusRingView extends View {
         sageGlowPaint.setAlpha(paintAlpha);
         canvas.drawCircle(cx, cy, size * 0.4f, sageGlowPaint);
         canvas.restore();
-        ring.draw(canvas, remaining);
+        ring.draw(canvas, progress);
     }
 }

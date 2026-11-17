@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focus top-bar action: Pomodoro settings (opens TimerPopup). Item id = view id so the
+     uiautomator node resolves it. -->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/focusSettingsButton"
+    android:layout_width="@dimen/focus_action_size"
+    android:layout_height="@dimen/focus_action_size"
+    android:background="@drawable/bg_sanct_action_off"
+    android:clickable="true"
+    android:contentDescription="@string/focus_settings_desc"
+    android:focusable="true"
+    android:padding="@dimen/focus_action_icon_padding"
+    android:scaleType="fitCenter"
+    android:src="@drawable/ic_tune_24"
+    app:tint="@color/bb_sanct_sage_bright" />

@@ -366,7 +366,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         RingStateMapper.Ring ring = RingStateMapper.map(state);
         boolean firstRender = lastRenderedState == null;
         binding.homePlayButton.setRest(ring.rest);
-        binding.homePlayButton.setRemaining(ring.remaining);
+        binding.homePlayButton.setProgress(ring.progress);
         binding.homePlayButton.setState(ring.state);
         if (firstRender && RingStateMapper.justStarted(state)) {
             binding.homePlayButton.playStartSweep();

@@ -1,0 +1,31 @@
+# Pomodoro ring: grows from a start stub to full, colour soft -> intense (idle stub, running, paused, Home button).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-ring.steps --save pcu-ring
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+ASSERT id=homePlayButton
+SHOT pcu-ring-home-idle
+TAP id=homePlayButton
+WAIT 2500
+ASSERT id=focusRingBox
+SHOT pcu-ring-focus-start
+WAIT 6000
+SHOT pcu-ring-focus-later
+TAP id=focusPlayButton
+WAIT 1500
+ASSERT id=focusEndsAtText expect~=Paused|En pausa
+SHOT pcu-ring-focus-paused
+TAP id=focusPlayButton
+WAIT 1500
+KEY KEYCODE_BACK
+WAIT 2000
+ASSERT id=homePlayButton
+SHOT pcu-ring-home-running
+TAP id=homePlayButton
+WAIT 3000
+ASSERT id=focusRingBox
+TAP id=focusStopButton
+WAIT 1500
+KEY KEYCODE_BACK
+WAIT 2000
+ASSERT id=homeCycleChip

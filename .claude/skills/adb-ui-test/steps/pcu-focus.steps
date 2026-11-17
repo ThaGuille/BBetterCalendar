@@ -1,0 +1,39 @@
+# Focus: paused line inside the ring, settings + block-mode buttons, Home settings chip (font 1.0).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-focus.steps --save pcu-focus
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+ASSERT id=homePlayButton
+ASSERT id=homeCycleChip
+SHOT pcu-focus-home-chip
+TAP id=homePlayButton
+WAIT 4000
+ASSERT id=focusRingBox
+SHOT pcu-focus-running
+TAP id=focusPlayButton
+WAIT 1500
+ASSERT id=focusEndsAtText expect~=Paused|En pausa
+SHOT pcu-focus-paused
+ASSERT id=focusBlockModeButton
+ASSERT id=focusSettingsButton
+SHOT pcu-focus-top-buttons
+TAP id=focusSettingsButton
+WAIT 2000
+SHOT pcu-focus-settings-sheet
+KEY KEYCODE_BACK
+WAIT 1500
+TAP id=focusBlockModeButton
+WAIT 2000
+SHOT pcu-focus-block-result
+KEY KEYCODE_BACK
+WAIT 1500
+ASSERT id=focusPlayButton
+TAP id=focusPlayButton
+WAIT 1500
+SHOT pcu-focus-resumed
+TAP id=focusStopButton
+WAIT 1500
+KEY KEYCODE_BACK
+WAIT 2500
+ASSERT id=homeCycleChip
+SHOT pcu-focus-home-chip-after

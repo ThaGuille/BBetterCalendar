@@ -1,7 +1,11 @@
 package com.example.bbettercalendar.ui.focus;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.graphics.Typeface;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,8 +22,6 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
@@ -30,7 +32,13 @@ import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.AccessibilityDisclosureDialog;
 import com.example.bbettercalendar.feedback.HapticFeedback;
 import com.example.bbettercalendar.feedback.SoundFeedback;
+import com.example.bbettercalendar.configuration.Configuration;
+import com.example.bbettercalendar.configuration.ConfigurationManager;
+import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.helpers.FormatHelper;
+import com.example.bbettercalendar.popups.OnPopupListener;
+import com.example.bbettercalendar.popups.PopupHelper;
+import com.example.bbettercalendar.popups.TimerPopup;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
@@ -71,7 +79,7 @@ import dagger.hilt.android.AndroidEntryPoint;
  */
 @AndroidEntryPoint
 public class FocusFragment extends Fragment
-        implements AccessibilityDisclosureDialog.OnConsentGrantedListener {
+        implements AccessibilityDisclosureDialog.OnConsentGrantedListener, OnPopupListener<Object> {
 
     private static final String TAG = "FocusFragment";
     private static final String DISCLOSURE_TAG = "accessibility_disclosure";
@@ -79,6 +87,17 @@ public class FocusFragment extends Fragment
     private static final int MAX_CYCLE_DOTS = 12;
     private static final float DISABLED_ALPHA = 0.4f;
     private static final float PAUSED_DOT_ALPHA = 0.5f;
+
+    @javax.inject.Inject
+    ConfigurationManager configurationManager;
+    @javax.inject.Inject
+    @DbWriteExecutor
+    java.util.concurrent.ExecutorService dbWriteExecutor;
+    // Last "ends at" line painted (the paused one is styled, so compare the raw text).
+    @Nullable private String endsAtShown;
+
+    // Same Pomodoro settings sheet Home opens from its cycle chip.
+    private final TimerPopup timerPopup = new TimerPopup();
 
     private FocusSessionViewModel session;
     private FocusViewModel viewModel;
@@ -260,14 +279,49 @@ public class FocusFragment extends Fragment
         toolbar.setNavigationIconTint(
                 ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface));
         toolbar.inflateMenu(R.menu.menu_focus);
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.focusBlockModeButton) {
-                onBlockModeTapped();
-                return true;
-            }
-            return false;
-        });
+        // The round actions must not touch the screen edge.
+        toolbar.setPaddingRelative(toolbar.getPaddingStart(), toolbar.getPaddingTop(),
+                getResources().getDimensionPixelSize(R.dimen.focus_action_gap), toolbar.getPaddingBottom());
+        // Both actions are action layouts (visible tonal circles): the click goes on the view.
+        View settings = actionView(R.id.focusSettingsButton);
+        if (settings != null) {
+            settings.setOnClickListener(v -> showTimerSettings());
+        }
+        View block = actionView(R.id.focusBlockModeButton);
+        if (block != null) {
+            block.setOnClickListener(v -> onBlockModeTapped());
+        }
+        timerPopup.setOnPopupListener(this);
         renderBlockMode();
+    }
+
+    @Nullable
+    private View actionView(int itemId) {
+        if (toolbar == null) {
+            return null;
+        }
+        MenuItem item = toolbar.getMenu().findItem(itemId);
+        return item == null ? null : item.getActionView();
+    }
+
+    /** Opens the Pomodoro settings sheet (same as Home's cycle chip). */
+    private void showTimerSettings() {
+        timerPopup.setConfiguration(configurationManager.getConfiguration());
+        timerPopup.show(getParentFragmentManager(), "popup_tag");
+    }
+
+    @Override
+    public void OnClosePopup(int popupType) {
+    }
+
+    @Override
+    public void OnClosePopup(int popupType, Object result) {
+        if (popupType == PopupHelper.TIMER_POPUP && result instanceof Configuration) {
+            Configuration config = (Configuration) result;
+            session.onConfigurationChanged(config);
+            // Same as Home: persist the (already mutated) configuration off the main thread.
+            dbWriteExecutor.execute(() -> configurationManager.updateConfiguration(config));
+        }
     }
 
     // ================================================================== session render
@@ -301,11 +355,11 @@ public class FocusFragment extends Fragment
      */
     private void renderRings(@NonNull FocusUiState state) {
         RingStateMapper.Ring r = RingStateMapper.map(state);
-        ring.setRemaining(r.remaining);
+        ring.setProgress(r.progress);
         ring.setMode(r.rest ? FocusRingView.Mode.REST
                 : r.state == RingState.PAUSED ? FocusRingView.Mode.PAUSED : FocusRingView.Mode.FOCUS);
         playButton.setRest(r.rest);
-        playButton.setRemaining(r.remaining);
+        playButton.setProgress(r.progress);
         boolean firstRender = lastRingState == null;
         // El botón barre él solo en la transición reposo → en marcha; en el primer pintado no sabe.
         playButton.setState(r.state);
@@ -358,9 +412,23 @@ public class FocusFragment extends Fragment
             line = getString(R.string.focus_idle_line);
             icon = false;
         }
-        if (!line.contentEquals(endsAtText.getText())) {
+        if (state.isPaused() && line.equals(endsAtShown)
+                && endsAtText.getText() instanceof Spannable) {
+            icon = false;
+        } else if (state.isPaused() && line.indexOf('\n') > 0) {
+            // "Paused" (strong) over the hint, centred inside the ring.
+            SpannableString sp = new SpannableString(line);
+            int nl = line.indexOf('\n');
+            sp.setSpan(new StyleSpan(Typeface.BOLD), 0, nl, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sp.setSpan(new ForegroundColorSpan(
+                            ContextCompat.getColor(requireContext(), R.color.bb_sanct_on_surface)),
+                    0, nl, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            endsAtText.setText(sp);
+            icon = false;
+        } else if (!line.equals(endsAtShown) || endsAtText.getText() instanceof Spannable) {
             endsAtText.setText(line);
         }
+        endsAtShown = line;
         endsAtIcon.setVisibility(icon ? View.VISIBLE : View.GONE);
         endsAtIcon.setImageResource(state.isPaused()
                 ? R.drawable.ic_pause_v2_filled_24 : R.drawable.ic_clock_v2_24);
@@ -498,37 +566,36 @@ public class FocusFragment extends Fragment
             return;
         }
         MenuItem item = toolbar.getMenu().findItem(R.id.focusBlockModeButton);
-        if (item == null) {
+        View view = item == null ? null : item.getActionView();
+        if (!(view instanceof ImageView)) {
             return;
         }
-        @DrawableRes int icon;
+        @DrawableRes int bg;
         @ColorRes int tint;
         int title;
         int desc;
         if (!session.isBlockModeArmed()) {
-            icon = R.drawable.ic_do_not_disturb_24;
-            tint = R.color.bb_on_surface_muted;
+            bg = R.drawable.bg_sanct_action_off;
+            tint = R.color.bb_sanct_on_surface_muted;
             title = R.string.home_block_mode_off;
             desc = R.string.focus_block_mode_desc_off;
         } else if (AccessibilityAccess.isEnabled(requireContext())) {
-            icon = R.drawable.ic_do_not_disturb_on_24;
-            tint = R.color.bb_primary_bright;
+            bg = R.drawable.bg_sanct_action_on;
+            tint = R.color.bb_sanct_sage_bright;
             title = R.string.home_block_mode_on;
             desc = R.string.focus_block_mode_desc_on;
         } else {
-            icon = R.drawable.ic_do_not_disturb_on_24;
-            tint = R.color.bb_accent_reward;
+            bg = R.drawable.bg_sanct_action_pending;
+            tint = R.color.bb_sanct_primary;
             title = R.string.home_block_mode_pending;
             desc = R.string.focus_block_mode_desc_pending;
         }
-        Drawable d = ContextCompat.getDrawable(requireContext(), icon);
-        if (d != null) {
-            d = DrawableCompat.wrap(d.mutate());
-            DrawableCompat.setTint(d, ContextCompat.getColor(requireContext(), tint));
-            item.setIcon(d);
-        }
+        ImageView icon = (ImageView) view;
+        icon.setBackgroundResource(bg);
+        icon.setImageTintList(android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), tint)));
+        icon.setContentDescription(getString(title) + ". " + getString(desc));
         item.setTitle(title);
-        MenuItemCompat.setContentDescription(item, getString(title) + ". " + getString(desc));
     }
 
     // ================================================================== today / streak
@@ -752,6 +819,7 @@ public class FocusFragment extends Fragment
         timeViews.clear();
         lastRendered = null;
         lastRingState = null;
+        endsAtShown = null;
         toolbar = null;
         modeDot = null;
         modeChip = null;

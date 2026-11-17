@@ -109,7 +109,7 @@ function Invoke-BBStep {
                     return @{ ok = $false; info = "ASSERT failed: id=$idSuffix not found" }
                 }
                 if ($expect) {
-                    $actual = if (($out -join "`n") -match "text='(.*?)' desc=") { $Matches[1] } else { '' }
+                    $actual = if (($out -join "`n") -match "(?s)text='(.*?)' desc=") { $Matches[1] } else { '' }
                     # "7 de 12|7 of 12": any alternative matches (same as bbadb.py).
                     $hit = $false
                     foreach ($alt in ($expect.ToLower() -split '\|')) { if ($alt -and $actual.ToLower().Contains($alt)) { $hit = $true } }

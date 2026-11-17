@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.notifications.PermissionGate;
+import com.example.bbettercalendar.notifications.nudge.NudgeState;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.inbox.InboxItem;
 import com.example.bbettercalendar.social.push.FriendsPushHandler;
@@ -394,5 +395,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         permissionGate.maybeRequest(this, notificationPermissionLauncher);
+        NudgeState.markAppOpened(this); // avisos diarios: corta los «ignorados» (retirada tras 3)
     }
 }

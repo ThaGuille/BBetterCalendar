@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nudge_morning_title_1">Tu día: %1$s</string>
+    <string name="nudge_morning_title_2">Hoy: %1$s</string>
+    <string name="nudge_morning_title_3">En el plan de hoy: %1$s</string>
+    <string name="nudge_morning_public_title">Tu día</string>
+    <string name="nudge_morning_public_body">Abre BBetter para ver el plan de hoy.</string>
+    <plurals name="nudge_count_tasks">
+        <item quantity="one">%d tarea</item>
+        <item quantity="many">%d tareas</item>
+        <item quantity="other">%d tareas</item>
+    </plurals>
+    <plurals name="nudge_count_events">
+        <item quantity="one">%d evento</item>
+        <item quantity="many">%d eventos</item>
+        <item quantity="other">%d eventos</item>
+    </plurals>
+    <string name="nudge_count_join">%1$s, %2$s</string>
+    <string name="nudge_morning_first_up">Lo primero: %1$s a las %2$s.</string>
+    <plurals name="nudge_morning_more">
+        <item quantity="one">Y %d más después.</item>
+        <item quantity="many">Y %d más después.</item>
+        <item quantity="other">Y %d más después.</item>
+    </plurals>
+    <string name="nudge_morning_no_upcoming">Toca para ver el plan de hoy.</string>
+    <string name="nudge_untitled">Sin título</string>
+
+    <string name="nudge_streak_title">Racha en juego</string>
+    <plurals name="nudge_streak_body_1">
+        <item quantity="one">Sigue con tu racha de %d día. Hoy basta con un pomodoro.</item>
+        <item quantity="many">Sigue con tu racha de %d días. Hoy basta con un pomodoro.</item>
+        <item quantity="other">Sigue con tu racha de %d días. Hoy basta con un pomodoro.</item>
+    </plurals>
+    <plurals name="nudge_streak_body_2">
+        <item quantity="one">Llevas %d día seguido. Una sola sesión de concentración la mantiene.</item>
+        <item quantity="many">Llevas %d días seguidos. Una sola sesión de concentración la mantiene.</item>
+        <item quantity="other">Llevas %d días seguidos. Una sola sesión de concentración la mantiene.</item>
+    </plurals>
+    <plurals name="nudge_streak_body_3">
+        <item quantity="one">Tu racha de %d día sigue abierta hoy. ¿Te apetece un pomodoro corto?</item>
+        <item quantity="many">Tu racha de %d días sigue abierta hoy. ¿Te apetece un pomodoro corto?</item>
+        <item quantity="other">Tu racha de %d días sigue abierta hoy. ¿Te apetece un pomodoro corto?</item>
+    </plurals>
+
+    <string name="nudge_evening_title">Planear mañana</string>
+    <string name="nudge_evening_body_1">Mañana está libre. ¿Dos minutos ahora para planearlo?</string>
+    <string name="nudge_evening_body_2">Mañana sigue casi en blanco. ¿Lo esbozas ahora?</string>
+    <string name="nudge_evening_body_3">Echar un vistazo a mañana esta noche hace la mañana más fácil.</string>
+
+    <string name="nudge_weekly_title">Tu semana</string>
+    <string name="nudge_weekly_focus">%1$s de concentración%2$s</string>
+    <string name="nudge_weekly_hours_minutes">%1$d h %2$d min</string>
+    <string name="nudge_weekly_minutes">%1$d min</string>
+    <string name="nudge_weekly_delta_up">" (+%1$d %% frente a la semana pasada)"</string>
+    <string name="nudge_weekly_delta_down">" (%1$d %% frente a la semana pasada)"</string>
+    <string name="nudge_weekly_delta_same">" (igual que la semana pasada)"</string>
+    <string name="nudge_weekly_active_days">Días activos: %1$d/7</string>
+    <plurals name="nudge_weekly_tasks">
+        <item quantity="one">%d tarea completada</item>
+        <item quantity="many">%d tareas completadas</item>
+        <item quantity="other">%d tareas completadas</item>
+    </plurals>
+</resources>

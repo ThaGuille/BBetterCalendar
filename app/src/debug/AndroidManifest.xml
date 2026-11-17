@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Debug-only additions, merged into the debug variant (never in release). -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application android:networkSecurityConfig="@xml/network_security_config">
         <!-- u9 component gallery. exported=true ONLY here (debug manifest) so it can be opened with
@@ -20,5 +21,14 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.BBetter.NoActionBar" />
+
+        <!-- Notificaciones (parte C): avisos diarios disparados a mano. exported=true SOLO aquí, para
+             que el shell de adb llegue al receiver; el disparo sin acción sólo se atiende con
+             BuildConfig.DEBUG (ver DailyNudgeReceiver):
+             adb shell am broadcast -f 32 -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.notifications.nudge.DailyNudgeReceiver (extras: nudge=morning|streak|evening|weekly, reset_state=true) -->
+        <receiver
+            android:name="com.example.bbettercalendar.notifications.nudge.DailyNudgeReceiver"
+            android:exported="true"
+            tools:replace="android:exported" />
     </application>
 </manifest>

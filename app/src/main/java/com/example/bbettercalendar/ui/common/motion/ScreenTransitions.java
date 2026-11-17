@@ -166,19 +166,36 @@ public final class ScreenTransitions {
      */
     public static void sharedFocusRing(@NonNull Fragment focus) {
         Context ctx = focus.requireContext();
-        int surface = ContextCompat.getColor(ctx, R.color.bb_sanct_surface);
+        int surface = FocusRingTransition.OPAQUE_CONTAINER
+                ? ContextCompat.getColor(ctx, R.color.bb_sanct_surface) : Color.TRANSPARENT;
         ShapeAppearanceModel circle = ShapeAppearanceModel.builder()
                 .setAllCornerSizes(new RelativeCornerSize(FocusRingTransition.CORNER_SIZE_FRACTION)).build();
         MaterialContainerTransform in = container(ctx, enterMs(ctx), surface);
         in.setStartShapeAppearanceModel(circle);
         in.setEndShapeAppearanceModel(circle);
-        in.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
+        in.setFadeMode(containerFadeMode(FocusRingTransition.FADE_MODE));
         MaterialContainerTransform back = container(ctx, exitMs(ctx), surface);
         back.setStartShapeAppearanceModel(circle);
         back.setEndShapeAppearanceModel(circle);
-        back.setFadeMode(MaterialContainerTransform.FADE_MODE_THROUGH);
+        back.setFadeMode(containerFadeMode(FocusRingTransition.FADE_MODE));
         focus.setSharedElementEnterTransition(in);
         focus.setSharedElementReturnTransition(back);
+    }
+
+    /** Maps the pure description's fade mode onto MaterialContainerTransform's FADE_MODE_* constants. */
+    @VisibleForTesting
+    static int containerFadeMode(@NonNull FocusRingTransition.FadeMode mode) {
+        switch (mode) {
+            case CROSS:
+                return MaterialContainerTransform.FADE_MODE_CROSS;
+            case IN:
+                return MaterialContainerTransform.FADE_MODE_IN;
+            case OUT:
+                return MaterialContainerTransform.FADE_MODE_OUT;
+            case THROUGH:
+            default:
+                return MaterialContainerTransform.FADE_MODE_THROUGH;
+        }
     }
 
     /** Postpones the enter of a screen whose layout depends on data, at most {@value #POSTPONE_TIMEOUT_MS} ms. */

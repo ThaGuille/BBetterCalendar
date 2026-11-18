@@ -3,28 +3,38 @@
 <resources>
     <!-- Minimo de area tactil (A4). -->
     <dimen name="touch_target_min">48dp</dimen>
-    <!-- Celda del mes (A10): el relleno de seleccion y el recuadro de hoy comparten este inset. -->
+    <!-- Celda del mes (A10): el tinte de enfoque y el contorno de seleccion comparten este inset. -->
     <dimen name="calendar_cell_inset">2dp</dimen>
     <!-- Alto de la celda del mes (cv_daySize=seventhWidth: el ancho es 1/7). -->
-    <dimen name="calendar_cell_height">44dp</dimen>
-    <!-- u5: circulo de hoy detras del numero (cabe 13sp x 1.3 de dos cifras) y su margen superior;
-         el numero se centra en la misma caja. Contorno de la seleccion. -->
-    <dimen name="calendar_today_circle_size">28dp</dimen>
-    <dimen name="calendar_today_circle_top">3dp</dimen>
+    <dimen name="calendar_cell_height">52dp</dimen>
+    <!-- Circulo de hoy detras del numero (cabe 13sp x 1.3 de dos cifras). El numero va centrado
+         en la celda y las marcas cuelgan debajo, ancladas al borde inferior: el numero ocupa el mismo sitio
+         en todas las celdas y el circulo queda centrado (rediseno-calendario-color). -->
+    <dimen name="calendar_today_circle_size">26dp</dimen>
     <dimen name="calendar_selected_stroke">1.5dp</dimen>
-    <!-- u5: muestra de "Enfoque" en la leyenda (cuadrado teñido, la forma del tinte de la celda). -->
+    <dimen name="calendar_marks_height">8dp</dimen>
+    <dimen name="calendar_marks_bottom">4dp</dimen>
+    <!-- Banderita de entrega: algo mayor que el punto para que se distinga tambien por la forma. -->
+    <dimen name="calendar_flag_size">9dp</dimen>
+    <!-- Muestra de la escala de enfoque (cuadrado teñido, la forma del tinte de la celda). -->
     <dimen name="calendar_legend_swatch_size">10dp</dimen>
     <dimen name="calendar_legend_swatch_radius">3dp</dimen>
     <!-- Cabecera del formulario: boton visual 40dp / 36dp dentro de un area tactil de 48dp. -->
     <dimen name="form_close_inset">4dp</dimen>
     <dimen name="form_save_inset">6dp</dimen>
-    <!-- Hueco bajo la lista del día para que el FAB (56dp + 12dp de margen) no tape la última fila. -->
-    <!-- Puntos de tipo en la celda del mes (u12). -->
+    <!-- Puntos de elemento en la celda (u12). -->
     <dimen name="calendar_dot_size">5dp</dimen>
     <dimen name="calendar_dot_gap">1.5dp</dimen>
-    <dimen name="calendar_cell_dots_bottom">7dp</dimen>
-    <!-- Agenda del dia (u12): barra de color de cada fila y boton "+" de la tarjeta. -->
+    <!-- Agenda del dia (u12): barra de cada fila y boton "+" de la tarjeta. -->
     <dimen name="calendar_agenda_bar_width">4dp</dimen>
     <dimen name="calendar_agenda_time_width">48dp</dimen>
     <dimen name="calendar_agenda_add_size">40dp</dimen>
+    <!-- Vista Semana (tira semanal + agenda): circulo del dia y barrita de enfoque. -->
+    <dimen name="calendar_week_day_circle">32dp</dimen>
+    <dimen name="calendar_week_bar_box">16dp</dimen>
+    <dimen name="calendar_week_bar_width">14dp</dimen>
+    <dimen name="calendar_week_bar_min">3dp</dimen>
+    <dimen name="calendar_week_bar_radius">3dp</dimen>
+    <!-- Hueco bajo la agenda para que el FAB (56dp + margen) no tape la ultima fila. -->
+    <dimen name="calendar_week_agenda_bottom">88dp</dimen>
 </resources>

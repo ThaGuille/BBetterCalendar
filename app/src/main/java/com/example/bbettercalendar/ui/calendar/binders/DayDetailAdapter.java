@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,24 +44,12 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_day_event, parent, false);
-        return new VH(view);
+        return VH.create(parent);
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        CalendarItem item = items.get(position);
-        holder.title.setText(item.getTitle() != null && !item.getTitle().isEmpty()
-                ? item.getTitle()
-                : holder.itemView.getContext().getString(R.string.calendar_untitled));
-        holder.meta.setText(metaFor(holder.itemView.getContext(), item));
-        holder.time.setText(item.getType() == CalendarItem.Type.DEADLINE
-                ? "" : timeFormat.format(new Date(item.getStartMillis())));
-        ViewCompat.setBackgroundTintList(holder.swatch, ColorStateList.valueOf(item.getColorArgb()));
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(item);
-        });
+        holder.bind(items.get(position), timeFormat, listener);
     }
 
     @Override
@@ -94,6 +84,11 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
         return ctx.getString(R.string.calendar_duration_h_min, (int) h, (int) m);
     }
 
+    /**
+     * Fila de un elemento (item_day_event): hora, barra, título y "Tipo · duración". La comparten la
+     * agenda del día (Mes) y la agenda de la semana ({@link WeekAgendaAdapter}). El tipo se lee en el
+     * texto, no en el color: la barra es neutra salvo en la entrega, que también tiñe su etiqueta.
+     */
     static class VH extends RecyclerView.ViewHolder {
         final View swatch;
         final TextView title;
@@ -106,6 +101,28 @@ public class DayDetailAdapter extends RecyclerView.Adapter<DayDetailAdapter.VH> 
             title = itemView.findViewById(R.id.eventTitle);
             meta = itemView.findViewById(R.id.eventMeta);
             time = itemView.findViewById(R.id.eventTime);
+        }
+
+        static VH create(@NonNull ViewGroup parent) {
+            return new VH(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_day_event, parent, false));
+        }
+
+        void bind(@NonNull CalendarItem item, @NonNull SimpleDateFormat timeFormat,
+                  @Nullable OnItemClickListener listener) {
+            Context ctx = itemView.getContext();
+            boolean deadline = item.getType() == CalendarItem.Type.DEADLINE;
+            title.setText(item.getTitle() != null && !item.getTitle().isEmpty()
+                    ? item.getTitle()
+                    : ctx.getString(R.string.calendar_untitled));
+            meta.setText(metaFor(ctx, item));
+            meta.setTextColor(ContextCompat.getColor(ctx,
+                    deadline ? R.color.calendar_item_deadline : R.color.bb_on_surface_muted));
+            time.setText(deadline ? "" : timeFormat.format(new Date(item.getStartMillis())));
+            ViewCompat.setBackgroundTintList(swatch, ColorStateList.valueOf(item.getColorArgb()));
+            itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onItemClick(item);
+            });
         }
     }
 }

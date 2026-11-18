@@ -23,4 +23,11 @@
     <string name="calendar_duration_h_min">%1$d h %2$d m</string>
     <string name="calendar_agenda_add">Add</string>
     <string name="calendar_agenda_empty_title">Nothing planned</string>
+    <!-- rediseno-calendario-color: optional focus layer (scale under the grid, agenda summary) and the Week view. -->
+    <string name="calendar_focus_scale_less">Less</string>
+    <string name="calendar_focus_scale_more">More focus</string>
+    <string name="calendar_agenda_focus">%1$s · %2$s of focus</string>
+    <string name="calendar_week_focus">%s of focus</string>
+    <string name="calendar_week_prev">Previous week</string>
+    <string name="calendar_week_next">Next week</string>
 </resources>

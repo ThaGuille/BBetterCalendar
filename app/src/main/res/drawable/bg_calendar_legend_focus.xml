@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Muestra de la leyenda para "Enfoque" (u5): un cuadrado redondeado con el tinte mas fuerte, la misma
-     forma que pinta la celda del mes (tinte de fondo), no un punto como los tipos de elemento. -->
+<!-- Muestra de la escala de enfoque: cuadrado redondeado, la forma con la que la celda pinta el enfoque.
+     El paso (bb_cal_focus_1..3) llega por backgroundTint. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <corners android:radius="@dimen/calendar_legend_swatch_radius" />
-    <solid android:color="@color/bb_cal_focus_3" />
+    <!-- Opaco: el alfa lo pone el backgroundTint (con un color ya translucido aqui, el alfa se aplicaba dos veces). -->
+    <solid android:color="@color/bb_primary" />
 </shape>

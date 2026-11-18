@@ -23,4 +23,11 @@
     <string name="calendar_duration_h_min">%1$d h %2$d m</string>
     <string name="calendar_agenda_add">Añadir</string>
     <string name="calendar_agenda_empty_title">Nada previsto</string>
+    <!-- rediseno-calendario-color: capa de enfoque opcional (escala bajo la rejilla, resumen de la agenda) y vista Semana. -->
+    <string name="calendar_focus_scale_less">Menos</string>
+    <string name="calendar_focus_scale_more">Más enfoque</string>
+    <string name="calendar_agenda_focus">%1$s · %2$s de enfoque</string>
+    <string name="calendar_week_focus">%s de enfoque</string>
+    <string name="calendar_week_prev">Semana anterior</string>
+    <string name="calendar_week_next">Semana siguiente</string>
 </resources>

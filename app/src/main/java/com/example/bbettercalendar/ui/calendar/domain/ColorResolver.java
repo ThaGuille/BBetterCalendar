@@ -10,15 +10,15 @@ public final class ColorResolver {
 
     private ColorResolver() {}
 
+    /**
+     * Colour of an item's mark (rediseno-calendario-color). Tasks, events and reminders share one
+     * neutral colour on purpose: the calendar does not encode the item type in colour, so the channel
+     * stays free for what the items gain later (importance, tags). Only the project deadline differs.
+     */
     public static int colorFor(CalendarItem.Type type, Context ctx) {
-        int resId;
-        switch (type) {
-            case EVENT:    resId = R.color.calendar_item_event;    break;
-            case TASK:     resId = R.color.calendar_item_task;     break;
-            case REMINDER: resId = R.color.calendar_item_reminder; break;
-            case DEADLINE: resId = R.color.calendar_item_deadline; break;
-            default:       resId = R.color.calendar_item_event;
-        }
+        int resId = type == CalendarItem.Type.DEADLINE
+                ? R.color.calendar_item_deadline
+                : R.color.calendar_item_default;
         return ContextCompat.getColor(ctx, resId);
     }
 }

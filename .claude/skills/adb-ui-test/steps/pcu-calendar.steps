@@ -1,10 +1,11 @@
-# Calendar colour system (pomodoro-calendario-ui u5): amber focus tint, item dots (task / event / reminder /
-# deadline), today = number in a filled circle, selected = light outline; legend with the five entries.
+# Calendar (rediseno-calendario-color): the month opens clean (neutral dots, deadline flag, today = number in a
+# filled circle, selected = light outline) and the focus wash is an optional layer behind the «Focus» chip. The
+# Week view is a week strip + a continuous agenda of the seven days.
 # Needs the seed (python .claude/scripts/seed_progress_db.py --device): focus on past days, today's tasks, and a
 # pending task + project deadline 3 days from today (the "other day with items" this walk selects; in the last
-# three days of a month that day is in the next month and the TAP below lands on the legend instead).
+# three days of a month that day is in the next month and the TAP below finds nothing).
 # Each month cell's content description says its marks ("20, Selected, Task, Deadline"), so a day is picked by
-# what it holds, not by its position.
+# what it holds, not by its position. "Focus" is only in a description while the layer is on.
 # Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/pcu-calendar.steps --save pcu-calendar
 GRANT android.permission.POST_NOTIFICATIONS
 START .configuration.SplashActivity
@@ -12,10 +13,9 @@ WAIT 5000
 TAP id=navigation_calendar_month
 WAIT 2000
 ASSERT id=monthCalendarView
-ASSERT id=calendarLegend
-ASSERT id=legendReminder
-ASSERT id=legendFocus
-SHOT pcu-calendar-month-today
+ASSERT id=monthTodayButton
+ASSERT id=calendarFocusToggle
+SHOT pcu-calendar-month-clean
 TAP text=deadline|entrega
 WAIT 1200
 ASSERT id=dayDetailTitle
@@ -25,10 +25,32 @@ WAIT 800
 ASSERT id=calendarAgendaCard
 ASSERT id=dayDetailRecycler
 SHOT pcu-calendar-day-list
-# Selecting a day with focus: the outline goes around the amber tint, which stays visible.
 SWIPE 540 600 540 1500 300
 WAIT 800
-TAP text=focus|enfoque
+# Focus layer on: sage wash on the days with focus, the scale under the grid, minutes in the day summary.
+TAP id=calendarFocusToggle
+WAIT 1000
+ASSERT id=calendarLegend
+SHOT pcu-calendar-month-focus-layer
+TAP id=monthTodayButton
 WAIT 1200
 ASSERT id=dayDetailTitle
-SHOT pcu-calendar-selected-focus-day
+SHOT pcu-calendar-month-today-focus
+# Week view: strip + agenda. The focus layer stays on (shared with the month).
+TAP id=calendarModeWeek
+WAIT 2000
+ASSERT id=weekStripView
+ASSERT id=weekAgendaRecycler
+ASSERT id=calendarAddEventButton2
+SHOT pcu-calendar-week
+TAP id=weekNextButton
+WAIT 1200
+SHOT pcu-calendar-week-next
+TAP id=weekTodayButton
+WAIT 1200
+TAP id=calendarFocusToggle
+WAIT 800
+SHOT pcu-calendar-week-clean
+TAP id=calendarModeMonth
+WAIT 1500
+ASSERT id=monthCalendarView

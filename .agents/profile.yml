@@ -40,6 +40,17 @@ bigTask:
     - "Gradle tiene build cache y configuration cache (gradle.properties): una worktree nueva compila en ~35 s; no hace falta un paso de calentamiento antes del primer check."
     - "Un check de mutación que cuenta mutantes declara los equivalentes con bt equivalent (con la salida que lo prueba) en vez de bloquear la unidad; no pongas en el check un mutante que el emulador rechaza antes de evaluar las reglas (p. ej. ids reservados __x__)."
 
+  # Código de UI: plan-check avisa de una unidad que lo toca sin ningún check que la ejerza (un paso del recorrido en el
+  # emulador o un test instrumentado). pomodoro-calendario-ui: todas las partes pasaron con greps del código y la revisión
+  # de la rama encontró después un cierre por doble toque.
+  uiTouches:
+    - "app/src/main/res/layout/**"
+    - "app/src/main/java/**/*Fragment.java"
+    - "app/src/main/java/**/*Activity.java"
+    - "app/src/main/java/**/ui/common/widget/**"
+    - "app/src/main/java/**/ui/common/motion/**"
+  uiCheck: "with-emulator\\.py|connectedAndroidTest"
+
   # Sin local.properties una worktree nueva depende de ANDROID_HOME; con él compila igual que el checkout.
   worktreeCopy: [local.properties]
   forbid:

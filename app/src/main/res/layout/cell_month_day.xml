@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/calendar_cell_height">
 
-    <!-- Canales separados (pomodoro-calendario-ui u5), los elige MonthDayBinder con DayCellStyle:
-         fondo = tinte ambar por minutos de enfoque (bg_calendar_focus_N); seleccion = contorno claro
-         encima (cellSelectedOutline) que deja ver el tinte; hoy = circulo relleno detras del numero
-         (cellTodayIndicator); puntos = tipos de elemento. -->
+    <!-- Celda del mes (rediseno-calendario-color), la pinta MonthDayBinder con DayCellStyle:
+         fondo = veladura salvia por minutos de enfoque, solo con la capa de enfoque encendida;
+         seleccion = contorno claro; hoy = circulo relleno detras del numero.
+         El numero va centrado en la celda (y por tanto en la veladura y en el contorno) y las marcas
+         cuelgan debajo, ancladas al borde inferior: el numero queda en el mismo sitio en todas las celdas. -->
     <View
         android:id="@+id/cellFocusBg"
         android:layout_width="match_parent"
@@ -19,52 +21,62 @@
         android:background="@drawable/bg_calendar_day_selected"
         android:visibility="gone" />
 
-    <!-- Marca de hoy: circulo relleno detras del numero. -->
-    <View
-        android:id="@+id/cellTodayIndicator"
-        android:layout_width="@dimen/calendar_today_circle_size"
-        android:layout_height="@dimen/calendar_today_circle_size"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="@dimen/calendar_today_circle_top"
-        android:background="@drawable/bg_calendar_day_today"
-        android:visibility="gone" />
+        <FrameLayout
+            android:layout_width="@dimen/calendar_today_circle_size"
+            android:layout_height="@dimen/calendar_today_circle_size"
+            android:layout_gravity="center">
 
-    <TextView
-        android:id="@+id/cellDayText"
-        android:layout_width="@dimen/calendar_today_circle_size"
-        android:layout_height="@dimen/calendar_today_circle_size"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="@dimen/calendar_today_circle_top"
-        android:fontFeatureSettings="tnum"
-        android:gravity="center"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.BBetter.Label"
-        android:textColor="@color/bb_on_surface" />
+            <View
+                android:id="@+id/cellTodayIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_calendar_day_today"
+                android:visibility="gone" />
 
-    <!-- Hasta 3 puntos por tipo (tarea / evento / entrega / recordatorio). -->
-    <LinearLayout
-        android:id="@+id/cellDots"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="@dimen/calendar_cell_dots_bottom"
-        android:orientation="horizontal">
+            <TextView
+                android:id="@+id/cellDayText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFeatureSettings="tnum"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.Label"
+                android:textColor="@color/bb_on_surface" />
+        </FrameLayout>
 
-        <View
-            android:id="@+id/cellDot1"
-            style="@style/Widget.BBetter.CalendarDot"
-            android:visibility="gone" />
+        <!-- Marcas: banderita si hay entrega; un punto neutro por elemento (hasta 3), sin color por tipo. -->
+        <LinearLayout
+            android:id="@+id/cellDots"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/calendar_marks_height"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="@dimen/calendar_marks_bottom"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        <View
-            android:id="@+id/cellDot2"
-            style="@style/Widget.BBetter.CalendarDot"
-            android:visibility="gone" />
+            <ImageView
+                android:id="@+id/cellDeadlineFlag"
+                android:layout_width="@dimen/calendar_flag_size"
+                android:layout_height="@dimen/calendar_flag_size"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_flag_24"
+                android:visibility="gone"
+                app:tint="@color/calendar_item_deadline" />
 
-        <View
-            android:id="@+id/cellDot3"
-            style="@style/Widget.BBetter.CalendarDot"
-            android:visibility="gone" />
-    </LinearLayout>
+            <View
+                android:id="@+id/cellDot1"
+                style="@style/Widget.BBetter.CalendarDot"
+                android:visibility="gone" />
 
+            <View
+                android:id="@+id/cellDot2"
+                style="@style/Widget.BBetter.CalendarDot"
+                android:visibility="gone" />
+
+            <View
+                android:id="@+id/cellDot3"
+                style="@style/Widget.BBetter.CalendarDot"
+                android:visibility="gone" />
+        </LinearLayout>
 </FrameLayout>

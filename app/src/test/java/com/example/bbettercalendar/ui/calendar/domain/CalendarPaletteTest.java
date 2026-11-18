@@ -3,6 +3,7 @@ package com.example.bbettercalendar.ui.calendar.domain;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
@@ -19,17 +20,15 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
- * pomodoro-calendario-ui u5: reads the real values/colors.xml and values/palette.xml, resolves the
- * calendar aliases to hex and checks the colour system: the four item types and the focus tint are
- * pairwise >= 30 degrees of hue apart, today and selected use different colours, and the day number
- * stays WCAG AA readable on every tint and on the today circle.
+ * rediseno-calendario-color: reads the real values/colors.xml and values/palette.xml, resolves the
+ * calendar aliases and checks the colour system: item types share one neutral mark, only the deadline
+ * has a colour of its own, the focus layer is one hue (the brand sage) in three growing alphas, today
+ * and selected use different colours, and the day number stays WCAG AA readable on every tint.
  */
 public class CalendarPaletteTest {
 
-    /** The strongest focus tint (bb_cal_focus_3 = amber_800), the one measured against the item hues. */
-    private static final String FOCUS_STRONGEST_HEX = "#604818";
-    private static final double MIN_HUE_GAP = 30.0;
     private static final double WCAG_AA_TEXT = 4.5;
+    private static final String[] FOCUS = {"bb_cal_focus_1", "bb_cal_focus_2", "bb_cal_focus_3"};
 
     private static final Map<String, String> COLORS = new HashMap<>();
 
@@ -41,20 +40,34 @@ public class CalendarPaletteTest {
     }
 
     @Test
-    public void itemColoursAndFocusTintAreAtLeast30DegreesOfHueApart() {
-        assertEquals("strongest focus tint", FOCUS_STRONGEST_HEX, hex("bb_cal_focus_3"));
-        String[] names = {"calendar_item_task", "calendar_item_event", "calendar_item_reminder",
-                "calendar_item_deadline", "bb_cal_focus_3"};
-        StringBuilder table = new StringBuilder();
-        for (String n : names) {
-            table.append(String.format(Locale.ROOT, "%s=%s(%.1f) ", n, hex(n), hue(rgb(n))));
+    public void itemTypesShareOneNeutralMarkAndOnlyTheDeadlineHasItsOwnColour() {
+        for (String gone : new String[]{"calendar_item_task", "calendar_item_event", "calendar_item_reminder"}) {
+            assertNull(gone + " must not come back: the item type is not encoded in colour", COLORS.get(gone));
         }
-        for (int i = 0; i < names.length; i++) {
-            for (int j = i + 1; j < names.length; j++) {
-                double gap = hueGap(hue(rgb(names[i])), hue(rgb(names[j])));
-                assertTrue(names[i] + " vs " + names[j] + " only " + gap + " degrees apart; " + table,
-                        gap >= MIN_HUE_GAP);
-            }
+        assertTrue("default mark is a neutral: saturation " + saturation(rgb("calendar_item_default")),
+                saturation(rgb("calendar_item_default")) < 0.15);
+        assertTrue("deadline is a real colour: saturation " + saturation(rgb("calendar_item_deadline")),
+                saturation(rgb("calendar_item_deadline")) > 0.4);
+        // A mark must stay visible on the cell, with and without the strongest focus wash.
+        int surface = rgb("bb_surface");
+        int washed = over("bb_cal_focus_3", surface);
+        for (String mark : new String[]{"calendar_item_default", "calendar_item_deadline"}) {
+            assertTrue(mark + " on the surface", contrast(rgb(mark), surface) >= 3.0);
+            assertTrue(mark + " on the strongest wash", contrast(rgb(mark), washed) >= 3.0);
+        }
+    }
+
+    @Test
+    public void focusLayerIsOneHueTheBrandSageInThreeGrowingAlphas() {
+        int sage = rgb("bb_primary");
+        int previousAlpha = 0;
+        for (String name : FOCUS) {
+            long argb = argb(name);
+            assertEquals(name + " is the brand sage", sage, (int) (argb & 0xFFFFFF));
+            int alpha = (int) (argb >>> 24);
+            assertTrue(name + " is translucent, not a solid fill", alpha < 0x80);
+            assertTrue(name + " is stronger than the step before", alpha > previousAlpha);
+            previousAlpha = alpha;
         }
     }
 
@@ -71,10 +84,11 @@ public class CalendarPaletteTest {
     @Test
     public void dayNumberIsWcagAaOnEveryTintAndOnTheTodayCircle() {
         int number = rgb("bb_on_surface");
-        String[] backgrounds = {"bb_surface_card", "bb_cal_focus_1", "bb_cal_focus_2", "bb_cal_focus_3"};
-        for (String bg : backgrounds) {
-            double ratio = contrast(number, rgb(bg));
-            assertTrue("day number on " + bg + " = " + ratio, ratio >= WCAG_AA_TEXT);
+        int surface = rgb("bb_surface");
+        assertTrue("day number on the surface", contrast(number, surface) >= WCAG_AA_TEXT);
+        for (String tint : FOCUS) {
+            double ratio = contrast(number, over(tint, surface));
+            assertTrue("day number on " + tint + " = " + ratio, ratio >= WCAG_AA_TEXT);
         }
         double onCircle = contrast(rgb("bb_cal_on_today"), rgb("bb_cal_today_fill"));
         assertTrue("today number on its circle = " + onCircle, onCircle >= WCAG_AA_TEXT);
@@ -82,20 +96,14 @@ public class CalendarPaletteTest {
 
     @Test
     public void focusRampGrowsInThreeVisibleSteps() {
-        double card = luminance(rgb("bb_surface_card"));
-        double l1 = luminance(rgb("bb_cal_focus_1"));
-        double l2 = luminance(rgb("bb_cal_focus_2"));
-        double l3 = luminance(rgb("bb_cal_focus_3"));
-        assertTrue("level 1 lifts off the card", contrastOf(l1, card) >= 1.15);
-        assertTrue("level 2 above level 1", contrastOf(l2, l1) >= 1.15);
-        assertTrue("level 3 above level 2", contrastOf(l3, l2) >= 1.15);
-    }
-
-    @Test
-    public void reminderIsTheNewLilacPrimitive() {
-        assertEquals("@color/lilac_300", COLORS.get("calendar_item_reminder"));
-        double h = hue(rgb("calendar_item_reminder"));
-        assertTrue("lilac hue " + h, h > 250 && h < 300);
+        int surface = rgb("bb_surface");
+        double previous = luminance(surface);
+        for (String tint : FOCUS) {
+            double l = luminance(over(tint, surface));
+            assertTrue(tint + " lifts off the step before: " + contrastOf(l, previous),
+                    contrastOf(l, previous) >= 1.15);
+            previous = l;
+        }
     }
 
     // ---------------------------------------------------------------- helpers
@@ -118,8 +126,8 @@ public class CalendarPaletteTest {
         }
     }
 
-    /** Resolves @color/ aliases down to "#RRGGBB" (alpha dropped; the calendar colours are opaque). */
-    private static String hex(String name) {
+    /** Resolves @color/ aliases down to 0xAARRGGBB. */
+    private static long argb(String name) {
         String value = COLORS.get(name);
         assertNotNull("colour not defined: " + name, value);
         int guard = 0;
@@ -130,38 +138,43 @@ public class CalendarPaletteTest {
             assertTrue("alias loop at " + name, ++guard < 10);
         }
         String digits = value.substring(1);
-        if (digits.length() == 8) {
-            assertEquals(name + " must be opaque", "FF", digits.substring(0, 2).toUpperCase(Locale.ROOT));
-            digits = digits.substring(2);
-        }
-        assertEquals(name + " = " + value, 6, digits.length());
-        return "#" + digits.toUpperCase(Locale.ROOT);
+        if (digits.length() == 6) digits = "FF" + digits;
+        assertEquals(name + " = " + value, 8, digits.length());
+        return Long.parseLong(digits, 16);
+    }
+
+    /** "#RRGGBB" of an opaque colour. */
+    private static String hex(String name) {
+        long argb = argb(name);
+        assertEquals(name + " must be opaque", 0xFF, (int) (argb >>> 24));
+        return String.format(Locale.ROOT, "#%06X", argb & 0xFFFFFF);
     }
 
     private static int rgb(String name) {
         return Integer.parseInt(hex(name).substring(1), 16);
     }
 
-    /** HSV/HSL hue in degrees [0, 360). */
-    static double hue(int rgb) {
+    /** The translucent colour {@code name} drawn over the opaque {@code background}. */
+    private static int over(String name, int background) {
+        long argb = argb(name);
+        double a = (argb >>> 24) / 255.0;
+        int out = 0;
+        for (int shift = 16; shift >= 0; shift -= 8) {
+            int fg = (int) ((argb >> shift) & 0xFF);
+            int bg = (background >> shift) & 0xFF;
+            out |= ((int) Math.round(fg * a + bg * (1 - a))) << shift;
+        }
+        return out;
+    }
+
+    /** HSV saturation, 0..1. */
+    static double saturation(int rgb) {
         double r = ((rgb >> 16) & 0xFF) / 255.0;
         double g = ((rgb >> 8) & 0xFF) / 255.0;
         double b = (rgb & 0xFF) / 255.0;
         double max = Math.max(r, Math.max(g, b));
         double min = Math.min(r, Math.min(g, b));
-        double d = max - min;
-        if (d == 0) return 0;
-        double h;
-        if (max == r) h = ((g - b) / d) % 6;
-        else if (max == g) h = (b - r) / d + 2;
-        else h = (r - g) / d + 4;
-        h *= 60;
-        return h < 0 ? h + 360 : h;
-    }
-
-    static double hueGap(double a, double b) {
-        double d = Math.abs(a - b) % 360;
-        return d > 180 ? 360 - d : d;
+        return max == 0 ? 0 : (max - min) / max;
     }
 
     private static double channel(int c) {
@@ -186,10 +199,11 @@ public class CalendarPaletteTest {
     }
 
     @Test
-    public void hueHelperMatchesKnownColours() {
-        assertEquals(0.0, hue(0xFF0000), 0.01);
-        assertEquals(120.0, hue(0x00FF00), 0.01);
-        assertEquals(240.0, hue(0x0000FF), 0.01);
-        assertEquals(10.0, hueGap(355, 5), 0.01);
+    public void overCompositesTowardsTheBackground() {
+        // 0 % keeps the background; the strongest wash is brighter than the surface it sits on.
+        int surface = rgb("bb_surface");
+        assertTrue(luminance(over("bb_cal_focus_3", surface)) > luminance(surface));
+        assertEquals(0.0, saturation(0x808080), 0.001);
+        assertEquals(1.0, saturation(0xFF0000), 0.001);
     }
 }

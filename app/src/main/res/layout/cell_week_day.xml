@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dia de la tira semanal (vista Semana): letra, numero (hoy = circulo relleno), barrita de enfoque
+     (solo con la capa de enfoque encendida) y marca (banderita de entrega o punto neutro).
+     Lo pinta WeekStripDayBinder; el fondo de seleccion lo pone el binder en la raiz. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:minHeight="@dimen/touch_target_min"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/spacing_sm"
+    android:paddingBottom="@dimen/spacing_sm">
+
+    <TextView
+        android:id="@+id/weekCellLetter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.BBetter.Micro" />
+
+    <FrameLayout
+        android:layout_width="@dimen/calendar_week_day_circle"
+        android:layout_height="@dimen/calendar_week_day_circle"
+        android:layout_marginTop="@dimen/spacing_xs">
+
+        <View
+            android:id="@+id/weekCellToday"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_calendar_day_today"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/weekCellDay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFeatureSettings="tnum"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/weekCellBarBox"
+        android:layout_width="@dimen/calendar_week_bar_width"
+        android:layout_height="@dimen/calendar_week_bar_box"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:visibility="gone">
+
+        <View
+            android:id="@+id/weekCellBar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/calendar_week_bar_min"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bg_calendar_week_bar" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/calendar_marks_height"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/weekCellFlag"
+            android:layout_width="@dimen/calendar_flag_size"
+            android:layout_height="@dimen/calendar_flag_size"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_flag_24"
+            android:visibility="gone"
+            app:tint="@color/calendar_item_deadline" />
+
+        <View
+            android:id="@+id/weekCellDot"
+            style="@style/Widget.BBetter.CalendarDot"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -29,6 +29,7 @@ import com.example.bbettercalendar.ui.calendar.domain.DayPlan;
 import com.example.bbettercalendar.ui.calendar.domain.ProjectDeadlineItemMapper;
 import com.example.bbettercalendar.ui.common.motion.Motion;
 import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
+import com.google.android.material.chip.Chip;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.view.CalendarView;
 
@@ -36,11 +37,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,8 +55,7 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
 
     private LocalDate selectedDate = LocalDate.now();
     private Map<LocalDate, List<CalendarItem>> currentItemsByDate = Collections.emptyMap();
-    private final DateTimeFormatter monthTitleFormatter =
-            DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault());
+    private Map<LocalDate, Integer> currentFocusMinutes = Collections.emptyMap();
     private YearMonth shownMonth;
 
     private final ActivityResultLauncher<Intent> addEventLauncher = registerForActivityResult(
@@ -100,6 +97,7 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
                 v -> launchAddEvent(selectedDate));
         populateWeekdayLegend();
         setupCalendar();
+        setupFocusLayer();
         setupDayDetail();
         observeItems();
 
@@ -136,12 +134,13 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
         calendarView.setup(startMonth, endMonth, FIRST_DAY_OF_WEEK);
         calendarView.scrollToMonth(currentMonth);
 
-        binding.monthTitleText.setText(currentMonth.format(monthTitleFormatter));
+        binding.monthTitleText.setText(CalendarTitleFormatter.monthYear(requireContext(), currentMonth));
 
         shownMonth = currentMonth;
         calendarView.setMonthScrollListener(month -> {
             updateRangeForMonth(month.getYearMonth());
-            binding.monthTitleText.setText(month.getYearMonth().format(monthTitleFormatter));
+            binding.monthTitleText.setText(
+                    CalendarTitleFormatter.monthYear(requireContext(), month.getYearMonth()));
             animateMonthChange(month.getYearMonth());
             return null;
         });
@@ -159,6 +158,34 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
                 calendarView.smoothScrollToMonth(visible.getYearMonth().plusMonths(1));
             }
         });
+        binding.monthTodayButton.setOnClickListener(v -> goToToday());
+    }
+
+    // «Hoy»: vuelve al mes actual y selecciona hoy.
+    private void goToToday() {
+        LocalDate today = LocalDate.now();
+        binding.monthCalendarView.smoothScrollToMonth(YearMonth.from(today));
+        onDaySelected(today);
+    }
+
+    // Capa de enfoque (rediseno-calendario-color): el calendario abre sin ella; el botón «Enfoque» la
+    // enciende (veladura de las celdas, escala bajo la rejilla y minutos en el resumen del día).
+    private void setupFocusLayer() {
+        Chip toggle = binding.getRoot().findViewById(R.id.calendarFocusToggle);
+        toggle.setChecked(viewModel.isFocusLayerVisible());
+        applyFocusLayer(viewModel.isFocusLayerVisible());
+        toggle.setOnCheckedChangeListener((button, checked) -> {
+            viewModel.setFocusLayerVisible(checked);
+            applyFocusLayer(checked);
+            if (binding == null) return;
+            binding.monthCalendarView.notifyCalendarChanged();
+            refreshDayDetail();
+        });
+    }
+
+    private void applyFocusLayer(boolean visible) {
+        dayBinder.setFocusLayerVisible(visible);
+        binding.calendarLegend.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     // Cambio de mes (eje X compartido): la página del pager ya se desliza sola; el título entra
@@ -222,55 +249,49 @@ public class CalendarFragmentMonth extends Fragment implements View.OnClickListe
     private void observeItems() {
         viewModel.getItems().observe(getViewLifecycleOwner(), items -> {
             if (binding == null) return;
-            currentItemsByDate = groupByDate(items);
+            currentItemsByDate = DayPlan.groupByDate(items, ZoneId.systemDefault());
             dayBinder.setItemsByDate(currentItemsByDate);
             binding.monthCalendarView.notifyCalendarChanged();
             refreshDayDetail();
         });
         viewModel.getFocusMinutes().observe(getViewLifecycleOwner(), minutes -> {
             if (binding == null) return;
-            dayBinder.setFocusMinutesByDate(minutes != null ? minutes : Collections.emptyMap());
+            currentFocusMinutes = minutes != null ? minutes : Collections.emptyMap();
+            dayBinder.setFocusMinutesByDate(currentFocusMinutes);
             binding.monthCalendarView.notifyCalendarChanged();
+            refreshDayDetail();
         });
     }
 
     private void refreshDayDetail() {
         if (binding == null) return;
-        String weekday = selectedDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault());
-        weekday = weekday.substring(0, 1).toUpperCase(Locale.getDefault()) + weekday.substring(1);
+        String weekday = CalendarTitleFormatter.capitalize(
+                selectedDate.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault()));
         binding.dayDetailTitle.setText(getString(R.string.calendar_agenda_title,
                 weekday, selectedDate.getDayOfMonth()));
         List<CalendarItem> dayItems = currentItemsByDate.get(selectedDate);
         boolean empty = dayItems == null || dayItems.isEmpty();
+        String summary;
         if (empty) {
-            binding.dayDetailSubtitle.setText(R.string.calendar_agenda_summary_none);
+            summary = getString(R.string.calendar_agenda_summary_none);
         } else {
             long planned = DayPlan.plannedMinutes(dayItems, selectedDate, ZoneId.systemDefault());
             String count = getResources().getQuantityString(R.plurals.calendar_agenda_count,
                     dayItems.size(), dayItems.size());
-            binding.dayDetailSubtitle.setText(planned > 0
+            summary = planned > 0
                     ? getString(R.string.calendar_agenda_summary, count,
                             DayDetailAdapter.formatDuration(requireContext(), planned))
-                    : count);
+                    : count;
         }
+        // Con la capa de enfoque encendida, el resumen añade los minutos de enfoque del día.
+        Integer focus = currentFocusMinutes.get(selectedDate);
+        if (viewModel.isFocusLayerVisible() && focus != null && focus > 0) {
+            summary = getString(R.string.calendar_agenda_focus, summary,
+                    DayDetailAdapter.formatDuration(requireContext(), focus));
+        }
+        binding.dayDetailSubtitle.setText(summary);
         dayDetailAdapter.submitList(empty ? Collections.emptyList() : dayItems);
         binding.dayDetailEmptyText.setVisibility(empty ? View.VISIBLE : View.GONE);
-    }
-
-    private Map<LocalDate, List<CalendarItem>> groupByDate(List<CalendarItem> items) {
-        Map<LocalDate, List<CalendarItem>> map = new HashMap<>();
-        if (items == null) return map;
-        ZoneId zone = ZoneId.systemDefault();
-        for (CalendarItem item : items) {
-            LocalDate startDate = java.time.Instant.ofEpochMilli(item.getStartMillis()).atZone(zone).toLocalDate();
-            LocalDate endDate = java.time.Instant.ofEpochMilli(item.getEndMillis()).atZone(zone).toLocalDate();
-            LocalDate cursor = startDate;
-            while (!cursor.isAfter(endDate)) {
-                map.computeIfAbsent(cursor, k -> new ArrayList<>()).add(item);
-                cursor = cursor.plusDays(1);
-            }
-        }
-        return map;
     }
 
     private void launchAddEvent(@Nullable LocalDate preselectedDate) {

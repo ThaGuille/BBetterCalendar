@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
  *
  * <p>The cell uses separate channels so no mark hides another:
  * <ul>
- *   <li>focus: amber tint of the cell background, level 0..{@link CalendarHeatLevel#MAX_LEVEL}
+ *   <li>focus: sage wash of the cell background (only with the focus layer on), level 0..{@link CalendarHeatLevel#MAX_LEVEL}
  *       ({@code bg_calendar_focus_N}); kept whatever the other marks are;</li>
  *   <li>today: the day number inside a filled circle ({@code cellTodayIndicator}), number drawn in
  *       the on-circle colour;</li>

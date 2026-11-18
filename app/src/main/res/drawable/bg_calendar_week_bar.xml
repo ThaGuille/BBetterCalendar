@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barrita de enfoque de un dia en la tira semanal; su alto lo pone WeekStripDayBinder. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="@dimen/calendar_week_bar_radius" />
+    <solid android:color="@color/bb_primary" />
+</shape>

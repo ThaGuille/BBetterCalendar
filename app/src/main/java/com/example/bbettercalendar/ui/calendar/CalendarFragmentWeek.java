@@ -16,32 +16,54 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.calendarEntries.AddEventActivity;
 import com.example.bbettercalendar.databinding.FragmentCalendarWeekBinding;
-import com.example.bbettercalendar.helpers.FontHelper;
-import com.example.bbettercalendar.ui.calendar.binders.WeekViewItemAdapter;
+import com.example.bbettercalendar.ui.calendar.binders.WeekAgendaAdapter;
+import com.example.bbettercalendar.ui.calendar.binders.WeekStripDayBinder;
+import com.example.bbettercalendar.ui.calendar.domain.CalendarItem;
+import com.example.bbettercalendar.ui.calendar.domain.DayPlan;
+import com.example.bbettercalendar.ui.calendar.domain.ProjectDeadlineItemMapper;
+import com.example.bbettercalendar.ui.calendar.domain.WeekAgenda;
 import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
+import com.google.android.material.chip.Chip;
 
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+/**
+ * Vista Semana (rediseno-calendario-color): una tira con los siete días arriba y, debajo, la agenda
+ * seguida de toda la semana. Sustituye a la rejilla horaria (el WeekView vendorizado, que ya no se
+ * usa desde aquí). Tocar un día de la tira lo selecciona y lleva la agenda a ese día; la tira pasa
+ * de semana deslizando o con las flechas.
+ */
 @AndroidEntryPoint
 public class CalendarFragmentWeek extends Fragment implements View.OnClickListener {
 
+    // Lunes fijo, como el mes, la racha y Progress.
+    private static final DayOfWeek FIRST_DAY_OF_WEEK = DayOfWeek.MONDAY;
+    private static final int MONTHS_AROUND = 12;
+
     private FragmentCalendarWeekBinding binding;
     private CalendarViewModel viewModel;
-    private WeekViewItemAdapter adapter;
-    private final SimpleDateFormat monthYearFormat =
-            new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
+    private WeekStripDayBinder dayBinder;
+    private WeekAgendaAdapter agendaAdapter;
+    private LinearLayoutManager agendaLayout;
+
+    private LocalDate selectedDate = LocalDate.now();
+    private LocalDate shownWeekStart = weekStartOf(LocalDate.now());
+    private Map<LocalDate, List<CalendarItem>> itemsByDate = Collections.emptyMap();
+    private Map<LocalDate, Integer> focusMinutes = Collections.emptyMap();
+    private List<WeekAgenda.Row> rows = Collections.emptyList();
 
     private final ActivityResultLauncher<Intent> addEventLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -76,72 +98,144 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
 
         binding.calendarAddEventButton2.setOnClickListener(this);
 
-        adapter = new WeekViewItemAdapter(requireContext());
-        adapter.setOnRangeChangedListener(this::updateMonthTitle);
-        binding.weekView.setAdapter(adapter);
-        // WeekView pinta con Paint: su atributo fontFamily no acepta @font/ (u6).
-        binding.weekView.setTypeface(FontHelper.appTypefaceOrDefault(requireContext()));
-        binding.weekMonthTitleText.setText(monthYearFormat.format(new Date()));
-
-        // Cover ~3 months around now so scrolling forward/back stays inside the queried window.
-        ZonedDateTime now = ZonedDateTime.now();
-        ZoneId zone = ZoneId.systemDefault();
-        long start = now.minusMonths(1).toLocalDate().atStartOfDay(zone).toInstant().toEpochMilli();
-        long end = now.plusMonths(2).toLocalDate().atTime(23, 59, 59).atZone(zone).toInstant().toEpochMilli();
-        viewModel.setRange(start, end);
-
-        viewModel.getItems().observe(getViewLifecycleOwner(), items -> {
-            if (binding == null) return;
-            adapter.submitList(items != null ? items : Collections.emptyList());
-        });
+        setupAgenda();
+        setupStrip();
+        setupFocusLayer();
+        observeData();
 
         return binding.getRoot();
     }
 
-    private void updateMonthTitle(Calendar firstVisibleDate, Calendar lastVisibleDate) {
+    private static LocalDate weekStartOf(LocalDate date) {
+        return date.with(TemporalAdjusters.previousOrSame(FIRST_DAY_OF_WEEK));
+    }
+
+    private void setupAgenda() {
+        agendaAdapter = new WeekAgendaAdapter();
+        // Igual que en Mes: sólo las entregas de proyecto llevan a algún sitio (su proyecto).
+        agendaAdapter.setOnItemClickListener(this::onAgendaItemClick);
+        agendaLayout = new LinearLayoutManager(getContext());
+        binding.weekAgendaRecycler.setLayoutManager(agendaLayout);
+        binding.weekAgendaRecycler.setAdapter(agendaAdapter);
+    }
+
+    private void setupStrip() {
+        dayBinder = new WeekStripDayBinder();
+        dayBinder.setSelectedDate(selectedDate);
+        dayBinder.setOnDayClickListener(this::onDaySelected);
+        binding.weekStripView.setDayBinder(dayBinder);
+
+        LocalDate today = LocalDate.now();
+        binding.weekStripView.setup(today.minusMonths(MONTHS_AROUND), today.plusMonths(MONTHS_AROUND),
+                FIRST_DAY_OF_WEEK);
+        binding.weekStripView.scrollToWeek(selectedDate);
+        binding.weekStripView.setWeekScrollListener(week -> {
+            onWeekShown(week.getDays().get(0).getDate());
+            return null;
+        });
+        onWeekShown(weekStartOf(selectedDate));
+
+        binding.weekPrevButton.setOnClickListener(v ->
+                binding.weekStripView.smoothScrollToWeek(shownWeekStart.minusWeeks(1)));
+        binding.weekNextButton.setOnClickListener(v ->
+                binding.weekStripView.smoothScrollToWeek(shownWeekStart.plusWeeks(1)));
+        binding.weekTodayButton.setOnClickListener(v -> {
+            LocalDate now = LocalDate.now();
+            binding.weekStripView.smoothScrollToWeek(now);
+            onDaySelected(now);
+        });
+    }
+
+    // Nueva semana a la vista: consulta sus siete días, pone el título y, si el día seleccionado
+    // queda fuera, selecciona hoy (si cae en ella) o su lunes.
+    private void onWeekShown(LocalDate weekStart) {
         if (binding == null) return;
-        int firstMonth = firstVisibleDate.get(Calendar.MONTH);
-        int firstYear = firstVisibleDate.get(Calendar.YEAR);
-        int lastMonth = lastVisibleDate.get(Calendar.MONTH);
-        int lastYear = lastVisibleDate.get(Calendar.YEAR);
+        shownWeekStart = weekStart;
+        ZoneId zone = ZoneId.systemDefault();
+        long start = weekStart.atStartOfDay(zone).toInstant().toEpochMilli();
+        long end = weekStart.plusDays(WeekAgenda.DAYS - 1).atTime(23, 59, 59).atZone(zone)
+                .toInstant().toEpochMilli();
+        viewModel.setRange(start, end);
+        binding.weekMonthTitleText.setText(CalendarTitleFormatter.week(requireContext(), weekStart));
 
-        String text;
-        if (firstMonth == lastMonth && firstYear == lastYear) {
-            text = monthYearFormat.format(firstVisibleDate.getTime());
-        } else {
-            SimpleDateFormat monthOnly = new SimpleDateFormat("MMM", Locale.getDefault());
-            String first = monthOnly.format(firstVisibleDate.getTime());
-            String last = monthOnly.format(lastVisibleDate.getTime());
-            text = firstYear == lastYear
-                    ? first + " – " + last + " " + lastYear
-                    : first + " " + firstYear + " – " + last + " " + lastYear;
+        if (!inShownWeek(selectedDate)) {
+            LocalDate today = LocalDate.now();
+            LocalDate previous = selectedDate;
+            selectedDate = inShownWeek(today) ? today : weekStart;
+            dayBinder.setSelectedDate(selectedDate);
+            // Fuera del pase de scroll de la tira: no se puede notificar al adapter desde dentro.
+            binding.weekStripView.post(() -> {
+                if (binding == null) return;
+                binding.weekStripView.notifyDateChanged(previous);
+                binding.weekStripView.notifyDateChanged(selectedDate);
+            });
         }
-        binding.weekMonthTitleText.setText(text);
+        rebuildAgenda();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        nowLineTick.run();
+    private boolean inShownWeek(LocalDate date) {
+        return !date.isBefore(shownWeekStart)
+                && date.isBefore(shownWeekStart.plusDays(WeekAgenda.DAYS));
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (binding != null) binding.weekView.removeCallbacks(nowLineTick);
+    private void onDaySelected(LocalDate date) {
+        if (binding == null) return;
+        if (!date.equals(selectedDate)) {
+            LocalDate previous = selectedDate;
+            selectedDate = date;
+            dayBinder.setSelectedDate(date);
+            binding.weekStripView.notifyDateChanged(previous);
+            binding.weekStripView.notifyDateChanged(date);
+        }
+        int position = WeekAgenda.headerPosition(rows, date);
+        if (position >= 0) agendaLayout.scrollToPositionWithOffset(position, 0);
     }
 
-    // WeekView solo redibuja al desplazarse: sin este tic la línea de «ahora» se quedaría quieta.
-    // Redibuja y se reprograma al inicio del minuto siguiente (la línea tiene resolución de minuto).
-    private final Runnable nowLineTick = new Runnable() {
-        @Override
-        public void run() {
+    // Capa de enfoque: misma preferencia que en Mes (vive en el ViewModel compartido).
+    private void setupFocusLayer() {
+        Chip toggle = binding.getRoot().findViewById(R.id.calendarFocusToggle);
+        toggle.setChecked(viewModel.isFocusLayerVisible());
+        dayBinder.setFocusLayerVisible(viewModel.isFocusLayerVisible());
+        toggle.setOnCheckedChangeListener((button, checked) -> {
+            viewModel.setFocusLayerVisible(checked);
             if (binding == null) return;
-            binding.weekView.invalidate();
-            long msToNextMinute = 60_000L - (System.currentTimeMillis() % 60_000L);
-            binding.weekView.postDelayed(this, msToNextMinute);
-        }
-    };
+            dayBinder.setFocusLayerVisible(checked);
+            binding.weekStripView.notifyCalendarChanged();
+            rebuildAgenda();
+        });
+    }
+
+    private void observeData() {
+        viewModel.getItems().observe(getViewLifecycleOwner(), items -> {
+            if (binding == null) return;
+            itemsByDate = DayPlan.groupByDate(items, ZoneId.systemDefault());
+            dayBinder.setItemsByDate(itemsByDate);
+            binding.weekStripView.notifyCalendarChanged();
+            rebuildAgenda();
+        });
+        viewModel.getFocusMinutes().observe(getViewLifecycleOwner(), minutes -> {
+            if (binding == null) return;
+            focusMinutes = minutes != null ? minutes : Collections.emptyMap();
+            dayBinder.setFocusMinutesByDate(focusMinutes);
+            binding.weekStripView.notifyCalendarChanged();
+            rebuildAgenda();
+        });
+    }
+
+    private void rebuildAgenda() {
+        rows = WeekAgenda.rows(shownWeekStart, itemsByDate);
+        agendaAdapter.submit(rows, focusMinutes, viewModel.isFocusLayerVisible());
+    }
+
+    // El calendario pinta la entrega pero no la edita: tocarla lleva al detalle del proyecto.
+    private void onAgendaItemClick(CalendarItem item) {
+        int projectId = ProjectDeadlineItemMapper.projectIdOf(item);
+        if (projectId <= 0) return;
+        Bundle args = new Bundle();
+        args.putInt("projectId", projectId);
+        Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main)
+                .navigate(R.id.action_global_project_detail, args);
+    }
 
     @Override
     public void onDestroyView() {
@@ -152,8 +246,11 @@ public class CalendarFragmentWeek extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.calendarAddEventButton2) {
+            // El FAB crea en el día seleccionado de la tira.
             Intent intent = new Intent(getActivity(), AddEventActivity.class);
             intent.putExtra("entry", AddEventActivity.TYPE_TASK);
+            long millis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            intent.putExtra(AddEventActivity.EXTRA_PRESELECTED_DATE_MILLIS, millis);
             addEventLauncher.launch(intent);
         }
     }

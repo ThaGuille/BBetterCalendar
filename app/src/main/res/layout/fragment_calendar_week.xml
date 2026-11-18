@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Vista Semana (rediseno-calendario-color): tira semanal arriba y agenda continua de los siete dias
+     debajo. Sustituye a la rejilla horaria (WeekView). -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -15,67 +17,85 @@
 
         <include layout="@layout/view_calendar_mode_toggle" />
 
-        <TextView
-            android:id="@+id/weekMonthTitleText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/bb_surface"
-            android:gravity="center"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:textAppearance="@style/TextAppearance.BBetter.Title"
-            tools:text="mayo 2026" />
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_xs">
 
-        <com.example.bbettercalendar.ui.calendar.weekview.WeekView
-            android:id="@+id/weekView"
+            <TextView
+                android:id="@+id/weekMonthTitleText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.Headline"
+                tools:text="Noviembre 2026" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/weekTodayButton"
+                style="@style/Widget.BBetter.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                android:text="@string/calendar_cell_today" />
+
+            <ImageButton
+                android:id="@+id/weekPrevButton"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/calendar_week_prev"
+                android:src="@drawable/ic_chevron_left_24"
+                app:tint="@color/bb_on_surface" />
+
+            <ImageButton
+                android:id="@+id/weekNextButton"
+                android:layout_width="@dimen/touch_target_min"
+                android:layout_height="@dimen/touch_target_min"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/calendar_week_next"
+                android:src="@drawable/ic_chevron_right_24"
+                app:tint="@color/bb_on_surface" />
+        </LinearLayout>
+
+        <com.kizitonwose.calendar.view.WeekCalendarView
+            android:id="@+id/weekStripView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:adaptiveEventTextSize="true"
-            app:columnGap="0dp"
-            app:dayBackgroundColor="@color/bb_surface"
-            app:daySeparatorColor="@color/bb_divider"
-            app:defaultEventColor="@color/bb_secondary"
-            app:eventPaddingHorizontal="2dp"
-            app:eventTextColor="@color/bb_on_primary"
-            app:eventTextSize="10sp"
-            app:futureBackgroundColor="@color/bb_surface"
-            app:futureWeekendBackgroundColor="@color/bb_surface"
-            app:headerBackgroundColor="@color/bb_surface_card"
-            app:headerBottomLineColor="@color/bb_divider"
-            app:headerBottomShadowColor="@color/bb_scrim"
-            app:headerTextColor="@color/bb_on_surface"
-            app:hourHeight="72dp"
-            app:hourSeparatorColor="@color/bb_divider"
-            app:maxHourHeight="120dp"
-            app:minHourHeight="48dp"
-            app:nowLineColor="@color/bb_accent_reward"
-            app:nowLineDotColor="@color/bb_accent_reward"
-            app:numberOfVisibleDays="7"
-            app:pastBackgroundColor="@color/bb_surface"
-            app:pastWeekendBackgroundColor="@color/bb_surface"
-            app:showCurrentTimeFirst="true"
-            app:showFirstDayOfWeekFirst="true"
-            app:showHeaderBottomLine="true"
-            app:showNowLine="true"
-            app:showNowLineDot="true"
-            app:timeColumnBackgroundColor="@color/bb_surface"
-            app:timeColumnSeparatorColor="@color/bb_divider"
-            app:timeColumnTextColor="@color/bb_on_surface_muted"
-            app:todayBackgroundColor="@color/bb_surface_card"
-            app:todayHeaderTextColor="@color/bb_primary"
-            app:weekNumberBackgroundColor="@color/bb_surface_subtle"
-            app:weekNumberTextColor="@color/bb_on_surface"
-            app:weekendHeaderTextColor="@color/bb_on_surface_muted" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_sm"
+            app:cv_dayViewResource="@layout/cell_week_day"
+            app:cv_daySize="seventhWidth"
+            app:cv_scrollPaged="true" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:background="@color/bb_divider" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/weekAgendaRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/calendar_week_agenda_bottom" />
 
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/calendarAddEventButton2"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:layout_marginBottom="@dimen/spacing_card_gap"
         android:contentDescription="@string/calendar_add_entry"
         app:srcCompat="@drawable/ic_add_24" />
 

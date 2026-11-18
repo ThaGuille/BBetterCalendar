@@ -1,13 +1,11 @@
 package com.example.bbettercalendar.ui.calendar.binders;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.ui.calendar.domain.CalendarHeatLevel;
@@ -31,6 +29,7 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
 
     private Map<LocalDate, List<CalendarItem>> itemsByDate = Collections.emptyMap();
     private Map<LocalDate, Integer> focusMinutesByDate = Collections.emptyMap();
+    private boolean focusLayerVisible;
     private LocalDate selectedDate;
     private OnDayClickListener listener;
 
@@ -40,6 +39,11 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
 
     public void setFocusMinutesByDate(@NonNull Map<LocalDate, Integer> focusMinutesByDate) {
         this.focusMinutesByDate = focusMinutesByDate;
+    }
+
+    /** The focus wash is an optional layer (the «Enfoque» button); off, no cell is tinted. */
+    public void setFocusLayerVisible(boolean visible) {
+        this.focusLayerVisible = visible;
     }
 
     public void setSelectedDate(LocalDate date) {
@@ -75,11 +79,11 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
 
         boolean isToday = inMonth && day.getDate().equals(LocalDate.now());
         boolean isSelected = inMonth && selectedDate != null && day.getDate().equals(selectedDate);
-        Integer minutes = inMonth ? focusMinutesByDate.get(day.getDate()) : null;
+        Integer minutes = inMonth && focusLayerVisible ? focusMinutesByDate.get(day.getDate()) : null;
         int level = CalendarHeatLevel.levelFor(minutes == null ? 0 : minutes);
 
-        // u5: canales separados. Fondo = tinte de enfoque (se mantiene al seleccionar); hoy = circulo
-        // relleno detras del numero; seleccion = contorno claro encima. Hoy + seleccionado = ambos.
+        // Canales separados. Fondo = veladura de enfoque (solo con la capa encendida; se mantiene al
+        // seleccionar); hoy = circulo relleno detras del numero; seleccion = contorno claro encima.
         DayCellStyle style = DayCellStyle.of(isToday, isSelected, level);
         Context ctx = container.getView().getContext();
         if (style.focusLevel > 0) {
@@ -92,27 +96,21 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
         container.dayText.setTextColor(ContextCompat.getColor(ctx,
                 style.numberOnCircle ? R.color.bb_cal_on_today : R.color.bb_on_surface));
 
-        // Hasta 3 puntos, uno por tipo distinto presente ese día; siempre en su color (también al
-        // seleccionar: la seleccion ya no es un relleno que los tape).
+        // Marcas sin color por tipo: banderita si hay una entrega; un punto neutro por cada otro
+        // elemento (tarea, evento o recordatorio), hasta MAX_DOTS. Los puntos dicen cuanta carga hay.
         List<CalendarItem> items = inMonth ? itemsByDate.get(day.getDate()) : null;
-        List<CalendarItem.Type> types = dotTypes(items);
+        container.deadlineFlag.setVisibility(hasDeadline(items) ? View.VISIBLE : View.GONE);
+        int dots = dotCount(items);
         for (int i = 0; i < container.dots.length; i++) {
-            View dot = container.dots[i];
-            if (i < types.size()) {
-                dot.setVisibility(View.VISIBLE);
-                int color = ContextCompat.getColor(ctx, colorFor(types.get(i)));
-                ViewCompat.setBackgroundTintList(dot, ColorStateList.valueOf(color));
-            } else {
-                dot.setVisibility(View.GONE);
-            }
+            container.dots[i].setVisibility(i < dots ? View.VISIBLE : View.GONE);
         }
 
-        // The marks are colour and shape only: say them (TalkBack, and the selector of the walks).
+        // The marks are shape only: say them (TalkBack, and the selector of the walks).
         container.getView().setContentDescription(
-                inMonth ? describe(ctx, day.getDate().getDayOfMonth(), style, types) : null);
+                inMonth ? describe(ctx, day.getDate().getDayOfMonth(), style, presentTypes(items)) : null);
     }
 
-    /** "20, Selected, Task, Deadline, Focus": day number, then the marks the cell shows. */
+    /** "20, Selected, Task, Deadline, Focus": day number, then what the cell holds. */
     private static String describe(Context ctx, int dayOfMonth, DayCellStyle style,
                                    List<CalendarItem.Type> types) {
         StringBuilder sb = new StringBuilder(String.valueOf(dayOfMonth));
@@ -138,14 +136,31 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
     };
     static final int MAX_DOTS = 3;
 
-    /** Tipos distintos presentes, en orden fijo tarea, evento, entrega, recordatorio; máx. 3. */
-    static List<CalendarItem.Type> dotTypes(List<CalendarItem> items) {
+    static boolean hasDeadline(List<CalendarItem> items) {
+        if (items == null) return false;
+        for (CalendarItem item : items) {
+            if (item.getType() == CalendarItem.Type.DEADLINE) return true;
+        }
+        return false;
+    }
+
+    /** Elementos que no son entrega, con tope en {@link #MAX_DOTS}. */
+    static int dotCount(List<CalendarItem> items) {
+        if (items == null) return 0;
+        int count = 0;
+        for (CalendarItem item : items) {
+            if (item.getType() != CalendarItem.Type.DEADLINE) count++;
+        }
+        return Math.min(count, MAX_DOTS);
+    }
+
+    /** Tipos distintos presentes, en orden fijo tarea, evento, entrega, recordatorio (para la descripcion). */
+    static List<CalendarItem.Type> presentTypes(List<CalendarItem> items) {
         List<CalendarItem.Type> out = new ArrayList<>();
         if (items == null) return out;
         CalendarItem.Type[] order = {CalendarItem.Type.TASK, CalendarItem.Type.EVENT,
                 CalendarItem.Type.DEADLINE, CalendarItem.Type.REMINDER};
         for (CalendarItem.Type t : order) {
-            if (out.size() >= MAX_DOTS) break;
             for (CalendarItem item : items) {
                 if (item.getType() == t) {
                     out.add(t);
@@ -156,21 +171,12 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
         return out;
     }
 
-    private static int colorFor(CalendarItem.Type type) {
-        switch (type) {
-            case TASK: return R.color.calendar_item_task;
-            case DEADLINE: return R.color.calendar_item_deadline;
-            case REMINDER: return R.color.calendar_item_reminder;
-            case EVENT:
-            default: return R.color.calendar_item_event;
-        }
-    }
-
     public static class DayContainer extends ViewContainer {
         final TextView dayText;
         final View todayIndicator;
         final View focusBg;
         final View selectedOutline;
+        final View deadlineFlag;
         final View[] dots;
         CalendarDay currentDay;
 
@@ -180,6 +186,7 @@ public class MonthDayBinder implements com.kizitonwose.calendar.view.MonthDayBin
             this.todayIndicator = view.findViewById(R.id.cellTodayIndicator);
             this.focusBg = view.findViewById(R.id.cellFocusBg);
             this.selectedOutline = view.findViewById(R.id.cellSelectedOutline);
+            this.deadlineFlag = view.findViewById(R.id.cellDeadlineFlag);
             this.dots = new View[]{
                     view.findViewById(R.id.cellDot1),
                     view.findViewById(R.id.cellDot2),

@@ -4,7 +4,7 @@
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:inset="@dimen/calendar_cell_inset">
     <shape android:shape="rectangle">
-        <corners android:radius="@dimen/radius_sm" />
+        <corners android:radius="@dimen/radius_md" />
         <stroke
             android:width="@dimen/calendar_selected_stroke"
             android:color="@color/bb_cal_selected_outline" />

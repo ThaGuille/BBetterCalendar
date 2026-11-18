@@ -164,6 +164,18 @@ public class CalendarViewModel extends AndroidViewModel {
         return focusMinutes;
     }
 
+    // Capa de enfoque (botón «Enfoque», rediseno-calendario-color): apagada al abrir. Vive aquí para
+    // que Mes y Semana, que comparten este ViewModel, la muestren igual al cambiar de una a otra.
+    private boolean focusLayerVisible;
+
+    public boolean isFocusLayerVisible() {
+        return focusLayerVisible;
+    }
+
+    public void setFocusLayerVisible(boolean visible) {
+        this.focusLayerVisible = visible;
+    }
+
     public LiveData<List<CalendarItem>> getItems() {
         return items;
     }

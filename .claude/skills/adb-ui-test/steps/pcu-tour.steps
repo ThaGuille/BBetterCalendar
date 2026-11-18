@@ -34,8 +34,8 @@ WAIT 1500
 TAP id=navigation_calendar_month
 WAIT 2000
 ASSERT id=monthCalendarView
-ASSERT id=legendReminder
-ASSERT id=legendFocus
+ASSERT id=monthTodayButton
+ASSERT id=calendarFocusToggle
 SHOT pcu-tour-calendar-month
 TAP text=deadline|entrega
 WAIT 1200

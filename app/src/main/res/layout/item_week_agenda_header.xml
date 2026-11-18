@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cabecera de un dia en la agenda de la vista Semana: "Hoy" / "Jueves 19" + minutos de enfoque
+     (solo con la capa de enfoque encendida). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/spacing_md"
+    android:paddingTop="@dimen/spacing_md"
+    android:paddingEnd="@dimen/spacing_md"
+    android:paddingBottom="@dimen/spacing_xs">
+
+    <TextView
+        android:id="@+id/weekAgendaDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+
+    <TextView
+        android:id="@+id/weekAgendaFocus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.BBetter.Caption" />
+</LinearLayout>

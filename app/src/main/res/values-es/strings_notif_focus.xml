@@ -6,6 +6,8 @@
     <string name="notif_focus_phase_focus_done_body">Toca un descanso de %1$d min</string>
     <string name="notif_focus_phase_break_over_title">Descanso terminado</string>
     <string name="notif_focus_phase_break_over_body">¿Vamos con otra ronda?</string>
+    <string name="notif_focus_phase_round_started_title">¡De vuelta al foco!</string>
+    <string name="notif_focus_phase_round_started_body">Se acabó el descanso: ha empezado una concentración de %1$d min</string>
     <string name="notif_focus_phase_session_complete_title">Sesión completada</string>
     <string name="notif_focus_phase_session_complete_body">Buen trabajo. Toca recargar pilas.</string>
 

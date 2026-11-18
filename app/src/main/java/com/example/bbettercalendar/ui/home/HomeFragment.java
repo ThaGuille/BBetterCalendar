@@ -120,8 +120,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         binding = FragmentHomeBinding.inflate(inflater, container, false);
 
         binding.homePlayButton.setOnClickListener(this);
-        // u15: el play crece hasta el anillo de Focus (contenedor que se transforma).
-        ViewCompat.setTransitionName(binding.homePlayButton, ScreenTransitions.FOCUS_RING);
+        // La tarjeta del temporizador se expande hacia abajo hasta ser la pantalla Focus.
+        ViewCompat.setTransitionName(binding.homeTimerCard, ScreenTransitions.FOCUS_SCREEN);
         binding.homeTimerCard.setOnClickListener(this);
         binding.homeCycleChip.setOnClickListener(this);
         binding.homeBellButton.setOnClickListener(this);
@@ -462,11 +462,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnPo
         NavController nav = NavHostFragment.findNavController(this);
         NavDestination current = nav.getCurrentDestination();
         if (current != null && current.getId() == R.id.navigation_home) {
-            // u15: el botón es el elemento compartido con la caja del anillo de Focus.
-            FragmentNavigator.Extras extras = binding == null ? null
-                    : new FragmentNavigator.Extras.Builder()
-                            .addSharedElement(binding.homePlayButton, ScreenTransitions.FOCUS_RING)
-                            .build();
+            // La tarjeta del temporizador es el elemento compartido con la raíz de Focus: se expande
+            // hacia abajo hasta ocupar la pantalla (y el resto de Home se queda quieto debajo).
+            FragmentNavigator.Extras extras = null;
+            if (binding != null) {
+                extras = new FragmentNavigator.Extras.Builder()
+                        .addSharedElement(binding.homeTimerCard, ScreenTransitions.FOCUS_SCREEN)
+                        .build();
+                ScreenTransitions.prepareContainerTransform();
+            }
             nav.navigate(R.id.navigation_focus, null, null, extras);
         }
     }

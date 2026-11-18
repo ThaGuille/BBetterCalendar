@@ -6,7 +6,7 @@
     android:id="@+id/focusSettingsButton"
     android:layout_width="@dimen/focus_action_size"
     android:layout_height="@dimen/focus_action_size"
-    android:background="@drawable/bg_sanct_action_off"
+    android:background="@drawable/bg_sanct_action_plain"
     android:clickable="true"
     android:contentDescription="@string/focus_settings_desc"
     android:focusable="true"

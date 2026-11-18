@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Focus top-bar action button (pending): 40dp visible circle (tonal fill + rim) centred in a 48dp
-     touch target (the 4dp inset). -->
+<!-- Focus top-bar action without a visible container (block mode): only the round press ripple,
+     inset like the 40dp circles so the touch target stays 48dp. -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/bb_ripple_primary">
-    <item>
+    <item android:id="@android:id/mask">
         <inset
             android:insetBottom="@dimen/focus_action_inset"
             android:insetLeft="@dimen/focus_action_inset"
             android:insetRight="@dimen/focus_action_inset"
             android:insetTop="@dimen/focus_action_inset">
             <shape android:shape="oval">
-                <solid android:color="@color/bb_sanct_chip_fill" />
-                <stroke android:width="@dimen/focus_action_stroke" android:color="@color/bb_sanct_primary" />
+                <solid android:color="@color/bb_ripple_primary" />
             </shape>
         </inset>
     </item>

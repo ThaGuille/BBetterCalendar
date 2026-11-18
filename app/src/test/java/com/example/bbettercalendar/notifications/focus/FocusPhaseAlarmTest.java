@@ -70,10 +70,17 @@ public class FocusPhaseAlarmTest {
     // ----------------------------------------------------------------------------- descanso
 
     @Test
-    public void runningRest_isBreakOver() {
+    public void runningRest_withAutoCycle_isRoundStarted() {
         Plan plan = FocusPhaseAlarm.plan(State.RUNNING_REST, 3 * MIN, NOW, settings(true, 4, false, true), 1);
-        assertEquals(Notice.BREAK_OVER, plan.notice);
+        assertEquals(Notice.ROUND_STARTED, plan.notice);
         assertEquals(NOW + 3 * MIN, plan.triggerAtWallMillis);
+        assertTrue(plan.nextMinutes >= 1);
+    }
+
+    @Test
+    public void runningRest_infiniteCycles_isRoundStarted() {
+        Plan plan = FocusPhaseAlarm.plan(State.RUNNING_REST, MIN, NOW, settings(true, 4, true, true), 40);
+        assertEquals(Notice.ROUND_STARTED, plan.notice);
     }
 
     @Test
@@ -141,7 +148,14 @@ public class FocusPhaseAlarmTest {
             if (plan.notice == Notice.FOCUS_DONE) {
                 assertEquals(where, State.RUNNING_REST, m.getState());
             } else if (plan.notice == Notice.BREAK_OVER) {
+                // Sin auto-ciclo: el descanso acaba y el temporizador espera.
                 assertEquals(where, State.RUNNING_REST, before);
+                assertEquals(where, State.STOPPED, m.getState());
+                assertFalse(where, outcome.allCycles);
+            } else if (plan.notice == Notice.ROUND_STARTED) {
+                // Con auto-ciclo: la siguiente concentración ya corre.
+                assertEquals(where, State.RUNNING_REST, before);
+                assertEquals(where, State.RUNNING, m.getState());
                 assertFalse(where, outcome.allCycles);
             } else {
                 // SESSION_COMPLETE: acaba en STOPPED, o con «todos los ciclos» si había ciclos.

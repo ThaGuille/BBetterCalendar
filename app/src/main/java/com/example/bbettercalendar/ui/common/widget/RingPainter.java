@@ -8,7 +8,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.view.View;
 
@@ -42,13 +44,28 @@ public final class RingPainter {
     private static final float START_ANGLE = -90f;
     private static final int RAMP_STOPS = 16;
     private static final float SOFT_ALPHA = 0.45f;
+    /** Vivid focus palette (big Focus ring): a less muddy start, so a full ring reads bright. */
+    private static final float VIVID_SOFT_ALPHA = 0.7f;
+    /** Glow strokes behind the vivid arc: width x arc width, alpha at a full turn. */
+    private static final float GLOW_OUTER_WIDTH = 3.2f;
+    private static final float GLOW_OUTER_ALPHA = 0.12f;
+    private static final float GLOW_INNER_WIDTH = 1.9f;
+    private static final float GLOW_INNER_ALPHA = 0.22f;
+    /** Halo around the vivid head: radius x arc width, alpha from the floor (start) to the max (full). */
+    private static final float HALO_RADIUS = 2.6f;
+    private static final float HALO_MAX_ALPHA = 0.75f;
+    private static final float HALO_MIN_ALPHA = 0.25f;
 
     private final Paint trackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint headPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint haloPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Matrix haloMatrix = new Matrix();
     private final RectF bounds = new RectF();
 
     @ColorInt private final int amber;
+    @ColorInt private final int amberBright;
     @ColorInt private final int sageBright;
     @ColorInt private final int sage;
     private final Matrix shaderMatrix = new Matrix();
@@ -56,6 +73,7 @@ public final class RingPainter {
     @ColorInt private int softColor;
     @ColorInt private int intenseColor;
     private boolean rest;
+    private boolean vivid;
     private int arcAlpha = 255;
     /** 0..1 multiplier of the drawn arc while the start sweep runs; 1 otherwise. */
     private float sweep = 1f;
@@ -63,6 +81,7 @@ public final class RingPainter {
 
     public RingPainter(@NonNull Context context) {
         amber = ContextCompat.getColor(context, R.color.bb_sanct_primary);
+        amberBright = ContextCompat.getColor(context, R.color.bb_sanct_primary_bright);
         sageBright = ContextCompat.getColor(context, R.color.bb_sanct_sage_bright);
         sage = ContextCompat.getColor(context, R.color.bb_sanct_sage);
         trackPaint.setStyle(Paint.Style.STROKE);
@@ -70,6 +89,21 @@ public final class RingPainter {
         // BUTT: a round cap at the start would sit on the gradient seam and show its intense colour.
         arcPaint.setStrokeCap(Paint.Cap.BUTT);
         headPaint.setStyle(Paint.Style.FILL);
+        glowPaint.setStyle(Paint.Style.STROKE);
+        glowPaint.setStrokeCap(Paint.Cap.BUTT);
+        haloPaint.setStyle(Paint.Style.FILL);
+    }
+
+    /**
+     * Vivid focus palette (only the big Focus ring): the arc ramps from a stronger amber to the bright
+     * amber, and a soft glow under the arc plus a halo at its head grow with the progress, so the ring
+     * gets livelier as it fills instead of duller. The rest palette is unchanged.
+     */
+    public void setVivid(boolean vivid) {
+        if (this.vivid != vivid) {
+            this.vivid = vivid;
+            updateShader();
+        }
     }
 
     public void setTrackColor(@ColorInt int color) {
@@ -111,9 +145,11 @@ public final class RingPainter {
         if (bounds.isEmpty()) {
             return;
         }
-        int intense = rest ? sageBright : amber;
+        boolean vividFocus = vivid && !rest;
+        int intense = rest ? sageBright : vividFocus ? amberBright : amber;
         int base = rest ? sage : amber;
-        int soft = (base & 0x00FFFFFF) | (Math.round(255 * SOFT_ALPHA) << 24);
+        float softAlpha = vividFocus ? VIVID_SOFT_ALPHA : SOFT_ALPHA;
+        int soft = (base & 0x00FFFFFF) | (Math.round(255 * softAlpha) << 24);
         softColor = soft;
         intenseColor = intense;
         int[] colors = new int[RAMP_STOPS + 1];
@@ -128,6 +164,11 @@ public final class RingPainter {
         shader.setLocalMatrix(shaderMatrix);
         arcPaint.setShader(shader);
         arcPaint.setAlpha(arcAlpha);
+        glowPaint.setShader(shader);
+        // Unit halo (radius 1 at the origin), moved and scaled per frame with a matrix: no
+        // allocation in draw().
+        haloPaint.setShader(new RadialGradient(0f, 0f, 1f,
+                new int[]{intense, intense & 0x00FFFFFF}, null, Shader.TileMode.CLAMP));
     }
 
     /** Track circle plus the arc for {@code fraction} (0..1) of the turn. */
@@ -138,11 +179,33 @@ public final class RingPainter {
         canvas.drawCircle(bounds.centerX(), bounds.centerY(), bounds.width() / 2f, trackPaint);
         float f = Math.max(0f, Math.min(1f, fraction)) * sweep;
         if (f > 0f) {
+            boolean vividFocus = vivid && !rest;
+            float arcWidth = arcPaint.getStrokeWidth();
+            if (vividFocus) {
+                // Glow under the arc: the same gradient on wider, faint strokes, stronger as it fills.
+                glowPaint.setStrokeWidth(arcWidth * GLOW_OUTER_WIDTH);
+                glowPaint.setAlpha(Math.round(arcAlpha * GLOW_OUTER_ALPHA * f));
+                canvas.drawArc(bounds, START_ANGLE, 360f * f, false, glowPaint);
+                glowPaint.setStrokeWidth(arcWidth * GLOW_INNER_WIDTH);
+                glowPaint.setAlpha(Math.round(arcAlpha * GLOW_INNER_ALPHA * f));
+                canvas.drawArc(bounds, START_ANGLE, 360f * f, false, glowPaint);
+            }
             canvas.drawArc(bounds, START_ANGLE, 360f * f, false, arcPaint);
             if (RingRamp.hasHeadCap(f)) {
                 // Round look only at the head: a small filled circle in the head colour.
                 double rad = Math.toRadians(RingRamp.headAngle(START_ANGLE, f));
                 float r = bounds.width() / 2f;
+                if (vividFocus) {
+                    float hx = bounds.centerX() + (float) (r * Math.cos(rad));
+                    float hy = bounds.centerY() + (float) (r * Math.sin(rad));
+                    float haloR = arcWidth * HALO_RADIUS;
+                    haloMatrix.setScale(haloR, haloR);
+                    haloMatrix.postTranslate(hx, hy);
+                    haloPaint.getShader().setLocalMatrix(haloMatrix);
+                    float haloAlpha = HALO_MIN_ALPHA + (HALO_MAX_ALPHA - HALO_MIN_ALPHA) * f;
+                    haloPaint.setAlpha(Math.round(arcAlpha * haloAlpha));
+                    canvas.drawCircle(hx, hy, haloR, haloPaint);
+                }
                 headPaint.setColor(RingRamp.headColor(softColor, intenseColor, f));
                 headPaint.setAlpha(Math.round(Color.alpha(headPaint.getColor()) * arcAlpha / 255f));
                 canvas.drawCircle(bounds.centerX() + (float) (r * Math.cos(rad)),

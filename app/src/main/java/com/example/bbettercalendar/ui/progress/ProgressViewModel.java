@@ -310,7 +310,7 @@ public class ProgressViewModel extends AndroidViewModel {
 
         overview.postValue(new ProgressOverview(focus.currentTotal, focus.hasDeltaPercent(),
                 focus.deltaPercent(), sessions, sessions / (double) elapsedDays,
-                tasksDone, tasksDone - tasksPrev, cur, prv, labels,
+                tasksDone, tasksDone - tasksPrev, tasksPrev > 0, cur, prv, labels,
                 trend.currentTotal, trend.deltaAbsolute(),
                 consistency, prevActive > 0, consistency.activeDays - prevActive,
                 spark, sparkLabels, sparkHighlight, avgSession));

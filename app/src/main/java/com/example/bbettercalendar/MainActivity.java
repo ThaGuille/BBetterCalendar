@@ -254,7 +254,11 @@ public class MainActivity extends AppCompatActivity {
                                 && !(f instanceof InsetsHelper.OwnsBottomInset)) {
                             sides |= InsetsHelper.BOTTOM;
                         }
-                        if (sides != 0) InsetsHelper.apply(v, sides);
+                        if (f instanceof InsetsHelper.LiftsWithIme) {
+                            InsetsHelper.applyWithIme(v, sides);
+                        } else if (sides != 0) {
+                            InsetsHelper.apply(v, sides);
+                        }
                     }
                 }, false);
     }

@@ -152,11 +152,6 @@
                     android:orientation="vertical" />
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/notif_settings_footer"
-                android:textAppearance="@style/TextAppearance.BBetter.Caption" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

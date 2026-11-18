@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Focus top bar: Pomodoro settings + block-mode toggle, both as visible tonal circle buttons
-     (action layouts). State, icon and descriptions of the block one are set by
+<!-- Focus top bar: Pomodoro settings + block-mode toggle, both as bare icons with a round press ripple
+     (action layouts). Icon (per-state drawable) and descriptions of the block one are set by
      FocusFragment.renderBlockMode (3 states). -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">

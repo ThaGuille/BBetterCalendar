@@ -16,7 +16,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.transition.Transition;
 
 import com.example.bbettercalendar.R;
-import com.google.android.material.shape.RelativeCornerSize;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialContainerTransform;
@@ -32,8 +31,8 @@ import java.util.concurrent.TimeUnit;
  *   <li>tab to a secondary screen (Focus, All progress, Screen time, profile...) and back: {@link MaterialSharedAxis} Z;</li>
  *   <li>secondary to secondary (Screen time to app detail...) and period / month changes: {@link MaterialSharedAxis} X;</li>
  *   <li>project card to its detail: {@link MaterialContainerTransform} with {@link Hold} on the list;</li>
- *   <li>Home play button to the Focus ring: {@link MaterialContainerTransform} on the shared ring plus the Z axis
- *       for the rest of both screens;</li>
+ *   <li>Home timer card to Focus: {@link MaterialContainerTransform}, the card expands downwards into the whole
+ *       Focus screen (and shrinks back into it on Back) with {@link Hold} on the rest of Home;</li>
  *   <li>sheets and dialogs keep Material's own animations (nothing here touches them).</li>
  * </ul>
  * Durations: {@code bb_motion_screen_enter} (300 ms) and {@code bb_motion_screen_exit} (250 ms) through
@@ -55,8 +54,8 @@ public final class ScreenTransitions {
     @VisibleForTesting static final String ARG_ENTER = "bb_transition_enter";
     @VisibleForTesting static final String ARG_EXIT = "bb_transition_exit";
 
-    /** transitionName shared by the Home play button and the Focus ring box. */
-    public static final String FOCUS_RING = "bb_focus_ring";
+    /** transitionName shared by the Home timer card and the Focus root (the screen grows out of the card). */
+    public static final String FOCUS_SCREEN = "bb_focus_screen";
     private static final String PROJECT_CARD_PREFIX = "bb_project_card_";
 
     /** Longest wait for the data of a postponed screen before it enters anyway. */
@@ -161,30 +160,34 @@ public final class ScreenTransitions {
     }
 
     /**
-     * Focus: the Home play button grows into the ring box (container transform, circular both ends) while the rest
-     * of the screen uses its Z axis. Without a shared element (any other way in) only the Z axis plays.
+     * Focus (call from its {@code onCreate}, after {@link #apply}): the Home timer card expands downwards into the
+     * whole screen (container transform from the card's rounded corners to the square screen) and Back shrinks it
+     * back into the card. Home navigates with {@link #prepareContainerTransform()}, so the rest of Home holds still.
+     * Without a shared element (any other way in) Focus plays its usual Z axis.
      */
-    public static void sharedFocusRing(@NonNull Fragment focus) {
+    public static void focusExpand(@NonNull Fragment focus) {
         Context ctx = focus.requireContext();
-        int surface = FocusRingTransition.OPAQUE_CONTAINER
+        int surface = FocusExpandTransition.OPAQUE_CONTAINER
                 ? ContextCompat.getColor(ctx, R.color.bb_sanct_surface) : Color.TRANSPARENT;
-        ShapeAppearanceModel circle = ShapeAppearanceModel.builder()
-                .setAllCornerSizes(new RelativeCornerSize(FocusRingTransition.CORNER_SIZE_FRACTION)).build();
+        ShapeAppearanceModel card = ShapeAppearanceModel.builder()
+                .setAllCornerSizes(ctx.getResources().getDimension(R.dimen.radius_card)).build();
+        ShapeAppearanceModel screen = ShapeAppearanceModel.builder()
+                .setAllCornerSizes(FocusExpandTransition.SCREEN_CORNER_RADIUS).build();
         MaterialContainerTransform in = container(ctx, enterMs(ctx), surface);
-        in.setStartShapeAppearanceModel(circle);
-        in.setEndShapeAppearanceModel(circle);
-        in.setFadeMode(containerFadeMode(FocusRingTransition.FADE_MODE));
+        in.setStartShapeAppearanceModel(card);
+        in.setEndShapeAppearanceModel(screen);
+        in.setFadeMode(containerFadeMode(FocusExpandTransition.FADE_MODE));
         MaterialContainerTransform back = container(ctx, exitMs(ctx), surface);
-        back.setStartShapeAppearanceModel(circle);
-        back.setEndShapeAppearanceModel(circle);
-        back.setFadeMode(containerFadeMode(FocusRingTransition.FADE_MODE));
+        back.setStartShapeAppearanceModel(screen);
+        back.setEndShapeAppearanceModel(card);
+        back.setFadeMode(containerFadeMode(FocusExpandTransition.FADE_MODE));
         focus.setSharedElementEnterTransition(in);
         focus.setSharedElementReturnTransition(back);
     }
 
     /** Maps the pure description's fade mode onto MaterialContainerTransform's FADE_MODE_* constants. */
     @VisibleForTesting
-    static int containerFadeMode(@NonNull FocusRingTransition.FadeMode mode) {
+    static int containerFadeMode(@NonNull FocusExpandTransition.FadeMode mode) {
         switch (mode) {
             case CROSS:
                 return MaterialContainerTransform.FADE_MODE_CROSS;

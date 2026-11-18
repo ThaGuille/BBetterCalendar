@@ -22,6 +22,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.ui.common.InsetsHelper;
 import com.example.bbettercalendar.ui.common.motion.ScreenTransitions;
 import com.example.bbettercalendar.ui.focus.CelebrationPrefs;
 import com.example.bbettercalendar.ui.focus.CelebrationSheet;
@@ -43,7 +44,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 // celdas Enfocado / Tareas, lista de tareas y alta rapida fija abajo. Barra propia con atras y menu
 // (completar, eliminar). Nombre y notas se guardan solos en onPause (sin boton Save).
 @AndroidEntryPoint
-public class ProjectDetailFragment extends Fragment {
+public class ProjectDetailFragment extends Fragment implements InsetsHelper.LiftsWithIme {
 
     private static final String ARG_PROJECT_ID = "projectId";
     private static final int MENU_COMPLETE = 1;

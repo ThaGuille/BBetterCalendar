@@ -202,7 +202,9 @@ public class ProgressFragment extends Fragment {
         } else {
             focusTile.clearDelta();
         }
-        focusTile.setSub(getString(g == Granularity.MONTH ? R.string.progress_summary_vs_month
+        // Sin datos del periodo anterior no hay comparación: ni delta ni "vs. semana anterior".
+        focusTile.setSub(!o.hasFocusDelta ? null
+                : getString(g == Granularity.MONTH ? R.string.progress_summary_vs_month
                 : g == Granularity.YEAR ? R.string.progress_summary_vs_year
                 : g == Granularity.DAY ? R.string.progress_summary_vs_day
                 : R.string.progress_summary_vs_week));
@@ -221,7 +223,8 @@ public class ProgressFragment extends Fragment {
         Motion.countUp(tasksTile.getValueView(), shownTasks, o.tasksDone, String::valueOf);
         shownTasks = o.tasksDone;
         int d = o.tasksDoneDelta;
-        tasksTile.setSub(d > 0 ? getString(R.string.progress_summary_tasks_more, d)
+        tasksTile.setSub(!o.hasTasksDelta ? null
+                : d > 0 ? getString(R.string.progress_summary_tasks_more, d)
                 : d < 0 ? getString(R.string.progress_summary_tasks_less, -d)
                 : getString(R.string.progress_summary_tasks_same));
 

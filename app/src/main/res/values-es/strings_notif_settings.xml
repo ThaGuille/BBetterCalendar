@@ -35,5 +35,4 @@
     <string name="notif_settings_channel_projects">Fechas límite de proyectos</string>
     <string name="notif_settings_channel_desc">Sonido y estilo en los ajustes del sistema</string>
 
-    <string name="notif_settings_footer">Lo mantenemos ligero: como mucho dos avisos diarios, nunca durante una concentración, nada entre las 22:00 y las 8:00. Un aviso que ignoras tres días seguidos se pausa hasta que abras la app.</string>
 </resources>

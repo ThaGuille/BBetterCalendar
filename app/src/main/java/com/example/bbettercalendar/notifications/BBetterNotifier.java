@@ -43,6 +43,14 @@ public class BBetterNotifier {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(spec.autoCancel);
         builder.setSilent(spec.silent);
+        if (spec.vibrate != null) {
+            // Pre-O (sin canales): vibración y sonido por notificación.
+            builder.setVibrate(spec.vibrate)
+                    .setDefaults(NotificationCompat.DEFAULT_SOUND | NotificationCompat.DEFAULT_LIGHTS);
+        }
+        if (spec.category != null) {
+            builder.setCategory(spec.category);
+        }
 
         if (spec.contentIntent != null) {
             builder.setContentIntent(spec.contentIntent);

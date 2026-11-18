@@ -17,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -141,7 +140,7 @@ public class FocusFragment extends Fragment
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ScreenTransitions.apply(this);
-        ScreenTransitions.sharedFocusRing(this);
+        ScreenTransitions.focusExpand(this);
     }
 
     @Override
@@ -189,8 +188,8 @@ public class FocusFragment extends Fragment
         modeChip = view.findViewById(R.id.focusModeChip);
         cycleDots = view.findViewById(R.id.focusCycleDots);
         ring = view.findViewById(R.id.focusRing);
-        // u15: la caja del anillo (anillo + restante) es donde aterriza el play de Home.
-        ViewCompat.setTransitionName(view.findViewById(R.id.focusRingBox), ScreenTransitions.FOCUS_RING);
+        // La pantalla entera es donde se expande la tarjeta del temporizador de Home.
+        ViewCompat.setTransitionName(view, ScreenTransitions.FOCUS_SCREEN);
         timerText = view.findViewById(R.id.focusTimerText);
         endsAtIcon = view.findViewById(R.id.focusEndsAtIcon);
         endsAtText = view.findViewById(R.id.focusEndsAtText);
@@ -579,8 +578,9 @@ public class FocusFragment extends Fragment
     }
 
     /**
-     * Three states: off (outline, muted) · on (filled {@code do_not_disturb_on}, sage — html 01) ·
-     * armed but the accessibility service is not on yet (filled, honey = "pending", as before).
+     * Three states, told apart by the glyph itself (no circle behind it): off = muted phone with an
+     * open padlock · on = bright phone with a closed red padlock · armed but the accessibility
+     * service is not on yet = greyed phone with a small amber "!" badge.
      */
     private void renderBlockMode() {
         if (toolbar == null || session == null) {
@@ -591,30 +591,26 @@ public class FocusFragment extends Fragment
         if (!(view instanceof ImageView)) {
             return;
         }
-        @DrawableRes int bg;
-        @ColorRes int tint;
+        @DrawableRes int glyph;
         int title;
         int desc;
         if (!session.isBlockModeArmed()) {
-            bg = R.drawable.bg_sanct_action_off;
-            tint = R.color.bb_sanct_on_surface_muted;
+            glyph = R.drawable.ic_focus_block_off_24;
             title = R.string.home_block_mode_off;
             desc = R.string.focus_block_mode_desc_off;
         } else if (AccessibilityAccess.isEnabled(requireContext())) {
-            bg = R.drawable.bg_sanct_action_on;
-            tint = R.color.bb_sanct_sage_bright;
+            glyph = R.drawable.ic_focus_block_on_24;
             title = R.string.home_block_mode_on;
             desc = R.string.focus_block_mode_desc_on;
         } else {
-            bg = R.drawable.bg_sanct_action_pending;
-            tint = R.color.bb_sanct_primary;
+            glyph = R.drawable.ic_focus_block_pending_24;
             title = R.string.home_block_mode_pending;
             desc = R.string.focus_block_mode_desc_pending;
         }
         ImageView icon = (ImageView) view;
-        icon.setBackgroundResource(bg);
-        icon.setImageTintList(android.content.res.ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), tint)));
+        icon.setBackgroundResource(R.drawable.bg_sanct_action_plain);
+        icon.setImageTintList(null);
+        icon.setImageResource(glyph);
         icon.setContentDescription(getString(title) + ". " + getString(desc));
         item.setTitle(title);
     }

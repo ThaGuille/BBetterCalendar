@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Focus top-bar action: block mode. Icon, tint, background and description are set by
+<!-- Focus top-bar action: block mode. Icon (per-state drawable, untinted) and description are set by
      FocusFragment.renderBlockMode (off / on / needs permission). -->
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/focusBlockModeButton"
     android:layout_width="@dimen/focus_action_size"
     android:layout_height="@dimen/focus_action_size"
-    android:background="@drawable/bg_sanct_action_off"
+    android:background="@drawable/bg_sanct_action_plain"
     android:clickable="true"
     android:contentDescription="@string/home_block_mode_off"
     android:focusable="true"
     android:padding="@dimen/focus_action_icon_padding"
     android:scaleType="fitCenter"
-    android:src="@drawable/ic_focus_block_mode_24" />
+    android:src="@drawable/ic_focus_block_off_24" />

@@ -44,6 +44,13 @@ public final class InsetsHelper {
     public interface OwnsBottomInset { }
 
     /**
+     * Destino secundario con un campo fijo abajo (alta rápida de ProjectDetailFragment): MainActivity
+     * le aplica el inset inferior con {@link #applyWithIme}, así la raíz encoge con el teclado y el
+     * campo queda justo encima en vez de tapado.
+     */
+    public interface LiftsWithIme { }
+
+    /**
      * A sangre completa con barras transparentes e iconos claros (el tema es oscuro). Llamar en
      * {@code onCreate}, antes de {@code setContentView}.
      */

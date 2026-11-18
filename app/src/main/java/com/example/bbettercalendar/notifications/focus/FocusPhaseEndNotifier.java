@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 
 import com.example.bbettercalendar.MainActivity;
 import com.example.bbettercalendar.R;
@@ -40,6 +41,7 @@ public final class FocusPhaseEndNotifier {
         }
         String title;
         String body;
+        String channel = NotificationChannels.CHANNEL_FOCUS_ALERTS;
         switch (notice) {
             case FOCUS_DONE:
                 title = app.getString(R.string.notif_focus_phase_focus_done_title);
@@ -50,20 +52,30 @@ public final class FocusPhaseEndNotifier {
                 title = app.getString(R.string.notif_focus_phase_break_over_title);
                 body = app.getString(R.string.notif_focus_phase_break_over_body);
                 break;
+            case ROUND_STARTED:
+                // La ronda ya corre sin que el usuario lo sepa: aviso fuerte (canal propio).
+                title = app.getString(R.string.notif_focus_phase_round_started_title);
+                body = app.getString(R.string.notif_focus_phase_round_started_body,
+                        Math.max(1, nextMinutes));
+                channel = NotificationChannels.CHANNEL_FOCUS_ROUND_START;
+                break;
             case SESSION_COMPLETE:
             default:
                 title = app.getString(R.string.notif_focus_phase_session_complete_title);
                 body = app.getString(R.string.notif_focus_phase_session_complete_body);
                 break;
         }
-        NotificationSpec spec = new NotificationSpec.Builder(
-                NotificationChannels.CHANNEL_FOCUS_ALERTS, NotificationIds.FOCUS_PHASE_END)
+        NotificationSpec.Builder spec = new NotificationSpec.Builder(
+                channel, NotificationIds.FOCUS_PHASE_END)
                 .title(title)
                 .body(body)
                 .contentIntent(openFocus(app, NotificationIds.FOCUS_PHASE_END))
-                .autoCancel(true)
-                .build();
-        new BBetterNotifier(app).notify(spec);
+                .autoCancel(true);
+        if (notice == FocusPhaseAlarm.Notice.ROUND_STARTED) {
+            spec.vibrate(NotificationChannels.ROUND_START_VIBRATION)
+                    .category(NotificationCompat.CATEGORY_ALARM);
+        }
+        new BBetterNotifier(app).notify(spec.build());
     }
 
     /** Retira el aviso de fin de fase (la app volvió a primer plano). */

@@ -35,5 +35,4 @@
     <string name="notif_settings_channel_projects">Project deadlines</string>
     <string name="notif_settings_channel_desc">Sound and style in system settings</string>
 
-    <string name="notif_settings_footer">We keep it light: at most two daily nudges, never during a focus session, nothing between 22:00 and 8:00. A nudge you ignore three days in a row pauses until you open the app.</string>
 </resources>

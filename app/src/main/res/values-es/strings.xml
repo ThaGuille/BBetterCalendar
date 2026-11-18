@@ -107,6 +107,8 @@
     <string name="notif_channel_event_reminders_desc">Recordatorios de próximos eventos y tareas.</string>
     <string name="notif_channel_focus_alerts_name">Alertas de concentración</string>
     <string name="notif_channel_focus_alerts_desc">Avisos cuando sales de la app durante una sesión de concentración.</string>
+    <string name="notif_channel_focus_round_start_name">Vuelta al foco</string>
+    <string name="notif_channel_focus_round_start_desc">Aviso fuerte (sonido y vibración) cuando acaba el descanso y la siguiente ronda empieza sola.</string>
     <string name="notif_channel_usage_limits_name">Avisos de límite de apps</string>
     <string name="notif_channel_usage_limits_desc">Te avisa cuando estás cerca o has superado el límite diario de una app.</string>
     <string name="notif_channel_project_deadlines_name">Fechas límite de proyectos</string>

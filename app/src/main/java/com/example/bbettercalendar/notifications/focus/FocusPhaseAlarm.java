@@ -44,8 +44,13 @@ public final class FocusPhaseAlarm {
     public enum Notice {
         /** Acaba una concentración y empieza un descanso ({@link Plan#nextMinutes} = su duración). */
         FOCUS_DONE,
-        /** Acaba un descanso (con o sin auto-ciclo, la siguiente ronda está por empezar). */
+        /** Acaba un descanso sin auto-ciclo: el temporizador espera a que el usuario empiece. */
         BREAK_OVER,
+        /**
+         * Acaba un descanso con auto-ciclo y la siguiente concentración YA ha arrancado sola
+         * ({@link Plan#nextMinutes} = su duración). Aviso fuerte: canal propio con vibración y sonido.
+         */
+        ROUND_STARTED,
         /** Último ciclo o descanso desactivado: se acabó la sesión. */
         SESSION_COMPLETE
     }
@@ -100,9 +105,13 @@ public final class FocusPhaseAlarm {
                     : new Plan(endsAt, Notice.SESSION_COMPLETE, 0);
         }
         if (state == State.RUNNING_REST) {
-            boolean lastRound = settings.autoCycle && !settings.infiniteCycles
-                    && cyclesCompleted + 1 >= settings.cycles;
-            return new Plan(endsAt, lastRound ? Notice.SESSION_COMPLETE : Notice.BREAK_OVER, 0);
+            if (!settings.autoCycle) {
+                return new Plan(endsAt, Notice.BREAK_OVER, 0);
+            }
+            boolean lastRound = !settings.infiniteCycles && cyclesCompleted + 1 >= settings.cycles;
+            return lastRound
+                    ? new Plan(endsAt, Notice.SESSION_COMPLETE, 0)
+                    : new Plan(endsAt, Notice.ROUND_STARTED, minutesOf(settings.focusMillis));
         }
         return Plan.NONE;
     }

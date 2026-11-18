@@ -48,6 +48,11 @@ public class FocusRingView extends View {
     /** Breathing range: the glow goes from this alpha / scale to full and back. */
     private static final float BREATH_MIN_ALPHA = 0.6f;
     private static final float BREATH_MIN_SCALE = 0.92f;
+    /**
+     * The hearth glow brightens as the ring fills: at a full turn its centre is this many times the
+     * html's .18 alpha (about .45). The shader is built at that peak and dimmed with the paint alpha.
+     */
+    private static final float HEARTH_PEAK_BOOST = 2.5f;
 
     private final RingPainter ring;
     private final Paint glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -77,6 +82,7 @@ public class FocusRingView extends View {
         ring = new RingPainter(context);
         ring.setTrackColor(ContextCompat.getColor(context, R.color.bb_sanct_track));
         ring.setStrokeWidths(6f * density, 7f * density);
+        ring.setVivid(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
@@ -186,7 +192,7 @@ public class FocusRingView extends View {
         if (rest) {
             glowPaint.setShader(null);
         } else {
-            float scale = mode == Mode.PAUSED ? PAUSED_GLOW_SCALE : 1f;
+            float scale = (mode == Mode.PAUSED ? PAUSED_GLOW_SCALE : 1f) * HEARTH_PEAK_BOOST;
             int start = scaleAlpha(glowStart, scale);
             int mid = scaleAlpha(glowStart, scale / 3f);
             glowPaint.setShader(new RadialGradient(cx, cy, glowR,
@@ -216,7 +222,10 @@ public class FocusRingView extends View {
         canvas.save();
         canvas.scale(scale, scale, cx, cy);
         if (glowPaint.getShader() != null) {
-            glowPaint.setAlpha(paintAlpha);
+            // From the html's level at the start to HEARTH_PEAK_BOOST times it at a full ring.
+            float base = 1f / HEARTH_PEAK_BOOST;
+            float hearth = base + (1f - base) * progress;
+            glowPaint.setAlpha(Math.round(255 * alpha * hearth));
             canvas.drawCircle(cx, cy, size / 2f, glowPaint);
         }
         sageGlowPaint.setAlpha(paintAlpha);

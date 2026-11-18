@@ -17,6 +17,7 @@ public final class ProgressOverview {
     public final double sessionsPerDay;     // sesiones / días transcurridos del rango
     public final int tasksDone;             // aproximado: CalendarEntry.isDone en el rango
     public final int tasksDoneDelta;        // vs. el periodo anterior completo
+    public final boolean hasTasksDelta;     // false si el periodo anterior no tiene tareas hechas
 
     // --- "Past 12 weeks" (siempre 12 semanas que terminan en el rango seleccionado) ---
     public final float[] trendCurrentHours;   // 12 valores, de la más antigua a la actual
@@ -38,6 +39,7 @@ public final class ProgressOverview {
 
     public ProgressOverview(long focusMinutes, boolean hasFocusDelta, double focusDeltaPercent,
                             int sessions, double sessionsPerDay, int tasksDone, int tasksDoneDelta,
+                            boolean hasTasksDelta,
                             float[] trendCurrentHours, float[] trendPreviousHours, String[] trendLabels,
                             long trendCurrentMinutes, long trendDeltaMinutes,
                             ConsistencyCalculator.Result consistency, boolean hasConsistencyDelta,
@@ -50,6 +52,7 @@ public final class ProgressOverview {
         this.sessionsPerDay = sessionsPerDay;
         this.tasksDone = tasksDone;
         this.tasksDoneDelta = tasksDoneDelta;
+        this.hasTasksDelta = hasTasksDelta;
         this.trendCurrentHours = trendCurrentHours;
         this.trendPreviousHours = trendPreviousHours;
         this.trendLabels = trendLabels;

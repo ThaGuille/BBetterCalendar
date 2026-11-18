@@ -3,6 +3,8 @@ package com.example.bbettercalendar.notifications;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
 import android.os.Build;
 
 import com.example.bbettercalendar.R;
@@ -12,6 +14,13 @@ public final class NotificationChannels {
     public static final String CHANNEL_FOREGROUND_SERVICE = "channelId";
     public static final String CHANNEL_EVENT_REMINDERS = "bb_event_reminders";
     public static final String CHANNEL_FOCUS_ALERTS = "bb_focus_alerts";
+    // Vuelta al foco: el descanso acabó y la siguiente ronda arrancó sola con la app fuera. Canal
+    // propio porque la vibración y el sonido de un canal sólo se fijan al crearlo (bb_focus_alerts ya
+    // existe en los móviles con la configuración por defecto).
+    public static final String CHANNEL_FOCUS_ROUND_START = "bb_focus_round_start";
+
+    /** Vibración larga y marcada (espera, vibra, pausa…): se nota en el bolsillo. */
+    public static final long[] ROUND_START_VIBRATION = {0L, 700L, 250L, 700L, 250L, 1100L};
     public static final String CHANNEL_USAGE_LIMITS = "bb_usage_limits";
     public static final String CHANNEL_PROJECT_DEADLINES = "bb_project_deadlines";
     // F5-u6 (D-034): ánimos, empujones y solicitudes de amigos. Es el único control para silenciarlos (DIF-01).
@@ -45,6 +54,20 @@ public final class NotificationChannels {
                 context.getString(R.string.notif_channel_focus_alerts_name),
                 NotificationManager.IMPORTANCE_HIGH);
         focus.setDescription(context.getString(R.string.notif_channel_focus_alerts_desc));
+
+        NotificationChannel roundStart = new NotificationChannel(
+                CHANNEL_FOCUS_ROUND_START,
+                context.getString(R.string.notif_channel_focus_round_start_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        roundStart.setDescription(context.getString(R.string.notif_channel_focus_round_start_desc));
+        roundStart.enableVibration(true);
+        roundStart.setVibrationPattern(ROUND_START_VIBRATION);
+        roundStart.enableLights(true);
+        roundStart.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build());
 
         NotificationChannel usageLimits = new NotificationChannel(
                 CHANNEL_USAGE_LIMITS,
@@ -83,6 +106,7 @@ public final class NotificationChannels {
         nm.createNotificationChannel(foreground);
         nm.createNotificationChannel(events);
         nm.createNotificationChannel(focus);
+        nm.createNotificationChannel(roundStart);
         nm.createNotificationChannel(usageLimits);
         nm.createNotificationChannel(projectDeadlines);
         nm.createNotificationChannel(friends);

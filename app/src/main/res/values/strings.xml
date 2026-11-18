@@ -108,6 +108,8 @@
     <string name="notif_channel_event_reminders_desc">Reminders for upcoming events and tasks.</string>
     <string name="notif_channel_focus_alerts_name">Focus alerts</string>
     <string name="notif_channel_focus_alerts_desc">Alerts when you leave the app during a focus session.</string>
+    <string name="notif_channel_focus_round_start_name">Back to focus</string>
+    <string name="notif_channel_focus_round_start_desc">Strong alert (sound and vibration) when your break ends and the next focus round starts on its own.</string>
     <string name="notif_channel_usage_limits_name">App limit nudges</string>
     <string name="notif_channel_usage_limits_desc">Warns you when you\'re close to or past a daily app limit.</string>
     <string name="notif_channel_project_deadlines_name">Project deadlines</string>

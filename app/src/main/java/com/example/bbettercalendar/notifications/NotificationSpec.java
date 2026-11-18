@@ -33,6 +33,10 @@ public final class NotificationSpec {
     public final List<NotificationCompat.Action> actions;
     /** Sale sin sonido ni vibración (amigos durante una concentración, plan sistema-notificaciones B.4). */
     public final boolean silent;
+    /** Pre-O vibration pattern (from O the channel's wins); null = the default. */
+    public final long[] vibrate;
+    /** {@code NotificationCompat.CATEGORY_*}; null = none. */
+    public final String category;
 
     private NotificationSpec(Builder b) {
         this.channelId = b.channelId;
@@ -46,6 +50,8 @@ public final class NotificationSpec {
         this.publicBody = b.publicBody;
         this.actions = b.actions;
         this.silent = b.silent;
+        this.vibrate = b.vibrate;
+        this.category = b.category;
     }
 
     public static final class Builder {
@@ -60,6 +66,8 @@ public final class NotificationSpec {
         private String publicBody;
         private final List<NotificationCompat.Action> actions = new ArrayList<>();
         private boolean silent;
+        private long[] vibrate;
+        private String category;
 
         public Builder(@NonNull String channelId, int notificationId) {
             this.channelId = channelId;
@@ -72,6 +80,8 @@ public final class NotificationSpec {
         public Builder contentIntent(PendingIntent pi) { this.contentIntent = pi; return this; }
         public Builder autoCancel(boolean v) { this.autoCancel = v; return this; }
         public Builder silent(boolean v) { this.silent = v; return this; }
+        public Builder vibrate(long[] pattern) { this.vibrate = pattern; return this; }
+        public Builder category(String category) { this.category = category; return this; }
 
         /** F5-u6 (d7): lo que se ve con el móvil bloqueado en vez de título y cuerpo (sin datos personales). */
         public Builder publicVersion(String title, String body) {

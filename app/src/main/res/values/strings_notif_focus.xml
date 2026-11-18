@@ -7,6 +7,9 @@
     <string name="notif_focus_phase_focus_done_body">Time for a %1$d-min break</string>
     <string name="notif_focus_phase_break_over_title">Break\'s over</string>
     <string name="notif_focus_phase_break_over_body">Ready for another round?</string>
+    <!-- Descanso terminado con auto-ciclo: la ronda ya ha empezado (bb_focus_round_start). -->
+    <string name="notif_focus_phase_round_started_title">Back to focus!</string>
+    <string name="notif_focus_phase_round_started_body">Your break is over: a %1$d-min focus round has started</string>
     <string name="notif_focus_phase_session_complete_title">Session complete</string>
     <string name="notif_focus_phase_session_complete_body">Nice work. Time to recharge.</string>
 

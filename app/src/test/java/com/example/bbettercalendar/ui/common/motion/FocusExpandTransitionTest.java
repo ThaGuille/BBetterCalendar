@@ -6,25 +6,25 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-/** Description of the Home play to Focus ring transition (plan pomodoro-calendario-ui u3, decision d5). */
-public class FocusRingTransitionTest {
+/** Description of the Home timer card to Focus screen transition (the card expands into the screen). */
+public class FocusExpandTransitionTest {
 
     @Test
     public void fadesThrough_keepingTheSharedElement() {
-        assertEquals(FocusRingTransition.FadeMode.THROUGH, FocusRingTransition.FADE_MODE);
-        assertTrue(FocusRingTransition.hasSharedElement());
-        assertTrue(FocusRingTransition.OPAQUE_CONTAINER);
+        assertEquals(FocusExpandTransition.FadeMode.THROUGH, FocusExpandTransition.FADE_MODE);
+        assertTrue(FocusExpandTransition.expandsWholeScreen());
+        assertTrue(FocusExpandTransition.OPAQUE_CONTAINER);
     }
 
     @Test
     public void startViewIsGoneBeforeTheEndViewAppears() {
-        assertTrue(FocusRingTransition.startFadeOutEnd() <= FocusRingTransition.endFadeInStart());
-        assertTrue(FocusRingTransition.neverOverlaps());
+        assertTrue(FocusExpandTransition.startFadeOutEnd() <= FocusExpandTransition.endFadeInStart());
+        assertTrue(FocusExpandTransition.neverOverlaps());
     }
 
     @Test
-    public void bothEndsAreCircles() {
-        assertEquals(0.5f, FocusRingTransition.CORNER_SIZE_FRACTION, 0f);
+    public void screenEndIsSquare() {
+        assertEquals(0f, FocusExpandTransition.SCREEN_CORNER_RADIUS, 0f);
     }
 
     @Test
@@ -33,18 +33,19 @@ public class FocusRingTransitionTest {
         String src = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(
                 "src/main/java/com/example/bbettercalendar/ui/common/motion/ScreenTransitions.java")),
                 java.nio.charset.StandardCharsets.UTF_8);
-        int start = src.indexOf("public static void sharedFocusRing");
+        int start = src.indexOf("public static void focusExpand");
         String body = src.substring(start, src.indexOf("postponeUntilReady", start));
         assertTrue(body.contains("container(ctx, enterMs(ctx)"));
         assertTrue(body.contains("container(ctx, exitMs(ctx)"));
-        assertTrue(body.contains("FocusRingTransition.CORNER_SIZE_FRACTION"));
+        assertTrue(body.contains("FocusExpandTransition.SCREEN_CORNER_RADIUS"));
+        assertTrue(body.contains("R.dimen.radius_card"));
     }
 
-    private static String sharedFocusRingBody() throws Exception {
+    private static String focusExpandBody() throws Exception {
         String src = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(
                 "src/main/java/com/example/bbettercalendar/ui/common/motion/ScreenTransitions.java")),
                 java.nio.charset.StandardCharsets.UTF_8);
-        int start = src.indexOf("public static void sharedFocusRing");
+        int start = src.indexOf("public static void focusExpand");
         return src.substring(start, src.indexOf("static int containerFadeMode", start));
     }
 
@@ -56,19 +57,22 @@ public class FocusRingTransitionTest {
 
     @Test
     public void bodyReadsTheDescription() throws Exception {
-        String body = sharedFocusRingBody();
-        assertTrue(body.contains("FocusRingTransition.FADE_MODE"));
-        assertTrue(body.contains("FocusRingTransition.OPAQUE_CONTAINER"));
+        String body = focusExpandBody();
+        assertTrue(body.contains("FocusExpandTransition.FADE_MODE"));
+        assertTrue(body.contains("FocusExpandTransition.OPAQUE_CONTAINER"));
         assertFalse(body.contains("FADE_MODE_THROUGH"));
     }
 
     @Test
     public void enterAndReturnBothSetFadeModeFromTheDescription() throws Exception {
-        String body = sharedFocusRingBody();
+        String body = focusExpandBody();
         assertEquals(2, count(body, ".setFadeMode("));
-        assertEquals(2, count(body, "setFadeMode(containerFadeMode(FocusRingTransition.FADE_MODE))"));
-        assertEquals(2, count(body, ".setStartShapeAppearanceModel(circle)"));
-        assertEquals(2, count(body, ".setEndShapeAppearanceModel(circle)"));
+        assertEquals(2, count(body, "setFadeMode(containerFadeMode(FocusExpandTransition.FADE_MODE))"));
+        // Enter: card -> screen; return: screen -> card.
+        assertEquals(1, count(body, "in.setStartShapeAppearanceModel(card)"));
+        assertEquals(1, count(body, "in.setEndShapeAppearanceModel(screen)"));
+        assertEquals(1, count(body, "back.setStartShapeAppearanceModel(screen)"));
+        assertEquals(1, count(body, "back.setEndShapeAppearanceModel(card)"));
         assertEquals(1, count(body, "container(ctx, enterMs(ctx), surface)"));
         assertEquals(1, count(body, "container(ctx, exitMs(ctx), surface)"));
     }
@@ -76,12 +80,12 @@ public class FocusRingTransitionTest {
     @Test
     public void mappingCoversEveryFadeMode() {
         assertEquals(com.google.android.material.transition.MaterialContainerTransform.FADE_MODE_THROUGH,
-                ScreenTransitions.containerFadeMode(FocusRingTransition.FadeMode.THROUGH));
+                ScreenTransitions.containerFadeMode(FocusExpandTransition.FadeMode.THROUGH));
         assertEquals(com.google.android.material.transition.MaterialContainerTransform.FADE_MODE_CROSS,
-                ScreenTransitions.containerFadeMode(FocusRingTransition.FadeMode.CROSS));
+                ScreenTransitions.containerFadeMode(FocusExpandTransition.FadeMode.CROSS));
         assertEquals(com.google.android.material.transition.MaterialContainerTransform.FADE_MODE_IN,
-                ScreenTransitions.containerFadeMode(FocusRingTransition.FadeMode.IN));
+                ScreenTransitions.containerFadeMode(FocusExpandTransition.FadeMode.IN));
         assertEquals(com.google.android.material.transition.MaterialContainerTransform.FADE_MODE_OUT,
-                ScreenTransitions.containerFadeMode(FocusRingTransition.FadeMode.OUT));
+                ScreenTransitions.containerFadeMode(FocusExpandTransition.FadeMode.OUT));
     }
 }

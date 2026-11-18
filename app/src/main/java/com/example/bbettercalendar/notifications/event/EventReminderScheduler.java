@@ -49,10 +49,14 @@ public class EventReminderScheduler {
             };
 
     private final AlarmReminderCore core;
+    // Alarmas pospuestas (ReminderActionReceiver.snooze): mismo receiver y extras, otro namespace.
+    private final AlarmReminderCore snoozeCore;
 
     @Inject
     public EventReminderScheduler(@ApplicationContext Context context, AlarmManager alarmManager) {
         this.core = new AlarmReminderCore(context, alarmManager, EventReminderReceiver.class, NAMESPACE);
+        this.snoozeCore = new AlarmReminderCore(context, alarmManager, EventReminderReceiver.class,
+                ReminderActionReceiver::snoozedAlarmRequestCode);
     }
 
     public void scheduleFor(CalendarEntry entry) {
@@ -66,5 +70,7 @@ public class EventReminderScheduler {
     public void cancelFor(CalendarEntry entry) {
         if (entry == null) return;
         core.cancel(entry.getId(), NotificationOffsets.OFFSET_MILLIS.length, EXTRAS);
+        // Tambien las pospuestas. Se pierden al reiniciar/actualizar (aceptado, sin persistencia).
+        snoozeCore.cancel(entry.getId(), NotificationOffsets.OFFSET_MILLIS.length, EXTRAS);
     }
 }

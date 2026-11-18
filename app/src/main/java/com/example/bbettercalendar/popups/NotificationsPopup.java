@@ -88,6 +88,19 @@ public class NotificationsPopup extends BottomSheetDialogFragment implements Com
         }
     }
 
+    /** Siembra la seleccion con lo que la actividad ya tiene (copia: el popup no comparte el array). */
+    public void setInitialSelection(boolean[] selection) {
+        notificationsArray = copyToSeven(selection);
+        if (toggleButtons[0] != null && getView() != null) setToggleButtons();
+    }
+
+    /** Copia defensiva de longitud fija 7; null o cortos se rellenan con false. */
+    public static boolean[] copyToSeven(boolean[] src) {
+        boolean[] out = new boolean[7];
+        if (src != null) System.arraycopy(src, 0, out, 0, Math.min(src.length, out.length));
+        return out;
+    }
+
     public void setOnNotificationsPopupListener(OnNotificationsPopupListener listener) {
         this.listener = listener;
     }

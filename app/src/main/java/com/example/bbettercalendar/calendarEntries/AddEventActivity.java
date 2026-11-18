@@ -508,6 +508,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
 
     private void openNotificationsPicker(){
         // todo expandir la layout de notificaciones, se puede hacer con un índice. Está al final de esta clase el código para hacerlo
+        notificationsPopup.setInitialSelection(eventBuilder.getEventNotifications());
         notificationsPopup.show(getSupportFragmentManager(), "popup_tag");
     }
 
@@ -581,6 +582,16 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
     public void OnSetNotifications(boolean[] notificationsArray) {
         int countNotifications=0;
 
+        // Quita los chips de lo que ya no esta marcado, para que la pantalla refleje lo que se guarda.
+        for(int i=0;i<createdNotificationLayouts.length;i++){
+            boolean wanted = i < notificationsArray.length && notificationsArray[i];
+            if(!wanted && createdNotificationLayouts[i]){
+                createdNotificationLayouts[i]=false;
+                if(createdNotificationViews[i]!=null) optionsCard.removeView(createdNotificationViews[i]);
+                createdNotificationViews[i]=null;
+            }
+        }
+
         for(int i=0;i<notificationsArray.length;i++){
             if(notificationsArray[i]){
                 if(createdNotificationLayouts[i]==false) {
@@ -590,7 +601,7 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
                 countNotifications++;
             }
         }
-        eventBuilder.setEventNotifications(notificationsArray);
+        eventBuilder.setEventNotifications(notificationsArray.clone());
     }
 
     private void addNotificationLayout(int indexNotification, int indexLayout){
@@ -602,12 +613,14 @@ public class AddEventActivity extends AppCompatActivity implements OnToolBarList
             @Override
             public void onClick(View view) {
                 createdNotificationLayouts[indexNotification]=false;
+                createdNotificationViews[indexNotification]=null;
                 optionsCard.removeView(newView);
                 eventBuilder.getEventNotifications()[indexNotification]=false;
             }
         });
 
         // Insert into the Options card just under the existing notifications row.
+        createdNotificationViews[indexNotification] = newView;
         optionsCard.addView(newView, indexLayout);
     }
 

@@ -1,8 +1,8 @@
 # Sistema de notificaciones
 
-Status: implemented on branch (feat/notificaciones), pending merge to main
+Status: merged
 Created: 2026-11-17
-Last updated: 2026-11-17
+Last updated: 2026-11-18
 Branch: `feat/notificaciones`
 
 ## Objetivo
@@ -131,7 +131,7 @@ entrada en el Bench Log.
 
 ## Resultado (2026-11-17)
 
-Hecho en `feat/notificaciones` (sin fusionar ni subir). Partes A–D integradas, más arreglos de la
+Hecho en `feat/notificaciones`, fusionado en `main` el 2026-11-18 tras `/review-branch` (2 arreglos: el selector de recordatorios no mostraba el aviso por defecto marcado; cancelar una entrada no cancelaba un «Posponer» pendiente). Partes A–D integradas, más arreglos de la
 revisión de código y de la prueba en emulador:
 - Tocar cualquier notificación recreaba `MainActivity` (CLEAR_TOP sin SINGLE_TOP) y perdía el pomodoro: arreglado.
 - La pantalla Notificaciones apagaba y guardaba todos los interruptores al recrearse (modo oscuro): las filas

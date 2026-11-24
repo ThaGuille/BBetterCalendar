@@ -6,10 +6,14 @@ import android.content.Context;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.room.Room;
+import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.bbettercalendar.notifications.NotificationChannels;
+import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.projects.Tag;
+import com.example.bbettercalendar.projects.TagSeeds;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.firebase.AppCheckInstaller;
 import com.example.bbettercalendar.social.invite.InstallReferrerReader;
@@ -21,6 +25,7 @@ import com.example.bbettercalendar.usage.UsageSnapshotter;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 import com.example.bbettercalendar.usage.limits.WarnedTodayStore;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -226,5 +231,72 @@ public class DBMigration extends Application {
         database.execSQL("UPDATE calendarEntry SET completedAtMillis = " +
                         "CASE WHEN startMillis > 0 THEN startMillis ELSE ? END WHERE isDone = 1",
                 new Object[]{nowMillis});
+    }
+
+    // rediseno-proyectos (DB v16, spec §4): secciones, subtareas, etiquetas y áreas, y campos nuevos de
+    // proyecto y de tarea. Aditiva (ADD COLUMN ... NOT NULL DEFAULT y CREATE TABLE IF NOT EXISTS) -> no se
+    // pierde ninguna fila (regla #6). Los CREATE son los createSql que Room exporta en
+    // app/schemas/.../16.json (si no coinciden, la validación de Room al abrir la BD falla). Rellenos:
+    //   project_section -> una sección por proyecto existente, en la posición 0, con el nombre «Tareas»
+    //                      en el idioma del móvil en ese momento (decisión del usuario d8)
+    //   calendarEntry.sectionId -> todas las filas de ese proyecto (de cualquier tipo, plantillas
+    //                      incluidas) apuntan a esa sección; las sueltas (projectId 0) se quedan a 0
+    //   tag             -> las 4 etiquetas y las 4 áreas predefinidas (TagSeeds), en el mismo idioma
+    // Es una fábrica y no un campo estático porque los nombres sembrados necesitan un Context.
+    public static Migration migration15To16(final Context context) {
+        final Context app = context.getApplicationContext() != null ? context.getApplicationContext() : context;
+        return new Migration(15, 16) {
+            @Override
+            public void migrate(SupportSQLiteDatabase database) {
+                migrate15To16(database, TagSeeds.sectionName(app), TagSeeds.build(app));
+            }
+        };
+    }
+
+    static void migrate15To16(SupportSQLiteDatabase database, String sectionName, List<Tag> seeds) {
+        database.execSQL("ALTER TABLE project ADD COLUMN iconKey TEXT NOT NULL DEFAULT '"
+                + Project.DEFAULT_ICON_KEY + "'");
+        database.execSQL("ALTER TABLE project ADD COLUMN areaId INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE calendarEntry ADD COLUMN priority INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE calendarEntry ADD COLUMN tagId INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE calendarEntry ADD COLUMN sectionId INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE calendarEntry ADD COLUMN blockOnFocus INTEGER NOT NULL DEFAULT 0");
+        database.execSQL("ALTER TABLE calendarEntry ADD COLUMN completionNote TEXT");
+        database.execSQL("CREATE TABLE IF NOT EXISTS `project_section` (`id` INTEGER PRIMARY KEY "
+                + "AUTOINCREMENT NOT NULL, `projectId` INTEGER NOT NULL, `name` TEXT, `position` INTEGER NOT NULL)");
+        database.execSQL("CREATE TABLE IF NOT EXISTS `task_subtask` (`id` INTEGER PRIMARY KEY "
+                + "AUTOINCREMENT NOT NULL, `entryId` INTEGER NOT NULL, `title` TEXT, `done` INTEGER NOT NULL, "
+                + "`position` INTEGER NOT NULL)");
+        database.execSQL("CREATE TABLE IF NOT EXISTS `tag` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                + "`name` TEXT, `iconKey` TEXT, `colorKey` TEXT, `kind` INTEGER NOT NULL, "
+                + "`position` INTEGER NOT NULL)");
+
+        database.execSQL("INSERT INTO project_section (projectId, name, position) "
+                + "SELECT id, ?, 0 FROM project ORDER BY id", new Object[]{sectionName});
+        database.execSQL("UPDATE calendarEntry SET sectionId = (SELECT s.id FROM project_section s "
+                + "WHERE s.projectId = calendarEntry.projectId AND s.position = 0) "
+                + "WHERE projectId != 0 AND projectId IN (SELECT projectId FROM project_section)");
+        insertTags(database, seeds);
+    }
+
+    // Inserta las etiquetas y áreas predefinidas (migración 15 -> 16 y base nueva).
+    static void insertTags(SupportSQLiteDatabase database, List<Tag> tags) {
+        for (Tag t : tags) {
+            database.execSQL("INSERT INTO tag (name, iconKey, colorKey, kind, position) VALUES (?, ?, ?, ?, ?)",
+                    new Object[]{t.name, t.iconKey, t.colorKey, t.kind, t.position});
+        }
+    }
+
+    // rediseno-proyectos (DB v16): una instalación nueva nace con las mismas etiquetas y áreas que deja
+    // la migración, con los nombres en el idioma del Context que recibe el builder (nunca uno fijo).
+    // onCreate solo corre al crear la base (las tablas ya existen y están vacías).
+    public static RoomDatabase.Callback seedCallback(final Context context) {
+        final Context app = context.getApplicationContext() != null ? context.getApplicationContext() : context;
+        return new RoomDatabase.Callback() {
+            @Override
+            public void onCreate(SupportSQLiteDatabase db) {
+                insertTags(db, TagSeeds.build(app));
+            }
+        };
     }
 }

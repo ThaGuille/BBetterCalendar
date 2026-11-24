@@ -2,6 +2,19 @@
 <!-- Projects (mejora-visual u11, mockups 30/31). List: cards with a top zone (opens the project) and a
      lower strip (expands the pending tasks). Detail: ring, figures, task list and quick add. -->
 <resources>
+    <!-- rediseno-proyectos: seeds -->
+    <!-- Names written into the database once (DB v16 migration and new installs), in the phone's
+         language at that moment; the user can rename them later. -->
+    <string name="projects_seed_section_tasks">Tasks</string>
+    <string name="projects_seed_tag_writing">writing</string>
+    <string name="projects_seed_tag_reading">reading</string>
+    <string name="projects_seed_tag_errand">errand</string>
+    <string name="projects_seed_tag_call">call</string>
+    <string name="projects_seed_area_studies">Studies</string>
+    <string name="projects_seed_area_work">Work</string>
+    <string name="projects_seed_area_home">Home</string>
+    <string name="projects_seed_area_personal">Personal</string>
+
     <string name="projects_title">Projects</string>
     <string name="projects_summary_active">%1$d active</string>
     <plurals name="projects_summary_due">

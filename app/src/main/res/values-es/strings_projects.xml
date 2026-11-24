@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- rediseno-proyectos: seeds -->
+    <string name="projects_seed_section_tasks">Tareas</string>
+    <string name="projects_seed_tag_writing">escritura</string>
+    <string name="projects_seed_tag_reading">lectura</string>
+    <string name="projects_seed_tag_errand">recado</string>
+    <string name="projects_seed_tag_call">llamada</string>
+    <string name="projects_seed_area_studies">Estudios</string>
+    <string name="projects_seed_area_work">Trabajo</string>
+    <string name="projects_seed_area_home">Casa</string>
+    <string name="projects_seed_area_personal">Personal</string>
+
     <string name="projects_title">Proyectos</string>
     <string name="project_tasks_and_time">%1$s · %2$s</string>
     <string name="projects_summary_active">%1$d activos</string>

@@ -1,5 +1,7 @@
 package com.example.bbettercalendar.projects;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -12,6 +14,8 @@ public class Project {
     public static final int STATUS_ACTIVE = 0;
     public static final int STATUS_COMPLETED = 1;
     public static final int STATUS_ARCHIVED = 2;
+    // rediseno-proyectos (DB v16): icono por defecto de los proyectos que ya existían y de los nuevos.
+    public static final String DEFAULT_ICON_KEY = "box";
 
     @PrimaryKey(autoGenerate = true)
     public int id;
@@ -22,6 +26,13 @@ public class Project {
     public int colorIndex;           // chip de acento en la lista, cicla la paleta bb_*
     public long createdAtMillis;
     public long completedAtMillis;
+    // rediseno-proyectos (DB v16): icono del círculo del proyecto (cap, book, code, plane, box, home,
+    // heart, image) y área (Tag con kind = Tag.KIND_AREA); areaId 0 = sin área.
+    @NonNull
+    @ColumnInfo(defaultValue = DEFAULT_ICON_KEY)
+    public String iconKey = DEFAULT_ICON_KEY;
+    @ColumnInfo(defaultValue = "0")
+    public int areaId;
 
     public Project() {
     }

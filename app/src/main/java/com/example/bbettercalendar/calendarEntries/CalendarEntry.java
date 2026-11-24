@@ -1,5 +1,7 @@
 package com.example.bbettercalendar.calendarEntries;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
@@ -9,6 +11,13 @@ import java.util.Calendar;
 
 @Entity(tableName = "calendarEntry")
 public class CalendarEntry {
+
+    // rediseno-proyectos (DB v16): valores de priority. La prioridad solo se dice con color en la
+    // fila (D-P03); el selector y el orden «Prioridad primero» la dicen con palabras.
+    public static final int PRIORITY_NONE = 0;
+    public static final int PRIORITY_LOW = 1;
+    public static final int PRIORITY_MEDIUM = 2;
+    public static final int PRIORITY_HIGH = 3;
 
     /** Esto tendrá que ser serializable para guardarlo, y usar patrón builder para su creación**/
     @PrimaryKey(autoGenerate = true)
@@ -64,6 +73,23 @@ public class CalendarEntry {
     // (una tarea diaria llenaba el mes entero), por eso las series nuevas nacen ocultas. Las
     // ocurrencias heredan el flag de su plantilla.
     private boolean hiddenInCalendar;
+
+    // rediseno-proyectos (DB v16). Todos con su setter en EventBuilder; las copias de una fila
+    // (ocurrencias del materializador, EventBuilder.copyTaskFieldsFrom) los conservan.
+    //   priority       -> PRIORITY_NONE / LOW / MEDIUM / HIGH (0..3)
+    //   tagId          -> Tag (kind etiqueta) de la tarea; 0 = ninguna
+    //   sectionId      -> ProjectSection del proyecto; 0 = ninguna (se pinta en la primera)
+    //   blockOnFocus   -> su sesión de Focus arma sola el modo bloqueo (bloqueo suave, D-P12)
+    //   completionNote -> nota opcional al completarla; null = sin nota
+    @ColumnInfo(defaultValue = "0")
+    private int priority;
+    @ColumnInfo(defaultValue = "0")
+    private int tagId;
+    @ColumnInfo(defaultValue = "0")
+    private int sectionId;
+    @ColumnInfo(defaultValue = "0")
+    private boolean blockOnFocus;
+    private String completionNote;
 
     // Transitorio (no persistido): nº de ocurrencias atrasadas que una fila colapsada representa
     // en la sección de atrasadas de Home. 0 = fila normal (tarea suelta o no colapsada).
@@ -142,7 +168,17 @@ public class CalendarEntry {
     public void setProjectId(int projectId) {this.projectId = projectId;}
     public boolean isHiddenInCalendar() {return hiddenInCalendar;}
     public void setHiddenInCalendar(boolean hiddenInCalendar) {this.hiddenInCalendar = hiddenInCalendar;}
-    
+    public int getPriority() {return priority;}
+    public void setPriority(int priority) {this.priority = priority;}
+    public int getTagId() {return tagId;}
+    public void setTagId(int tagId) {this.tagId = tagId;}
+    public int getSectionId() {return sectionId;}
+    public void setSectionId(int sectionId) {this.sectionId = sectionId;}
+    public boolean isBlockOnFocus() {return blockOnFocus;}
+    public void setBlockOnFocus(boolean blockOnFocus) {this.blockOnFocus = blockOnFocus;}
+    public String getCompletionNote() {return completionNote;}
+    public void setCompletionNote(String completionNote) {this.completionNote = completionNote;}
+
     public static class EventBuilder implements Serializable {
         private int id;
         private String title;
@@ -162,6 +198,11 @@ public class CalendarEntry {
         private int type;
         private int projectId;
         private boolean hiddenInCalendar;
+        private int priority;
+        private int tagId;
+        private int sectionId;
+        private boolean blockOnFocus;
+        private String completionNote;
 
         public EventBuilder(){}  //hacer constructor con lo mínimo obligatiorio (title, description, limitDate)
 
@@ -288,6 +329,52 @@ public class CalendarEntry {
         }
         public boolean getEventHiddenInCalendar() {return hiddenInCalendar;}
 
+        // rediseno-proyectos (DB v16): un setter por campo nuevo.
+        public EventBuilder setPriority(int priority) {
+            this.priority = priority;
+            return this;
+        }
+        public int getPriority() {return priority;}
+
+        public EventBuilder setTagId(int tagId) {
+            this.tagId = tagId;
+            return this;
+        }
+        public int getTagId() {return tagId;}
+
+        public EventBuilder setSectionId(int sectionId) {
+            this.sectionId = sectionId;
+            return this;
+        }
+        public int getSectionId() {return sectionId;}
+
+        public EventBuilder setBlockOnFocus(boolean blockOnFocus) {
+            this.blockOnFocus = blockOnFocus;
+            return this;
+        }
+        public boolean getBlockOnFocus() {return blockOnFocus;}
+
+        public EventBuilder setCompletionNote(String completionNote) {
+            this.completionNote = completionNote;
+            return this;
+        }
+        public String getCompletionNote() {return completionNote;}
+
+        /**
+         * Copia en este builder los cinco campos de tarea de la v16 (prioridad, etiqueta, sección,
+         * bloqueo al enfocar y nota al completar) de {@code source}. Lo usa toda copia de una fila
+         * que se reconstruye con el builder (ocurrencias del materializador; un guardado que reescriba
+         * una tarea existente), para que no los pierda volviendo a los valores por defecto.
+         */
+        public EventBuilder copyTaskFieldsFrom(@NonNull CalendarEntry source) {
+            this.priority = source.getPriority();
+            this.tagId = source.getTagId();
+            this.sectionId = source.getSectionId();
+            this.blockOnFocus = source.isBlockOnFocus();
+            this.completionNote = source.getCompletionNote();
+            return this;
+        }
+
         public CalendarEntry build(){
             return new CalendarEntry(this);
         }
@@ -314,6 +401,11 @@ public class CalendarEntry {
         this.type = builder.type;
         this.projectId = builder.projectId;
         this.hiddenInCalendar = builder.hiddenInCalendar;
+        this.priority = builder.priority;
+        this.tagId = builder.tagId;
+        this.sectionId = builder.sectionId;
+        this.blockOnFocus = builder.blockOnFocus;
+        this.completionNote = builder.completionNote;
     }
     public CalendarEntry(){}
 }

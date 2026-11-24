@@ -183,6 +183,15 @@ public class RecurrenceMaterializer {
     }
 
     private void insertOccurrence(CalendarEntry template, long startMillis) {
+        CalendarEntry occurrence = buildOccurrence(template, startMillis);
+        long rowId = dao.insert(occurrence);
+        occurrence.setId((int) rowId);
+        scheduler.scheduleFor(occurrence);
+    }
+
+    // La fila de ocurrencia que se inserta para la plantilla en startMillis (sin id aún). Pura (sin BD
+    // ni Android más allá de Calendar) para poder cubrirla con tests JVM -- ver EventBuilderV16Test.
+    static CalendarEntry buildOccurrence(CalendarEntry template, long startMillis) {
         Calendar start = Calendar.getInstance();
         start.setTimeInMillis(startMillis);
 
@@ -190,7 +199,7 @@ public class RecurrenceMaterializer {
                 ? Arrays.copyOf(template.getNotifications(), template.getNotifications().length)
                 : new boolean[7];
 
-        CalendarEntry occurrence = new CalendarEntry.EventBuilder()
+        return new CalendarEntry.EventBuilder()
                 .setEventType(template.getType())  // hereda el tipo de la plantilla, no lo asume tarea
                 .setEventTitle(template.getTitle())
                 .setEventDescription(template.getDescription())
@@ -203,11 +212,10 @@ public class RecurrenceMaterializer {
                 // de su plantilla (spec recurrence-calendar-visibility).
                 .setEventHiddenInCalendar(template.isHiddenInCalendar())
                 .setEventTemplateId(template.getId())
+                // rediseno-proyectos (DB v16): prioridad, etiqueta, sección, bloqueo y nota son de la
+                // serie; la ocurrencia los hereda igual que el resto.
+                .copyTaskFieldsFrom(template)
                 .build();
-
-        long rowId = dao.insert(occurrence);
-        occurrence.setId((int) rowId);
-        scheduler.scheduleFor(occurrence);
     }
 
     private long horizonMillis() {

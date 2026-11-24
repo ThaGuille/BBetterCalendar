@@ -33,6 +33,10 @@ import java.util.List;
  * TODAS las tablas, y la abre con Room a v15 solo con {@link DBMigration#MIGRATION_14_15} y SIN
  * fallbackToDestructiveMigration: si el SQL de la migración no deja el esquema que Room espera, la
  * validación de Room lanza al abrir; si la migración borrara algo, las filas no estarían.
+ *
+ * <p>rediseno-proyectos (DB v16): AppDatabase ya es v16, así que la base se abre encadenando
+ * {@link DBMigration#MIGRATION_14_15} y {@link DBMigration#migration15To16(Context)}; lo que aquí se
+ * comprueba de la 14 -> 15 sigue igual (la 15 -> 16 solo añade).
  */
 @RunWith(AndroidJUnit4.class)
 public class Migration14To15Test {
@@ -85,7 +89,7 @@ public class Migration14To15Test {
         // getWritableDatabase() corre la migración y la validación de esquema de Room: si el SQL no
         // coincide con las entidades lanza IllegalStateException ("Migration didn't properly handle").
         SupportSQLiteDatabase db = room.getOpenHelper().getWritableDatabase();
-        assertEquals(15, db.getVersion());
+        assertEquals(16, db.getVersion());
 
         // La tabla nueva funciona por su DAO (clave compuesta + suma por día).
         room.appUsageDailyDao().upsertAll(Arrays.asList(
@@ -182,7 +186,7 @@ public class Migration14To15Test {
     private void openV15() {
         // SIN fallbackToDestructiveMigration: una migración que falte o no cuadre lanza en vez de borrar.
         room = Room.databaseBuilder(context, AppDatabase.class, DB_NAME)
-                .addMigrations(DBMigration.MIGRATION_14_15)
+                .addMigrations(DBMigration.MIGRATION_14_15, DBMigration.migration15To16(context))
                 .allowMainThreadQueries()
                 .build();
     }

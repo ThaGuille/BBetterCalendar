@@ -5,6 +5,9 @@ import android.content.Context;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.configuration.ConfigurationDAO;
 import com.example.bbettercalendar.projects.ProjectDAO;
+import com.example.bbettercalendar.projects.ProjectSectionDAO;
+import com.example.bbettercalendar.projects.TagDAO;
+import com.example.bbettercalendar.projects.TaskSubtaskDAO;
 import com.example.bbettercalendar.stats.AppRuleDAO;
 import com.example.bbettercalendar.stats.AppUsageDailyDAO;
 import com.example.bbettercalendar.stats.ConsentRecordDAO;
@@ -87,5 +90,24 @@ public class DatabaseModule {
     @Singleton
     public static AppUsageDailyDAO provideAppUsageDailyDAO(AppDatabase database) {
         return database.appUsageDailyDao();
+    }
+
+    // rediseno-proyectos (DB v16): secciones, subtareas y etiquetas/áreas de Proyectos.
+    @Provides
+    @Singleton
+    public static ProjectSectionDAO provideProjectSectionDAO(AppDatabase database) {
+        return database.projectSectionDao();
+    }
+
+    @Provides
+    @Singleton
+    public static TaskSubtaskDAO provideTaskSubtaskDAO(AppDatabase database) {
+        return database.taskSubtaskDao();
+    }
+
+    @Provides
+    @Singleton
+    public static TagDAO provideTagDAO(AppDatabase database) {
+        return database.tagDao();
     }
 }

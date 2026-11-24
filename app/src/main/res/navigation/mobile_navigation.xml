@@ -49,6 +49,28 @@
             app:argType="integer" />
     </fragment>
 
+    <!-- rediseno-proyectos u9: full-screen task editor (D1), secondary destination without the bottom bar.
+         entryId 0 = new task; draft = optional TaskDraft (Serializable) coming from the quick add. -->
+    <fragment
+        android:id="@+id/navigation_task_editor"
+        android:name="com.example.bbettercalendar.ui.projects.editor.TaskEditorFragment"
+        android:label="@string/projects_editor_title_edit"
+        tools:layout="@layout/fragment_task_editor" >
+        <argument
+            android:name="projectId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="entryId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="draft"
+            android:defaultValue="@null"
+            app:argType="com.example.bbettercalendar.projects.domain.TaskDraft"
+            app:nullable="true" />
+    </fragment>
+
     <!-- Acción global: alcanzable desde cualquier destino. Las tres entradas a un proyecto (deep link de la
          notificación de deadline, marcador del calendario, fila de la banda de Progress) abren Proyectos con
          ese proyecto elegido; singleTop + popUpTo evitan una entrada duplicada en la pila. -->

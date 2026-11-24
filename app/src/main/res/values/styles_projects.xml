@@ -51,6 +51,14 @@
     <!-- rediseno-proyectos: quickadd -->
 
     <!-- rediseno-proyectos: editor -->
+    <!-- Big value of a When / Focus tile (the day, the duration). -->
+    <style name="TextAppearance.BBetter.EditorTileValue" parent="TextAppearance.BBetter.Title" />
+
+    <!-- Meta line of a tile (time, reminder, Pomodoro). -->
+    <style name="TextAppearance.BBetter.EditorTileMeta" parent="TextAppearance.BBetter.Caption">
+        <item name="android:textColor">@color/bb_on_surface</item>
+    </style>
+
 
     <!-- rediseno-proyectos: form -->
 

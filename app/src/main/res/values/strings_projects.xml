@@ -211,6 +211,33 @@
     <!-- rediseno-proyectos: quickadd -->
 
     <!-- rediseno-proyectos: editor -->
+    <string name="projects_editor_title_new">New task</string>
+    <string name="projects_editor_title_edit">Task</string>
+    <string name="projects_editor_close_desc">Close without saving</string>
+    <string name="projects_editor_delete_desc">Delete task</string>
+    <string name="projects_editor_save">Save</string>
+    <string name="projects_editor_title_hint">Task title</string>
+    <string name="projects_editor_add_note">Add note</string>
+    <string name="projects_editor_note_hint">Write a note</string>
+    <string name="projects_editor_tile_when">When</string>
+    <string name="projects_editor_tile_focus">Focus</string>
+    <string name="projects_editor_tile_priority">Priority</string>
+    <string name="projects_editor_tile_tag">Tag</string>
+    <string name="projects_editor_tile_section">Section</string>
+    <string name="projects_editor_tile_subtasks">Subtasks</string>
+    <string name="projects_editor_subtasks_header">Subtasks · %1$s</string>
+    <string name="projects_editor_subtasks_none">None</string>
+    <string name="projects_editor_subtasks_more">+%1$d more</string>
+    <string name="projects_editor_pomodoro">Pomodoro</string>
+    <string name="projects_editor_lock_desc">Soft block when focusing</string>
+    <string name="projects_editor_discard_title">Discard changes?</string>
+    <string name="projects_editor_discard_confirm">Discard</string>
+    <string name="projects_editor_discard_keep">Keep editing</string>
+    <string name="projects_editor_done_mark">Mark as done</string>
+    <string name="projects_editor_done_done">Done</string>
+    <string name="projects_editor_completion_note_hint">Completion note (optional)</string>
+    <string name="projects_editor_focused_minutes">%1$d min focused on this task</string>
+
 
     <!-- rediseno-proyectos: form -->
 

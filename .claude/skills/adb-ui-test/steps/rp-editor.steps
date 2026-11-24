@@ -1,0 +1,74 @@
+# rediseno-proyectos u9: the full-screen task editor (D1) on the seeded app. Opens Escribir el capítulo 3 (today 17:00,
+# 2 h with Pomodoro and the lock, High, its tag, Redacción, subtasks 2/5), changes its priority, saves; reopens it and
+# marks it done with a completion note; deletes another task and undoes it. Repeat is inert and never touched here.
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device (every run of the check seeds first).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-editor.steps --save rp-editor
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+TAP text=Tesis final,
+WAIT 1500
+# The second row of Redacción (the AVD is 1080x1920; the check before a title has the same words in its description,
+# so a text tap would complete the task: open the row by a tap on its title instead).
+SWIPE 500 1180 500 1180 60
+WAIT 2000
+ASSERT id=taskEditorTitle expect~=Escribir el capítulo 3
+ASSERT id=taskEditorWhen
+ASSERT id=taskEditorWhenValue expect~=Today|Hoy
+ASSERT id=taskEditorMetaTime expect~=17:00
+ASSERT id=taskEditorFocus
+ASSERT id=taskEditorFocusValue expect~=2 h
+ASSERT id=taskEditorMetaPomodoro expect~=Pomodoro
+ASSERT id=taskEditorMetaLock
+ASSERT id=taskEditorPriority expect~=High|Alta
+ASSERT id=taskEditorTag expect~=Writing|Escritura
+ASSERT id=taskEditorSection expect~=Redacción
+ASSERT id=taskEditorSubtasks
+SHOT rp-editor-initial
+# Open the Priority picker under its row; pick Medium; the tile follows.
+TAP id=taskEditorPriority
+WAIT 800
+ASSERT id=pickerPriMedium
+SHOT rp-editor-priority-open
+TAP id=pickerPriMedium
+WAIT 600
+ASSERT id=taskEditorPriority expect~=Medium|Media
+# Opening another tile closes the first one.
+TAP id=taskEditorFocus
+WAIT 800
+ASSERT id=pickerDur50
+SHOT rp-editor-focus-open
+TAP id=taskEditorSave
+WAIT 2000
+ASSERT id=snackbar_text expect~=Changes saved|Cambios guardados
+SHOT rp-editor-saved
+# Reopen it (same place: the order is by date), mark it done and write the completion note.
+SWIPE 500 1180 500 1180 60
+WAIT 2000
+ASSERT id=taskEditorTitle expect~=Escribir el capítulo 3
+ASSERT id=taskEditorPriority expect~=Medium|Media
+SWIPE 540 1500 540 600 400
+WAIT 800
+TAP id=taskEditorDone
+WAIT 800
+ASSERT id=taskEditorDone expect~=Done|Hecha
+TAP id=taskEditorCompletionNote
+TYPE Capitulo entregado
+SHOT rp-editor-done
+TAP id=taskEditorSave
+WAIT 2000
+SHOT rp-editor-done-saved
+# Another task (Reunión con la tutora, first row): the trash closes the screen and the snackbar offers Undo.
+SWIPE 500 1030 500 1030 60
+WAIT 2000
+ASSERT id=taskEditorTitle expect~=Reunión con la tutora
+TAP id=taskEditorDelete
+WAIT 1500
+# Finding the Undo button is the proof that the snackbar is up. No assert or capture before the tap: two UI dumps
+# would outlast the snackbar (a few seconds).
+TAP id=snackbar_action
+WAIT 2500
+ASSERT id=projectsSummaryTitle expect~=tutora
+SHOT rp-editor-undone

@@ -1,0 +1,63 @@
+﻿# scenario: rp-editor
+# recorded: 2026-11-24T21:05:52.881397+00:00  from run-steps rp-editor
+1795554288716	GRANT android.permission.POST_NOTIFICATIONS
+1795554288890	START .configuration.SplashActivity
+1795554289259	WAIT 5000
+1795554289259	TAP id=navigation_projects
+1795554294687	WAIT 2500
+1795554294687	TAP text=Tesis final,
+1795554297602	WAIT 1500
+1795554299189	SWIPE 500 1180 500 1180 60
+1795554299440	WAIT 2000
+1795554299440	ASSERT id=taskEditorTitle expect~=Escribir el capítulo 3
+1795554301966	ASSERT id=taskEditorWhen
+1795554302053	ASSERT id=taskEditorWhenValue expect~=Today|Hoy
+1795554302140	ASSERT id=taskEditorMetaTime expect~=17:00
+1795554302222	ASSERT id=taskEditorFocus
+1795554302305	ASSERT id=taskEditorFocusValue expect~=2 h
+1795554302386	ASSERT id=taskEditorMetaPomodoro expect~=Pomodoro
+1795554302466	ASSERT id=taskEditorMetaLock
+1795554302546	ASSERT id=taskEditorPriority expect~=High|Alta
+1795554302628	ASSERT id=taskEditorTag expect~=Writing|Escritura
+1795554302731	ASSERT id=taskEditorSection expect~=Redacción
+1795554302818	ASSERT id=taskEditorSubtasks
+1795554302910	SHOT rp-editor-initial
+1795554303510	TAP id=taskEditorPriority
+1795554305940	WAIT 800
+1795554305940	ASSERT id=pickerPriMedium
+1795554308297	SHOT rp-editor-priority-open
+1795554308829	TAP id=pickerPriMedium
+1795554311250	WAIT 600
+1795554311250	ASSERT id=taskEditorPriority expect~=Medium|Media
+1795554313669	TAP id=taskEditorFocus
+1795554316130	WAIT 800
+1795554316130	ASSERT id=pickerDur50
+1795554318477	SHOT rp-editor-focus-open
+1795554319045	TAP id=taskEditorSave
+1795554321494	WAIT 2000
+1795554321495	ASSERT id=snackbar_text expect~=Changes saved|Cambios guardados
+1795554324061	SHOT rp-editor-saved
+1795554324684	SWIPE 500 1180 500 1180 60
+1795554324996	WAIT 2000
+1795554324996	ASSERT id=taskEditorTitle expect~=Escribir el capítulo 3
+1795554327478	ASSERT id=taskEditorPriority expect~=Medium|Media
+1795554327562	SWIPE 540 1500 540 600 400
+1795554328207	WAIT 800
+1795554328207	TAP id=taskEditorDone
+1795554330831	WAIT 800
+1795554330831	ASSERT id=taskEditorDone expect~=Done|Hecha
+1795554333278	TAP id=taskEditorCompletionNote
+1795554335738	TYPE Capitulo entregado
+1795554336375	SHOT rp-editor-done
+1795554336968	TAP id=taskEditorSave
+1795554339458	WAIT 2000
+1795554341538	SHOT rp-editor-done-saved
+1795554342089	SWIPE 500 1030 500 1030 60
+1795554342353	WAIT 2000
+1795554342353	ASSERT id=taskEditorTitle expect~=Reunión con la tutora
+1795554344774	TAP id=taskEditorDelete
+1795554347200	WAIT 1500
+1795554347200	TAP id=snackbar_action
+1795554349945	WAIT 2500
+1795554349945	ASSERT id=projectsSummaryTitle expect~=tutora
+1795554352346	SHOT rp-editor-undone

@@ -78,6 +78,17 @@
     <!-- rediseno-proyectos: quickadd -->
 
     <!-- rediseno-proyectos: editor -->
+    <dimen name="projects_editor_pad">16dp</dimen>
+    <dimen name="projects_editor_gap">8dp</dimen>
+    <dimen name="projects_editor_tile_pad">12dp</dimen>
+    <dimen name="projects_editor_tile_min">48dp</dimen>
+    <dimen name="projects_editor_tile_stroke">1dp</dimen>
+    <dimen name="projects_editor_tile_stroke_open">2dp</dimen>
+    <dimen name="projects_editor_icon">20dp</dimen>
+    <dimen name="projects_editor_meta_icon">16dp</dimen>
+    <dimen name="projects_editor_sub_box">16dp</dimen>
+    <dimen name="projects_editor_sub_radius">4dp</dimen>
+
 
     <!-- rediseno-proyectos: form -->
 

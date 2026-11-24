@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: small unchecked box of a subtask line in the Subtasks tile. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <stroke
+        android:width="1.5dp"
+        android:color="@color/bb_checkbox_border" />
+    <corners android:radius="@dimen/projects_editor_sub_radius" />
+</shape>

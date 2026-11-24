@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: a tile of the full task editor; the tile whose picker is open (selected) gets the
+     bb_primary_bright border. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_surface_card" />
+            <stroke
+                android:width="@dimen/projects_editor_tile_stroke_open"
+                android:color="@color/bb_primary_bright" />
+            <corners android:radius="@dimen/radius_inner" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bb_surface_card" />
+            <stroke
+                android:width="@dimen/projects_editor_tile_stroke"
+                android:color="@color/bb_outline" />
+            <corners android:radius="@dimen/radius_inner" />
+        </shape>
+    </item>
+</selector>

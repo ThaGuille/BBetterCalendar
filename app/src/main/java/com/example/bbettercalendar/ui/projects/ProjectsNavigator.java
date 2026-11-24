@@ -34,12 +34,19 @@ public class ProjectsNavigator {
 
     /** Full editor (D1) in edit mode. */
     public void openTaskEditor(int projectId, int entryId) {
-        // TODO(rediseno-proyectos): editor
+        android.os.Bundle args = new android.os.Bundle();
+        args.putInt("projectId", projectId);
+        args.putInt("entryId", entryId);
+        NavHostFragment.findNavController(fragment).navigate(R.id.navigation_task_editor, args);
     }
 
     /** Full editor (D1) opened with the quick add draft. */
     public void openTaskEditorWithDraft(int projectId, TaskDraft draft) {
-        // TODO(rediseno-proyectos): editor draft
+        android.os.Bundle args = new android.os.Bundle();
+        args.putInt("projectId", projectId);
+        args.putInt("entryId", 0);
+        args.putSerializable("draft", draft);
+        NavHostFragment.findNavController(fragment).navigate(R.id.navigation_task_editor, args);
     }
 
     /** Project form; 0 = create. */

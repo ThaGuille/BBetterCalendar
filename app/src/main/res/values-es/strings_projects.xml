@@ -202,6 +202,33 @@
     <!-- rediseno-proyectos: quickadd -->
 
     <!-- rediseno-proyectos: editor -->
+    <string name="projects_editor_title_new">Nueva tarea</string>
+    <string name="projects_editor_title_edit">Tarea</string>
+    <string name="projects_editor_close_desc">Cerrar sin guardar</string>
+    <string name="projects_editor_delete_desc">Eliminar tarea</string>
+    <string name="projects_editor_save">Guardar</string>
+    <string name="projects_editor_title_hint">Título de la tarea</string>
+    <string name="projects_editor_add_note">Añadir nota</string>
+    <string name="projects_editor_note_hint">Escribe una nota</string>
+    <string name="projects_editor_tile_when">Cuándo</string>
+    <string name="projects_editor_tile_focus">Enfoque</string>
+    <string name="projects_editor_tile_priority">Prioridad</string>
+    <string name="projects_editor_tile_tag">Etiqueta</string>
+    <string name="projects_editor_tile_section">Sección</string>
+    <string name="projects_editor_tile_subtasks">Subtareas</string>
+    <string name="projects_editor_subtasks_header">Subtareas · %1$s</string>
+    <string name="projects_editor_subtasks_none">Ninguna</string>
+    <string name="projects_editor_subtasks_more">+%1$d más</string>
+    <string name="projects_editor_pomodoro">Pomodoro</string>
+    <string name="projects_editor_lock_desc">Bloqueo suave al enfocar</string>
+    <string name="projects_editor_discard_title">¿Descartar los cambios?</string>
+    <string name="projects_editor_discard_confirm">Descartar</string>
+    <string name="projects_editor_discard_keep">Seguir editando</string>
+    <string name="projects_editor_done_mark">Marcar como hecha</string>
+    <string name="projects_editor_done_done">Hecha</string>
+    <string name="projects_editor_completion_note_hint">Nota al completar (opcional)</string>
+    <string name="projects_editor_focused_minutes">%1$d min enfocados en esta tarea</string>
+
 
     <!-- rediseno-proyectos: form -->
 

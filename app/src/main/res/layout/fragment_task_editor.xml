@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos u9: full-screen task editor (D1, spec 3.4). Bar, big title, note, then the grid of tiles:
+     row 1 When + Focus, row 2 Priority + Tag, row 3 Section, row 4 Subtasks. The picker of a tile opens in the
+     FrameLayout right under its row (taskEditorSlot1..4), at full width. Edit mode adds the done block. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/taskEditorRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface"
+    android:orientation="vertical"
+    tools:context=".ui.projects.editor.TaskEditorFragment">
+
+    <LinearLayout
+        android:id="@+id/taskEditorBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_sm">
+
+        <ImageButton
+            android:id="@+id/taskEditorClose"
+            style="@style/Widget.BBetter.ProjectsToolButton"
+            android:contentDescription="@string/projects_editor_close_desc"
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/bb_on_surface" />
+
+        <TextView
+            android:id="@+id/taskEditorBarTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.BBetter.TopBar"
+            tools:text="Tarea" />
+
+        <ImageButton
+            android:id="@+id/taskEditorDelete"
+            style="@style/Widget.BBetter.ProjectsToolButton"
+            android:contentDescription="@string/projects_editor_delete_desc"
+            android:src="@drawable/ic_delete_24"
+            android:visibility="gone"
+            app:tint="@color/bb_on_surface" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/taskEditorSave"
+            style="@style/Widget.BBetter.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/projects_editor_tile_min"
+            android:text="@string/projects_editor_save" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/taskEditorScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="ifContentScrolls">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/projects_editor_pad"
+            android:paddingTop="@dimen/projects_editor_gap"
+            android:paddingEnd="@dimen/projects_editor_pad"
+            android:paddingBottom="@dimen/spacing_xl">
+
+            <EditText
+                android:id="@+id/taskEditorTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:hint="@string/projects_editor_title_hint"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences|textMultiLine"
+                android:minHeight="@dimen/projects_editor_tile_min"
+                android:textAppearance="@style/TextAppearance.BBetter.Headline"
+                android:textColorHint="@color/bb_on_surface_muted" />
+
+            <TextView
+                android:id="@+id/taskEditorAddNote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/projects_editor_gap"
+                android:drawableStart="@drawable/ic_note_24"
+                android:drawableTint="@color/bb_on_surface_muted"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/projects_editor_tile_min"
+                android:text="@string/projects_editor_add_note"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+            <EditText
+                android:id="@+id/taskEditorNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="top|start"
+                android:hint="@string/projects_editor_note_hint"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences|textMultiLine"
+                android:minHeight="@dimen/projects_editor_tile_min"
+                android:minLines="2"
+                android:textAppearance="@style/TextAppearance.BBetter.Body"
+                android:textColorHint="@color/bb_on_surface_muted"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/taskEditorGrid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/projects_editor_gap"
+                android:orientation="vertical">
+
+                <!-- Row 1: When + Focus (medium, tall). -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/taskEditorWhen"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="@dimen/projects_editor_gap"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_task_editor_tile"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="vertical"
+                        android:padding="@dimen/projects_editor_tile_pad">
+
+                        <TextView
+                            android:id="@+id/taskEditorWhenLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="@dimen/spacing_xs"
+                            android:drawableStart="@drawable/ic_calendar_24"
+                            android:drawableTint="@color/bb_primary"
+                            android:gravity="center_vertical"
+                            android:text="@string/projects_editor_tile_when"
+                            android:textAppearance="@style/TextAppearance.BBetter.PickerLabel" />
+
+                        <TextView
+                            android:id="@+id/taskEditorWhenValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:textAppearance="@style/TextAppearance.BBetter.EditorTileValue"
+                            tools:text="Today" />
+
+                        <LinearLayout
+                            android:id="@+id/taskEditorWhenMeta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/taskEditorFocus"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_task_editor_tile"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="vertical"
+                        android:padding="@dimen/projects_editor_tile_pad">
+
+                        <TextView
+                            android:id="@+id/taskEditorFocusLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="@dimen/spacing_xs"
+                            android:drawableStart="@drawable/ic_timer_24"
+                            android:drawableTint="@color/bb_sanct_primary"
+                            android:gravity="center_vertical"
+                            android:text="@string/projects_editor_tile_focus"
+                            android:textAppearance="@style/TextAppearance.BBetter.PickerLabel" />
+
+                        <TextView
+                            android:id="@+id/taskEditorFocusValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:textAppearance="@style/TextAppearance.BBetter.EditorTileValue"
+                            tools:text="Free" />
+
+                        <LinearLayout
+                            android:id="@+id/taskEditorFocusMeta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/taskEditorSlot1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <!-- Row 2: Priority + Tag (small, one line). -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/projects_editor_gap"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/taskEditorPriority"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/projects_editor_gap"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_task_editor_tile"
+                        android:clickable="true"
+                        android:drawablePadding="@dimen/projects_editor_gap"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:minHeight="@dimen/projects_editor_tile_min"
+                        android:padding="@dimen/projects_editor_tile_pad"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body"
+                        tools:text="High" />
+
+                    <TextView
+                        android:id="@+id/taskEditorTag"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_task_editor_tile"
+                        android:clickable="true"
+                        android:drawablePadding="@dimen/projects_editor_gap"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:minHeight="@dimen/projects_editor_tile_min"
+                        android:padding="@dimen/projects_editor_tile_pad"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body"
+                        tools:text="Tag" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/taskEditorSlot2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <!-- Row 3: Section (small, left column). -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/projects_editor_gap"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/taskEditorSection"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/projects_editor_gap"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_task_editor_tile"
+                        android:clickable="true"
+                        android:drawablePadding="@dimen/projects_editor_gap"
+                        android:drawableStart="@drawable/ic_section_24"
+                        android:drawableTint="@color/bb_on_surface_muted"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:minHeight="@dimen/projects_editor_tile_min"
+                        android:padding="@dimen/projects_editor_tile_pad"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body"
+                        tools:text="Redacción" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/taskEditorSlot3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <!-- Row 4: Subtasks (wide). -->
+                <LinearLayout
+                    android:id="@+id/taskEditorSubtasks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/projects_editor_gap"
+                    android:background="@drawable/bg_task_editor_tile"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="vertical"
+                    android:padding="@dimen/projects_editor_tile_pad">
+
+                    <TextView
+                        android:id="@+id/taskEditorSubtasksLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="@dimen/spacing_xs"
+                        android:drawableStart="@drawable/ic_subtasks_24"
+                        android:drawableTint="@color/bb_primary"
+                        android:gravity="center_vertical"
+                        android:textAppearance="@style/TextAppearance.BBetter.PickerLabel"
+                        tools:text="Subtasks · 1/2" />
+
+                    <LinearLayout
+                        android:id="@+id/taskEditorSubtasksLines"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/taskEditorSlot4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Edit mode only: done button, completion note, minutes focused. -->
+            <LinearLayout
+                android:id="@+id/taskEditorDoneBlock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/taskEditorDone"
+                    style="@style/Widget.BBetter.Button.Secondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/projects_editor_done_mark"
+                    app:icon="@drawable/ic_check_24"
+                    app:iconGravity="textStart" />
+
+                <EditText
+                    android:id="@+id/taskEditorCompletionNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/projects_editor_gap"
+                    android:background="@drawable/bg_task_editor_tile"
+                    android:drawablePadding="@dimen/projects_editor_gap"
+                    android:drawableStart="@drawable/ic_note_24"
+                    android:drawableTint="@color/bb_on_surface_muted"
+                    android:gravity="center_vertical"
+                    android:hint="@string/projects_editor_completion_note_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:minHeight="@dimen/projects_editor_tile_min"
+                    android:padding="@dimen/projects_editor_tile_pad"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body"
+                    android:textColorHint="@color/bb_on_surface_muted"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/taskEditorFocusedMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/projects_editor_gap"
+                    android:drawablePadding="@dimen/projects_editor_gap"
+                    android:drawableStart="@drawable/ic_timer_24"
+                    android:drawableTint="@color/bb_sanct_primary"
+                    android:gravity="center_vertical"
+                    android:textAppearance="@style/TextAppearance.BBetter.Caption"
+                    android:textColor="@color/bb_sanct_primary"
+                    android:visibility="gone"
+                    tools:text="45 min focused on this task" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

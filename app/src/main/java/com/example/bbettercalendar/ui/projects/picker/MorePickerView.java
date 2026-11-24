@@ -42,6 +42,7 @@ public class MorePickerView extends PickerView {
     private final Chip[] repeatChips = new Chip[REPEATS.length];
     private final Chip[] reminderChips = new Chip[REMINDERS.length];
     private final EditText note;
+    private final TextView noteLabel;
     private boolean binding;
 
     public MorePickerView(@NonNull Context context) {
@@ -83,7 +84,7 @@ public class MorePickerView extends PickerView {
             });
         }
 
-        addLabel(c, R.string.projects_picker_note_label);
+        noteLabel = addLabel(c, R.string.projects_picker_note_label);
         note = (EditText) LayoutInflater.from(context).inflate(R.layout.picker_input, c, false);
         note.setId(R.id.pickerNoteInput);
         note.setHint(R.string.projects_picker_note_hint);
@@ -104,6 +105,12 @@ public class MorePickerView extends PickerView {
             }
         });
         c.addView(note);
+    }
+
+    /** The full editor shows the note as its own field, so it hides the one of this picker. */
+    public void setNoteVisible(boolean visible) {
+        noteLabel.setVisibility(visible ? VISIBLE : GONE);
+        note.setVisibility(visible ? VISIBLE : GONE);
     }
 
     @Override

@@ -33,7 +33,9 @@
         android:fillViewport="true"
         android:scrollbars="none">
 
+        <!-- Su fondo y su overlay los pone FocusChains (cadenas con el bloqueo activo). -->
         <LinearLayout
+            android:id="@+id/focusContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
@@ -151,6 +153,7 @@
 
             <!-- ============ Controles: stop · pausa/play · saltar descanso ============ -->
             <LinearLayout
+                android:id="@+id/focusControlsRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"

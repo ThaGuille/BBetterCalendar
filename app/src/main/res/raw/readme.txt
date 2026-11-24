@@ -22,3 +22,12 @@ Where to source them (free, no attribution preferred)
 
 After adding files, uncomment the matching pool.load(...) calls inside
 SoundFeedback#SoundFeedback(Context).
+
+Already in use
+--------------
+  focus_chains_lock.wav     Focus: chains lock in (block mode + running), 1.7 s
+  focus_chains_release.wav  Focus: chains release, 0.6 s
+
+Synthesised, not sourced: regenerate both with
+  python .claude/scripts/gen_focus_chain_sounds.py
+(stereo 44.1 kHz WAV; the timing matches FocusChainsMotion).

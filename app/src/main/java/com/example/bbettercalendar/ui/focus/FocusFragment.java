@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -130,6 +132,10 @@ public class FocusFragment extends Fragment
     @Nullable private FocusUiState lastRendered;
     // u6: último estado de anillo pintado (null = aún nada en esta vista), para el barrido al empezar.
     @Nullable private RingState lastRingState;
+    // Cadenas con el bloqueo activo y la concentración en marcha. chainsShown: lo último pintado en esta
+    // vista (null = nada aún: el primer pintado no anima ni suena).
+    @Nullable private FocusChains chains;
+    @Nullable private Boolean chainsShown;
 
     public FocusFragment() {
         super(R.layout.fragment_focus);
@@ -161,6 +167,9 @@ public class FocusFragment extends Fragment
 
         lastRendered = null;
         lastRingState = null;
+        chainsShown = null;
+        chains = new FocusChains(view.findViewById(R.id.focusContent), view.findViewById(R.id.focusRingBox),
+                view.findViewById(R.id.focusControlsRow), view.findViewById(R.id.focusStatsCard));
         session.getUiState().observe(getViewLifecycleOwner(), this::render);
         session.getTodayTimeStudiedMillis().observe(getViewLifecycleOwner(), this::renderToday);
         session.getTodayFails().observe(getViewLifecycleOwner(), this::renderFails);
@@ -365,6 +374,48 @@ public class FocusFragment extends Fragment
         renderCycleDots(state);
         renderControls(state);
         renderBlockMode();
+        renderChains();
+    }
+
+    /**
+     * Cadenas de fondo mientras las apps están bloqueadas de verdad: modo bloqueo armado, permiso de
+     * accesibilidad concedido y concentración en marcha (no en pausa ni en el descanso). Al cambiar con
+     * la pantalla abierta entran desde las esquinas o se retiran, con su sonido; al abrir la pantalla
+     * sobre una sesión ya bloqueada aparecen quietas.
+     */
+    private void renderChains() {
+        if (chains == null || lastRendered == null) {
+            return;
+        }
+        boolean locked = lastRendered.isBlockingActive() && AccessibilityAccess.isEnabled(requireContext());
+        if (chainsShown != null && chainsShown == locked) {
+            return;
+        }
+        boolean live = chainsShown != null;
+        chainsShown = locked;
+        chains.setLocked(locked, live, live && locked ? this::popBlockModeIcon : null);
+        if (live) {
+            SoundFeedback sound = SoundFeedback.get(requireContext());
+            if (locked) {
+                sound.playChainsLock();
+            } else {
+                sound.playChainsRelease();
+            }
+        }
+    }
+
+    /** El candado de las cadenas se ha cerrado: el icono de bloqueo de la barra da un pequeño golpe. */
+    private void popBlockModeIcon() {
+        View icon = actionView(R.id.focusBlockModeButton);
+        if (icon == null) {
+            return;
+        }
+        icon.animate().cancel();
+        icon.animate().scaleX(1.3f).scaleY(1.3f).setDuration(120)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(() -> icon.animate().scaleX(1f).scaleY(1f).setDuration(230)
+                        .setInterpolator(new AccelerateDecelerateInterpolator()).start())
+                .start();
     }
 
     /**
@@ -560,11 +611,14 @@ public class FocusFragment extends Fragment
      * never needs anything. Always available, also mid-run (spec focus-mode-and-streak).
      */
     private void onBlockModeTapped() {
-        if (session.isBlockModeArmed()) {
+        boolean granted = AccessibilityAccess.isEnabled(requireContext());
+        if (session.isBlockModeArmed() && granted) {
             session.setBlockModeArmed(false);
-        } else if (AccessibilityAccess.isEnabled(requireContext())) {
+        } else if (!session.isBlockModeArmed() && granted) {
             session.setBlockModeArmed(true);
         } else {
+            // Sin el permiso de accesibilidad (apagado, o armado pero pendiente con la «!»): el
+            // diálogo sale al primer toque y el estado no cambia hasta que se acepte.
             AccessibilityDisclosureDialog.newInstance()
                     .show(getChildFragmentManager(), DISCLOSURE_TAG);
         }
@@ -817,6 +871,8 @@ public class FocusFragment extends Fragment
         // callback from Settings: re-assert the flag and re-render the 🚫 state.
         session.syncBlockState();
         renderBlockMode();
+        // También al volver de Ajustes con el permiso de accesibilidad recién concedido.
+        renderChains();
         // Red de seguridad: un resultado que llegó con el estado guardado sigue pendiente.
         sessionEvents.recheck();
         scheduleTick();
@@ -837,6 +893,11 @@ public class FocusFragment extends Fragment
         lastRendered = null;
         lastRingState = null;
         endsAtShown = null;
+        if (chains != null) {
+            chains.release();
+            chains = null;
+        }
+        chainsShown = null;
         toolbar = null;
         modeDot = null;
         modeChip = null;

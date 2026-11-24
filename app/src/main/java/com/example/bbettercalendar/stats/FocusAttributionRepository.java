@@ -8,6 +8,9 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.calendarEntries.CompletionStamp;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,53 @@ public class FocusAttributionRepository {
     }
 
     /**
+     * Rediseño de Proyectos (u4): como {@link #applyAttribution} pero sin tocar las filas que ya se
+     * emitieron. Con los ciclos de una tarea (y «Terminar antes») los minutos cambian sin que cambie la
+     * fila en Room; si se mutara la misma instancia, la lista que un adapter ya tiene pintada cambiaría
+     * por debajo y su DiffUtil no vería nada nuevo (Home se quedaba en «25 / 60 min»). Cada fila con
+     * meta sale como copia con sus minutos; las demás, tal cual.
+     */
+    static List<CalendarEntry> withAttribution(List<CalendarEntry> entries,
+                                               Map<Integer, Integer> minutesByEntryId) {
+        if (entries == null) {
+            return null;
+        }
+        List<CalendarEntry> out = new ArrayList<>(entries.size());
+        for (CalendarEntry entry : entries) {
+            if (entry.getTargetMinutes() > 0) {
+                Integer minutes = minutesByEntryId.get(entry.getId());
+                CalendarEntry copy = copyOf(entry);
+                copy.setAttributedMinutes(minutes == null ? 0 : minutes);
+                out.add(copy);
+            } else {
+                out.add(entry);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Copia superficial de una fila ya construida, campo a campo (todos, también los transitorios),
+     * para no depender de una lista de campos que se quede corta cuando la entidad crezca. No es
+     * construir una entrada nueva (regla 4): la original ya pasó por EventBuilder.
+     */
+    static CalendarEntry copyOf(CalendarEntry source) {
+        CalendarEntry copy = new CalendarEntry();
+        for (Field field : CalendarEntry.class.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            try {
+                field.setAccessible(true);
+                field.set(copy, field.get(source));
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException("Cannot copy CalendarEntry." + field.getName(), e);
+            }
+        }
+        return copy;
+    }
+
+    /**
      * Envuelve una lista observable de CalendarEntry (tareas/items) con sus minutos atribuidos,
      * recalculando cuando cambia la lista de entrada O cuando se registra un nuevo FocusEvent --
      * las dos fuentes viven en tablas distintas, así que hace falta un MediatorLiveData
@@ -89,7 +139,7 @@ public class FocusAttributionRepository {
                     byId.put(am.entryId, am.minutes);
                 }
             }
-            result.setValue(applyAttribution(currentEntries, byId));
+            result.setValue(withAttribution(currentEntries, byId));
         };
         result.addSource(entries, e -> recompute.run());
         result.addSource(minutesSource, m -> recompute.run());

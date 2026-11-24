@@ -1,0 +1,29 @@
+# Rediseño de Proyectos, motor de Focus: «Focus this» de Home arranca los ciclos de la tarea desde
+# lo que ya lleva (60 min de meta, 25 hechos) y «Terminar antes» guarda el minuto entero hecho.
+# Needs the seeded app (python .claude/scripts/seed_progress_db.py --device).
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-focus-engine.steps --save rp-focus-engine
+# Home's progress text of a today task is taskTimeText («25 / 60 min · Tesis final»); the today
+# list sits below the timer card, so the walk scrolls down to it (Home keeps that scroll when
+# Back returns from Focus).
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 6000
+ASSERT id=homePlayButton
+SWIPE 540 1400 540 500 300
+WAIT 3000
+ASSERT id=taskFocusButton
+ASSERT id=taskTimeText expect~=25 / 60
+SHOT rp-focus-engine-home-before
+TAP id=taskFocusButton
+WAIT 5000
+ASSERT id=focusRingBox
+ASSERT id=focusStopButton
+SHOT rp-focus-engine-running
+WAIT 65000
+TAP id=focusStopButton
+WAIT 2000
+SHOT rp-focus-engine-stopped
+KEY KEYCODE_BACK
+WAIT 6000
+ASSERT id=taskTimeText expect~=26 / 60
+SHOT rp-focus-engine-home-after

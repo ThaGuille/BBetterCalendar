@@ -95,6 +95,10 @@ public final class FocusTimerStateMachine {
         public final int cyclesCompleted;
         /** Pauses of the current concentration so far (mejora-visual u1, FocusEvent.pauseCount). */
         public final int focusPauseCount;
+        /** Focus blocks of a running task plan (rediseño de Proyectos, D-P11); null = plain session. */
+        public final long[] planBlocksMillis;
+        /** Index of the plan block in progress (or next, between blocks). */
+        public final int planBlockIndex;
 
         public Snapshot(State state, long remainingMillis, long endsAtMillis, long countdownMillis,
                         long sessionMillis, int cyclesCompleted) {
@@ -103,6 +107,13 @@ public final class FocusTimerStateMachine {
 
         public Snapshot(State state, long remainingMillis, long endsAtMillis, long countdownMillis,
                         long sessionMillis, int cyclesCompleted, int focusPauseCount) {
+            this(state, remainingMillis, endsAtMillis, countdownMillis, sessionMillis, cyclesCompleted,
+                    focusPauseCount, null, 0);
+        }
+
+        public Snapshot(State state, long remainingMillis, long endsAtMillis, long countdownMillis,
+                        long sessionMillis, int cyclesCompleted, int focusPauseCount,
+                        long[] planBlocksMillis, int planBlockIndex) {
             this.state = state;
             this.remainingMillis = remainingMillis;
             this.endsAtMillis = endsAtMillis;
@@ -110,6 +121,10 @@ public final class FocusTimerStateMachine {
             this.sessionMillis = sessionMillis;
             this.cyclesCompleted = cyclesCompleted;
             this.focusPauseCount = focusPauseCount;
+            this.planBlocksMillis = planBlocksMillis == null || planBlocksMillis.length == 0
+                    ? null : planBlocksMillis.clone();
+            this.planBlockIndex = this.planBlocksMillis == null ? 0
+                    : Math.max(0, Math.min(planBlockIndex, this.planBlocksMillis.length - 1));
         }
     }
 
@@ -128,6 +143,11 @@ public final class FocusTimerStateMachine {
     // fallida). Los lee el Listener dentro de onFocusCompleted / onFailed para FocusEvent v15.
     private int focusPauseCount;
     private long lastFocusElapsedMillis;
+    // Rediseño de Proyectos (D-P11): bloques de la sesión de una tarea (TaskCyclePlan). null = sesión
+    // normal. planIndex = bloque en curso; entre bloques (descanso o parada sin auto-ciclo) apunta al
+    // que acaba de terminar durante el descanso y al siguiente en cuanto el descanso acaba.
+    private long[] planBlocks;
+    private int planIndex;
 
     public FocusTimerStateMachine(Clock clock, SettingsProvider settings, Listener listener) {
         this.clock = clock;
@@ -197,6 +217,42 @@ public final class FocusTimerStateMachine {
         return cyclesCompleted + 1;
     }
 
+    /**
+     * Countdown time run so far by the concentration in progress (running or paused), pauses
+     * excluded; 0 in a rest or when idle. What "end early" keeps for a task (rediseño de Proyectos).
+     */
+    public long getCurrentFocusElapsedMillis() {
+        if (state != State.RUNNING && state != State.PAUSED) {
+            return 0L;
+        }
+        return Math.max(0L, countdownMillis - getRemainingMillis());
+    }
+
+    /** A task plan ({@link #startPlan(long[])}) is in progress or pending its next block. */
+    public boolean hasPlan() {
+        return planBlocks != null;
+    }
+
+    /** Number of focus blocks of the plan; 0 without one. */
+    public int getPlanBlockCount() {
+        return planBlocks == null ? 0 : planBlocks.length;
+    }
+
+    /** 0-based block in progress (during a rest: the block it follows); 0 without a plan. */
+    public int getPlanBlockIndex() {
+        return planBlocks == null ? 0 : planIndex;
+    }
+
+    /** Another focus block follows the current one. */
+    public boolean planHasNextBlock() {
+        return planBlocks != null && planIndex < planBlocks.length - 1;
+    }
+
+    /** Length of the plan block in progress or next; 0 without a plan. */
+    public long getPlanBlockMillis() {
+        return planBlocks == null ? 0L : planBlocks[planIndex];
+    }
+
     // ----------------------------------------------------------------------- transitions
 
     /**
@@ -209,7 +265,12 @@ public final class FocusTimerStateMachine {
     public boolean toggle() {
         switch (state) {
             case STOPPED:
-                startFocus(settings.get().focusMillis);
+                if (planBlocks != null) {
+                    // Entre bloques de una tarea (sin auto-ciclo): play sigue con el siguiente bloque.
+                    beginPlanBlock();
+                } else {
+                    startFocus(settings.get().focusMillis);
+                }
                 return true;
             case STOPPED_REST:
                 begin(settings.get().restMillis);
@@ -229,14 +290,35 @@ public final class FocusTimerStateMachine {
     /**
      * Starts a concentration of {@code durationMillis} if idle (old play-from-STOPPED and
      * {@code startBoundConcentrationIfIdle}). The length is what {@link Listener#onFocusCompleted}
-     * reports. No-op outside STOPPED.
+     * reports. No-op outside STOPPED. A plain start drops a task plan still pending between blocks.
      */
     public boolean startFocus(long durationMillis) {
         if (state != State.STOPPED) {
             return false;
         }
+        clearPlan();
         sessionMillis = durationMillis;
         begin(durationMillis);
+        return true;
+    }
+
+    /**
+     * Rediseño de Proyectos (D-P11): starts a task session of several focus blocks if idle (see
+     * {@link TaskCyclePlan}). Each block is a concentration of its own length, reported by
+     * {@link Listener#onFocusCompleted}; rests between blocks and auto-cycle follow the settings as
+     * in a plain session; after the last block the session ends through
+     * {@link Listener#onAllCyclesCompleted} (payload = blocks) whatever the configured cycles say.
+     *
+     * @return false (nothing changes) outside STOPPED or with no blocks
+     */
+    public boolean startPlan(long[] focusBlocksMillis) {
+        if (state != State.STOPPED || focusBlocksMillis == null || focusBlocksMillis.length == 0) {
+            return false;
+        }
+        planBlocks = focusBlocksMillis.clone();
+        planIndex = 0;
+        cyclesCompleted = 0;
+        beginPlanBlock();
         return true;
     }
 
@@ -267,14 +349,16 @@ public final class FocusTimerStateMachine {
      * Old {@code cancelSession}: drops the whole cycle and goes idle. Does NOT count as a failure
      * (a fail means "left the app mid-session", this is an explicit user decision).
      *
-     * @return false if it was already STOPPED (the old method returned early, no sound).
+     * @return false if it was already STOPPED (the old method returned early, no sound) and no task
+     *     plan was waiting for its next block (cancelling drops that plan).
      */
     public boolean cancel() {
-        if (state == State.STOPPED) {
+        if (state == State.STOPPED && planBlocks == null) {
             return false;
         }
         state = State.STOPPED;
         cyclesCompleted = 0;
+        clearPlan();
         resetIdle();
         return true;
     }
@@ -290,6 +374,7 @@ public final class FocusTimerStateMachine {
         }
         cyclesCompleted++;
         state = State.STOPPED;
+        advancePlanBlock();
         resetIdle();
         return true;
     }
@@ -337,13 +422,16 @@ public final class FocusTimerStateMachine {
         if (!newSettings.restEnabled && state.isRest()) {
             state = State.STOPPED;
             cyclesCompleted = 0;
+            advancePlanBlock(); // el bloque que precedía al descanso ya está hecho
         }
         if (!newSettings.autoCycle) {
             cyclesCompleted = 0;
         }
         if (state == State.STOPPED) {
-            remainingMillis = newSettings.focusMillis;
-            countdownMillis = newSettings.focusMillis;
+            // Con un plan de tarea pendiente se sigue mostrando su siguiente bloque.
+            long idle = planBlocks != null ? planBlocks[planIndex] : newSettings.focusMillis;
+            remainingMillis = idle;
+            countdownMillis = idle;
         }
     }
 
@@ -369,7 +457,7 @@ public final class FocusTimerStateMachine {
 
     public Snapshot snapshot() {
         return new Snapshot(state, getRemainingMillis(), endsAtMillis, countdownMillis,
-                sessionMillis, cyclesCompleted, focusPauseCount);
+                sessionMillis, cyclesCompleted, focusPauseCount, planBlocks, planIndex);
     }
 
     /**
@@ -385,6 +473,8 @@ public final class FocusTimerStateMachine {
         sessionMillis = s.sessionMillis;
         cyclesCompleted = s.cyclesCompleted;
         focusPauseCount = s.focusPauseCount;
+        planBlocks = s.planBlocksMillis == null ? null : s.planBlocksMillis.clone();
+        planIndex = s.planBlockIndex;
     }
 
     // -------------------------------------------------------------------------- internals
@@ -406,6 +496,10 @@ public final class FocusTimerStateMachine {
         state = State.STOPPED;
         listener.onFocusCompleted(sessionMillis);
         Settings s = settings.get();
+        if (planBlocks != null) {
+            completePlanFocus(s);
+            return;
+        }
         if (s.restEnabled) {
             if (cyclesCompleted < s.cycles || s.infiniteCycles) {
                 // Old setRestTimer(): STOPPED_REST and immediately start the rest countdown.
@@ -421,10 +515,44 @@ public final class FocusTimerStateMachine {
         }
     }
 
+    /**
+     * Fin de un bloque de un plan de tarea: tras el último, la sesión acaba por el camino de "todos
+     * los ciclos" sin mirar cycles / infiniteCycles; si quedan bloques, descanso como en una sesión
+     * normal o, sin descanso, el siguiente bloque enseguida (parar entre bloques dejaría la sesión
+     * como terminada).
+     */
+    private void completePlanFocus(Settings s) {
+        if (!planHasNextBlock()) {
+            int blocks = planBlocks.length;
+            clearPlan();
+            listener.onAllCyclesCompleted(blocks);
+            cyclesCompleted = 0;
+            resetIdle();
+            return;
+        }
+        if (s.restEnabled) {
+            state = State.STOPPED_REST;
+            begin(s.restMillis);
+        } else {
+            planIndex++;
+            beginPlanBlock();
+        }
+    }
+
     /** Old {@code completeRest}. */
     private void completeRest() {
         state = State.STOPPED;
         cyclesCompleted++;
+        if (planBlocks != null) {
+            // Plan de tarea: el descanso siempre va seguido de otro bloque (nunca hay uno tras el
+            // último); el auto-ciclo decide si arranca solo, como en una sesión normal.
+            advancePlanBlock();
+            resetIdle();
+            if (settings.get().autoCycle) {
+                beginPlanBlock();
+            }
+            return;
+        }
         resetIdle();
         Settings s = settings.get();
         if (s.autoCycle) {
@@ -441,8 +569,27 @@ public final class FocusTimerStateMachine {
     }
 
     private void resetIdle() {
-        long focus = settings.get().focusMillis;
+        long focus = planBlocks != null ? planBlocks[planIndex] : settings.get().focusMillis;
         remainingMillis = focus;
         countdownMillis = focus;
+    }
+
+    /** STOPPED -> RUNNING with the current plan block; its length is what gets recorded. */
+    private void beginPlanBlock() {
+        long block = planBlocks[planIndex];
+        sessionMillis = block;
+        begin(block);
+    }
+
+    /** After a rest of a plan: the next block becomes the current one. */
+    private void advancePlanBlock() {
+        if (planBlocks != null && planIndex < planBlocks.length - 1) {
+            planIndex++;
+        }
+    }
+
+    private void clearPlan() {
+        planBlocks = null;
+        planIndex = 0;
     }
 }

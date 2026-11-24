@@ -2,6 +2,7 @@ package com.example.bbettercalendar.stats;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -15,6 +16,7 @@ import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -106,6 +108,42 @@ public class FocusSessionRepository {
             maybeAnnounceFirstFocusOfDay();
             todayTimeStudiedMillis.postValue(statsDao.getTodayTimeStudied());
         });
+    }
+
+    /**
+     * Rediseño de Proyectos (§3.5, decisión d4 del usuario): «Terminar antes» una sesión ligada a una
+     * tarea guarda los minutos enteros ya concentrados en el bloque en curso como una sesión normal
+     * ({@code TYPE_FOCUS} con la tarea), así que cuentan en la tarea, el proyecto, Progreso y el
+     * tiempo de hoy. No es un fallo ni un pomodoro terminado (ni {@code addFails} ni
+     * {@code addTasksDone}, ni el premio del primer pomodoro del día). Si con ellos la tarea llega a
+     * su meta, se completa como al acabar un bloque. Menos de un minuto o sin tarea: nada.
+     *
+     * @param boundEntryId tarea de la sesión (0 = sin tarea: no se guarda nada)
+     * @param minutes      minutos enteros concentrados en el bloque en curso
+     * @param pauseCount   pausas de ese bloque
+     */
+    public void recordFocusEndedEarly(int boundEntryId, int minutes, int pauseCount) {
+        if (boundEntryId == 0 || minutes < 1) {
+            return;
+        }
+        dbWriteExecutor.execute(() -> {
+            infoLog.accept("recordFocusEndedEarly( " + boundEntryId + ", " + minutes + " min )");
+            statsDao.addTimeStudied(FormatHelper.minutesToMillis(minutes));
+            logFocusEvent(FocusEvent.TYPE_FOCUS, minutes, boundEntryId, minutes, pauseCount);
+            requestStatsPublish();
+            focusAttributionRepository.maybeAutoComplete(boundEntryId);
+            todayTimeStudiedMillis.postValue(statsDao.getTodayTimeStudied());
+        });
+    }
+
+    /**
+     * Minutos ya atribuidos a una tarea ({@link FocusEventDAO#sumAttributedMinutes}), leídos fuera del
+     * hilo principal. Va por el executor de escritura (un solo hilo) para leer DESPUÉS de cualquier
+     * sesión que se esté guardando (p. ej. un «Terminar antes» justo antes de volver a enfocar).
+     * {@code callback} corre en ese hilo: quien lo pasa vuelve al principal.
+     */
+    public void loadAttributedMinutes(int entryId, @NonNull IntConsumer callback) {
+        dbWriteExecutor.execute(() -> callback.accept(focusEventDao.sumAttributedMinutes(entryId)));
     }
 
     //Cuando el usuario cierra la app a medio contador

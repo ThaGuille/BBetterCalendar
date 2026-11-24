@@ -13,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -484,5 +486,142 @@ public class FocusTimerStateMachineTest {
         machine.restore(saved);
 
         assertEquals(2, machine.getFocusPauseCount());
+    }
+
+    // ------------------------------------------------- task plans (rediseño de Proyectos, D-P11)
+
+    private static final long MIN = 60_000L;
+
+    /** 60 min goal with 25 already done, cycles of 20 + 5: blocks of 20 and 15. */
+    private static final long[] TWO_BLOCKS = {20 * MIN, 15 * MIN};
+
+    @Test
+    public void plan_eachFocusBlockRunsAndRecordsItsOwnLength() {
+        settings = new Settings(FOCUS, REST, true, 4, false, true);
+
+        assertTrue(machine.startPlan(TWO_BLOCKS));
+        assertEquals(State.RUNNING, machine.getState());
+        assertEquals(20 * MIN, machine.getRemainingMillis());
+
+        elapse(20 * MIN);
+        elapse(REST);
+        assertEquals(State.RUNNING, machine.getState());
+        assertEquals(15 * MIN, machine.getRemainingMillis());
+        elapse(15 * MIN);
+
+        assertEquals(Arrays.asList("focus:" + 20 * MIN, "focus:" + 15 * MIN, "allCycles:2"), calls);
+    }
+
+    @Test
+    public void plan_restsBetweenBlocksFollowAutoCycleOff_playStartsTheNextBlock() {
+        // auto-cycle off (setUp): after the rest the timer waits, showing the next block.
+        machine.startPlan(TWO_BLOCKS);
+        elapse(20 * MIN);
+        assertEquals(State.RUNNING_REST, machine.getState());
+        assertEquals(REST, machine.getRemainingMillis());
+
+        elapse(REST);
+        assertEquals(State.STOPPED, machine.getState());
+        assertEquals(15 * MIN, machine.getRemainingMillis());
+
+        assertTrue(machine.toggle());
+        assertEquals(State.RUNNING, machine.getState());
+        assertEquals(15 * MIN, machine.getRemainingMillis());
+    }
+
+    @Test
+    public void plan_withRestDisabled_runsTheBlocksBackToBack() {
+        settings = new Settings(FOCUS, REST, false, 4, false, false);
+        machine.startPlan(TWO_BLOCKS);
+
+        elapse(20 * MIN);
+
+        assertEquals(State.RUNNING, machine.getState());
+        assertEquals(15 * MIN, machine.getRemainingMillis());
+        assertEquals(Collections.singletonList("focus:" + 20 * MIN), calls);
+    }
+
+    @Test
+    public void plan_endsAfterItsLastBlock_evenWithInfiniteCycles() {
+        settings = new Settings(FOCUS, REST, true, 4, true, true);
+        machine.startPlan(new long[]{10 * MIN});
+
+        elapse(10 * MIN);
+
+        assertEquals(State.STOPPED, machine.getState());
+        assertEquals(Arrays.asList("focus:" + 10 * MIN, "allCycles:1"), calls);
+        assertFalse(machine.hasPlan());
+        assertEquals("idle shows the configured length again", FOCUS, machine.getRemainingMillis());
+    }
+
+    @Test
+    public void plan_endsAfterItsLastBlock_evenWhenMoreCyclesAreConfigured() {
+        // 1 cycle configured, 3 blocks: the plan, not the cycle count, decides the end.
+        settings = new Settings(FOCUS, REST, true, 1, false, true);
+        machine.startPlan(new long[]{5 * MIN, 5 * MIN, 5 * MIN});
+
+        elapse(5 * MIN);
+        elapse(REST);
+        elapse(5 * MIN);
+        elapse(REST);
+        elapse(5 * MIN);
+
+        assertEquals(Arrays.asList("focus:" + 5 * MIN, "focus:" + 5 * MIN, "focus:" + 5 * MIN,
+                "allCycles:3"), calls);
+        assertEquals(State.STOPPED, machine.getState());
+    }
+
+    @Test
+    public void plan_survivesSnapshotAndRestore_midSecondBlock() {
+        settings = new Settings(FOCUS, REST, true, 4, false, true);
+        machine.startPlan(TWO_BLOCKS);
+        elapse(20 * MIN);
+        elapse(REST);
+        elapse(5 * MIN);
+        Snapshot saved = machine.snapshot();
+
+        machine = newMachine();
+        machine.restore(saved);
+
+        assertTrue(machine.hasPlan());
+        assertEquals(1, machine.getPlanBlockIndex());
+        assertEquals(2, machine.getPlanBlockCount());
+        assertEquals(10 * MIN, machine.getRemainingMillis());
+        elapse(10 * MIN);
+        assertEquals(Arrays.asList("focus:" + 20 * MIN, "focus:" + 15 * MIN, "allCycles:2"), calls);
+    }
+
+    @Test
+    public void plan_cannotStartOverARunningSession() {
+        machine.toggle();
+
+        assertFalse(machine.startPlan(TWO_BLOCKS));
+        assertFalse(machine.hasPlan());
+        assertEquals(FOCUS, machine.getRemainingMillis());
+    }
+
+    @Test
+    public void plan_cancelDropsItAndReportsTheFocusedPartOfTheBlock() {
+        machine.startPlan(TWO_BLOCKS);
+        elapse(3 * MIN + 30_000);
+
+        assertEquals(3 * MIN + 30_000, machine.getCurrentFocusElapsedMillis());
+        assertTrue(machine.cancel());
+        assertFalse(machine.hasPlan());
+        assertEquals(State.STOPPED, machine.getState());
+        assertEquals(FOCUS, machine.getRemainingMillis());
+        assertTrue(calls.isEmpty());
+    }
+
+    @Test
+    public void plan_pendingBetweenBlocks_canBeCancelled() {
+        machine.startPlan(TWO_BLOCKS);
+        elapse(20 * MIN);
+        elapse(REST); // auto-cycle off: STOPPED, next block pending
+
+        assertEquals(0L, machine.getCurrentFocusElapsedMillis());
+        assertTrue(machine.cancel());
+        assertFalse(machine.hasPlan());
+        assertFalse("a plain idle timer still has nothing to cancel", machine.cancel());
     }
 }

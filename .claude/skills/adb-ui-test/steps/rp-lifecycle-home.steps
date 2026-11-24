@@ -1,6 +1,5 @@
 # rediseno-proyectos u14: Home's today list leaves out the tasks of the ARCHIVED project Huerto. The seed dates
-# "Comprar semillas" (Huerto, archived) and "Repasar el tema 4" both today with no time (00:00); Comprar semillas
-# was written first, so before the filter it was the first row. Now the first row is Repasar el tema 4.
+# "Comprar semillas" (Huerto, archived) and "Repasar el tema 4" (Examen de fisica, active) both today with no time.
 # The walk ends on Home; the check then confirms with find-node that "Comprar semillas" is not shown.
 # Needs the seed: python .claude/scripts/seed_progress_db.py --device
 # Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-lifecycle-home.steps --save rp-lifecycle-home
@@ -14,5 +13,9 @@ SWIPE 540 1500 540 600 300
 WAIT 1200
 ASSERT id=homeTasksCard
 ASSERT id=homeTodayTaskList
-ASSERT id=taskTitleText expect~=Repasar el tema 4
+# A row title does nothing on tap (only the check box, focus and remove buttons act): the TAP proves the seeded
+# task is listed. Earlier walks leave plain "Repasar" tasks on the emulator, so the row is found by its full title.
+TAP text=Repasar el tema 4
+WAIT 800
+ASSERT id=homeTodayTaskList
 SHOT rp-lifecycle-home-today

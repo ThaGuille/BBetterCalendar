@@ -43,6 +43,29 @@
 
     <!-- rediseno-proyectos: main -->
 
+    <dimen name="projects_main_toolbar_button">48dp</dimen>
+    <dimen name="projects_main_toolbar_icon">24dp</dimen>
+    <dimen name="projects_main_selector_item">68dp</dimen>
+    <dimen name="projects_main_summary_min_height">64dp</dimen>
+    <dimen name="projects_main_summary_ring">46dp</dimen>
+    <dimen name="projects_main_summary_ring_stroke">4dp</dimen>
+    <dimen name="projects_main_summary_icon">14dp</dimen>
+    <dimen name="projects_main_section_gap">12dp</dimen>
+    <dimen name="projects_main_section_bar_width">72dp</dimen>
+    <dimen name="projects_main_section_bar_height">4dp</dimen>
+    <dimen name="projects_main_row_min">56dp</dimen>
+    <dimen name="projects_main_meta_icon">16dp</dimen>
+    <dimen name="projects_main_meta_overlap">-14dp</dimen>
+    <dimen name="projects_main_pill_radius">14dp</dimen>
+    <dimen name="projects_main_subtask_ring">32dp</dimen>
+    <dimen name="projects_main_subtask_ring_stroke">2.5dp</dimen>
+    <dimen name="projects_main_subtask_indent">44dp</dimen>
+    <dimen name="projects_main_empty_icon">56dp</dimen>
+    <dimen name="projects_main_note_bar_lift">72dp</dimen>
+    <dimen name="projects_main_dash_width">6dp</dimen>
+    <dimen name="projects_main_dash_gap">4dp</dimen>
+    <dimen name="projects_main_dash_stroke">1.5dp</dimen>
+
     <!-- rediseno-proyectos: pickers -->
     <dimen name="projects_picker_chip_height">48dp</dimen>
     <dimen name="projects_picker_row_min">48dp</dimen>

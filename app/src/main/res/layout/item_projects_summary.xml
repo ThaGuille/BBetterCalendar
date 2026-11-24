@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: summary R2 card, lit in the project colour (bg_card_lit + bg_glow_project tinted by
+     code). Ring with the percentage, the next task, the weekly focus and days left, and the big timer. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/projectsSummary"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/projects_main_section_gap"
+    android:background="@drawable/bg_card_lit"
+    android:minHeight="@dimen/projects_main_summary_min_height">
+
+    <View
+        android:id="@+id/projectsSummaryGlow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_glow_project"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/projects_main_summary_min_height"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_card_gap"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_xs"
+        android:paddingBottom="@dimen/spacing_sm">
+
+        <com.example.bbettercalendar.ui.common.widget.ProgressRingView
+            android:id="@+id/projectsSummaryRing"
+            android:layout_width="@dimen/projects_main_summary_ring"
+            android:layout_height="@dimen/projects_main_summary_ring"
+            app:ringStroke="@dimen/projects_main_summary_ring_stroke" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_card_gap"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/projectsSummaryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/projects_main_summary_next"
+                android:textAppearance="@style/TextAppearance.BBetter.Micro.Bold"
+                android:textColor="@color/bb_on_surface_muted" />
+
+            <TextView
+                android:id="@+id/projectsSummaryTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+                tools:text="Reunión con la tutora" />
+
+            <LinearLayout
+                android:id="@+id/projectsSummaryMeta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/projectsSummaryFocused"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/projects_main_summary_icon"
+                        android:layout_height="@dimen/projects_main_summary_icon"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_timer_24"
+                        app:tint="@color/bb_sanct_primary" />
+
+                    <TextView
+                        android:id="@+id/projectsSummaryFocusedText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_xs"
+                        android:textAppearance="@style/TextAppearance.BBetter.Caption.Semibold"
+                        android:textColor="@color/bb_sanct_primary"
+                        tools:text="35 min" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/projectsSummaryDays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_card_gap"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/projects_main_summary_icon"
+                        android:layout_height="@dimen/projects_main_summary_icon"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_flag_24"
+                        app:tint="@color/bb_on_surface_muted" />
+
+                    <TextView
+                        android:id="@+id/projectsSummaryDaysText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_xs"
+                        android:textAppearance="@style/TextAppearance.BBetter.ProjectsCaption"
+                        tools:text="24 d" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.example.bbettercalendar.ui.common.widget.FocusTimerButton
+            android:id="@+id/projectsSummaryFocus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:timerSize="big" />
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: trailing "New" bubble of the selector. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/projectsNewButton"
+    android:layout_width="@dimen/projects_main_selector_item"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/spacing_xs">
+
+    <com.example.bbettercalendar.ui.common.widget.ProjectBubbleView
+        android:id="@+id/projectsNewBubble"
+        android:layout_width="@dimen/widget_bubble_view"
+        android:layout_height="@dimen/widget_bubble_view" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="@string/projects_main_selector_new"
+        android:textAppearance="@style/TextAppearance.BBetter.ProjectsCaption" />
+</LinearLayout>

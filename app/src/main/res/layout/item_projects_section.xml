@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: one section card: header (name, thin progress, n/m, chevron, plus) and its task rows. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/projectsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/projects_main_section_gap"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/projectsSectionHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:minHeight="@dimen/touch_target_min"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/spacing_md">
+
+            <TextView
+                android:id="@+id/projectsSectionName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyStrong"
+                tools:text="Redacción" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/projectsSectionBar"
+                android:layout_width="@dimen/projects_main_section_bar_width"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_card_gap"
+                android:max="100"
+                app:trackThickness="@dimen/projects_main_section_bar_height"
+                tools:progress="40" />
+
+            <TextView
+                android:id="@+id/projectsSectionCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_sm"
+                android:textAppearance="@style/TextAppearance.BBetter.ProjectsCaption"
+                tools:text="2/5" />
+
+            <ImageView
+                android:id="@+id/projectsSectionChevron"
+                android:layout_width="@dimen/project_chevron_size"
+                android:layout_height="@dimen/project_chevron_size"
+                android:layout_marginStart="@dimen/spacing_xs"
+                android:layout_marginEnd="@dimen/spacing_sm"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_chevron_right_24"
+                app:tint="@color/bb_on_surface_muted" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/projectsSectionAdd"
+            style="@style/Widget.BBetter.ProjectsToolButton"
+            android:src="@drawable/ic_add_24"
+            app:tint="@color/bb_primary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/projectsSectionRows"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/spacing_xs" />
+</LinearLayout>

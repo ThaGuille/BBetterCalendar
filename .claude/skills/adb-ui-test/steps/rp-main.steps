@@ -1,0 +1,124 @@
+# rediseno-proyectos u7: the single Projects screen on the seeded app (selector, summary R2, section cards,
+# task rows, sort, Hide done, sections, area filter, link from Progress). The walk leaves every remembered
+# setting (sort, Hide done, area filter, collapsed sections) as it found it, so it can run again.
+# Section long-press = SWIPE on one point for 900 ms (the AVD is 1080x1920; the headers sit at fixed rows
+# because Redacción and Defensa are collapsed at that moment).
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-main.steps --save rp-main
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+ASSERT id=projectsSelector
+# The Tesis final bubble carries a badge (its description says how many tasks are due); tapping it selects it.
+TAP text=Tesis final,
+WAIT 1200
+ASSERT id=projectsSummary
+ASSERT id=projectsSummaryTitle expect~=tutora
+ASSERT id=projectsAgendaButton
+ASSERT id=projectsMenuButton
+ASSERT id=projectsFab
+SHOT rp-main-initial
+# Collapse Redacción and Defensa.
+TAP text=Collapse Redacción
+WAIT 800
+TAP text=Collapse Defensa
+WAIT 800
+SHOT rp-main-collapsed
+# Add a section through the dialog, rename it (long press on its header), delete it (long press, confirm).
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Add section|Añadir sección
+WAIT 1000
+TYPE Extras
+SHOT rp-main-add-section
+TAP id=button1
+WAIT 1200
+SWIPE 300 1260 300 1260 900
+WAIT 1000
+TAP text=Rename|Renombrar
+WAIT 1000
+TYPE 2
+TAP id=button1
+WAIT 1200
+SHOT rp-main-renamed
+SWIPE 300 1260 300 1260 900
+WAIT 1000
+TAP text=Delete section|Eliminar sección
+WAIT 1000
+SHOT rp-main-delete-section
+TAP id=button1
+WAIT 1200
+# Leave the tab and come back: Defensa is still collapsed (its Expand control is there; tapping it restores it).
+TAP id=navigation_progress
+WAIT 2500
+TAP id=navigation_projects
+WAIT 2500
+TAP text=Expand Defensa
+WAIT 800
+TAP text=Expand Redacción
+WAIT 800
+# Check a task: the snackbar appears, Undo reverts it.
+SWIPE 540 1400 540 800 400
+WAIT 800
+TAP text=Complete: Revisar la bibliografía
+WAIT 800
+ASSERT id=snackbar_text expect~=Completed|Completada
+SHOT rp-main-completed
+TAP id=snackbar_action
+WAIT 3000
+TAP text=Complete: Revisar la bibliografía
+WAIT 1500
+TAP id=snackbar_action
+WAIT 3000
+SWIPE 540 700 540 1700 300
+WAIT 800
+# Sort: Priority first, then back around to Upcoming first.
+TAP id=projectsSortButton
+WAIT 800
+ASSERT id=projectsSortLabel expect~=Priority first|Prioridad primero
+SHOT rp-main-priority
+TAP id=projectsSortButton
+WAIT 500
+TAP id=projectsSortButton
+WAIT 800
+ASSERT id=projectsSortLabel expect~=Upcoming first|Próximas primero
+# Hide done from the menu, and show it again.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Hide done|Ocultar hechas
+WAIT 800
+SHOT rp-main-hide-done
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Show done|Mostrar hechas
+WAIT 800
+# Filter by area: Studies keeps two projects in the selector, All brings them back.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Filter by area|Filtrar por área
+WAIT 800
+TAP text=Studies|Estudios
+WAIT 1000
+SHOT rp-main-filter-studies
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Filter by area|Filtrar por área
+WAIT 800
+TAP text=All|Todas
+WAIT 1000
+# From Progress, a project row opens Projects with that project selected.
+TAP id=navigation_progress
+WAIT 2500
+SWIPE 540 1500 540 300 500
+WAIT 800
+SWIPE 540 1500 540 300 500
+WAIT 800
+SHOT rp-main-progress
+TAP text=Examen de física
+WAIT 2500
+ASSERT id=projectsSummaryTitle expect~=tema 4
+SHOT rp-main-from-progress
+TAP text=Tesis final,
+WAIT 1000

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: dashed "Add section" button at the end of the list. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/projectsAddSection"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_projects_add_section"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:minHeight="@dimen/touch_target_min"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="@dimen/projects_main_summary_icon"
+        android:layout_height="@dimen/projects_main_summary_icon"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_section_24"
+        app:tint="@color/bb_on_surface_muted" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:text="@string/projects_main_add_section"
+        android:textAppearance="@style/TextAppearance.BBetter.Label" />
+</LinearLayout>

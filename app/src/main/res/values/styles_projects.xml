@@ -17,6 +17,19 @@
 
     <!-- rediseno-proyectos: main -->
 
+    <!-- Icon-only button of the Projects toolbar: 48dp target, on-surface glyph. -->
+    <style name="Widget.BBetter.ProjectsToolButton" parent="">
+        <item name="android:layout_width">@dimen/projects_main_toolbar_button</item>
+        <item name="android:layout_height">@dimen/projects_main_toolbar_button</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:scaleType">center</item>
+    </style>
+
+    <!-- Small muted caption of the Projects screen (sort label, section counters, selector names). -->
+    <style name="TextAppearance.BBetter.ProjectsCaption" parent="TextAppearance.BBetter.Caption">
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+    </style>
+
     <!-- rediseno-proyectos: pickers -->
     <!-- Option chip of the task pickers: 48dp tall, selected on bb_primary_container. -->
     <style name="Widget.BBetter.Chip.Picker">

@@ -31,7 +31,7 @@ import com.example.bbettercalendar.ui.common.widget.PeriodNavigatorView;
 import com.example.bbettercalendar.ui.common.widget.ProgressRowView;
 import com.example.bbettercalendar.ui.common.widget.StatTileView;
 import com.example.bbettercalendar.ui.common.widget.WidgetTone;
-import com.example.bbettercalendar.ui.projects.ProjectListAdapter;
+import com.example.bbettercalendar.ui.common.widget.ProjectAccents;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -352,7 +352,7 @@ public class ProgressFragment extends Fragment {
             row.setTitle(r.name);
             row.setValue(FormatHelper.formatDuration(r.minutesInRange * 60_000L));
             row.setProgress((int) Math.round(100.0 * r.minutesInRange / total));
-            row.setIndicatorColorRes(ProjectListAdapter.accentColorResFor(r.colorIndex));
+            row.setIndicatorColorRes(ProjectAccents.colorResFor(r.colorIndex));
             row.setOnClickListener(v -> openProjectDetail(r));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);

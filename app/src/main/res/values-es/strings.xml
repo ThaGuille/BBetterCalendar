@@ -28,7 +28,6 @@
     <string name="create_project_save">Crear</string>
     <string name="create_project_name_required">Ponle un nombre</string>
     <string name="project_deadline_passed">Vencido</string>
-    <string name="project_detail_title">Proyecto</string>
     <string name="project_detail_items_empty">Aún no hay elementos — añade uno</string>
     <string name="project_detail_complete">Marcar como completado</string>
     <string name="project_detail_delete">Eliminar proyecto</string>

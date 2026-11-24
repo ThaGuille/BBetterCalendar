@@ -24,7 +24,6 @@
     <string name="create_project_save">Create</string>
     <string name="create_project_name_required">Give it a name</string>
     <string name="project_deadline_passed">Overdue</string>
-    <string name="project_detail_title">Project</string>
     <string name="project_detail_items_empty">No items yet — add one</string>
     <string name="project_detail_complete">Mark complete</string>
     <string name="project_detail_delete">Delete project</string>

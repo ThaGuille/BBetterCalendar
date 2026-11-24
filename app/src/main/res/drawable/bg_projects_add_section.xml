@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: dashed "Add section" button at the end of the list. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <stroke
+        android:width="@dimen/projects_main_dash_stroke"
+        android:color="@color/bb_outline"
+        android:dashWidth="@dimen/projects_main_dash_width"
+        android:dashGap="@dimen/projects_main_dash_gap" />
+    <corners android:radius="@dimen/radius_card" />
+</shape>

@@ -37,34 +37,26 @@
             app:destination="@id/navigation_calendar_month" />
     </fragment>
 
+    <!-- rediseno-proyectos: Projects is the single screen (D-P16). projectId > 0 selects that project (consumed once). -->
     <fragment
         android:id="@+id/navigation_projects"
         android:name="com.example.bbettercalendar.ui.projects.ProjectsFragment"
         android:label="@string/title_projects"
         tools:layout="@layout/fragment_projects" >
-        <action
-            android:id="@+id/action_navigation_projects_to_navigation_project_detail"
-            app:destination="@id/navigation_project_detail" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/navigation_project_detail"
-        android:name="com.example.bbettercalendar.ui.projects.ProjectDetailFragment"
-        android:label="@string/project_detail_title"
-        tools:layout="@layout/fragment_project_detail" >
         <argument
             android:name="projectId"
+            android:defaultValue="0"
             app:argType="integer" />
     </fragment>
 
-    <!-- Acción global (spec project-deadlines-progress): alcanzable desde cualquier destino, así
-         que las TRES entradas nuevas al detalle de proyecto (deep link de la notificación de
-         deadline, tap en el marcador del calendario, tap en una fila de la banda de Progress)
-         comparten una sola acción en vez de definir una por destino. La pestaña Projects conserva
-         su propia acción. -->
+    <!-- Acción global: alcanzable desde cualquier destino. Las tres entradas a un proyecto (deep link de la
+         notificación de deadline, marcador del calendario, fila de la banda de Progress) abren Proyectos con
+         ese proyecto elegido; singleTop + popUpTo evitan una entrada duplicada en la pila. -->
     <action
         android:id="@+id/action_global_project_detail"
-        app:destination="@id/navigation_project_detail" />
+        app:destination="@id/navigation_projects"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/navigation_projects" />
 
     <!-- ===== u12: destinos secundarios (sin barra inferior; MainActivity.TOP_LEVEL_DESTINATIONS).
          Se navega a ellos por id de destino (navController.navigate(R.id.navigation_focus)), desde

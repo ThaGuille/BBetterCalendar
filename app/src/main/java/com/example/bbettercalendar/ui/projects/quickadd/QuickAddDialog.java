@@ -1,6 +1,8 @@
 package com.example.bbettercalendar.ui.projects.quickadd;
 
 import android.app.Dialog;
+import androidx.activity.ComponentDialog;
+import androidx.activity.OnBackPressedCallback;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -129,12 +131,17 @@ public class QuickAddDialog extends DialogFragment implements PickerHost {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new Dialog(requireContext(), getTheme()) {
+        ComponentDialog dialog = new ComponentDialog(requireContext(), getTheme());
+        dialog.getOnBackPressedDispatcher().addCallback(dialog, new OnBackPressedCallback(true) {
             @Override
-            public void onBackPressed() {
-                if (!handleBack()) super.onBackPressed();
+            public void handleOnBackPressed() {
+                if (!handleBack()) {
+                    setEnabled(false);
+                    dialog.getOnBackPressedDispatcher().onBackPressed();
+                }
             }
-        };
+        });
+        return dialog;
     }
 
     @Nullable

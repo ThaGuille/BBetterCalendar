@@ -1,0 +1,375 @@
+# rediseno-proyectos u15: the whole Projects tab end to end on the seeded app (spec section 7, acceptance 1 to 6).
+# Create a project (icon, colour, deadline, area), see it selected and empty, add its first task from the empty state
+# through the quick-add box with every picker, Expand to the full-screen editor, then work the list (check, Undo,
+# subtasks, sections, Hide done, sorts, agenda, area filter, focus from a row and from the summary, edit / archive /
+# delete a project with Undo), a new tag from the tag picker, the Progress link and the Calendar.
+# The AVD runs in English: texts carry alternatives; ids are preferred. The AVD is 1080x1920.
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-tour.steps --save rp-tour
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+ASSERT id=projectsSelector
+# 1. Create a project: icon, colour, deadline, area.
+TAP id=projectsNewButton
+WAIT 1500
+ASSERT id=projectFormName
+TYPE Viaje Japon
+WAIT 600
+KEY KEYCODE_BACK
+WAIT 800
+TAP id=projectFormIcon
+WAIT 800
+TAP text=Icon: Plane|Icono: Avión
+WAIT 500
+TAP text=Colour: Dusk|Color: Crepúsculo
+WAIT 500
+TAP text=End of month|Fin de mes
+WAIT 500
+SWIPE 540 1600 540 700 300
+WAIT 600
+TAP text=Personal
+WAIT 500
+SHOT rp-tour-form
+TAP id=projectFormSave
+WAIT 2000
+# 2. Selected and empty: the empty state offers the first task.
+ASSERT id=projectsSelector
+ASSERT id=projectsAddFirstTask
+SHOT rp-tour-empty
+# 3. First task from the empty state through the quick-add box, every picker in the keyboard's place.
+TAP id=projectsAddFirstTask
+WAIT 2000
+ASSERT id=quickAddTitle
+TYPE Reservar vuelos
+WAIT 500
+TAP id=quickAddDate
+WAIT 1200
+TAP id=pickerDateTomorrow
+WAIT 500
+TAP id=pickerTime1700
+WAIT 500
+ASSERT id=quickAddChipDate expect~=Tomorrow|Mañana
+TAP id=quickAddDuration
+WAIT 800
+TAP id=pickerDur50
+WAIT 500
+TAP id=pickerPomodoroSwitch
+WAIT 500
+TAP id=pickerBlockSwitch
+WAIT 500
+ASSERT id=quickAddChipDuration expect~=50
+TAP id=quickAddPriority
+WAIT 800
+TAP id=pickerPriHigh
+WAIT 500
+ASSERT id=quickAddChipPriority expect~=High|Alta
+TAP id=quickAddTag
+WAIT 800
+TAP id=pickerTagItem0
+WAIT 500
+ASSERT id=quickAddChipTag
+TAP id=quickAddSubtasks
+WAIT 800
+TAP id=pickerSubtaskInput
+WAIT 500
+TYPE Mirar precios
+KEY KEYCODE_ENTER
+WAIT 500
+ASSERT id=pickerSubtaskList
+TAP id=quickAddMore
+WAIT 800
+# Repeat and Reminder fill the first screen of More: the note sits below them.
+SWIPE 540 1700 540 1000 400
+WAIT 600
+TAP id=pickerNoteInput
+WAIT 500
+TYPE Nota del viaje
+WAIT 500
+TAP id=pickerHeaderDone
+WAIT 1200
+ASSERT id=quickAddTitle
+SHOT rp-tour-quick-chips
+# 4. Expand: the full-screen editor keeps every value.
+TAP id=quickAddExpand
+WAIT 2000
+ASSERT id=taskEditorTitle expect~=Reservar vuelos
+ASSERT id=taskEditorWhenValue expect~=Tomorrow|Mañana
+ASSERT id=taskEditorMetaTime expect~=17:00
+ASSERT id=taskEditorFocusValue expect~=50
+ASSERT id=taskEditorMetaPomodoro
+ASSERT id=taskEditorMetaLock
+ASSERT id=taskEditorPriority expect~=High|Alta
+ASSERT id=taskEditorTag
+SHOT rp-tour-editor-expanded
+TAP id=taskEditorSave
+WAIT 2000
+ASSERT id=snackbar_text expect~=Added to|Añadida a|saved|guardad
+SHOT rp-tour-first-task
+# 5. Add a section (menu), then change the task's section in the editor.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Add section|Añadir sección
+WAIT 1000
+TYPE Extras
+TAP id=button1
+WAIT 1500
+SHOT rp-tour-section-added
+SWIPE 400 1005 400 1005 60
+WAIT 2000
+ASSERT id=taskEditorTitle expect~=Reservar vuelos
+TAP id=taskEditorSection
+WAIT 1000
+TAP id=pickerSectionItem1
+WAIT 600
+ASSERT id=taskEditorSection expect~=Extras
+SHOT rp-tour-editor-section
+TAP id=taskEditorSave
+WAIT 2000
+SHOT rp-tour-section-changed
+# 6. Expand the subtasks of the task and complete the task by checking its last one.
+TAP id=projectsTaskSubtasks
+WAIT 1000
+ASSERT id=projectsSubtaskCheck
+SHOT rp-tour-subtasks-open
+TAP id=projectsSubtaskCheck
+WAIT 1500
+# Completing by the last subtask has no snackbar (only the row check does): the summary says so.
+ASSERT id=projectsSummaryTitle expect~=All done|Todo hecho
+SHOT rp-tour-subtask-completed
+# 7. Hide done hides it, Show done brings it back.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Hide done|Ocultar hechas
+WAIT 1000
+SHOT rp-tour-hide-done
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Show done|Mostrar hechas
+WAIT 1000
+SHOT rp-tour-show-done
+# 8. Collapse a section, rename it (long press on its header = SWIPE on one point), delete it (confirm).
+TAP text=Collapse Extras|Plegar Extras
+WAIT 800
+SHOT rp-tour-collapsed
+SWIPE 300 1049 300 1049 900
+WAIT 1000
+TAP text=Rename|Renombrar
+WAIT 1000
+TYPE 2
+TAP id=button1
+WAIT 1200
+SHOT rp-tour-renamed
+SWIPE 300 1049 300 1049 900
+WAIT 1000
+TAP text=Delete section|Eliminar sección
+WAIT 1000
+TAP id=button1
+WAIT 1500
+SHOT rp-tour-section-deleted
+# 9. The three sort modes, then back to the first.
+TAP id=projectsSortButton
+WAIT 800
+ASSERT id=projectsSortLabel expect~=Priority first|Prioridad primero
+TAP id=projectsSortButton
+WAIT 800
+ASSERT id=projectsSortLabel expect~=Recent|Recientes
+SHOT rp-tour-sort-recent
+TAP id=projectsSortButton
+WAIT 800
+ASSERT id=projectsSortLabel expect~=Upcoming first|Próximas primero
+# 10. The agenda sheet opens from the toolbar and closes.
+TAP id=projectsAgendaButton
+WAIT 1500
+ASSERT id=agendaClose
+SHOT rp-tour-agenda
+TAP id=agendaClose
+WAIT 1200
+# 11. The area filter: Studies keeps the studies projects, All brings the rest back.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Filter by area|Filtrar por área
+WAIT 800
+TAP text=Studies|Estudios
+WAIT 1000
+SHOT rp-tour-filter-studies
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Filter by area|Filtrar por área
+WAIT 800
+TAP text=All|Todas
+WAIT 1000
+ASSERT id=projectsSelector
+# 12. Focus from a row: Focus opens with the project and the task (the block explanation shows once, dismissed with Back).
+TAP text=Tesis final,
+WAIT 1500
+ASSERT id=projectsSummary
+TAP id=projectsTaskFocus
+WAIT 3500
+KEY KEYCODE_BACK
+WAIT 1000
+ASSERT id=focusProjectChip expect~=Tesis final
+ASSERT id=focusTaskTitle expect~=tulo 3
+SHOT rp-tour-focus-row
+# Back keeps the session: the row shows the running ring; the timer opens Focus again; End early (stop) keeps the minutes.
+KEY KEYCODE_BACK
+WAIT 2500
+ASSERT id=projectsSummary
+SHOT rp-tour-focus-running-row
+TAP id=projectsTaskFocus
+WAIT 3000
+ASSERT id=focusProjectChip expect~=Tesis final
+TAP id=focusStopButton
+WAIT 2000
+KEY KEYCODE_BACK
+WAIT 2500
+ASSERT id=projectsSummary
+# Focus from the summary card.
+TAP id=projectsSummaryFocus
+WAIT 3500
+ASSERT id=focusProjectChip expect~=Tesis final
+ASSERT id=focusTaskTitle
+SHOT rp-tour-focus-summary
+TAP id=focusStopButton
+WAIT 2000
+KEY KEYCODE_BACK
+WAIT 2500
+ASSERT id=projectsSummary
+# 13. Open a task, edit it, mark it done with a note; delete another and Undo.
+SWIPE 500 1180 500 1180 60
+WAIT 2000
+ASSERT id=taskEditorTitle expect~=Escribir el capítulo 3
+TAP id=taskEditorPriority
+WAIT 800
+TAP id=pickerPriMedium
+WAIT 600
+ASSERT id=taskEditorPriority expect~=Medium|Media
+TAP id=taskEditorSave
+WAIT 2000
+ASSERT id=snackbar_text expect~=Changes saved|Cambios guardados
+SWIPE 500 1180 500 1180 60
+WAIT 2000
+ASSERT id=taskEditorPriority expect~=Medium|Media
+SWIPE 540 1500 540 600 400
+WAIT 800
+TAP id=taskEditorDone
+WAIT 800
+ASSERT id=taskEditorDone expect~=Done|Hecha
+TAP id=taskEditorCompletionNote
+TYPE Capitulo entregado
+TAP id=taskEditorSave
+WAIT 2000
+SHOT rp-tour-task-done
+SWIPE 500 1030 500 1030 60
+WAIT 2000
+ASSERT id=taskEditorTitle expect~=Reunión con la tutora
+TAP id=taskEditorDelete
+WAIT 1500
+TAP id=snackbar_action
+WAIT 2500
+ASSERT id=projectsSummaryTitle
+SHOT rp-tour-task-undeleted
+# 14. Complete with the row check, then Undo.
+TAP text=Complete: Reunión con la tutora
+WAIT 800
+ASSERT id=snackbar_text expect~=Completed|Completada
+SHOT rp-tour-checked
+TAP id=snackbar_action
+WAIT 3000
+SHOT rp-tour-check-undone
+# 15. A new tag from the tag picker (the box closes on the scrim without saving).
+TAP id=projectsFab
+WAIT 2000
+TAP id=quickAddTag
+WAIT 1000
+TAP id=pickerTagNew
+WAIT 1200
+ASSERT id=tagEditorName
+TYPE Viajes
+KEY KEYCODE_BACK
+WAIT 800
+ASSERT id=tagEditorColors
+SHOT rp-tour-new-tag
+TAP id=button1
+WAIT 1500
+ASSERT id=pickerTagItem0
+SHOT rp-tour-new-tag-listed
+TAP id=pickerHeaderDone
+WAIT 1000
+SWIPE 540 200 540 200 100
+WAIT 1200
+ASSERT id=projectsFab
+# 16. A dated task shows in the Calendar (today's day list).
+TAP id=navigation_calendar_month
+WAIT 2000
+ASSERT id=monthCalendarView
+TAP id=monthTodayButton
+WAIT 1200
+ASSERT id=dayDetailTitle
+SWIPE 540 1400 540 500 300
+WAIT 1000
+ASSERT id=dayDetailRecycler
+ASSERT id=eventTitle
+TAP text=Escribir el cap
+WAIT 800
+ASSERT id=dayDetailRecycler
+SHOT rp-tour-calendar-today
+# 17. From Progress, a project row opens Projects with that project selected.
+TAP id=navigation_progress
+WAIT 2500
+SWIPE 540 1500 540 300 500
+WAIT 800
+SWIPE 540 1500 540 300 500
+WAIT 800
+SHOT rp-tour-progress
+TAP text=Examen de física
+WAIT 2500
+ASSERT id=projectsSummaryTitle expect~=tema 4
+SHOT rp-tour-from-progress
+# 18. Edit, archive (Undo) and delete a project. The Undo snackbar lives about 3 s: its action is tapped by position.
+TAP text=Viaje Japon
+WAIT 1200
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Edit project|Editar proyecto
+WAIT 1500
+ASSERT id=projectFormName
+TAP id=projectFormName
+WAIT 500
+TYPE 2
+WAIT 500
+TAP id=projectFormSave
+WAIT 2000
+ASSERT id=projectsSelector
+TAP text=Viaje Japon2
+WAIT 1000
+SHOT rp-tour-project-edited
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Edit project|Editar proyecto
+WAIT 1500
+SWIPE 540 1600 540 700 300
+WAIT 600
+TAP id=projectFormArchive
+WAIT 900
+SWIPE 960 1465 960 1465 80
+WAIT 1500
+SHOT rp-tour-project-unarchived
+TAP text=Viaje Japon2
+WAIT 1000
+ASSERT id=projectsSummary
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Edit project|Editar proyecto
+WAIT 1500
+SWIPE 540 1600 540 700 300
+WAIT 600
+TAP id=projectFormDelete
+WAIT 1200
+ASSERT id=snackbar_action
+SHOT rp-tour-project-deleted
+WAIT 6000
+SHOT rp-tour-project-deleted-gone
+ASSERT id=projectsSelector

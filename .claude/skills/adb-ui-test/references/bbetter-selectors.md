@@ -143,24 +143,19 @@ u13: hoja breve `celebrationSheetMark/Title/Message/Button` (`CelebrationSheet`)
 
 Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
-## Projects (u11, mejora-visual)
+## Projects (rediseno-proyectos, one screen)
 
-- Lista: `projectsList`, `projectsAddButton` (FAB extendido "Nuevo proyecto"), `projectsSummaryText`, `projectsStreakChip`,
-  `projectsEmptyState` (EmptyStateView), `projectsCompletedHeader` (+ `projectsCompletedTitle`, `projectsCompletedChevron`) que despliega `projectsCompletedList`.
-- Tarjeta (`item_project.xml`, dos zonas): `projectCard`; **`projectCardTop`** (tap = abre el detalle; ya no hay pulsacion larga) con `projectGlow`,
-  `projectRing` (ProgressRingView), `projectNameText`, `projectTasksText` ("4 de 9 tareas · 6 h 20 m"), `projectDeadlineChip`, `projectChevron`,
-  `projectNextRow` (`projectNextTitle`, `projectFocusButton` "Enfocar"); **`projectCardStrip`** (ExpandStripView: tap = solo despliega, no navega;
-  `expandStripTitle` = "5 tareas pendientes", `expandStripAction` = Ver/Ocultar) cuyo contenido son filas `item_project_subtask.xml`
-  (`projectSubtaskCheck/Title/Meta`, `projectSubtaskFocus` = play pequeno) y `projectAddSubtask` ("Anadir tarea").
-- Retirados en u11: `projectHeader`, `projectColorAccent`, `projectDotRing`, `projectPercentText`, `projectCardProgress`, `projectPomodoroRow`,
-  `projectPomodorosToday`, `projectEstRemaining`, `projectExpandIcon`, `projectExpandedBody`, `projectSubtasksContainer`, `projectOpenDetail`,
-  `projectsRhythmCard`, `projectsEmptyText`.
-- Detalle (`fragment_project_detail.xml`): `projectDetailBackButton`, `projectDetailMenuButton` (menu: completar, eliminar), `projectDetailRing`,
-  `projectDetailNameInput`, `projectDetailDeadlineChip` (siempre visible; abre el selector de fecha), `projectDetailFocusTile` ("Enfocado"),
-  `projectDetailTasksTile` ("4 de 9" + "Quedan unas 5 h"), `projectDetailNotesInput`, `projectDetailItemsList` (filas `projectItemDoneCheckbox`,
-  `projectItemTitleText`, `projectItemProgressText`, `projectItemFocusButton`), `projectDetailItemsEmptyText`, alta rapida fija
-  `projectDetailQuickAddInput` + `projectDetailAddItemButton` ("+", pulsacion larga = hoja completa).
-- Retirados en u11: `projectDetailDeadlineButton`, `projectDetailCompleteButton`, `projectDetailDeleteButton`, `projectItemDateText`.
+- Pantalla unica `fragment_projects.xml` (ya no hay lista de tarjetas ni detalle): `projectsToolbar`, `projectsAgendaButton`, `projectsSortButton`
+  (+ `projectsSortLabel`), `projectsMenuButton` (Editar proyecto, Ocultar hechas, Anadir seccion, Filtrar por area, Archivar, Completar), `projectsSelector`
+  (burbujas "Nombre, N tareas"; `projectsNewButton` = circulo punteado), `projectsList`, `projectsFab`, `projectsFirstState` (`projectsAddFirstTask`).
+- Resumen (`item_projects_summary.xml`): `projectsSummary`, `projectsSummaryTitle`, `projectsSummaryMeta`, `projectsSummaryFocus` (cronometro).
+- Seccion (`item_projects_section.xml`): `projectsSectionHeader` (pulsacion larga = SWIPE en un punto 900 ms: Renombrar / Eliminar), `projectsSectionAdd`,
+  chevron con descripcion "Collapse|Expand <seccion>".
+- Fila de tarea: `projectsTaskCheck` ("Complete: <titulo>"), `projectsTaskTitle`, `projectsTaskFocus`, `projectsTaskSubtasks` (despliega), `projectsSubtaskCheck`.
+- Crear rapido `quickAdd*`, selectores `picker*`, editor `taskEditor*`, formulario `projectForm*`, editor de etiquetas `tagEditor*`, agenda `agenda*`:
+  ver `res/values/ids_*.xml`. Recorrido completo: `steps/rp-tour.steps`.
+- Retirados en rediseno-proyectos: `projectCard*`, `projectDetail*`, `projectItem*`, `projectSubtask*`, `projectTasksText`, `projectsAddButton`.
+
 
 ## All progress (u18)
 

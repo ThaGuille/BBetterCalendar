@@ -70,6 +70,9 @@ ASSERT id=pickerSubtaskList
 # More: a note, then Done brings the keyboard back.
 TAP id=quickAddMore
 WAIT 800
+# Repeat and Reminder (u14) fill the first screen of More: the note sits below them.
+SWIPE 540 1700 540 1000 400
+WAIT 600
 ASSERT id=pickerNoteInput
 TAP id=pickerNoteInput
 WAIT 500

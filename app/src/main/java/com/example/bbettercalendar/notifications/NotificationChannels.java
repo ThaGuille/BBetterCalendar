@@ -21,6 +21,10 @@ public final class NotificationChannels {
 
     /** Vibración larga y marcada (espera, vibra, pausa…): se nota en el bolsillo. */
     public static final long[] ROUND_START_VIBRATION = {0L, 700L, 250L, 700L, 250L, 1100L};
+    // Aviso de empezar una tarea (rediseno-proyectos 3.8, decision d2): dos canales, el de las tareas que
+    // bloquean con la vibracion larga (la vibracion del canal solo se fija al crearlo).
+    public static final String CHANNEL_TASK_START = "bb_task_start";
+    public static final String CHANNEL_TASK_START_BLOCK = "bb_task_start_block";
     public static final String CHANNEL_USAGE_LIMITS = "bb_usage_limits";
     public static final String CHANNEL_PROJECT_DEADLINES = "bb_project_deadlines";
     // F5-u6 (D-034): ánimos, empujones y solicitudes de amigos. Es el único control para silenciarlos (DIF-01).
@@ -69,6 +73,20 @@ public final class NotificationChannels {
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build());
 
+        NotificationChannel taskStart = new NotificationChannel(
+                CHANNEL_TASK_START,
+                context.getString(R.string.notif_channel_task_start_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        taskStart.setDescription(context.getString(R.string.notif_channel_task_start_desc));
+
+        NotificationChannel taskStartBlock = new NotificationChannel(
+                CHANNEL_TASK_START_BLOCK,
+                context.getString(R.string.notif_channel_task_start_block_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        taskStartBlock.setDescription(context.getString(R.string.notif_channel_task_start_block_desc));
+        taskStartBlock.enableVibration(true);
+        taskStartBlock.setVibrationPattern(ROUND_START_VIBRATION);
+
         NotificationChannel usageLimits = new NotificationChannel(
                 CHANNEL_USAGE_LIMITS,
                 context.getString(R.string.notif_channel_usage_limits_name),
@@ -107,6 +125,8 @@ public final class NotificationChannels {
         nm.createNotificationChannel(events);
         nm.createNotificationChannel(focus);
         nm.createNotificationChannel(roundStart);
+        nm.createNotificationChannel(taskStart);
+        nm.createNotificationChannel(taskStartBlock);
         nm.createNotificationChannel(usageLimits);
         nm.createNotificationChannel(projectDeadlines);
         nm.createNotificationChannel(friends);

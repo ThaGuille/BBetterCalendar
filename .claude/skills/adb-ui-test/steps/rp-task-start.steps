@@ -1,0 +1,20 @@
+# Rediseno de Proyectos, aviso de empezar una tarea: la notificacion de «Escribir el capitulo 3» (bloquea)
+# sale con Empezar y En 10 min; Empezar abre Focus con la sesion de la tarea.
+# Needs the seeded app and the debug broadcast fired BEFORE this walk (no START: force-stopping the app
+# would remove the notification):
+#   python .claude/scripts/seed_progress_db.py --device
+#   adb shell am broadcast -f 32 -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.notifications.task.TaskStartReceiver --ez debug_first_eligible true
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-task-start.steps --save rp-task-start
+WAIT 3000
+SWIPE 540 15 540 1700 700
+WAIT 2000
+SHOT rp-task-start-shade
+TAP text=Start|Empezar
+WAIT 5000
+SHOT rp-task-start-disclosure
+# The task blocks and the AVD has no accessibility service: Focus starts unarmed and shows the existing
+# explanation once (decision d3). Back closes it and leaves Focus on screen.
+KEY KEYCODE_BACK
+WAIT 2000
+ASSERT id=focusRingBox
+SHOT rp-task-start-focus

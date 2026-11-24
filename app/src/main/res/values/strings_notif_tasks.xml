@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: aviso de empezar una tarea de un proyecto (Spanish in values-es). -->
+<resources>
+    <string name="notif_channel_task_start_name">Task start</string>
+    <string name="notif_channel_task_start_desc">Tells you when a project task is due to start, with a Start button.</string>
+    <string name="notif_channel_task_start_block_name">Task start (blocking)</string>
+    <string name="notif_channel_task_start_block_desc">Strong vibration when the task that starts will block other apps.</string>
+
+    <string name="notif_task_start_title">Starts: %1$s</string>
+    <string name="notif_task_start_duration">%1$d min</string>
+    <string name="notif_task_start_block">Block on start</string>
+    <string name="notif_task_start_action_start">Start</string>
+    <string name="notif_task_start_action_snooze">In 10 min</string>
+</resources>

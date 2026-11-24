@@ -40,6 +40,14 @@
             android:exported="true"
             tools:replace="android:exported" />
 
+        <!-- rediseno-proyectos u13: aviso de empezar una tarea disparado a mano. exported=true SOLO aqui; el
+             disparo sin accion solo se atiende con BuildConfig.DEBUG (ver TaskStartReceiver):
+             adb shell am broadcast -f 32 -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.notifications.task.TaskStartReceiver, boolean extra debug_first_eligible = true -->
+        <receiver
+            android:name="com.example.bbettercalendar.notifications.task.TaskStartReceiver"
+            android:exported="true"
+            tools:replace="android:exported" />
+
         <!-- rediseno-proyectos u6: gallery of the task pickers (adb recording rp-pickers). Same rules as above:
              exported only in the debug manifest, no intent filter.
              adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugPickersGalleryActivity -->

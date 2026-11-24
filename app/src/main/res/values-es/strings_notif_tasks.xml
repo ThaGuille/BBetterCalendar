@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: aviso de empezar una tarea de un proyecto. -->
+<resources>
+    <string name="notif_channel_task_start_name">Empezar tarea</string>
+    <string name="notif_channel_task_start_desc">Te avisa cuando toca empezar una tarea de un proyecto, con un botón Empezar.</string>
+    <string name="notif_channel_task_start_block_name">Empezar tarea (con bloqueo)</string>
+    <string name="notif_channel_task_start_block_desc">Vibración fuerte cuando la tarea que empieza va a bloquear otras apps.</string>
+
+    <string name="notif_task_start_title">Empieza: %1$s</string>
+    <string name="notif_task_start_duration">%1$d min</string>
+    <string name="notif_task_start_block">Bloqueo al empezar</string>
+    <string name="notif_task_start_action_start">Empezar</string>
+    <string name="notif_task_start_action_snooze">En 10 min</string>
+</resources>

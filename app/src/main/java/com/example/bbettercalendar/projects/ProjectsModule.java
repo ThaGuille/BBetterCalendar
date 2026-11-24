@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.database.AppDatabase;
+import com.example.bbettercalendar.notifications.task.TaskStartScheduler;
 
 import javax.inject.Singleton;
 
@@ -20,19 +20,11 @@ import dagger.hilt.components.SingletonComponent;
 @InstallIn(SingletonComponent.class)
 public class ProjectsModule {
 
-    // Binding por defecto: no hace nada. La parte del aviso de empezar lo sustituye por la alarma real.
+    // El aviso de empezar de una tarea: la alarma real (rediseno-proyectos 3.8).
     @Provides
     @Singleton
-    public static TaskStartAlarm provideTaskStartAlarm() {
-        return new TaskStartAlarm() {
-            @Override
-            public void schedule(CalendarEntry entry) {
-            }
-
-            @Override
-            public void cancel(CalendarEntry entry) {
-            }
-        };
+    public static TaskStartAlarm provideTaskStartAlarm(TaskStartScheduler scheduler) {
+        return scheduler;
     }
 
     @Provides

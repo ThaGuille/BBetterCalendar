@@ -18,6 +18,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.bbettercalendar.configuration.InitialConfiguration;
 import com.example.bbettercalendar.notifications.PermissionGate;
 import com.example.bbettercalendar.notifications.nudge.NudgeState;
+import com.example.bbettercalendar.notifications.task.TaskStartIds;
+import com.example.bbettercalendar.notifications.task.TaskStartLauncher;
+import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.social.SocialFeature;
 import com.example.bbettercalendar.social.inbox.InboxItem;
 import com.example.bbettercalendar.social.push.FriendsPushHandler;
@@ -66,6 +69,12 @@ public class MainActivity extends AppCompatActivity {
      * notificación del servicio) abre la pantalla Focus. Boolean; se consume una vez.
      */
     public static final String EXTRA_OPEN_FOCUS = "open_focus";
+
+    /**
+     * rediseno-proyectos 3.8: el boton "Empezar" del aviso de empezar una tarea. Int (id de la tarea);
+     * se consume una vez: arranca su sesion de Focus (FocusSessionViewModel.startTaskFocus) y abre Focus.
+     */
+    public static final String EXTRA_START_TASK_ID = "start_task_id";
 
     /**
      * u12: destinos de primer nivel = los únicos con barra inferior. Calendar Week cuenta porque es
@@ -119,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
     @androidx.annotation.Nullable private PendingInviteViewModel pendingInvite;
 
     @Inject PermissionGate permissionGate;
+    @Inject TaskStartLauncher taskStartLauncher;
 
     private ActivityResultLauncher<String> notificationPermissionLauncher;
 
@@ -179,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
         openProjectFromIntent(getIntent());
         openInboxFromIntent(getIntent());
         openFocusFromIntent(getIntent());
+        startTaskFromIntent(getIntent());
         handleDebugNav(getIntent());
         setUpPendingInvite();
     }
@@ -296,7 +307,30 @@ public class MainActivity extends AppCompatActivity {
         openProjectFromIntent(intent);
         openInboxFromIntent(intent);
         openFocusFromIntent(intent);
+        startTaskFromIntent(intent);
         handleDebugNav(intent);
+    }
+
+    /**
+     * EXTRA_START_TASK_ID: arranca la sesion de Focus de la tarea del aviso y abre Focus.
+     * Con una sesion ya en marcha solo abre Focus (startTaskFocus no toca nada). Consumido.
+     */
+    private void startTaskFromIntent(Intent intent) {
+        if (intent == null || navController == null) return;
+        int entryId = intent.getIntExtra(EXTRA_START_TASK_ID, 0);
+        if (entryId <= 0) return;
+        intent.removeExtra(EXTRA_START_TASK_ID);
+        androidx.core.app.NotificationManagerCompat.from(this)
+                .cancel(TaskStartIds.notificationId(entryId));
+        FocusSessionViewModel session = new ViewModelProvider(this).get(FocusSessionViewModel.class);
+        taskStartLauncher.prepare(entryId, request -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (request != null) session.startTaskFocus(request);
+            NavDestination current = navController.getCurrentDestination();
+            if (current != null && current.getId() == R.id.navigation_focus) return;
+            navController.navigate(R.id.navigation_focus, null,
+                    new androidx.navigation.NavOptions.Builder().setLaunchSingleTop(true).build());
+        });
     }
 
     /**

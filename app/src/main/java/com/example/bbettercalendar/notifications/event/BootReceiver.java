@@ -10,11 +10,14 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.notifications.nudge.DailyNudgeScheduler;
 import com.example.bbettercalendar.notifications.project.ProjectDeadlineScheduler;
+import com.example.bbettercalendar.notifications.task.TaskStartScheduler;
 import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.ProjectDAO;
 import com.example.bbettercalendar.usage.limits.UsageLimitScheduler;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -31,6 +34,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Inject UsageLimitScheduler usageLimitScheduler;
     @Inject ProjectDAO projectDao;
     @Inject ProjectDeadlineScheduler projectDeadlineScheduler;
+    @Inject TaskStartScheduler taskStartScheduler;
     @Inject @IoExecutor ExecutorService IO;
 
     @Override
@@ -70,8 +74,24 @@ public class BootReceiver extends BroadcastReceiver {
                 // el arm() del monitor de límites).
                 List<CalendarEntry> all = calendarEntryDAO.getAllEvents();
                 int rescheduled = 0;
+                int startAlarms = 0;
+                Map<Integer, Boolean> activeProject = new HashMap<>();
                 if (all != null) {
                     for (CalendarEntry entry : all) {
+                        // Aviso de empezar de las tareas de proyectos activos (rediseno-proyectos 3.8):
+                        // el scheduler descarta las no elegibles y el core las que ya pasaron.
+                        if (entry.getProjectId() != 0 && !entry.isTemplate() && entry.getStartMillis() > now) {
+                            Boolean active = activeProject.get(entry.getProjectId());
+                            if (active == null) {
+                                Project p = projectDao.getById(entry.getProjectId());
+                                active = p != null && p.status == Project.STATUS_ACTIVE;
+                                activeProject.put(entry.getProjectId(), active);
+                            }
+                            if (active) {
+                                taskStartScheduler.schedule(entry);
+                                startAlarms++;
+                            }
+                        }
                         // Las plantillas de recurrencia no reciben alarmas (spec tasks-recurrence):
                         // sólo sus ocurrencias materializadas, que ya están en 'all' como filas propias.
                         if (!entry.isTemplate() && entry.getStartMillis() > now) {
@@ -80,7 +100,8 @@ public class BootReceiver extends BroadcastReceiver {
                         }
                     }
                 }
-                Log.i(TAG, "Rescheduled reminders for " + rescheduled + " future events");
+                Log.i(TAG, "Rescheduled reminders for " + rescheduled + " future events, "
+                        + startAlarms + " task-start candidates");
 
                 // Tercer inquilino de este bloque (spec project-deadlines-progress): las alarmas de
                 // deadline de proyecto también se pierden en el reinicio.

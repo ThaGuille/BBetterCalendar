@@ -184,6 +184,12 @@
             android:name=".notifications.nudge.DailyNudgeReceiver"
             android:exported="false" />
 
+        <!-- rediseno-proyectos: aviso de empezar una tarea (alarma exacta + acciones). El manifest de
+             debug lo exporta para dispararlo con adb. -->
+        <receiver
+            android:name=".notifications.task.TaskStartReceiver"
+            android:exported="false" />
+
         <receiver
             android:name=".notifications.event.BootReceiver"
             android:exported="true">

@@ -3,8 +3,14 @@ package com.example.bbettercalendar.calendarEntries;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
+import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import com.example.bbettercalendar.popups.RepetitionOptions;
+import com.example.bbettercalendar.projects.TaskStartAlarm;
 
 import org.junit.Test;
 
@@ -217,5 +223,141 @@ public class RecurrenceMaterializerTest {
         List<Long> starts = RecurrenceMaterializer.occurrenceStarts(
                 RepetitionOptions.DAILY, /*anchor*/ 0L, 1, 0, -1, DAY * 10);
         assertTrue(starts.isEmpty());
+    }
+
+    // ---------------------------------------------------------------- project series (rediseno-proyectos 3.8)
+
+    private static final int PROJECT = 7;
+
+    private static CalendarEntry projectTemplate(int projectId, long anchor) {
+        Calendar start = Calendar.getInstance();
+        start.setTimeInMillis(anchor);
+        boolean[] flags = new boolean[8];
+        flags[2] = true; // 15 min antes
+        flags[7] = true; // A la hora (aviso de empezar)
+        return new CalendarEntry.EventBuilder()
+                .setEventType(2)
+                .setEventTitle("Regar el huerto")
+                .setEventProjectId(projectId)
+                .setSectionId(4)
+                .setPriority(CalendarEntry.PRIORITY_HIGH)
+                .setTagId(6)
+                .setBlockOnFocus(true)
+                .setEventDuration(30 * 60_000)
+                .setEventTargetMinutes(30)
+                .setEventNotifications(flags)
+                .setEventStartDayAndHour(start)
+                .setEventRepetition(RepetitionOptions.DAILY)
+                .setEventRepetitionInterval(1)
+                .setEventIsTemplate(true)
+                .build();
+    }
+
+    private static long threeHoursAgo() {
+        return System.currentTimeMillis() - 3 * 60 * 60 * 1000L;
+    }
+
+    @Test
+    public void archivedProjectTemplate_getsNoOccurrences() {
+        InMemoryEntries table = new InMemoryEntries();
+        table.statusOf = id -> com.example.bbettercalendar.projects.Project.STATUS_ARCHIVED;
+        EventReminderScheduler reminders = mock(EventReminderScheduler.class);
+        int templateId = table.put(projectTemplate(PROJECT, threeHoursAgo()));
+
+        new RecurrenceMaterializer(table.dao, reminders, mock(TaskStartAlarm.class)).materializeAll();
+
+        assertTrue(table.occurrencesOf(templateId).isEmpty());
+        verify(reminders, never()).scheduleFor(any());
+    }
+
+    @Test
+    public void completedProjectTemplate_getsNoOccurrences() {
+        InMemoryEntries table = new InMemoryEntries();
+        table.statusOf = id -> com.example.bbettercalendar.projects.Project.STATUS_COMPLETED;
+        int templateId = table.put(projectTemplate(PROJECT, threeHoursAgo()));
+
+        new RecurrenceMaterializer(table.dao, mock(EventReminderScheduler.class), mock(TaskStartAlarm.class))
+                .materializeTemplate(templateId);
+
+        assertTrue(table.occurrencesOf(templateId).isEmpty());
+    }
+
+    @Test
+    public void unarchivedProjectTemplate_resumesItsOccurrences() {
+        InMemoryEntries table = new InMemoryEntries();
+        int[] status = {com.example.bbettercalendar.projects.Project.STATUS_ARCHIVED};
+        table.statusOf = id -> status[0];
+        long anchor = threeHoursAgo();
+        int templateId = table.put(projectTemplate(PROJECT, anchor));
+        RecurrenceMaterializer materializer = new RecurrenceMaterializer(table.dao,
+                mock(EventReminderScheduler.class), mock(TaskStartAlarm.class));
+
+        materializer.materializeAll();
+        assertTrue("archived: nothing yet", table.occurrencesOf(templateId).isEmpty());
+
+        status[0] = com.example.bbettercalendar.projects.Project.STATUS_ACTIVE;
+        materializer.materializeAll();
+
+        List<CalendarEntry> occurrences = table.occurrencesOf(templateId);
+        // Daily from the anchor to the 35-day horizon.
+        assertTrue("got " + occurrences.size(), occurrences.size() >= RecurrenceMaterializer.HORIZON_DAYS);
+        assertEquals(anchor, occurrences.get(0).getStartMillis());
+        assertEquals(anchor + DAY, occurrences.get(1).getStartMillis(), 60 * 60 * 1000L);
+    }
+
+    @Test
+    public void projectOccurrence_copiesTheProjectAndTaskFields_andGetsItsAlarms() {
+        InMemoryEntries table = new InMemoryEntries();
+        table.statusOf = id -> com.example.bbettercalendar.projects.Project.STATUS_ACTIVE;
+        EventReminderScheduler reminders = mock(EventReminderScheduler.class);
+        TaskStartAlarm startAlarm = mock(TaskStartAlarm.class);
+        int templateId = table.put(projectTemplate(PROJECT, threeHoursAgo()));
+
+        new RecurrenceMaterializer(table.dao, reminders, startAlarm).materializeTemplate(templateId);
+
+        CalendarEntry first = table.occurrencesOf(templateId).get(0);
+        assertFalse(first.isTemplate());
+        assertEquals(templateId, first.getTemplateId());
+        assertEquals(PROJECT, first.getProjectId());
+        assertEquals(4, first.getSectionId());
+        assertEquals(CalendarEntry.PRIORITY_HIGH, first.getPriority());
+        assertEquals(6, first.getTagId());
+        assertTrue(first.isBlockOnFocus());
+        assertEquals(30, first.getTargetMinutes());
+        assertEquals(30 * 60_000, first.getDuration());
+        assertTrue(first.getNotifications()[2]);
+        assertTrue(first.getNotifications()[7]);
+        assertFalse(first.isDone());
+        verify(reminders).scheduleFor(first);
+        verify(startAlarm).schedule(first);
+    }
+
+    @Test
+    public void calendarTemplateWithoutProject_stillMaterializes_withoutStartAlarm() {
+        InMemoryEntries table = new InMemoryEntries();
+        TaskStartAlarm startAlarm = mock(TaskStartAlarm.class);
+        int templateId = table.put(projectTemplate(0, threeHoursAgo()));
+
+        new RecurrenceMaterializer(table.dao, mock(EventReminderScheduler.class), startAlarm).materializeAll();
+
+        assertFalse(table.occurrencesOf(templateId).isEmpty());
+        verify(startAlarm, never()).schedule(any());
+    }
+
+    @Test
+    public void oldOccurrenceWithoutProject_inheritsItFromItsTemplate() {
+        InMemoryEntries table = new InMemoryEntries();
+        table.statusOf = id -> com.example.bbettercalendar.projects.Project.STATUS_ARCHIVED;
+        CalendarEntry template = projectTemplate(PROJECT, threeHoursAgo());
+        int templateId = table.put(template);
+        CalendarEntry legacy = RecurrenceMaterializer.buildOccurrence(template, threeHoursAgo());
+        legacy.setProjectId(0); // as materialized before occurrences carried projectId
+        int legacyId = table.put(legacy);
+
+        new RecurrenceMaterializer(table.dao, mock(EventReminderScheduler.class), mock(TaskStartAlarm.class))
+                .materializeAll();
+
+        assertEquals(PROJECT, table.rows.get(legacyId).getProjectId());
+        assertEquals(templateId, table.rows.get(legacyId).getTemplateId());
     }
 }

@@ -118,6 +118,10 @@ public class TaskEditorViewModel extends ViewModel {
                 }
                 List<TaskSubtask> subs = subtaskDao.getByEntry(entryId);
                 TaskDraft draft = TaskEditorDrafts.fromEntry(entry, subs, now, zone, firstSection);
+                // Repetir es de la serie (decision d5): una ocurrencia muestra el de su plantilla.
+                CalendarEntry template = entry.getTemplateId() != 0
+                        ? entryDao.getEventById(entry.getTemplateId()) : null;
+                draft.setRepeat(ProjectTasksRepository.seriesRepeat(entry, template));
                 int minutes = focusDao.sumAttributedMinutes(entryId);
                 state.postValue(new State(draft, TaskEditorTiles.signature(draft), sections, minutes, false));
                 return;

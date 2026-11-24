@@ -33,6 +33,7 @@ public class ProjectsRepository {
     private final TaskSubtaskDAO subtaskDao;
     private final ProjectDeadlineScheduler deadlineScheduler;
     private final TaskAlarms taskAlarms;
+    private final ProjectLifecycle lifecycle;
     private final TransactionRunner transaction;
     private final MainThread mainThread;
     private final TagSeeds.Names names;
@@ -42,6 +43,7 @@ public class ProjectsRepository {
     public ProjectsRepository(ProjectDAO projectDao, ProjectSectionDAO sectionDao,
                               CalendarEntryDAO calendarEntryDao, TaskSubtaskDAO subtaskDao,
                               ProjectDeadlineScheduler deadlineScheduler, TaskAlarms taskAlarms,
+                              ProjectLifecycle lifecycle,
                               TransactionRunner transaction, MainThread mainThread,
                               TagSeeds.Names names,
                               @DbWriteExecutor ExecutorService dbWriteExecutor) {
@@ -51,6 +53,7 @@ public class ProjectsRepository {
         this.subtaskDao = subtaskDao;
         this.deadlineScheduler = deadlineScheduler;
         this.taskAlarms = taskAlarms;
+        this.lifecycle = lifecycle;
         this.transaction = transaction;
         this.mainThread = mainThread;
         this.names = names;
@@ -161,18 +164,20 @@ public class ProjectsRepository {
         reopenWith(projectId);
     }
 
-    // Archivar o completar: cambia el status (nunca borra filas) y apaga todos los avisos del proyecto.
+    // Archivar o completar: cambia el status (nunca borra filas), apaga todos los avisos del proyecto y
+    // corta sus series (ProjectLifecycle, spec 3.8).
     private void close(int projectId, int status) {
         dbWriteExecutor.execute(() -> {
             Project fresh = projectDao.getById(projectId);
             if (fresh == null) return;
+            long now = System.currentTimeMillis();
             fresh.status = status;
             if (status == Project.STATUS_COMPLETED) {
-                fresh.completedAtMillis = System.currentTimeMillis();
+                fresh.completedAtMillis = now;
             }
             projectDao.update(fresh);
             deadlineScheduler.cancelFor(projectId);
-            taskAlarms.onProjectClosed(projectId);
+            lifecycle.onProjectClosed(projectId, now);
         });
     }
 
@@ -184,7 +189,8 @@ public class ProjectsRepository {
             fresh.completedAtMillis = 0L;
             projectDao.update(fresh);
             deadlineScheduler.scheduleFor(fresh);
-            taskAlarms.onProjectReopened(projectId);
+            // Con el status ya ACTIVE: el materializador vuelve a rellenar sus series desde ahora.
+            lifecycle.onProjectReopened(projectId, System.currentTimeMillis());
         });
     }
 

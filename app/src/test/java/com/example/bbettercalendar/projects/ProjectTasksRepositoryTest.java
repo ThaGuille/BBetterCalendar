@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import com.example.bbettercalendar.projects.domain.TaskDraft;
 import com.example.bbettercalendar.projects.domain.TaskSnapshot;
@@ -54,7 +55,8 @@ public class ProjectTasksRepositoryTest {
         startAlarm = mock(TaskStartAlarm.class);
         TaskAlarms alarms = new TaskAlarms(reminders, startAlarm, entryDao);
         repo = new ProjectTasksRepository(entryDao, sectionDao, subtaskDao, mock(FocusEventDAO.class),
-                alarms, Runnable::run, Runnable::run, new DirectExecutor());
+                alarms, new RecurrenceMaterializer(entryDao, reminders, startAlarm), Runnable::run,
+                Runnable::run, new DirectExecutor());
     }
 
     private static ProjectSection section(int id, int projectId, int position) {

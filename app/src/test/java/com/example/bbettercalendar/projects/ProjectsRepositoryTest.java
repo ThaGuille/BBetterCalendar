@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
+import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
 import com.example.bbettercalendar.notifications.project.ProjectDeadlineScheduler;
 
@@ -48,8 +49,10 @@ public class ProjectsRepositoryTest {
             transactions++;
             block.run();
         };
+        ProjectLifecycle lifecycle = new ProjectLifecycle(entryDao, taskAlarms,
+                new RecurrenceMaterializer(entryDao, reminders, startAlarm));
         repo = new ProjectsRepository(projectDao, sectionDao, entryDao, subtaskDao, deadlines,
-                taskAlarms, tx, Runnable::run, resId -> "Tasks", new DirectExecutor());
+                taskAlarms, lifecycle, tx, Runnable::run, resId -> "Tasks", new DirectExecutor());
     }
 
     private static Project project(int id, int status) {

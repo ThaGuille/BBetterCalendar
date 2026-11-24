@@ -3,14 +3,21 @@ package com.example.bbettercalendar.calendarEntries;
 import android.app.AlarmManager;
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+
 import com.example.bbettercalendar.notifications.event.EventReminderScheduler;
+import com.example.bbettercalendar.notifications.task.TaskStartScheduler;
 import com.example.bbettercalendar.popups.RepetitionOptions;
 import com.example.bbettercalendar.popups.RepetitionSpec;
+import com.example.bbettercalendar.projects.Project;
+import com.example.bbettercalendar.projects.TaskStartAlarm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Materializa las series recurrentes (spec tasks-recurrence): a partir de una fila PLANTILLA
@@ -23,6 +30,10 @@ import java.util.List;
  *
  * TODOS los métodos públicos hacen E/S de BD sincrónica: hay que invocarlos fuera del hilo
  * principal (los call sites ya corren sobre ExecutorService), regla #3.
+ *
+ * rediseno-proyectos 3.8: una plantilla de un proyecto que no está ACTIVE (archivado o completado) no
+ * genera ocurrencias; al reabrirlo, {@code ProjectLifecycle} adelanta su marca de agua hasta "ahora" y
+ * la serie sigue desde ahí. Las ocurrencias de un proyecto reciben también el aviso de empezar.
  */
 public class RecurrenceMaterializer {
 
@@ -35,21 +46,38 @@ public class RecurrenceMaterializer {
 
     private final CalendarEntryDAO dao;
     private final EventReminderScheduler scheduler;
+    @Nullable private final TaskStartAlarm startAlarm;
 
     public RecurrenceMaterializer(Context context, CalendarEntryDAO dao) {
+        this(dao, new EventReminderScheduler(context.getApplicationContext(), alarmManager(context)),
+                new TaskStartScheduler(context.getApplicationContext(), alarmManager(context)));
+    }
+
+    /**
+     * {@code scheduler} programa los recordatorios de cada ocurrencia; {@code startAlarm} (null = ninguno)
+     * el aviso de empezar de las ocurrencias de un proyecto.
+     */
+    @Inject
+    public RecurrenceMaterializer(CalendarEntryDAO dao, EventReminderScheduler scheduler,
+                                  TaskStartAlarm startAlarm) {
         this.dao = dao;
-        Context app = context.getApplicationContext();
-        AlarmManager am = (AlarmManager) app.getSystemService(Context.ALARM_SERVICE);
-        this.scheduler = new EventReminderScheduler(app, am);
+        this.scheduler = scheduler;
+        this.startAlarm = startAlarm;
+    }
+
+    private static AlarmManager alarmManager(Context context) {
+        return (AlarmManager) context.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
     }
 
     /** Adopta filas repetitivas legacy y rellena todas las plantillas. Llamar fuera del hilo UI. */
     public void materializeAll() {
         adoptLegacyRepeatingRows();
+        dao.adoptOccurrenceProjects();
         List<CalendarEntry> templates = dao.getTemplates();
         if (templates == null) return;
         long horizon = horizonMillis();
         for (CalendarEntry template : templates) {
+            if (!projectAllowsSeries(template)) continue;
             materialize(template, horizon);
         }
     }
@@ -58,7 +86,16 @@ public class RecurrenceMaterializer {
     public void materializeTemplate(int templateId) {
         CalendarEntry template = dao.getEventById(templateId);
         if (template == null || !template.isTemplate()) return;
+        if (!projectAllowsSeries(template)) return;
         materialize(template, horizonMillis());
+    }
+
+    // Una serie de un proyecto solo se rellena mientras el proyecto está ACTIVE (spec 3.8: la serie se
+    // corta al completar o archivar). Sin proyecto (tareas del Calendario) siempre.
+    private boolean projectAllowsSeries(CalendarEntry template) {
+        if (template.getProjectId() == 0) return true;
+        Integer status = dao.getProjectStatus(template.getProjectId());
+        return status != null && status == Project.STATUS_ACTIVE;
     }
 
     // Promueve filas con repetition != NONE que aún no son plantillas (modelo antiguo de
@@ -187,6 +224,10 @@ public class RecurrenceMaterializer {
         long rowId = dao.insert(occurrence);
         occurrence.setId((int) rowId);
         scheduler.scheduleFor(occurrence);
+        // El aviso de empezar es solo de las tareas de proyectos (rediseno-proyectos 3.8).
+        if (startAlarm != null && occurrence.getProjectId() != 0) {
+            startAlarm.schedule(occurrence);
+        }
     }
 
     // La fila de ocurrencia que se inserta para la plantilla en startMillis (sin id aún). Pura (sin BD
@@ -212,6 +253,9 @@ public class RecurrenceMaterializer {
                 // de su plantilla (spec recurrence-calendar-visibility).
                 .setEventHiddenInCalendar(template.isHiddenInCalendar())
                 .setEventTemplateId(template.getId())
+                // rediseno-proyectos: la ocurrencia es del proyecto de su serie (Proyectos, filtro de
+                // archivados y aviso de empezar la buscan por projectId).
+                .setEventProjectId(template.getProjectId())
                 // rediseno-proyectos (DB v16): prioridad, etiqueta, sección, bloqueo y nota son de la
                 // serie; la ocurrencia los hereda igual que el resto.
                 .copyTaskFieldsFrom(template)

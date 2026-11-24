@@ -15,6 +15,7 @@ import com.example.bbettercalendar.database.IoExecutor;
 import com.example.bbettercalendar.notifications.BBetterNotifier;
 import com.example.bbettercalendar.notifications.NotificationChannels;
 import com.example.bbettercalendar.notifications.NotificationSpec;
+import com.example.bbettercalendar.projects.Project;
 
 import java.util.concurrent.ExecutorService;
 
@@ -49,6 +50,9 @@ public class EventReminderReceiver extends BroadcastReceiver {
                 }
                 // Hecha o retirada: el aviso ya no tiene sentido (la alarma pudo sobrevivir al cambio).
                 if (entry.isDone() || entry.isDismissed()) return;
+                // Tarea de un proyecto archivado o completado (rediseno-proyectos 3.8): sin aviso, aunque
+                // la alarma (o un "posponer") sobreviviera al cierre.
+                if (!isInOpenProject(entry)) return;
                 fireNotification(appContext, entry, offsetIndex);
             } catch (Exception e) {
                 Log.e(TAG, "onReceive failed", e);
@@ -56,6 +60,12 @@ public class EventReminderReceiver extends BroadcastReceiver {
                 pendingResult.finish();
             }
         });
+    }
+
+    private boolean isInOpenProject(CalendarEntry entry) {
+        if (entry.getProjectId() == 0) return true;
+        Integer status = calendarEntryDAO.getProjectStatus(entry.getProjectId());
+        return status == null || status == Project.STATUS_ACTIVE;
     }
 
     private void fireNotification(Context context, CalendarEntry entry, int offsetIndex) {

@@ -1,0 +1,47 @@
+# rediseno-proyectos u14: Repeat is on in the quick add (More shows the Repeat row), and the tasks of the ARCHIVED
+# project Huerto leave the Calendar. Seed: ARCHIVED Huerto with the weekly template "Regar el huerto" and the task
+# "Comprar semillas" dated today; ACTIVE Tesis final with "Escribir el capitulo 3" today at 17:00.
+# The walk ends on today's day list; the check then confirms with find-node that neither "Comprar semillas" nor
+# "Regar el huerto" is on screen.
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-lifecycle.steps --save rp-lifecycle
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+# Quick add: More now has the Repeat row (it was hidden until repetition existed). Nothing is saved.
+TAP id=navigation_projects
+WAIT 2500
+ASSERT id=projectsSelector
+TAP text=Tesis final,
+WAIT 1200
+TAP id=projectsFab
+WAIT 2000
+ASSERT id=quickAddTitle
+TAP id=quickAddMore
+WAIT 1200
+ASSERT id=pickerRepeatGroup
+ASSERT id=pickerRepWeekly expect~=Every week|Cada semana
+ASSERT id=pickerRepeatNote expect~=until the project ends|hasta que termine el proyecto
+SHOT rp-lifecycle-repeat-row
+TAP id=pickerHeaderDone
+WAIT 1200
+# Tapping outside (on the scrim) closes the box without saving.
+SWIPE 540 200 540 200 100
+WAIT 1200
+ASSERT id=projectsFab
+# Calendar: today's day list lists the ACTIVE project's task and none of the ARCHIVED project's.
+TAP id=navigation_calendar_month
+WAIT 2000
+ASSERT id=monthCalendarView
+TAP id=monthTodayButton
+WAIT 1200
+ASSERT id=dayDetailTitle
+SWIPE 540 1400 540 500 300
+WAIT 1000
+ASSERT id=dayDetailRecycler
+ASSERT id=eventTitle
+# A day-list row of a task does nothing on tap: the TAP only proves the row is listed.
+TAP text=Escribir el cap
+WAIT 800
+ASSERT id=dayDetailRecycler
+SHOT rp-lifecycle-calendar-today

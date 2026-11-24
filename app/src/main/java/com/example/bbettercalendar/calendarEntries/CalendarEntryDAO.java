@@ -7,10 +7,18 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
+import com.example.bbettercalendar.projects.Project;
+
 import java.util.List;
 
 @Dao
 public interface CalendarEntryDAO {
+
+    // rediseno-proyectos (spec 4): las tareas de un proyecto ARCHIVED salen del Calendario, de Home y de los
+    // avisos. La subconsulta referencia la tabla project, asi Room invalida estas LiveData al archivar o
+    // desarchivar. Las de un proyecto COMPLETED siguen saliendo.
+    String NOT_IN_ARCHIVED_PROJECT = "(projectId = 0 OR projectId NOT IN "
+            + "(SELECT id FROM project WHERE status = " + Project.STATUS_ARCHIVED + "))";
     @Insert
     long insert(CalendarEntry calendarEntry);
 
@@ -44,7 +52,7 @@ public interface CalendarEntryDAO {
     @Query("SELECT * FROM CalendarEntry WHERE isTemplate = 0 AND isDismissed = 0 AND (" +
             "(startMillis BETWEEN :startMillis AND :endMillis) OR " +
             "(endMillis BETWEEN :startMillis AND :endMillis) OR " +
-            "(startMillis <= :startMillis AND endMillis >= :endMillis))")
+            "(startMillis <= :startMillis AND endMillis >= :endMillis)) AND " + NOT_IN_ARCHIVED_PROJECT)
     LiveData<List<CalendarEntry>> getEventsBetween(long startMillis, long endMillis);
 
     // Igual que getEventsBetween pero síncrona, para los avisos diarios (notifications/nudge:
@@ -52,7 +60,8 @@ public interface CalendarEntryDAO {
     @Query("SELECT * FROM CalendarEntry WHERE isTemplate = 0 AND isDismissed = 0 AND (" +
             "(startMillis BETWEEN :startMillis AND :endMillis) OR " +
             "(endMillis BETWEEN :startMillis AND :endMillis) OR " +
-            "(startMillis <= :startMillis AND endMillis >= :endMillis)) ORDER BY startMillis ASC")
+            "(startMillis <= :startMillis AND endMillis >= :endMillis)) AND " + NOT_IN_ARCHIVED_PROJECT +
+            " ORDER BY startMillis ASC")
     List<CalendarEntry> getEventsBetweenSync(long startMillis, long endMillis);
 
     // Igual que getEventsBetween pero además sin las filas marcadas "no pintar en el calendario"
@@ -63,7 +72,7 @@ public interface CalendarEntryDAO {
             "AND hiddenInCalendar = 0 AND (" +
             "(startMillis BETWEEN :startMillis AND :endMillis) OR " +
             "(endMillis BETWEEN :startMillis AND :endMillis) OR " +
-            "(startMillis <= :startMillis AND endMillis >= :endMillis))")
+            "(startMillis <= :startMillis AND endMillis >= :endMillis)) AND " + NOT_IN_ARCHIVED_PROJECT)
     LiveData<List<CalendarEntry>> getVisibleEventsBetween(long startMillis, long endMillis);
 
     // Tareas (type = 2 = TYPE_TASK) sin completar anteriores a un instante — sección
@@ -72,7 +81,8 @@ public interface CalendarEntryDAO {
     // plantillas; isDismissed = 0 excluye las tareas retiradas por el usuario (spec tasks-recurrence).
     @Query("SELECT * FROM CalendarEntry WHERE type = 2 AND isDone = 0 " +
             "AND isTemplate = 0 AND isDismissed = 0 " +
-            "AND startMillis > 0 AND startMillis < :beforeMillis ORDER BY startMillis ASC")
+            "AND startMillis > 0 AND startMillis < :beforeMillis AND " + NOT_IN_ARCHIVED_PROJECT +
+            " ORDER BY startMillis ASC")
     LiveData<List<CalendarEntry>> getUndoneTasksBefore(long beforeMillis);
 
     // --- Recurrencia (spec tasks-recurrence) ---
@@ -94,6 +104,41 @@ public interface CalendarEntryDAO {
     @Query("UPDATE CalendarEntry SET isDismissed = 1 WHERE templateId = :templateId " +
             "AND isDone = 0 AND startMillis < :beforeMillis")
     void dismissSeriesBefore(int templateId, long beforeMillis);
+
+    // rediseno-proyectos 3.8: estado del proyecto de una plantilla o tarea (null = el proyecto no existe).
+    // El materializador no rellena series de proyectos que no estan ACTIVE y los avisos no saltan en ellos.
+    @Query("SELECT status FROM project WHERE id = :projectId")
+    Integer getProjectStatus(int projectId);
+
+    // Ocurrencias materializadas antes de que buildOccurrence copiara projectId: lo heredan de su plantilla
+    // (el materializador lo hace en cada arranque; sin filas que arreglar no cambia nada).
+    @Query("UPDATE CalendarEntry SET projectId = (SELECT t.projectId FROM CalendarEntry t " +
+            "WHERE t.id = CalendarEntry.templateId) WHERE isTemplate = 0 AND templateId != 0 " +
+            "AND projectId = 0 AND templateId IN (SELECT id FROM CalendarEntry WHERE projectId != 0)")
+    void adoptOccurrenceProjects();
+
+    // Las plantillas que repiten de un proyecto (ProjectLifecycle).
+    @Query("SELECT * FROM CalendarEntry WHERE isTemplate = 1 AND repetition != 0 AND projectId = :projectId")
+    List<CalendarEntry> getRepeatingTemplatesOfProject(int projectId);
+
+    // Cerrar un proyecto corta sus series: sus ocurrencias futuras sin hacer se retiran (los datos quedan).
+    @Query("UPDATE CalendarEntry SET isDismissed = 1 WHERE isTemplate = 0 AND isDone = 0 " +
+            "AND isDismissed = 0 AND startMillis > :afterMillis AND templateId IN " +
+            "(SELECT id FROM CalendarEntry WHERE isTemplate = 1 AND repetition != 0 AND projectId = :projectId)")
+    void dismissProjectSeriesAfter(int projectId, long afterMillis);
+
+    // Reabrir (o Deshacer) devuelve las ocurrencias futuras retiradas al cerrar. "Quitar" de Home solo
+    // retira ocurrencias pasadas, asi que una futura retirada solo puede venir del cierre del proyecto.
+    @Query("UPDATE CalendarEntry SET isDismissed = 0 WHERE isTemplate = 0 AND isDone = 0 " +
+            "AND isDismissed = 1 AND startMillis > :afterMillis AND templateId IN " +
+            "(SELECT id FROM CalendarEntry WHERE isTemplate = 1 AND repetition != 0 AND projectId = :projectId)")
+    void restoreProjectSeriesAfter(int projectId, long afterMillis);
+
+    // Ocurrencias sin hacer de una serie posteriores a un instante: las que se borran al cambiar o quitar
+    // Repetir desde una ocurrencia (decision d5).
+    @Query("SELECT * FROM CalendarEntry WHERE templateId = :templateId AND isTemplate = 0 " +
+            "AND isDone = 0 AND startMillis > :afterMillis")
+    List<CalendarEntry> getUndoneOccurrencesAfter(int templateId, long afterMillis);
 
     // --- Proyectos (spec projects-mvp) ---
 

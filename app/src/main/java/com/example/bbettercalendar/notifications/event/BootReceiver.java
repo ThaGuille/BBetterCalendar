@@ -78,19 +78,21 @@ public class BootReceiver extends BroadcastReceiver {
                 Map<Integer, Boolean> activeProject = new HashMap<>();
                 if (all != null) {
                     for (CalendarEntry entry : all) {
-                        // Aviso de empezar de las tareas de proyectos activos (rediseno-proyectos 3.8):
-                        // el scheduler descarta las no elegibles y el core las que ya pasaron.
-                        if (entry.getProjectId() != 0 && !entry.isTemplate() && entry.getStartMillis() > now) {
+                        // Una tarea de un proyecto archivado o completado no recibe ningún aviso
+                        // (rediseno-proyectos 3.8: cerrarlo los canceló; un reinicio no los resucita).
+                        boolean inProject = entry.getProjectId() != 0;
+                        if (inProject && !entry.isTemplate() && entry.getStartMillis() > now) {
                             Boolean active = activeProject.get(entry.getProjectId());
                             if (active == null) {
                                 Project p = projectDao.getById(entry.getProjectId());
                                 active = p != null && p.status == Project.STATUS_ACTIVE;
                                 activeProject.put(entry.getProjectId(), active);
                             }
-                            if (active) {
-                                taskStartScheduler.schedule(entry);
-                                startAlarms++;
-                            }
+                            if (!active) continue;
+                            // Aviso de empezar de las tareas de proyectos activos: el scheduler
+                            // descarta las no elegibles y el core las que ya pasaron.
+                            taskStartScheduler.schedule(entry);
+                            startAlarms++;
                         }
                         // Las plantillas de recurrencia no reciben alarmas (spec tasks-recurrence):
                         // sólo sus ocurrencias materializadas, que ya están en 'all' como filas propias.

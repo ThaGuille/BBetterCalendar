@@ -1,0 +1,18 @@
+# rediseno-proyectos u14: Home's today list leaves out the tasks of the ARCHIVED project Huerto. The seed dates
+# "Comprar semillas" (Huerto, archived) and "Repasar el tema 4" both today with no time (00:00); Comprar semillas
+# was written first, so before the filter it was the first row. Now the first row is Repasar el tema 4.
+# The walk ends on Home; the check then confirms with find-node that "Comprar semillas" is not shown.
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-lifecycle-home.steps --save rp-lifecycle-home
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_home
+WAIT 2000
+ASSERT id=homeTimerCard
+SWIPE 540 1500 540 600 300
+WAIT 1200
+ASSERT id=homeTasksCard
+ASSERT id=homeTodayTaskList
+ASSERT id=taskTitleText expect~=Repasar el tema 4
+SHOT rp-lifecycle-home-today

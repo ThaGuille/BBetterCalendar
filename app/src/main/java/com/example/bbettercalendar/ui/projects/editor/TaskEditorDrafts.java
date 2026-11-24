@@ -15,7 +15,8 @@ public final class TaskEditorDrafts {
     private TaskEditorDrafts() {}
 
     /**
-     * The draft of an existing task. Repeat is not read (it is inert until the repetition part); the reminder
+     * The draft of an existing task. Repeat is not read here: it belongs to the series template, so
+     * TaskEditorViewModel sets it (ProjectTasksRepository.seriesRepeat); the reminder
      * comes from the stored offsets (the at-the-time reminder has no stored flag, see TaskDraft).
      *
      * @param firstSectionId section that holds the tasks stored with sectionId 0

@@ -50,6 +50,7 @@ import com.example.bbettercalendar.ui.projects.picker.PickerHost;
 import com.example.bbettercalendar.ui.projects.picker.PickerLabels;
 import com.example.bbettercalendar.ui.projects.picker.PickerView;
 import com.example.bbettercalendar.ui.projects.picker.PriorityPickerView;
+import com.example.bbettercalendar.ui.projects.picker.RepeatAvailability;
 import com.example.bbettercalendar.ui.projects.picker.SectionPickerView;
 import com.example.bbettercalendar.ui.projects.picker.SubtasksPickerView;
 import com.example.bbettercalendar.ui.projects.picker.TagPickerView;
@@ -301,6 +302,12 @@ public class TaskEditorFragment extends Fragment implements PickerHost {
                     R.color.bb_on_surface, null);
             whenDesc.append(", ").append(time);
         }
+        if (RepeatAvailability.isEnabled() && draft.getRepeat() != TaskDraft.Repeat.NONE) {
+            String repeat = repeatText(draft.getRepeat());
+            addMeta(whenMeta, R.id.taskEditorMetaRepeat, R.drawable.ic_repeat_24, R.color.bb_on_surface_muted, repeat,
+                    R.color.bb_on_surface, null);
+            whenDesc.append(", ").append(repeat);
+        }
         if (draft.getReminder() != TaskDraft.Reminder.NONE) {
             String reminder = reminderText(draft.getReminder());
             addMeta(whenMeta, R.id.taskEditorMetaReminder, R.drawable.ic_bell_24, R.color.bb_on_surface_muted, reminder,
@@ -389,6 +396,15 @@ public class TaskEditorFragment extends Fragment implements PickerHost {
         tagTile.setSelected(openTile == Tile.TAG);
         sectionTile.setSelected(openTile == Tile.SECTION);
         subtasksTile.setSelected(openTile == Tile.SUBTASKS);
+    }
+
+    private String repeatText(TaskDraft.Repeat repeat) {
+        switch (repeat) {
+            case DAILY: return getString(R.string.projects_picker_rep_daily);
+            case WEEKLY: return getString(R.string.projects_picker_rep_weekly);
+            case MONTHLY: return getString(R.string.projects_picker_rep_monthly);
+            default: return "";
+        }
     }
 
     private String reminderText(TaskDraft.Reminder reminder) {

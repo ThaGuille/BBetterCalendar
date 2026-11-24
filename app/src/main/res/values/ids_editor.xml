@@ -3,6 +3,7 @@
 <resources>
     <item name="taskEditorMetaTime" type="id" />
     <item name="taskEditorMetaReminder" type="id" />
+    <item name="taskEditorMetaRepeat" type="id" />
     <item name="taskEditorMetaPomodoro" type="id" />
     <item name="taskEditorMetaLock" type="id" />
 </resources>

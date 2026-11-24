@@ -1,6 +1,6 @@
 # System — Calendar (`ui/calendar/` + `calendarEntries/` + `notifications/event/`)
 
-**Last verified:** 2026-11-18 (DB v15, rediseno-calendario-color) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-25 (DB v16, rediseno-proyectos u16) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Month and week views over a single unified entity (`CalendarEntry`) that represents events,
 tasks, and reminders via an int `type` field. Includes creation (`AddEventActivity`) and the
@@ -121,3 +121,6 @@ Supersedes the two colour sections above. Research and options: `.claude/plans/r
 - **Agenda rows** (`item_day_event.xml`, `DayDetailAdapter.VH`): the bar is neutral, the type is read in the meta text; a deadline tints its bar and its meta label.
 - **Week view** = week strip + agenda: `weekStripView` (Kizitonwose `WeekCalendarView`, Monday first, paged) and `weekAgendaRecycler` with the seven days in order (`WeekAgenda.rows`). Tapping a strip day selects it and scrolls the agenda to its header; changing week sets the ViewModel range to that week and, if the selected day falls outside, selects today or the Monday. With the focus layer on each strip day shows a sage bar (full at `CalendarHeatLevel.LEVEL_3_MIN`) and day headers show the minutes. The FAB adds on the selected day. Deadline rows open the project, as in Month.
 - Tests: `CalendarPaletteTest` (neutral marks, one-hue focus ramp, contrast), `WeekAgendaTest`, `DayCellStyleTest`. Walk: `steps/pcu-calendar.steps`.
+
+## Archived-project filter (rediseno-proyectos u14, 2026-11-25, Last verified: 2026-11-25)
+Tasks of ARCHIVED projects do not show in the Calendar, in Home's today / overdue lists or in nudges. `CalendarEntryDAO.NOT_IN_ARCHIVED_PROJECT` is a subquery on `project` (so Room invalidates when a project is archived) used by `getEventsBetween`, `getEventsBetweenSync`, `getVisibleEventsBetween` and `getUndoneTasksBefore`. Completed projects' tasks still show; their repeating series are cut (future unfinished occurrences are retired by `ProjectLifecycle`). Readers without the filter on purpose: `countDoneTasksBetween` (history stays), `getEventById` paths that act on a row already shown, per-project queries. A project task with a date has `hiddenInCalendar = 0` even when it repeats (the project offers no hide switch). Tapping a project task in the Calendar opens the Calendar's own screen (d7); deadline markers still open Projects through `action_global_project_detail`. `AddEventActivity` still has no edit path; any future one must keep the five v16 fields (`EventBuilder.copyTaskFieldsFrom`). `RecurrenceMaterializer` skips templates of non-ACTIVE projects and every occurrence copies `projectId`. Full reader table: `.claude/plans/rediseno-proyectos/notes/u14.md`.

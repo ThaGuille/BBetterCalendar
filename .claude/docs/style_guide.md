@@ -1,6 +1,6 @@
 # BBetterCalendar — Style Guide
 
-**Last verified:** 2026-11-18 (DB v15, rediseno-calendario-color) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-25 (DB v16, rediseno-proyectos u16) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 The visual language is **Stitch «Calm Focus»**: dark-first, sage on deep pine, honey amber only for earned moments, one family (Plus Jakarta Sans). Source of truth for look and feel: [`.stitch/DESIGN.md`](../../.stitch/DESIGN.md) and the exported designs in `.stitch/designs/` (PNG) + `.stitch/html/`. History and per-unit decisions: [`migracion-visual-stitch-impl.md`](../plans/migracion-visual-stitch-impl.md); open design questions: [`migracion-visual-stitch-questions.md`](../plans/migracion-visual-stitch-questions.md).
 
@@ -230,6 +230,17 @@ The one-line Java API of each view is in `.claude/plans/migracion-visual-stitch-
 | `AvatarView` | Canvas-drawn initials avatar: none / studying (sage ring) / away (40 %), dot, badge |
 | `StepperView` | − value unit / caption + on a dark track, min/max/step |
 | `EmptyStateView` | icon disc · title · message · [secondary action] |
+
+#### Projects widgets (rediseno-proyectos u3, 2026-11-25)
+
+| View | Panel |
+|---|---|
+| `TaskCheckView` (`ui/common/widget/`) | Square task checkbox: 17dp box (14dp with `app:checkSmall`) in a 48dp touch area. Priority is only the border colour (high `bb_danger`, medium `bb_secondary`, low / none `bb_checkbox_border`); checked = `bb_primary` fill with the sprout (`ic_sprout_check`). API `setPriority`, `setTaskTitle`, `setChecked` (silent, for binding rows), `toggle` (touch: animates + notifies), `setOnCheckedChangeListener`. The pop uses `Motion` and does nothing with animations off |
+| `FocusTimerButton` | Stopwatch (`ic_timer_24`) in a translucent amber disc (`bb_sanct_primary`) with an amber ring of attributed minutes (shared `RingPainter`); `setGoal(attributed, goal)`, `setProgress`, `setRunning` (pause icon); `app:timerSize` = `row` 34dp / `big` 42dp, always a 48dp touch area |
+| `ProjectBubbleView` | 56dp view, 42dp circle in the project colour with its icon, progress ring (hand-drawn, any project colour), `setBadge(count, late)` ("9+" from 10), `setSelected`, `setNewProject` (dashed). Used by the Projects selector |
+| `ProjectAccents` | Pure helper: `colorResFor(int)` (cycles `bb_project_1..4`, negative-safe), `projectIconRes(key)`, `tagIconRes(key)`, `tagColorRes(key)` and the key lists. Progress takes its project colour from here |
+
+Colour: **`bb_project_2` is lilac** (`lilac_300`, primitive in `palette.xml`; D-P13) so projects never read as Focus amber or `bb_danger`; contrast checked by `.claude/scripts/check_project_colours.py` (prints `project colours ok`). A project's lit card = `bg_card_lit` + a view with the tintable `bg_glow_project` (`backgroundTint` = project colour); there is no per-colour drawable. Everything amber on the Projects screen means "focus". Debug gallery: `DebugProjectsGalleryActivity` (widgets) and `DebugPickersGalleryActivity` (pickers), both in `app/src/debug/`.
 
 ### Charts — `ui/common/chart/` (u10, u13b)
 

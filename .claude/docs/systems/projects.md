@@ -1,122 +1,112 @@
-# System — Projects (`projects/` + `ui/projects/`)
+# System — Projects (`projects/` + `projects/domain/` + `ui/projects/`)
 
-**Last verified:** 2026-11-11 (DB v15, mejora-visual u11) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-25 (DB v16, rediseno-proyectos u16) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
-The Projects bottom-nav tab: a `Project` entity that groups existing `CalendarEntry` (type
-task) rows via a nullable `projectId` — there is no separate "project item" table. Progress is
-item-count based (done/total, equal weight, one nesting level); completing a project is a status
-transition, never a delete, so history survives for future stats. Since Phase 5 a project's soft
-deadline is no longer inert: it schedules two alarms, paints a read-only marker on the Calendar, and
-the project's attributed focus minutes surface on Progress.
+The Projects bottom-nav tab, rebuilt in rediseno-proyectos (phases 1 and 2; spec and board:
+`.claude/plans/rediseno-proyectos.md`, prototype `docs/proyectos/prototipo-v5.html`). A `Project` groups
+`CalendarEntry` (type task) rows through `projectId`; since v16 each task also lives in a **section**
+(`project_section`), can have **subtasks** (`task_subtask`), a **priority**, a **tag** (`tag`, kind 0), and a
+focus goal; projects can belong to an **area** (`tag`, kind 1). Everything is **one screen**: project selector,
+R2 summary, section cards, task rows, agenda sheet. Completing/archiving a project is a status change, never a
+delete. Phase 3 (shared projects with friends) is deferred and nothing of it exists (no members, no Firestore).
 
 ## Surface (manifest + entry points)
 | Kind | Entry |
 |---|---|
-| Fragment | `ProjectsFragment` — bottom-nav destination (`navigation_projects`), list + create affordance |
-| Fragment | `ProjectDetailFragment` — nav-graph destination (`navigation_project_detail`), reached via `action_navigation_projects_to_navigation_project_detail` carrying a `projectId` int arg. Secondary destination: no bottom nav since u12 (MainActivity hides it) |
-| Dialog | `CreateProjectDialog` — `DialogFragment`, shares `ProjectsViewModel` with its parent fragment |
-| Nav action | `action_global_project_detail` — **root-level/global** action to `navigation_project_detail`; one action serves all three Phase-5 entry points (deadline notification deep link, calendar marker tap, Progress band row tap). The Projects tab keeps its own `action_navigation_projects_to_navigation_project_detail` |
-| Receiver | `.notifications.project.ProjectDeadlineReceiver` (`exported=false`) — deadline alarms |
-| Channel | `bb_project_deadlines` (`IMPORTANCE_HIGH`) — see `notifications.md` |
+| Fragment | `ProjectsFragment` — bottom-nav destination `navigation_projects`, optional int arg `projectId` (0 = none), consumed once |
+| Fragment | `TaskEditorFragment` (`navigation_task_editor`, args `projectId`, `entryId` 0 = new, optional serializable `draft`) — full-screen D1 create/edit; secondary, no bottom nav |
+| Fragment | `ProjectFormFragment` (`navigation_project_form`, arg `projectId`, 0 = new) — full-screen project create/edit |
+| Dialog | `QuickAddDialog` (A2 box above the keyboard), `TagEditorDialog` (tag or area), `AgendaSheet` (`BottomSheetDialogFragment`, tag `project_agenda_sheet`) |
+| Nav contract | `action_global_project_detail` is global and now points at `navigation_projects` (`launchSingleTop`, `popUpTo navigation_projects`) with the `projectId` argument. Progress rows, Calendar deadline markers and the deadline notification still call it; none was edited. `navigation_project_detail` and the old detail screen no longer exist |
+| Receiver | `.notifications.project.ProjectDeadlineReceiver` (deadlines) and `.notifications.task.TaskStartReceiver` (task start, see `notifications.md`) |
+
+## Screen anatomy (`ui/projects/`)
+- **Selector** (`projectsSelector`): `ProjectBubbleView` per active project (accent colour, icon, progress ring, badge = today + late tasks; `bb_danger` badge if any late) plus a dashed "new" bubble. Order `createdAtMillis ASC`.
+- **R2 summary** (`projectsSummary`): lit card (`bg_card_lit` + tinted `bg_glow_project`), next task from `NextTaskRule`, days to the deadline (`DueDays`), focused minutes this week, big `FocusTimerButton`.
+- **Sections**: collapsible cards (`projectsSectionCard`), long-press = rename / delete (last section cannot be deleted), per-section add button. Order by `TaskOrdering` (modes UPCOMING / PRIORITY / RECENT, cycled by `projectsSortButton`), Hide done, collapse state in `ProjectsPrefs`.
+- **Task row**: `TaskCheckView` (priority = border colour only, D-P03), title, meta icons (duration, repeat, reminder, lock, note), tag pill, `FocusTimerButton` (amber ring = attributed minutes, pause icon while running), expandable subtasks (`SubtaskCountView` n/m).
+- **Toolbar menu** (`projectsMenuButton`): edit project, Hide done, add section, filter by area, archive, complete. The **area filter** is deliberately easy to remove (D-P14): one menu entry plus `ProjectsViewModel.setAreaFilter` and the pure filter in `ProjectsScreenModel`.
+- **Agenda** (`AgendaSheet`): pending dated tasks grouped by day (Yesterday / Today / Tomorrow / dates), the deadline row, then undated; built by pure `AgendaGrouping.build(...)`.
 
 ## Files
 | Class | Path | Role |
 |---|---|---|
-| `Project` | `projects/Project.java` | Room `@Entity("project")`: `id`, `name`, `notes`, `status` (ACTIVE/COMPLETED/ARCHIVED), `softDeadlineMillis` (0 = none, never overwritten), `colorIndex` (list accent), `createdAtMillis`, `completedAtMillis` |
-| `ProjectDAO` | `projects/ProjectDAO.java` | `observeAll()` (non-archived, status then recency), `observeAllWithCounts()`, `getById`/`observeById`, `getProjectCount()` (feeds `colorIndex` cycling), `deleteById`, `getDoneItemCount`/`getTotalItemCount` (cross-table count against `calendarEntry`, `isTemplate = 0 AND isDismissed = 0`), `observeDeadlinesBetween(start, end)` (ACTIVE only, for the Calendar), `getActiveWithDeadlineAfter(now)` (boot re-arm) |
-| `ProjectDeadlineScheduler` | `notifications/project/ProjectDeadlineScheduler.java` | `@Singleton` `AlarmReminderCore` client: fixed offsets `{3d, 1d}`, both always on; `requestCodeFor` = `500_000 + projectId * 10 + offsetIndex`, `notificationIdFor` = `70_000 + ...`. `scheduleFor(Project)` no-ops unless ACTIVE with a deadline; `cancelFor(int)` takes the id, not the row, because deletion cancels after the row is gone |
-| `ProjectDeadlineReceiver` | `notifications/project/ProjectDeadlineReceiver.java` | `@AndroidEntryPoint`; `goAsync()` + `@IoExecutor` re-read, then `shouldNotify()` decides whether an alarm armed in the past is still valid |
-| `ProjectDeadlineItemMapper` | `ui/calendar/domain/ProjectDeadlineItemMapper.java` | `Project` → `CalendarItem` (`Type.DEADLINE`, `start == end`, `id = -project.id`); `projectIdOf()` decodes it back. Encode and decode live together deliberately |
-| `ProjectMinutes` | `stats/ProjectMinutes.java` | Room projection (`projectId`, `projectName`, `minutes`) from `FocusEventDAO.getMinutesByProject(start, end)` — carries the id so one query feeds both the Progress chart and the Progress band |
-| `ProjectDeadlineState` | `projects/ProjectDeadlineState.java` | Pure enum: `softDeadlineMillis` vs now → NONE/APPROACHING (≤3 days)/PASSED; reuses `bb_accent_reward`/`bb_danger`, no new tokens |
-| `ProjectsRepository` | `projects/ProjectsRepository.java` | `@Singleton` (repository-layer-consolidation, T2): owns `ProjectDAO.observeAllWithCounts()` + `createProject()` (on `@DbWriteExecutor`) |
-| `ProjectWithCounts` | `projects/ProjectWithCounts.java` | Room projection: `@Embedded Project` + `doneCount`/`totalCount`, populated by `observeAllWithCounts()`'s join query |
-| `ProjectsViewModel` | `ui/projects/ProjectsViewModel.java` | `@HiltViewModel`: `Transformations.map` over `ProjectsRepository.observeAllWithCounts()` → `ProjectListItem`s; `createProject()` delegates to the repository |
-| `ProjectListItem` | `ui/projects/ProjectListItem.java` | Non-entity UI composition: `Project` + `doneCount`/`totalCount` + `percent()` |
-| `ProjectListAdapter` | `ui/projects/ProjectListAdapter.java` | u16: expandable cards (html 03): accent dot, "DUE ..." chip, x/y tasks, % bar, expanded body with "x Pomodoros today", "Est. Nh remaining", subtasks (tap toggles done), "Add subtask" (`QuickAddTaskSheet.forProject`); long-press / "Open project" -> detail. `ProjectsViewModel` composes projects + `CalendarEntryDAO.observeAllProjectItems()` + `FocusEventDAO.observeMinutesByProject(today)` + configured pomodoro length; `ProjectListItem` holds the pure derivations. Owns the accent palette: `ACCENT_COLORS` (= `bb_project_1..4` since u4) + `accentColorResFor(int)` (public — the Progress band reuses it so the palette cycling, negative-modulo included, lives in one place) |
-| `CreateProjectDialog` | `ui/projects/CreateProjectDialog.java` | Name + optional notes/deadline; same `AlertDialog.Builder` pattern as `AppLimitDialog` |
-| `ProjectDetailFragment` | `ui/projects/ProjectDetailFragment.java` | Header (name/notes edit — **auto-persisted on `onPause`**, no Save button; deadline picker + chip), item list, add-item, complete, delete (confirm dialog), focus-this → Home |
-| `ProjectDetailViewModel` | `ui/projects/ProjectDetailViewModel.java` | `Transformations.switchMap` on `projectId` over `ProjectDAO.observeById` + `CalendarEntryDAO.observeItemsByProject`, items enriched via `FocusAttributionRepository.enrich()` (shared with `HomeViewModel`, see `data-model.md`); `addItem`, `updateHeader`, `updateDeadline`, `completeProject`, `deleteProject` (cascade), all on `@DbWriteExecutor` |
-| `ProjectItemAdapter` | `ui/projects/ProjectItemAdapter.java` | Checkbox rows over the project's `CalendarEntry` items; `X/Ym` time-progress + a focus-this pomodoro-icon `ImageView` for items with `targetMinutes > 0`; hides the date label for undated items |
+| `Project` | `projects/Project.java` | `@Entity("project")`: `id`, `name`, `notes`, `status` (0 ACTIVE / 1 COMPLETED / 2 ARCHIVED), `softDeadlineMillis` (0 = none), `colorIndex`, `createdAtMillis`, `completedAtMillis`, `iconKey` (default `box`), `areaId` (0 = none) |
+| `ProjectSection`, `TaskSubtask`, `Tag` | `projects/` | v16 entities (see `data-model.md`). `Tag.KIND_TAG = 0`, `KIND_AREA = 1` |
+| `ProjectDAO`, `ProjectSectionDAO`, `TaskSubtaskDAO`, `TagDAO` | `projects/` | `ProjectDAO.observeActiveWithBadge` joins `calendarEntry` (keeps Room invalidation) and counts today / late; `observeAllWithCounts` still feeds Progress |
+| `ProjectsRepository` | `projects/` | `@Singleton`: `observeActiveProjects(areaId)`, `createProject(...)` (project + "Tasks" section in one transaction), `updateProject`, `archive` / `unarchive` / `complete` / `reopen`, `deleteProject`, `loadProject`, `countProjects`, `loadDeadline`; writes on `@DbWriteExecutor`, results on the main thread via `Callback<T>` |
+| `ProjectTasksRepository` | `projects/` | `observeBoard(projectId)` -> `ProjectBoard`; `saveDraft(TaskDraft, cb)` (series from a draft with Repeat), `setDone`, `toggleSubtask`, `deleteTask`, `setCompletionNote`, `moveTask`, section CRUD, `loadAgenda`, `ensurePomodoro` (d9), `repetitionOf`, `seriesRepeat` |
+| `TagRepository` | `projects/` | `observe(kind)`, `create`, `update`, `delete` (clears `tagId` / `areaId` in the same transaction) |
+| `ProjectLifecycle` | `projects/` | `@Singleton`: `onProjectClosed` (cancels task alarms, retires future unfinished occurrences of its series) and `onProjectReopened` (restores them, re-arms, advances watermarks) — called by `ProjectsRepository.archive/complete/unarchive/reopen` |
+| `TaskAlarms` / `TaskStartAlarm` | `projects/` | `onTaskSaved`, `onTaskClosed`, `onProjectClosed`, `onProjectReopened`; `TaskStartAlarm` is implemented by `TaskStartScheduler` (Hilt `ProjectsModule`) |
+| `projects/domain/*` | pure Java (`java.*` only) | `TaskSnapshot`, `TaskOrdering`, `NextTaskRule`, `TodayBadge`, `ProjectProgress`, `DueDays`, `DateChoices`, `TaskDraft` (+ `Repeat`, `Reminder`, `Subtask`), `SectionRef`, `TagRef`. All tested on the JVM |
+| `ProjectsScreenModel` / `ProjectsViewModel` / `ProjectsPrefs` | `ui/projects/` | The VM publishes one `LiveData<ProjectsScreenModel>` built on `@IoExecutor` with `postValue`; the model is pure (area filter, badge, summary, ordering, collapse, pending deletes). Prefs = `projects_screen` SharedPreferences |
+| `ProjectsNavigator` | `ui/projects/` | One method per destination: `openQuickAdd`, `openTaskEditor`, `openTaskEditorWithDraft`, `openProjectForm`, `openTagEditor`, `openAgenda`, `startFocus(TaskSnapshot)`. Sub-screens never touch `ProjectsFragment` navigation |
+| `ProjectsResults` | `ui/projects/` | Fragment-result keys on the NavHost child FragmentManager: `TASK_SAVED`, `TASK_DELETE_REQUESTED`, `PROJECT_SAVED`, `PROJECT_ARCHIVE_REQUESTED`, `PROJECT_DELETE_REQUESTED`, `TAG_SAVED`. `ProjectsFragment` is the single listener per key |
+| `QuickAddDialog` / `QuickAddViewModel` / `QuickAddChips` | `ui/projects/quickadd/` | A2 box (see below) |
+| `TaskEditorFragment` / `TaskEditorViewModel` / `TaskEditorTiles` / `TaskEditorDrafts` / `WhenPickerView` | `ui/projects/editor/` | D1 editor (see below) |
+| `ProjectFormFragment` / `ProjectFormViewModel` / `ProjectFormModel` / `FormPickers`, `TagEditorDialog` | `ui/projects/form/`, `ui/projects/tags/` | Project create/edit (icon, colour, deadline, area, archive, delete) and tag/area editor |
+| Pickers | `ui/projects/picker/` | `PickerHost`, `PickerView` base, `DatePickerView`, `DurationPickerView`, `PriorityPickerView`, `TagPickerView`, `SubtasksPickerView`, `MorePickerView`, `SectionPickerView`, `RepeatAvailability` (now `DEFAULT = true`), `PickerLabels` |
+| `FocusLink` | `ui/projects/FocusLink.java` | Pure: `decide(task, sessionRunning)` -> OPEN_ONLY / START / ENABLE_POMODORO_THEN_START; builds the `TaskFocusRequest` |
+| Deadline pipeline | `notifications/project/*`, `ProjectDeadlineState`, `ProjectDeadlineItemMapper`, `ProjectMinutes` | Unchanged since Phase 5 (below) |
+| Widgets | `ui/common/widget/` | `TaskCheckView`, `FocusTimerButton`, `ProjectBubbleView`, `ProjectAccents` (see `style_guide.md`) |
 
-## Flow — non-obvious hops only
+Removed: `ProjectDetailFragment`, `ProjectDetailViewModel`, `CreateProjectDialog`, `ProjectItemAdapter`, `ProjectListAdapter`, `ProjectListItem`, `ProjectFormat`.
 
-1. **`ProjectsViewModel` uses a plain `Transformations.map`** over
-   `ProjectsRepository.observeAllWithCounts()` (repository-layer-consolidation, T2) — the
-   per-project percent used to need a second table (`calendarEntry` counts) read off the main
-   thread, which forced a manual `Observer` + executor recompute; `observeAllWithCounts()` now
-   resolves both in one Room query (see #2), so the composition is a pure, main-thread `map`.
-2. **`ProjectDAO.observeAllWithCounts()` replaced the `refresh()`/`onResume()` polling workaround
-   with a query that references both tables it needs.** The old `observeAll()` only selected from
-   `project`, so Room's `InvalidationTracker` never re-fired it on a `calendarEntry` write (marking
-   an item done, adding one) — that was a real structural gap, not "InvalidationTracker lag" (see
-   `data-model.md`'s Room invalidation invariant for how this differs from the
-   `HomeViewModel.refreshToday()` / `CalendarViewModel.refresh()` case in `calendar.md`, which
-   *was* folklore and got deleted outright instead of fixed). `observeAllWithCounts()`'s two
-   correlated subqueries read `calendarEntry`, so a write there now re-fires the query on its own
-   — `ProjectsViewModel.refresh()` and `ProjectsFragment.onResume()` were deleted.
-3. **Delete cascade is two sequential DAO calls, not a transaction**: `CalendarEntryDAO.deleteItemsByProject`
-   then `ProjectDAO.deleteById`, both from `ProjectDetailViewModel.deleteProject()` on the
-   executor. No `@Transaction` — matches the rest of the codebase's DAO style (none uses one
-   either); accepted as a proposal-sanctioned tradeoff, not an oversight.
-4. **Project items are ordinary `CalendarEntry` rows** (`type = TYPE_TASK`, `projectId` set via
-   `EventBuilder.setEventProjectId()`), so they ride every existing task pipeline (recurrence
-   materializer, Home overdue collapse, calendar range queries) for free — except recurrence is
-   suppressed in project mode (`QuickAddTaskSheet` hides the repeat row when `projectId != 0`).
-   Undated items (`startMillis = 0`) never surface outside the project detail screen, by the same
-   `startMillis > 0` filters `calendar.md` documents.
+## Quick add (A2) and full editor (D1) share `TaskDraft` and the pickers
+- Both edit one `TaskDraft` through its setters (rules: choosing a time puts Today if no day; removing the day clears time, reminder and repeat; `setTime(null)` also clears the reminder). Both host the same `PickerView`s through `PickerHost`.
+- **A2** (`QuickAddDialog`): box glued above the keyboard (IME inset), fixed icon row (date, duration, priority, tag, subtasks, more) that never moves, chips only for values set (`QuickAddChips.derive`), each picker opens in the keyboard's place. Send = `saveDraft` into the chosen section. Expand passes the whole draft to `openTaskEditorWithDraft`. Home's `QuickAddTaskSheet` is untouched except it lost its project path.
+- **D1** (`TaskEditorFragment`): tile grid (When, Focus big; Priority, Tag, Section one line; Subtasks wide); a tile opens its picker right under its row, one at a time. Editing adds "Mark as done" (+ completion note) and focused minutes. Discard prompt only with changes (`TaskEditorTiles.signature`). Delete posts `TASK_DELETE_REQUESTED` and the screen does the deferred delete.
+- Date/time dialogs ("Other") do not survive rotation (the draft does).
+
+## Undoable deletes, archive and complete (D-P17)
+- Deleting a task, a section or a project hides it in the model first (`ProjectsViewModel.hideTask/hideProject`) and shows a snackbar with Undo; the real delete (`commitTaskDelete`, `commitProjectDelete`) runs when the snackbar leaves without Undo, and `flushPendingDeletes` on `onDestroyView`.
+- Archive and complete are status changes with Undo (`unarchive` / `reopen`). Both go through `ProjectLifecycle`: alarms off, series cut. Completing a project is in the ⋮ menu (user decision d6).
+- Completing a task shows a snackbar with Undo and an optional completion note (`setCompletionNote`); the "Completed" snackbar is `LENGTH_INDEFINITE` with a 7 s timer that pauses while typing.
+
+## Focus link (phase 1, D-P10 to D-P12)
+- The row / summary stopwatch calls `ProjectsNavigator.startFocus`. A task without a goal gets a pomodoro first (`ensurePomodoro`: its duration or 25 min, d9). With a session already running it only opens Focus.
+- `FocusSessionViewModel.startTaskFocus(TaskFocusRequest)` builds a **`TaskCyclePlan`** (D-P11): what is left of the goal in blocks of the configured work time, last block shortened, rests between them (example in `pomodoro-timer.md`). Cycles that already ran count (attributed minutes).
+- **Block auto-armed (D-P12)**: a task with `blockOnFocus` arms the existing block mode when the accessibility service is on; if not, the session starts unarmed and Focus shows the existing explanation once (d3). The armed state returns to what it was when the task session ends.
+- **Ending early keeps minutes (d4)**: "Terminar antes" on a task session stores a normal `focus_event` with the task and whole minutes only.
+- Focus shows the project chip (`focusProjectChip*`, `focusTaskTitle`); hitting the goal auto-completes the task and `ProjectsFragment` shows "Time reached" (single consumer).
+
+## Phase-2 parts
+- **Task-start notification** (`notifications/task/`): see `notifications.md`. Reminders map: 15 min before = offset index 2, 1 h before = index 4; "At time" stores no flag (d1) and is covered by the start notification.
+- **Repeat inside a project**: a draft with Repeat creates a template (`isTemplate = 1`) filled by `RecurrenceMaterializer`; the written task is the first occurrence. Editing an occurrence affects only it; changing the Repeat value rewrites the series anchored there and removes later untouched occurrences; removing it ends the series (d5). Series stop while the project is not ACTIVE; occurrences copy `projectId`, section, priority, tag, block, goal and reminders.
+- **Calendar**: tasks of ARCHIVED projects are filtered out in SQL (`NOT_IN_ARCHIVED_PROJECT` in `CalendarEntryDAO`; table in `calendar.md`). Tapping a task in the Calendar opens the Calendar's own screen (d7).
 
 ## Contracts
-- Reads/Writes: `Project` (owner: this doc) · `CalendarEntry` (owner: `data-model.md#per-entity-readerswriters-contract-table`, shared with `calendar.md`) · Reads: `FocusEvent` (via `FocusEventDAO.getMinutesByProject`, owner: `pomodoro-timer.md`) · Shared with: `ui/home/QuickAddTaskSheet` (item-add reuse), `calendar.md` (deadline markers, read-only), `progress-screen.md` (chart page + project band), `notifications.md` (channel + id partitions)
+- Reads/Writes: `Project`, `ProjectSection`, `TaskSubtask`, `Tag` (owner: this doc; schema in `data-model.md`) · `CalendarEntry` (owner `data-model.md`, shared with `calendar.md`) · Reads `FocusEvent` (`FocusEventDAO.getMinutesByProject`, `sumAttributedMinutes`; owner `pomodoro-timer.md`) · Shared with `calendar.md` (deadline markers, archived filter), `progress-screen.md` (chart page, project band, `ProjectAccents`), `notifications.md` (channels, id partitions)
 
 ## Invariants & gotchas
+- **Completing a project never deletes rows**; only the explicit delete cascade does (tasks, sections, subtasks of the project).
+- **`softDeadlineMillis` is absolute**; 0 = none. Deadlines are painted on the Calendar (no mirror rows) and only edited from the project form.
+- **Only ACTIVE projects get alarms and Calendar markers** (deadline and task-start). Every write to status / deadline must cancel or reschedule: `ProjectsRepository` does it through `ProjectDeadlineScheduler` and `ProjectLifecycle`; a new mutation path owes the same call.
+- **A stale alarm is caught at delivery.** `ProjectDeadlineReceiver` and `TaskStartReceiver` re-read the row and drop the notification when it no longer applies. For deadlines the window is an interval and `OFFSET_MILLIS` must stay sorted descending.
+- **Templates and dismissed rows are excluded** from counts, rows, progress (`isTemplate = 0 AND isDismissed = 0`); a repeating series shows one row per generated occurrence.
+- **0 tasks => empty state, never a divide by zero** (`ProjectProgress.percent`, `ProjectsScreenModel.noTasks()`).
+- **Today's badge is fixed at call time** (`observeActiveProjects` takes today's start); after midnight call again.
+- **Project colour**: `colorIndex` cycles over `bb_project_1..4`; `bb_project_2` is lilac (`lilac_300`, D-P13) so it is never confused with Focus amber. Progress's donut uses the same tokens.
+- **Home must not change**: `HomeFragment` is untouched; project tasks still ride Home's today list and nudges.
+- **Task editing from the Calendar**: `AddEventActivity` has no edit path today; any future one must carry the five v16 fields with `EventBuilder.copyTaskFieldsFrom`.
 
-- **Completing a project never deletes rows** — it only flips `status` and sets
-  `completedAtMillis`; the only path that deletes item data is the explicit delete-project
-  cascade (decision #3). Don't "clean up" completed projects' items.
-- **`softDeadlineMillis` is absolute and write-once-per-edit** — 0 means "no deadline", never
-  overwritten implicitly; only `ProjectDetailViewModel.updateDeadline()` (user-driven) changes it.
-- **Deadlines are painted on the Calendar but only edited here** — `CalendarViewModel` merges
-  `observeDeadlinesBetween()` as a second source; there are **no mirror `CalendarEntry` rows**, so
-  there is nothing to keep in sync. One fact, one owner: the Calendar is read-only for deadlines.
-- **Only ACTIVE projects get alarms and calendar markers.** A completed project whose deadline is
-  still in the future must not nag, and `observeDeadlinesBetween()`/`scheduleFor()` both filter on
-  `STATUS_ACTIVE` — but its row is retained either way, for stats.
-- **Every write to `status`/`softDeadlineMillis` must cancel or reschedule the alarms.**
-  `updateDeadline()` cancels then reschedules, `completeProject()`/`deleteProject()` cancel,
-  `ProjectsRepository.createProject()` schedules after the insert (a project can be born with a
-  deadline), and `BootReceiver` re-arms on boot. Add a new mutation path (an `archiveProject()`,
-  say) and it owes the same call, or it leaves a stale alarm.
-- **A stale alarm is caught at delivery, not only at scheduling.** `ProjectDeadlineReceiver`
-  re-reads the row and drops the notification if the project vanished, left ACTIVE, or the deadline
-  moved. The valid window is an **interval**: the alarm for offset `i` fires only while
-  `remaining` sits between `OFFSET_MILLIS[i + 1]` (floor, exclusive) and `OFFSET_MILLIS[i] + grace`
-  (ceiling). The floor matters because the notification body is chosen by *offset index*, not by
-  time remaining — without it an OS-deferred 3-day alarm arriving 2 hours before the deadline would
-  say "due in 3 days". `OFFSET_MILLIS` being sorted **descending** is therefore a contract, not a
-  formatting choice.
-- **Project items are excluded from % if template or dismissed** (`isTemplate = 0 AND isDismissed
-  = 0` on both `getDoneItemCount`/`getTotalItemCount` and `observeItemsByProject`) — a recurrence
-  template row parented to a project would otherwise silently inflate the denominator.
-- **0 items ⇒ "no items yet", never a divide-by-zero** — `ProjectListItem.percent()` guards
-  `totalCount == 0` explicitly.
-- **Header persists on `onPause`, not on a button** — `persistHeaderIfValid()` writes on leaving the
-  screen (back / ActionBar Up / background); an **empty name is silently skipped** so it can't wipe the
-  current name. `MainActivity.onSupportNavigateUp()` drives the Up arrow (non-top-level destinations
-  wouldn't navigate up without it). Project completion/percent is still item-count based — the
-  focus-attribution `targetMinutes` drives per-item *time* progress, not the project %.
+## Decisions the user took (rediseno-proyectos)
+d1 "At time" fires the start notification for any task with it · d2 two new channels, the blocking one with a long vibration · d3 block unarmed + existing explanation once without accessibility · d4 early end = normal focus record with the task, whole minutes · d5 editing an occurrence = that occurrence, Repeat edits the series · d6 complete project from the ⋮ menu (also stops repeats) · d7 tapping a Calendar task opens the Calendar screen · d8 seed tags / areas / section in the phone's language · d9 stopwatch on a task without goal = pomodoro with its duration or 25 min. Earlier: D-P01..D-P17 in the spec.
+
+## Deadline pipeline (Phase 5, unchanged)
+`ProjectDeadlineScheduler` (`@Singleton`, `AlarmReminderCore`, offsets `{3d, 1d}`, `requestCodeFor` = `500_000 + projectId * 10 + offsetIndex`, notification id `70_000 + ...`, `cancelFor(int)` takes the id), `ProjectDeadlineReceiver` (`goAsync()` + re-read + `shouldNotify()`), `ProjectDeadlineItemMapper` (`Type.DEADLINE`, `id = -project.id`), `ProjectDeadlineState` (NONE / APPROACHING / PASSED), channel `bb_project_deadlines`. `BootReceiver` re-arms ACTIVE deadlines.
+
+## Verification
+Emulator only: `.claude/skills/adb-ui-test/steps/rp-*.steps` (see `bbetter-selectors.md`), whole walk `rp-tour.steps`. Nothing was tested on the phone.
 
 ## History
 
 | Date | Change | Ref |
 |---|---|---|
-| 2026-07-12 | Projects MVP: `Project` entity + `ProjectDAO` (DB v11→v12, `MIGRATION_11_12`), `projectId` column on `calendarEntry`, real Projects list + detail screens, `QuickAddTaskSheet` project-mode reuse | — |
-| 2026-07-17 | Focus attribution: project items gain `targetMinutes` + `X/Ym` progress + focus-this (binds Home timer via `FocusTarget`, navigates to Home); header Save button replaced by `onPause` auto-persist; ActionBar Up-nav wired | — |
-| 2026-08-29 | Repository layer: new `ProjectsRepository` + `ProjectDAO.observeAllWithCounts()` (cross-table join) replace `ProjectsViewModel`'s manual Observer/recompute and the `refresh()`/`onResume()` polling workaround, which turned out to be a real structural gap (not "InvalidationTracker lag" — see `data-model.md`). `ProjectDetailViewModel`'s enrichment now shares `FocusAttributionRepository.enrich()` with `HomeViewModel` instead of a duplicated private method; all its writes moved to `@DbWriteExecutor`. No schema change. | — |
-| 2026-09-01 | Phase 5 — deadlines stop being inert: `{3d, 1d}` alarms via `ProjectDeadlineScheduler`/`Receiver` (new channel, deep-linking notification), read-only deadline markers on the Calendar, a time-per-project chart page and a project-progress band on Progress. New global nav action `action_global_project_detail`. No schema change. | — |
-
-## mejora-visual redesign (2026-11-11, Last verified: 2026-11-11)
-- **List**: subtitle with plurals ("3 activos · 1 vence esta semana"); card = `projectCardTop` (tap opens the detail; no long-press) with a tinted radial glow, `ProgressRingView` and tasks/time line, plus a separate `ExpandStripView` strip for the tasks. Collapsed "Completados (N)" section, extended FAB "Nuevo proyecto" (`Widget.BBetter.FAB.Extended`), `EmptyStateView` when empty. The fixed "weekly rhythm" card was removed (`projects-weekly-rhythm` resolved).
-- **Detail**: top bar with back + menu (complete, delete), header with 76dp ring, two-line editable name, always-visible due chip that opens the date picker, `StatTileView` cells, quick-add task sheet (`QuickAddTaskSheet`). `ProjectFormat` formats durations and due text.
-- **Completion**: all done-marking sites go through `CompletionStamp` (`completedAtMillis`). "Complete project" shows `CelebrationSheet` once per project id (`CelebrationPrefs`, decision d3).
-- Screen transitions: project card -> detail is a `MaterialContainerTransform` (`transitionName` `bb_project_card_<id>`) with `Hold` on the list (`ui/common/motion/ScreenTransitions`).
+| 2026-07-12 | Projects MVP (`Project`, DB v11→v12, list + detail) | — |
+| 2026-07-17 | Focus attribution: `targetMinutes`, focus-this | — |
+| 2026-08-29 | Repository layer, `observeAllWithCounts` | — |
+| 2026-09-01 | Phase 5: deadline alarms, Calendar markers, Progress band, `action_global_project_detail` | — |
+| 2026-11-11 | mejora-visual redesign (cards, detail, `CelebrationSheet`) — replaced below | — |
+| 2026-11-25 | rediseno-proyectos phases 1 and 2: one screen, sections / subtasks / tags / areas, A2 + D1, project form, agenda, DB v16, Focus cycles, task-start notification, repeat in projects, archived filter | `.claude/plans/rediseno-proyectos.md` |

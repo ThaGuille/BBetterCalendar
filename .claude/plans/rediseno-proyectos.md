@@ -1,8 +1,8 @@
 # Rediseño de la pestaña Proyectos (fases 1 y 2)
 
-Status: proposed
+Status: in progress
 Created: 2026-11-24
-Last updated: 2026-11-24
+Last updated: 2026-11-25
 
 Especificación completa y tablero del rediseño de Proyectos. Está escrita para quien no estuvo en la conversación de diseño: todo lo necesario para construirlo está aquí o en los ficheros que se enlazan.
 
@@ -424,10 +424,11 @@ Compartir proyectos necesita lo que no existe:
 | Bloque | Estado | Notas |
 |---|---|---|
 | Diseño (prototipo v5) | hecho | 2026-11-24, aprobado por el usuario |
-| Fase 1: proyectos individuales | pendiente | Tarea big-task `rediseno-proyectos` |
-| Fase 2: avisos y repetición | pendiente | Misma tarea |
+| Fase 1: proyectos individuales | hecho 2026-11-25 | Tarea big-task `rediseno-proyectos`; verificado solo en el emulador, el usuario lo prueba en el móvil |
+| Fase 2: avisos y repetición | hecho 2026-11-25 | Misma tarea; verificado solo en el emulador |
 | Fase 3: proyectos con amigos | aplazada | Su propio plan cuando toque (§6) |
 | Hábitos (con plantillas) | aplazada | Pantalla aparte |
 
 ### Diario
 - **2026-11-24:** diseño cerrado. Decisiones D-P11 (ciclos), D-P13 (sin miel), D-P14 (filtro por área, provisional) y D-P15 (fase 3 después). Especificación escrita para big-task.
+- **2026-11-25:** fases 1 y 2 construidas en la rama de la tarea `rediseno-proyectos` (el usuario fusiona; aquí nunca se fusiona). Pantalla única de Proyectos (selector, resumen R2, secciones en tarjetas, filas con casilla y cronómetro), crear rápido A2, editor completo D1, formulario de proyecto, hoja de agenda, base de datos v16 con `MIGRATION_15_16`, Focus de una tarea en ciclos con el bloqueo armado solo y «Terminar antes» que guarda los minutos enteros, aviso de empezar con Empezar y En 10 min, Repetir hasta completar el proyecto y tareas de proyectos archivados fuera del Calendario. Decisiones del usuario en palabras llanas: «A la hora» avisa a la hora para toda tarea que lo tenga; dos canales nuevos, el del bloqueo con vibración larga; sin permiso de accesibilidad la tarea empieza sin bloqueo y se enseña la explicación una vez; terminar antes guarda una sesión normal con la tarea, solo minutos enteros; editar una ocurrencia afecta solo a esa y el valor de Repetir edita la serie; completar el proyecto va en el menú ⋮ y detiene lo que se repite; tocar una tarea en el Calendario abre la pantalla del Calendario; las etiquetas y áreas de inicio salen en el idioma del móvil; el cronómetro grande sin meta activa un pomodoro con su duración o 25 min. Todo se verificó en el emulador solamente (recorridos `rp-*.steps`, `rp-tour` de 345 pasos sin cierres); nada se probó en el móvil. Fase 3 sigue aplazada.

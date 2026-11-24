@@ -67,7 +67,8 @@ Recording: `mv-u6-home` (rest, tasks card, start, Focus, Home running, pause, re
 | `navigation_all_progress` | `allProgressScreen` | `fragment_all_progress.xml` |
 | `navigation_screen_time` | `screenTimeScreen` | `fragment_screen_time.xml` |
 | `navigation_app_detail` (arg `packageName`) | `appDetailScreen` | `fragment_app_detail.xml` |
-| `navigation_project_detail` (arg `projectId`) | — (`projectDetailBackButton`) | `fragment_project_detail.xml` |
+| `navigation_task_editor` (args `projectId`, `entryId`, `draft`) | `taskEditorRoot` | `fragment_task_editor.xml` |
+| `navigation_project_form` (arg `projectId`) | `projectFormRoot` | `fragment_project_form.xml` |
 
 Top bar of the secondary screens: `topBar` (MaterialToolbar); its back arrow has no id → tap it
 with `find-node.ps1 -Text "Back"` (content-desc; "Atrás" in Spanish). System back (`input keyevent 4`)
@@ -143,7 +144,19 @@ u13: hoja breve `celebrationSheetMark/Title/Message/Button` (`CelebrationSheet`)
 
 Salto debug: `am start -n ...SplashActivity --es bb_debug_nav cycle_complete`.
 
-## Projects (rediseno-proyectos, one screen)
+## Projects (rediseno-proyectos)
+
+Walks (`steps/`, run with `run-steps`): `rp-widgets` (debug gallery), `rp-pickers` (debug gallery), `rp-main`, `rp-quick-add`, `rp-editor`, `rp-project-form`, `rp-agenda`, `rp-focus-engine`, `rp-focus`, `rp-task-start`, `rp-lifecycle`, `rp-lifecycle-home`, and the whole `rp-tour` (345 steps). `action_global_project_detail` now opens `navigation_projects` with the project selected (arg `projectId`).
+
+Ids by part:
+- Main screen: `projectsRoot`, `projectsToolbar`, `projectsTitle`, `projectsAgendaButton`, `projectsSortButton`, `projectsMenuButton`, `projectsSelector`, `projectsList`, `projectsSummary` (`projectsSummaryTitle`, `projectsSummaryMeta`, `projectsSummaryFocus`, `projectsSummaryRing`), `projectsFab`, `projectsFirstState` (`projectsCreateFirst`, `projectsAddFirstTask`), `projectsNoteBar` (`projectsNoteInput`, `projectsNoteDone`); selector `projectsBubble`, `projectsNewButton`.
+- Quick add: `quickAddRoot`, `quickAddBox`, `quickAddTitle`, `quickAddSend`, `quickAddSection`, `quickAddChips`, icon row `quickAddDate`, `quickAddDuration`, `quickAddPriority`, `quickAddTag`, `quickAddSubtasks`, `quickAddMore`, `quickAddExpand`, `quickAddPickerPanel`, chips `quickAddChipDate|Duration|Priority|Tag|Subtasks|Note`.
+- Pickers: `pickerHeaderDone`, `pickerDateToday|Tomorrow|Sat|None|Other`, `pickerTime*`, `pickerDur*`, `pickerPomodoroSwitch`, `pickerBlockSwitch`, `pickerPri*`, `pickerTagNone|New|Item0..7`, `pickerSubtaskInput`, `pickerRep*`, `pickerRem*`, `pickerNoteInput`, `pickerSectionItem0..7`.
+- Task editor: `taskEditorClose`, `taskEditorTitle`, `taskEditorSave`, `taskEditorDelete`, `taskEditorWhen`, `taskEditorFocus`, `taskEditorPriority`, `taskEditorTag`, `taskEditorSection`, `taskEditorSubtasks`, `taskEditorSlot1..4`, `taskEditorDone`, `taskEditorCompletionNote`, `taskEditorFocusedMinutes`.
+- Project form: `projectFormClose`, `projectFormSave`, `projectFormName`, `projectFormIcons`, `projectFormColors`, `projectFormNotes`, `projectFormDeadlineChips`, `projectFormAreaChips`, `projectFormArchive`, `projectFormDelete`; tag editor `tagEditorName`, `tagEditorIcons`, `tagEditorColors`.
+- Agenda: `agendaTitle`, `agendaClose`, `agendaList`, `agendaRowTitle`, `agendaDeadlineText`, `agendaHeaderToday`, `agendaHeaderYesterday`.
+- Focus link: `focusProjectChipRow`, `focusProjectChip`, `focusProjectChipIcon`, `focusTaskTitle`; the task-start notification is fired with the debug broadcast in `notifications.md` (`rp-task-start.steps`).
+- Debug galleries: `DebugProjectsGalleryActivity` (`galleryTaskCheck*`, `galleryTimer*`, `galleryBubble*`, `galleryLit*`) and `DebugPickersGalleryActivity` (`galleryDraftSummary`, `galleryTab*`).
 
 - Pantalla unica `fragment_projects.xml` (ya no hay lista de tarjetas ni detalle): `projectsToolbar`, `projectsAgendaButton`, `projectsSortButton`
   (+ `projectsSortLabel`), `projectsMenuButton` (Editar proyecto, Ocultar hechas, Anadir seccion, Filtrar por area, Archivar, Completar), `projectsSelector`

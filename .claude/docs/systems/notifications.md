@@ -1,6 +1,6 @@
 # System — Notifications infra (`notifications/`)
 
-**Last verified:** 2026-11-17 (plan sistema-notificaciones) · Code wins on conflict — if you find drift, fix this doc and bump the date.
+**Last verified:** 2026-11-25 (plan sistema-notificaciones; task-start notification, rediseno-proyectos u16) · Code wins on conflict — if you find drift, fix this doc and bump the date.
 
 Shared notification plumbing every feature-specific notifier builds on: channel definitions, the
 actual `NotificationManagerCompat` wrapper, a spec builder, and `POST_NOTIFICATIONS` runtime
@@ -70,6 +70,14 @@ Flow and invariants:
 7. **Debug:** `adb shell am broadcast -f 32 -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.notifications.nudge.DailyNudgeReceiver --es nudge morning|streak|evening|weekly --ez reset_state true` fires a nudge now in debug builds (the debug manifest exports the receiver); policy and content still apply.
 
 New id partitions (also in `NotificationIds`): notification ids `50_003` (phase end), `80_001..80_019` (nudges, weekly `80_010`); request codes `900_001..900_099` (fixed alarms), `1_000_000 / 2_000_000 / 3_000_000 + entryId*10 + i` (Done, Snooze, snoozed alarm; `ReminderActionCodesTest`).
+
+## Task-start notification (rediseno-proyectos u13, 2026-11-25, Last verified: 2026-11-25)
+- **`TaskStartPolicy`** (`notifications/task/`, pure, `TaskStartPolicyTest`): `isEligible(hasTime, durationMillis, targetMinutes, done, template, dismissed, projectActive, atTimeReminder)`, `triggerMillis`, `snoozeMillis(now)` (+10 min), `channelFor(blockOnFocus)`, `content(...)`. A task notifies at its start time when it has a time of day and a duration or a pomodoro goal, is not done / template / dismissed, and its project is ACTIVE.
+- **`TaskStartScheduler`** (implements `TaskStartAlarm`, an `AlarmReminderCore` client): one exact alarm per eligible task; `snooze(entryId, now)`. Namespace `TaskStartIds`: request codes 4M (alarm), 5M (snoozed), 6M (action In 10 min), 7M (action Start); notification id 8M + entry id; disjoint from reminders, deadlines and actions (tested). `ProjectsModule.provideTaskStartAlarm` binds it, so `TaskAlarms` schedules on save and cancels on complete, delete, archive and complete-project. Re-arm: `BootReceiver` re-arms future tasks of ACTIVE projects.
+- **`TaskStartReceiver`** (main manifest, not exported; exported in `app/src/debug/AndroidManifest.xml`): handles the alarm, `ACTION_SNOOZE`, and in debug builds only a direct fire with the boolean extra `debug_first_eligible` (first pending task with block): `adb shell am broadcast -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.notifications.task.TaskStartReceiver --ez debug_first_eligible true`. It re-reads the task and its project, so a stale alarm does not notify. Title `Starts: <title>` / `Empieza: <title>`, text `project · N min · Block on start`. Actions **Start / Empezar** (opens `MainActivity` with `EXTRA_START_TASK_ID`, which calls `FocusSessionViewModel.startTaskFocus` and opens `navigation_focus`; `TaskStartLauncher` ensures a goal and reads minutes off the main thread) and **In 10 min / En 10 min** (snooze). Tapping the body does the same as Start.
+- **Channels (d2):** `NotificationChannels.CHANNEL_TASK_START` (`bb_task_start`) and `CHANNEL_TASK_START_BLOCK` (`bb_task_start_block`, long `ROUND_START_VIBRATION`, used only when the task has `blockOnFocus`). Strings in `strings_notif_tasks.xml` (`notif_channel_task_start_*`, `notif_task_start_*`). The strong vibration lives only on the blocking channel; a channel's vibration is fixed at creation, so changing it needs a new channel id.
+- **Task reminder mapping:** the picker's Reminder row maps to `NotificationOffsets` through `TaskDraft.toNotificationFlags` (15 min before = index 2, 1 h before = index 4). "At time" (d1) stores no flag, so `TaskStartScheduler` passes `atTimeReminder = false` and a task with "At time" but neither duration nor goal does not notify yet (open point recorded in the u13 notes). `EventReminderReceiver` (also after a snooze) and `BootReceiver` skip reminders of tasks in non-ACTIVE projects.
+- With block requested and no accessibility service, Focus shows the existing explanation instead of arming (d3).
 
 ## History
 

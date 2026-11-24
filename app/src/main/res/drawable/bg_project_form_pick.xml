@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos: option of the icon grids of the project form and the tag editor. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_surface_highest" />
+            <stroke
+                android:width="@dimen/projects_form_ring_stroke"
+                android:color="@color/bb_primary" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/bb_surface_raised" />
+        </shape>
+    </item>
+</selector>

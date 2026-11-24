@@ -103,6 +103,14 @@
 
 
     <!-- rediseno-proyectos: form -->
+    <dimen name="projects_form_padding">16dp</dimen>
+    <dimen name="projects_form_pick">48dp</dimen>
+    <dimen name="projects_form_pick_icon">24dp</dimen>
+    <dimen name="projects_form_dot">34dp</dimen>
+    <dimen name="projects_form_ring_stroke">2dp</dimen>
+    <dimen name="projects_form_badge">22dp</dimen>
+    <dimen name="projects_form_badge_icon">12dp</dimen>
+    <dimen name="projects_form_bar_button">48dp</dimen>
 
     <!-- rediseno-proyectos: agenda -->
     <dimen name="projects_agenda_time_width">56dp</dimen>

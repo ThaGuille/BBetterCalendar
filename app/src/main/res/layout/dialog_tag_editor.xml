@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos u10 (spec 3.7): tag / area editor body. The buttons are the dialog's own. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_sm">
+
+        <EditText
+            android:id="@+id/tagEditorName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/projects_tag_name_hint"
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences"
+            android:maxLength="24"
+            android:minHeight="@dimen/projects_form_pick"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.BBetter.Body"
+            android:textColorHint="@color/bb_on_surface_muted" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:text="@string/projects_tag_icon_label"
+            android:textAppearance="@style/TextAppearance.BBetter.PickerLabel" />
+
+        <GridLayout
+            android:id="@+id/tagEditorIcons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tagEditorColorLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_md"
+            android:layout_marginBottom="@dimen/spacing_sm"
+            android:text="@string/projects_tag_color_label"
+            android:textAppearance="@style/TextAppearance.BBetter.PickerLabel" />
+
+        <LinearLayout
+            android:id="@+id/tagEditorColors"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </LinearLayout>
+</ScrollView>

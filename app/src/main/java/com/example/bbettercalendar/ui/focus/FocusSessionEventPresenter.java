@@ -20,6 +20,7 @@ import com.example.bbettercalendar.popups.FirstFocusCelebrationPopup;
 import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.ui.common.SingleEvent;
+import com.example.bbettercalendar.ui.home.FocusTarget;
 
 /**
  * u14: the ONE place that turns the focus session's one-shot outcomes into UI, shared by the two
@@ -139,6 +140,11 @@ public final class FocusSessionEventPresenter implements OnPopupListener<Object>
     /** Spec focus-attribution: in-app feedback first, the notification is the fallback. */
     private void onAutoCompletedTask(@Nullable String title) {
         if (title == null || !host.isAdded()) {
+            return;
+        }
+        // Rediseno de Proyectos (3.5): una tarea de un proyecto la avisa Projects («Tiempo cumplido»,
+        // con nota y Deshacer), el unico que llama a onAutoCompletedTaskShown; aqui queda pendiente.
+        if (FocusTarget.isSet() && FocusTarget.getProjectId() > 0) {
             return;
         }
         View view = host.getView();

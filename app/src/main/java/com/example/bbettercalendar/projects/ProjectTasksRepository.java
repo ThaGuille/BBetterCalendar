@@ -238,6 +238,29 @@ public class ProjectTasksRepository {
         });
     }
 
+    /**
+     * Enfocar una tarea sin meta (decision d9): le activa el pomodoro con su duracion, o 25 min si no
+     * tiene ({@link com.example.bbettercalendar.ui.projects.FocusLink#goalForTask}). Con meta no toca
+     * nada. {@code callback} recibe la meta resultante (0 si la tarea ya no existe) en el hilo principal.
+     */
+    public void ensurePomodoro(int entryId, Callback<Integer> callback) {
+        dbWriteExecutor.execute(() -> {
+            CalendarEntry entry = calendarEntryDao.getEventById(entryId);
+            int goal = 0;
+            if (entry != null) {
+                goal = entry.getTargetMinutes();
+                if (goal <= 0) {
+                    goal = com.example.bbettercalendar.ui.projects.FocusLink.goalForTask(entry.getDuration());
+                    entry.setTargetMinutes(goal);
+                    if (entry.getDuration() <= 0) entry.setDuration(goal * 60_000);
+                    calendarEntryDao.update(entry);
+                }
+            }
+            int result = goal;
+            if (callback != null) mainThread.post(() -> callback.onResult(result));
+        });
+    }
+
     /** Alterna una subtarea; si deja todas hechas, la tarea pasa a hecha. */
     public void toggleSubtask(int subtaskId) {
         dbWriteExecutor.execute(() -> {

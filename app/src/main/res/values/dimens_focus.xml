@@ -41,4 +41,8 @@
     <dimen name="focus_action_stroke">1.5dp</dimen>
     <dimen name="focus_action_icon_padding">12dp</dimen>
     <dimen name="focus_action_gap">8dp</dimen>
+
+    <dimen name="focus_project_chip_icon">24dp</dimen>
+    <dimen name="focus_project_chip_icon_padding">5dp</dimen>
+    <dimen name="focus_project_chip_max_width">220dp</dimen>
 </resources>

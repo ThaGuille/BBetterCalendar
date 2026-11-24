@@ -41,6 +41,9 @@ import com.example.bbettercalendar.popups.OnPopupListener;
 import com.example.bbettercalendar.popups.PopupHelper;
 import com.example.bbettercalendar.popups.TimerPopup;
 import com.example.bbettercalendar.social.SocialFeature;
+import com.example.bbettercalendar.ui.common.SingleEvent;
+import com.example.bbettercalendar.ui.common.widget.ProjectAccents;
+import com.example.bbettercalendar.ui.home.FocusTarget;
 import com.example.bbettercalendar.social.SocialSnapshot;
 import com.example.bbettercalendar.social.account.AccountState;
 import com.example.bbettercalendar.stats.StreakCalculator;
@@ -103,6 +106,11 @@ public class FocusFragment extends Fragment
     private FocusSessionViewModel session;
     private FocusViewModel viewModel;
     private FocusSessionEventPresenter sessionEvents;
+    // Tarea de Proyectos enfocada (rediseno-proyectos 3.5): chip del proyecto y titulo de la tarea.
+    private View projectChipRow;
+    private ImageView projectChipIcon;
+    private TextView projectChipName;
+    private TextView taskTitle;
 
     @Nullable private MaterialToolbar toolbar;
     private View modeDot;
@@ -180,6 +188,10 @@ public class FocusFragment extends Fragment
         sessionEvents = new FocusSessionEventPresenter(this, session, null);
         sessionEvents.observe(getViewLifecycleOwner());
 
+        // D-P12 / d3: una tarea con bloqueo empezo sin el permiso de accesibilidad: la sesion va sin
+        // bloqueo y se ensena una vez la explicacion de siempre, con la forma de activarlo.
+        session.getBlockUnavailableEvents().observe(getViewLifecycleOwner(), this::onBlockUnavailable);
+
         // Maqueta social tras FEATURE_SOCIAL_MOCK: con el flag apagado, bloque e invitación GONE.
         View socialBlock = view.findViewById(R.id.focusSocialBlock);
         View invite = view.findViewById(R.id.focusInviteButton);
@@ -210,6 +222,10 @@ public class FocusFragment extends Fragment
         failsText = view.findViewById(R.id.focusFailsText);
         streakText = view.findViewById(R.id.focusStreakText);
         streakWeekText = view.findViewById(R.id.focusStreakWeekText);
+        projectChipRow = view.findViewById(R.id.focusProjectChipRow);
+        projectChipIcon = view.findViewById(R.id.focusProjectChipIcon);
+        projectChipName = view.findViewById(R.id.focusProjectChip);
+        taskTitle = view.findViewById(R.id.focusTaskTitle);
         studyingMeta = view.findViewById(R.id.focusStudyingMeta);
         friendsGrid = view.findViewById(R.id.focusFriendsGrid);
     }
@@ -370,6 +386,7 @@ public class FocusFragment extends Fragment
             return;
         }
         lastRendered = state;
+        renderTaskBinding();
         renderChip(state);
         renderCycleDots(state);
         renderControls(state);
@@ -636,6 +653,37 @@ public class FocusFragment extends Fragment
      * open padlock · on = bright phone with a closed red padlock · armed but the accessibility
      * service is not on yet = greyed phone with a small amber "!" badge.
      */
+    private void onBlockUnavailable(@Nullable SingleEvent<Boolean> event) {
+        if (event == null || event.isHandled() || !isAdded() || isStateSaved()) {
+            return;
+        }
+        event.consume();
+        if (getChildFragmentManager().findFragmentByTag(DISCLOSURE_TAG) == null) {
+            AccessibilityDisclosureDialog.newInstance().show(getChildFragmentManager(), DISCLOSURE_TAG);
+        }
+    }
+
+    /** Chip del proyecto y titulo cuando la sesion va ligada a una tarea de un proyecto; si no, ocultos. */
+    private void renderTaskBinding() {
+        if (projectChipRow == null) {
+            return;
+        }
+        boolean bound = FocusTarget.isSet() && FocusTarget.getProjectId() > 0;
+        projectChipRow.setVisibility(bound ? View.VISIBLE : View.GONE);
+        taskTitle.setVisibility(bound && FocusTarget.getTitle() != null ? View.VISIBLE : View.GONE);
+        if (!bound) {
+            return;
+        }
+        String name = FocusTarget.getProjectName() == null ? "" : FocusTarget.getProjectName();
+        projectChipName.setText(name);
+        projectChipRow.setContentDescription(getString(R.string.focus_project_chip_desc, name));
+        projectChipIcon.setImageResource(ProjectAccents.projectIconRes(FocusTarget.getProjectIconKey()));
+        projectChipIcon.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(),
+                        ProjectAccents.colorResFor(FocusTarget.getProjectColorIndex()))));
+        taskTitle.setText(FocusTarget.getTitle());
+    }
+
     private void renderBlockMode() {
         if (toolbar == null || session == null) {
             return;
@@ -875,6 +923,7 @@ public class FocusFragment extends Fragment
         renderChains();
         // Red de seguridad: un resultado que llegó con el estado guardado sigue pendiente.
         sessionEvents.recheck();
+        onBlockUnavailable(session.getBlockUnavailableEvents().getValue());
         scheduleTick();
     }
 

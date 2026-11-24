@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Circle behind the project icon in the Focus project chip; the fragment tints it with the project colour. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/bb_sanct_chip_fill" />
+</shape>

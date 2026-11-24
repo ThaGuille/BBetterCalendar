@@ -1,19 +1,23 @@
 package com.example.bbettercalendar.ui.projects;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.bbettercalendar.R;
+import com.example.bbettercalendar.projects.Project;
 import com.example.bbettercalendar.projects.domain.TaskDraft;
 import com.example.bbettercalendar.projects.domain.TaskSnapshot;
 import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
-import com.example.bbettercalendar.ui.home.FocusTarget;
+import com.example.bbettercalendar.ui.focus.TaskFocusRequest;
 import com.example.bbettercalendar.ui.projects.agenda.AgendaSheet;
 import com.example.bbettercalendar.ui.projects.quickadd.QuickAddDialog;
 
@@ -74,7 +78,8 @@ public class ProjectsNavigator {
     }
 
     /**
-     * Binds the task to the Focus session and opens Focus. When a session already runs it is not touched:
+     * Binds the task to the Focus session and opens Focus straight (no Home in between). A task without a
+     * goal first gets its pomodoro saved ({@link FocusLink}); when a session already runs it is not touched:
      * Focus just opens.
      */
     public void startFocus(@NonNull TaskSnapshot task) {
@@ -82,12 +87,38 @@ public class ProjectsNavigator {
         FocusSessionViewModel session = new ViewModelProvider(activity).get(FocusSessionViewModel.class);
         FocusUiState ui = session.getUiState().getValue();
         boolean running = ui != null && ui.getState() != FocusTimerStateMachine.State.STOPPED;
-        if (!running) {
-            FocusTarget.set((int) task.id, task.title, task.targetMinutes);
-            session.startBoundFocusIfIdle();
-            // The session is already started: Home must not start another one when it consumes this later.
-            FocusTarget.consumePendingAutoStart();
+        FocusLink.Action action = FocusLink.decide(task, running);
+        if (action == FocusLink.Action.OPEN_ONLY) {
+            openFocus();
+            return;
         }
-        NavHostFragment.findNavController(fragment).navigate(R.id.navigation_focus);
+        ProjectsViewModel projects = new ViewModelProvider(fragment).get(ProjectsViewModel.class);
+        ProjectsScreenModel model = projects.getModel().getValue();
+        Project project = model == null ? null : model.selectedProject;
+        if (action == FocusLink.Action.START) {
+            begin(session, project, task, task.targetMinutes);
+        } else {
+            projects.ensurePomodoro((int) task.id, goal -> {
+                if (goal == null || goal <= 0 || !fragment.isAdded()) return;
+                begin(session, project, task, goal);
+            });
+        }
+    }
+
+    private void begin(FocusSessionViewModel session, @Nullable Project project, TaskSnapshot task, int goal) {
+        TaskFocusRequest request = FocusLink.request(task, goal,
+                project == null ? null : project.name, project == null ? null : project.iconKey,
+                project == null ? 0 : project.colorIndex, project == null ? 0 : project.id);
+        session.startTaskFocus(request);
+        openFocus();
+    }
+
+    /** Focus is a secondary destination: one instance, never stacked on a double tap. */
+    private void openFocus() {
+        NavController nav = NavHostFragment.findNavController(fragment);
+        NavDestination current = nav.getCurrentDestination();
+        if (current != null && current.getId() == R.id.navigation_projects) {
+            nav.navigate(R.id.navigation_focus);
+        }
     }
 }

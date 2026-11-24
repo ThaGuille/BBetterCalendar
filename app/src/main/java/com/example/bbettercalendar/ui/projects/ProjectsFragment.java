@@ -33,6 +33,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bbettercalendar.R;
 import com.example.bbettercalendar.databinding.FragmentProjectsBinding;
+import com.example.bbettercalendar.feedback.HapticFeedback;
+import com.example.bbettercalendar.feedback.SoundFeedback;
 import com.example.bbettercalendar.projects.Tag;
 import com.example.bbettercalendar.projects.TaskSubtask;
 import com.example.bbettercalendar.projects.domain.TaskSnapshot;
@@ -143,7 +145,22 @@ public class ProjectsFragment extends Fragment {
             int entryId = ui != null && ui.isRunning() && FocusTarget.isSet() ? FocusTarget.getEntryId() : 0;
             listAdapter.setRunning(entryId, ui == null ? 0f : ui.getProgress());
         });
+        // Meta cumplida de una tarea de un proyecto: el sitio unico que la avisa (el presentador de
+        // Home/Focus la deja pendiente), ahora o la proxima vez que se abre Projects.
+        session.getAutoCompletedTaskTitle().observe(getViewLifecycleOwner(), this::onTimeReached);
         return binding.getRoot();
+    }
+
+    /** The goal of a project task was reached and the engine marked it done: "Time reached" + note + Undo. */
+    private void onTimeReached(@Nullable String title) {
+        if (title == null || binding == null || !isAdded() || isStateSaved()) return;
+        if (!FocusTarget.isSet() || FocusTarget.getProjectId() <= 0) return;
+        int entryId = FocusTarget.getEntryId();
+        FocusSessionViewModel session = new ViewModelProvider(requireActivity()).get(FocusSessionViewModel.class);
+        HapticFeedback.confirm(binding.getRoot());
+        SoundFeedback.get(requireContext()).playSuccess();
+        session.onAutoCompletedTaskShown(title);
+        showCompleted(entryId, R.string.projects_focus_time_reached);
     }
 
     // ---------------------------------------------------------------- toolbar and menu
@@ -455,10 +472,14 @@ public class ProjectsFragment extends Fragment {
 
     /** "Completed" with the note icon button and Undo; stays 7 s (longer while the note is being written). */
     private void showCompleted(int entryId) {
+        showCompleted(entryId, R.string.projects_main_completed);
+    }
+
+    private void showCompleted(int entryId, int text) {
         if (binding == null) return;
         dismissCompletedNow();
         completedEntryId = entryId;
-        Snackbar snack = Snackbar.make(binding.projectsRoot, R.string.projects_main_completed,
+        Snackbar snack = Snackbar.make(binding.projectsRoot, text,
                 Snackbar.LENGTH_INDEFINITE);
         snack.setAction(R.string.projects_main_undo, v -> viewModel.setTaskDone(entryId, false));
         ViewGroup content = (ViewGroup) ((ViewGroup) snack.getView()).getChildAt(0);

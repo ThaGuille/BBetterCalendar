@@ -272,5 +272,6 @@
     <string name="projects_agenda_block_desc">Blocks apps while focusing</string>
 
     <!-- rediseno-proyectos: focus -->
+    <string name="projects_focus_time_reached">Time reached: done</string>
 
 </resources>

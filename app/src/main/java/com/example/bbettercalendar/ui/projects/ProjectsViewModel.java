@@ -179,6 +179,11 @@ public class ProjectsViewModel extends AndroidViewModel {
 
     // ---------------------------------------------------------------- task writes
 
+    /** Focus on a task without a goal: turns its pomodoro on (duration or 25 min); the callback gets the goal. */
+    public void ensurePomodoro(int entryId, Callback<Integer> callback) {
+        tasksRepository.ensurePomodoro(entryId, callback);
+    }
+
     public void setTaskDone(int entryId, boolean done) {
         tasksRepository.setDone(entryId, done);
     }

@@ -12,4 +12,5 @@
     <string name="focus_friend_paused">Paused</string>
     <string name="focus_friends_empty">No friends here yet. Invite someone to study together.</string>
     <string name="focus_settings_desc">Pomodoro settings</string>
+    <string name="focus_project_chip_desc">Project: %1$s</string>
 </resources>

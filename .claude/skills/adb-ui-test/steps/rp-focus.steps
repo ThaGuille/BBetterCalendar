@@ -1,0 +1,37 @@
+# rediseno-proyectos u12: focusing from Projects. The timer of Escribir el capítulo 3 (35 of 120 min done,
+# block on) opens Focus straight with the project chip and the task title; leaving Focus keeps the session
+# (the row shows the running look); the row timer opens Focus again; Terminar antes keeps the minutes.
+# The first row timer of the Tesis final list is Escribir el capítulo 3 (the only task before it has no goal).
+# The block explanation shows when the accessibility service is off (fresh install): dismissed with Back (on the AVD its buttons sit below the screen).
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-focus.steps --save rp-focus
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+TAP text=Tesis final,
+WAIT 1500
+ASSERT id=projectsSummary
+SHOT rp-focus-projects
+TAP id=projectsTaskFocus
+WAIT 3500
+SHOT rp-focus-explanation
+KEY KEYCODE_BACK
+WAIT 1000
+ASSERT id=focusProjectChip expect~=Tesis final
+ASSERT id=focusTaskTitle expect~=tulo 3
+SHOT rp-focus-open
+KEY KEYCODE_BACK
+WAIT 2500
+ASSERT id=projectsSummary
+SHOT rp-focus-running-row
+TAP id=projectsTaskFocus
+WAIT 3000
+ASSERT id=focusProjectChip expect~=Tesis final
+TAP id=focusStopButton
+WAIT 2000
+KEY KEYCODE_BACK
+WAIT 2500
+ASSERT id=projectsSummary
+SHOT rp-focus-after-stop

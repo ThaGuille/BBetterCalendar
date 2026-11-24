@@ -83,6 +83,60 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal" />
 
+            <!-- Tarea de Proyectos enfocada: chip del proyecto (icono sobre su color + nombre) y titulo. -->
+            <LinearLayout
+                android:id="@+id/focusProjectChipRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:background="@drawable/bg_sanct_chip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/spacing_xs"
+                android:paddingTop="@dimen/spacing_xs"
+                android:paddingEnd="@dimen/focus_chip_padding_h"
+                android:paddingBottom="@dimen/spacing_xs"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/focusProjectChipIcon"
+                    android:layout_width="@dimen/focus_project_chip_icon"
+                    android:layout_height="@dimen/focus_project_chip_icon"
+                    android:layout_marginEnd="@dimen/spacing_sm"
+                    android:background="@drawable/bg_focus_project_dot"
+                    android:importantForAccessibility="no"
+                    android:padding="@dimen/focus_project_chip_icon_padding"
+                    app:tint="@color/bb_sanct_surface"
+                    tools:src="@drawable/ic_project_book" />
+
+                <TextView
+                    android:id="@+id/focusProjectChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxWidth="@dimen/focus_project_chip_max_width"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.Chip"
+                    android:textColor="@color/bb_sanct_on_surface"
+                    android:textSize="@dimen/focus_chip_text"
+                    tools:text="Tesis final" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/focusTaskTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:ellipsize="end"
+                android:gravity="center_horizontal"
+                android:maxLines="2"
+                android:textAppearance="@style/TextAppearance.BBetter.Body.Medium"
+                android:textColor="@color/bb_sanct_on_surface"
+                android:visibility="gone"
+                tools:text="Escribir el capitulo 3"
+                tools:visibility="visible" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

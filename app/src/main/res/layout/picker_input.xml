@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Text field of the pickers (minutes, subtask, note); the picker sets inputType and IME action. -->
+<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/projects_picker_row_min"
+    android:importantForAutofill="no"
+    android:textAppearance="@style/TextAppearance.BBetter.Body"
+    android:textColorHint="@color/bb_on_surface_muted" />

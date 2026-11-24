@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only gallery of the task pickers (rediseno-proyectos u6): every picker over one in-memory
+     TaskDraft, one at a time (tabs), with a live summary of the draft. Opened with
+     adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugPickersGalleryActivity -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/galleryPickersRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/galleryDraftSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_md"
+        android:textAppearance="@style/TextAppearance.BBetter.Caption"
+        android:textColor="@color/bb_primary" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/galleryPickerTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:chipSpacingVertical="0dp"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/galleryTabDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Date" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/galleryTabDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duration" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/galleryTabPriority"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Priority" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/galleryTabTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tag" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/galleryTabSubtasks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subtasks" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/galleryTabMore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="More" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/galleryTabSection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Section" />
+    </com.google.android.material.chip.ChipGroup>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.example.bbettercalendar.ui.projects.picker.DatePickerView
+            android:id="@+id/galleryPickerDate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.example.bbettercalendar.ui.projects.picker.DurationPickerView
+            android:id="@+id/galleryPickerDuration"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <com.example.bbettercalendar.ui.projects.picker.PriorityPickerView
+            android:id="@+id/galleryPickerPriority"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <com.example.bbettercalendar.ui.projects.picker.TagPickerView
+            android:id="@+id/galleryPickerTag"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <com.example.bbettercalendar.ui.projects.picker.SubtasksPickerView
+            android:id="@+id/galleryPickerSubtasks"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <com.example.bbettercalendar.ui.projects.picker.MorePickerView
+            android:id="@+id/galleryPickerMore"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <com.example.bbettercalendar.ui.projects.picker.SectionPickerView
+            android:id="@+id/galleryPickerSection"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

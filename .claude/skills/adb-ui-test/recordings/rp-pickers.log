@@ -1,0 +1,75 @@
+﻿# scenario: rp-pickers
+# recorded: 2026-11-24T19:50:44.112446+00:00  from run-steps rp-pickers
+1795549750771	GRANT android.permission.POST_NOTIFICATIONS
+1795549750962	START .debug.DebugPickersGalleryActivity
+1795549751345	WAIT 2500
+1795549751345	ASSERT id=galleryDraftSummary expect~=day=none
+1795549756187	ASSERT id=pickerDateToday
+1795549756268	SHOT rp-pickers-date-initial
+1795549756859	TAP id=pickerDateTomorrow
+1795549759296	WAIT 500
+1795549759296	ASSERT id=galleryDraftSummary expect~=day=tomorrow
+1795549761690	TAP id=pickerTime1700
+1795549764112	WAIT 500
+1795549764112	ASSERT id=galleryDraftSummary expect~=time=17:00
+1795549766530	SHOT rp-pickers-date
+1795549767097	TAP id=galleryTabDuration
+1795549769510	WAIT 500
+1795549769510	TAP id=pickerDur50
+1795549772018	WAIT 500
+1795549772018	ASSERT id=galleryDraftSummary expect~=dur=50
+1795549774410	TAP id=pickerPomodoroSwitch
+1795549776809	WAIT 500
+1795549776809	ASSERT id=galleryDraftSummary expect~=pomo=true
+1795549779196	SHOT rp-pickers-duration
+1795549779724	TAP id=galleryTabPriority
+1795549782165	WAIT 500
+1795549782165	TAP id=pickerPriHigh
+1795549784654	WAIT 500
+1795549784654	ASSERT id=galleryDraftSummary expect~=pri=3
+1795549787016	SHOT rp-pickers-priority
+1795549787533	TAP id=galleryTabTag
+1795549789973	WAIT 500
+1795549789973	TAP id=pickerTagItem0
+1795549792516	WAIT 500
+1795549792516	ASSERT id=galleryDraftSummary expect~=tag=11
+1795549794834	SHOT rp-pickers-tag
+1795549795416	TAP id=galleryTabSubtasks
+1795549797837	WAIT 500
+1795549797837	TAP id=pickerSubtaskInput
+1795549800373	WAIT 500
+1795549800960	TYPE Buy milk
+1795549801317	KEY KEYCODE_ENTER
+1795549801566	WAIT 500
+1795549801566	ASSERT id=galleryDraftSummary expect~=subs=1
+1795549803955	SHOT rp-pickers-subtasks
+1795549804532	TAP id=galleryTabMore
+1795549806958	WAIT 500
+1795549806958	TAP id=pickerRepWeekly
+1795549809495	WAIT 500
+1795549809495	ASSERT id=galleryDraftSummary expect~=rep=WEEKLY
+1795549811918	TAP id=pickerRem15
+1795549814339	WAIT 500
+1795549814339	ASSERT id=galleryDraftSummary expect~=rem=MIN_15
+1795549816736	SHOT rp-pickers-more
+1795549817311	TAP id=galleryTabSection
+1795549819732	WAIT 500
+1795549819732	ASSERT id=pickerSectionItem1
+1795549822129	SHOT rp-pickers-section
+1795549822657	TAP id=galleryTabDate
+1795549825121	WAIT 500
+1795549825121	TAP id=pickerDateNone
+1795549827697	WAIT 500
+1795549827697	ASSERT id=galleryDraftSummary expect~=time=none
+1795549830109	ASSERT id=galleryDraftSummary expect~=rep=NONE
+1795549830191	ASSERT id=galleryDraftSummary expect~=rem=NONE
+1795549830272	SHOT rp-pickers-cleared
+1795549830792	TAP id=galleryTabDuration
+1795549833226	WAIT 500
+1795549833226	TAP id=pickerDurFree
+1795549835816	WAIT 500
+1795549835816	ASSERT id=galleryDraftSummary expect~=pomo=false block=false
+1795549838317	TAP id=pickerBlockSwitch
+1795549840845	WAIT 500
+1795549840845	ASSERT id=galleryDraftSummary expect~=dur=50
+1795549843456	SHOT rp-pickers-block

@@ -18,6 +18,22 @@
     <!-- rediseno-proyectos: main -->
 
     <!-- rediseno-proyectos: pickers -->
+    <!-- Option chip of the task pickers: 48dp tall, selected on bb_primary_container. -->
+    <style name="Widget.BBetter.Chip.Picker">
+        <item name="chipMinHeight">@dimen/projects_picker_chip_height</item>
+        <item name="chipBackgroundColor">@color/bb_picker_chip_bg</item>
+        <item name="chipStrokeColor">@color/bb_picker_chip_stroke</item>
+        <item name="android:textColor">@color/bb_picker_chip_text</item>
+        <item name="chipIconTint">@null</item>
+        <item name="chipIconSize">@dimen/projects_picker_icon</item>
+        <item name="android:checkable">true</item>
+    </style>
+
+    <!-- Small caps label of a picker section (TIME, REPEAT...). -->
+    <style name="TextAppearance.BBetter.PickerLabel" parent="TextAppearance.BBetter.Micro.Bold">
+        <item name="android:textColor">@color/bb_on_surface_muted</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
 
     <!-- rediseno-proyectos: quickadd -->
 

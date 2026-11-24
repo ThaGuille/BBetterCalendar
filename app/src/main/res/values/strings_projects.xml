@@ -94,6 +94,48 @@
     <!-- rediseno-proyectos: main -->
 
     <!-- rediseno-proyectos: pickers -->
+    <string name="projects_picker_header_done">Done</string>
+    <string name="projects_picker_title_date">Date</string>
+    <string name="projects_picker_title_duration">Duration</string>
+    <string name="projects_picker_title_priority">Priority</string>
+    <string name="projects_picker_title_tag">Tag</string>
+    <string name="projects_picker_title_subtasks">Subtasks</string>
+    <string name="projects_picker_title_more">More</string>
+    <string name="projects_picker_title_section">Section</string>
+    <string name="projects_picker_date_today">Today</string>
+    <string name="projects_picker_date_tomorrow">Tomorrow</string>
+    <string name="projects_picker_date_none">No date</string>
+    <string name="projects_picker_other">Other</string>
+    <string name="projects_picker_time_label">Time</string>
+    <string name="projects_picker_time_none">No time</string>
+    <string name="projects_picker_date_dialog_title">Pick a date</string>
+    <string name="projects_picker_time_dialog_title">Pick a time</string>
+    <string name="projects_picker_dur_free">Free</string>
+    <string name="projects_picker_dur_minutes_hint">Minutes</string>
+    <string name="projects_picker_dur_minutes_desc">Duration in minutes</string>
+    <string name="projects_picker_dur_pomodoro">Pomodoro: when it ends, it completes</string>
+    <string name="projects_picker_dur_block">Soft block when focusing</string>
+    <string name="projects_picker_pri_none">None</string>
+    <string name="projects_picker_pri_low">Low</string>
+    <string name="projects_picker_pri_medium">Medium</string>
+    <string name="projects_picker_pri_high">High</string>
+    <string name="projects_picker_tag_none">None</string>
+    <string name="projects_picker_tag_new">New</string>
+    <string name="projects_picker_tag_hint">Long press a tag to edit it</string>
+    <string name="projects_picker_subtask_hint">Add subtask</string>
+    <string name="projects_picker_subtask_remove">Remove %1$s</string>
+    <string name="projects_picker_no">No</string>
+    <string name="projects_picker_rep_label">Repeat</string>
+    <string name="projects_picker_rep_daily">Every day</string>
+    <string name="projects_picker_rep_weekly">Every week</string>
+    <string name="projects_picker_rep_monthly">Every month</string>
+    <string name="projects_picker_rep_note">Repeats until the project ends</string>
+    <string name="projects_picker_rem_label">Reminder</string>
+    <string name="projects_picker_rem_at_time">At the time</string>
+    <string name="projects_picker_rem_15">15 min before</string>
+    <string name="projects_picker_rem_60">1 h before</string>
+    <string name="projects_picker_note_label">Note</string>
+    <string name="projects_picker_note_hint">Write a note</string>
 
     <!-- rediseno-proyectos: quickadd -->
 

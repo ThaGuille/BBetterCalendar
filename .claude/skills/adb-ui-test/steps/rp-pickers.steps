@@ -1,0 +1,76 @@
+# rediseno-proyectos u6: the reusable task pickers in the debug gallery (one draft, one picker at a time).
+# Debug build only. The gallery turns Repeat on for itself (RepeatAvailability), so the Repeat row shows here.
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-pickers.steps --save rp-pickers
+GRANT android.permission.POST_NOTIFICATIONS
+START .debug.DebugPickersGalleryActivity
+WAIT 2500
+ASSERT id=galleryDraftSummary expect~=day=none
+ASSERT id=pickerDateToday
+SHOT rp-pickers-date-initial
+TAP id=pickerDateTomorrow
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=day=tomorrow
+TAP id=pickerTime1700
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=time=17:00
+SHOT rp-pickers-date
+TAP id=galleryTabDuration
+WAIT 500
+TAP id=pickerDur50
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=dur=50
+TAP id=pickerPomodoroSwitch
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=pomo=true
+SHOT rp-pickers-duration
+TAP id=galleryTabPriority
+WAIT 500
+TAP id=pickerPriHigh
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=pri=3
+SHOT rp-pickers-priority
+TAP id=galleryTabTag
+WAIT 500
+TAP id=pickerTagItem0
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=tag=11
+SHOT rp-pickers-tag
+TAP id=galleryTabSubtasks
+WAIT 500
+TAP id=pickerSubtaskInput
+WAIT 500
+TYPE Buy milk
+KEY KEYCODE_ENTER
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=subs=1
+SHOT rp-pickers-subtasks
+TAP id=galleryTabMore
+WAIT 500
+TAP id=pickerRepWeekly
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=rep=WEEKLY
+TAP id=pickerRem15
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=rem=MIN_15
+SHOT rp-pickers-more
+TAP id=galleryTabSection
+WAIT 500
+ASSERT id=pickerSectionItem1
+SHOT rp-pickers-section
+TAP id=galleryTabDate
+WAIT 500
+TAP id=pickerDateNone
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=time=none
+ASSERT id=galleryDraftSummary expect~=rep=NONE
+ASSERT id=galleryDraftSummary expect~=rem=NONE
+SHOT rp-pickers-cleared
+TAP id=galleryTabDuration
+WAIT 500
+TAP id=pickerDurFree
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=pomo=false block=false
+TAP id=pickerBlockSwitch
+WAIT 500
+ASSERT id=galleryDraftSummary expect~=dur=50
+SHOT rp-pickers-block

@@ -44,6 +44,13 @@
     <!-- rediseno-proyectos: main -->
 
     <!-- rediseno-proyectos: pickers -->
+    <dimen name="projects_picker_chip_height">48dp</dimen>
+    <dimen name="projects_picker_row_min">48dp</dimen>
+    <dimen name="projects_picker_dot">12dp</dimen>
+    <dimen name="projects_picker_icon">20dp</dimen>
+    <dimen name="projects_picker_gap">8dp</dimen>
+    <dimen name="projects_picker_padding">16dp</dimen>
+    <dimen name="projects_picker_input_width">120dp</dimen>
 
     <!-- rediseno-proyectos: quickadd -->
 

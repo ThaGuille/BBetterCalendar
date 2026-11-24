@@ -22,7 +22,9 @@ TAP id=agendaClose
 WAIT 1200
 TAP id=projectsMenuButton
 WAIT 1000
-ASSERT id=projectsFab
 SHOT rp-agenda-closed
+TAP text=Add section|Añadir sección
+WAIT 1000
 KEY KEYCODE_BACK
 WAIT 500
+ASSERT id=projectsFab

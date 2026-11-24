@@ -1,0 +1,26 @@
+﻿# scenario: rp-agenda
+# recorded: 2026-11-24T21:19:58.600787+00:00  from run-steps rp-agenda
+1795555169123	GRANT android.permission.POST_NOTIFICATIONS
+1795555169410	START .configuration.SplashActivity
+1795555169941	WAIT 5000
+1795555169941	TAP id=navigation_projects
+1795555176737	WAIT 2500
+1795555176737	TAP text=Tesis final,
+1795555179658	WAIT 1500
+1795555179658	TAP id=projectsAgendaButton
+1795555182155	WAIT 1500
+1795555182155	ASSERT id=agendaClose
+1795555184744	ASSERT id=agendaHeaderYesterday expect~=Yesterday|Ayer
+1795555184828	ASSERT id=agendaHeaderToday expect~=Today|Hoy
+1795555184908	ASSERT id=agendaDeadlineText expect~=Project deadline|Entrega del proyecto
+1795555184995	SHOT rp-agenda-open
+1795555185611	TAP id=agendaClose
+1795555188131	WAIT 1200
+1795555188131	TAP id=projectsMenuButton
+1795555190728	WAIT 1000
+1795555191818	SHOT rp-agenda-closed
+1795555192379	TAP text=Add section|Añadir sección
+1795555194872	WAIT 1000
+1795555195954	KEY KEYCODE_BACK
+1795555196207	WAIT 500
+1795555196207	ASSERT id=projectsFab

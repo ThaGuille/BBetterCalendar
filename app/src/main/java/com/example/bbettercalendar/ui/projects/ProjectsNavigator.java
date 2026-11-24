@@ -1,5 +1,7 @@
 package com.example.bbettercalendar.ui.projects;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -19,7 +21,9 @@ import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
 import com.example.bbettercalendar.ui.focus.TaskFocusRequest;
 import com.example.bbettercalendar.ui.projects.agenda.AgendaSheet;
+import com.example.bbettercalendar.ui.projects.form.ProjectFormFragment;
 import com.example.bbettercalendar.ui.projects.quickadd.QuickAddDialog;
+import com.example.bbettercalendar.ui.projects.tags.TagEditorDialog;
 
 /**
  * One method per destination reachable from the Projects screen. {@link #startFocus} is real; the other
@@ -61,12 +65,21 @@ public class ProjectsNavigator {
 
     /** Project form; 0 = create. */
     public void openProjectForm(int projectId) {
-        // TODO(rediseno-proyectos): form
+        Bundle args = new Bundle();
+        args.putInt(ProjectFormFragment.ARG_PROJECT_ID, projectId);
+        NavController nav = NavHostFragment.findNavController(fragment);
+        // A second tap while the form is already opening must not stack another one.
+        NavDestination current = nav.getCurrentDestination();
+        if (current != null && current.getId() == R.id.navigation_project_form) return;
+        nav.navigate(R.id.navigation_project_form, args);
     }
 
     /** Tag or area editor; 0 = create. */
     public void openTagEditor(int kind, int tagId) {
-        // TODO(rediseno-proyectos): tag editor
+        // Like the quick add, the dialog lives in the NavHostFragment's child manager.
+        FragmentManager manager = fragment.getParentFragmentManager();
+        if (manager.isStateSaved() || manager.findFragmentByTag(TagEditorDialog.TAG) != null) return;
+        TagEditorDialog.newInstance(kind, tagId).show(manager, TagEditorDialog.TAG);
     }
 
     /** Agenda sheet of the project. */

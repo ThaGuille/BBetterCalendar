@@ -259,6 +259,62 @@
 
 
     <!-- rediseno-proyectos: form -->
+    <string name="projects_form_title_new">New project</string>
+    <string name="projects_form_title_edit">Edit project</string>
+    <string name="projects_form_close_desc">Close without saving</string>
+    <string name="projects_form_create">Create</string>
+    <string name="projects_form_save">Save</string>
+    <string name="projects_form_icon_desc">Icon and colour</string>
+    <string name="projects_form_name_hint">Project name</string>
+    <string name="projects_form_notes_hint">Add note</string>
+    <string name="projects_form_icon_option">Icon: %1$s</string>
+    <string name="projects_form_color_option">Colour: %1$s</string>
+    <string name="projects_form_icon_cap">Graduation cap</string>
+    <string name="projects_form_icon_book">Book</string>
+    <string name="projects_form_icon_code">Code</string>
+    <string name="projects_form_icon_plane">Plane</string>
+    <string name="projects_form_icon_box">Box</string>
+    <string name="projects_form_icon_home">Home</string>
+    <string name="projects_form_icon_heart">Heart</string>
+    <string name="projects_form_icon_image">Image</string>
+    <string name="projects_form_icon_pen">Pen</string>
+    <string name="projects_form_icon_bag">Bag</string>
+    <string name="projects_form_icon_phone">Phone</string>
+    <string name="projects_form_icon_bulb">Light bulb</string>
+    <string name="projects_form_color_sage">Sage</string>
+    <string name="projects_form_color_lilac">Lilac</string>
+    <string name="projects_form_color_dusk">Dusk</string>
+    <string name="projects_form_color_seafoam">Seafoam</string>
+    <string name="projects_form_color_muted">Grey</string>
+    <string name="projects_form_deadline">Deadline</string>
+    <string name="projects_form_deadline_none">No date</string>
+    <string name="projects_form_deadline_end_month">End of month</string>
+    <string name="projects_form_deadline_month">In a month</string>
+    <string name="projects_form_deadline_other">Other</string>
+    <string name="projects_form_deadline_note">Shows in the Calendar and reminds 3 days and 1 day before.</string>
+    <string name="projects_form_area">Area</string>
+    <string name="projects_form_area_none">None</string>
+    <string name="projects_form_area_new">New</string>
+    <string name="projects_form_archive">Archive project</string>
+    <string name="projects_form_delete">Delete project</string>
+    <string name="projects_form_discard_title">Discard changes?</string>
+    <string name="projects_form_discard_message">What you changed in this project will be lost.</string>
+    <string name="projects_form_discard_keep">Keep editing</string>
+    <string name="projects_form_discard_confirm">Discard</string>
+    <string name="projects_form_missing">The project could not be opened.</string>
+
+    <string name="projects_tag_title_new_tag">New tag</string>
+    <string name="projects_tag_title_edit_tag">Edit tag</string>
+    <string name="projects_tag_title_new_area">New area</string>
+    <string name="projects_tag_title_edit_area">Edit area</string>
+    <string name="projects_tag_name_hint">Name</string>
+    <string name="projects_tag_icon_label">Icon</string>
+    <string name="projects_tag_color_label">Colour</string>
+    <string name="projects_tag_delete">Delete</string>
+    <string name="projects_tag_delete_title_tag">Delete this tag?</string>
+    <string name="projects_tag_delete_title_area">Delete this area?</string>
+    <string name="projects_tag_delete_message_tag">Its tasks keep existing and are left without a tag.</string>
+    <string name="projects_tag_delete_message_area">Its projects keep existing and are left without an area.</string>
 
     <!-- rediseno-proyectos: agenda -->
     <string name="projects_agenda_title">Agenda</string>

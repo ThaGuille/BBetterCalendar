@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos u10 (spec 3.6): create / edit project, a secondary full-screen destination. Bar (close, title,
+     Create / Save), a name card (bubble + field, inline icon and colour picker, note), a questions card (deadline,
+     area) and, when editing, the archive / delete card. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/projectFormRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface"
+    android:orientation="vertical"
+    tools:context=".ui.projects.form.ProjectFormFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_md">
+
+        <ImageButton
+            android:id="@+id/projectFormClose"
+            style="@style/Widget.BBetter.ProjectsToolButton"
+            android:contentDescription="@string/projects_form_close_desc"
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/bb_on_surface" />
+
+        <TextView
+            android:id="@+id/projectFormTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_weight="1"
+            android:text="@string/projects_form_title_new"
+            android:textAppearance="@style/TextAppearance.BBetter.Title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/projectFormSave"
+            style="@style/Widget.BBetter.Button.Primary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:minHeight="@dimen/projects_form_bar_button"
+            android:text="@string/projects_form_create" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/projectFormScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingTop="@dimen/spacing_sm"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_lg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Name card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/projects_form_padding">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <com.example.bbettercalendar.ui.common.widget.ProjectBubbleView
+                            android:id="@+id/projectFormIcon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <ImageView
+                            android:layout_width="@dimen/projects_form_badge"
+                            android:layout_height="@dimen/projects_form_badge"
+                            android:layout_gravity="bottom|end"
+                            android:background="@drawable/bg_project_form_badge"
+                            android:importantForAccessibility="no"
+                            android:padding="5dp"
+                            android:src="@drawable/ic_edit_24"
+                            app:tint="@color/bb_on_surface" />
+                    </FrameLayout>
+
+                    <EditText
+                        android:id="@+id/projectFormName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:autofillHints="name"
+                        android:background="@null"
+                        android:hint="@string/projects_form_name_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="textCapSentences"
+                        android:maxLength="28"
+                        android:minHeight="@dimen/projects_form_pick"
+                        android:singleLine="true"
+                        android:textAppearance="@style/TextAppearance.BBetter.Title"
+                        android:textColorHint="@color/bb_on_surface_muted" />
+                </LinearLayout>
+
+                <!-- Inline picker: the 8 project icons and the 4 project colours (opens from the bubble). -->
+                <LinearLayout
+                    android:id="@+id/projectFormPicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <GridLayout
+                        android:id="@+id/projectFormIcons"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:id="@+id/projectFormColors"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_sm"
+                        android:orientation="horizontal" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/projectFormNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:background="@null"
+                    android:drawablePadding="@dimen/spacing_sm"
+                    android:drawableStart="@drawable/ic_note_24"
+                    android:drawableTint="@color/bb_on_surface_muted"
+                    android:gravity="center_vertical"
+                    android:hint="@string/projects_form_notes_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:minHeight="@dimen/projects_form_pick"
+                    android:textAppearance="@style/TextAppearance.BBetter.Body"
+                    android:textColorHint="@color/bb_on_surface_muted" />
+            </LinearLayout>
+
+            <!-- Questions card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_card_gap"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/projects_form_padding">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/projects_picker_icon"
+                        android:layout_height="@dimen/projects_picker_icon"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_flag_24"
+                        app:tint="@color/bb_on_surface_muted" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:text="@string/projects_form_deadline"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body.Medium" />
+
+                    <TextView
+                        android:id="@+id/projectFormDeadlineValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/projects_form_deadline_none"
+                        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+                </LinearLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/projectFormDeadlineChips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:chipSpacingHorizontal="@dimen/projects_picker_gap"
+                    app:chipSpacingVertical="@dimen/projects_picker_gap" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/projects_form_deadline_note"
+                    android:textAppearance="@style/TextAppearance.BBetter.ProjectsCaption" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_md"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/projects_picker_icon"
+                        android:layout_height="@dimen/projects_picker_icon"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_tag_24"
+                        app:tint="@color/bb_on_surface_muted" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_sm"
+                        android:layout_weight="1"
+                        android:text="@string/projects_form_area"
+                        android:textAppearance="@style/TextAppearance.BBetter.Body.Medium" />
+
+                    <TextView
+                        android:id="@+id/projectFormAreaValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/projects_form_area_none"
+                        android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+                </LinearLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/projectFormAreaChips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:chipSpacingHorizontal="@dimen/projects_picker_gap"
+                    app:chipSpacingVertical="@dimen/projects_picker_gap" />
+            </LinearLayout>
+
+            <!-- Edit only: archive and delete (both come back to Projects, which offers Undo). -->
+            <LinearLayout
+                android:id="@+id/projectFormEditCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_card_gap"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_sm"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/projectFormArchive"
+                    style="@style/Widget.BBetter.Button.Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start|center_vertical"
+                    android:text="@string/projects_form_archive"
+                    app:icon="@drawable/ic_archive_24"
+                    app:iconGravity="start"
+                    app:iconPadding="@dimen/spacing_sm" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/projectFormDelete"
+                    style="@style/Widget.BBetter.Button.Danger"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start|center_vertical"
+                    android:text="@string/projects_form_delete"
+                    app:icon="@drawable/ic_delete_24"
+                    app:iconGravity="start"
+                    app:iconPadding="@dimen/spacing_sm" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

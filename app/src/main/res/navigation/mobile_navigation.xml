@@ -83,6 +83,18 @@
     <!-- ===== u12: destinos secundarios (sin barra inferior; MainActivity.TOP_LEVEL_DESTINATIONS).
          Se navega a ellos por id de destino (navController.navigate(R.id.navigation_focus)), desde
          cualquier pestaña; system back / la flecha de la barra superior vuelven al origen. ===== -->
+    <!-- rediseno-proyectos u10: create / edit project, full screen (projectId 0 = new). -->
+    <fragment
+        android:id="@+id/navigation_project_form"
+        android:name="com.example.bbettercalendar.ui.projects.form.ProjectFormFragment"
+        android:label="@string/projects_form_title_new"
+        tools:layout="@layout/fragment_project_form" >
+        <argument
+            android:name="projectId"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </fragment>
+
     <fragment
         android:id="@+id/navigation_focus"
         android:name="com.example.bbettercalendar.ui.focus.FocusFragment"

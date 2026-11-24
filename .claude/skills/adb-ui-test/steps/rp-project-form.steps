@@ -1,0 +1,149 @@
+# rediseno-proyectos u10: create / edit project full screen (spec 3.6) and the tag / area editor (spec 3.7) on the
+# seeded app. Create a project (plane icon, third colour, End of month, Area Personal), see it selected with the
+# "Project ready" empty state, rename it, archive it and Undo, delete it, open Area New and the tag picker's New.
+# The AVD runs in English: texts have alternatives; ids are preferred.
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-project-form.steps --save rp-project-form
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+ASSERT id=projectsSelector
+# Create: the dashed circle of the selector opens the form with the name field focused.
+TAP id=projectsNewButton
+WAIT 1500
+ASSERT id=projectFormClose
+ASSERT id=projectFormSave
+ASSERT id=projectFormIcon
+ASSERT id=projectFormName
+ASSERT id=projectFormNotes
+ASSERT id=projectFormDeadlineChips
+TYPE Viaje Japon
+WAIT 600
+SHOT rp-project-form-new
+# The first Back only hides the keyboard (the form stays open).
+KEY KEYCODE_BACK
+WAIT 800
+ASSERT id=projectFormAreaChips
+# The bubble opens the inline picker: 8 icons and 4 colours (each with its name as description).
+TAP id=projectFormIcon
+WAIT 800
+ASSERT id=projectFormIcons
+ASSERT id=projectFormColors
+SHOT rp-project-form-picker
+TAP text=Icon: Plane|Icono: Avión
+WAIT 500
+TAP text=Colour: Dusk|Color: Crepúsculo
+WAIT 500
+SHOT rp-project-form-picked
+# Deadline End of month, Area Personal.
+TAP text=End of month|Fin de mes
+WAIT 500
+# The Area question sits below the fold.
+SWIPE 540 1600 540 700 300
+WAIT 600
+TAP text=Personal
+WAIT 500
+SHOT rp-project-form-questions
+TAP id=projectFormSave
+WAIT 2000
+# Back on Projects: the new project is selected and shows the Project ready empty state.
+ASSERT id=projectsSelector
+ASSERT id=projectsAddFirstTask
+SHOT rp-project-form-created
+# Edit: menu, Edit project, rename, save.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Edit project|Editar proyecto
+WAIT 1500
+ASSERT id=projectFormName
+SHOT rp-project-form-edit
+SWIPE 540 1600 540 700 300
+WAIT 600
+ASSERT id=projectFormArchive
+ASSERT id=projectFormDelete
+SHOT rp-project-form-edit-bottom
+SWIPE 540 700 540 1600 300
+WAIT 600
+TAP id=projectFormName
+WAIT 500
+TYPE 2
+WAIT 500
+TAP id=projectFormSave
+WAIT 2000
+ASSERT id=projectsSelector
+TAP text=Viaje Japon2
+WAIT 800
+# Archive from the form: back on Projects with the snackbar; Undo brings it back.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Edit project|Editar proyecto
+WAIT 1500
+SWIPE 540 1600 540 700 300
+WAIT 600
+TAP id=projectFormArchive
+WAIT 900
+# The Undo snackbar lives about 3 s, less than two dump round trips: tap its action by position (a SWIPE on one point).
+SWIPE 960 1465 960 1465 80
+WAIT 1500
+SHOT rp-project-form-undone
+TAP text=Viaje Japon2
+WAIT 1000
+ASSERT id=projectsAddFirstTask
+# Delete from the form: the snackbar appears and, after it goes, the project is gone.
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Edit project|Editar proyecto
+WAIT 1500
+SWIPE 540 1600 540 700 300
+WAIT 600
+TAP id=projectFormDelete
+WAIT 1200
+ASSERT id=snackbar_action
+SHOT rp-project-form-deleted
+WAIT 6000
+SHOT rp-project-form-deleted-gone
+# Area New: the form of another project opens the tag editor without colours; the new area is listed.
+TAP text=Tesis final,
+WAIT 1200
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Edit project|Editar proyecto
+WAIT 1500
+TAP text=New|Nueva
+WAIT 1200
+ASSERT id=tagEditorName
+ASSERT id=tagEditorIcons
+TYPE Salud
+WAIT 500
+SHOT rp-project-form-area-editor
+TAP id=button1
+WAIT 1500
+ASSERT id=projectFormAreaChips
+TAP text=Salud
+WAIT 500
+SHOT rp-project-form-area-listed
+# Choosing the area made the form dirty: X asks to discard.
+TAP id=projectFormClose
+WAIT 1000
+ASSERT id=button1
+SHOT rp-project-form-discard
+TAP id=button1
+WAIT 1200
+ASSERT id=projectsFab
+# Tag picker New: the tag editor with the 8 tag icons and the 4 tag colours.
+TAP id=projectsFab
+WAIT 2000
+TAP id=quickAddTag
+WAIT 1000
+TAP id=pickerTagNew
+WAIT 1200
+ASSERT id=tagEditorName
+# The keyboard covers the colours: the first Back only hides it (the dialog stays).
+KEY KEYCODE_BACK
+WAIT 800
+ASSERT id=tagEditorColors
+SHOT rp-project-form-tag-editor
+TAP id=button2
+WAIT 800

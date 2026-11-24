@@ -88,6 +88,22 @@ public class ProjectsRepository {
         return projectDao.observeActiveWithBadge(areaId, todayStart, today.getTimeInMillis());
     }
 
+    /** Carga un proyecto para el formulario de edicion; {@code callback} lo recibe (o null) en el hilo principal. */
+    public void loadProject(int projectId, Callback<Project> callback) {
+        dbWriteExecutor.execute(() -> {
+            Project project = projectDao.getById(projectId);
+            mainThread.post(() -> callback.onResult(project));
+        });
+    }
+
+    /** Cuantos proyectos hay (el formulario de alta elige el color siguiente del ciclo con este numero). */
+    public void countProjects(Callback<Integer> callback) {
+        dbWriteExecutor.execute(() -> {
+            int count = projectDao.getProjectCount();
+            mainThread.post(() -> callback.onResult(count));
+        });
+    }
+
     /** Alta sencilla (color por rotacion, icono por defecto, sin area): CreateProjectDialog. */
     public void createProject(String name, String notes, long softDeadlineMillis) {
         dbWriteExecutor.execute(() -> insertProject(name, notes, softDeadlineMillis,

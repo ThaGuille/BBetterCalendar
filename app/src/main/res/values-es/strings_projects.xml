@@ -250,6 +250,62 @@
 
 
     <!-- rediseno-proyectos: form -->
+    <string name="projects_form_title_new">Nuevo proyecto</string>
+    <string name="projects_form_title_edit">Editar proyecto</string>
+    <string name="projects_form_close_desc">Cerrar sin guardar</string>
+    <string name="projects_form_create">Crear</string>
+    <string name="projects_form_save">Guardar</string>
+    <string name="projects_form_icon_desc">Icono y color</string>
+    <string name="projects_form_name_hint">Nombre del proyecto</string>
+    <string name="projects_form_notes_hint">Añadir nota</string>
+    <string name="projects_form_icon_option">Icono: %1$s</string>
+    <string name="projects_form_color_option">Color: %1$s</string>
+    <string name="projects_form_icon_cap">Birrete</string>
+    <string name="projects_form_icon_book">Libro</string>
+    <string name="projects_form_icon_code">Código</string>
+    <string name="projects_form_icon_plane">Avión</string>
+    <string name="projects_form_icon_box">Caja</string>
+    <string name="projects_form_icon_home">Casa</string>
+    <string name="projects_form_icon_heart">Corazón</string>
+    <string name="projects_form_icon_image">Imagen</string>
+    <string name="projects_form_icon_pen">Pluma</string>
+    <string name="projects_form_icon_bag">Bolsa</string>
+    <string name="projects_form_icon_phone">Teléfono</string>
+    <string name="projects_form_icon_bulb">Bombilla</string>
+    <string name="projects_form_color_sage">Salvia</string>
+    <string name="projects_form_color_lilac">Lila</string>
+    <string name="projects_form_color_dusk">Crepúsculo</string>
+    <string name="projects_form_color_seafoam">Espuma</string>
+    <string name="projects_form_color_muted">Gris</string>
+    <string name="projects_form_deadline">Fecha límite</string>
+    <string name="projects_form_deadline_none">Sin fecha</string>
+    <string name="projects_form_deadline_end_month">Fin de mes</string>
+    <string name="projects_form_deadline_month">Dentro de un mes</string>
+    <string name="projects_form_deadline_other">Otra</string>
+    <string name="projects_form_deadline_note">Sale en el Calendario y avisa 3 días y 1 día antes.</string>
+    <string name="projects_form_area">Área</string>
+    <string name="projects_form_area_none">Ninguna</string>
+    <string name="projects_form_area_new">Nueva</string>
+    <string name="projects_form_archive">Archivar proyecto</string>
+    <string name="projects_form_delete">Eliminar proyecto</string>
+    <string name="projects_form_discard_title">¿Descartar los cambios?</string>
+    <string name="projects_form_discard_message">Lo que has cambiado en este proyecto se perderá.</string>
+    <string name="projects_form_discard_keep">Seguir editando</string>
+    <string name="projects_form_discard_confirm">Descartar</string>
+    <string name="projects_form_missing">No se pudo abrir el proyecto.</string>
+
+    <string name="projects_tag_title_new_tag">Nueva etiqueta</string>
+    <string name="projects_tag_title_edit_tag">Editar etiqueta</string>
+    <string name="projects_tag_title_new_area">Nueva área</string>
+    <string name="projects_tag_title_edit_area">Editar área</string>
+    <string name="projects_tag_name_hint">Nombre</string>
+    <string name="projects_tag_icon_label">Icono</string>
+    <string name="projects_tag_color_label">Color</string>
+    <string name="projects_tag_delete">Eliminar</string>
+    <string name="projects_tag_delete_title_tag">¿Eliminar esta etiqueta?</string>
+    <string name="projects_tag_delete_title_area">¿Eliminar esta área?</string>
+    <string name="projects_tag_delete_message_tag">Sus tareas siguen existiendo y se quedan sin etiqueta.</string>
+    <string name="projects_tag_delete_message_area">Sus proyectos siguen existiendo y se quedan sin área.</string>
 
     <!-- rediseno-proyectos: agenda -->
     <string name="projects_agenda_title">Agenda</string>

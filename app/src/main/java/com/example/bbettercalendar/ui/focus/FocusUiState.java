@@ -19,10 +19,24 @@ public final class FocusUiState {
     private final boolean infiniteCycles;
     private final int cyclesCompleted;
     private final boolean blockModeArmed;
+    private final boolean taskPlan;
 
     public FocusUiState(State state, long remainingMillis, long countdownMillis,
                         long endsAtWallMillis, int currentCycle, int totalCycles,
                         boolean infiniteCycles, int cyclesCompleted, boolean blockModeArmed) {
+        this(state, remainingMillis, countdownMillis, endsAtWallMillis, currentCycle, totalCycles,
+                infiniteCycles, cyclesCompleted, blockModeArmed, false);
+    }
+
+    /**
+     * @param taskPlan the session runs a task's cycles (rediseño de Proyectos, D-P11): then
+     *                 {@code currentCycle} / {@code totalCycles} are the plan's block x of N
+     */
+    public FocusUiState(State state, long remainingMillis, long countdownMillis,
+                        long endsAtWallMillis, int currentCycle, int totalCycles,
+                        boolean infiniteCycles, int cyclesCompleted, boolean blockModeArmed,
+                        boolean taskPlan) {
+        this.taskPlan = taskPlan;
         this.state = state;
         this.remainingMillis = remainingMillis;
         this.countdownMillis = countdownMillis;
@@ -127,6 +141,14 @@ public final class FocusUiState {
         return blockModeArmed && state == State.RUNNING;
     }
 
+    /**
+     * The session runs a task's cycles (TaskCyclePlan): {@link #getCurrentCycle()} of
+     * {@link #getTotalCycles()} is then the block in progress of the plan's blocks.
+     */
+    public boolean isTaskPlan() {
+        return taskPlan;
+    }
+
     /** True when anything but the countdown text changed (controls need re-rendering). */
     public boolean controlsDifferFrom(FocusUiState other) {
         return other == null
@@ -134,6 +156,7 @@ public final class FocusUiState {
                 || other.blockModeArmed != blockModeArmed
                 || other.currentCycle != currentCycle
                 || other.totalCycles != totalCycles
-                || other.infiniteCycles != infiniteCycles;
+                || other.infiniteCycles != infiniteCycles
+                || other.taskPlan != taskPlan;
     }
 }

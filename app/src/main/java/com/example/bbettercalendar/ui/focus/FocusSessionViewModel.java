@@ -2,6 +2,7 @@ package com.example.bbettercalendar.ui.focus;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -14,6 +15,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
+import com.example.bbettercalendar.blocking.AccessibilityAccess;
 import com.example.bbettercalendar.blocking.BlockingSettings;
 import com.example.bbettercalendar.blocking.FocusBlockState;
 import com.example.bbettercalendar.configuration.Configuration;
@@ -71,6 +73,20 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private static final String KEY_CYCLES = "bb_focus_cycles_completed";
     private static final String KEY_BLOCK_ARMED = "bb_focus_block_mode_armed";
     private static final String KEY_FOCUS_PAUSES = "bb_focus_pause_count";
+    // Rediseño de Proyectos (u4): bloques del plan de una tarea y la tarea ligada (FocusTarget).
+    private static final String KEY_PLAN_BLOCKS = "bb_focus_plan_blocks";
+    private static final String KEY_PLAN_INDEX = "bb_focus_plan_index";
+    private static final String KEY_TARGET = "bb_focus_target";
+    private static final String TARGET_ENTRY = "entryId";
+    private static final String TARGET_TITLE = "title";
+    private static final String TARGET_GOAL = "goal";
+    private static final String TARGET_ATTRIBUTED = "attributed";
+    private static final String TARGET_BLOCK = "blockOnFocus";
+    private static final String TARGET_PROJECT = "projectId";
+    private static final String TARGET_PROJECT_NAME = "projectName";
+    private static final String TARGET_PROJECT_ICON = "projectIconKey";
+    private static final String TARGET_PROJECT_COLOR = "projectColorIndex";
+    private static final long MINUTE_MILLIS = 60_000L;
 
     private final SavedStateHandle savedState;
     private final ConfigurationManager configurationManager;
@@ -88,8 +104,16 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private final MutableLiveData<SingleEvent<Long>> focusCompleted = new MutableLiveData<>();
     private final MutableLiveData<SingleEvent<Integer>> cycleCompleted = new MutableLiveData<>();
     private final MutableLiveData<SingleEvent<Boolean>> sessionFailed = new MutableLiveData<>();
+    // Rediseño de Proyectos (D-P12, decisión d3): una tarea con «Bloqueo al enfocar» empezó sin el
+    // permiso de accesibilidad; la pantalla Focus enseña una vez la explicación existente.
+    private final MutableLiveData<SingleEvent<Boolean>> blockUnavailable = new MutableLiveData<>();
 
-    private boolean blockModeArmed;
+    // Rediseño de Proyectos (§3.5, D-P12): arranca las sesiones de tarea y es el dueño del 🚫 (el que
+    // armó una tarea vuelve a como estaba al acabar su sesión). Java puro, con tests JVM.
+    private final TaskFocusStarter starter;
+    // Arranque diferido de «Focus this» de Home mientras se leen los minutos de la tarea: cualquier
+    // otro arranque o cancelación lo invalida.
+    private int startToken;
     private final BackgroundGrace grace;
     private final FocusBackgroundObserver backgroundObserver;
     // u13: el servicio en primer plano sigue a la SESIÓN (≠ STOPPED), no a la pantalla visible.
@@ -118,6 +142,18 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         this.appContext = appContext;
         this.machine = new FocusTimerStateMachine(
                 SystemClock::elapsedRealtime, this::currentSettings, this);
+        this.starter = new TaskFocusStarter(machine, this::currentSettings,
+                new TaskFocusStarter.BlockAccess() {
+                    @Override
+                    public boolean isAvailable() {
+                        return AccessibilityAccess.isEnabled(appContext);
+                    }
+
+                    @Override
+                    public void onUnavailable() {
+                        blockUnavailable.setValue(new SingleEvent<>(Boolean.TRUE));
+                    }
+                });
         this.grace = new BackgroundGrace(new BackgroundGrace.Scheduler() {
             @Override
             public void postDelayed(@NonNull Runnable task, long delayMillis) {
@@ -197,6 +233,34 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         focusAttributionRepository.clearAutoCompletedTaskTitle();
     }
 
+    /**
+     * One-shot (rediseño de Proyectos, D-P12): a task with «Bloqueo al enfocar» started while the
+     * accessibility service is off, so the session runs unarmed; Focus shows the explanation once.
+     */
+    public LiveData<SingleEvent<Boolean>> getBlockUnavailableEvents() {
+        return blockUnavailable;
+    }
+
+    /**
+     * Rediseño de Proyectos (§3.5): enfoca una tarea. Sólo con la sesión parada: liga
+     * {@link FocusTarget} a la tarea y arranca sus ciclos (D-P11, {@link TaskCyclePlan} con la
+     * configuración del temporizador) desde lo que ya lleva; sin meta, o con la meta ya alcanzada, una
+     * sesión de la duración configurada ligada a ella. Con «Bloqueo al enfocar» arma el bloqueo si el
+     * servicio de accesibilidad está activo; si no, empieza sin él y emite
+     * {@link #getBlockUnavailableEvents()}.
+     *
+     * @return false, sin cambiar nada, si ya hay una sesión en marcha
+     */
+    public boolean startTaskFocus(@NonNull TaskFocusRequest request) {
+        // TaskFocusStarter: con la sesión en marcha devuelve false sin tocar nada.
+        if (!starter.startTaskFocus(request)) {
+            return false;
+        }
+        startToken++; // invalida un «Focus this» de Home aún leyendo minutos
+        onTransition();
+        return true;
+    }
+
     /** Play/pause button. @return true if running afterwards (play the start sound), else paused. */
     public boolean toggle() {
         boolean running = machine.toggle();
@@ -212,19 +276,42 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     }
 
     /**
-     * "Focus this": starts a concentration bound to {@link FocusTarget} if idle — its length is
-     * the target's minutes when it has one, else the configured length. A running session is not
-     * touched (it is attributed to the target when it completes).
+     * "Focus this": starts a session bound to {@link FocusTarget} if idle. A target with a goal runs
+     * its cycles from the minutes it already has (rediseño de Proyectos, D-P11): when FocusTarget
+     * does not carry them (the old {@code set(id, title, targetMinutes)}), they are read off the main
+     * thread and the session starts as soon as they arrive (tens of ms; returns true meanwhile).
+     * Without a goal, a concentration of the configured length. A running session is not touched
+     * (it is attributed to the target when it completes).
      */
     public boolean startBoundFocusIfIdle() {
         if (machine.getState() != State.STOPPED) {
             return false;
         }
-        int targetMinutes = FocusTarget.getTargetMinutes();
-        long duration = targetMinutes > 0
-                ? FormatHelper.minutesToMillis(targetMinutes)
-                : currentSettings().focusMillis;
-        boolean started = machine.startFocus(duration);
+        int entryId = FocusTarget.getEntryId();
+        int goal = FocusTarget.getTargetMinutes();
+        boolean blockOnFocus = FocusTarget.isBlockOnFocus();
+        if (entryId == 0 || goal <= 0 || FocusTarget.isAttributedMinutesKnown()) {
+            return beginTaskSession(goal, FocusTarget.getAttributedMinutes(), blockOnFocus);
+        }
+        int token = ++startToken;
+        repository.loadAttributedMinutes(entryId, attributed -> handler.post(() -> {
+            // Nada cambió entretanto: ni otro arranque, ni cancelar, ni otra tarea ligada.
+            if (token != startToken || machine.getState() != State.STOPPED
+                    || FocusTarget.getEntryId() != entryId) {
+                return;
+            }
+            beginTaskSession(goal, attributed, blockOnFocus);
+        }));
+        return true;
+    }
+
+    /**
+     * Arranca la sesión de la tarea ya ligada en {@link FocusTarget}: sus ciclos si le falta meta, si
+     * no una concentración de la duración configurada; arma el bloqueo si la tarea lo pide.
+     */
+    private boolean beginTaskSession(int goalMinutes, int attributedMinutes, boolean blockOnFocus) {
+        startToken++;
+        boolean started = starter.begin(goalMinutes, attributedMinutes, blockOnFocus);
         onTransition();
         return started;
     }
@@ -242,16 +329,25 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     }
 
     /**
-     * Stop button: drops the whole session (cycles reset) and unbinds {@link FocusTarget}. Not a
-     * failure. @return false if there was nothing to cancel.
+     * Stop button ("end early"): drops the whole session (cycles reset) and unbinds
+     * {@link FocusTarget}. Not a failure. For a session bound to a task, the whole minutes focused
+     * in the current block are kept for that task (rediseño de Proyectos §3.5, decisión d4) and,
+     * if the task armed the block mode, the 🚫 goes back to how it was. @return false if there was
+     * nothing to cancel.
      */
     public boolean cancelSession() {
+        int entryId = FocusTarget.getEntryId();
+        long focusedMillis = machine.getCurrentFocusElapsedMillis();
+        int pauses = machine.getFocusPauseCount();
+        startToken++;
         if (!machine.cancel()) {
             return false;
         }
+        repository.recordFocusEndedEarly(entryId, (int) (focusedMillis / MINUTE_MILLIS), pauses);
         // Desvincular: dejar el banner "Focusing: X" colgado sin sesión viva confunde sobre si la
         // siguiente cuenta atrás se atribuiría sola a esa tarea.
         FocusTarget.clear();
+        starter.onTaskSessionEnded();
         onTransition();
         return true;
     }
@@ -265,12 +361,12 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
 
     /** Arms/disarms the 🚫 total-block mode (the caller checks the accessibility grant). */
     public void setBlockModeArmed(boolean armed) {
-        blockModeArmed = armed;
+        starter.setBlockModeArmedByUser(armed);
         onTransition();
     }
 
     public boolean isBlockModeArmed() {
-        return blockModeArmed;
+        return starter.isBlockModeArmed();
     }
 
     /** Old fail-alert close -> resetTimer(): show the configured length again when idle. */
@@ -293,7 +389,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
      * service clears it on (re)connect, so a running armed session must re-assert it.
      */
     public void syncBlockState() {
-        FocusBlockState.setActive(appContext, blockModeArmed && machine.getState() == State.RUNNING);
+        FocusBlockState.setActive(appContext,
+                starter.isBlockModeArmed() && machine.getState() == State.RUNNING);
     }
 
     // ===================================================== background grace (FocusBackgroundObserver)
@@ -305,7 +402,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
      */
     @Override
     public void onAppBackgrounded() {
-        if (grace.onBackgrounded(machine.shouldArmBackgroundGrace(blockModeArmed))) {
+        if (grace.onBackgrounded(machine.shouldArmBackgroundGrace(starter.isBlockModeArmed()))) {
             Log.i(TAG, "App enters background: grace period armed");
         }
     }
@@ -354,6 +451,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
 
     @Override
     public void onAllCyclesCompleted(int cycles) {
+        starter.onTaskSessionEnded(); // lo aplica el onTransition() que sigue a advance()
         cycleCompleted.setValue(new SingleEvent<>(cycles));
     }
 
@@ -461,8 +559,29 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     }
 
     private FocusPhaseAlarm.Plan currentPhasePlan() {
+        Settings settings = currentSettings();
+        if (machine.hasPlan()) {
+            // Plan de una tarea: tras un bloque hay descanso sólo si queda otro bloque, y tras un
+            // descanso siempre empieza otro (el siguiente, con su duración). Unos ajustes de un
+            // ciclo que lo describen, para que FocusPhaseAlarm.plan siga siendo quien decide el aviso.
+            boolean next = machine.planHasNextBlock();
+            long nextBlock = machine.getState().isRest()
+                    ? planBlockAfterRest() : settings.focusMillis;
+            Settings planSettings = new Settings(nextBlock, settings.restMillis,
+                    settings.restEnabled && next, 1, machine.getState().isRest() || next,
+                    settings.autoCycle);
+            return FocusPhaseAlarm.plan(machine.getState(), machine.getRemainingMillis(),
+                    System.currentTimeMillis(), planSettings, 0);
+        }
         return FocusPhaseAlarm.plan(machine.getState(), machine.getRemainingMillis(),
-                System.currentTimeMillis(), currentSettings(), machine.getCyclesCompleted());
+                System.currentTimeMillis(), settings, machine.getCyclesCompleted());
+    }
+
+    /** Durante un descanso del plan: la duración del bloque que lo sigue. */
+    private long planBlockAfterRest() {
+        long[] blocks = machine.snapshot().planBlocksMillis;
+        int next = Math.min(machine.getPlanBlockIndex() + 1, blocks.length - 1);
+        return blocks[next];
     }
 
     /**
@@ -503,16 +622,19 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         long remaining = machine.getRemainingMillis();
         long endsAtWall = machine.getState().isRunning()
                 ? System.currentTimeMillis() + remaining : 0L;
+        boolean plan = machine.hasPlan();
         uiState.setValue(new FocusUiState(
                 machine.getState(),
                 remaining,
                 machine.getCountdownMillis(),
                 endsAtWall,
-                machine.getCurrentCycle(),
-                settings.cycles,
-                settings.infiniteCycles,
+                // Plan de una tarea: «x de N» son sus bloques, no los ciclos configurados.
+                plan ? machine.getPlanBlockIndex() + 1 : machine.getCurrentCycle(),
+                plan ? machine.getPlanBlockCount() : settings.cycles,
+                !plan && settings.infiniteCycles,
                 machine.getCyclesCompleted(),
-                blockModeArmed));
+                starter.isBlockModeArmed(),
+                plan));
     }
 
     private void saveState() {
@@ -524,14 +646,50 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         savedState.set(KEY_SESSION, s.sessionMillis);
         savedState.set(KEY_CYCLES, s.cyclesCompleted);
         savedState.set(KEY_FOCUS_PAUSES, s.focusPauseCount);
-        savedState.set(KEY_BLOCK_ARMED, blockModeArmed);
+        savedState.set(KEY_BLOCK_ARMED, starter.isBlockModeArmed());
+        savedState.set(KEY_PLAN_BLOCKS, s.planBlocksMillis);
+        savedState.set(KEY_PLAN_INDEX, s.planBlockIndex);
+        boolean live = s.state != State.STOPPED || s.planBlocksMillis != null;
+        savedState.set(KEY_TARGET, live ? targetBundle(FocusTarget.toRequest()) : null);
+    }
+
+    /** La tarea ligada a una sesión viva, para devolverla a FocusTarget tras la muerte del proceso. */
+    private static Bundle targetBundle(TaskFocusRequest r) {
+        if (r == null) {
+            return null;
+        }
+        Bundle b = new Bundle();
+        b.putInt(TARGET_ENTRY, r.getEntryId());
+        b.putString(TARGET_TITLE, r.getTitle());
+        b.putInt(TARGET_GOAL, r.getGoalMinutes());
+        b.putInt(TARGET_ATTRIBUTED, r.getAttributedMinutes());
+        b.putBoolean(TARGET_BLOCK, r.isBlockOnFocus());
+        b.putInt(TARGET_PROJECT, r.getProjectId());
+        b.putString(TARGET_PROJECT_NAME, r.getProjectName());
+        b.putString(TARGET_PROJECT_ICON, r.getProjectIconKey());
+        b.putInt(TARGET_PROJECT_COLOR, r.getProjectColorIndex());
+        return b;
+    }
+
+    /** Tras la muerte del proceso FocusTarget está vacío: se le devuelve la tarea de la sesión. */
+    private void restoreTarget() {
+        Bundle b = savedState.get(KEY_TARGET);
+        if (b == null || FocusTarget.isSet() || b.getInt(TARGET_ENTRY) == 0) {
+            return;
+        }
+        FocusTarget.set(new TaskFocusRequest(b.getInt(TARGET_ENTRY), b.getString(TARGET_TITLE),
+                b.getInt(TARGET_GOAL), b.getInt(TARGET_ATTRIBUTED), b.getBoolean(TARGET_BLOCK),
+                b.getInt(TARGET_PROJECT), b.getString(TARGET_PROJECT_NAME),
+                b.getString(TARGET_PROJECT_ICON), b.getInt(TARGET_PROJECT_COLOR)));
+        FocusTarget.consumePendingAutoStart(); // la sesión ya existe: nada que arrancar en Home
     }
 
     private void restoreFromSavedState() {
         String stateName = savedState.get(KEY_STATE);
         Boolean armed = savedState.get(KEY_BLOCK_ARMED);
         // u19: sin estado guardado (sesion nueva) arranca como diga "Focus shield" de Screen time.
-        blockModeArmed = armed != null ? armed : BlockingSettings.isFocusShieldEnabled(appContext);
+        starter.restoreBlockModeArmed(
+                armed != null ? armed : BlockingSettings.isFocusShieldEnabled(appContext));
         if (stateName != null) {
             try {
                 machine.restore(new Snapshot(
@@ -541,7 +699,12 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
                         longOr(KEY_COUNTDOWN, machine.getCountdownMillis()),
                         longOr(KEY_SESSION, machine.getSessionMillis()),
                         intOr(KEY_CYCLES, 0),
-                        intOr(KEY_FOCUS_PAUSES, 0)));
+                        intOr(KEY_FOCUS_PAUSES, 0),
+                        savedState.<long[]>get(KEY_PLAN_BLOCKS),
+                        intOr(KEY_PLAN_INDEX, 0)));
+                // Antes del advance() de abajo: un bloque que acabó con el proceso muerto se
+                // atribuye a su tarea.
+                restoreTarget();
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "Unknown saved timer state " + stateName, e);
             }
@@ -590,7 +753,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         // this (and nobody listens any more), so the grace is armed here with the same rule; one
         // that was already pending is simply left to fire.
         if (!grace.isArmed()) {
-            grace.onBackgrounded(machine.shouldArmBackgroundGrace(blockModeArmed));
+            grace.onBackgrounded(machine.shouldArmBackgroundGrace(starter.isBlockModeArmed()));
         }
         handler.removeCallbacks(tick);
         if (foregroundServiceOn) {

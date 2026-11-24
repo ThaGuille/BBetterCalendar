@@ -3,6 +3,7 @@ package com.example.bbettercalendar.ui.projects;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -13,6 +14,7 @@ import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
 import com.example.bbettercalendar.ui.home.FocusTarget;
+import com.example.bbettercalendar.ui.projects.quickadd.QuickAddDialog;
 
 /**
  * One method per destination reachable from the Projects screen. {@link #startFocus} is real; the other
@@ -29,7 +31,10 @@ public class ProjectsNavigator {
 
     /** Quick add (A2) with the section pre-selected. */
     public void openQuickAdd(int projectId, int sectionId) {
-        // TODO(rediseno-proyectos): quickadd
+        // The dialog lives in the NavHostFragment's child manager, the one ProjectsFragment listens on.
+        FragmentManager manager = fragment.getParentFragmentManager();
+        if (manager.isStateSaved() || manager.findFragmentByTag(QuickAddDialog.TAG) != null) return;
+        QuickAddDialog.newInstance(projectId, sectionId).show(manager, QuickAddDialog.TAG);
     }
 
     /** Full editor (D1) in edit mode. */

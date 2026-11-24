@@ -76,6 +76,18 @@
     <dimen name="projects_picker_input_width">120dp</dimen>
 
     <!-- rediseno-proyectos: quickadd -->
+    <dimen name="projects_quick_padding">16dp</dimen>
+    <dimen name="projects_quick_gap">8dp</dimen>
+    <dimen name="projects_quick_touch">48dp</dimen>
+    <dimen name="projects_quick_icon">24dp</dimen>
+    <dimen name="projects_quick_dot">4dp</dimen>
+    <dimen name="projects_quick_context_icon">20dp</dimen>
+    <dimen name="projects_quick_chip_height">32dp</dimen>
+    <dimen name="projects_quick_separator_height">24dp</dimen>
+    <dimen name="projects_quick_name_max_width">160dp</dimen>
+    <!-- Height of the picker panel until the real keyboard has been measured. -->
+    <dimen name="projects_quick_keyboard_fallback">280dp</dimen>
+
 
     <!-- rediseno-proyectos: editor -->
     <dimen name="projects_editor_pad">16dp</dimen>

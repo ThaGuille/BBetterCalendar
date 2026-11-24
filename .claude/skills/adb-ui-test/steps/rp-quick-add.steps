@@ -1,0 +1,116 @@
+# rediseno-proyectos u8: the quick add "A2" on the seeded app. The box sits on the keyboard; each icon shows its
+# picker in the keyboard's place; Send saves into the chosen section and the main screen says "Added to ...".
+# Repeat stays inert and hidden (user decision): this walk never touches it.
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-quick-add.steps --save rp-quick-add
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+ASSERT id=projectsSelector
+TAP text=Tesis final,
+WAIT 1200
+ASSERT id=projectsFab
+# FAB: the box opens with the keyboard up and the title field above it.
+TAP id=projectsFab
+WAIT 2000
+ASSERT id=quickAddTitle
+ASSERT id=quickAddSend
+ASSERT id=quickAddDate
+ASSERT id=quickAddDuration
+ASSERT id=quickAddPriority
+ASSERT id=quickAddTag
+ASSERT id=quickAddSubtasks
+ASSERT id=quickAddMore
+ASSERT id=quickAddExpand
+TYPE Prueba del crear rapido
+WAIT 500
+ASSERT id=quickAddSend
+SHOT rp-quick-add-keyboard
+# Date: Tomorrow at 17:00 (the picker takes the keyboard's place).
+TAP id=quickAddDate
+WAIT 1200
+ASSERT id=pickerDateTomorrow
+SHOT rp-quick-add-date-picker
+TAP id=pickerDateTomorrow
+WAIT 500
+TAP id=pickerTime1700
+WAIT 500
+ASSERT id=quickAddChipDate expect~=Tomorrow|Mañana
+# Duration: 50 min with pomodoro on.
+TAP id=quickAddDuration
+WAIT 800
+TAP id=pickerDur50
+WAIT 500
+TAP id=pickerPomodoroSwitch
+WAIT 500
+ASSERT id=quickAddChipDuration expect~=50
+# Priority: High.
+TAP id=quickAddPriority
+WAIT 800
+TAP id=pickerPriHigh
+WAIT 500
+ASSERT id=quickAddChipPriority expect~=High|Alta
+# Tag: the first tag.
+TAP id=quickAddTag
+WAIT 800
+TAP id=pickerTagItem0
+WAIT 500
+ASSERT id=quickAddChipTag
+# Subtasks: add one with the keyboard action.
+TAP id=quickAddSubtasks
+WAIT 800
+TAP id=pickerSubtaskInput
+WAIT 500
+TYPE Primer paso
+KEY KEYCODE_ENTER
+WAIT 500
+ASSERT id=pickerSubtaskList
+# More: a note, then Done brings the keyboard back.
+TAP id=quickAddMore
+WAIT 800
+ASSERT id=pickerNoteInput
+TAP id=pickerNoteInput
+WAIT 500
+TYPE Una nota
+WAIT 500
+SHOT rp-quick-add-more
+TAP id=pickerHeaderDone
+WAIT 1200
+ASSERT id=quickAddTitle
+# While a picker has the keyboard the chips step aside; with Done they are all back.
+ASSERT id=quickAddChipSubtasks expect~=1
+ASSERT id=quickAddChipNote expect~=note|nota
+SHOT rp-quick-add-chips
+# Send: the box closes, the screen says Added to <section> and the row is in the list.
+TAP id=quickAddSend
+WAIT 2000
+ASSERT id=snackbar_text expect~=Added to|Añadida a
+ASSERT id=projectsList
+SHOT rp-quick-add-saved
+# The new task is in Redacción, ordered by date (tomorrow), so it sits below the fold: scroll to it.
+SWIPE 540 1600 540 700 1500
+WAIT 800
+SHOT rp-quick-add-row
+TAP text=Prueba del crear rapido
+WAIT 800
+SWIPE 540 600 540 1700 300
+WAIT 800
+# Opening the box from a section plus button, then changing the section from the context line.
+TAP id=projectsSectionAdd
+WAIT 2000
+ASSERT id=quickAddSectionName expect~=Redacci
+TAP id=quickAddSection
+WAIT 1200
+ASSERT id=pickerSectionItem1
+TAP id=pickerSectionItem1
+WAIT 600
+ASSERT id=quickAddSectionName expect~=Defensa
+SHOT rp-quick-add-section
+TAP id=pickerHeaderDone
+WAIT 1000
+# Tapping outside (on the scrim) closes without saving.
+SWIPE 540 200 540 200 100
+WAIT 1200
+ASSERT id=projectsFab

@@ -200,6 +200,25 @@
     <string name="projects_picker_note_hint">Escribe una nota</string>
 
     <!-- rediseno-proyectos: quickadd -->
+    <string name="projects_quick_title_hint">Nueva tarea</string>
+    <string name="projects_quick_send">Añadir tarea</string>
+    <string name="projects_quick_section_desc">Cambiar de sección: %1$s</string>
+    <string name="projects_quick_context_separator">·</string>
+    <string name="projects_quick_icon_date">Fecha</string>
+    <string name="projects_quick_icon_duration">Duración</string>
+    <string name="projects_quick_icon_priority">Prioridad</string>
+    <string name="projects_quick_icon_tag">Etiqueta</string>
+    <string name="projects_quick_icon_subtasks">Subtareas</string>
+    <string name="projects_quick_icon_more">Más</string>
+    <string name="projects_quick_icon_expand">Abrir el editor completo</string>
+    <string name="projects_quick_chip_today">Hoy</string>
+    <string name="projects_quick_chip_tomorrow">Mañana</string>
+    <string name="projects_quick_chip_note">Con nota</string>
+    <plurals name="projects_quick_chip_subtasks">
+        <item quantity="one">%d subtarea</item>
+        <item quantity="other">%d subtareas</item>
+    </plurals>
+
 
     <!-- rediseno-proyectos: editor -->
     <string name="projects_editor_title_new">Nueva tarea</string>

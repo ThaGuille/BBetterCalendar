@@ -1,0 +1,24 @@
+# rediseno-proyectos u3: the Projects redesign widgets in the debug gallery (TaskCheckView, FocusTimerButton,
+# ProjectBubbleView, lit cards in the four project colours). Debug build only.
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-widgets.steps --save rp-widgets
+GRANT android.permission.POST_NOTIFICATIONS
+START .debug.DebugProjectsGalleryActivity
+WAIT 2500
+ASSERT id=galleryTaskCheck
+ASSERT id=galleryTaskCheckSmall
+ASSERT id=galleryTaskCheckState expect~=open
+ASSERT id=galleryTimerIdle
+ASSERT id=galleryTimerRunning
+ASSERT id=galleryBubble
+ASSERT id=galleryBubbleLate
+ASSERT id=galleryBubbleNew
+SHOT rp-widgets-initial
+TAP id=galleryTaskCheck
+WAIT 800
+ASSERT id=galleryTaskCheckState expect~=checked
+SHOT rp-widgets-checked
+SWIPE 540 1700 540 500
+WAIT 800
+ASSERT id=galleryLit1
+SHOT rp-widgets-lit
+KEY KEYCODE_BACK

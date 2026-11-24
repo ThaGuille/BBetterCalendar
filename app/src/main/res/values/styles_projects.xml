@@ -12,4 +12,21 @@
         <item name="elevation">@dimen/elevation_fab</item>
         <item name="shapeAppearance">@style/ShapeAppearance.BBetter.Pill</item>
     </style>
+
+    <!-- rediseno-proyectos: widgets -->
+
+    <!-- rediseno-proyectos: main -->
+
+    <!-- rediseno-proyectos: pickers -->
+
+    <!-- rediseno-proyectos: quickadd -->
+
+    <!-- rediseno-proyectos: editor -->
+
+    <!-- rediseno-proyectos: form -->
+
+    <!-- rediseno-proyectos: agenda -->
+
+    <!-- rediseno-proyectos: focus -->
+
 </resources>

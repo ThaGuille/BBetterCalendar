@@ -73,4 +73,36 @@
     <string name="project_detail_list_title">Tasks</string>
     <string name="project_detail_quick_hint">Add task…</string>
     <string name="project_detail_quick_add_desc">Add task (long press for more options)</string>
+
+    <!-- rediseno-proyectos: widgets -->
+    <string name="widget_task_check_complete">Complete: %1$s</string>
+    <string name="widget_task_check_uncheck">Uncheck: %1$s</string>
+    <string name="widget_task_check_complete_generic">Complete task</string>
+    <string name="widget_task_check_uncheck_generic">Uncheck task</string>
+    <string name="widget_focus_timer_focus">Focus</string>
+    <string name="widget_focus_timer_open">Open Focus</string>
+    <plurals name="widget_bubble_desc">
+        <item quantity="one">%1$s, %2$d task due</item>
+        <item quantity="other">%1$s, %2$d tasks due</item>
+    </plurals>
+    <plurals name="widget_bubble_desc_late">
+        <item quantity="one">%1$s, %2$d task due, some late</item>
+        <item quantity="other">%1$s, %2$d tasks due, some late</item>
+    </plurals>
+    <string name="widget_bubble_new">New project</string>
+
+    <!-- rediseno-proyectos: main -->
+
+    <!-- rediseno-proyectos: pickers -->
+
+    <!-- rediseno-proyectos: quickadd -->
+
+    <!-- rediseno-proyectos: editor -->
+
+    <!-- rediseno-proyectos: form -->
+
+    <!-- rediseno-proyectos: agenda -->
+
+    <!-- rediseno-proyectos: focus -->
+
 </resources>

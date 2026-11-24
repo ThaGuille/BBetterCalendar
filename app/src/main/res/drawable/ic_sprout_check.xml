@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos u3: the app sprout (same stem and two leaves as ic_sprout_48, without the dots) in
+     bb_on_primary, for the checked TaskCheckView: a sage fill would hide the sage leaves of ic_sprout_48. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M24,40L24,22"
+        android:strokeColor="@color/bb_on_primary"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.4" />
+    <path
+        android:fillColor="@color/bb_on_primary"
+        android:pathData="M24,27C24,19 18.5,14.5 9,14.5C9,23 14.5,27 24,27Z" />
+    <path
+        android:fillColor="@color/bb_on_primary"
+        android:pathData="M24,22.5C24,14.5 29.5,9.5 39,9.5C39,18.5 33.5,22.5 24,22.5Z" />
+</vector>

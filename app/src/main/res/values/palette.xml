@@ -27,6 +27,7 @@
     <color name="sage_300">#FF7FB69A</color>   <!-- primary-container: sage fills (play, FAB, checks, bars) -->
     <color name="sage_200">#FF9BD3B5</color>   <!-- primary: accent text and icons; 3rd project accent -->
     <color name="seafoam_200">#FFABCEC7</color> <!-- secondary: 4th project accent -->
+    <color name="lilac_300">#FFB9A3E3</color>   <!-- 2nd project accent (D-P13: replaces honey; not amber, not red) -->
 
     <!-- Reward (use sparingly) -->
     <color name="honey_300">#FFFABC4A</color>  <!-- tertiary (Honey Amber): earned moments only -->

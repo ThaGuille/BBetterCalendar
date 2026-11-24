@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos u3: the one glow of the R2 summary card for the four project colours. Same radial
+     wash as bg_glow_sage; the colour comes from backgroundTint = ProjectAccents.colorResFor(...) (SRC_IN
+     keeps the alpha ramp). Lit card per project colour = bg_card_lit + this glow tinted. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:gradientRadius="@dimen/glow_radius"
+        android:startColor="@color/bb_glow_sage_start"
+        android:endColor="@color/bb_glow_sage_end"
+        android:type="radial" />
+</shape>

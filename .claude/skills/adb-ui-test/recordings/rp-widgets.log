@@ -1,0 +1,23 @@
+﻿# scenario: rp-widgets
+# recorded: 2026-11-24T19:34:31.623156+00:00  from run-steps rp-widgets
+1795548856609	GRANT android.permission.POST_NOTIFICATIONS
+1795548856793	START .debug.DebugProjectsGalleryActivity
+1795548857165	WAIT 2500
+1795548857165	ASSERT id=galleryTaskCheck
+1795548861206	ASSERT id=galleryTaskCheckSmall
+1795548861289	ASSERT id=galleryTaskCheckState expect~=open
+1795548861372	ASSERT id=galleryTimerIdle
+1795548861453	ASSERT id=galleryTimerRunning
+1795548861534	ASSERT id=galleryBubble
+1795548861615	ASSERT id=galleryBubbleLate
+1795548861698	ASSERT id=galleryBubbleNew
+1795548861784	SHOT rp-widgets-initial
+1795548862329	TAP id=galleryTaskCheck
+1795548864728	WAIT 800
+1795548864728	ASSERT id=galleryTaskCheckState expect~=checked
+1795548867089	SHOT rp-widgets-checked
+1795548867662	SWIPE 540 1700 540 500
+1795548868277	WAIT 800
+1795548868277	ASSERT id=galleryLit1
+1795548870831	SHOT rp-widgets-lit
+1795548871385	KEY KEYCODE_BACK

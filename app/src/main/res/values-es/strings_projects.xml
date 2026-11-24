@@ -64,4 +64,36 @@
     <string name="project_detail_list_title">Tareas</string>
     <string name="project_detail_quick_hint">Añadir tarea…</string>
     <string name="project_detail_quick_add_desc">Añadir tarea (pulsación larga para más opciones)</string>
+
+    <!-- rediseno-proyectos: widgets -->
+    <string name="widget_task_check_complete">Completar: %1$s</string>
+    <string name="widget_task_check_uncheck">Desmarcar: %1$s</string>
+    <string name="widget_task_check_complete_generic">Completar tarea</string>
+    <string name="widget_task_check_uncheck_generic">Desmarcar tarea</string>
+    <string name="widget_focus_timer_focus">Enfocar</string>
+    <string name="widget_focus_timer_open">Abrir Focus</string>
+    <plurals name="widget_bubble_desc">
+        <item quantity="one">%1$s, %2$d tarea para hoy</item>
+        <item quantity="other">%1$s, %2$d tareas para hoy</item>
+    </plurals>
+    <plurals name="widget_bubble_desc_late">
+        <item quantity="one">%1$s, %2$d tarea para hoy, alguna atrasada</item>
+        <item quantity="other">%1$s, %2$d tareas para hoy, alguna atrasada</item>
+    </plurals>
+    <string name="widget_bubble_new">Nuevo proyecto</string>
+
+    <!-- rediseno-proyectos: main -->
+
+    <!-- rediseno-proyectos: pickers -->
+
+    <!-- rediseno-proyectos: quickadd -->
+
+    <!-- rediseno-proyectos: editor -->
+
+    <!-- rediseno-proyectos: form -->
+
+    <!-- rediseno-proyectos: agenda -->
+
+    <!-- rediseno-proyectos: focus -->
+
 </resources>

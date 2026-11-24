@@ -13,6 +13,15 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.BBetter.NoActionBar" />
 
+        <!-- rediseno-proyectos u3: gallery of the Projects widgets (adb recording rp-widgets). Same rules as
+             above: exported only in the debug manifest, no intent filter.
+             adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugProjectsGalleryActivity -->
+        <activity
+            android:name="com.example.bbettercalendar.debug.DebugProjectsGalleryActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.BBetter.NoActionBar" />
+
         <!-- mejora-visual u4: gallery page of the Canvas chart kit (adb recording mv-u4-charts). Same rules as
              above: exported only in the debug manifest, no intent filter.
              adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugChartsGalleryActivity -->
@@ -30,5 +39,14 @@
             android:name="com.example.bbettercalendar.notifications.nudge.DailyNudgeReceiver"
             android:exported="true"
             tools:replace="android:exported" />
+
+        <!-- rediseno-proyectos u6: gallery of the task pickers (adb recording rp-pickers). Same rules as above:
+             exported only in the debug manifest, no intent filter.
+             adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugPickersGalleryActivity -->
+        <activity
+            android:name="com.example.bbettercalendar.debug.DebugPickersGalleryActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.BBetter.NoActionBar" />
     </application>
 </manifest>

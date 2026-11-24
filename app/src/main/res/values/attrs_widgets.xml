@@ -184,4 +184,17 @@
         </attr>
     </declare-styleable>
 
+    <!-- rediseno-proyectos u3 · TaskCheckView: checkSmall = the 14dp box of subtasks (default 17dp). -->
+    <declare-styleable name="TaskCheckView">
+        <attr name="checkSmall" format="boolean" />
+    </declare-styleable>
+
+    <!-- rediseno-proyectos u3 · FocusTimerButton: row = 34dp circle in a 48dp target, big = 42dp circle. -->
+    <declare-styleable name="FocusTimerButton">
+        <attr name="timerSize" format="enum">
+            <enum name="row" value="0" />
+            <enum name="big" value="1" />
+        </attr>
+    </declare-styleable>
+
 </resources>

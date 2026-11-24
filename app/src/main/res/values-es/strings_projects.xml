@@ -64,4 +64,78 @@
     <string name="project_detail_list_title">Tareas</string>
     <string name="project_detail_quick_hint">Añadir tarea…</string>
     <string name="project_detail_quick_add_desc">Añadir tarea (pulsación larga para más opciones)</string>
+
+    <!-- rediseno-proyectos: widgets -->
+    <string name="widget_task_check_complete">Completar: %1$s</string>
+    <string name="widget_task_check_uncheck">Desmarcar: %1$s</string>
+    <string name="widget_task_check_complete_generic">Completar tarea</string>
+    <string name="widget_task_check_uncheck_generic">Desmarcar tarea</string>
+    <string name="widget_focus_timer_focus">Enfocar</string>
+    <string name="widget_focus_timer_open">Abrir Focus</string>
+    <plurals name="widget_bubble_desc">
+        <item quantity="one">%1$s, %2$d tarea para hoy</item>
+        <item quantity="other">%1$s, %2$d tareas para hoy</item>
+    </plurals>
+    <plurals name="widget_bubble_desc_late">
+        <item quantity="one">%1$s, %2$d tarea para hoy, alguna atrasada</item>
+        <item quantity="other">%1$s, %2$d tareas para hoy, alguna atrasada</item>
+    </plurals>
+    <string name="widget_bubble_new">Nuevo proyecto</string>
+
+    <!-- rediseno-proyectos: main -->
+
+    <!-- rediseno-proyectos: pickers -->
+    <string name="projects_picker_header_done">Listo</string>
+    <string name="projects_picker_title_date">Fecha</string>
+    <string name="projects_picker_title_duration">Duración</string>
+    <string name="projects_picker_title_priority">Prioridad</string>
+    <string name="projects_picker_title_tag">Etiqueta</string>
+    <string name="projects_picker_title_subtasks">Subtareas</string>
+    <string name="projects_picker_title_more">Más</string>
+    <string name="projects_picker_title_section">Sección</string>
+    <string name="projects_picker_date_today">Hoy</string>
+    <string name="projects_picker_date_tomorrow">Mañana</string>
+    <string name="projects_picker_date_none">Sin fecha</string>
+    <string name="projects_picker_other">Otra</string>
+    <string name="projects_picker_time_label">Hora</string>
+    <string name="projects_picker_time_none">Sin hora</string>
+    <string name="projects_picker_date_dialog_title">Elige una fecha</string>
+    <string name="projects_picker_time_dialog_title">Elige una hora</string>
+    <string name="projects_picker_dur_free">Libre</string>
+    <string name="projects_picker_dur_minutes_hint">Minutos</string>
+    <string name="projects_picker_dur_minutes_desc">Duración en minutos</string>
+    <string name="projects_picker_dur_pomodoro">Pomodoro: al acabar, se completa</string>
+    <string name="projects_picker_dur_block">Bloqueo suave al enfocar</string>
+    <string name="projects_picker_pri_none">Ninguna</string>
+    <string name="projects_picker_pri_low">Baja</string>
+    <string name="projects_picker_pri_medium">Media</string>
+    <string name="projects_picker_pri_high">Alta</string>
+    <string name="projects_picker_tag_none">Ninguna</string>
+    <string name="projects_picker_tag_new">Nueva</string>
+    <string name="projects_picker_tag_hint">Mantén pulsada una etiqueta para editarla</string>
+    <string name="projects_picker_subtask_hint">Añadir subtarea</string>
+    <string name="projects_picker_subtask_remove">Quitar %1$s</string>
+    <string name="projects_picker_no">No</string>
+    <string name="projects_picker_rep_label">Repetir</string>
+    <string name="projects_picker_rep_daily">Cada día</string>
+    <string name="projects_picker_rep_weekly">Cada semana</string>
+    <string name="projects_picker_rep_monthly">Cada mes</string>
+    <string name="projects_picker_rep_note">Se repite hasta que termine el proyecto</string>
+    <string name="projects_picker_rem_label">Recordatorio</string>
+    <string name="projects_picker_rem_at_time">A la hora</string>
+    <string name="projects_picker_rem_15">15 min antes</string>
+    <string name="projects_picker_rem_60">1 h antes</string>
+    <string name="projects_picker_note_label">Nota</string>
+    <string name="projects_picker_note_hint">Escribe una nota</string>
+
+    <!-- rediseno-proyectos: quickadd -->
+
+    <!-- rediseno-proyectos: editor -->
+
+    <!-- rediseno-proyectos: form -->
+
+    <!-- rediseno-proyectos: agenda -->
+
+    <!-- rediseno-proyectos: focus -->
+
 </resources>

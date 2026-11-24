@@ -21,4 +21,45 @@
     <dimen name="project_quick_add_height">56dp</dimen>
     <dimen name="project_quick_add_button">44dp</dimen>
     <dimen name="project_cell_gap">12dp</dimen>
+
+    <!-- rediseno-proyectos: widgets -->
+    <dimen name="widget_task_check_touch">48dp</dimen>
+    <dimen name="widget_task_check_box">17dp</dimen>
+    <dimen name="widget_task_check_box_small">14dp</dimen>
+    <dimen name="widget_task_check_radius">4dp</dimen>
+    <dimen name="widget_task_check_stroke">1.5dp</dimen>
+    <dimen name="widget_focus_timer_touch">48dp</dimen>
+    <dimen name="widget_focus_timer_row">34dp</dimen>
+    <dimen name="widget_focus_timer_big">42dp</dimen>
+    <dimen name="widget_focus_timer_stroke_row">2.5dp</dimen>
+    <dimen name="widget_focus_timer_stroke_big">3dp</dimen>
+    <dimen name="widget_bubble_view">56dp</dimen>
+    <dimen name="widget_bubble_size">42dp</dimen>
+    <dimen name="widget_bubble_ring_stroke">3dp</dimen>
+    <dimen name="widget_bubble_halo">4dp</dimen>
+    <dimen name="widget_bubble_badge">16dp</dimen>
+    <dimen name="widget_bubble_badge_text">10sp</dimen>
+    <dimen name="widget_bubble_icon">20dp</dimen>
+
+    <!-- rediseno-proyectos: main -->
+
+    <!-- rediseno-proyectos: pickers -->
+    <dimen name="projects_picker_chip_height">48dp</dimen>
+    <dimen name="projects_picker_row_min">48dp</dimen>
+    <dimen name="projects_picker_dot">12dp</dimen>
+    <dimen name="projects_picker_icon">20dp</dimen>
+    <dimen name="projects_picker_gap">8dp</dimen>
+    <dimen name="projects_picker_padding">16dp</dimen>
+    <dimen name="projects_picker_input_width">120dp</dimen>
+
+    <!-- rediseno-proyectos: quickadd -->
+
+    <!-- rediseno-proyectos: editor -->
+
+    <!-- rediseno-proyectos: form -->
+
+    <!-- rediseno-proyectos: agenda -->
+
+    <!-- rediseno-proyectos: focus -->
+
 </resources>

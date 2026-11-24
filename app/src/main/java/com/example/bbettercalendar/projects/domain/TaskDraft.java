@@ -25,7 +25,12 @@ public class TaskDraft implements Serializable {
     static final int FLAG_MIN_15 = 2;
     /** Index of "1 h antes" in NotificationOffsets. */
     static final int FLAG_HOUR_1 = 4;
-    static final int FLAG_COUNT = 7;
+    /**
+     * "A la hora": slot just past the NotificationOffsets (they have no zero offset). Event reminder
+     * scheduling walks min(flags, offsets), so it ignores this slot; TaskStartScheduler reads it.
+     */
+    static final int FLAG_AT_TIME = 7;
+    static final int FLAG_COUNT = 8;
 
     public static final class Subtask implements Serializable {
         private static final long serialVersionUID = 1L;
@@ -157,11 +162,12 @@ public class TaskDraft implements Serializable {
     }
 
     /**
-     * The boolean[7] of NotificationOffsets: MIN_15 at index 2, HOUR_1 at index 4. AT_TIME sets no
-     * flag (user decision d1: the task-start notification serves it).
+     * The boolean[8]: the 7 NotificationOffsets (MIN_15 at index 2, HOUR_1 at index 4) plus AT_TIME at
+     * index 7 (user decision d1: the task-start notification serves it).
      */
     public boolean[] toNotificationFlags() {
         boolean[] flags = new boolean[FLAG_COUNT];
+        if (reminder == Reminder.AT_TIME) flags[FLAG_AT_TIME] = true;
         if (reminder == Reminder.MIN_15) flags[FLAG_MIN_15] = true;
         if (reminder == Reminder.HOUR_1) flags[FLAG_HOUR_1] = true;
         return flags;
@@ -170,9 +176,15 @@ public class TaskDraft implements Serializable {
     /** Inverse of {@link #toNotificationFlags()}: the smallest offset set wins; none gives NONE. */
     public static Reminder fromNotificationFlags(boolean[] flags) {
         if (flags != null) {
+            if (hasAtTimeFlag(flags)) return Reminder.AT_TIME;
             if (flags.length > FLAG_MIN_15 && flags[FLAG_MIN_15]) return Reminder.MIN_15;
             if (flags.length > FLAG_HOUR_1 && flags[FLAG_HOUR_1]) return Reminder.HOUR_1;
         }
         return Reminder.NONE;
+    }
+
+    /** True when the stored flags carry the "A la hora" reminder. */
+    public static boolean hasAtTimeFlag(boolean[] flags) {
+        return flags != null && flags.length > FLAG_AT_TIME && flags[FLAG_AT_TIME];
     }
 }

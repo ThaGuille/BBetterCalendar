@@ -6,6 +6,7 @@ import android.content.Context;
 import com.example.bbettercalendar.calendarEntries.CalendarEntry;
 import com.example.bbettercalendar.notifications.event.AlarmReminderCore;
 import com.example.bbettercalendar.projects.TaskStartAlarm;
+import com.example.bbettercalendar.projects.domain.TaskDraft;
 
 import java.util.TimeZone;
 
@@ -58,12 +59,11 @@ public class TaskStartScheduler implements TaskStartAlarm {
     public void schedule(CalendarEntry entry) {
         if (entry == null) return;
         long start = entry.getStartMillis();
-        // El recordatorio "A la hora" no se guarda aparte de "ninguno" (los flags no tienen offset 0):
-        // por ahora solo cuentan las tareas con duracion o pomodoro.
+        // "A la hora" se guarda en el slot extra de los flags (TaskDraft.FLAG_AT_TIME).
         boolean eligible = TaskStartPolicy.isEligible(
                 TaskStartPolicy.hasTimeOfDay(start, TimeZone.getDefault()), entry.getDuration(),
                 entry.getTargetMinutes(), entry.isDone(), entry.isTemplate(), entry.isDismissed(),
-                true, false);
+                true, TaskDraft.hasAtTimeFlag(entry.getNotifications()));
         if (!eligible) return;
         core.schedule(entry.getId(), ENABLED, NO_OFFSET, TaskStartPolicy.triggerMillis(start), EXTRAS);
     }

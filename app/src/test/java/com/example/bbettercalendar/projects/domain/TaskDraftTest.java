@@ -217,22 +217,36 @@ public class TaskDraftTest {
     public void notificationFlags_marksOnlyTheOffsetOfTheReminder() {
         TaskDraft d = draft();
         d.setReminder(Reminder.MIN_15);
-        assertArrayEquals(new boolean[]{false, false, true, false, false, false, false}, d.toNotificationFlags());
+        assertArrayEquals(new boolean[]{false, false, true, false, false, false, false, false}, d.toNotificationFlags());
         d.setReminder(Reminder.HOUR_1);
-        assertArrayEquals(new boolean[]{false, false, false, false, true, false, false}, d.toNotificationFlags());
+        assertArrayEquals(new boolean[]{false, false, false, false, true, false, false, false}, d.toNotificationFlags());
     }
 
     @Test
-    public void notificationFlags_atTimeAndNoneSetNoFlag() {
+    public void notificationFlags_atTimeSetsOnlyTheExtraSlotAndNoneSetsNothing() {
         TaskDraft d = draft();
-        assertArrayEquals(new boolean[7], d.toNotificationFlags());
+        assertArrayEquals(new boolean[8], d.toNotificationFlags());
+        assertFalse(TaskDraft.hasAtTimeFlag(d.toNotificationFlags()));
         d.setReminder(Reminder.AT_TIME);
-        assertArrayEquals(new boolean[7], d.toNotificationFlags());
+        assertArrayEquals(new boolean[]{false, false, false, false, false, false, false, true},
+                d.toNotificationFlags());
+        assertTrue(TaskDraft.hasAtTimeFlag(d.toNotificationFlags()));
+    }
+
+    @Test
+    public void notificationFlags_otherRemindersAndShortArraysAreNotAtTime() {
+        for (Reminder r : new Reminder[]{Reminder.MIN_15, Reminder.HOUR_1}) {
+            TaskDraft d = draft();
+            d.setReminder(r);
+            assertFalse(TaskDraft.hasAtTimeFlag(d.toNotificationFlags()));
+        }
+        assertFalse(TaskDraft.hasAtTimeFlag(null));
+        assertFalse(TaskDraft.hasAtTimeFlag(new boolean[7]));
     }
 
     @Test
     public void notificationFlags_roundTripsMin15Hour1AndNone() {
-        for (Reminder r : new Reminder[]{Reminder.NONE, Reminder.MIN_15, Reminder.HOUR_1}) {
+        for (Reminder r : new Reminder[]{Reminder.NONE, Reminder.AT_TIME, Reminder.MIN_15, Reminder.HOUR_1}) {
             TaskDraft d = draft();
             d.setReminder(r);
             assertEquals(r, TaskDraft.fromNotificationFlags(d.toNotificationFlags()));

@@ -108,10 +108,9 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     // permiso de accesibilidad; la pantalla Focus enseña una vez la explicación existente.
     private final MutableLiveData<SingleEvent<Boolean>> blockUnavailable = new MutableLiveData<>();
 
-    private boolean blockModeArmed;
-    // Valor del 🚫 antes de que una tarea lo armara sola; se devuelve al acabar su sesión (terminar
-    // antes o último bloque). null = la sesión no lo armó, o el usuario lo tocó después.
-    private Boolean armedBeforeTask;
+    // Rediseño de Proyectos (§3.5, D-P12): arranca las sesiones de tarea y es el dueño del 🚫 (el que
+    // armó una tarea vuelve a como estaba al acabar su sesión). Java puro, con tests JVM.
+    private final TaskFocusStarter starter;
     // Arranque diferido de «Focus this» de Home mientras se leen los minutos de la tarea: cualquier
     // otro arranque o cancelación lo invalida.
     private int startToken;
@@ -143,6 +142,18 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         this.appContext = appContext;
         this.machine = new FocusTimerStateMachine(
                 SystemClock::elapsedRealtime, this::currentSettings, this);
+        this.starter = new TaskFocusStarter(machine, this::currentSettings,
+                new TaskFocusStarter.BlockAccess() {
+                    @Override
+                    public boolean isAvailable() {
+                        return AccessibilityAccess.isEnabled(appContext);
+                    }
+
+                    @Override
+                    public void onUnavailable() {
+                        blockUnavailable.setValue(new SingleEvent<>(Boolean.TRUE));
+                    }
+                });
         this.grace = new BackgroundGrace(new BackgroundGrace.Scheduler() {
             @Override
             public void postDelayed(@NonNull Runnable task, long delayMillis) {
@@ -241,14 +252,13 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
      * @return false, sin cambiar nada, si ya hay una sesión en marcha
      */
     public boolean startTaskFocus(@NonNull TaskFocusRequest request) {
-        if (machine.getState() != State.STOPPED) {
+        // TaskFocusStarter: con la sesión en marcha devuelve false sin tocar nada.
+        if (!starter.startTaskFocus(request)) {
             return false;
         }
-        FocusTarget.set(request);
-        // Se arranca aquí mismo: que Home no lo vuelva a intentar (y abra Focus) en su onResume.
-        FocusTarget.consumePendingAutoStart();
-        return beginTaskSession(request.getGoalMinutes(), request.getAttributedMinutes(),
-                request.isBlockOnFocus());
+        startToken++; // invalida un «Focus this» de Home aún leyendo minutos
+        onTransition();
+        return true;
     }
 
     /** Play/pause button. @return true if running afterwards (play the start sound), else paused. */
@@ -301,46 +311,9 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
      */
     private boolean beginTaskSession(int goalMinutes, int attributedMinutes, boolean blockOnFocus) {
         startToken++;
-        Configuration config = configurationManager.getConfiguration();
-        TaskCyclePlan plan = TaskCyclePlan.of(goalMinutes, attributedMinutes,
-                wholeMinutes(config.getHomeTimerTime()), wholeMinutes(config.getHomeRestTime()),
-                config.isHomeIsRestEnabled());
-        boolean started = plan.isEmpty()
-                ? machine.startFocus(currentSettings().focusMillis)
-                : machine.startPlan(plan.getFocusBlocksMillis());
-        if (started && blockOnFocus) {
-            armForTask();
-        }
+        boolean started = starter.begin(goalMinutes, attributedMinutes, blockOnFocus);
         onTransition();
         return started;
-    }
-
-    /** D-P12 / d3: arma el 🚫 con el permiso; sin él la sesión sigue sin bloqueo y se avisa una vez. */
-    private void armForTask() {
-        if (!AccessibilityAccess.isEnabled(appContext)) {
-            blockUnavailable.setValue(new SingleEvent<>(Boolean.TRUE));
-            return;
-        }
-        if (!blockModeArmed) {
-            armedBeforeTask = Boolean.FALSE;
-            blockModeArmed = true;
-        }
-    }
-
-    /** Fin de la sesión de una tarea: el 🚫 vuelve a como estaba si la tarea lo armó. */
-    private void restoreArmAfterTask() {
-        if (armedBeforeTask != null) {
-            blockModeArmed = armedBeforeTask;
-            armedBeforeTask = null;
-        }
-    }
-
-    /** Minutos de una duración de la configuración (en ms), al menos 1 si es positiva. */
-    private static int wholeMinutes(long millis) {
-        if (millis <= 0) {
-            return 0;
-        }
-        return (int) Math.max(1L, millis / MINUTE_MILLIS);
     }
 
     public boolean pause() {
@@ -374,7 +347,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         // Desvincular: dejar el banner "Focusing: X" colgado sin sesión viva confunde sobre si la
         // siguiente cuenta atrás se atribuiría sola a esa tarea.
         FocusTarget.clear();
-        restoreArmAfterTask();
+        starter.onTaskSessionEnded();
         onTransition();
         return true;
     }
@@ -388,13 +361,12 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
 
     /** Arms/disarms the 🚫 total-block mode (the caller checks the accessibility grant). */
     public void setBlockModeArmed(boolean armed) {
-        blockModeArmed = armed;
-        armedBeforeTask = null; // el usuario manda: al acabar la tarea no se deshace su elección
+        starter.setBlockModeArmedByUser(armed);
         onTransition();
     }
 
     public boolean isBlockModeArmed() {
-        return blockModeArmed;
+        return starter.isBlockModeArmed();
     }
 
     /** Old fail-alert close -> resetTimer(): show the configured length again when idle. */
@@ -417,7 +389,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
      * service clears it on (re)connect, so a running armed session must re-assert it.
      */
     public void syncBlockState() {
-        FocusBlockState.setActive(appContext, blockModeArmed && machine.getState() == State.RUNNING);
+        FocusBlockState.setActive(appContext,
+                starter.isBlockModeArmed() && machine.getState() == State.RUNNING);
     }
 
     // ===================================================== background grace (FocusBackgroundObserver)
@@ -429,7 +402,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
      */
     @Override
     public void onAppBackgrounded() {
-        if (grace.onBackgrounded(machine.shouldArmBackgroundGrace(blockModeArmed))) {
+        if (grace.onBackgrounded(machine.shouldArmBackgroundGrace(starter.isBlockModeArmed()))) {
             Log.i(TAG, "App enters background: grace period armed");
         }
     }
@@ -478,7 +451,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
 
     @Override
     public void onAllCyclesCompleted(int cycles) {
-        restoreArmAfterTask(); // lo aplica el onTransition() que sigue a advance()
+        starter.onTaskSessionEnded(); // lo aplica el onTransition() que sigue a advance()
         cycleCompleted.setValue(new SingleEvent<>(cycles));
     }
 
@@ -660,7 +633,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
                 plan ? machine.getPlanBlockCount() : settings.cycles,
                 !plan && settings.infiniteCycles,
                 machine.getCyclesCompleted(),
-                blockModeArmed,
+                starter.isBlockModeArmed(),
                 plan));
     }
 
@@ -673,7 +646,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         savedState.set(KEY_SESSION, s.sessionMillis);
         savedState.set(KEY_CYCLES, s.cyclesCompleted);
         savedState.set(KEY_FOCUS_PAUSES, s.focusPauseCount);
-        savedState.set(KEY_BLOCK_ARMED, blockModeArmed);
+        savedState.set(KEY_BLOCK_ARMED, starter.isBlockModeArmed());
         savedState.set(KEY_PLAN_BLOCKS, s.planBlocksMillis);
         savedState.set(KEY_PLAN_INDEX, s.planBlockIndex);
         boolean live = s.state != State.STOPPED || s.planBlocksMillis != null;
@@ -715,7 +688,8 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         String stateName = savedState.get(KEY_STATE);
         Boolean armed = savedState.get(KEY_BLOCK_ARMED);
         // u19: sin estado guardado (sesion nueva) arranca como diga "Focus shield" de Screen time.
-        blockModeArmed = armed != null ? armed : BlockingSettings.isFocusShieldEnabled(appContext);
+        starter.restoreBlockModeArmed(
+                armed != null ? armed : BlockingSettings.isFocusShieldEnabled(appContext));
         if (stateName != null) {
             try {
                 machine.restore(new Snapshot(
@@ -779,7 +753,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         // this (and nobody listens any more), so the grace is armed here with the same rule; one
         // that was already pending is simply left to fire.
         if (!grace.isArmed()) {
-            grace.onBackgrounded(machine.shouldArmBackgroundGrace(blockModeArmed));
+            grace.onBackgrounded(machine.shouldArmBackgroundGrace(starter.isBlockModeArmed()));
         }
         handler.removeCallbacks(tick);
         if (foregroundServiceOn) {

@@ -8,7 +8,9 @@ import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.Phase;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.Settings;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.Snapshot;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.State;
+import com.example.bbettercalendar.ui.home.FocusTarget;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -623,5 +625,226 @@ public class FocusTimerStateMachineTest {
         assertTrue(machine.cancel());
         assertFalse(machine.hasPlan());
         assertFalse("a plain idle timer still has nothing to cancel", machine.cancel());
+    }
+
+    // ------------------------- starting a task over this machine (TaskFocusStarter, §3.5, D-P12)
+
+    private static final int TASK_ID = 42;
+    private static final int OTHER_TASK_ID = 7;
+
+    private boolean accessibilityOn;
+    private int blockUnavailableEvents;
+
+    private final TaskFocusStarter.BlockAccess blockAccess = new TaskFocusStarter.BlockAccess() {
+        @Override
+        public boolean isAvailable() {
+            return accessibilityOn;
+        }
+
+        @Override
+        public void onUnavailable() {
+            blockUnavailableEvents++;
+        }
+    };
+
+    @After
+    public void unbindTask() {
+        FocusTarget.clear();
+    }
+
+    private TaskFocusStarter newStarter() {
+        return new TaskFocusStarter(machine, () -> settings, blockAccess);
+    }
+
+    /** «Repasar el tema 4»: 60 min goal, 25 already focused. */
+    private static TaskFocusRequest task(boolean blockOnFocus) {
+        return new TaskFocusRequest(TASK_ID, "Repasar el tema 4", 60, 25, blockOnFocus, 3,
+                "Estudios", "book", 2);
+    }
+
+    @Test
+    public void taskStart_whenIdle_bindsTheTaskAndRunsItsCyclesFromWhatItHas() {
+        TaskFocusStarter starter = newStarter();
+
+        assertTrue(starter.startTaskFocus(task(false)));
+
+        assertEquals(TASK_ID, FocusTarget.getEntryId());
+        assertEquals(3, FocusTarget.getProjectId());
+        assertFalse("started here: Home must not auto-start it again",
+                FocusTarget.consumePendingAutoStart());
+        assertEquals(State.RUNNING, machine.getState());
+        assertTrue(machine.hasPlan());
+        // 35 min left in cycles of 25: blocks of 25 and 10.
+        assertEquals(2, machine.getPlanBlockCount());
+        assertEquals(25 * MIN, machine.getRemainingMillis());
+    }
+
+    @Test
+    public void taskStart_whileASessionRuns_changesNothingAndReturnsFalse() {
+        FocusTarget.set(OTHER_TASK_ID, "Otra", 0);
+        TaskFocusStarter starter = newStarter();
+        accessibilityOn = true;
+        machine.startFocus(FOCUS);
+        elapse(MIN);
+
+        assertFalse(starter.startTaskFocus(task(true)));
+
+        assertEquals("the running session keeps its task", OTHER_TASK_ID, FocusTarget.getEntryId());
+        assertFalse("block mode not armed by the refused task", starter.isBlockModeArmed());
+        assertEquals(0, blockUnavailableEvents);
+        assertFalse(machine.hasPlan());
+        assertEquals(State.RUNNING, machine.getState());
+        assertEquals(FOCUS - MIN, machine.getRemainingMillis());
+    }
+
+    @Test
+    public void taskStart_whilePaused_alsoChangesNothing() {
+        TaskFocusStarter starter = newStarter();
+        machine.startFocus(FOCUS);
+        machine.pause();
+
+        assertFalse(starter.startTaskFocus(task(true)));
+
+        assertEquals(0, FocusTarget.getEntryId());
+        assertEquals(0, blockUnavailableEvents);
+        assertEquals(State.PAUSED, machine.getState());
+    }
+
+    @Test
+    public void taskStart_withReachedGoal_runsABoundSessionOfTheConfiguredLength() {
+        TaskFocusStarter starter = newStarter();
+
+        assertTrue(starter.startTaskFocus(new TaskFocusRequest(TASK_ID, "Hecha", 50, 50, false, 0,
+                null, null, 0)));
+
+        assertEquals(TASK_ID, FocusTarget.getEntryId());
+        assertFalse(machine.hasPlan());
+        assertEquals(FOCUS, machine.getRemainingMillis());
+    }
+
+    @Test
+    public void blockOnFocus_withAccessibilityOn_armsTheBlockAtStart() {
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+
+        starter.startTaskFocus(task(true));
+
+        assertTrue(starter.isBlockModeArmed());
+        assertEquals(0, blockUnavailableEvents);
+    }
+
+    @Test
+    public void blockOnFocus_withAccessibilityOff_startsUnarmedAndSignalsOnce() {
+        accessibilityOn = false;
+        TaskFocusStarter starter = newStarter();
+
+        assertTrue(starter.startTaskFocus(task(true)));
+
+        assertEquals(State.RUNNING, machine.getState());
+        assertFalse(starter.isBlockModeArmed());
+        assertEquals(1, blockUnavailableEvents);
+    }
+
+    @Test
+    public void withoutBlockOnFocus_neverArmsNorSignals() {
+        TaskFocusStarter starter = newStarter();
+
+        starter.startTaskFocus(task(false));
+
+        assertFalse(starter.isBlockModeArmed());
+        assertEquals(0, blockUnavailableEvents);
+    }
+
+    @Test
+    public void homeFocusThis_withBlockOnFocusAndAccessibilityOff_alsoSignals() {
+        // Home's path: FocusTarget already bound, minutes read from the db, then begin(...).
+        TaskFocusStarter starter = newStarter();
+
+        assertTrue(starter.begin(60, 25, true));
+
+        assertFalse(starter.isBlockModeArmed());
+        assertEquals(1, blockUnavailableEvents);
+        assertTrue(machine.hasPlan());
+    }
+
+    @Test
+    public void blockArmedByTheTask_goesBackOffWhenItEndsEarly() {
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+        starter.startTaskFocus(task(true));
+
+        machine.cancel();
+        starter.onTaskSessionEnded();
+
+        assertFalse(starter.isBlockModeArmed());
+    }
+
+    @Test
+    public void blockArmedByTheTask_goesBackOffAfterItsLastBlock() {
+        settings = new Settings(FOCUS, REST, true, 4, false, true);
+        accessibilityOn = true;
+        TaskFocusStarter[] starter = new TaskFocusStarter[1];
+        // The view model's wiring: the all-cycles signal ends the task session.
+        machine = new FocusTimerStateMachine(() -> now, () -> settings,
+                new FocusTimerStateMachine.Listener() {
+                    @Override
+                    public void onFocusCompleted(long sessionMillis) { }
+
+                    @Override
+                    public void onAllCyclesCompleted(int cycles) {
+                        starter[0].onTaskSessionEnded();
+                    }
+
+                    @Override
+                    public void onFailed() { }
+                });
+        starter[0] = newStarter();
+        starter[0].startTaskFocus(new TaskFocusRequest(TASK_ID, "Corta", 10, 0, true, 0, null,
+                null, 0));
+        assertTrue(starter[0].isBlockModeArmed());
+
+        elapse(10 * MIN);
+
+        assertEquals(State.STOPPED, machine.getState());
+        assertFalse(starter[0].isBlockModeArmed());
+    }
+
+    @Test
+    public void blockTheUserHadArmed_staysArmedAfterTheTask() {
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+        starter.restoreBlockModeArmed(true);
+        starter.startTaskFocus(task(true));
+
+        machine.cancel();
+        starter.onTaskSessionEnded();
+
+        assertTrue(starter.isBlockModeArmed());
+    }
+
+    @Test
+    public void userChoiceDuringTheTask_isKeptWhenItEnds() {
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+        starter.startTaskFocus(task(true));
+
+        starter.setBlockModeArmedByUser(true); // the user confirms the block on the Focus screen
+        machine.cancel();
+        starter.onTaskSessionEnded();
+
+        assertTrue(starter.isBlockModeArmed());
+    }
+
+    @Test
+    public void userDisarmDuringTheTask_isKeptWhenItEnds() {
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+        starter.startTaskFocus(task(true));
+
+        starter.setBlockModeArmedByUser(false);
+        machine.cancel();
+        starter.onTaskSessionEnded();
+
+        assertFalse(starter.isBlockModeArmed());
     }
 }

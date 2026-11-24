@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only gallery of the Projects redesign widgets (rediseno-proyectos u3): TaskCheckView,
+     FocusTimerButton, ProjectBubbleView and the lit-card look of the four project colours. Opened with
+     adb shell am start -n io.github.thaguille.bbettercalendar/com.example.bbettercalendar.debug.DebugProjectsGalleryActivity -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/galleryProjectsScroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_surface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/spacing_md"
+        android:paddingEnd="@dimen/spacing_md"
+        android:paddingBottom="@dimen/spacing_xl">
+
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="TaskCheckView (D-P03)" />
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.example.bbettercalendar.ui.common.widget.TaskCheckView
+                android:id="@+id/galleryTaskCheck"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/galleryTaskCheckState"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="state: open"
+                android:textAppearance="@style/TextAppearance.BBetter.Body"
+                android:textColor="@color/bb_on_surface" />
+
+            <com.example.bbettercalendar.ui.common.widget.TaskCheckView
+                android:id="@+id/galleryTaskCheckSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:checkSmall="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.example.bbettercalendar.ui.common.widget.TaskCheckView
+                android:id="@+id/galleryCheckHigh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.TaskCheckView
+                android:id="@+id/galleryCheckMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.TaskCheckView
+                android:id="@+id/galleryCheckLow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.TaskCheckView
+                android:id="@+id/galleryCheckDone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.TaskCheckView
+                android:id="@+id/galleryCheckDoneSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:checkSmall="true" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="FocusTimerButton (D-P04)" />
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.example.bbettercalendar.ui.common.widget.FocusTimerButton
+                android:id="@+id/galleryTimerIdle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.FocusTimerButton
+                android:id="@+id/galleryTimerRunning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.FocusTimerButton
+                android:id="@+id/galleryTimerBig"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:timerSize="big" />
+
+            <com.example.bbettercalendar.ui.common.widget.FocusTimerButton
+                android:id="@+id/galleryTimerBigRunning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:timerSize="big" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="ProjectBubbleView (D-P05)" />
+
+        <LinearLayout
+            style="@style/GalleryCard"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.example.bbettercalendar.ui.common.widget.ProjectBubbleView
+                android:id="@+id/galleryBubble"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.ProjectBubbleView
+                android:id="@+id/galleryBubbleSelected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.ProjectBubbleView
+                android:id="@+id/galleryBubbleLate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.ProjectBubbleView
+                android:id="@+id/galleryBubbleQuiet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.example.bbettercalendar.ui.common.widget.ProjectBubbleView
+                android:id="@+id/galleryBubbleNew"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/GalleryLabel"
+            android:text="Lit card per project colour (bg_card_lit + bg_glow_project)" />
+
+        <FrameLayout
+            android:id="@+id/galleryLit1"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:background="@drawable/bg_card_lit">
+
+            <View
+                android:id="@+id/galleryLitGlow1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_glow_project"
+                android:backgroundTint="@color/bb_project_1" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/galleryLit2"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:background="@drawable/bg_card_lit">
+
+            <View
+                android:id="@+id/galleryLitGlow2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_glow_project"
+                android:backgroundTint="@color/bb_project_2" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/galleryLit3"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:background="@drawable/bg_card_lit">
+
+            <View
+                android:id="@+id/galleryLitGlow3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_glow_project"
+                android:backgroundTint="@color/bb_project_3" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/galleryLit4"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:background="@drawable/bg_card_lit">
+
+            <View
+                android:id="@+id/galleryLitGlow4"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_glow_project"
+                android:backgroundTint="@color/bb_project_4" />
+        </FrameLayout>
+    </LinearLayout>
+</ScrollView>

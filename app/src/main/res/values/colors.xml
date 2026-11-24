@@ -65,7 +65,7 @@
     <!-- Project accents (ProjectListAdapter.ACCENT_COLORS cycles them by colorIndex).
          Order and hues follow the four project dots of .stitch/html/03-projects.html. -->
     <color name="bb_project_1">@color/sage_300</color>
-    <color name="bb_project_2">@color/honey_300</color>
+    <color name="bb_project_2">@color/lilac_300</color>
     <color name="bb_project_3">@color/dusk_300</color>
     <color name="bb_project_4">@color/seafoam_200</color>
 

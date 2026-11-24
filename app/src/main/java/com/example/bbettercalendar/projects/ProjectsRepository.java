@@ -57,6 +57,15 @@ public class ProjectsRepository {
         this.dbWriteExecutor = dbWriteExecutor;
     }
 
+    /** Entrega del proyecto (0 = sin ella), leida fuera del hilo principal; llega en el hilo principal. */
+    public void loadDeadline(int projectId, Callback<Long> callback) {
+        dbWriteExecutor.execute(() -> {
+            Project project = projectDao.getById(projectId);
+            long deadline = project == null ? 0L : project.softDeadlineMillis;
+            mainThread.post(() -> callback.onResult(deadline));
+        });
+    }
+
     public LiveData<List<ProjectWithCounts>> observeAllWithCounts() {
         return projectDao.observeAllWithCounts();
     }

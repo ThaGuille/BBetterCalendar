@@ -1,0 +1,28 @@
+# rediseno-proyectos u11: the project agenda sheet on the seeded app. Tesis final: Reunion con la tutora is yesterday,
+# Escribir el capitulo 3 today, the project deadline is in 3 days. Opens the sheet from the toolbar, checks the
+# Yesterday and Today headers (ember / sage) and the deadline row, closes it with agendaClose and proves it is gone:
+# the menu button opens its menu (a live modal sheet would swallow that tap).
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-agenda.steps --save rp-agenda
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+TAP text=Tesis final,
+WAIT 1500
+TAP id=projectsAgendaButton
+WAIT 1500
+ASSERT id=agendaClose
+ASSERT id=agendaHeaderYesterday expect~=Yesterday|Ayer
+ASSERT id=agendaHeaderToday expect~=Today|Hoy
+ASSERT id=agendaDeadlineText expect~=Project deadline|Entrega del proyecto
+SHOT rp-agenda-open
+TAP id=agendaClose
+WAIT 1200
+TAP id=projectsMenuButton
+WAIT 1000
+ASSERT id=projectsFab
+SHOT rp-agenda-closed
+KEY KEYCODE_BACK
+WAIT 500

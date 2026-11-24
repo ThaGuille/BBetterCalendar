@@ -105,6 +105,10 @@
     <!-- rediseno-proyectos: form -->
 
     <!-- rediseno-proyectos: agenda -->
+    <dimen name="projects_agenda_time_width">56dp</dimen>
+    <dimen name="projects_agenda_row_min_height">40dp</dimen>
+    <dimen name="projects_agenda_icon_size">16dp</dimen>
+    <dimen name="projects_agenda_close_size">48dp</dimen>
 
     <!-- rediseno-proyectos: focus -->
 

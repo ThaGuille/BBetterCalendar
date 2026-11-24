@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- rediseno-proyectos agenda: ids set from code on the day headers so the adb walk can assert them. -->
+<resources>
+    <item name="agendaHeaderYesterday" type="id" />
+    <item name="agendaHeaderToday" type="id" />
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/projects_agenda_row_min_height"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="@dimen/projects_agenda_icon_size"
+        android:layout_height="@dimen/projects_agenda_icon_size"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_flag_24"
+        app:tint="@color/bb_danger" />
+
+    <TextView
+        android:id="@+id/agendaDeadlineText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:textAppearance="@style/TextAppearance.BBetter.Body"
+        android:textColor="@color/bb_danger" />
+</LinearLayout>

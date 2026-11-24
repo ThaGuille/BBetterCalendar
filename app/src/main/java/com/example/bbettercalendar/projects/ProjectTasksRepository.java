@@ -12,6 +12,7 @@ import com.example.bbettercalendar.projects.domain.TaskDraft;
 import com.example.bbettercalendar.stats.AttributedMinutes;
 import com.example.bbettercalendar.stats.FocusEventDAO;
 import com.example.bbettercalendar.stats.ProjectMinutes;
+import com.example.bbettercalendar.ui.projects.agenda.AgendaTask;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -88,6 +89,29 @@ public class ProjectTasksRepository {
         board.addSource(attributed, v -> recompute.run());
         board.addSource(weekMinutes, v -> recompute.run());
         return board;
+    }
+
+    /**
+     * Las tareas pendientes (no hechas, no plantillas, no retiradas) del proyecto para la hoja de agenda,
+     * leidas fuera del hilo principal; {@code callback} las recibe en el hilo principal.
+     */
+    public void loadAgenda(int projectId, Callback<List<AgendaTask>> callback) {
+        dbWriteExecutor.execute(() -> {
+            List<AgendaTask> out = new ArrayList<>();
+            for (CalendarEntry e : calendarEntryDao.getItemsByProjectNow(projectId)) {
+                if (e.isDone() || e.isTemplate() || e.isDismissed()) continue;
+                out.add(new AgendaTask(e.getTitle(), Math.max(0L, e.getStartMillis()), hasTime(e),
+                        e.getDuration() / 60_000, e.isBlockOnFocus()));
+            }
+            mainThread.post(() -> callback.onResult(out));
+        });
+    }
+
+    private static boolean hasTime(CalendarEntry e) {
+        if (e.getStartMillis() <= 0L) return false;
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(e.getStartMillis());
+        return c.get(Calendar.HOUR_OF_DAY) != 0 || c.get(Calendar.MINUTE) != 0;
     }
 
     // ---- tareas ----

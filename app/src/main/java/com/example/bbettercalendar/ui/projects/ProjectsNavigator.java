@@ -14,6 +14,7 @@ import com.example.bbettercalendar.ui.focus.FocusSessionViewModel;
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine;
 import com.example.bbettercalendar.ui.focus.FocusUiState;
 import com.example.bbettercalendar.ui.home.FocusTarget;
+import com.example.bbettercalendar.ui.projects.agenda.AgendaSheet;
 import com.example.bbettercalendar.ui.projects.quickadd.QuickAddDialog;
 
 /**
@@ -66,7 +67,10 @@ public class ProjectsNavigator {
 
     /** Agenda sheet of the project. */
     public void openAgenda(int projectId) {
-        // TODO(rediseno-proyectos): agenda
+        // The sheet lives in the NavHostFragment's child manager; never a second one on top.
+        FragmentManager manager = fragment.getParentFragmentManager();
+        if (manager.isStateSaved() || manager.findFragmentByTag(AgendaSheet.TAG) != null) return;
+        AgendaSheet.newInstance(projectId).show(manager, AgendaSheet.TAG);
     }
 
     /**

@@ -252,6 +252,15 @@
     <!-- rediseno-proyectos: form -->
 
     <!-- rediseno-proyectos: agenda -->
+    <string name="projects_agenda_title">Agenda</string>
+    <string name="projects_agenda_close">Cerrar</string>
+    <string name="projects_agenda_yesterday">Ayer</string>
+    <string name="projects_agenda_today">Hoy</string>
+    <string name="projects_agenda_tomorrow">Mañana</string>
+    <string name="projects_agenda_deadline">Entrega del proyecto</string>
+    <string name="projects_agenda_undated">Sin fecha · %1$d</string>
+    <string name="projects_agenda_empty">Nada con fecha todavía.</string>
+    <string name="projects_agenda_block_desc">Bloquea apps al enfocar</string>
 
     <!-- rediseno-proyectos: focus -->
 

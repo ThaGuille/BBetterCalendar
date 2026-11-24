@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Icon and accessible name of a QuickAddIconButton (rediseno-proyectos u8). -->
+    <declare-styleable name="QuickAddIconButton">
+        <attr name="quickIcon" format="reference" />
+        <attr name="quickLabel" format="reference" />
+    </declare-styleable>
+</resources>

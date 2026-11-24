@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ids of the quick-add box (rediseno-proyectos u8) that are created in code. -->
+<resources>
+    <item name="quickAddChipDate" type="id" />
+    <item name="quickAddChipDuration" type="id" />
+    <item name="quickAddChipPriority" type="id" />
+    <item name="quickAddChipTag" type="id" />
+    <item name="quickAddChipSubtasks" type="id" />
+    <item name="quickAddChipNote" type="id" />
+</resources>

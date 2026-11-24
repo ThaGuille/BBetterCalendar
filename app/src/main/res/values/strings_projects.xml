@@ -209,6 +209,25 @@
     <string name="projects_picker_note_hint">Write a note</string>
 
     <!-- rediseno-proyectos: quickadd -->
+    <string name="projects_quick_title_hint">New task</string>
+    <string name="projects_quick_send">Add task</string>
+    <string name="projects_quick_section_desc">Change section: %1$s</string>
+    <string name="projects_quick_context_separator">·</string>
+    <string name="projects_quick_icon_date">Date</string>
+    <string name="projects_quick_icon_duration">Duration</string>
+    <string name="projects_quick_icon_priority">Priority</string>
+    <string name="projects_quick_icon_tag">Tag</string>
+    <string name="projects_quick_icon_subtasks">Subtasks</string>
+    <string name="projects_quick_icon_more">More</string>
+    <string name="projects_quick_icon_expand">Open the full editor</string>
+    <string name="projects_quick_chip_today">Today</string>
+    <string name="projects_quick_chip_tomorrow">Tomorrow</string>
+    <string name="projects_quick_chip_note">With note</string>
+    <plurals name="projects_quick_chip_subtasks">
+        <item quantity="one">%d subtask</item>
+        <item quantity="other">%d subtasks</item>
+    </plurals>
+
 
     <!-- rediseno-proyectos: editor -->
 

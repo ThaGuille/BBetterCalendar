@@ -49,6 +49,25 @@
     </style>
 
     <!-- rediseno-proyectos: quickadd -->
+    <!-- Value chip of the quick-add box: not checkable, 32dp drawn (the touch target stays 48dp). -->
+    <style name="Widget.BBetter.Chip.QuickValue">
+        <item name="chipMinHeight">@dimen/projects_quick_chip_height</item>
+        <item name="android:checkable">false</item>
+        <item name="chipIconSize">18dp</item>
+        <item name="closeIconSize">18dp</item>
+        <item name="chipIconTint">@null</item>
+        <item name="closeIconTint">@color/bb_on_surface_muted</item>
+    </style>
+
+    <!-- Window of the quick-add box: transparent so the scrim and the box draw themselves. -->
+    <style name="Theme.BBetter.QuickAdd" parent="Base.Theme.BBetter.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
 
     <!-- rediseno-proyectos: editor -->
 

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick add "A2" (rediseno-proyectos u8): a scrim over the list and, glued to the bottom (the window
+     resizes above the keyboard), the box: context line, title + send, value chips, the fixed icon row and,
+     when an icon is tapped, the picker panel in the place of the keyboard. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/quickAddRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bb_scrim">
+
+    <LinearLayout
+        android:id="@+id/quickAddBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_quick_add_box"
+        android:clickable="true"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/projects_quick_padding"
+        android:paddingTop="@dimen/projects_quick_gap"
+        android:paddingEnd="@dimen/projects_quick_padding">
+
+        <LinearLayout
+            android:id="@+id/quickAddContext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/quickAddProjectIcon"
+                android:layout_width="@dimen/projects_quick_context_icon"
+                android:layout_height="@dimen/projects_quick_context_icon"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/quickAddProjectName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/projects_quick_gap"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:maxWidth="@dimen/projects_quick_name_max_width"
+                android:textAppearance="@style/TextAppearance.BBetter.BodyStrong" />
+
+            <LinearLayout
+                android:id="@+id/quickAddSection"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/projects_quick_touch"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/projects_quick_gap">
+
+                <TextView
+                    android:id="@+id/quickAddSectionName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.BBetter.BodyMuted" />
+
+                <ImageView
+                    android:layout_width="@dimen/projects_quick_context_icon"
+                    android:layout_height="@dimen/projects_quick_context_icon"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_expand_more_24"
+                    app:tint="@color/bb_on_surface_muted" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/quickAddTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/projects_quick_title_hint"
+                android:imeOptions="actionSend"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences"
+                android:maxLines="1"
+                android:minHeight="@dimen/projects_quick_touch"
+                android:textAppearance="@style/TextAppearance.BBetter.Body" />
+
+            <ImageButton
+                android:id="@+id/quickAddSend"
+                android:layout_width="@dimen/projects_quick_touch"
+                android:layout_height="@dimen/projects_quick_touch"
+                android:layout_marginStart="@dimen/projects_quick_gap"
+                android:background="@drawable/bg_quick_add_send"
+                android:contentDescription="@string/projects_quick_send"
+                android:enabled="false"
+                android:src="@drawable/ic_arrow_up"
+                app:tint="@color/bb_quick_add_send_icon" />
+        </LinearLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/quickAddChips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/projects_quick_gap"
+            android:visibility="gone"
+            app:chipSpacingHorizontal="@dimen/projects_quick_gap"
+            app:chipSpacingVertical="0dp" />
+
+        <LinearLayout
+            android:id="@+id/quickAddIconRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/projects_quick_gap"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.example.bbettercalendar.ui.projects.quickadd.QuickAddIconButton
+                android:id="@+id/quickAddDate"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/projects_quick_touch"
+                android:layout_weight="1"
+                app:quickIcon="@drawable/ic_calendar_24"
+                app:quickLabel="@string/projects_quick_icon_date" />
+
+            <com.example.bbettercalendar.ui.projects.quickadd.QuickAddIconButton
+                android:id="@+id/quickAddDuration"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/projects_quick_touch"
+                android:layout_weight="1"
+                app:quickIcon="@drawable/ic_timer_24"
+                app:quickLabel="@string/projects_quick_icon_duration" />
+
+            <com.example.bbettercalendar.ui.projects.quickadd.QuickAddIconButton
+                android:id="@+id/quickAddPriority"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/projects_quick_touch"
+                android:layout_weight="1"
+                app:quickIcon="@drawable/ic_flag_24"
+                app:quickLabel="@string/projects_quick_icon_priority" />
+
+            <com.example.bbettercalendar.ui.projects.quickadd.QuickAddIconButton
+                android:id="@+id/quickAddTag"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/projects_quick_touch"
+                android:layout_weight="1"
+                app:quickIcon="@drawable/ic_tag_24"
+                app:quickLabel="@string/projects_quick_icon_tag" />
+
+            <com.example.bbettercalendar.ui.projects.quickadd.QuickAddIconButton
+                android:id="@+id/quickAddSubtasks"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/projects_quick_touch"
+                android:layout_weight="1"
+                app:quickIcon="@drawable/ic_subtasks_24"
+                app:quickLabel="@string/projects_quick_icon_subtasks" />
+
+            <com.example.bbettercalendar.ui.projects.quickadd.QuickAddIconButton
+                android:id="@+id/quickAddMore"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/projects_quick_touch"
+                android:layout_weight="1"
+                app:quickIcon="@drawable/ic_more_vert_24"
+                app:quickLabel="@string/projects_quick_icon_more" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="@dimen/projects_quick_separator_height"
+                android:layout_marginStart="@dimen/projects_quick_gap"
+                android:layout_marginEnd="@dimen/projects_quick_gap"
+                android:background="@color/bb_outline" />
+
+            <com.example.bbettercalendar.ui.projects.quickadd.QuickAddIconButton
+                android:id="@+id/quickAddExpand"
+                android:layout_width="@dimen/projects_quick_touch"
+                android:layout_height="@dimen/projects_quick_touch"
+                app:quickIcon="@drawable/ic_expand_24"
+                app:quickLabel="@string/projects_quick_icon_expand" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/quickAddPickerPanel"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/projects_quick_keyboard_fallback"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

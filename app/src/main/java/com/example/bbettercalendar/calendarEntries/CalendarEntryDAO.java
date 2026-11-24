@@ -103,6 +103,19 @@ public interface CalendarEntryDAO {
             "AND isTemplate = 0 AND isDismissed = 0 ORDER BY startMillis ASC")
     LiveData<List<CalendarEntry>> observeItemsByProject(int projectId);
 
+    // rediseno-proyectos: tablero de un proyecto. A diferencia de observeItemsByProject INCLUYE las
+    // plantillas (el repositorio las marca en el TaskSnapshot); excluye solo las retiradas.
+    @Query("SELECT * FROM CalendarEntry WHERE projectId = :projectId AND isDismissed = 0 "
+            + "ORDER BY startMillis ASC")
+    LiveData<List<CalendarEntry>> observeTasksByProject(int projectId);
+
+    // rediseno-proyectos: mover una tarea de seccion, y mover todas las de una seccion a otra.
+    @Query("UPDATE CalendarEntry SET sectionId = :sectionId WHERE id = :entryId")
+    void moveToSection(int entryId, int sectionId);
+
+    @Query("UPDATE CalendarEntry SET sectionId = :toSectionId WHERE sectionId = :fromSectionId")
+    void moveSectionTasks(int fromSectionId, int toSectionId);
+
     // u16: items de TODOS los proyectos en una sola fuente reactiva, para las tarjetas desplegables
     // de la lista de Projects (agrupa por projectId en el ViewModel). Mismos filtros que arriba.
     @Query("SELECT * FROM CalendarEntry WHERE projectId != 0 " +

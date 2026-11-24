@@ -39,6 +39,32 @@ public interface ProjectDAO {
             + " ORDER BY status ASC, createdAtMillis DESC")
     LiveData<List<ProjectWithCounts>> observeAllWithCounts();
 
+    // rediseno-proyectos: selector de proyectos. Solo ACTIVE, filtrados por area (:areaId = 0 -> todas),
+    // con hechas/total y lo del aviso de hoy (D-P05) en la misma fila. Referencia project y
+    // calendarEntry, asi que Room la re-dispara con una escritura en cualquiera de las dos. Las
+    // plantillas y las retiradas no cuentan. todayStart/tomorrowStart: inicio de hoy y de manana
+    // (millis locales); vencen hoy o antes = startMillis en (0, tomorrowStart), atrasadas =
+    // startMillis en (0, todayStart).
+    @Query("SELECT project.*, "
+            + "(SELECT COUNT(*) FROM calendarEntry WHERE calendarEntry.projectId = project.id "
+            + "AND calendarEntry.isTemplate = 0 AND calendarEntry.isDismissed = 0 "
+            + "AND calendarEntry.isDone = 1) AS doneCount, "
+            + "(SELECT COUNT(*) FROM calendarEntry WHERE calendarEntry.projectId = project.id "
+            + "AND calendarEntry.isTemplate = 0 AND calendarEntry.isDismissed = 0) AS totalCount, "
+            + "(SELECT COUNT(*) FROM calendarEntry WHERE calendarEntry.projectId = project.id "
+            + "AND calendarEntry.isTemplate = 0 AND calendarEntry.isDismissed = 0 "
+            + "AND calendarEntry.isDone = 0 AND calendarEntry.startMillis > 0 "
+            + "AND calendarEntry.startMillis < :tomorrowStart) AS dueTodayCount, "
+            + "(SELECT COUNT(*) FROM calendarEntry WHERE calendarEntry.projectId = project.id "
+            + "AND calendarEntry.isTemplate = 0 AND calendarEntry.isDismissed = 0 "
+            + "AND calendarEntry.isDone = 0 AND calendarEntry.startMillis > 0 "
+            + "AND calendarEntry.startMillis < :todayStart) AS lateCount "
+            + "FROM project WHERE status = " + Project.STATUS_ACTIVE
+            + " AND (:areaId = 0 OR project.areaId = :areaId)"
+            + " ORDER BY createdAtMillis ASC, project.id ASC")
+    LiveData<List<ProjectWithBadge>> observeActiveWithBadge(int areaId, long todayStart,
+                                                            long tomorrowStart);
+
     @Query("SELECT * FROM project WHERE id = :id")
     Project getById(int id);
 

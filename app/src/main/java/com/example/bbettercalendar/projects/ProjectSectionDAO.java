@@ -42,6 +42,10 @@ public interface ProjectSectionDAO {
     @Query("SELECT COUNT(*) FROM project_section WHERE projectId = :projectId")
     int countByProject(int projectId);
 
+    // Posicion de una seccion nueva al final del proyecto.
+    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM project_section WHERE projectId = :projectId")
+    int nextPosition(int projectId);
+
     // Al borrar un proyecto (sus tareas las borra CalendarEntryDAO.deleteItemsByProject).
     @Query("DELETE FROM project_section WHERE projectId = :projectId")
     void deleteByProject(int projectId);

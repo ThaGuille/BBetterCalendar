@@ -1,0 +1,24 @@
+# rediseno-proyectos u18 (F4): an area filter that hides every active project keeps the menu button (the way
+# back to the filter) and offers a button to clear it. Home has no active project in the seed (Huerto is
+# archived). The walk clears the filter at the end, so it can run again.
+# Needs the seed: python .claude/scripts/seed_progress_db.py --device
+# Run: python bbadb.py run-steps .claude/skills/adb-ui-test/steps/rp-area-filter.steps --save rp-area-filter
+GRANT android.permission.POST_NOTIFICATIONS
+START .configuration.SplashActivity
+WAIT 5000
+TAP id=navigation_projects
+WAIT 2500
+ASSERT id=projectsSelector
+TAP id=projectsMenuButton
+WAIT 800
+TAP text=Filter by area|Filtrar por área
+WAIT 800
+TAP text=Home|Casa
+WAIT 1200
+ASSERT id=projectsMenuButton
+ASSERT id=projectsFilterState
+SHOT rp-area-filter-hides-all
+TAP id=projectsClearFilter
+WAIT 1200
+ASSERT id=projectsSelector
+SHOT rp-area-filter-cleared

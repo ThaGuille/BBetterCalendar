@@ -20,6 +20,7 @@ import com.example.bbettercalendar.projects.TagRepository;
 import com.example.bbettercalendar.projects.domain.TagRef;
 import com.example.bbettercalendar.projects.domain.TaskOrdering;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,6 +61,8 @@ public class ProjectsViewModel extends AndroidViewModel {
     private final LiveData<List<ProjectWithBadge>> allProjects;
     private final LiveData<List<Tag>> tags;
     private final LiveData<List<Tag>> areas;
+    // Local day the selector badges were computed for (F8): a new day re-observes them.
+    private final MutableLiveData<Long> badgeDay = new MutableLiveData<>();
     private final MutableLiveData<Integer> boardId = new MutableLiveData<>();
     private final LiveData<BoardFor> board;
     private final MediatorLiveData<ProjectsScreenModel> model = new MediatorLiveData<>();
@@ -94,7 +97,8 @@ public class ProjectsViewModel extends AndroidViewModel {
         this.hideDoneProjects = prefs.getHideDoneProjects();
         this.collapsed = prefs.getCollapsedSections();
 
-        allProjects = projectsRepository.observeActiveProjects(0);
+        badgeDay.setValue(LocalDate.now().toEpochDay());
+        allProjects = Transformations.switchMap(badgeDay, d -> projectsRepository.observeActiveProjects(0));
         tags = tagRepository.observe(Tag.KIND_TAG);
         areas = tagRepository.observe(Tag.KIND_AREA);
         board = Transformations.switchMap(boardId, id -> {
@@ -119,6 +123,13 @@ public class ProjectsViewModel extends AndroidViewModel {
     /** Areas for the filter dialog. */
     public LiveData<List<Tag>> getAreas() {
         return areas;
+    }
+
+    /** Call on resume: when the local day changed since the badges were observed, observes them again (F8). */
+    public void onDayMayHaveChanged() {
+        long today = LocalDate.now().toEpochDay();
+        Long seen = badgeDay.getValue();
+        if (seen == null || seen != today) badgeDay.setValue(today);
     }
 
     public int getAreaFilter() {

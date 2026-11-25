@@ -157,6 +157,9 @@
     <string name="projects_main_task_deleted">Task deleted</string>
     <string name="projects_main_area_title">Filter by area</string>
     <string name="projects_main_area_all">All</string>
+    <string name="projects_main_filter_hides_title">Your area filter hides every project</string>
+    <string name="projects_main_filter_hides_message">Projects exist, but none is in this area. Clear the filter to see them.</string>
+    <string name="projects_main_filter_clear">Show all areas</string>
     <string name="projects_main_first_title">Your first project</string>
     <string name="projects_main_first_message">Something big you want to split into steps: a thesis, a move, a trip.</string>
     <string name="projects_main_first_button">Create project</string>

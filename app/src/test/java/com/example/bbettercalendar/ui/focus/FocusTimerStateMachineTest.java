@@ -2,6 +2,7 @@ package com.example.bbettercalendar.ui.focus;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.example.bbettercalendar.ui.focus.FocusTimerStateMachine.Phase;
@@ -846,5 +847,71 @@ public class FocusTimerStateMachineTest {
         starter.onTaskSessionEnded();
 
         assertFalse(starter.isBlockModeArmed());
+    }
+
+    @Test
+    public void regressionF5_plainSessionOfAReachedGoal_releasesTheTaskBlockWhenItCompletes() {
+        settings = new Settings(FOCUS, REST, false, 2, false, true);
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+        assertTrue(starter.startTaskFocus(new TaskFocusRequest(TASK_ID, "Hecha", 50, 50, true, 0,
+                null, null, 0)));
+        assertFalse(machine.hasPlan());
+        assertTrue(starter.isBlockModeArmed());
+
+        elapse(FOCUS);
+
+        assertEquals(State.STOPPED, machine.getState());
+        assertFalse(starter.isBlockModeArmed());
+        assertNull(starter.getArmedBeforeTask());
+    }
+
+    @Test
+    public void regressionF5_plainSessionCancelled_releasesTheTaskBlock() {
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+        starter.startTaskFocus(new TaskFocusRequest(TASK_ID, "Hecha", 50, 50, true, 0,
+                null, null, 0));
+        assertTrue(starter.isBlockModeArmed());
+
+        machine.cancel();
+
+        assertFalse(starter.isBlockModeArmed());
+    }
+
+    @Test
+    public void regressionF5_armedBeforeTaskSurvivesProcessDeathAndIsLaterReleased() {
+        settings = new Settings(FOCUS, REST, false, 2, false, true);
+        accessibilityOn = true;
+        TaskFocusStarter first = newStarter();
+        first.startTaskFocus(new TaskFocusRequest(TASK_ID, "Hecha", 50, 50, true, 0,
+                null, null, 0));
+        // What the view model saves, then a new process: a new starter gets the values back.
+        Boolean savedBefore = first.getArmedBeforeTask();
+        boolean savedArmed = first.isBlockModeArmed();
+        assertEquals(Boolean.FALSE, savedBefore);
+        assertTrue(savedArmed);
+
+        TaskFocusStarter second = newStarter();
+        second.restoreBlockModeArmed(savedArmed);
+        second.restoreArmedBeforeTask(savedBefore);
+        assertTrue(second.isBlockModeArmed());
+
+        elapse(FOCUS);
+
+        assertFalse(second.isBlockModeArmed());
+    }
+
+    @Test
+    public void regressionF5_blockTheUserSetByHand_isNotUndoneWhenPlainSessionEnds() {
+        accessibilityOn = true;
+        TaskFocusStarter starter = newStarter();
+        starter.startTaskFocus(new TaskFocusRequest(TASK_ID, "Hecha", 50, 50, true, 0,
+                null, null, 0));
+        starter.setBlockModeArmedByUser(true);
+
+        machine.cancel();
+
+        assertTrue(starter.isBlockModeArmed());
     }
 }

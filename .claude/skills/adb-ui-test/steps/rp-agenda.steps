@@ -17,12 +17,12 @@ ASSERT id=agendaClose
 ASSERT id=agendaHeaderYesterday expect~=Yesterday|Ayer
 ASSERT id=agendaHeaderToday expect~=Today|Hoy
 # The deadline row sits at the end of the list and can be below the fold (depends on the weekday of the seed):
-# drag up inside the sheet (coordinates for a 1080x2400 emulator, adb shell wm size), then assert it.
-SWIPE 540 1900 540 700 400
+# drag up inside the sheet (coordinates for a 1080x1920 emulator, adb shell wm size), then assert it.
+SWIPE 540 1500 540 600 400
 WAIT 600
-SWIPE 540 1900 540 700 400
+SWIPE 540 1500 540 600 400
 WAIT 600
-SWIPE 540 1900 540 700 400
+SWIPE 540 1500 540 600 400
 WAIT 600
 ASSERT id=agendaDeadlineText expect~=Project deadline|Entrega del proyecto
 SHOT rp-agenda-open

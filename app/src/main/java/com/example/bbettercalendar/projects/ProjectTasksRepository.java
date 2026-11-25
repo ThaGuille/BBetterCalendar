@@ -11,6 +11,7 @@ import com.example.bbettercalendar.calendarEntries.CompletionStamp;
 import com.example.bbettercalendar.calendarEntries.RecurrenceMaterializer;
 import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.popups.RepetitionOptions;
+import com.example.bbettercalendar.popups.RepetitionSpec;
 import com.example.bbettercalendar.projects.domain.TaskDraft;
 import com.example.bbettercalendar.stats.AttributedMinutes;
 import com.example.bbettercalendar.stats.FocusEventDAO;
@@ -21,7 +22,10 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -44,6 +48,10 @@ public class ProjectTasksRepository {
     private final TransactionRunner transaction;
     private final MainThread mainThread;
     private final ExecutorService dbWriteExecutor;
+    // Revision F6: al completar una tarea con setDone, el estado de cada subtarea (id -> hecha) justo
+    // antes, para que Deshacer (setDone false) lo devuelva. Solo en memoria: tras matar el proceso, o si
+    // la tarea o sus subtareas cambian por otro camino, se pierde y desmarcar las deja todas pendientes.
+    private final Map<Integer, Map<Integer, Boolean>> subtasksBeforeCompletion = new ConcurrentHashMap<>();
 
     @Inject
     public ProjectTasksRepository(CalendarEntryDAO calendarEntryDao, ProjectSectionDAO sectionDao,
@@ -133,6 +141,8 @@ public class ProjectTasksRepository {
      * Al editar una ocurrencia los cambios son solo de esa ocurrencia; cambiar Repetir cambia la serie
      * desde ella (su plantilla pasa a la nueva frecuencia, anclada en esa ocurrencia) y quitarlo la
      * termina. En los dos casos las ocurrencias futuras sin hacer de la serie anterior se borran.
+     * Una serie nueva queda oculta en el Calendario ({@link RepetitionSpec#DEFAULT_HIDDEN_IN_CALENDAR},
+     * como en el editor del Calendario); una serie que ya existia conserva su visibilidad.
      */
     public void saveDraft(TaskDraft draft, Callback<Integer> callback) {
         dbWriteExecutor.execute(() -> {
@@ -159,9 +169,12 @@ public class ProjectTasksRepository {
                 subtasks.add(new TaskSubtask(0, s.title, s.done, i));
             }
             // Las ocurrencias de la serie anterior que se van: sus alarmas fuera antes de borrar las filas.
+            // Desde la ocurrencia editada; si se le quita la fecha (o es la plantilla), desde ahora: las
+            // atrasadas sin hacer que Inicio sigue mostrando no se borran (revision F7).
             List<CalendarEntry> doomed = new ArrayList<>();
             if (plan.cutsSeries()) {
-                long after = existing.isTemplate() ? now : entry.getStartMillis();
+                long after = existing.isTemplate() || entry.getStartMillis() <= 0L
+                        ? now : entry.getStartMillis();
                 List<CalendarEntry> later = calendarEntryDao.getUndoneOccurrencesAfter(plan.oldTemplateId, after);
                 if (later != null) {
                     for (CalendarEntry e : later) {
@@ -190,11 +203,17 @@ public class ProjectTasksRepository {
                     calendarEntryDao.update(template);
                     entry.setTemplateId(0);
                 } else if (plan.kind == SeriesPlan.Kind.CHANGE) {
-                    CalendarEntry changed = seriesTemplate(template, entry.getStartMillis(), plan.wanted);
+                    // La plantilla nueva sale de la ocurrencia editada, como en START (revision F1): las
+                    // ocurrencias que se regeneran llevan sus cambios. Conserva el id y la visibilidad de la serie.
+                    CalendarEntry changed = seriesTemplate(entry, entry.getStartMillis(), plan.wanted);
                     changed.setId(template.getId());
+                    changed.setHiddenInCalendar(template.isHiddenInCalendar());
                     calendarEntryDao.update(changed);
                     materialize[0] = changed.getId();
                 } else if (plan.kind == SeriesPlan.Kind.START) {
+                    // Una serie nueva no se pinta en el Calendario, como en su editor (revision F2):
+                    // la plantilla, sus ocurrencias y esta primera ocurrencia.
+                    entry.setHiddenInCalendar(RepetitionSpec.DEFAULT_HIDDEN_IN_CALENDAR);
                     int templateId = (int) calendarEntryDao.insert(
                             seriesTemplate(entry, entry.getStartMillis(), plan.wanted));
                     entry.setTemplateId(templateId);
@@ -209,6 +228,8 @@ public class ProjectTasksRepository {
                     calendarEntryDao.update(entry);
                 }
                 subtaskDao.deleteByEntry(id);
+                // Subtareas nuevas: el estado guardado para Deshacer (revision F6) ya no vale.
+                subtasksBeforeCompletion.remove(id);
                 for (TaskSubtask s : subtasks) s.entryId = id;
                 if (!subtasks.isEmpty()) subtaskDao.insertAll(subtasks);
             });
@@ -388,16 +409,26 @@ public class ProjectTasksRepository {
         return entry;
     }
 
-    /** Marca la tarea y todas sus subtareas como hechas o pendientes. */
+    /**
+     * Marca la tarea y todas sus subtareas como hechas o pendientes. Desmarcar justo despues de marcarla
+     * aqui (Deshacer) devuelve cada subtarea al estado que tenia antes (revision F6); si no hay ese
+     * estado guardado, todas quedan pendientes.
+     */
     public void setDone(int entryId, boolean done) {
         dbWriteExecutor.execute(() -> {
             CalendarEntry[] holder = new CalendarEntry[1];
             transaction.run(() -> {
                 CalendarEntry fresh = calendarEntryDao.getEventById(entryId);
                 if (fresh == null) return;
+                boolean wasDone = fresh.isDone();
                 CompletionStamp.apply(fresh, done, System.currentTimeMillis());
                 calendarEntryDao.update(fresh);
-                subtaskDao.setAllDone(entryId, done);
+                if (done) {
+                    if (!wasDone) snapshotSubtasks(entryId);
+                    subtaskDao.setAllDone(entryId, true);
+                } else {
+                    restoreSubtasks(entryId);
+                }
                 holder[0] = fresh;
             });
             CalendarEntry fresh = holder[0];
@@ -408,6 +439,36 @@ public class ProjectTasksRepository {
                 taskAlarms.onTaskSaved(fresh);
             }
         });
+    }
+
+    // Guarda el estado de las subtareas de la tarea antes de completarla (revision F6).
+    private void snapshotSubtasks(int entryId) {
+        List<TaskSubtask> all = subtaskDao.getByEntry(entryId);
+        Map<Integer, Boolean> states = new HashMap<>();
+        if (all != null) {
+            for (TaskSubtask s : all) states.put(s.id, s.done);
+        }
+        subtasksBeforeCompletion.put(entryId, states);
+    }
+
+    // Deshacer: cada subtarea vuelve a su estado guardado (las que no estaban, pendientes). Sin estado
+    // guardado, como siempre: todas pendientes.
+    private void restoreSubtasks(int entryId) {
+        Map<Integer, Boolean> states = subtasksBeforeCompletion.remove(entryId);
+        if (states == null) {
+            subtaskDao.setAllDone(entryId, false);
+            return;
+        }
+        List<TaskSubtask> all = subtaskDao.getByEntry(entryId);
+        if (all == null) return;
+        for (TaskSubtask s : all) {
+            Boolean before = states.get(s.id);
+            boolean target = before != null && before;
+            if (s.done != target) {
+                s.done = target;
+                subtaskDao.update(s);
+            }
+        }
     }
 
     /**
@@ -433,16 +494,29 @@ public class ProjectTasksRepository {
         });
     }
 
-    /** Alterna una subtarea; si deja todas hechas, la tarea pasa a hecha. */
+    /**
+     * Alterna una subtarea; si deja todas hechas, la tarea pasa a hecha. Desmarcar una subtarea de una
+     * tarea hecha la reabre (sin sello de completado) y le devuelve sus avisos (revision F3).
+     */
     public void toggleSubtask(int subtaskId) {
         dbWriteExecutor.execute(() -> {
             CalendarEntry[] completed = new CalendarEntry[1];
+            CalendarEntry[] reopened = new CalendarEntry[1];
             transaction.run(() -> {
                 TaskSubtask subtask = subtaskDao.getById(subtaskId);
                 if (subtask == null) return;
                 subtask.done = !subtask.done;
                 subtaskDao.update(subtask);
-                if (!subtask.done) return;
+                // Las subtareas ya no son las de antes de completar: Deshacer no tiene nada que devolver.
+                subtasksBeforeCompletion.remove(subtask.entryId);
+                if (!subtask.done) {
+                    CalendarEntry task = calendarEntryDao.getEventById(subtask.entryId);
+                    if (task == null || !task.isDone()) return;
+                    CompletionStamp.apply(task, false, System.currentTimeMillis());
+                    calendarEntryDao.update(task);
+                    reopened[0] = task;
+                    return;
+                }
                 List<TaskSubtask> all = subtaskDao.getByEntry(subtask.entryId);
                 for (TaskSubtask s : all) {
                     if (!s.done) return;
@@ -454,12 +528,14 @@ public class ProjectTasksRepository {
                 completed[0] = task;
             });
             if (completed[0] != null) taskAlarms.onTaskClosed(completed[0]);
+            if (reopened[0] != null) taskAlarms.onTaskSaved(reopened[0]);
         });
     }
 
     /** Borra la tarea y sus subtareas y cancela sus alarmas. */
     public void deleteTask(int entryId) {
         dbWriteExecutor.execute(() -> {
+            subtasksBeforeCompletion.remove(entryId);
             CalendarEntry entry = calendarEntryDao.getEventById(entryId);
             if (entry == null) return;
             taskAlarms.onTaskClosed(entry);

@@ -111,7 +111,8 @@ public class ProjectTaskSeriesTest {
             assertEquals(CalendarEntry.PRIORITY_MEDIUM, o.getPriority());
             assertEquals(9, o.getTagId());
             assertEquals(15 * 60_000, o.getDuration());
-            assertFalse("project series are shown in the Calendar", o.isHiddenInCalendar());
+            assertTrue("new project series are hidden in the Calendar, like the Calendar editor's",
+                    o.isHiddenInCalendar());
         }
         assertEquals(TaskDraft.Repeat.WEEKLY, editorDraftOf(savedId).getRepeat());
     }

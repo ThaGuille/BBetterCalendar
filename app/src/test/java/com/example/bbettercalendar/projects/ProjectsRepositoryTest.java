@@ -176,4 +176,27 @@ public class ProjectsRepositoryTest {
         verify(deadlines).cancelFor(8);
         assertEquals("all deletes in one transaction", 1, transactions);
     }
+
+    @Test
+    public void regressionF8_dayBoundsFollowTheDayOfTheInstant() {
+        java.time.ZoneId zone = java.time.ZoneId.of("Europe/Madrid");
+        long d1 = java.time.LocalDate.of(2026, 11, 25).atTime(23, 30).atZone(zone).toInstant().toEpochMilli();
+        long d2 = java.time.LocalDate.of(2026, 11, 26).atTime(0, 30).atZone(zone).toInstant().toEpochMilli();
+        long[] a = ProjectsRepository.dayBounds(d1, zone);
+        long[] b = ProjectsRepository.dayBounds(d2, zone);
+        assertTrue(a[0] != b[0]);
+        assertEquals(a[1], b[0]);
+        assertEquals(java.time.LocalDate.of(2026, 11, 25).atStartOfDay(zone).toInstant().toEpochMilli(), a[0]);
+    }
+
+    @Test
+    public void regressionF8_dayBoundsSpanTwentyThreeHoursOnTheSpringDstDay() {
+        java.time.ZoneId zone = java.time.ZoneId.of("Europe/Madrid");
+        long noon = java.time.LocalDate.of(2026, 3, 29).atTime(12, 0).atZone(zone).toInstant().toEpochMilli();
+        long[] bounds = ProjectsRepository.dayBounds(noon, zone);
+        assertEquals(23L * 3_600_000L, bounds[1] - bounds[0]);
+        long autumn = java.time.LocalDate.of(2026, 10, 25).atTime(12, 0).atZone(zone).toInstant().toEpochMilli();
+        long[] fall = ProjectsRepository.dayBounds(autumn, zone);
+        assertEquals(25L * 3_600_000L, fall[1] - fall[0]);
+    }
 }

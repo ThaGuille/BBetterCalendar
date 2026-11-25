@@ -110,11 +110,15 @@ public final class ProjectsScreenModel {
     public final List<Section> sections;
     public final TaskOrdering.Mode sort;
     public final boolean hideDone;
+    /** The area filter hides every active project while some exist (F4): not the "first project" state. */
+    private final boolean filterHidesAll;
 
     private ProjectsScreenModel(List<Bubble> bubbles, int selectedProjectId, Project selectedProject,
                                 NextTaskRule.SummaryState summaryState, int percent, TaskSnapshot next,
                                 int focusedWeekMinutes, Integer daysToDue, List<Section> sections,
-                                TaskOrdering.Mode sort, boolean hideDone) {
+                                TaskOrdering.Mode sort, boolean hideDone,
+                                boolean filterHidesAll) {
+        this.filterHidesAll = filterHidesAll;
         this.bubbles = bubbles;
         this.selectedProjectId = selectedProjectId;
         this.selectedProject = selectedProject;
@@ -131,6 +135,14 @@ public final class ProjectsScreenModel {
     /** No active project (after the area filter and the pending deletions): the "Your first project" state. */
     public boolean noProjects() {
         return selectedProjectId == 0;
+    }
+
+    /**
+     * Active projects exist but the area filter hides all of them (F4). The screen keeps the menu (the way to
+     * the filter) and offers to clear it; with no projects at all this is false.
+     */
+    public boolean filterHidesAll() {
+        return filterHidesAll;
     }
 
     /** A project is selected and it has no tasks at all: the "Project ready" state. */
@@ -174,6 +186,8 @@ public final class ProjectsScreenModel {
                                             long nowMillis, ZoneId zone) {
         List<ProjectWithBadge> visible = visibleProjects(allProjects, areaFilter, hiddenProjects);
         int selected = resolveSelection(preferredId, visible);
+        boolean filterHidesAll = visible.isEmpty() && areaFilter != 0
+                && !visibleProjects(allProjects, 0, hiddenProjects).isEmpty();
 
         List<Bubble> bubbles = new ArrayList<>();
         Project selectedProject = null;
@@ -187,7 +201,7 @@ public final class ProjectsScreenModel {
         if (selected == 0 || board == null) {
             return new ProjectsScreenModel(bubbles, selected, selectedProject,
                     NextTaskRule.SummaryState.EMPTY, 0, null, 0, null,
-                    Collections.<Section>emptyList(), sort, hideDone);
+                    Collections.<Section>emptyList(), sort, hideDone, filterHidesAll);
         }
 
         // Tasks without the ones pending deletion; templates stay out of rows (their occurrences are the tasks).
@@ -228,7 +242,7 @@ public final class ProjectsScreenModel {
                 : DueDays.until(selectedProject.softDeadlineMillis, nowMillis, zone);
         return new ProjectsScreenModel(bubbles, selected, selectedProject, state,
                 ProjectProgress.percent(tasks), next, board.focusedWeekMinutes, days,
-                sections, sort, hideDone);
+                sections, sort, hideDone, filterHidesAll);
     }
 
     private static Row rowFor(TaskSnapshot t, ProjectBoard board, Map<Long, TagRef> tagById) {

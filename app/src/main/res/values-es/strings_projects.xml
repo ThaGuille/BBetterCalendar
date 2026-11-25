@@ -148,6 +148,9 @@
     <string name="projects_main_task_deleted">Tarea eliminada</string>
     <string name="projects_main_area_title">Filtrar por área</string>
     <string name="projects_main_area_all">Todas</string>
+    <string name="projects_main_filter_hides_title">El filtro de área oculta todos los proyectos</string>
+    <string name="projects_main_filter_hides_message">Hay proyectos, pero ninguno es de esta área. Quita el filtro para verlos.</string>
+    <string name="projects_main_filter_clear">Mostrar todas las áreas</string>
     <string name="projects_main_first_title">Tu primer proyecto</string>
     <string name="projects_main_first_message">Algo grande que quieras partir en pasos: un trabajo, una mudanza, un viaje.</string>
     <string name="projects_main_first_button">Crear proyecto</string>

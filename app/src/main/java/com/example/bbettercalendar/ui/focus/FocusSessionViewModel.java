@@ -72,6 +72,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
     private static final String KEY_SESSION = "bb_focus_session_millis";
     private static final String KEY_CYCLES = "bb_focus_cycles_completed";
     private static final String KEY_BLOCK_ARMED = "bb_focus_block_mode_armed";
+    private static final String KEY_ARMED_BEFORE_TASK = "bb_focus_armed_before_task";
     private static final String KEY_FOCUS_PAUSES = "bb_focus_pause_count";
     // Rediseño de Proyectos (u4): bloques del plan de una tarea y la tarea ligada (FocusTarget).
     private static final String KEY_PLAN_BLOCKS = "bb_focus_plan_blocks";
@@ -647,6 +648,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         savedState.set(KEY_CYCLES, s.cyclesCompleted);
         savedState.set(KEY_FOCUS_PAUSES, s.focusPauseCount);
         savedState.set(KEY_BLOCK_ARMED, starter.isBlockModeArmed());
+        savedState.set(KEY_ARMED_BEFORE_TASK, starter.getArmedBeforeTask());
         savedState.set(KEY_PLAN_BLOCKS, s.planBlocksMillis);
         savedState.set(KEY_PLAN_INDEX, s.planBlockIndex);
         boolean live = s.state != State.STOPPED || s.planBlocksMillis != null;
@@ -690,6 +692,7 @@ public class FocusSessionViewModel extends ViewModel implements FocusTimerStateM
         // u19: sin estado guardado (sesion nueva) arranca como diga "Focus shield" de Screen time.
         starter.restoreBlockModeArmed(
                 armed != null ? armed : BlockingSettings.isFocusShieldEnabled(appContext));
+        starter.restoreArmedBeforeTask(savedState.<Boolean>get(KEY_ARMED_BEFORE_TASK));
         if (stateName != null) {
             try {
                 machine.restore(new Snapshot(

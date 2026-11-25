@@ -7,7 +7,9 @@ import com.example.bbettercalendar.calendarEntries.CalendarEntryDAO;
 import com.example.bbettercalendar.database.DbWriteExecutor;
 import com.example.bbettercalendar.notifications.project.ProjectDeadlineScheduler;
 
-import java.util.Calendar;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -78,14 +80,19 @@ public class ProjectsRepository {
      * areaId} 0 = todas las areas. "Hoy" se fija al llamar: quien observe tras medianoche vuelve a llamar.
      */
     public LiveData<List<ProjectWithBadge>> observeActiveProjects(int areaId) {
-        Calendar today = Calendar.getInstance();
-        today.set(Calendar.HOUR_OF_DAY, 0);
-        today.set(Calendar.MINUTE, 0);
-        today.set(Calendar.SECOND, 0);
-        today.set(Calendar.MILLISECOND, 0);
-        long todayStart = today.getTimeInMillis();
-        today.add(Calendar.DAY_OF_MONTH, 1);
-        return projectDao.observeActiveWithBadge(areaId, todayStart, today.getTimeInMillis());
+        long[] bounds = dayBounds(System.currentTimeMillis(), ZoneId.systemDefault());
+        return projectDao.observeActiveWithBadge(areaId, bounds[0], bounds[1]);
+    }
+
+    /**
+     * Limites del dia local que contiene {@code nowMillis}: {start of day, start of next day} (F8). Pura: el
+     * dia de 23 o 25 horas (cambio de hora) sale bien porque el final es el inicio del dia siguiente.
+     */
+    public static long[] dayBounds(long nowMillis, ZoneId zone) {
+        LocalDate day = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate();
+        return new long[]{
+                day.atStartOfDay(zone).toInstant().toEpochMilli(),
+                day.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()};
     }
 
     /** Carga un proyecto para el formulario de edicion; {@code callback} lo recibe (o null) en el hilo principal. */

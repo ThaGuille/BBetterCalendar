@@ -117,7 +117,27 @@ public final class TaskFocusStarter {
         blockModeArmed = armed;
     }
 
+    /**
+     * Valor del 🚫 antes de que la tarea lo armara (null = no lo armó la tarea); se guarda con el
+     * resto de la sesion para sobrevivir a la muerte del proceso.
+     */
+    public Boolean getArmedBeforeTask() {
+        return armedBeforeTask;
+    }
+
+    /** Devuelve lo guardado por {@link #getArmedBeforeTask()} tras la muerte del proceso. */
+    public void restoreArmedBeforeTask(Boolean value) {
+        armedBeforeTask = value;
+    }
+
+    /**
+     * El 🚫 vigente. Si lo armo una tarea y su sesion ya acabo sin pasar por el aviso de ciclos
+     * (concentracion simple sin descanso, cancelar, fallo), se suelta aqui.
+     */
     public boolean isBlockModeArmed() {
+        if (armedBeforeTask != null && machine.getState() == State.STOPPED && !machine.hasPlan()) {
+            onTaskSessionEnded();
+        }
         return blockModeArmed;
     }
 

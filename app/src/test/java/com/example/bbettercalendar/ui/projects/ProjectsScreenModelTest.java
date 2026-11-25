@@ -261,4 +261,23 @@ public class ProjectsScreenModelTest {
         assertEquals(Collections.singletonList(8L), ids(m.sections.get(0)));
         assertEquals(1, m.sections.get(0).total);
     }
+
+    @Test
+    public void regressionF4_filterOnAnAreaWithNoProjectsIsNotTheFirstProjectState() {
+        List<ProjectWithBadge> all = Arrays.asList(project(1, "A", 10, 0, 1, 0, 0),
+                project(2, "B", 11, 0, 1, 0, 0));
+        ProjectsScreenModel m = build(all, 1, 99, null, TaskOrdering.Mode.UPCOMING, false, null);
+        assertTrue(m.bubbles.isEmpty());
+        assertTrue(m.filterHidesAll());
+        // Without the filter the same projects show normally.
+        assertFalse(build(all, 1, 0, board(0), TaskOrdering.Mode.UPCOMING, false, null).filterHidesAll());
+    }
+
+    @Test
+    public void regressionF4_noProjectsAtAllIsNotFilterHidesAll() {
+        ProjectsScreenModel m = build(Collections.<ProjectWithBadge>emptyList(), 0, 99, null,
+                TaskOrdering.Mode.UPCOMING, false, null);
+        assertTrue(m.noProjects());
+        assertFalse(m.filterHidesAll());
+    }
 }

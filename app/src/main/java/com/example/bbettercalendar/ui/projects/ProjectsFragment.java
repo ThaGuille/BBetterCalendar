@@ -135,6 +135,7 @@ public class ProjectsFragment extends Fragment {
             navigator.openQuickAdd(current.selectedProjectId, firstSectionId());
         });
         binding.projectsCreateFirst.setOnClickListener(v -> navigator.openProjectForm(0));
+        binding.projectsClearFilter.setOnClickListener(v -> viewModel.setAreaFilter(0));
         setupNoteBar();
 
         viewModel.getModel().observe(getViewLifecycleOwner(), this::render);
@@ -180,7 +181,16 @@ public class ProjectsFragment extends Fragment {
     }
 
     private void showMenu(View anchor) {
-        if (current == null || current.noProjects()) return;
+        if (current == null) return;
+        if (current.noProjects()) {
+            // F4: the filter hides every project; the menu keeps the way to change the filter.
+            if (!current.filterHidesAll()) return;
+            PopupMenu filterOnly = new PopupMenu(requireContext(), anchor);
+            filterOnly.getMenu().add(Menu.NONE, MENU_FILTER_AREA, 1, R.string.projects_main_menu_filter_area);
+            filterOnly.setOnMenuItemClickListener(this::onMenuItem);
+            filterOnly.show();
+            return;
+        }
         PopupMenu menu = new PopupMenu(requireContext(), anchor);
         boolean hideDone = viewModel.isHideDone(current.selectedProjectId);
         menu.getMenu().add(Menu.NONE, MENU_EDIT, 1, R.string.projects_main_menu_edit);
@@ -195,6 +205,10 @@ public class ProjectsFragment extends Fragment {
     }
 
     private boolean onMenuItem(MenuItem item) {
+        if (current != null && current.filterHidesAll() && item.getItemId() == MENU_FILTER_AREA) {
+            showAreaFilter();
+            return true;
+        }
         if (current == null || current.noProjects()) return true;
         int projectId = current.selectedProjectId;
         switch (item.getItemId()) {
@@ -286,14 +300,17 @@ public class ProjectsFragment extends Fragment {
         if (binding == null || model == null) return;
         current = model;
         boolean none = model.noProjects();
-        binding.projectsFirstState.setVisibility(none ? View.VISIBLE : View.GONE);
+        boolean filtered = model.filterHidesAll();
+        binding.projectsFirstState.setVisibility(none && !filtered ? View.VISIBLE : View.GONE);
+        binding.projectsFilterState.setVisibility(filtered ? View.VISIBLE : View.GONE);
         binding.projectsList.setVisibility(none ? View.GONE : View.VISIBLE);
         binding.projectsSelector.setVisibility(none ? View.GONE : View.VISIBLE);
         binding.projectsFab.setVisibility(none ? View.GONE : View.VISIBLE);
         int tools = none ? View.GONE : View.VISIBLE;
         binding.projectsAgendaButton.setVisibility(tools);
         binding.projectsSortButton.setVisibility(tools);
-        binding.projectsMenuButton.setVisibility(tools);
+        // The menu is the way to the area filter: it stays when the filter hides everything.
+        binding.projectsMenuButton.setVisibility(none && !filtered ? View.GONE : View.VISIBLE);
 
         String sortName = ProjectsListAdapter.sortLabel(requireContext(), model.sort);
         String sortDesc = getString(R.string.projects_main_sort_desc, sortName);
@@ -634,6 +651,12 @@ public class ProjectsFragment extends Fragment {
     }
 
     // ---------------------------------------------------------------- lifecycle
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        viewModel.onDayMayHaveChanged();
+    }
 
     @Override
     public void onDestroyView() {

@@ -1,0 +1,21 @@
+﻿# scenario: rp-area-filter
+# recorded: 2026-11-25T00:05:10.355916+00:00  from run-steps rp-area-filter
+1795565083336	GRANT android.permission.POST_NOTIFICATIONS
+1795565083512	START .configuration.SplashActivity
+1795565083862	WAIT 5000
+1795565083862	TAP id=navigation_projects
+1795565090563	WAIT 2500
+1795565090563	ASSERT id=projectsSelector
+1795565093498	TAP id=projectsMenuButton
+1795565095963	WAIT 800
+1795565095963	TAP text=Filter by area|Filtrar por área
+1795565098621	WAIT 800
+1795565098621	TAP text=Home|Casa
+1795565101303	WAIT 1200
+1795565101303	ASSERT id=projectsMenuButton
+1795565103715	ASSERT id=projectsFilterState
+1795565103807	SHOT rp-area-filter-hides-all
+1795565104610	TAP id=projectsClearFilter
+1795565107266	WAIT 1200
+1795565107266	ASSERT id=projectsSelector
+1795565109745	SHOT rp-area-filter-cleared
